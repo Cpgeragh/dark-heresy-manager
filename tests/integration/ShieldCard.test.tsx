@@ -23,15 +23,7 @@ const baseItem: ShieldItem = {
 
 function renderCard(props: Partial<React.ComponentProps<typeof ShieldCard>> = {}) {
   const onRemove = vi.fn();
-  render(
-    <ShieldCard
-      item={baseItem}
-      editable={true}
-      isEquipped
-      onRemove={onRemove}
-      {...props}
-    />
-  );
+  render(<ShieldCard item={baseItem} editable={true} isEquipped onRemove={onRemove} {...props} />);
   return { onRemove };
 }
 

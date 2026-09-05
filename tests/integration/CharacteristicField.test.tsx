@@ -24,9 +24,9 @@ describe("CharacteristicField", () => {
     const baseInput = screen.getByRole("textbox", { name: /weapon skill base value/i });
     expect(baseInput).toHaveValue("30");
 
-    const pressed = screen.getAllByRole("button").filter(
-      (btn) => btn.getAttribute("aria-pressed") === "true"
-    );
+    const pressed = screen
+      .getAllByRole("button")
+      .filter((btn) => btn.getAttribute("aria-pressed") === "true");
     expect(pressed).toHaveLength(3);
 
     // total = 30 + 3 * 5 = 45
@@ -54,14 +54,7 @@ describe("CharacteristicField", () => {
     const value = { base: 30, advances: 3 };
     const onChange = vi.fn();
 
-    render(
-      <CharacteristicField
-        label="WS"
-        value={value}
-        editable={true}
-        onChange={onChange}
-      />
-    );
+    render(<CharacteristicField label="WS" value={value} editable={true} onChange={onChange} />);
 
     const baseInput = screen.getByRole("textbox", { name: /ws base value/i });
 
@@ -107,7 +100,9 @@ describe("CharacteristicField", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.queryByRole("dialog", { name: "Upgrade Characteristic" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Upgrade Characteristic" })
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /weapon skill advance 1 of 4/i }));
     fireEvent.click(screen.getByRole("button", { name: "Upgrade" }));
@@ -150,7 +145,9 @@ describe("CharacteristicField", () => {
     fireEvent.click(screen.getByRole("button", { name: /ballistic skill advance 1 of 4/i }));
     expect(onChange).not.toHaveBeenCalled();
     const dialog = screen.getByRole("dialog", { name: "Downgrade Characteristic" });
-    expect(dialog).toHaveTextContent("Downgrade Ballistic Skill from 4 to 0 advances and refund 2500 XP?");
+    expect(dialog).toHaveTextContent(
+      "Downgrade Ballistic Skill from 4 to 0 advances and refund 2500 XP?"
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Downgrade" }));
     expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 0 });
@@ -201,10 +198,16 @@ describe("CharacteristicField", () => {
       />
     );
 
-    expect(screen.getByRole("button", { name: /weapon skill advance 1 of 4, 100 xp/i })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /weapon skill advance 2 of 4, not available for this career/i })
+      screen.getByRole("button", { name: /weapon skill advance 1 of 4, 100 xp/i })
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^weapon skill advance 3 of 4$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: /weapon skill advance 2 of 4, not available for this career/i,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^weapon skill advance 3 of 4$/i })
+    ).toBeInTheDocument();
   });
 });

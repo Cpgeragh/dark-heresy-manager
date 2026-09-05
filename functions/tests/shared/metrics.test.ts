@@ -23,9 +23,8 @@ describe("recordUsageMetric", () => {
 
     expect(mockCollection).toHaveBeenCalledWith("usageMetrics");
     expect(mockDoc).toHaveBeenCalledWith("character-claim");
-    expect(mockSet).toHaveBeenCalledWith(
-      expect.objectContaining({ count: { __increment: 1 } }),
-      { merge: true }
-    );
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ count: { __increment: 1 } }), {
+      merge: true,
+    });
   });
 });

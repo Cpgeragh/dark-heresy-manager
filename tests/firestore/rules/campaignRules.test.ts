@@ -3,17 +3,9 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import {
-  dbAs,
-  createCampaign,
-  createIdentityReclaimEntry,
-} from "../helpers";
+import { dbAs, createCampaign, createIdentityReclaimEntry } from "../helpers";
 
-async function createUserLink(
-  env: RulesTestEnvironment,
-  linkedUid: string,
-  primaryUid: string
-) {
+async function createUserLink(env: RulesTestEnvironment, linkedUid: string, primaryUid: string) {
   await env.withSecurityRulesDisabled(async (context) => {
     await context
       .firestore()
@@ -42,7 +34,9 @@ describe("Firestore Rules: Campaigns", () => {
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign", memberIds: ["player-1"] });
 
-    await expect(dbAs(env, "player-1").collection("campaigns").doc("c1").get()).resolves.toBeDefined();
+    await expect(
+      dbAs(env, "player-1").collection("campaigns").doc("c1").get()
+    ).resolves.toBeDefined();
   });
 
   it("a linked device may read a campaign belonging to its primary member", async () => {
@@ -80,9 +74,7 @@ describe("Firestore Rules: Campaigns", () => {
     await createCampaign(env, "c1", "dm-1", { name: "One" });
     await createCampaign(env, "c2", "dm-2", { name: "Two" });
 
-    await expect(
-      dbAs(env, "player-1").collection("campaigns").limit(100).get()
-    ).rejects.toThrow();
+    await expect(dbAs(env, "player-1").collection("campaigns").limit(100).get()).rejects.toThrow();
   });
 
   it("player membership query returns only active campaigns containing that player", async () => {

@@ -4,8 +4,8 @@ import type { CustomItemStatus } from "../../types/CustomItems";
 
 const STATUS_COLOUR: Record<CustomItemStatus, string> = {
   published: colourEmerald,
-  draft:     colourAmberFaint,
-  archived:  colourInactive,
+  draft: colourAmberFaint,
+  archived: colourInactive,
 };
 
 export function StatusBadge({ status }: { status: CustomItemStatus }) {

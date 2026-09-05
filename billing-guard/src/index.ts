@@ -9,7 +9,10 @@ import { onMessagePublished } from "firebase-functions/v2/pubsub";
 import { logger } from "firebase-functions/v2";
 import { GoogleAuth } from "google-auth-library";
 
-export const MONITORED_PROJECT_IDS = ["dark-heresy-manager", "dark-heresy-manager-staging"] as const;
+export const MONITORED_PROJECT_IDS = [
+  "dark-heresy-manager",
+  "dark-heresy-manager-staging",
+] as const;
 
 export interface BudgetNotification {
   budgetDisplayName?: string;
@@ -41,15 +44,21 @@ async function getBillingAccessToken(): Promise<string> {
   return token.token;
 }
 
-export async function disableBillingForProject(projectId: string, accessToken: string): Promise<void> {
-  const response = await fetch(`https://cloudbilling.googleapis.com/v1/projects/${projectId}/billingInfo`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ billingAccountName: "" }),
-  });
+export async function disableBillingForProject(
+  projectId: string,
+  accessToken: string
+): Promise<void> {
+  const response = await fetch(
+    `https://cloudbilling.googleapis.com/v1/projects/${projectId}/billingInfo`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ billingAccountName: "" }),
+    }
+  );
   if (!response.ok) {
     const body = await response.text();
     throw new Error(`Failed to disable billing for ${projectId}: ${response.status} ${body}`);
@@ -90,6 +99,8 @@ export const billingGuard = onMessagePublished(
     await Promise.all(
       MONITORED_PROJECT_IDS.map((projectId) => disableBillingForProject(projectId, accessToken))
     );
-    logger.warn("Billing disabled for monitored projects.", { monitoredProjectIds: MONITORED_PROJECT_IDS });
+    logger.warn("Billing disabled for monitored projects.", {
+      monitoredProjectIds: MONITORED_PROJECT_IDS,
+    });
   }
 );

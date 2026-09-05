@@ -158,7 +158,11 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
     type: "character-deletion",
     status: "running",
     actorUid: DM_UID,
-    data: { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID, recoveryIndexId: RECOVERY_INDEX_ID },
+    data: {
+      campaignId: CAMPAIGN_ID,
+      characterId: CHARACTER_ID,
+      recoveryIndexId: RECOVERY_INDEX_ID,
+    },
     totalCount: 10,
     processedCount: 0,
     checkpoint: null,
@@ -185,7 +189,12 @@ describe("startCharacterDeletionJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: false });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key", "secret")
+      startCharacterDeletionJob(
+        { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID },
+        DM_UID,
+        "idem-key",
+        "secret"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -193,7 +202,12 @@ describe("startCharacterDeletionJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "someone-else" }) });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key", "secret")
+      startCharacterDeletionJob(
+        { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID },
+        DM_UID,
+        "idem-key",
+        "secret"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
   });
 
@@ -202,7 +216,12 @@ describe("startCharacterDeletionJob", () => {
     mockCharacterGet.mockResolvedValue({ exists: false });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key", "secret")
+      startCharacterDeletionJob(
+        { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID },
+        DM_UID,
+        "idem-key",
+        "secret"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -211,13 +230,21 @@ describe("startCharacterDeletionJob", () => {
     mockCharacterGet.mockResolvedValue({ exists: true, data: () => ({}) });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key", "secret")
+      startCharacterDeletionJob(
+        { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID },
+        DM_UID,
+        "idem-key",
+        "secret"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
   });
 
   it("creates a job with the exact preflight count across every dependent collection", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
-    mockCharacterGet.mockResolvedValue({ exists: true, data: () => ({ recoveryCode: RECOVERY_CODE }) });
+    mockCharacterGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ recoveryCode: RECOVERY_CODE }),
+    });
     claimLog.countGet.mockResolvedValue({ data: () => ({ count: 3 }) });
     xpProposals.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     messages.countGet.mockResolvedValue({ data: () => ({ count: 250 }) });
@@ -245,7 +272,10 @@ describe("startCharacterDeletionJob", () => {
 
   it("rejects starting a deletion job whose preflight total exceeds the size ceiling", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
-    mockCharacterGet.mockResolvedValue({ exists: true, data: () => ({ recoveryCode: RECOVERY_CODE }) });
+    mockCharacterGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ recoveryCode: RECOVERY_CODE }),
+    });
     claimLog.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     xpProposals.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     messages.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
@@ -253,7 +283,12 @@ describe("startCharacterDeletionJob", () => {
     mockRecoveryGet.mockResolvedValue({ exists: false });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key", "secret")
+      startCharacterDeletionJob(
+        { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID },
+        DM_UID,
+        "idem-key",
+        "secret"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "resource-exhausted" }));
     expect(mockCreateBulkJob).not.toHaveBeenCalled();
   });
@@ -266,7 +301,10 @@ describe("processCharacterDeletionChunk", () => {
   });
 
   it("rejects when the job is not a character-deletion job, without touching Firestore", async () => {
-    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ type: "other-job" }), leaseId: "lease-1" });
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ type: "other-job" }),
+      leaseId: "lease-1",
+    });
 
     await expect(processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID)).rejects.toThrow(
       expect.objectContaining({ code: "failed-precondition" })
@@ -315,7 +353,10 @@ describe("processCharacterDeletionChunk", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     claimLog.pageGet.mockResolvedValue({
       empty: false,
-      docs: [{ id: "c0", ref: {} }, { id: "c1", ref: {} }],
+      docs: [
+        { id: "c0", ref: {} },
+        { id: "c1", ref: {} },
+      ],
     });
 
     await processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID);
@@ -459,7 +500,10 @@ describe("processCharacterDeletionChunk", () => {
   });
 
   it("returns an in-progress result instead of throwing when handleChunkFailure signals a retry", async () => {
-    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ processedCount: 3 }), leaseId: "lease-1" });
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ processedCount: 3 }),
+      leaseId: "lease-1",
+    });
     mockCampaignGet.mockRejectedValue(new Error("transient"));
     mockHandleChunkFailure.mockResolvedValueOnce(true);
 

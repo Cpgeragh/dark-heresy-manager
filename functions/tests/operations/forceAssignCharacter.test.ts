@@ -50,7 +50,9 @@ function setupTransactionGet(options: {
 }) {
   mockTransactionGet.mockImplementation((ref: unknown) => {
     if (ref === mockMembershipQuery) {
-      return Promise.resolve({ docs: (options.otherOwnedCharacterIds ?? []).map((id) => ({ id })) });
+      return Promise.resolve({
+        docs: (options.otherOwnedCharacterIds ?? []).map((id) => ({ id })),
+      });
     }
     if (ref === mockCampaignRef) {
       return Promise.resolve({ data: () => ({ memberIds: options.campaignMemberIds ?? [] }) });
@@ -72,7 +74,10 @@ describe("forceAssignCharacter", () => {
     mockCampaignGet.mockResolvedValue({ exists: false });
 
     await expect(
-      forceAssignCharacter({ campaignId: "c1", characterId: "char-1", targetUid: "player-1" }, "dm-1")
+      forceAssignCharacter(
+        { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -80,7 +85,10 @@ describe("forceAssignCharacter", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "other-dm" }) });
 
     await expect(
-      forceAssignCharacter({ campaignId: "c1", characterId: "char-1", targetUid: "player-1" }, "dm-1")
+      forceAssignCharacter(
+        { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
   });
 
@@ -92,7 +100,10 @@ describe("forceAssignCharacter", () => {
     });
 
     await expect(
-      forceAssignCharacter({ campaignId: "c1", characterId: "char-1", targetUid: "player-1" }, "dm-1")
+      forceAssignCharacter(
+        { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 

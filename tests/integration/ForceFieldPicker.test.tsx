@@ -17,7 +17,9 @@ function row(name: string): HTMLElement {
   return match as HTMLElement;
 }
 
-function makeCustomItem(overrides: Partial<CampaignCustomItem<"armour">> = {}): CampaignCustomItem<"armour"> {
+function makeCustomItem(
+  overrides: Partial<CampaignCustomItem<"armour">> = {}
+): CampaignCustomItem<"armour"> {
   return {
     id: "custom-1",
     campaignId: "camp-1",

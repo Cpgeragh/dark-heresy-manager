@@ -14,7 +14,12 @@ import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
-import { uiItemName, uiSection, uiSectionShell, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  uiItemName,
+  uiSection,
+  uiSectionShell,
+  uiTextPlaceholder,
+} from "../../ui/styles/editableStyles";
 import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
 import { CustomTraitForm } from "./CustomTraitForm";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";

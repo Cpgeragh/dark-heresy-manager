@@ -144,7 +144,11 @@ describe("RangedCard ammo picker", () => {
     expect(screen.getByText("Add Ammo Type")).toBeInTheDocument();
     await user.click(screen.getByText("Charge Pack (Pistol)"));
     expect(onUpdateAmmoEntries).toHaveBeenCalledWith([
-      expect.objectContaining({ referenceId: "cr-charge-pack-pistol", name: "Charge Pack (Pistol)", loaded: true }),
+      expect.objectContaining({
+        referenceId: "cr-charge-pack-pistol",
+        name: "Charge Pack (Pistol)",
+        loaded: true,
+      }),
     ]);
   });
 

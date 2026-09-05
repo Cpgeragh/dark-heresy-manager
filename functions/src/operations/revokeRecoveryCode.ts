@@ -13,7 +13,10 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
-import { RECOVERY_CODE_HISTORY_COLLECTION, buildRecoveryCodeHistoryPayload } from "../shared/recoveryCodeHistory.js";
+import {
+  RECOVERY_CODE_HISTORY_COLLECTION,
+  buildRecoveryCodeHistoryPayload,
+} from "../shared/recoveryCodeHistory.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
@@ -41,21 +44,24 @@ export async function revokeRecoveryCode(
     throw new HttpsError("permission-denied", "Only the campaign DM can revoke a Recovery Code.");
   }
 
-  await db.runTransaction(async (transaction) => {
-    const characterSnapshot = await transaction.get(characterRef);
-    if (!characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Character not found.");
-    }
+  await db.runTransaction(
+    async (transaction) => {
+      const characterSnapshot = await transaction.get(characterRef);
+      if (!characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Character not found.");
+      }
 
-    const currentCode = characterSnapshot.data()?.recoveryCode as string | undefined;
-    if (currentCode && CODE_FORMAT.test(currentCode)) {
-      const hash = hashRecoveryCode(currentCode, hmacSecret);
-      transaction.delete(db.collection(RECOVERY_INDEX_COLLECTION).doc(hash));
-      transaction.set(
-        characterRef.collection(RECOVERY_CODE_HISTORY_COLLECTION).doc(),
-        buildRecoveryCodeHistoryPayload("revoked")
-      );
-    }
-    transaction.update(characterRef, { recoveryCode: "" });
-  }, { maxAttempts: 5 });
+      const currentCode = characterSnapshot.data()?.recoveryCode as string | undefined;
+      if (currentCode && CODE_FORMAT.test(currentCode)) {
+        const hash = hashRecoveryCode(currentCode, hmacSecret);
+        transaction.delete(db.collection(RECOVERY_INDEX_COLLECTION).doc(hash));
+        transaction.set(
+          characterRef.collection(RECOVERY_CODE_HISTORY_COLLECTION).doc(),
+          buildRecoveryCodeHistoryPayload("revoked")
+        );
+      }
+      transaction.update(characterRef, { recoveryCode: "" });
+    },
+    { maxAttempts: 5 }
+  );
 }

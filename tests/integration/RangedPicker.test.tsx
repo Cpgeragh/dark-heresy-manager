@@ -64,7 +64,9 @@ const references: RangedWeaponRef[] = [
   },
 ];
 
-function makeCustomItem(overrides: Partial<CampaignCustomItem<"weapon">> = {}): CampaignCustomItem<"weapon"> {
+function makeCustomItem(
+  overrides: Partial<CampaignCustomItem<"weapon">> = {}
+): CampaignCustomItem<"weapon"> {
   return {
     id: "custom-1",
     campaignId: "camp-1",
@@ -169,10 +171,7 @@ describe("RangedPicker", () => {
     await user.click(screen.getByRole("button", { name: "Select Lasgun" }));
     await user.click(screen.getByRole("button", { name: "Good" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
-    expect(onSelect).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "ref-lasgun" }),
-      "Good"
-    );
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "ref-lasgun" }), "Good");
   });
 
   it("defaults to Common craftsmanship when no selection is made", async () => {
@@ -206,9 +205,7 @@ describe("RangedPicker", () => {
 
   it("shows a Draft badge only for draft-status custom items", () => {
     renderPicker({
-      customItems: [
-        makeCustomItem({ id: "draft-1", name: "Draft Blaster", status: "draft" }),
-      ],
+      customItems: [makeCustomItem({ id: "draft-1", name: "Draft Blaster", status: "draft" })],
     });
     expect(screen.getByText("Draft Blaster")).toBeInTheDocument();
     expect(screen.getByText("Draft")).toBeInTheDocument();

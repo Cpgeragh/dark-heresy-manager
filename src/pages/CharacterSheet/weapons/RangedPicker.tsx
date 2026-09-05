@@ -7,30 +7,35 @@ import {
   type RangedWeaponRef,
 } from "../../../data/reference/weaponReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import {
-  uiTextBody,
-  uiTextMuted,
-  uiItemName,
-} from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextMuted, uiItemName } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../../ui/pickers/PickerModal";
 import { ArrowRight, ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip } from "./weaponShared";
 import { RangedCard } from "./RangedCard";
 import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
-import {
-  weaponClassChip,
-  ammoFamilyChip,
-  rangedCraftsmanshipDescription,
-} from "./weaponHelpers";
+import { weaponClassChip, ammoFamilyChip, rangedCraftsmanshipDescription } from "./weaponHelpers";
 
-function RangedWeaponCardPickerRow({ weaponReference, editable, onSelect }: { weaponReference: RangedWeaponRef; editable: boolean; onSelect: () => void }) {
+function RangedWeaponCardPickerRow({
+  weaponReference,
+  editable,
+  onSelect,
+}: {
+  weaponReference: RangedWeaponRef;
+  editable: boolean;
+  onSelect: () => void;
+}) {
   const weapon: RangedWeapon = {
     id: `picker-${weaponReference.id}`,
     referenceId: weaponReference.id,
@@ -53,7 +58,20 @@ function RangedWeaponCardPickerRow({ weaponReference, editable, onSelect }: { we
     upgrades: [],
     ammoEntries: [],
   };
-  return <RangedCard weapon={weapon} editable={false} pickerMode onSelect={editable ? onSelect : undefined} onRemove={() => {}} onAddUpgrade={() => {}} onRemoveUpgrade={() => {}} onUpdateAmmoEntries={() => {}} onUpdateQuantity={() => {}} allowUpgrades={false} />;
+  return (
+    <RangedCard
+      weapon={weapon}
+      editable={false}
+      pickerMode
+      onSelect={editable ? onSelect : undefined}
+      onRemove={() => {}}
+      onAddUpgrade={() => {}}
+      onRemoveUpgrade={() => {}}
+      onUpdateAmmoEntries={() => {}}
+      onUpdateQuantity={() => {}}
+      allowUpgrades={false}
+    />
+  );
 }
 
 /*
@@ -155,9 +173,9 @@ export function RangedPicker({
   customItems?: CampaignCustomItem<"weapon">[];
   onSelect: (weaponReference: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
-    onCustom: () => void;
-    onClose: () => void;
-    suspended?: boolean;
+  onCustom: () => void;
+  onClose: () => void;
+  suspended?: boolean;
   references?: RangedWeaponRef[];
   title?: string;
   placeholder?: string;
@@ -199,7 +217,11 @@ export function RangedPicker({
     .sort((a, b) => a.name.localeCompare(b.name));
   const pickerEntries = [
     ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
-    ...filtered.map((weaponReference) => ({ kind: "reference" as const, name: weaponReference.name, weaponReference })),
+    ...filtered.map((weaponReference) => ({
+      kind: "reference" as const,
+      name: weaponReference.name,
+      weaponReference,
+    })),
   ].sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : `${title.replace(/^Add /, "View ")}s`;
 
@@ -250,10 +272,13 @@ export function RangedPicker({
         isEmpty={false}
         hideSearch
         footer={
-          <Button className="w-full" onClick={() => {
-            onSelect(selected, craftsmanship);
-            resetPicker();
-          }}>
+          <Button
+            className="w-full"
+            onClick={() => {
+              onSelect(selected, craftsmanship);
+              resetPicker();
+            }}
+          >
             Add Weapon
           </Button>
         }
@@ -263,7 +288,8 @@ export function RangedPicker({
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((q) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={q}
                   onClick={() => setCraftsmanship(q)}
                   className={[
@@ -278,7 +304,9 @@ export function RangedPicker({
               ))}
             </div>
           </div>
-          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
+          <div
+            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
+          >
             {rangedCraftsmanshipDescription(craftsmanship)}
           </div>
         </PickerBody>
@@ -318,11 +346,7 @@ export function RangedPicker({
       }
       footer={
         editable && showCustom ? (
-          <PickerCustomAction
-            onClick={onCustom}
-          >
-            + Add custom weapon
-          </PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>+ Add custom weapon</PickerCustomAction>
         ) : undefined
       }
     >
@@ -347,9 +371,7 @@ export function RangedPicker({
             interactive={editable}
             onClick={() => onSelectCustomItem?.(item)}
           >
-            <span
-              className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
-            >
+            <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
               {item.name}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
@@ -361,12 +383,22 @@ export function RangedPicker({
               {data.clip && <StatChip size="sm" label="Clip" value={data.clip} />}
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              {(() => { const c = weaponClassChip(data.class); return c ? (
-                <Chip size="sm" className={c.active}>{c.label}</Chip>
-              ) : null; })()}
-              {(() => { const f = ammoFamilyChip(data.ammoType); return f ? (
-                <Chip size="sm" className={f.className}>{f.label}</Chip>
-              ) : null; })()}
+              {(() => {
+                const c = weaponClassChip(data.class);
+                return c ? (
+                  <Chip size="sm" className={c.active}>
+                    {c.label}
+                  </Chip>
+                ) : null;
+              })()}
+              {(() => {
+                const f = ammoFamilyChip(data.ammoType);
+                return f ? (
+                  <Chip size="sm" className={f.className}>
+                    {f.label}
+                  </Chip>
+                ) : null;
+              })()}
               {item.status === "draft" && (
                 <Chip size="sm" className={colourAmberFaint}>
                   Draft
@@ -375,7 +407,12 @@ export function RangedPicker({
               <Chip size="sm" className={colourFuchsia}>
                 Custom
               </Chip>
-              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+              <ItemMetaChips
+                weight={data.weight}
+                value={data.value}
+                availability={data.availability}
+                source={data.source}
+              />
             </div>
           </PickerRow>
         );

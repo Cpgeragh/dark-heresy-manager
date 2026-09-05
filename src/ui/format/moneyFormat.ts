@@ -1,13 +1,4 @@
-const EMPTY_MONEY_VALUES = new Set([
-  "",
-  "-",
-  "—",
-  "n/a",
-  "na",
-  "none",
-  "variable",
-  "varies",
-]);
+const EMPTY_MONEY_VALUES = new Set(["", "-", "—", "n/a", "na", "none", "variable", "varies"]);
 
 function formatInteger(value: number): string {
   if (!Number.isFinite(value) || value < 0) return "0";
@@ -20,7 +11,10 @@ function parseMoneyNumber(value?: string | number | null): number {
   const trimmed = value?.trim() ?? "";
   if (EMPTY_MONEY_VALUES.has(trimmed.toLowerCase())) return 0;
 
-  const normalized = trimmed.replace(/₮/g, "").replace(/,/g, "").replace(/thrones?/gi, "");
+  const normalized = trimmed
+    .replace(/₮/g, "")
+    .replace(/,/g, "")
+    .replace(/thrones?/gi, "");
   const match = normalized.match(/\d+/);
   if (!match) return 0;
 

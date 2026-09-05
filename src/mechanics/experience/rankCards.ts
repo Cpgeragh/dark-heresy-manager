@@ -8,11 +8,7 @@ import type {
   XpPurchaseRecord,
 } from "../../types/Character";
 import { CHARACTERISTIC_ADVANCE_TIERS } from "./characteristicAdvanceCosts";
-import {
-  getCareerRankProgression,
-  getRankXpBand,
-  type RankXpBand,
-} from "./careerRankProgression";
+import { getCareerRankProgression, getRankXpBand, type RankXpBand } from "./careerRankProgression";
 
 export type RankCardEntryKind =
   | "characteristic"

@@ -519,8 +519,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     goodAvailability: "Rare",
     notes:
       "Using a pre-existing bionic arm, a pistol or a short, single-handed melee weapon can be modified and implanted as a concealed device. Weapons concealed in this fashion can be deployed and readied as a Half Action. Cost is plus the cost of the weapon and bionic arm.\n\nDisadvantage: Any catastrophic Jam or Overheat automatically disables the limb in question as well as the weapon.",
-    poor:
-      "The bionic weapon functions as normal, but gains the Unreliable Quality. In addition, the weapon cannot be removed with a Disarm, and locating the weapon requires a detailed inspection or a successful auspex scan.",
+    poor: "The bionic weapon functions as normal, but gains the Unreliable Quality. In addition, the weapon cannot be removed with a Disarm, and locating the weapon requires a detailed inspection or a successful auspex scan.",
     common: "As Poor, but the weapon loses the Unreliable Quality.",
     good: "As Common, but the weapon functions as being best craftsmanship.",
   },
@@ -535,8 +534,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "As another departure from the frailties of the flesh, the infuser system replaces human blood and blood processing organs with a far more efficient biomechanical serum, the most advanced forms of which contain legions of microscopic homunculitic machines that can search out and repair damage on a cellular level with frightening speed.\n\nPrerequisite: Tech-Priest, Autosanguine talent.\n\nDisadvantages: Aside from a greying of the flesh and visible withering of the tissues, Hermetic Infusion has one marked side effect: the tech-priest’s body can no longer use human blood, and so cannot be treated for Blood Loss or severe injuries by transfusion or regular medical treatments. Instead, the tech-priest must look to his own care (if possible) or that of a Magos Biologis to replace his lost serum.",
     common:
       "The tech-priest gains a +10 bonus on Tests made to resist toxins, diseases and radioactive contamination. As well, the tech-priest gains the Die Hard talent.",
-    good:
-      "As Common, but the bonus on Tests increases to +20 and the tech-priest gains the Regeneration trait.",
+    good: "As Common, but the bonus on Tests increases to +20 and the tech-priest gains the Regeneration trait.",
   },
   {
     id: "ih-mining-helot-augmetics",

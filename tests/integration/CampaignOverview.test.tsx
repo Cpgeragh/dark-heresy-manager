@@ -181,11 +181,7 @@ describe("CampaignOverview — character query role", () => {
     renderPage("player-1");
 
     expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", false);
-    expect(useCampaignCharactersMock).toHaveBeenCalledWith(
-      "campaign-1",
-      "player-1",
-      false
-    );
+    expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "player-1", false);
   });
 
   it("requests the DM campaign character view only for the campaign DM", () => {
@@ -466,7 +462,11 @@ describe("CampaignOverview — player-facing My Characters and Party", () => {
   });
 
   it("shows a loading state for the party roster", () => {
-    useCampaignCharacterSummariesMock.mockReturnValue({ summaries: [], loading: true, error: null });
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [],
+      loading: true,
+      error: null,
+    });
     renderPage("player-1");
     expect(screen.getByText("Loading the party roster…")).toBeInTheDocument();
   });

@@ -81,7 +81,10 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       updatedAt: now,
     };
     const base = legacyText.trim()
-      ? [{ id: createLocalId("note"), title: "Notes", text: legacyText.trim(), updatedAt: now }, ...entries]
+      ? [
+          { id: createLocalId("note"), title: "Notes", text: legacyText.trim(), updatedAt: now },
+          ...entries,
+        ]
       : entries;
     onSave([...base, newEntry]);
     closeAll();
@@ -92,7 +95,12 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
     onSave(
       entries.map((entry) =>
         entry.id === activeEntry.id
-          ? { ...entry, title: title.trim(), text: text.trim(), updatedAt: new Date().toISOString() }
+          ? {
+              ...entry,
+              title: title.trim(),
+              text: text.trim(),
+              updatedAt: new Date().toISOString(),
+            }
           : entry
       )
     );
@@ -157,31 +165,43 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No notes match your search.</p>
       ) : (
         <div className="grid grid-cols-2 items-start gap-3">
-          {[filtered.slice(0, Math.ceil(filtered.length / 2)), filtered.slice(Math.ceil(filtered.length / 2))].map(
-            (column, index) => (
-              <div key={index} className="space-y-3">
-                {column.map((entry) => (
-                  <div key={entry.id} className={`${uiSectionShell} p-4 transition hover:bg-slate-700/40 lg:p-5`}>
-                    <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                      <button type="button" onClick={() => openView(entry)} className="min-w-0 text-left lg:flex-1">
-                        <span className={uiTextLabel}>{entry.title}</span>
-                        <p className="mt-2 text-sm text-slate-300 leading-relaxed line-clamp-3 min-h-[4.3rem]">{entry.text}</p>
-                        <Chip size="sm" className={`mt-2 ${colourCyan}`}>
-                          {formatDate(entry.updatedAt)}
-                        </Chip>
-                      </button>
-                      {editable && (
-                        <div className="flex shrink-0 justify-end gap-1.5 order-first lg:order-2">
-                          <Button size="xs" onClick={() => openEdit(entry)}>Edit</Button>
-                          <RemoveButton onClick={() => setDeleteArmed(entry)} label="Remove" />
-                        </div>
-                      )}
-                    </div>
+          {[
+            filtered.slice(0, Math.ceil(filtered.length / 2)),
+            filtered.slice(Math.ceil(filtered.length / 2)),
+          ].map((column, index) => (
+            <div key={index} className="space-y-3">
+              {column.map((entry) => (
+                <div
+                  key={entry.id}
+                  className={`${uiSectionShell} p-4 transition hover:bg-slate-700/40 lg:p-5`}
+                >
+                  <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                    <button
+                      type="button"
+                      onClick={() => openView(entry)}
+                      className="min-w-0 text-left lg:flex-1"
+                    >
+                      <span className={uiTextLabel}>{entry.title}</span>
+                      <p className="mt-2 text-sm text-slate-300 leading-relaxed line-clamp-3 min-h-[4.3rem]">
+                        {entry.text}
+                      </p>
+                      <Chip size="sm" className={`mt-2 ${colourCyan}`}>
+                        {formatDate(entry.updatedAt)}
+                      </Chip>
+                    </button>
+                    {editable && (
+                      <div className="flex shrink-0 justify-end gap-1.5 order-first lg:order-2">
+                        <Button size="xs" onClick={() => openEdit(entry)}>
+                          Edit
+                        </Button>
+                        <RemoveButton onClick={() => setDeleteArmed(entry)} label="Remove" />
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )
-          )}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       )}
 
@@ -249,8 +269,12 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmDelete}>Delete</Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(null)}>Cancel</Button>
+              <Button variant="primary" onClick={confirmDelete}>
+                Delete
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(null)}>
+                Cancel
+              </Button>
             </div>
           }
         >

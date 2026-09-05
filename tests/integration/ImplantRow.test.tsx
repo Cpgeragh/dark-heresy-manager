@@ -18,7 +18,9 @@ function item(over: Partial<CyberneticItem> = {}): CyberneticItem {
 
 describe("ImplantRow", () => {
   it("renders the item name", () => {
-    render(<ImplantRow item={item()} editable={true} onCycleQuality={vi.fn()} onRemove={vi.fn()} />);
+    render(
+      <ImplantRow item={item()} editable={true} onCycleQuality={vi.fn()} onRemove={vi.fn()} />
+    );
     expect(screen.getByText("Auto-Quill")).toBeInTheDocument();
   });
 

@@ -120,11 +120,12 @@ export default function CharacteristicField({
 
   const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
   const isUpgrade = pendingAdvances !== null && pendingAdvances > advances;
-  const changedTierCosts = pendingAdvances === null
-    ? []
-    : isUpgrade
-      ? tierCosts?.slice(advances, pendingAdvances) ?? []
-      : tierCosts?.slice(pendingAdvances, advances) ?? [];
+  const changedTierCosts =
+    pendingAdvances === null
+      ? []
+      : isUpgrade
+        ? (tierCosts?.slice(advances, pendingAdvances) ?? [])
+        : (tierCosts?.slice(pendingAdvances, advances) ?? []);
   const hasCompleteCost =
     changedTierCosts.length === Math.abs((pendingAdvances ?? advances) - advances) &&
     changedTierCosts.every((cost): cost is number => typeof cost === "number");
@@ -182,7 +183,11 @@ export default function CharacteristicField({
                     onClick={() => toggleAdvance(idx)}
                     disabled={!clickable}
                     aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${
-                      typeof cost === "number" ? `, ${cost} XP` : locked ? ", not available for this career" : ""
+                      typeof cost === "number"
+                        ? `, ${cost} XP`
+                        : locked
+                          ? ", not available for this career"
+                          : ""
                     }`}
                     aria-pressed={filled}
                     tabIndex={clickable ? 0 : -1}
@@ -232,10 +237,7 @@ export default function CharacteristicField({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                onClick={confirmAdvanceChange}
-              >
+              <Button variant="primary" onClick={confirmAdvanceChange}>
                 {isUpgrade ? "Upgrade" : "Downgrade"}
               </Button>
               <Button variant="ghost" onClick={() => setPendingAdvances(null)}>

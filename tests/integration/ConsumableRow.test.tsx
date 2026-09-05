@@ -13,7 +13,9 @@ function item(over: Partial<ConsumableItem> = {}): ConsumableItem {
 
 describe("ConsumableRow", () => {
   it("renders the item name", () => {
-    render(<ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+    render(
+      <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
+    );
     expect(screen.getByText("Stimm")).toBeInTheDocument();
   });
 
@@ -45,7 +47,12 @@ describe("ConsumableRow", () => {
 
   it("hides the info button when there is no description", () => {
     render(
-      <ConsumableRow item={item({ description: "" })} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
+      <ConsumableRow
+        item={item({ description: "" })}
+        editable={true}
+        onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
+      />
     );
     expect(screen.queryByRole("button", { name: /information/i })).not.toBeInTheDocument();
   });
@@ -69,14 +76,18 @@ describe("ConsumableRow", () => {
   it("calls onRemove", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={onRemove} />);
+    render(
+      <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={onRemove} />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledWith("c1");
   });
 
   it("hides quantity and remove controls when not editable", () => {
-    render(<ConsumableRow item={item()} editable={false} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+    render(
+      <ConsumableRow item={item()} editable={false} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
+    );
     expect(screen.queryByRole("button", { name: "Decrease quantity" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
   });

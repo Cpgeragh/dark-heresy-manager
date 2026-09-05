@@ -1,11 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
-import {
-  createRecoveryIndexEntry,
-  dbAnon,
-  dbAs,
-} from "../helpers";
+import { createRecoveryIndexEntry, dbAnon, dbAs } from "../helpers";
 
 const indexId = "hmac-derived-index-id";
 const indexData = { campaignId: "c1", characterId: "char1" };
@@ -20,8 +16,12 @@ describe("Firestore Rules: Recovery Index", () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createRecoveryIndexEntry(env, indexId, indexData);
 
-    await expect(dbAs(env, "dm-1").collection("recoveryIndex").doc(indexId).get()).rejects.toThrow();
-    await expect(dbAs(env, "user-1").collection("recoveryIndex").doc(indexId).get()).rejects.toThrow();
+    await expect(
+      dbAs(env, "dm-1").collection("recoveryIndex").doc(indexId).get()
+    ).rejects.toThrow();
+    await expect(
+      dbAs(env, "user-1").collection("recoveryIndex").doc(indexId).get()
+    ).rejects.toThrow();
     await expect(dbAs(env, "user-1").collection("recoveryIndex").get()).rejects.toThrow();
     await expect(dbAnon(env).collection("recoveryIndex").doc(indexId).get()).rejects.toThrow();
   });

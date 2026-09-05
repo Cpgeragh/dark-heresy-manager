@@ -46,7 +46,10 @@ describe("WeaponTrainingTab", () => {
 
   it("shows trained buttons as pressed", () => {
     renderTab({ weaponTraining: makeBlock({ trained: ["basic-bolt"] }) });
-    expect(screen.getAllByRole("button", { name: /^Bolt/ })[0]).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByRole("button", { name: /^Bolt/ })[0]).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
   });
 
   it("shows a confirm dialog and only calls onUpdate after confirming, when an already-trained button is clicked", async () => {
@@ -93,7 +96,9 @@ describe("WeaponTrainingTab", () => {
     await user.click(button);
     expect(onUpdate).not.toHaveBeenCalled();
 
-    expect(screen.getByText(/Train Basic Weapon Training \(Las\) for 100 XP\?/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Train Basic Weapon Training \(Las\) for 100 XP\?/)
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Train" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
@@ -148,7 +153,9 @@ describe("WeaponTrainingTab", () => {
   });
 
   it("shows exotic weapons as chips", () => {
-    renderTab({ weaponTraining: makeBlock({ exoticWeapons: [{ name: "Needle Pistol", cost: 200 }] }) });
+    renderTab({
+      weaponTraining: makeBlock({ exoticWeapons: [{ name: "Needle Pistol", cost: 200 }] }),
+    });
     expect(screen.getByText("Needle Pistol")).toBeInTheDocument();
   });
 
@@ -210,15 +217,17 @@ describe("WeaponTrainingTab", () => {
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
-    expect(next.exoticWeapons).toEqual([{
-      name: "Needle Pistol",
-      cost: 200,
-      xpPurchase: {
+    expect(next.exoticWeapons).toEqual([
+      {
+        name: "Needle Pistol",
         cost: 200,
-        careerId: "guardsman",
-        purchasedAtRankId: "captain",
+        xpPurchase: {
+          cost: 200,
+          careerId: "guardsman",
+          purchasedAtRankId: "captain",
+        },
       },
-    }]);
+    ]);
   });
 
   it("gives a DM a choice between using a slot and adding a bonus, when a slot is available", async () => {
@@ -226,8 +235,12 @@ describe("WeaponTrainingTab", () => {
     renderTab({ career: "Guardsman", rank: "Captain", isDM: true });
 
     await user.click(screen.getByRole("button", { name: "Add Exotic Weapon" }));
-    expect(screen.getByRole("button", { name: "Use an available training slot" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add as a bonus (doesn't use a slot)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Use an available training slot" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Add as a bonus (doesn't use a slot)" })
+    ).toBeInTheDocument();
   });
 
   it("tags a DM's bonus exotic weapon as bonus, not counted against slots", async () => {
@@ -242,16 +255,18 @@ describe("WeaponTrainingTab", () => {
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
-    expect(next.exoticWeapons).toEqual([{
-      name: "Web Pistol",
-      cost: 0,
-      bonus: true,
-      xpPurchase: {
+    expect(next.exoticWeapons).toEqual([
+      {
+        name: "Web Pistol",
         cost: 0,
-        careerId: "guardsman",
-        purchasedAtRankId: "captain",
+        bonus: true,
+        xpPurchase: {
+          cost: 0,
+          careerId: "guardsman",
+          purchasedAtRankId: "captain",
+        },
       },
-    }]);
+    ]);
   });
 
   it("skips straight to the bonus form for a DM when no slots remain", async () => {
@@ -259,7 +274,9 @@ describe("WeaponTrainingTab", () => {
     renderTab({ career: "Guardsman", rank: "Conscript", isDM: true });
 
     await user.click(screen.getByRole("button", { name: "Add Exotic Weapon" }));
-    expect(screen.queryByRole("button", { name: "Use an available training slot" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Use an available training slot" })
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Weapon Name")).toBeInTheDocument();
   });
 
@@ -286,9 +303,13 @@ describe("WeaponTrainingTab", () => {
         traits: [],
       },
     });
-    const chain = screen.getAllByRole("button", { name: /^Chain/ }).find((button) => button.getAttribute("aria-pressed") === "true")!;
+    const chain = screen
+      .getAllByRole("button", { name: /^Chain/ })
+      .find((button) => button.getAttribute("aria-pressed") === "true")!;
     expect(chain).toBeDisabled();
-    expect(screen.getByText(/Granted by a Talent, Trait, or Career effect: Chain/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Granted by a Talent, Trait, or Career effect: Chain/)
+    ).toBeInTheDocument();
     expect(screen.getByText("Granted by Sicarius Tutoring (Guardsman)")).toBeInTheDocument();
     expect(screen.queryByLabelText("Remove Needle Pistol")).not.toBeInTheDocument();
   });

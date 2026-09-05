@@ -90,7 +90,8 @@ export async function reclaimIdentity(
     await driveJobToCompletion(
       started.jobId,
       async (jobId) => (await callProcessIdentityReclaimChunk({ jobId })).data,
-      (chunk) => onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
+      (chunk) =>
+        onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
     );
     return {
       role: started.role,

@@ -87,10 +87,7 @@ describe("stripUndefined — arrays", () => {
   });
 
   it("recursively strips undefined from objects inside arrays", () => {
-    const input = [
-      { a: 1, b: undefined },
-      { c: 2 },
-    ];
+    const input = [{ a: 1, b: undefined }, { c: 2 }];
     expect(stripUndefined(input)).toEqual([{ a: 1 }, { c: 2 }]);
   });
 

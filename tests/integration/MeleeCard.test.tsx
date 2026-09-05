@@ -98,7 +98,9 @@ describe("MeleeCard thrown weapon", () => {
 
   it("calls onUpdateQuantity when the stepper is incremented", async () => {
     const user = userEvent.setup();
-    const { onUpdateQuantity } = renderCard({ weapon: { ...baseWeapon, class: "Melee / Thrown", quantity: 3 } });
+    const { onUpdateQuantity } = renderCard({
+      weapon: { ...baseWeapon, class: "Melee / Thrown", quantity: 3 },
+    });
     await user.click(screen.getByRole("button", { name: "Increase quantity" }));
     expect(onUpdateQuantity).toHaveBeenCalledWith(4);
   });
@@ -116,7 +118,13 @@ describe("MeleeCard craftsmanship", () => {
 describe("MeleeCard Two-Handed quality", () => {
   it("shows Two-Handed in Qualities for a weapon whose reference has that flag", () => {
     renderCard({
-      weapon: { id: "gw1", name: "Great Weapon", referenceId: "cr-great-weapon", damage: "2d10 R", pen: "2" },
+      weapon: {
+        id: "gw1",
+        name: "Great Weapon",
+        referenceId: "cr-great-weapon",
+        damage: "2d10 R",
+        pen: "2",
+      },
     });
     expect(screen.getByText(/Two-Handed/)).toBeInTheDocument();
   });

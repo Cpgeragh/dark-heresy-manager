@@ -17,7 +17,9 @@ function row(name: string): HTMLElement {
   return match as HTMLElement;
 }
 
-function makeCustomItem(overrides: Partial<CampaignCustomItem<"armour">> = {}): CampaignCustomItem<"armour"> {
+function makeCustomItem(
+  overrides: Partial<CampaignCustomItem<"armour">> = {}
+): CampaignCustomItem<"armour"> {
   return {
     id: "custom-1",
     campaignId: "camp-1",
@@ -90,7 +92,10 @@ describe("ArmourPicker craftsmanship selection", () => {
     await user.click(row(ARMOUR_A));
     await user.click(screen.getByRole("button", { name: "Best" }));
     await user.click(screen.getByRole("button", { name: "Add Armour" }));
-    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "cr-flak-jacket" }), "Best");
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "cr-flak-jacket" }),
+      "Best"
+    );
   });
 });
 

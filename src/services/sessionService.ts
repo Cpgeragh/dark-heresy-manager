@@ -43,10 +43,10 @@ export type SessionUpdateData = Partial<
   Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">
 >;
 
-const callRepairSessionSummaries = httpsCallable<
-  { campaignId: string },
-  { repairedCount: number }
->(functions, "repairSessionSummaries");
+const callRepairSessionSummaries = httpsCallable<{ campaignId: string }, { repairedCount: number }>(
+  functions,
+  "repairSessionSummaries"
+);
 
 /** Rebuilds every safe session summary through the protected DM-only operation. */
 export async function repairSessionSummaries(campaignId: string): Promise<number> {
@@ -315,10 +315,9 @@ export async function applySessionXp(
       }
 
       transaction.update(sessionRef, { xpApplied: true });
-      transaction.update(
-        doc(db, "campaigns", campaignId, "sessionSummaries", sessionId),
-        { xpApplied: true }
-      );
+      transaction.update(doc(db, "campaigns", campaignId, "sessionSummaries", sessionId), {
+        xpApplied: true,
+      });
 
       for (const characterId of attendeeIds) {
         transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {

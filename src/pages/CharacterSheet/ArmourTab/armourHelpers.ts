@@ -80,7 +80,10 @@ function parseWeightDelta(value: string): number {
 }
 
 /** Base piece weight plus every fitted upgrade's weight delta, resolved to one real number. */
-export function effectiveArmourWeight(piece: WornArmourPiece, upgradeRefs: ArmourUpgradeRef[]): string {
+export function effectiveArmourWeight(
+  piece: WornArmourPiece,
+  upgradeRefs: ArmourUpgradeRef[]
+): string {
   const baseKg = parseKg(piece.weight);
   const deltaKg = upgradeRefs.reduce((total, ref) => total + parseWeightDelta(ref.weight), 0);
   return formatKg(baseKg + deltaKg);
@@ -108,7 +111,13 @@ export function apBreakdown(piece: {
       label = "Arms";
     } else if (set.size === 2 && set.has("rightLeg") && set.has("leftLeg")) {
       label = "Legs";
-    } else if (set.size === 4 && set.has("rightArm") && set.has("leftArm") && set.has("rightLeg") && set.has("leftLeg")) {
+    } else if (
+      set.size === 4 &&
+      set.has("rightArm") &&
+      set.has("leftArm") &&
+      set.has("rightLeg") &&
+      set.has("leftLeg")
+    ) {
       label = "Arms and Legs";
     } else {
       label = locations.map((loc) => ARMOUR_LOCATION_LABELS[loc]).join(", ");

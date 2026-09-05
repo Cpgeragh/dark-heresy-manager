@@ -42,11 +42,19 @@ import { makeCurrentRankPurchase } from "../experience/purchaseAttribution";
 import type { CampaignCustomItem } from "../../types/CustomItems";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../ui/pickers/PickerModal";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
-import { sanitizeNonNegativeIntegerInput, sanitizePositiveIntegerInput } from "../../utils/formInput";
+import {
+  sanitizeNonNegativeIntegerInput,
+  sanitizePositiveIntegerInput,
+} from "../../utils/formInput";
 import {
   getAvailableTalentChoices,
   getTalentBehaviour,
@@ -124,7 +132,9 @@ export function TalentPickerModal({
           if (!isTalentAvailableInPicker(item as TalentData, entries)) return false;
         } else if (
           (!item.repeatable && owned.length > 0) ||
-          ("maxPurchases" in item && item.maxPurchases !== undefined && owned.length >= item.maxPurchases)
+          ("maxPurchases" in item &&
+            item.maxPurchases !== undefined &&
+            owned.length >= item.maxPurchases)
         ) {
           return false;
         }
@@ -148,7 +158,9 @@ export function TalentPickerModal({
           if (!isTalentAvailableInPicker(item as TalentData, entries)) return false;
         } else if (
           (!item.repeatable && owned.length > 0) ||
-          ("maxPurchases" in item && item.maxPurchases !== undefined && owned.length >= item.maxPurchases)
+          ("maxPurchases" in item &&
+            item.maxPurchases !== undefined &&
+            owned.length >= item.maxPurchases)
         ) {
           return false;
         }
@@ -164,20 +176,17 @@ export function TalentPickerModal({
         .filter((item) => !entries.some((entry) => entry.customLibraryId === item.id))
         .filter(
           (item) =>
-            !query.trim() || item.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
+            !query.trim() ||
+            item.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
         )
         .sort((a, b) => a.name.localeCompare(b.name)),
     [customItems, entries, query]
   );
 
   const talentData = picked as TalentData | null;
-  const traitData = !useTalentBehaviours ? picked as TraitData | null : null;
-  const ownedForPicked = picked
-    ? entries.filter((entry) => entry.talentId === picked.id)
-    : [];
-  const behaviour = talentData && useTalentBehaviours
-    ? getTalentBehaviour(talentData)
-    : null;
+  const traitData = !useTalentBehaviours ? (picked as TraitData | null) : null;
+  const ownedForPicked = picked ? entries.filter((entry) => entry.talentId === picked.id) : [];
+  const behaviour = talentData && useTalentBehaviours ? getTalentBehaviour(talentData) : null;
   const isNumeric = talentData?.specialisationMin !== undefined;
   const choiceOptions: readonly PickerOption[] = talentData
     ? useTalentBehaviours
@@ -205,7 +214,8 @@ export function TalentPickerModal({
           if (!traitData) return [];
           const atPurchaseLimit =
             (!traitData.repeatable && ownedForPicked.length > 0) ||
-            (traitData.maxPurchases !== undefined && ownedForPicked.length >= traitData.maxPurchases);
+            (traitData.maxPurchases !== undefined &&
+              ownedForPicked.length >= traitData.maxPurchases);
           if (atPurchaseLimit) return [];
           const base = (traitData.specialisationOptions ?? [])
             .filter((option) => {
@@ -214,20 +224,24 @@ export function TalentPickerModal({
               return !hasTalentChoice(ownedForPicked, value);
             })
             .map((option) => {
-            const value = typeof option === "string" ? option : option.value;
-            const label = typeof option === "string" ? option : option.label;
-            if (!traitData.repeatableSpecialisation) return option;
-            const ownedCount = ownedForPicked.filter(
-              (entry) => entry.specialisation?.trim().toLocaleLowerCase() === value.toLocaleLowerCase()
-            ).length;
-            return { value, label, ownedCount };
+              const value = typeof option === "string" ? option : option.value;
+              const label = typeof option === "string" ? option : option.label;
+              if (!traitData.repeatableSpecialisation) return option;
+              const ownedCount = ownedForPicked.filter(
+                (entry) =>
+                  entry.specialisation?.trim().toLocaleLowerCase() === value.toLocaleLowerCase()
+              ).length;
+              return { value, label, ownedCount };
             });
           if (!career) return base;
           return base
             .map((option) => {
               const value = typeof option === "string" ? option : option.value;
               const label = typeof option === "string" ? option : option.label;
-              const ownedCount = typeof option !== "string" && "ownedCount" in option ? option.ownedCount : undefined;
+              const ownedCount =
+                typeof option !== "string" && "ownedCount" in option
+                  ? option.ownedCount
+                  : undefined;
               return {
                 value,
                 label,
@@ -239,8 +253,7 @@ export function TalentPickerModal({
             .filter((option) => showOverflow || option.cost !== undefined);
         })()
     : [];
-  const choicePickerUnavailable =
-    showChoicePicker && picked !== null && choiceOptions.length === 0;
+  const choicePickerUnavailable = showChoicePicker && picked !== null && choiceOptions.length === 0;
   const composedSpecialisation = detailChoice?.displayPrefix
     ? `${detailChoice.displayPrefix}: ${specialisation.trim()}`
     : specialisation.trim();
@@ -253,8 +266,10 @@ export function TalentPickerModal({
     if (!talentData) return false;
     const value = Number(specialisation.trim());
     if (!Number.isInteger(value)) return false;
-    if (talentData.specialisationMin !== undefined && value < talentData.specialisationMin) return false;
-    if (talentData.specialisationMax !== undefined && value > talentData.specialisationMax) return false;
+    if (talentData.specialisationMin !== undefined && value < talentData.specialisationMin)
+      return false;
+    if (talentData.specialisationMax !== undefined && value > talentData.specialisationMax)
+      return false;
     return true;
   };
 
@@ -382,7 +397,9 @@ export function TalentPickerModal({
             type="text"
             inputMode="numeric"
             value={manualCostInput}
-            onChange={(event) => setManualCostInput(sanitizeNonNegativeIntegerInput(event.target.value))}
+            onChange={(event) =>
+              setManualCostInput(sanitizeNonNegativeIntegerInput(event.target.value))
+            }
             placeholder="0"
             className={editableInputClass(true) + " mt-0.5"}
           />
@@ -419,11 +436,15 @@ export function TalentPickerModal({
                 if (editable) onSelectCustomItem?.(item);
               }}
             >
-              <span className={`${uiItemName} truncate block ${editable ? "group-hover:text-white" : ""}`}>
+              <span
+                className={`${uiItemName} truncate block ${editable ? "group-hover:text-white" : ""}`}
+              >
                 {item.name}
               </span>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                <Chip className={colourAmberFaint}>{item.status === "draft" ? "Draft" : "Custom"}</Chip>
+                <Chip className={colourAmberFaint}>
+                  {item.status === "draft" ? "Draft" : "Custom"}
+                </Chip>
               </div>
             </PickerRow>
           ))}
@@ -436,14 +457,16 @@ export function TalentPickerModal({
               itemBehaviour?.kind === "fixed-single" ||
               itemBehaviour?.kind === "hybrid" ||
               (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
-            const usesTextEntry = row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
+            const usesTextEntry =
+              row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
             const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
-            const opensAcquisition = Boolean(!useTalentBehaviours && (row as TraitData).acquisition) || (
-              useTalentBehaviours && needsTalentAcquisition(
-                { uid: "picker-preview", talentId: row.id, name: row.name },
-                { homeworld: "", talents: [...entries], traits: [] }
-              )
-            );
+            const opensAcquisition =
+              Boolean(!useTalentBehaviours && (row as TraitData).acquisition) ||
+              (useTalentBehaviours &&
+                needsTalentAcquisition(
+                  { uid: "picker-preview", talentId: row.id, name: row.name },
+                  { homeworld: "", talents: [...entries], traits: [] }
+                ));
             return (
               <PickerRow
                 key={item.id}
@@ -464,11 +487,16 @@ export function TalentPickerModal({
               >
                 <div className="flex-1 min-w-0 space-y-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className={`${uiItemName} truncate ${canMakeManualPurchase ? "group-hover:text-white" : ""}`}>
+                    <span
+                      className={`${uiItemName} truncate ${canMakeManualPurchase ? "group-hover:text-white" : ""}`}
+                    >
                       {item.name}
                     </span>
                     {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                      <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
+                      <span
+                        className={uiInfoModalWrapper}
+                        onClick={(event) => event.stopPropagation()}
+                      >
                         <InfoModal
                           title={item.name}
                           content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
@@ -479,7 +507,10 @@ export function TalentPickerModal({
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5">
                     {sources.map((source) => (
-                      <Chip key={source} className={`bg-slate-800/40 font-code ${sourceColour(source)}`}>
+                      <Chip
+                        key={source}
+                        className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
+                      >
                         {source}
                       </Chip>
                     ))}
@@ -538,7 +569,9 @@ export function TalentPickerModal({
               <button
                 type="button"
                 onClick={() => setShowChoicePicker(true)}
-                className={editableInputClass(true) + " text-left flex items-center justify-between"}
+                className={
+                  editableInputClass(true) + " text-left flex items-center justify-between"
+                }
               >
                 <span className="text-slate-500">
                   {talentData.specialisationLabel ?? "Choice"}…
@@ -566,7 +599,9 @@ export function TalentPickerModal({
                   max={talentData.specialisationMax}
                   step={1}
                   placeholder={
-                    traitData?.specialisationPlaceholder ?? talentData.specialisationLabel ?? "Value…"
+                    traitData?.specialisationPlaceholder ??
+                    talentData.specialisationLabel ??
+                    "Value…"
                   }
                   className={editableInputClass(true)}
                 />
@@ -587,7 +622,9 @@ export function TalentPickerModal({
                   if (event.key === "Enter" && canAdd) handleSpecAdd();
                 }}
                 placeholder={`Enter ${(
-                  detailChoice?.detailLabel ?? talentData.specialisationLabel ?? "specialisation"
+                  detailChoice?.detailLabel ??
+                  talentData.specialisationLabel ??
+                  "specialisation"
                 ).toLocaleLowerCase()}…`}
                 className={editableInputClass(true)}
               />
@@ -632,116 +669,123 @@ export function TalentPickerModal({
       }
     >
       <div className="space-y-3 p-3 lg:p-4" data-testid="talent-picker-card-list">
-      {filtered.map((item) => {
-        const row = item as TalentData;
-        const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
-        const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
-        const itemBehaviour = useTalentBehaviours ? getTalentBehaviour(row) : null;
-        const showsOwnedCount = ownedCount > 0 && (
-          itemBehaviour?.kind === "ranked" ||
-          itemBehaviour?.kind === "fixed-repeatable" ||
-          itemBehaviour?.kind === "hybrid" ||
-          itemBehaviour?.kind === "repeatable-free-text" ||
-          itemBehaviour?.kind === "psychic-purchase" ||
-          (!useTalentBehaviours && row.repeatable === true) ||
-          (itemBehaviour?.kind === "ordinary" && row.repeatable === true)
-        );
-        const ownedLabel = showsOwnedCount
-          ? itemBehaviour?.kind === "ranked" && itemBehaviour.maxPurchases !== undefined
-            ? `Owned: ${ownedCount}/${itemBehaviour.maxPurchases}`
-            : `Owned: ${ownedCount}`
-          : null;
-        const usesChoicePicker =
-          itemBehaviour?.kind === "fixed-repeatable" ||
-          itemBehaviour?.kind === "fixed-single" ||
-          itemBehaviour?.kind === "hybrid" ||
-          (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
-        const usesTextEntry =
-          row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
-        const opensAcquisition = Boolean(!useTalentBehaviours && (row as TraitData).acquisition) || (
-          useTalentBehaviours && needsTalentAcquisition(
-            { uid: "picker-preview", talentId: row.id, name: row.name },
-            { homeworld: "", talents: [...entries], traits: [] }
-          )
-        );
-        const opensNextStep = usesChoicePicker || usesTextEntry || opensAcquisition;
-        const cost =
-          career && !usesChoicePicker && !usesTextEntry
-            ? getNextTalentCost(career, rank, item.id, undefined, entries)
-            : undefined;
-        const rankChips =
-          career && !usesChoicePicker && !usesTextEntry
-            ? getTalentRankChips(career, item.id, undefined)
-            : undefined;
-        return (
-          <PickerRow
-            key={item.id}
-            card
-            className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
-            interactive={editable}
-            onClick={() => {
-              if (!editable) return;
-              const itemTalent = item as TalentData;
-              if (usesChoicePicker) {
-                setPicked(item);
-                setShowChoicePicker(true);
-              } else if (usesTextEntry) {
-                setPicked(item);
-              } else {
-                attemptRealAdd(itemTalent);
-              }
-            }}
-          >
-            <div className="flex-1 min-w-0 space-y-1.5">
-              <div className="flex items-center gap-1.5">
-                <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-                  {item.name}
-                </span>
-                {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                  <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
-                    <InfoModal
-                      title={item.name}
-                      content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
-                      as="span"
-                    />
+        {filtered.map((item) => {
+          const row = item as TalentData;
+          const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
+          const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
+          const itemBehaviour = useTalentBehaviours ? getTalentBehaviour(row) : null;
+          const showsOwnedCount =
+            ownedCount > 0 &&
+            (itemBehaviour?.kind === "ranked" ||
+              itemBehaviour?.kind === "fixed-repeatable" ||
+              itemBehaviour?.kind === "hybrid" ||
+              itemBehaviour?.kind === "repeatable-free-text" ||
+              itemBehaviour?.kind === "psychic-purchase" ||
+              (!useTalentBehaviours && row.repeatable === true) ||
+              (itemBehaviour?.kind === "ordinary" && row.repeatable === true));
+          const ownedLabel = showsOwnedCount
+            ? itemBehaviour?.kind === "ranked" && itemBehaviour.maxPurchases !== undefined
+              ? `Owned: ${ownedCount}/${itemBehaviour.maxPurchases}`
+              : `Owned: ${ownedCount}`
+            : null;
+          const usesChoicePicker =
+            itemBehaviour?.kind === "fixed-repeatable" ||
+            itemBehaviour?.kind === "fixed-single" ||
+            itemBehaviour?.kind === "hybrid" ||
+            (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
+          const usesTextEntry =
+            row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
+          const opensAcquisition =
+            Boolean(!useTalentBehaviours && (row as TraitData).acquisition) ||
+            (useTalentBehaviours &&
+              needsTalentAcquisition(
+                { uid: "picker-preview", talentId: row.id, name: row.name },
+                { homeworld: "", talents: [...entries], traits: [] }
+              ));
+          const opensNextStep = usesChoicePicker || usesTextEntry || opensAcquisition;
+          const cost =
+            career && !usesChoicePicker && !usesTextEntry
+              ? getNextTalentCost(career, rank, item.id, undefined, entries)
+              : undefined;
+          const rankChips =
+            career && !usesChoicePicker && !usesTextEntry
+              ? getTalentRankChips(career, item.id, undefined)
+              : undefined;
+          return (
+            <PickerRow
+              key={item.id}
+              card
+              className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
+              interactive={editable}
+              onClick={() => {
+                if (!editable) return;
+                const itemTalent = item as TalentData;
+                if (usesChoicePicker) {
+                  setPicked(item);
+                  setShowChoicePicker(true);
+                } else if (usesTextEntry) {
+                  setPicked(item);
+                } else {
+                  attemptRealAdd(itemTalent);
+                }
+              }}
+            >
+              <div className="flex-1 min-w-0 space-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
+                  >
+                    {item.name}
                   </span>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {sources.map((source) => (
-                  <Chip key={source} className={`bg-slate-800/40 font-code ${sourceColour(source)}`}>
-                    {source}
-                  </Chip>
-                ))}
-                {ownedLabel && (
-                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                    {ownedLabel}
-                  </Chip>
-                )}
-                {cost !== undefined && (
-                  <Chip className={colourValue}>{cost} XP</Chip>
-                )}
-              </div>
-              {rankChips && rankChips.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {rankChips.map((rankName) => (
-                    <Chip key={rankName} size="sm" className={`${colourRank} font-code`}>
-                      {rankName}
+                  {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
+                    <span
+                      className={uiInfoModalWrapper}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <InfoModal
+                        title={item.name}
+                        content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
+                        as="span"
+                      />
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {sources.map((source) => (
+                    <Chip
+                      key={source}
+                      className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
+                    >
+                      {source}
                     </Chip>
                   ))}
+                  {ownedLabel && (
+                    <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                      {ownedLabel}
+                    </Chip>
+                  )}
+                  {cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
                 </div>
-              )}
-              {row.prerequisites && (
-                <div className="text-xs lg:text-sm">
-                  <span className={uiTextLabel}>Prerequisites: </span>
-                  <span className="text-slate-300 font-medium">{row.prerequisites}</span>
-                </div>
-              )}
-            </div>
-            {opensNextStep && <ArrowRight />}
-          </PickerRow>
-        );
-      })}
+                {rankChips && rankChips.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {rankChips.map((rankName) => (
+                      <Chip key={rankName} size="sm" className={`${colourRank} font-code`}>
+                        {rankName}
+                      </Chip>
+                    ))}
+                  </div>
+                )}
+                {row.prerequisites && (
+                  <div className="text-xs lg:text-sm">
+                    <span className={uiTextLabel}>Prerequisites: </span>
+                    <span className="text-slate-300 font-medium">{row.prerequisites}</span>
+                  </div>
+                )}
+              </div>
+              {opensNextStep && <ArrowRight />}
+            </PickerRow>
+          );
+        })}
       </div>
     </PickerModal>
   );
@@ -785,11 +829,16 @@ export function EntryCard({
   const [deleteArmed, setDeleteArmed] = useState(false);
   const shownName = displayName ?? entry.name;
   const isGranted = Boolean(entry.grantedByTalentEntryUid);
-  const description = TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId] ?? entry.description;
+  const description =
+    TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId] ?? entry.description;
   const refData = (
     [...TALENT_LIST, ...TRAIT_LIST] as Array<{ id: string; source: SkillSource | SkillSource[] }>
   ).find((reference) => reference.id === entry.talentId);
-  const refSources = refData ? normaliseSources(refData.source) : entry.source ? [entry.source] : [];
+  const refSources = refData
+    ? normaliseSources(refData.source)
+    : entry.source
+      ? [entry.source]
+      : [];
 
   return (
     <div className={uiSection + " flex items-start justify-between gap-2 text-sm lg:text-base"}>
@@ -814,7 +863,10 @@ export function EntryCard({
                             const heading = breakAt === -1 ? group : group.slice(0, breakAt);
                             const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
                             return (
-                              <p key={index} className={`text-sm ${uiTextBody} leading-relaxed whitespace-pre-line`}>
+                              <p
+                                key={index}
+                                className={`text-sm ${uiTextBody} leading-relaxed whitespace-pre-line`}
+                              >
                                 <span className="font-semibold">{heading}</span>
                                 {body && `\n${body}`}
                               </p>
@@ -829,9 +881,13 @@ export function EntryCard({
             </span>
           )}
         </div>
-        {!statusAfterSource && secondaryText && <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>}
+        {!statusAfterSource && secondaryText && (
+          <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>
+        )}
         {!statusAfterSource && isGranted && (
-          <p className={`text-sm ${colourAmberPlain}`}>{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
+          <p className={`text-sm ${colourAmberPlain}`}>
+            {entry.grantedByTalentName} ({entry.grantedByType}): Granted
+          </p>
         )}
         <div className="flex flex-wrap items-center gap-1.5">
           {refSources.map((source) => (
@@ -840,14 +896,16 @@ export function EntryCard({
             </Chip>
           ))}
           {statusChip && (
-            <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-              {statusChip}
-            </Chip>
+            <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">{statusChip}</Chip>
           )}
         </div>
-        {statusAfterSource && secondaryText && <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>}
+        {statusAfterSource && secondaryText && (
+          <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>
+        )}
         {statusAfterSource && isGranted && (
-          <p className={`text-sm ${colourAmberPlain}`}>{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
+          <p className={`text-sm ${colourAmberPlain}`}>
+            {entry.grantedByTalentName} ({entry.grantedByType}): Granted
+          </p>
         )}
         {libraryItem && (
           <CustomItemActionButtons
@@ -865,7 +923,9 @@ export function EntryCard({
       </div>
       {editable && (removable || deletionBlockedMessage) && !isGranted && (
         <RemoveButton
-          onClick={() => deletionBlockedMessage || confirmDeletion ? setDeleteArmed(true) : onRemove(entry.uid)}
+          onClick={() =>
+            deletionBlockedMessage || confirmDeletion ? setDeleteArmed(true) : onRemove(entry.uid)
+          }
           label={`${confirmDeletion ? "Delete" : "Remove"} ${shownName}`}
           className="mt-0.5"
         />
@@ -873,7 +933,9 @@ export function EntryCard({
 
       {deleteArmed && (
         <PickerModal
-          title={deletionBlockedMessage ? `Cannot Delete ${deletionNoun}` : `Delete ${deletionNoun}`}
+          title={
+            deletionBlockedMessage ? `Cannot Delete ${deletionNoun}` : `Delete ${deletionNoun}`
+          }
           query=""
           onQueryChange={() => undefined}
           onClose={() => setDeleteArmed(false)}
@@ -882,11 +944,17 @@ export function EntryCard({
           maxWidth="max-w-sm"
           footer={
             deletionBlockedMessage ? (
-              <Button fullWidth variant="ghost" onClick={() => setDeleteArmed(false)}>Close</Button>
+              <Button fullWidth variant="ghost" onClick={() => setDeleteArmed(false)}>
+                Close
+              </Button>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="primary" onClick={() => onRemove(entry.uid)}>Delete</Button>
-                <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+                <Button variant="primary" onClick={() => onRemove(entry.uid)}>
+                  Delete
+                </Button>
+                <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                  Cancel
+                </Button>
               </div>
             )
           }

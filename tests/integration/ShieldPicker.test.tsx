@@ -12,7 +12,7 @@ import type { CampaignCustomItem } from "../../src/types/CustomItems";
 // InfoModal titled with the bare item name, which always mounts (closed) into
 // the DOM outside any row — filter for whichever match has a button row
 // as an ancestor.
-const SHIELD_A = "Synford-Pattern \"Lockshield\"";
+const SHIELD_A = 'Synford-Pattern "Lockshield"';
 const SHIELD_B = "Enforcer Riot Shield";
 
 function row(name: string): HTMLButtonElement {
@@ -24,7 +24,9 @@ function row(name: string): HTMLButtonElement {
   return match;
 }
 
-function makeCustomItem(overrides: Partial<CampaignCustomItem<"armour">> = {}): CampaignCustomItem<"armour"> {
+function makeCustomItem(
+  overrides: Partial<CampaignCustomItem<"armour">> = {}
+): CampaignCustomItem<"armour"> {
   return {
     id: "custom-1",
     campaignId: "camp-1",
@@ -100,7 +102,9 @@ describe("ShieldPicker", () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
     await user.click(row(SHIELD_B));
-    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "boj-enforcer-riot-shield" }));
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "boj-enforcer-riot-shield" })
+    );
   });
 
   it("shows a View title in read-only mode and does not call onSelect on click", async () => {

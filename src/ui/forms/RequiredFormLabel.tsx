@@ -27,11 +27,12 @@ function RequiredLabelContent({
 }: Pick<SharedRequiredFormLabelProps, "children" | "supportingText">) {
   return (
     <>
-      {children} <span className={colourRequiredText} aria-hidden="true">*</span>
+      {children}{" "}
+      <span className={colourRequiredText} aria-hidden="true">
+        *
+      </span>
       {supportingText && (
-        <span className="ml-1 normal-case tracking-normal text-slate-500">
-          {supportingText}
-        </span>
+        <span className="ml-1 normal-case tracking-normal text-slate-500">{supportingText}</span>
       )}
     </>
   );
@@ -45,7 +46,8 @@ function RequiredLabelContent({
  * use the native required attribute or aria-required as appropriate.
  */
 export function RequiredFormLabel(props: RequiredFormLabelProps) {
-  const className = `${props.tone === "blue" ? uiFormLabelBlue : uiFormLabel} ${props.className ?? ""}`.trim();
+  const className =
+    `${props.tone === "blue" ? uiFormLabelBlue : uiFormLabel} ${props.className ?? ""}`.trim();
   const content = (
     <RequiredLabelContent supportingText={props.supportingText}>
       {props.children}

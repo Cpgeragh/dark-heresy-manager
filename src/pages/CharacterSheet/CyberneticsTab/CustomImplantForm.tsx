@@ -6,10 +6,17 @@ import type {
   CyberneticCraftsmanship,
   CyberneticItem,
 } from "../../../types/Character";
-import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiFormLabel,
+} from "../../../ui/styles/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
-import { CRAFTSMANSHIP_STYLE, CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/styles/craftsmanship";
+import {
+  CRAFTSMANSHIP_STYLE,
+  CYBERNETIC_CRAFTSMANSHIP_OPTIONS,
+} from "../../../ui/styles/craftsmanship";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";

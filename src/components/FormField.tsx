@@ -100,7 +100,11 @@ export function FormField({
 
       {/* Error message (takes precedence over description) */}
       {hasError && (
-        <span id={`${inputId}-error`} className="text-[10px] lg:text-xs text-red-400 mt-0.5" role="alert">
+        <span
+          id={`${inputId}-error`}
+          className="text-[10px] lg:text-xs text-red-400 mt-0.5"
+          role="alert"
+        >
           {error}
         </span>
       )}

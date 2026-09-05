@@ -173,7 +173,9 @@ describe("effectiveWeaponWeight", () => {
   });
 
   it("stacks multiple upgrade modifiers", () => {
-    expect(effectiveWeaponWeight("4 kg", [upgrade("cr-compact"), upgrade("cr-exterminator")])).toBe("3 kg");
+    expect(effectiveWeaponWeight("4 kg", [upgrade("cr-compact"), upgrade("cr-exterminator")])).toBe(
+      "3 kg"
+    );
   });
 
   it("accepts a plain ASCII 'x' in place of the × sign", () => {
@@ -316,53 +318,81 @@ describe("effectiveMeleeStats", () => {
 
 describe("getCompatibleUpgrades", () => {
   it("includes Compact for a Pistol", () => {
-    expect(getCompatibleUpgrades("Pistol", "Laspistol", false, [], "Las").map((u) => u.id)).toContain("cr-compact");
+    expect(
+      getCompatibleUpgrades("Pistol", "Laspistol", false, [], "Las").map((u) => u.id)
+    ).toContain("cr-compact");
   });
 
   it("excludes Compact for melee weapons", () => {
-    expect(getCompatibleUpgrades("Pistol", "Laspistol", true, [], "Las").map((u) => u.id)).not.toContain("cr-compact");
+    expect(
+      getCompatibleUpgrades("Pistol", "Laspistol", true, [], "Las").map((u) => u.id)
+    ).not.toContain("cr-compact");
   });
 
   it("excludes Compact for Heavy weapons", () => {
-    expect(getCompatibleUpgrades("Heavy", "Heavy Bolter", false, [], "Bolt").map((u) => u.id)).not.toContain("cr-compact");
+    expect(
+      getCompatibleUpgrades("Heavy", "Heavy Bolter", false, [], "Bolt").map((u) => u.id)
+    ).not.toContain("cr-compact");
   });
 
   it("includes Extra Grip only for Basic weapons", () => {
-    expect(getCompatibleUpgrades("Basic", "Lasgun", false, [], "Las").map((u) => u.id)).toContain("cr-extra-grip");
-    expect(getCompatibleUpgrades("Pistol", "Laspistol", false, [], "Las").map((u) => u.id)).not.toContain("cr-extra-grip");
+    expect(getCompatibleUpgrades("Basic", "Lasgun", false, [], "Las").map((u) => u.id)).toContain(
+      "cr-extra-grip"
+    );
+    expect(
+      getCompatibleUpgrades("Pistol", "Laspistol", false, [], "Las").map((u) => u.id)
+    ).not.toContain("cr-extra-grip");
   });
 
   it("includes Mono only for melee weapons", () => {
     expect(getCompatibleUpgrades("", "Chainsword", true, []).map((u) => u.id)).toContain("cr-mono");
-    expect(getCompatibleUpgrades("Basic", "Lasgun", false, []).map((u) => u.id)).not.toContain("cr-mono");
+    expect(getCompatibleUpgrades("Basic", "Lasgun", false, []).map((u) => u.id)).not.toContain(
+      "cr-mono"
+    );
   });
 
   it("includes Overcharge Pack only for Las-ammo Pistol/Basic weapons", () => {
-    expect(getCompatibleUpgrades("Pistol", "Laspistol", false, [], "Las").map((u) => u.id)).toContain("cr-overcharge-pack");
-    expect(getCompatibleUpgrades("Pistol", "Autopistol", false, [], "Solid Projectile").map((u) => u.id)).not.toContain("cr-overcharge-pack");
+    expect(
+      getCompatibleUpgrades("Pistol", "Laspistol", false, [], "Las").map((u) => u.id)
+    ).toContain("cr-overcharge-pack");
+    expect(
+      getCompatibleUpgrades("Pistol", "Autopistol", false, [], "Solid Projectile").map((u) => u.id)
+    ).not.toContain("cr-overcharge-pack");
   });
 
   it("includes Silencer only for specific weapon names", () => {
-    expect(getCompatibleUpgrades("Basic", "Autogun", false, []).map((u) => u.id)).toContain("cr-silencer");
-    expect(getCompatibleUpgrades("Pistol", "Laspistol", false, []).map((u) => u.id)).not.toContain("cr-silencer");
+    expect(getCompatibleUpgrades("Basic", "Autogun", false, []).map((u) => u.id)).toContain(
+      "cr-silencer"
+    );
+    expect(getCompatibleUpgrades("Pistol", "Laspistol", false, []).map((u) => u.id)).not.toContain(
+      "cr-silencer"
+    );
   });
 
   it("excludes Red-Dot Laser Sight and Telescopic Sight when a sight is already fitted", () => {
-    const ids = getCompatibleUpgrades("Basic", "Lasgun", false, ["cr-red-dot-laser-sight"]).map((u) => u.id);
+    const ids = getCompatibleUpgrades("Basic", "Lasgun", false, ["cr-red-dot-laser-sight"]).map(
+      (u) => u.id
+    );
     expect(ids).not.toContain("cr-telescopic-sight");
     expect(ids).not.toContain("cr-red-dot-laser-sight");
   });
 
   it("excludes upgrades that are already fitted", () => {
-    expect(getCompatibleUpgrades("Basic", "Lasgun", false, ["cr-extra-grip"]).map((u) => u.id)).not.toContain("cr-extra-grip");
+    expect(
+      getCompatibleUpgrades("Basic", "Lasgun", false, ["cr-extra-grip"]).map((u) => u.id)
+    ).not.toContain("cr-extra-grip");
   });
 
   it("excludes creation-component-only upgrades", () => {
-    expect(getCompatibleUpgrades("Basic", "Lasgun", false, []).map((u) => u.id)).not.toContain("lw-integrated-weapon-components");
+    expect(getCompatibleUpgrades("Basic", "Lasgun", false, []).map((u) => u.id)).not.toContain(
+      "lw-integrated-weapon-components"
+    );
   });
 
   it("always includes Exterminator", () => {
-    expect(getCompatibleUpgrades("Heavy", "Heavy Bolter", false, []).map((u) => u.id)).toContain("cr-exterminator");
+    expect(getCompatibleUpgrades("Heavy", "Heavy Bolter", false, []).map((u) => u.id)).toContain(
+      "cr-exterminator"
+    );
   });
 });
 
@@ -470,9 +500,7 @@ describe("ammoFamilyChip", () => {
 
 describe("compatibleAmmoIdsWithIH", () => {
   it("adds the IH shotgun ammunition to shell-compatible weapons", () => {
-    expect(
-      compatibleAmmoIdsWithIH(["cr-shells"], "Shells")
-    ).toEqual(
+    expect(compatibleAmmoIdsWithIH(["cr-shells"], "Shells")).toEqual(
       expect.arrayContaining([
         "cr-shells",
         "ih-blazer-shotgun-shells",
@@ -483,14 +511,8 @@ describe("compatibleAmmoIdsWithIH", () => {
   });
 
   it("adds IH bolt ammunition to bolt-compatible weapons", () => {
-    expect(
-      compatibleAmmoIdsWithIH(["cr-bolt-shells"], "Bolt Shells")
-    ).toEqual(
-      expect.arrayContaining([
-        "cr-bolt-shells",
-        "ih-psycannon-bolts",
-        "ih-blessed-ammunition",
-      ])
+    expect(compatibleAmmoIdsWithIH(["cr-bolt-shells"], "Bolt Shells")).toEqual(
+      expect.arrayContaining(["cr-bolt-shells", "ih-psycannon-bolts", "ih-blessed-ammunition"])
     );
   });
 });

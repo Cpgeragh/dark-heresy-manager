@@ -9,7 +9,11 @@ import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButto
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
-import { AMMO_REFERENCE, isSoldAsFullClip, usesUnitAmmoTracking } from "../../../data/reference/ammoReference";
+import {
+  AMMO_REFERENCE,
+  isSoldAsFullClip,
+  usesUnitAmmoTracking,
+} from "../../../data/reference/ammoReference";
 import {
   uiSectionShell,
   uiTextBody,
@@ -116,9 +120,7 @@ export function MeleeCard({
   const [showPistolAmmoPicker, setShowPistolAmmoPicker] = useState(false);
 
   const upgradeIds = weapon.upgrades ?? [];
-  const upgradeRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) =>
-    upgradeIds.includes(upgrade.id)
-  );
+  const upgradeRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) => upgradeIds.includes(upgrade.id));
   const weaponRef = weapon.referenceId
     ? resolveMeleeWeaponReference(weapon.referenceId)
     : undefined;
@@ -132,30 +134,38 @@ export function MeleeCard({
   }
   const baseWeapon = { ...weapon, specialRules: baseSpecialRules };
   const effective = effectiveMeleeStats(baseWeapon, upgradeRefs);
-  const effectiveDamage = concealedBionicQuality === "Good"
-    ? meleeDamageForCraftsmanship(weapon.damage ?? "", "Best")
-    : weapon.damage ?? "";
+  const effectiveDamage =
+    concealedBionicQuality === "Good"
+      ? meleeDamageForCraftsmanship(weapon.damage ?? "", "Best")
+      : (weapon.damage ?? "");
   const pistolProfile = weaponRef?.alternateRangedProfile;
   const alternateMeleeProfiles = weaponRef?.alternateMeleeProfiles ?? [];
-  const activeMeleeProfile = alternateMeleeProfiles.find((profile) => profile.label === activeProfile);
+  const activeMeleeProfile = alternateMeleeProfiles.find(
+    (profile) => profile.label === activeProfile
+  );
   const isPistolProfile = activeProfile === "Pistol" && !!pistolProfile;
   const displayedMeleeDamage = activeMeleeProfile?.damage ?? effectiveDamage;
   const displayedMeleePen = activeMeleeProfile?.pen ?? effective.pen;
   const displayedMeleeRules = activeMeleeProfile?.specialRules;
-  const pistolAmmoEntries = weapon.alternateRangedAmmoEntries
-    ?? (weapon.alternateRangedAmmoReferenceId
-      ? [{
-          id: "legacy-alternate-ammo",
-          referenceId: weapon.alternateRangedAmmoReferenceId,
-          name: AMMO_REFERENCE.find((ammo) => ammo.id === weapon.alternateRangedAmmoReferenceId)?.name ?? "Ammo",
-          clips: 1,
-          rounds: 0,
-          loaded: true,
-        }]
+  const pistolAmmoEntries =
+    weapon.alternateRangedAmmoEntries ??
+    (weapon.alternateRangedAmmoReferenceId
+      ? [
+          {
+            id: "legacy-alternate-ammo",
+            referenceId: weapon.alternateRangedAmmoReferenceId,
+            name:
+              AMMO_REFERENCE.find((ammo) => ammo.id === weapon.alternateRangedAmmoReferenceId)
+                ?.name ?? "Ammo",
+            clips: 1,
+            rounds: 0,
+            loaded: true,
+          },
+        ]
       : []);
-  const loadedPistolAmmoEntry = pistolAmmoEntries.find(
-    (entry) => entry.id === weapon.loadedAlternateRangedAmmoId
-  ) ?? pistolAmmoEntries.find((entry) => entry.loaded);
+  const loadedPistolAmmoEntry =
+    pistolAmmoEntries.find((entry) => entry.id === weapon.loadedAlternateRangedAmmoId) ??
+    pistolAmmoEntries.find((entry) => entry.loaded);
   const pistolAmmoRef = loadedPistolAmmoEntry?.referenceId
     ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedPistolAmmoEntry.referenceId)
     : undefined;
@@ -169,8 +179,26 @@ export function MeleeCard({
   const craftsmanship = concealedBionicQuality ?? weapon.craftsmanship ?? "Common";
   const strengthBonusMultiplier = weapon.strengthBonusMultiplier ?? 1;
   const effectiveStrengthBonus = strengthBonus * strengthBonusMultiplier;
-  const addableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, true, upgradeIds, undefined, undefined, baseSpecialRules, craftsmanship);
-  const viewableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, true, [], undefined, undefined, baseSpecialRules, craftsmanship);
+  const addableCompatible = getCompatibleUpgrades(
+    weapon.class ?? "",
+    weapon.name,
+    true,
+    upgradeIds,
+    undefined,
+    undefined,
+    baseSpecialRules,
+    craftsmanship
+  );
+  const viewableCompatible = getCompatibleUpgrades(
+    weapon.class ?? "",
+    weapon.name,
+    true,
+    [],
+    undefined,
+    undefined,
+    baseSpecialRules,
+    craftsmanship
+  );
   const visibleCompatible = allowUpgrades
     ? editable
       ? addableCompatible
@@ -180,17 +208,17 @@ export function MeleeCard({
   const rulesText = isPistolProfile
     ? pistolRules
     : displayedMeleeRules
-    ? displayedMeleeRules
-    : weaponRef?.twoHanded
-    ? [baseRulesText, "Two-Handed"].filter((part) => part && part !== "—" && part !== "-").join(", ")
-    : baseRulesText;
+      ? displayedMeleeRules
+      : weaponRef?.twoHanded
+        ? [baseRulesText, "Two-Handed"]
+            .filter((part) => part && part !== "—" && part !== "-")
+            .join(", ")
+        : baseRulesText;
   const ruleNamesInLookup = rulesText
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
-  const hasQualities = Boolean(
-    rulesText && rulesText !== "—" && rulesText !== "-"
-  );
+  const hasQualities = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
   const rulesDescription = weaponRef?.description ?? weapon.description;
   const hasQualityModal = ruleNamesInLookup.length > 0;
   const hasItemRules = !!weapon.concealedBionic;
@@ -212,7 +240,9 @@ export function MeleeCard({
   }
 
   function handleAddPistolAmmo(name: string, referenceId?: string) {
-    const ammoRef = referenceId ? AMMO_REFERENCE.find((ammo) => ammo.id === referenceId) : undefined;
+    const ammoRef = referenceId
+      ? AMMO_REFERENCE.find((ammo) => ammo.id === referenceId)
+      : undefined;
     const entry: WeaponAmmoEntry = {
       id: crypto.randomUUID(),
       referenceId,
@@ -221,7 +251,10 @@ export function MeleeCard({
       rounds: isSoldAsFullClip(ammoRef) ? Number(pistolProfile?.clip ?? 1) : 0,
       loaded: pistolAmmoEntries.length === 0,
     };
-    updatePistolAmmo([...pistolAmmoEntries, entry], entry.loaded ? entry.id : weapon.loadedAlternateRangedAmmoId);
+    updatePistolAmmo(
+      [...pistolAmmoEntries, entry],
+      entry.loaded ? entry.id : weapon.loadedAlternateRangedAmmoId
+    );
   }
 
   function handleSetLoadedPistolAmmo(entryId: string) {
@@ -242,13 +275,15 @@ export function MeleeCard({
 
   function handleUpdatePistolAmmo(entryId: string, patch: Partial<WeaponAmmoEntry>) {
     updatePistolAmmo(
-      pistolAmmoEntries.map((entry) => entry.id === entryId ? { ...entry, ...patch } : entry),
+      pistolAmmoEntries.map((entry) => (entry.id === entryId ? { ...entry, ...patch } : entry)),
       loadedPistolAmmoEntry?.id
     );
   }
 
   return (
-    <div className={`${weapon.concealedBionic ? "border border-pink-500/60 bg-pink-900/10" : uiSectionShell} overflow-hidden`}>
+    <div
+      className={`${weapon.concealedBionic ? "border border-pink-500/60 bg-pink-900/10" : uiSectionShell} overflow-hidden`}
+    >
       {/* Header — always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
         {!forceExpanded && (
@@ -256,7 +291,11 @@ export function MeleeCard({
             type="button"
             onClick={onSelect ?? (() => setExpanded((e) => !e))}
             aria-expanded={onSelect ? undefined : expanded}
-            aria-label={onSelect ? `Select ${weapon.name}` : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+            aria-label={
+              onSelect
+                ? `Select ${weapon.name}`
+                : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`
+            }
             className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
           />
         )}
@@ -267,13 +306,15 @@ export function MeleeCard({
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
                   title={weapon.name}
-                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{rulesDescription}</p>}
+                  content={
+                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                      {rulesDescription}
+                    </p>
+                  }
                 />
               </span>
             )}
-            {libraryItem && (
-              <StatusBadge status={libraryItem.status} />
-            )}
+            {libraryItem && <StatusBadge status={libraryItem.status} />}
             {integrated && (
               <Chip size="sm" className={colourViolet}>
                 Integrated
@@ -287,7 +328,11 @@ export function MeleeCard({
                   Concealed Bionic
                 </Chip>
               )}
-              {weapon.concealedBionic && <Chip size="sm" className={colourPink}>Cybernetic</Chip>}
+              {weapon.concealedBionic && (
+                <Chip size="sm" className={colourPink}>
+                  Cybernetic
+                </Chip>
+              )}
               {classChips.map((chip) => (
                 <Chip key={chip.label} size="sm" className={chip.className}>
                   {chip.label}
@@ -305,11 +350,20 @@ export function MeleeCard({
               onChange={onToggleEquip}
             />
           )}
-          {!forceExpanded && (onSelect ? (
-            <button type="button" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`} className="relative z-10 pointer-events-auto p-1 -m-1">
+          {!forceExpanded &&
+            (onSelect ? (
+              <button
+                type="button"
+                onClick={() => setExpanded((e) => !e)}
+                aria-expanded={expanded}
+                aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+                className="relative z-10 pointer-events-auto p-1 -m-1"
+              >
+                <ExpandChevron expanded={expanded} />
+              </button>
+            ) : (
               <ExpandChevron expanded={expanded} />
-            </button>
-          ) : <ExpandChevron expanded={expanded} />)}
+            ))}
         </div>
       </div>
 
@@ -337,13 +391,26 @@ export function MeleeCard({
 
           {(pistolProfile || alternateMeleeProfiles.length > 0) && (
             <div className="flex gap-2">
-              {[weaponRef?.primaryMeleeProfileLabel ?? "Melee", ...alternateMeleeProfiles.map((profile) => profile.label), ...(pistolProfile ? ["Pistol"] : [])].map((profile) => (
+              {[
+                weaponRef?.primaryMeleeProfileLabel ?? "Melee",
+                ...alternateMeleeProfiles.map((profile) => profile.label),
+                ...(pistolProfile ? ["Pistol"] : []),
+              ].map((profile) => (
                 <button
                   type="button"
                   key={profile}
-                  onClick={() => setActiveProfile(profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee") ? "Melee" : profile)}
+                  onClick={() =>
+                    setActiveProfile(
+                      profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee")
+                        ? "Melee"
+                        : profile
+                    )
+                  }
                   className={`rounded border px-2 py-1 text-xs lg:text-sm ${
-                    activeProfile === (profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee") ? "Melee" : profile)
+                    activeProfile ===
+                    (profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee")
+                      ? "Melee"
+                      : profile)
                       ? "border-sky-400 bg-sky-950/60 text-sky-200"
                       : "border-slate-600 text-slate-300"
                   }`}
@@ -358,7 +425,10 @@ export function MeleeCard({
             <div className="flex flex-wrap gap-1.5">
               <StatChip label="Range" value={pistolProfile.range} />
               <StatChip label="RoF" value={pistolProfile.rof} />
-              <StatChip label="Damage" value={pistolProfile.damage.replace(/\s*[IREX]$/i, "").trim()} />
+              <StatChip
+                label="Damage"
+                value={pistolProfile.damage.replace(/\s*[IREX]$/i, "").trim()}
+              />
               <DamageTypeChip damage={pistolProfile.damage} />
               <StatChip label="Pen" value={pistolProfile.pen} />
               <StatChip label="Clip" value={pistolProfile.clip} />
@@ -367,14 +437,22 @@ export function MeleeCard({
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {thrownRange && <StatChip label="Range" value={thrownRange} />}
-              {displayedMeleeDamage && <StatChip label="Damage" value={displayMeleeDamage(displayedMeleeDamage)} />}
-              {displayedMeleeDamage && !hasMultipleProfiles && <DamageTypeChip damage={displayedMeleeDamage} />}
+              {displayedMeleeDamage && (
+                <StatChip label="Damage" value={displayMeleeDamage(displayedMeleeDamage)} />
+              )}
+              {displayedMeleeDamage && !hasMultipleProfiles && (
+                <DamageTypeChip damage={displayedMeleeDamage} />
+              )}
               {displayedMeleePen && <StatChip label="Pen" value={displayedMeleePen} />}
               <StatChip label="SB" value={`+${effectiveStrengthBonus}`} />
               {displayedMeleeDamage && !hasMultipleProfiles && (
                 <StatChip
                   label="Total"
-                  value={computeMeleeTotalDamage(displayedMeleeDamage, strengthBonus, strengthBonusMultiplier)}
+                  value={computeMeleeTotalDamage(
+                    displayedMeleeDamage,
+                    strengthBonus,
+                    strengthBonusMultiplier
+                  )}
                 />
               )}
             </div>
@@ -403,9 +481,14 @@ export function MeleeCard({
                     title={`${weapon.name} Rules`}
                     content={
                       <div className="space-y-3">
-                        <p className="text-sm lg:text-base font-semibold text-amber-300">Concealed Weapon Bionic</p>
+                        <p className="text-sm lg:text-base font-semibold text-amber-300">
+                          Concealed Weapon Bionic
+                        </p>
                         {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                          <p key={rule} className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          <p
+                            key={rule}
+                            className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}
+                          >
                             {rule}
                           </p>
                         ))}
@@ -413,12 +496,12 @@ export function MeleeCard({
                     }
                   />
                 </span>
-              ) : <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>}
+              ) : (
+                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
+              )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>
-                Craftsmanship
-              </span>
+              <span className={uiTextLabel}>Craftsmanship</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
@@ -477,12 +560,19 @@ export function MeleeCard({
                       editable={editable}
                       clipSize={String(pistolProfile.clip)}
                       ammoTracking="loose"
-                      weightKg={calcEntryWeight(effective.weight, String(pistolProfile.clip), entry, "loose")}
+                      weightKg={calcEntryWeight(
+                        effective.weight,
+                        String(pistolProfile.clip),
+                        entry,
+                        "loose"
+                      )}
                       onSetLoaded={() => handleSetLoadedPistolAmmo(entry.id)}
                       onRemove={() => handleRemovePistolAmmo(entry.id)}
                       onUpdateClips={(clips) => handleUpdatePistolAmmo(entry.id, { clips })}
                       onUpdateRounds={(rounds) => handleUpdatePistolAmmo(entry.id, { rounds })}
-                      onSetLooseRounds={(rounds) => handleUpdatePistolAmmo(entry.id, { rounds, clips: 0 })}
+                      onSetLooseRounds={(rounds) =>
+                        handleUpdatePistolAmmo(entry.id, { rounds, clips: 0 })
+                      }
                     />
                   ))}
                 </div>
@@ -506,16 +596,19 @@ export function MeleeCard({
           {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
             <div className="border-t border-slate-800 pt-2 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className={uiTextLabel}>
-                  Upgrades
-                </span>
-                {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-                  editable ? (
-                    <AddButton label="Add upgrade" size="sm" onClick={() => setShowUpgradePicker(true)} />
+                <span className={uiTextLabel}>Upgrades</span>
+                {(editable
+                  ? visibleCompatible.length > 0
+                  : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
+                  (editable ? (
+                    <AddButton
+                      label="Add upgrade"
+                      size="sm"
+                      onClick={() => setShowUpgradePicker(true)}
+                    />
                   ) : (
                     <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
-                  )
-                )}
+                  ))}
               </div>
               {upgradeRefs.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>

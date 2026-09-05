@@ -116,7 +116,9 @@ describe("ArcheotechPickerModal", () => {
     ).toBe(210);
 
     const assignedDialog = screen.getByRole("dialog", { name: "GM-Assigned Values" });
-    const assignedBack = assignedDialog.querySelector<HTMLButtonElement>('button[aria-label="Back"]');
+    const assignedBack = assignedDialog.querySelector<HTMLButtonElement>(
+      'button[aria-label="Back"]'
+    );
     if (!assignedBack) throw new Error("No assigned-values Back button found");
     await user.click(assignedBack);
     expect(

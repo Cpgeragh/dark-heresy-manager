@@ -48,7 +48,9 @@ export function useCharacterHelpers({ character }: UseCharacterHelpersProps) {
       const baseBonus = Math.floor(getEffectiveCharTotal(statKey) / CHARACTERISTIC_BONUS_DIVISOR);
       const traits = character?.talentsAndTraits.traits ?? [];
       const unnaturalCount = traits.filter(
-        (t) => t.talentId === "unnatural-characteristic" && t.specialisation === CHARACTERISTIC_LABELS[statKey]
+        (t) =>
+          t.talentId === "unnatural-characteristic" &&
+          t.specialisation === CHARACTERISTIC_LABELS[statKey]
       ).length;
       return baseBonus * (1 + unnaturalCount);
     },

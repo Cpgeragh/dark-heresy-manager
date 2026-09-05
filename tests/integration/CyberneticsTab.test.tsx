@@ -108,9 +108,7 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/CustomImplantForm", () =>
     onCancel: () => void;
   }) => (
     <div>
-      <button
-        onClick={() => onAdd({ id: "draft-1", name: "Custom Bionic Eye", source: "Custom" })}
-      >
+      <button onClick={() => onAdd({ id: "draft-1", name: "Custom Bionic Eye", source: "Custom" })}>
         Mock Submit Custom Implant
       </button>
       <button onClick={onCancel}>Mock Cancel</button>
@@ -308,7 +306,11 @@ describe("CyberneticsTab", () => {
     await user.click(screen.getByText("Mock Select Plain Implant"));
 
     expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ referenceId: "auto-quill", name: "Auto-Quill", craftsmanship: "Common" }),
+      expect.objectContaining({
+        referenceId: "auto-quill",
+        name: "Auto-Quill",
+        craftsmanship: "Common",
+      }),
     ]);
   });
 
@@ -473,7 +475,11 @@ describe("CyberneticsTab", () => {
       expect.objectContaining({ campaignId: "campaign-1", category: "weapon" })
     );
     expect(onUpdateRanged).toHaveBeenCalledWith([
-      expect.objectContaining({ customLibraryId: "lib-3", customLibraryVersionId: "v3", integrated: true }),
+      expect.objectContaining({
+        customLibraryId: "lib-3",
+        customLibraryVersionId: "v3",
+        integrated: true,
+      }),
     ]);
   });
 });

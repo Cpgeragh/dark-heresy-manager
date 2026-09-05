@@ -248,7 +248,8 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     value: "75 Thrones",
     availability: "Average",
     duration: "2d10 Rounds",
-    effect: "A single dose of Kick removes all Fatigue levels and provides immunity to Fatigue for 2d10 Rounds.",
+    effect:
+      "A single dose of Kick removes all Fatigue levels and provides immunity to Fatigue for 2d10 Rounds.",
     sideEffect: "Once it wears off, the user takes 1d5 levels of Fatigue.",
     notes:
       "A potent combination of neural accelerants and stimulants, Kick makes the user feel supercharged with energy. It is ideal for short-term assaults as the effects burn off rapidly inducing profound fatigue and listlessness for the next several hours.",

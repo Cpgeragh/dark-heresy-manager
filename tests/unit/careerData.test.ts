@@ -7,7 +7,10 @@ import { WEAPON_TRAINING_GROUPS } from "../../src/data/reference/weaponTrainingD
 const skillIds = new Set(DEFAULT_SKILLS.map((skill) => skill.id));
 const talentById = new Map(TALENT_LIST.map((talent) => [talent.id, talent]));
 const weaponTrainingOptionsByTalentName = new Map(
-  WEAPON_TRAINING_GROUPS.map((group) => [group.label, new Set(group.items.map((item) => item.display))])
+  WEAPON_TRAINING_GROUPS.map((group) => [
+    group.label,
+    new Set(group.items.map((item) => item.display)),
+  ])
 );
 
 describe("careerData starting benefit grants", () => {
@@ -43,7 +46,10 @@ describe("careerData starting benefit grants", () => {
             }
 
             const behaviour = talent?.behaviour;
-            if (behaviour && (behaviour.kind === "fixed-repeatable" || behaviour.kind === "fixed-single")) {
+            if (
+              behaviour &&
+              (behaviour.kind === "fixed-repeatable" || behaviour.kind === "fixed-single")
+            ) {
               expect(behaviour.options.includes(option.specialisation), label).toBe(true);
             }
           }

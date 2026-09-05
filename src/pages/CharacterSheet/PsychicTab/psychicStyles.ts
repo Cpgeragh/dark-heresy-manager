@@ -70,12 +70,20 @@ export function psyRatingGlow(psyRating: number): string {
 export function psyRatingPulseVars(psyRating: number): CSSProperties {
   const capped = Math.max(1, Math.min(6, psyRating));
   const lo: Record<number, [number, number]> = {
-    1: [6, 0.35], 2: [9, 0.45], 3: [12, 0.55],
-    4: [15, 0.65], 5: [19, 0.75], 6: [24, 0.9],
+    1: [6, 0.35],
+    2: [9, 0.45],
+    3: [12, 0.55],
+    4: [15, 0.65],
+    5: [19, 0.75],
+    6: [24, 0.9],
   };
   const hi: Record<number, [number, number]> = {
-    1: [10, 0.55], 2: [14, 0.65], 3: [18, 0.75],
-    4: [22, 0.85], 5: [27, 0.92], 6: [32, 0.98],
+    1: [10, 0.55],
+    2: [14, 0.65],
+    3: [18, 0.75],
+    4: [22, 0.85],
+    5: [27, 0.92],
+    6: [32, 0.98],
   };
   const [loBlur, loOpacity] = lo[capped];
   const [hiBlur, hiOpacity] = hi[capped];

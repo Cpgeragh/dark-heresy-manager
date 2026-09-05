@@ -26,9 +26,9 @@ describe("skill reference data", () => {
   });
 
   it("uses Fellowship for Performer (Dancer)", () => {
-    expect(
-      DEFAULT_SKILLS.find((skill) => skill.id === "performer-dancer")?.characteristic
-    ).toBe("fel");
+    expect(DEFAULT_SKILLS.find((skill) => skill.id === "performer-dancer")?.characteristic).toBe(
+      "fel"
+    );
   });
 
   it("includes the complete Diplomacy resolution procedure", () => {

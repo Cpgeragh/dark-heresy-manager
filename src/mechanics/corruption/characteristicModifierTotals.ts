@@ -12,7 +12,9 @@ import {
   getTraitCharacteristicModifierTotals,
 } from "../traits/traitEffects";
 
-export type CharacteristicTotals = Partial<Record<CharacteristicModifier["characteristic"], number>>;
+export type CharacteristicTotals = Partial<
+  Record<CharacteristicModifier["characteristic"], number>
+>;
 
 function applyModifiers(
   totals: CharacteristicTotals,
@@ -20,8 +22,12 @@ function applyModifiers(
   rolledModifiers: Record<string, number> | undefined
 ) {
   for (const modifier of modifiers ?? []) {
-    const magnitude = modifier.kind === "flat" ? modifier.value ?? 0 : rolledModifiers?.[modifier.characteristic] ?? 0;
-    totals[modifier.characteristic] = (totals[modifier.characteristic] ?? 0) + modifier.sign * magnitude;
+    const magnitude =
+      modifier.kind === "flat"
+        ? (modifier.value ?? 0)
+        : (rolledModifiers?.[modifier.characteristic] ?? 0);
+    totals[modifier.characteristic] =
+      (totals[modifier.characteristic] ?? 0) + modifier.sign * magnitude;
   }
 }
 
@@ -34,7 +40,11 @@ export function getCharacteristicModifierTotals(
 
   const malignancies = Array.isArray(corruption.malignancies) ? corruption.malignancies : [];
   for (const entry of malignancies) {
-    applyModifiers(totals, getCorruptionMalignancyRef(entry.referenceId)?.modifiers, entry.rolledModifiers);
+    applyModifiers(
+      totals,
+      getCorruptionMalignancyRef(entry.referenceId)?.modifiers,
+      entry.rolledModifiers
+    );
   }
   for (const entry of corruption.minorMutations ?? []) {
     applyModifiers(totals, getMutationRef(entry.referenceId)?.modifiers, entry.rolledModifiers);
@@ -54,7 +64,14 @@ export function getCharacteristicModifierTotals(
 
 export interface CharacteristicModifierSource {
   name: string;
-  type: "Malignancy" | "Minor Mutation" | "Major Mutation" | "Talent" | "Trait" | "Career" | "Homeworld";
+  type:
+    | "Malignancy"
+    | "Minor Mutation"
+    | "Major Mutation"
+    | "Talent"
+    | "Trait"
+    | "Career"
+    | "Homeworld";
   amount: number;
 }
 

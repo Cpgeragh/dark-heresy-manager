@@ -30,118 +30,110 @@ describe("Functions: bulk job lease recovery", () => {
     await teardownTestFunctions();
   });
 
-  it(
-    "resumes a job whose lease was abandoned (acquired, then never released) once that lease has expired",
-    async () => {
-      const dmUid = await signInTestUser();
-      const campaignRef = adminDb.collection("campaigns").doc();
-      const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id });
-      const registerRecoveryCode = httpsCallable<
-        { campaignId: string; characterId: string },
-        { code: string }
-      >(getTestFunctions(), "registerRecoveryCode");
-      const { data: registered } = await registerRecoveryCode({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-      });
-      const recoveryCode = registered.code;
-      await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
-      await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
-      const threadRef = campaignRef.collection("threads").doc(characterRef.id);
-      await threadRef.set({ characterId: characterRef.id });
-      await threadRef.collection("messages").add({ text: "hello" });
+  it("resumes a job whose lease was abandoned (acquired, then never released) once that lease has expired", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({ campaignId: campaignRef.id });
+    const registerRecoveryCode = httpsCallable<
+      { campaignId: string; characterId: string },
+      { code: string }
+    >(getTestFunctions(), "registerRecoveryCode");
+    const { data: registered } = await registerRecoveryCode({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
+    const recoveryCode = registered.code;
+    await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
+    await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
+    const threadRef = campaignRef.collection("threads").doc(characterRef.id);
+    await threadRef.set({ characterId: characterRef.id });
+    await threadRef.collection("messages").add({ text: "hello" });
 
-      const startJob = httpsCallable<
-        { campaignId: string; characterId: string },
-        { jobId: string; totalCount: number }
-      >(getTestFunctions(), "startCharacterDeletionJob");
-      const { data: started } = await startJob({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-      });
-      expect(started.totalCount).toBe(6);
+    const startJob = httpsCallable<
+      { campaignId: string; characterId: string },
+      { jobId: string; totalCount: number }
+    >(getTestFunctions(), "startCharacterDeletionJob");
+    const { data: started } = await startJob({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
+    expect(started.totalCount).toBe(6);
 
-      const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
-        getTestFunctions(),
-        "processCharacterDeletionChunk"
-      );
+    const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
+      getTestFunctions(),
+      "processCharacterDeletionChunk"
+    );
 
-      // Finish the claimLog phase for real, checkpoint now points at
-      // xpProposals and the lease is correctly released.
-      const afterFirstChunk = await processChunk({ jobId: started.jobId });
-      expect(afterFirstChunk.data.done).toBe(false);
-      expect(afterFirstChunk.data.processedCount).toBe(2);
+    // Finish the claimLog phase for real, checkpoint now points at
+    // xpProposals and the lease is correctly released.
+    const afterFirstChunk = await processChunk({ jobId: started.jobId });
+    expect(afterFirstChunk.data.done).toBe(false);
+    expect(afterFirstChunk.data.processedCount).toBe(2);
 
-      // Simulate real abandonment: some other call acquired the lease for
-      // the next phase and then vanished (crashed, timed out, connection
-      // dropped) before ever releasing it. The checkpoint stays exactly
-      // where the real call left it, only the lease fields are faked.
-      const jobRef = adminDb.collection("bulkJobs").doc(started.jobId);
-      await jobRef.update({
-        leaseOwner: "zombie-lease",
-        leaseExpiresAt: Date.now() - 1000,
-      });
+    // Simulate real abandonment: some other call acquired the lease for
+    // the next phase and then vanished (crashed, timed out, connection
+    // dropped) before ever releasing it. The checkpoint stays exactly
+    // where the real call left it, only the lease fields are faked.
+    const jobRef = adminDb.collection("bulkJobs").doc(started.jobId);
+    await jobRef.update({
+      leaseOwner: "zombie-lease",
+      leaseExpiresAt: Date.now() - 1000,
+    });
 
-      // A fresh call must still succeed once that lease has expired, and
-      // resume from the real checkpoint rather than restarting or getting
-      // stuck behind the abandoned lease.
-      let result = (await processChunk({ jobId: started.jobId })).data;
-      while (!result.done) {
-        result = (await processChunk({ jobId: started.jobId })).data;
-      }
+    // A fresh call must still succeed once that lease has expired, and
+    // resume from the real checkpoint rather than restarting or getting
+    // stuck behind the abandoned lease.
+    let result = (await processChunk({ jobId: started.jobId })).data;
+    while (!result.done) {
+      result = (await processChunk({ jobId: started.jobId })).data;
+    }
 
-      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
-        getTestFunctions(),
-        "lookupRecoveryCode"
-      );
-      expect(result.processedCount).toBe(6);
-      expect((await characterRef.get()).exists).toBe(false);
-      expect((await threadRef.get()).exists).toBe(false);
-      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
-    },
-    15000
-  );
+    const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+      getTestFunctions(),
+      "lookupRecoveryCode"
+    );
+    expect(result.processedCount).toBe(6);
+    expect((await characterRef.get()).exists).toBe(false);
+    expect((await threadRef.get()).exists).toBe(false);
+    expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
+  }, 15000);
 
-  it(
-    "rejects processing a job whose lease is still genuinely unexpired",
-    async () => {
-      const dmUid = await signInTestUser();
-      const campaignRef = adminDb.collection("campaigns").doc();
-      const characterRef = campaignRef.collection("characters").doc();
-      const recoveryCode = "DH-TEST-0004";
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id, recoveryCode });
-      await adminDb
-        .collection("recoveryIndex")
-        .doc(recoveryCode)
-        .set({ campaignId: campaignRef.id, characterId: characterRef.id });
+  it("rejects processing a job whose lease is still genuinely unexpired", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    const recoveryCode = "DH-TEST-0004";
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({ campaignId: campaignRef.id, recoveryCode });
+    await adminDb
+      .collection("recoveryIndex")
+      .doc(recoveryCode)
+      .set({ campaignId: campaignRef.id, characterId: characterRef.id });
 
-      const startJob = httpsCallable<
-        { campaignId: string; characterId: string },
-        { jobId: string; totalCount: number }
-      >(getTestFunctions(), "startCharacterDeletionJob");
-      const { data: started } = await startJob({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-      });
+    const startJob = httpsCallable<
+      { campaignId: string; characterId: string },
+      { jobId: string; totalCount: number }
+    >(getTestFunctions(), "startCharacterDeletionJob");
+    const { data: started } = await startJob({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
 
-      const jobRef = adminDb.collection("bulkJobs").doc(started.jobId);
-      await jobRef.update({
-        leaseOwner: "still-active-lease",
-        leaseExpiresAt: Date.now() + 30_000,
-      });
+    const jobRef = adminDb.collection("bulkJobs").doc(started.jobId);
+    await jobRef.update({
+      leaseOwner: "still-active-lease",
+      leaseExpiresAt: Date.now() + 30_000,
+    });
 
-      const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
-        getTestFunctions(),
-        "processCharacterDeletionChunk"
-      );
+    const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
+      getTestFunctions(),
+      "processCharacterDeletionChunk"
+    );
 
-      await expect(processChunk({ jobId: started.jobId })).rejects.toMatchObject({
-        code: "functions/aborted",
-      });
-    },
-    15000
-  );
+    await expect(processChunk({ jobId: started.jobId })).rejects.toMatchObject({
+      code: "functions/aborted",
+    });
+  }, 15000);
 });

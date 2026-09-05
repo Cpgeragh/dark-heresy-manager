@@ -290,8 +290,7 @@ export const HOMEWORLD_LIST: readonly HomeworldData[] = [
         description:
           "Birthed in the depths of a spacefaring craft, the void born have a natural affinity for such vehicles.",
         effectLabel: "Benefit",
-        effect:
-          "Navigation (Stellar) (Int) and Pilot (Spacecraft) (Ag) are Basic Skills for you.",
+        effect: "Navigation (Stellar) (Int) and Pilot (Spacecraft) (Ag) are Basic Skills for you.",
       },
       {
         name: "Void Accustomed",

@@ -1,7 +1,13 @@
 // src/pages/CharacterSheet/GearTab/ConsumableRow.tsx
 
 import type { ConsumableItem } from "../../../types/Character";
-import { uiSection, uiTextBody, uiTextLabel, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextBody,
+  uiTextLabel,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -49,9 +55,7 @@ export function ConsumableRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className={uiItemName}>{item.name}</p>
-            {libraryItem && (
-              <StatusBadge status={libraryItem.status} />
-            )}
+            {libraryItem && <StatusBadge status={libraryItem.status} />}
             {hasDesc && (
               <span className={uiInfoModalWrapper}>
                 <InfoModal
@@ -84,9 +88,7 @@ export function ConsumableRow({
           )}
         </div>
 
-        {editable && (
-          <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />
-        )}
+        {editable && <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />}
       </div>
     </div>
   );

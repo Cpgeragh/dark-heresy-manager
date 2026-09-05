@@ -142,7 +142,9 @@ describe("CustomGrenadeForm", () => {
   }, 15_000);
 
   it("parses an existing grenade's Special damage for editing", () => {
-    renderForm({ initialGrenade: { id: "g1", name: "Old Device", quantity: 1, damage: "Special" } });
+    renderForm({
+      initialGrenade: { id: "g1", name: "Old Device", quantity: 1, damage: "Special" },
+    });
     expect(screen.getByRole("button", { name: "special" })).toHaveClass("border-slate-400");
   });
 

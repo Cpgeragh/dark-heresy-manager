@@ -2,10 +2,7 @@
 
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
-import type {
-  RulesTestEnvironment,
-  RulesTestContext
-} from "@firebase/rules-unit-testing";
+import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
 
 describe("Firestore Rules: DM Privileges", () => {
   const campaignId = "camp1";
@@ -20,18 +17,14 @@ describe("Firestore Rules: DM Privileges", () => {
     await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
       await ctx.firestore().collection("campaigns").doc(campaignId).set({
         dmId: "dm-1",
-        name: "Test Campaign"
+        name: "Test Campaign",
       });
 
-      await ctx
-        .firestore()
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc(characterId)
-        .set({
-          userId: "player-1",
-          isEditableByPlayer: false,
-          name: "Original"
-        });
+      await ctx.firestore().collection(`campaigns/${campaignId}/characters`).doc(characterId).set({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        name: "Original",
+      });
     });
   }
 
@@ -42,11 +35,7 @@ describe("Firestore Rules: DM Privileges", () => {
     const dm = env.authenticatedContext("dm-1");
 
     await expect(
-      dm
-        .firestore()
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc(characterId)
-        .delete()
+      dm.firestore().collection(`campaigns/${campaignId}/characters`).doc(characterId).delete()
     ).resolves.toBeUndefined();
   });
 
@@ -57,11 +46,7 @@ describe("Firestore Rules: DM Privileges", () => {
     const p = env.authenticatedContext("player-1");
 
     await expect(
-      p
-        .firestore()
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc(characterId)
-        .delete()
+      p.firestore().collection(`campaigns/${campaignId}/characters`).doc(characterId).delete()
     ).rejects.toThrow();
   });
 });

@@ -115,7 +115,9 @@ describe("migrateCampaignOwnership", () => {
     const batchUpdate = vi.fn();
     const batch = { update: batchUpdate } as never;
     const db = makeDb({});
-    const campaignGet = vi.mocked((db as ReturnType<typeof makeDb>).collection("campaigns").doc("c1").get);
+    const campaignGet = vi.mocked(
+      (db as ReturnType<typeof makeDb>).collection("campaigns").doc("c1").get
+    );
 
     const writeCount = await migrateCampaignOwnership(
       db,

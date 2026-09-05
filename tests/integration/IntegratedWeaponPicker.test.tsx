@@ -5,7 +5,10 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { IntegratedWeaponPicker } from "../../src/pages/CharacterSheet/weapons/IntegratedWeaponPicker";
-import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../src/pages/CharacterSheet/weapons/weaponHelpers";
+import {
+  INTEGRATED_RANGED_REFS,
+  INTEGRATED_MELEE_REFS,
+} from "../../src/pages/CharacterSheet/weapons/weaponHelpers";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 // Real weapons with a description have their own Rules InfoModal titled with
@@ -43,16 +46,22 @@ describe("IntegratedWeaponPicker craftsmanship description", () => {
     renderPicker();
     await user.click(row(INTEGRATED_RANGED_REFS[0].name));
     expect(
-      screen.getByText(/ranged weapon has the Unreliable quality|ranged weapons are more reliable|never suffer from jamming|no additional modifier/)
+      screen.getByText(
+        /ranged weapon has the Unreliable quality|ranged weapons are more reliable|never suffer from jamming|no additional modifier/
+      )
     ).toBeInTheDocument();
-    expect(screen.queryByText(/incur a -10 penalty to Tests made to attack/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/incur a -10 penalty to Tests made to attack/)
+    ).not.toBeInTheDocument();
   });
 
   it("shows the melee-specific description for an integrated melee weapon", async () => {
     const user = userEvent.setup();
     renderPicker();
     await user.click(row(INTEGRATED_MELEE_REFS[0].name));
-    expect(screen.getByText(/Common craftsmanship melee weapons have no additional modifier/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Common craftsmanship melee weapons have no additional modifier/)
+    ).toBeInTheDocument();
   });
 
   it("updates the description when a different craftsmanship level is picked", async () => {

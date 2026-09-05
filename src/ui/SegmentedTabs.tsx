@@ -21,8 +21,7 @@ const tabButtonBase =
   "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border";
 const tabButtonBaseNarrow =
   "rounded-md px-2 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border";
-const tabButtonBaseCompact =
-  "rounded-md px-1 py-1.5 text-[11px] font-semibold transition border";
+const tabButtonBaseCompact = "rounded-md px-1 py-1.5 text-[11px] font-semibold transition border";
 const tabButtonInactive =
   "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200";
 

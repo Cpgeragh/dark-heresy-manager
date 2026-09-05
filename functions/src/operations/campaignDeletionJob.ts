@@ -16,7 +16,12 @@
 // Recovery Code, since that's the only way its recoveryIndex entry can be
 // found and removed safely.
 
-import { FieldPath, getFirestore, type CollectionReference, type Firestore } from "firebase-admin/firestore";
+import {
+  FieldPath,
+  getFirestore,
+  type CollectionReference,
+  type Firestore,
+} from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
@@ -125,7 +130,9 @@ export async function startCampaignDeletionJob(
 
   const threadsSnapshot = await campaignRef.collection("threads").get();
   const threads = threadsSnapshot.docs;
-  const messageCounts = await Promise.all(threads.map((t) => t.ref.collection("messages").count().get()));
+  const messageCounts = await Promise.all(
+    threads.map((t) => t.ref.collection("messages").count().get())
+  );
 
   const customItemsSnapshot = await campaignRef.collection("customItems").get();
   const customItems = customItemsSnapshot.docs;
@@ -182,7 +189,10 @@ async function deleteFlatPage(
   const page = await pageQuery.get();
 
   if (page.empty) {
-    return { processed: 0, nextCheckpoint: { phase: nextPhase(phase)!, parentCursor: null, cursor: null } };
+    return {
+      processed: 0,
+      nextCheckpoint: { phase: nextPhase(phase)!, parentCursor: null, cursor: null },
+    };
   }
 
   const batch = collectionRef.firestore.batch();
@@ -208,7 +218,10 @@ async function sweepNestedPhase(
   if (parentId === null) {
     const firstParent = await parentCollection.orderBy(FieldPath.documentId()).limit(1).get();
     if (firstParent.empty) {
-      return { processed: 0, nextCheckpoint: { phase: nextPhase(phase)!, parentCursor: null, cursor: null } };
+      return {
+        processed: 0,
+        nextCheckpoint: { phase: nextPhase(phase)!, parentCursor: null, cursor: null },
+      };
     }
     parentId = firstParent.docs[0].id;
   }
@@ -239,7 +252,10 @@ async function sweepNestedPhase(
     .get();
 
   if (nextParentSnapshot.empty) {
-    return { processed: page.docs.length, nextCheckpoint: { phase: nextPhase(phase)!, parentCursor: null, cursor: null } };
+    return {
+      processed: page.docs.length,
+      nextCheckpoint: { phase: nextPhase(phase)!, parentCursor: null, cursor: null },
+    };
   }
 
   return {
@@ -261,7 +277,11 @@ async function processRecoveryIndexPage(
   if (page.empty) {
     return {
       processed: 0,
-      nextCheckpoint: { phase: nextPhase("characterRecoveryIndex")!, parentCursor: null, cursor: null },
+      nextCheckpoint: {
+        phase: nextPhase("characterRecoveryIndex")!,
+        parentCursor: null,
+        cursor: null,
+      },
     };
   }
 
@@ -285,7 +305,11 @@ async function processRecoveryIndexPage(
     processed: existingRefs.length,
     nextCheckpoint: isLastPage
       ? { phase: nextPhase("characterRecoveryIndex")!, parentCursor: null, cursor: null }
-      : { phase: "characterRecoveryIndex", parentCursor: null, cursor: page.docs[page.docs.length - 1].id },
+      : {
+          phase: "characterRecoveryIndex",
+          parentCursor: null,
+          cursor: page.docs[page.docs.length - 1].id,
+        },
   };
 }
 
@@ -313,9 +337,18 @@ async function processPhase(
         "characterXpProposals"
       );
     case "characterRecoveryIndex":
-      return processRecoveryIndexPage(db, campaignRef.collection("characters"), checkpoint, hmacSecret);
+      return processRecoveryIndexPage(
+        db,
+        campaignRef.collection("characters"),
+        checkpoint,
+        hmacSecret
+      );
     case "characterSummaries":
-      return deleteFlatPage(campaignRef.collection("characterSummaries"), checkpoint, "characterSummaries");
+      return deleteFlatPage(
+        campaignRef.collection("characterSummaries"),
+        checkpoint,
+        "characterSummaries"
+      );
     case "characters":
       return deleteFlatPage(campaignRef.collection("characters"), checkpoint, "characters");
     case "sessions":
@@ -327,7 +360,12 @@ async function processPhase(
         "sessionSummaries"
       );
     case "threadMessages":
-      return sweepNestedPhase(campaignRef.collection("threads"), "messages", checkpoint, "threadMessages");
+      return sweepNestedPhase(
+        campaignRef.collection("threads"),
+        "messages",
+        checkpoint,
+        "threadMessages"
+      );
     case "threads":
       return deleteFlatPage(campaignRef.collection("threads"), checkpoint, "threads");
     case "customItemVersions":
@@ -378,15 +416,28 @@ export async function processCampaignDeletionChunk(
     }
 
     const checkpoint = parseCheckpoint(job.checkpoint);
-    const { processed, nextCheckpoint } = await processPhase(db, campaignId, checkpoint, hmacSecret);
+    const { processed, nextCheckpoint } = await processPhase(
+      db,
+      campaignId,
+      checkpoint,
+      hmacSecret
+    );
 
     if (nextCheckpoint === null) {
       await completeJob(input.jobId, leaseId);
-      return { done: true, processedCount: job.processedCount + processed, totalCount: job.totalCount };
+      return {
+        done: true,
+        processedCount: job.processedCount + processed,
+        totalCount: job.totalCount,
+      };
     }
 
     await advanceJobCheckpoint(input.jobId, leaseId, JSON.stringify(nextCheckpoint), processed);
-    return { done: false, processedCount: job.processedCount + processed, totalCount: job.totalCount };
+    return {
+      done: false,
+      processedCount: job.processedCount + processed,
+      totalCount: job.totalCount,
+    };
   } catch (error) {
     const message = error instanceof HttpsError ? error.message : "Unexpected error.";
     if (await handleChunkFailure(input.jobId, leaseId, job, error, message)) {

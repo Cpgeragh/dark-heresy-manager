@@ -23,7 +23,9 @@ describe("NotesTab legacy plain-text notes", () => {
     const user = userEvent.setup();
     render(<NotesWiring initial="Old campaign notes." />);
 
-    const textarea = screen.getByPlaceholderText("Campaign notes, reminders, character details, or anything else…");
+    const textarea = screen.getByPlaceholderText(
+      "Campaign notes, reminders, character details, or anything else…"
+    );
     expect(textarea).toHaveValue("Old campaign notes.");
 
     await user.type(textarea, "!");
@@ -34,7 +36,11 @@ describe("NotesTab legacy plain-text notes", () => {
     render(<NotesWiring initial="Old campaign notes." editable={false} />);
 
     expect(screen.getByText("Old campaign notes.")).toBeInTheDocument();
-    expect(screen.queryByPlaceholderText("Campaign notes, reminders, character details, or anything else…")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText(
+        "Campaign notes, reminders, character details, or anything else…"
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("coalesces legacy note typing into one save after the user pauses", () => {
@@ -85,7 +91,10 @@ describe("NotesTab adding notes", () => {
     await user.click(screen.getByRole("button", { name: "Add Note" }));
     const dialog = screen.getByRole("dialog", { name: "Add Note" });
     await user.type(screen.getByPlaceholderText("e.g. Session 12, Inquisitor Varn…"), "Session 12");
-    await user.type(screen.getByPlaceholderText("What do you want to remember…"), "Found the relic.");
+    await user.type(
+      screen.getByPlaceholderText("What do you want to remember…"),
+      "Found the relic."
+    );
     await user.click(within(dialog).getByRole("button", { name: "Add Note" }));
 
     expect(screen.getByText("Notes")).toBeInTheDocument();
@@ -106,7 +115,10 @@ describe("NotesTab adding notes", () => {
     await user.type(screen.getByPlaceholderText("e.g. Session 12, Inquisitor Varn…"), "General");
     expect(addButton).toBeDisabled();
 
-    await user.type(screen.getByPlaceholderText("What do you want to remember…"), "Some reminders.");
+    await user.type(
+      screen.getByPlaceholderText("What do you want to remember…"),
+      "Some reminders."
+    );
     expect(addButton).not.toBeDisabled();
 
     await user.click(addButton);
@@ -129,8 +141,18 @@ describe("NotesTab adding notes", () => {
 describe("NotesTab search", () => {
   function twoEntries(): NoteEntry[] {
     return [
-      { id: "n1", title: "Session 12", text: "Found the relic in the vault.", updatedAt: "2026-01-02T00:00:00.000Z" },
-      { id: "n2", title: "Inquisitor Varn", text: "Suspicious of the cult.", updatedAt: "2026-01-01T00:00:00.000Z" },
+      {
+        id: "n1",
+        title: "Session 12",
+        text: "Found the relic in the vault.",
+        updatedAt: "2026-01-02T00:00:00.000Z",
+      },
+      {
+        id: "n2",
+        title: "Inquisitor Varn",
+        text: "Suspicious of the cult.",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
     ];
   }
 
@@ -179,7 +201,14 @@ describe("NotesTab search", () => {
 
 describe("NotesTab editing and deleting", () => {
   function oneEntry(): NoteEntry[] {
-    return [{ id: "n1", title: "Session 12", text: "Found the relic.", updatedAt: "2026-01-01T00:00:00.000Z" }];
+    return [
+      {
+        id: "n1",
+        title: "Session 12",
+        text: "Found the relic.",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ];
   }
 
   it("tapping the card itself opens a read view, not an editable form, even when editable", async () => {
@@ -190,7 +219,9 @@ describe("NotesTab editing and deleting", () => {
 
     const dialog = screen.getByRole("dialog", { name: "Session 12" });
     expect(within(dialog).getByText("Found the relic.")).toBeInTheDocument();
-    expect(screen.queryByPlaceholderText("e.g. Session 12, Inquisitor Varn…")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("e.g. Session 12, Inquisitor Varn…")
+    ).not.toBeInTheDocument();
   });
 
   it("opens an entry for editing, pre-filled, and saves changes", async () => {

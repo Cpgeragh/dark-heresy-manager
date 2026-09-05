@@ -5,11 +5,7 @@ import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign, createCharacter } from "../helpers";
 
-async function createUserLink(
-  env: RulesTestEnvironment,
-  linkedUid: string,
-  primaryUid: string
-) {
+async function createUserLink(env: RulesTestEnvironment, linkedUid: string, primaryUid: string) {
   await env.withSecurityRulesDisabled(async (context) => {
     await context
       .firestore()

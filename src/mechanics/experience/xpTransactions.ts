@@ -1,8 +1,4 @@
-import type {
-  CharacterHeader,
-  ExperienceBlock,
-  XpTransaction,
-} from "../../types/Character";
+import type { CharacterHeader, ExperienceBlock, XpTransaction } from "../../types/Character";
 import { getCareerRankProgression } from "./careerRankProgression";
 
 export interface NewXpTransaction {
@@ -49,10 +45,7 @@ export function applyXpTransaction(
         : transaction.type === "remove"
           ? experience.total - transaction.amount
           : experience.total,
-    spent:
-      transaction.type === "spend"
-        ? experience.spent + transaction.amount
-        : experience.spent,
+    spent: transaction.type === "spend" ? experience.spent + transaction.amount : experience.spent,
     transactions: [...(experience.transactions ?? []), persisted],
   };
 }
@@ -69,10 +62,7 @@ export function setRankUpXpCost(
   const existingCosts = (experience.transactions ?? []).filter(
     (transaction) => transaction.type === "spend" && transaction.rankId === cost.rankId
   );
-  const existingTotal = existingCosts.reduce(
-    (total, transaction) => total + transaction.amount,
-    0
-  );
+  const existingTotal = existingCosts.reduce((total, transaction) => total + transaction.amount, 0);
   const spentWithoutExistingCost = experience.spent - existingTotal;
   if (cost.amount > experience.total - spentWithoutExistingCost) {
     throw new Error("Cannot spend more XP than the character has remaining.");
@@ -92,8 +82,7 @@ export function setRankUpXpCost(
     spent: spentWithoutExistingCost + cost.amount,
     transactions: [
       ...(experience.transactions ?? []).filter(
-        (transaction) =>
-          transaction.type !== "spend" || transaction.rankId !== cost.rankId
+        (transaction) => transaction.type !== "spend" || transaction.rankId !== cost.rankId
       ),
       persisted,
     ],
@@ -101,19 +90,13 @@ export function setRankUpXpCost(
 }
 
 /** Remove an unconfirmed Rank Up XP cost that was persisted against the still-current rank. */
-export function clearRankUpXpCost(
-  experience: ExperienceBlock,
-  rankId: string
-): ExperienceBlock {
+export function clearRankUpXpCost(experience: ExperienceBlock, rankId: string): ExperienceBlock {
   const existingCosts = (experience.transactions ?? []).filter(
     (transaction) => transaction.type === "spend" && transaction.rankId === rankId
   );
   if (existingCosts.length === 0) return experience;
 
-  const existingTotal = existingCosts.reduce(
-    (total, transaction) => total + transaction.amount,
-    0
-  );
+  const existingTotal = existingCosts.reduce((total, transaction) => total + transaction.amount, 0);
   const transactions = (experience.transactions ?? []).filter(
     (transaction) => transaction.type !== "spend" || transaction.rankId !== rankId
   );
@@ -147,8 +130,7 @@ export function applyCareerRankUp(
   }
 
   const careerPath =
-    progression.careerPath ??
-    (nextRank.paths?.length === 1 ? nextRank.paths[0] : undefined);
+    progression.careerPath ?? (nextRank.paths?.length === 1 ? nextRank.paths[0] : undefined);
 
   const nextHeader: CharacterHeader = {
     ...header,

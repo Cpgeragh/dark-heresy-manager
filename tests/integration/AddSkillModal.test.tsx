@@ -104,13 +104,7 @@ describe("AddSkillModal skill row", () => {
     expect(screen.getByRole("dialog", { name: "Trade" })).toBeInTheDocument();
 
     rerender(
-      <AddSkillModal
-        isOpen
-        editable
-        onClose={onClose}
-        untrainedSkills={[]}
-        onAdd={onAdd}
-      />
+      <AddSkillModal isOpen editable onClose={onClose} untrainedSkills={[]} onAdd={onAdd} />
     );
 
     expect(screen.queryByRole("dialog", { name: "Trade" })).not.toBeInTheDocument();
@@ -156,7 +150,11 @@ describe("AddSkillModal with a career-restricted list", () => {
 
   it("selecting a skill with no known cost opens a manual cost entry step instead of calling onAdd directly", async () => {
     const user = userEvent.setup();
-    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
+    const { onAdd } = setup({
+      untrainedSkills: twoSkills,
+      unlockedCosts: new Map([["s1", 100]]),
+      isDM: true,
+    });
     await user.click(screen.getByRole("button", { name: "Show all skills" }));
     await user.click(screen.getByRole("button", { name: "Select Dodge" }));
 
@@ -172,7 +170,11 @@ describe("AddSkillModal with a career-restricted list", () => {
 
   it("accepts 0 as a valid manual cost, blocking only a blank field", async () => {
     const user = userEvent.setup();
-    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
+    const { onAdd } = setup({
+      untrainedSkills: twoSkills,
+      unlockedCosts: new Map([["s1", 100]]),
+      isDM: true,
+    });
     await user.click(screen.getByRole("button", { name: "Show all skills" }));
     await user.click(screen.getByRole("button", { name: "Select Dodge" }));
 
@@ -189,8 +191,20 @@ describe("AddSkillModal with a career-restricted list", () => {
   it("shows a category's full skill list on the overflow screen, always going to manual entry even for a skill with a real known cost", async () => {
     const user = userEvent.setup();
     const tradeSkills: SkillWithComputed[] = [
-      { ...untrainedSkills[0], id: "trade-agri", name: "Trade (Agri)", category: "Trade", advanced: true },
-      { ...untrainedSkills[0], id: "trade-cook", name: "Trade (Cook)", category: "Trade", advanced: true },
+      {
+        ...untrainedSkills[0],
+        id: "trade-agri",
+        name: "Trade (Agri)",
+        category: "Trade",
+        advanced: true,
+      },
+      {
+        ...untrainedSkills[0],
+        id: "trade-cook",
+        name: "Trade (Cook)",
+        category: "Trade",
+        advanced: true,
+      },
     ];
     const { onAdd } = setup({
       untrainedSkills: tradeSkills,
@@ -218,7 +232,11 @@ describe("AddSkillModal with a career-restricted list", () => {
 
   it("always opens manual cost entry from the overflow screen, even for a skill that also has a real known cost", async () => {
     const user = userEvent.setup();
-    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
+    const { onAdd } = setup({
+      untrainedSkills: twoSkills,
+      unlockedCosts: new Map([["s1", 100]]),
+      isDM: true,
+    });
     await user.click(screen.getByRole("button", { name: "Show all skills" }));
     await user.click(screen.getByRole("button", { name: "Select Awareness" }));
 

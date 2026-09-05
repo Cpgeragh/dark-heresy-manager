@@ -14,7 +14,10 @@ import {
   getTraitGrantedWeaponTrainingIds,
   getTraitSkillEffects,
 } from "../traits/traitEffects";
-import { getDerivedCareerSkillIds, getDerivedCareerTalentGrants } from "../career/careerStartingBenefits";
+import {
+  getDerivedCareerSkillIds,
+  getDerivedCareerTalentGrants,
+} from "../career/careerStartingBenefits";
 
 export interface TalentModifierSource {
   name: string;
@@ -30,7 +33,10 @@ function entriesFor(talents: TalentsAndTraitsBlock, talentId: string): TalentEnt
   return talents.talents.filter((entry) => entry.talentId === talentId);
 }
 
-export function getActiveTalentEntries(talents: TalentsAndTraitsBlock, career?: string): TalentEntry[] {
+export function getActiveTalentEntries(
+  talents: TalentsAndTraitsBlock,
+  career?: string
+): TalentEntry[] {
   const grants = getGrantedTalentEntries(talents, career);
   return [...filterTalentEntriesCoveredByGrants(talents.talents, grants), ...grants];
 }
@@ -66,11 +72,12 @@ export function getTalentCharacteristicModifierSources(
   const sources: TalentModifierSource[] = [];
 
   if (activeEntriesFor(talents, "machinator-array").length > 0) {
-    const amount = characteristic === "s" || characteristic === "t"
-      ? 10
-      : characteristic === "ag" || characteristic === "fel"
-        ? -5
-        : 0;
+    const amount =
+      characteristic === "s" || characteristic === "t"
+        ? 10
+        : characteristic === "ag" || characteristic === "fel"
+          ? -5
+          : 0;
     addCharacteristicSource(sources, "Machinator Array", amount);
   }
 
@@ -92,7 +99,17 @@ export function getTalentCharacteristicModifierTotals(
   talents: TalentsAndTraitsBlock
 ): TalentCharacteristicTotals {
   const totals: TalentCharacteristicTotals = {};
-  const keys: readonly (keyof Characteristics)[] = ["ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel"];
+  const keys: readonly (keyof Characteristics)[] = [
+    "ws",
+    "bs",
+    "s",
+    "t",
+    "ag",
+    "int",
+    "per",
+    "wp",
+    "fel",
+  ];
   for (const key of keys) {
     totals[key] = getTalentCharacteristicModifierSources(talents, key).reduce(
       (total, source) => total + source.amount,
@@ -119,7 +136,11 @@ export function getTalentWoundModifierSources(
 ): TalentModifierSource[] {
   const sources: TalentModifierSource[] = [];
   const soundConstitution = activeEntriesFor(talents, "sound-constitution").length;
-  addCharacteristicSource(sources, `Sound Constitution${soundConstitution > 1 ? ` (${soundConstitution})` : ""}`, soundConstitution);
+  addCharacteristicSource(
+    sources,
+    `Sound Constitution${soundConstitution > 1 ? ` (${soundConstitution})` : ""}`,
+    soundConstitution
+  );
 
   if (sicariusEntry(talents, "Imperial Psyker")) {
     addCharacteristicSource(sources, "Sicarius Tutoring (Imperial Psyker)", 1);
@@ -142,9 +163,7 @@ function grantsChemGeld(talents: TalentsAndTraitsBlock): boolean {
 export function getTalentInsanityModifierSources(
   talents: TalentsAndTraitsBlock
 ): TalentModifierSource[] {
-  return grantsChemGeld(talents)
-    ? [{ name: "Chem Geld", type: "Talent", amount: 1 }]
-    : [];
+  return grantsChemGeld(talents) ? [{ name: "Chem Geld", type: "Talent", amount: 1 }] : [];
 }
 
 export interface TalentFateEffects {
@@ -209,7 +228,12 @@ export function getTalentSkillEffects(
   if (getDerivedCareerSkillIds(career, talents.careerStartingChoices).includes(skill.id)) {
     effects.minimumLevel = "trained";
     if (skill.level === "untrained") {
-      effects.sources.push({ name: `Career: ${career}`, type: "Career", amount: 0, detail: `counts ${skill.name} as trained` });
+      effects.sources.push({
+        name: `Career: ${career}`,
+        type: "Career",
+        amount: 0,
+        detail: `counts ${skill.name} as trained`,
+      });
     }
   }
 
@@ -226,30 +250,55 @@ export function getTalentSkillEffects(
 
   if (skill.category === "Common Lore" && cultEntry(talents, "Political")) {
     effects.countsAsBasic = true;
-    effects.sources.push({ name: "Cult Briefing (Political)", type: "Talent", amount: 0, detail: `counts ${skill.name} as Basic` });
+    effects.sources.push({
+      name: "Cult Briefing (Political)",
+      type: "Talent",
+      amount: 0,
+      detail: `counts ${skill.name} as Basic`,
+    });
   }
 
   if (skill.id === "tech-use" && cultEntry(talents, "Heretek")) {
     effects.minimumLevel = "trained";
     if (skill.level === "untrained") {
-      effects.sources.push({ name: "Cult Briefing (Heretek)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
+      effects.sources.push({
+        name: "Cult Briefing (Heretek)",
+        type: "Talent",
+        amount: 0,
+        detail: `counts ${skill.name} as trained`,
+      });
     }
   }
 
   if (skill.id === "medicae" && cultEntry(talents, "Infestation")) {
     effects.minimumLevel = "trained";
     if (skill.level === "untrained") {
-      effects.sources.push({ name: "Cult Briefing (Infestation)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
+      effects.sources.push({
+        name: "Cult Briefing (Infestation)",
+        type: "Talent",
+        amount: 0,
+        detail: `counts ${skill.name} as trained`,
+      });
     }
   }
 
   if (skill.id === "deceive" && sicariusEntry(talents, "Adept")) {
     effects.characteristic = "int";
-    effects.sources.push({ name: "Sicarius Tutoring (Adept)", type: "Talent", amount: 0, detail: "uses Intelligence" });
+    effects.sources.push({
+      name: "Sicarius Tutoring (Adept)",
+      type: "Talent",
+      amount: 0,
+      detail: "uses Intelligence",
+    });
   }
   if (skill.id === "inquiry" && sicariusEntry(talents, "Tech-Priest")) {
     effects.characteristic = "int";
-    effects.sources.push({ name: "Sicarius Tutoring (Tech-Priest)", type: "Talent", amount: 0, detail: "uses Intelligence" });
+    effects.sources.push({
+      name: "Sicarius Tutoring (Tech-Priest)",
+      type: "Talent",
+      amount: 0,
+      detail: "uses Intelligence",
+    });
   }
   if (skill.id === "shadowing" && sicariusEntry(talents, "Arbitrator")) {
     effects.modifier += 10;
@@ -270,7 +319,10 @@ export function getTalentSkillEffects(
 }
 
 /** Resolves a career-granted talent into its real weapon-training id, or undefined if it isn't one. */
-function weaponTrainingIdFor(talentId: string, specialisation: string | undefined): WeaponTrainingTalentId | undefined {
+function weaponTrainingIdFor(
+  talentId: string,
+  specialisation: string | undefined
+): WeaponTrainingTalentId | undefined {
   if (!specialisation) return undefined;
   const talent = TALENT_LIST.find((item) => item.id === talentId);
   const group = WEAPON_TRAINING_GROUPS.find((item) => item.label === talent?.name);
@@ -295,7 +347,10 @@ function virtualGrant(
   };
 }
 
-export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock, career?: string): TalentEntry[] {
+export function getGrantedTalentEntries(
+  talents: TalentsAndTraitsBlock,
+  career?: string
+): TalentEntry[] {
   const grants: TalentEntry[] = [];
   for (const origin of entriesFor(talents, "the-power-within")) {
     grants.push(virtualGrant(origin, "resistance", "Resistance", "Psychic Powers"));
@@ -320,12 +375,18 @@ export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock, career?:
     if (hasChoice(origin, "Blood")) grants.push(virtualGrant(origin, "frenzy", "Frenzy"));
   }
   for (const origin of entriesFor(talents, "sicarius-tutoring")) {
-    if (hasChoice(origin, "Arbitrator")) grants.push(virtualGrant(origin, "talented", "Talented", "Shadowing"));
-    if (hasChoice(origin, "Assassin")) grants.push(virtualGrant(origin, "talented", "Talented", "Concealment"));
-    if (hasChoice(origin, "Battle Sister")) grants.push(virtualGrant(origin, "swift-attack", "Swift Attack"));
-    if (hasChoice(origin, "Cleric")) grants.push(virtualGrant(origin, "disturbing-voice", "Disturbing Voice"));
+    if (hasChoice(origin, "Arbitrator"))
+      grants.push(virtualGrant(origin, "talented", "Talented", "Shadowing"));
+    if (hasChoice(origin, "Assassin"))
+      grants.push(virtualGrant(origin, "talented", "Talented", "Concealment"));
+    if (hasChoice(origin, "Battle Sister"))
+      grants.push(virtualGrant(origin, "swift-attack", "Swift Attack"));
+    if (hasChoice(origin, "Cleric"))
+      grants.push(virtualGrant(origin, "disturbing-voice", "Disturbing Voice"));
     if (hasChoice(origin, "Scum") && origin.acquisition?.grantedTalentSpecialisation) {
-      grants.push(virtualGrant(origin, "peer", "Peer", origin.acquisition.grantedTalentSpecialisation));
+      grants.push(
+        virtualGrant(origin, "peer", "Peer", origin.acquisition.grantedTalentSpecialisation)
+      );
     }
   }
   for (const grant of getTraitGrantedTalentSpecs(talents)) {
@@ -405,13 +466,15 @@ export function getGrantedWeaponTrainingIds(
   const careerGranted = getDerivedCareerTalentGrants(career, talents.careerStartingChoices)
     .map((grant) => weaponTrainingIdFor(grant.talentId, grant.specialisation))
     .filter((id): id is WeaponTrainingTalentId => Boolean(id));
-  return [...new Set([
-    ...talents.talents
-      .map((entry) => entry.acquisition?.weaponTrainingId)
-      .filter((id): id is WeaponTrainingTalentId => Boolean(id)),
-    ...getTraitGrantedWeaponTrainingIds(talents),
-    ...careerGranted,
-  ])];
+  return [
+    ...new Set([
+      ...talents.talents
+        .map((entry) => entry.acquisition?.weaponTrainingId)
+        .filter((id): id is WeaponTrainingTalentId => Boolean(id)),
+      ...getTraitGrantedWeaponTrainingIds(talents),
+      ...careerGranted,
+    ]),
+  ];
 }
 
 export function getGrantedExoticWeapons(talents: TalentsAndTraitsBlock): string[] {
@@ -420,9 +483,9 @@ export function getGrantedExoticWeapons(talents: TalentsAndTraitsBlock): string[
     .filter((name): name is string => Boolean(name));
 }
 
-export function getMachineArmourSource(talents: TalentsAndTraitsBlock): TalentModifierSource | null {
+export function getMachineArmourSource(
+  talents: TalentsAndTraitsBlock
+): TalentModifierSource | null {
   const rank = entriesFor(talents, "the-flesh-is-weak").length;
-  return rank > 0
-    ? { name: `The Flesh is Weak (${rank})`, type: "Talent", amount: rank }
-    : null;
+  return rank > 0 ? { name: `The Flesh is Weak (${rank})`, type: "Talent", amount: rank } : null;
 }

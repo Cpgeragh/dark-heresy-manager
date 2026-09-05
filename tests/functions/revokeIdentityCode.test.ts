@@ -16,43 +16,35 @@ describe("Functions: revokeIdentityCode", () => {
     await teardownTestFunctions();
   });
 
-  it(
-    "revokes a registered identity code so it can no longer be used, and clears the stored copy",
-    async () => {
-      const uid = await signInTestUser();
-      await adminDb.collection("userProfiles").doc(uid).set({ firstName: "Player" });
-      const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
-        getTestFunctions(),
-        "registerIdentityCode"
-      );
-      const { data: registered } = await registerIdentityCode({ role: "player" });
+  it("revokes a registered identity code so it can no longer be used, and clears the stored copy", async () => {
+    const uid = await signInTestUser();
+    await adminDb.collection("userProfiles").doc(uid).set({ firstName: "Player" });
+    const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+      getTestFunctions(),
+      "registerIdentityCode"
+    );
+    const { data: registered } = await registerIdentityCode({ role: "player" });
 
-      const revokeIdentityCode = httpsCallable(getTestFunctions(), "revokeIdentityCode");
-      await revokeIdentityCode({});
+    const revokeIdentityCode = httpsCallable(getTestFunctions(), "revokeIdentityCode");
+    await revokeIdentityCode({});
 
-      const secretSnapshot = await adminDb.collection("identitySecret").doc(uid).get();
-      expect(secretSnapshot.exists).toBe(false);
+    const secretSnapshot = await adminDb.collection("identitySecret").doc(uid).get();
+    expect(secretSnapshot.exists).toBe(false);
 
-      await signInTestUser();
-      const getMode = httpsCallable<{ code: string }, { status: string }>(
-        getTestFunctions(),
-        "getIdentityRecoveryMode"
-      );
-      await expect(getMode({ code: registered.code })).resolves.toMatchObject({
-        data: { status: "not-found" },
-      });
-    },
-    20000
-  );
+    await signInTestUser();
+    const getMode = httpsCallable<{ code: string }, { status: string }>(
+      getTestFunctions(),
+      "getIdentityRecoveryMode"
+    );
+    await expect(getMode({ code: registered.code })).resolves.toMatchObject({
+      data: { status: "not-found" },
+    });
+  }, 20000);
 
-  it(
-    "succeeds as a safe no-op when the caller has no identity code registered",
-    async () => {
-      await signInTestUser();
-      const revokeIdentityCode = httpsCallable(getTestFunctions(), "revokeIdentityCode");
+  it("succeeds as a safe no-op when the caller has no identity code registered", async () => {
+    await signInTestUser();
+    const revokeIdentityCode = httpsCallable(getTestFunctions(), "revokeIdentityCode");
 
-      await expect(revokeIdentityCode({})).resolves.toBeDefined();
-    },
-    15000
-  );
+    await expect(revokeIdentityCode({})).resolves.toBeDefined();
+  }, 15000);
 });

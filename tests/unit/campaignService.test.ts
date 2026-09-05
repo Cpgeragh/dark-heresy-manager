@@ -238,9 +238,9 @@ describe("createCampaign — GM and Inquisitor name", () => {
   });
 
   it("rejects an Inquisitor name over 100 characters before writing", async () => {
-    await expect(
-      createCampaign("The Lathe Run", "dm-1", "Cain", "x".repeat(101))
-    ).rejects.toThrow("Inquisitor name cannot be more than 100 characters");
+    await expect(createCampaign("The Lathe Run", "dm-1", "Cain", "x".repeat(101))).rejects.toThrow(
+      "Inquisitor name cannot be more than 100 characters"
+    );
     expect(mockSetDoc).not.toHaveBeenCalled();
   });
 });
@@ -265,9 +265,9 @@ describe("updateCampaignDetails", () => {
   });
 
   it("rejects an Inquisitor name over 100 characters before writing", async () => {
-    await expect(
-      updateCampaignDetails("camp-1", "New Name", "x".repeat(101))
-    ).rejects.toThrow("Inquisitor name cannot be more than 100 characters");
+    await expect(updateCampaignDetails("camp-1", "New Name", "x".repeat(101))).rejects.toThrow(
+      "Inquisitor name cannot be more than 100 characters"
+    );
     expect(mockUpdateDoc).not.toHaveBeenCalled();
   });
 });

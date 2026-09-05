@@ -2,7 +2,11 @@
 
 import { useRef, useState } from "react";
 import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiFormLabel,
+} from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -19,14 +23,8 @@ import {
   sanitizeNonNegativeIntegerInput,
   sanitizePositiveIntegerInput,
 } from "../../../utils/formInput";
-import {
-  WeaponQualitySelector,
-} from "./weaponShared";
-import {
-  DAMAGE_TYPE_OPTIONS,
-  formatDamageInput,
-  isValidDiceInput,
-} from "./weaponDamageFormatting";
+import { WeaponQualitySelector } from "./weaponShared";
+import { DAMAGE_TYPE_OPTIONS, formatDamageInput, isValidDiceInput } from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 import { CUSTOM_AMMO_FAMILY_OPTIONS, type AmmoTrackingMode } from "./weaponHelpers";
 

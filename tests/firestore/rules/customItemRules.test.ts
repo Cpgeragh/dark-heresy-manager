@@ -161,15 +161,13 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb
-        .doc(versionPath("missing-item"))
-        .set(
-          draftVersion({
-            customItemId: "missing-item",
-            createdBy: { userId: "dm-1" },
-            updatedBy: { userId: "dm-1" },
-          })
-        )
+      dmDb.doc(versionPath("missing-item")).set(
+        draftVersion({
+          customItemId: "missing-item",
+          createdBy: { userId: "dm-1" },
+          updatedBy: { userId: "dm-1" },
+        })
+      )
     ).rejects.toThrow();
   });
 

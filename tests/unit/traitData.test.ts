@@ -9,22 +9,32 @@ function find(id: string) {
 describe("Trait catalogue", () => {
   it("requires the numeric values the source leaves to each creature entry", () => {
     for (const id of ["burrower", "flyer", "hoverer", "unnatural-senses"]) {
-      expect(find(id)).toEqual(expect.objectContaining({
-        hasSpecialisation: true,
-        positiveIntegerInput: true,
-        specialisationMin: 1,
-      }));
+      expect(find(id)).toEqual(
+        expect.objectContaining({
+          hasSpecialisation: true,
+          positiveIntegerInput: true,
+          specialisationMin: 1,
+        })
+      );
     }
   });
 
   it("uses the source's fixed Fear, Machine and Size limits", () => {
     expect(find("fear").specialisationOptions).toHaveLength(4);
-    expect(find("machine")).toEqual(expect.objectContaining({
-      specialisationMin: 1,
-      specialisationMax: 5,
-    }));
+    expect(find("machine")).toEqual(
+      expect.objectContaining({
+        specialisationMin: 1,
+        specialisationMax: 5,
+      })
+    );
     expect(find("size").specialisationOptions).toEqual([
-      "Minuscule", "Puny", "Scrawny", "Average", "Hulking", "Enormous", "Massive",
+      "Minuscule",
+      "Puny",
+      "Scrawny",
+      "Average",
+      "Hulking",
+      "Enormous",
+      "Massive",
     ]);
   });
 
@@ -33,7 +43,9 @@ describe("Trait catalogue", () => {
     expect(find("blank-slate").acquisition).toBe("blank-slate");
     expect(find("sanctioned-psyker").acquisition).toBe("sanctioned-psyker");
     expect(find("skin-of-iron").acquisition).toBe("skin-of-iron");
-    expect(find("skin-of-iron")).toEqual(expect.objectContaining({ repeatable: true, maxPurchases: 4 }));
+    expect(find("skin-of-iron")).toEqual(
+      expect.objectContaining({ repeatable: true, maxPurchases: 4 })
+    );
   });
 
   it("retains the audited missing rule details", () => {

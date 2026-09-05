@@ -186,60 +186,92 @@ describe("meleeDamageForCraftsmanship", () => {
 // ============================================================
 
 describe("compareWeaponEntries", () => {
-  const makeRegular = (name: string, equipped: boolean) =>
-    ({ kind: "regular" as const, weapon: { equipped }, name });
+  const makeRegular = (name: string, equipped: boolean) => ({
+    kind: "regular" as const,
+    weapon: { equipped },
+    name,
+  });
 
-  const makeCybernetic = (name: string) =>
-    ({ kind: "cybernetic" as const, name });
+  const makeCybernetic = (name: string) => ({ kind: "cybernetic" as const, name });
 
-  const makeArcheotech = (name: string, equipped: boolean) =>
-    ({ kind: "archeotech" as const, item: { equipped }, name });
+  const makeArcheotech = (name: string, equipped: boolean) => ({
+    kind: "archeotech" as const,
+    item: { equipped },
+    name,
+  });
 
   it("sorts cybernetic before regular", () => {
-    expect(compareWeaponEntries(makeCybernetic("Mechadendrite"), makeRegular("Bolter", true))).toBeLessThan(0);
+    expect(
+      compareWeaponEntries(makeCybernetic("Mechadendrite"), makeRegular("Bolter", true))
+    ).toBeLessThan(0);
   });
 
   it("sorts regular after cybernetic", () => {
-    expect(compareWeaponEntries(makeRegular("Bolter", true), makeCybernetic("Mechadendrite"))).toBeGreaterThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Bolter", true), makeCybernetic("Mechadendrite"))
+    ).toBeGreaterThan(0);
   });
 
   it("sorts cybernetic before archeotech", () => {
-    expect(compareWeaponEntries(makeCybernetic("Mechadendrite"), makeArcheotech("Archeotech Pistol", true))).toBeLessThan(0);
+    expect(
+      compareWeaponEntries(
+        makeCybernetic("Mechadendrite"),
+        makeArcheotech("Archeotech Pistol", true)
+      )
+    ).toBeLessThan(0);
   });
 
   it("sorts two cybernetics alphabetically by name", () => {
     expect(compareWeaponEntries(makeCybernetic("Alpha"), makeCybernetic("Beta"))).toBeLessThan(0);
-    expect(compareWeaponEntries(makeCybernetic("Beta"), makeCybernetic("Alpha"))).toBeGreaterThan(0);
+    expect(compareWeaponEntries(makeCybernetic("Beta"), makeCybernetic("Alpha"))).toBeGreaterThan(
+      0
+    );
   });
 
   it("sorts equipped regular before unequipped regular", () => {
-    expect(compareWeaponEntries(makeRegular("Bolter", true), makeRegular("Bolter", false))).toBeLessThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Bolter", true), makeRegular("Bolter", false))
+    ).toBeLessThan(0);
   });
 
   it("sorts unequipped regular after equipped regular", () => {
-    expect(compareWeaponEntries(makeRegular("Bolter", false), makeRegular("Bolter", true))).toBeGreaterThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Bolter", false), makeRegular("Bolter", true))
+    ).toBeGreaterThan(0);
   });
 
   it("sorts two equipped regulars alphabetically by name", () => {
-    expect(compareWeaponEntries(makeRegular("Autogun", true), makeRegular("Bolter", true))).toBeLessThan(0);
-    expect(compareWeaponEntries(makeRegular("Bolter", true), makeRegular("Autogun", true))).toBeGreaterThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Autogun", true), makeRegular("Bolter", true))
+    ).toBeLessThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Bolter", true), makeRegular("Autogun", true))
+    ).toBeGreaterThan(0);
   });
 
   it("sorts two unequipped regulars alphabetically by name", () => {
-    expect(compareWeaponEntries(makeRegular("Autogun", false), makeRegular("Bolter", false))).toBeLessThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Autogun", false), makeRegular("Bolter", false))
+    ).toBeLessThan(0);
   });
 
   it("sorts equipped archeotech before unequipped archeotech", () => {
-    expect(compareWeaponEntries(makeArcheotech("Arc Pistol", true), makeArcheotech("Arc Pistol", false))).toBeLessThan(0);
+    expect(
+      compareWeaponEntries(makeArcheotech("Arc Pistol", true), makeArcheotech("Arc Pistol", false))
+    ).toBeLessThan(0);
   });
 
   it("sorts equipped regular before unequipped archeotech (cross-kind equipped check)", () => {
     // regular equipped (aEq=0) vs archeotech unequipped (bEq=1) → regular comes first
-    expect(compareWeaponEntries(makeRegular("Bolter", true), makeArcheotech("Arc Pistol", false))).toBeLessThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Bolter", true), makeArcheotech("Arc Pistol", false))
+    ).toBeLessThan(0);
   });
 
   it("sorts unequipped regular after equipped archeotech (cross-kind equipped check)", () => {
     // regular unequipped (aEq=1) vs archeotech equipped (bEq=0) → archeotech comes first
-    expect(compareWeaponEntries(makeRegular("Bolter", false), makeArcheotech("Arc Pistol", true))).toBeGreaterThan(0);
+    expect(
+      compareWeaponEntries(makeRegular("Bolter", false), makeArcheotech("Arc Pistol", true))
+    ).toBeGreaterThan(0);
   });
 });

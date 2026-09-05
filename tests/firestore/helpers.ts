@@ -1,9 +1,6 @@
 // tests/firestore/helpers.ts
 
-import type {
-  RulesTestEnvironment,
-  RulesTestContext
-} from "@firebase/rules-unit-testing";
+import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 
 /**
@@ -48,7 +45,7 @@ export function validCharacterDocument(
 
 /**
  * Create a campaign document bypassing security rules.
- * 
+ *
  * IMPORTANT: This now waits to ensure the campaign is readable
  * before returning, preventing "Service call error" in child documents.
  */
@@ -59,11 +56,13 @@ export async function createCampaign(
   extra: Record<string, unknown> = {}
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore().collection("campaigns").doc(campaignId).set(
-      validCampaignDocument(dmId, `Campaign ${campaignId}`, extra)
-    );
+    await ctx
+      .firestore()
+      .collection("campaigns")
+      .doc(campaignId)
+      .set(validCampaignDocument(dmId, `Campaign ${campaignId}`, extra));
   });
-  
+
   // CRITICAL: Wait for the campaign to be readable by verifying with an authenticated read
   // This ensures the document is committed and available for get() calls in rules
   const dmDb = dbAs(env, dmId);
@@ -92,7 +91,8 @@ export async function createCharacter(
       characterName: `Character ${characterId}`,
     });
 
-    await ctx.firestore()
+    await ctx
+      .firestore()
       .collection(`campaigns/${campaignId}/characters`)
       .doc(characterId)
       .set({
@@ -113,10 +113,9 @@ export async function createClaimLog(
   data: Record<string, unknown>
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore()
-      .collection(
-        `campaigns/${campaignId}/characters/${characterId}/claimLog`
-      )
+    await ctx
+      .firestore()
+      .collection(`campaigns/${campaignId}/characters/${characterId}/claimLog`)
       .doc(logId)
       .set(data);
   });
@@ -132,7 +131,8 @@ export async function createCharacterSummary(
   data: Record<string, unknown>
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore()
+    await ctx
+      .firestore()
       .collection(`campaigns/${campaignId}/characterSummaries`)
       .doc(characterId)
       .set(data);
@@ -148,10 +148,7 @@ export async function createRecoveryIndexEntry(
   data: Record<string, unknown>
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore()
-      .collection("recoveryIndex")
-      .doc(code)
-      .set(data);
+    await ctx.firestore().collection("recoveryIndex").doc(code).set(data);
   });
 }
 
@@ -164,10 +161,7 @@ export async function createIdentityRecoveryEntry(
   data: Record<string, unknown>
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore()
-      .collection("identityRecovery")
-      .doc(code)
-      .set(data);
+    await ctx.firestore().collection("identityRecovery").doc(code).set(data);
   });
 }
 
@@ -180,10 +174,7 @@ export async function createIdentitySecretEntry(
   data: Record<string, unknown>
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore()
-      .collection("identitySecret")
-      .doc(uid)
-      .set(data);
+    await ctx.firestore().collection("identitySecret").doc(uid).set(data);
   });
 }
 
@@ -196,9 +187,6 @@ export async function createIdentityReclaimEntry(
   data: Record<string, unknown>
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore()
-      .collection("identityReclaims")
-      .doc(uid)
-      .set(data);
+    await ctx.firestore().collection("identityReclaims").doc(uid).set(data);
   });
 }

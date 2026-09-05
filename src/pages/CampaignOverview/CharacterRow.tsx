@@ -65,9 +65,10 @@ export function CharacterRow({
     result?: { jobId: string; totalCount: number };
     error?: string;
   }>({ loading: false });
-  const [deleteProgress, setDeleteProgress] = useState<
-    { processedCount: number; totalCount: number } | null
-  >(null);
+  const [deleteProgress, setDeleteProgress] = useState<{
+    processedCount: number;
+    totalCount: number;
+  } | null>(null);
   const {
     logs,
     loading: logsLoading,

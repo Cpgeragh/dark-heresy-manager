@@ -17,11 +17,7 @@ export function isValidDiceInput(value: string): boolean {
   return Number(match[1]) > 0 && Number(match[2]) > 0;
 }
 
-export function formatDamageInput(
-  baseDice: string,
-  plusValue: string,
-  type: string
-): string {
+export function formatDamageInput(baseDice: string, plusValue: string, type: string): string {
   const plus = Number(plusValue || "0");
   const plusPart = plus > 0 ? `+${plus}` : "";
   return `${baseDice}${plusPart} ${type}`.trim();
@@ -45,7 +41,11 @@ export function parseDamageType(
   }
 }
 
-export function computeMeleeTotalDamage(damage: string, strengthBonus: number, multiplier = 1): string {
+export function computeMeleeTotalDamage(
+  damage: string,
+  strengthBonus: number,
+  multiplier = 1
+): string {
   const base = damage.replace(/\s*[IREX]$/i, "").trim();
   const match = base.match(/^(\d*d\d+)([+-]\d+)?$/i);
   if (!match) return base;

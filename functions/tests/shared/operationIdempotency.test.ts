@@ -16,8 +16,14 @@ describe("buildOperationIdempotencyKey", () => {
   it("does not collide across operations, callers, or operation IDs", () => {
     const base = buildOperationIdempotencyKey("release-character", "user-1", "operation-1");
 
-    expect(buildOperationIdempotencyKey("force-release-character", "user-1", "operation-1")).not.toBe(base);
-    expect(buildOperationIdempotencyKey("release-character", "user-2", "operation-1")).not.toBe(base);
-    expect(buildOperationIdempotencyKey("release-character", "user-1", "operation-2")).not.toBe(base);
+    expect(
+      buildOperationIdempotencyKey("force-release-character", "user-1", "operation-1")
+    ).not.toBe(base);
+    expect(buildOperationIdempotencyKey("release-character", "user-2", "operation-1")).not.toBe(
+      base
+    );
+    expect(buildOperationIdempotencyKey("release-character", "user-1", "operation-2")).not.toBe(
+      base
+    );
   });
 });

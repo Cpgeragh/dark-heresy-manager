@@ -2,16 +2,8 @@
 
 import { describe, it, expect } from "vitest";
 import { getTestEnv } from "../setup";
-import type {
-  RulesTestEnvironment,
-  RulesTestContext,
-} from "@firebase/rules-unit-testing";
-import {
-  dbAnon,
-  createCampaign,
-  createCharacter,
-  createRecoveryIndexEntry,
-} from "../helpers";
+import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
+import { dbAnon, createCampaign, createCharacter, createRecoveryIndexEntry } from "../helpers";
 
 describe("Firestore Rules: Unauthenticated access", () => {
   it("unauthenticated user cannot read campaigns", async () => {
@@ -21,9 +13,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("campaigns").doc("test-camp").get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("campaigns").doc("test-camp").get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot list campaigns", async () => {
@@ -33,9 +23,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("campaigns").get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("campaigns").get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot write campaigns", async () => {
@@ -60,9 +48,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("users").doc("u1").get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("users").doc("u1").get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot list users", async () => {
@@ -76,9 +62,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("users").get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("users").get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot write users", async () => {
@@ -86,9 +70,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("users").doc("u1").set({ role: "player" })
-    ).rejects.toThrow();
+    await expect(anonDb.collection("users").doc("u1").set({ role: "player" })).rejects.toThrow();
   });
 
   it("unauthenticated user cannot read recoveryIndex", async () => {
@@ -101,9 +83,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("recoveryIndex").doc("CODE-1").get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("recoveryIndex").doc("CODE-1").get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot list recoveryIndex", async () => {
@@ -116,9 +96,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("recoveryIndex").get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("recoveryIndex").get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot write recoveryIndex", async () => {
@@ -146,10 +124,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
     const anonDb = dbAnon(env);
 
     await expect(
-      anonDb
-        .collection(`campaigns/camp1/characters`)
-        .doc("char1")
-        .get()
+      anonDb.collection(`campaigns/camp1/characters`).doc("char1").get()
     ).rejects.toThrow();
   });
 
@@ -164,11 +139,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb
-        .collection(`campaigns/camp1/characters`)
-        .get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection(`campaigns/camp1/characters`).get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot write characters", async () => {
@@ -177,13 +148,10 @@ describe("Firestore Rules: Unauthenticated access", () => {
     const anonDb = dbAnon(env);
 
     await expect(
-      anonDb
-        .collection(`campaigns/camp1/characters`)
-        .doc("char-new")
-        .set({
-          userId: "player-1",
-          isEditableByPlayer: true,
-        })
+      anonDb.collection(`campaigns/camp1/characters`).doc("char-new").set({
+        userId: "player-1",
+        isEditableByPlayer: true,
+      })
     ).rejects.toThrow();
   });
 
@@ -198,9 +166,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("campaigns").doc("camp1").delete()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("campaigns").doc("camp1").delete()).rejects.toThrow();
 
     await expect(
       anonDb.collection("campaigns/camp1/characters").doc("char1").delete()

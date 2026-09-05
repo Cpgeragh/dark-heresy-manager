@@ -112,9 +112,10 @@ function DmCampaignList({
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
-  const [deleteProgress, setDeleteProgress] = useState<
-    { processedCount: number; totalCount: number } | null
-  >(null);
+  const [deleteProgress, setDeleteProgress] = useState<{
+    processedCount: number;
+    totalCount: number;
+  } | null>(null);
   const [deletePreflights, setDeletePreflights] = useState<Record<string, DeletePreflightState>>(
     {}
   );
@@ -389,7 +390,8 @@ function DmCampaignList({
                     onArm={() => loadDeletePreflight(campaign.id)}
                     details={deleteImpactDetails(deletePreflights[campaign.id])}
                     confirmDisabled={
-                      deletePreflights[campaign.id]?.loading || !deletePreflights[campaign.id]?.result
+                      deletePreflights[campaign.id]?.loading ||
+                      !deletePreflights[campaign.id]?.result
                     }
                     onConfirm={() => handleDeleteConfirm(campaign.id)}
                     busyLabel={
@@ -450,7 +452,8 @@ function DmCampaignList({
                       onArm={() => loadDeletePreflight(campaign.id)}
                       details={deleteImpactDetails(deletePreflights[campaign.id])}
                       confirmDisabled={
-                        deletePreflights[campaign.id]?.loading || !deletePreflights[campaign.id]?.result
+                        deletePreflights[campaign.id]?.loading ||
+                        !deletePreflights[campaign.id]?.result
                       }
                       onConfirm={() => handleDeleteConfirm(campaign.id)}
                       busyLabel={
@@ -618,7 +621,11 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         {!playerError && !playerLoading && playerCampaigns.length > 0 && (
           <div className="space-y-4">
             {playerCampaigns.map((campaign) => (
-              <PlayerCampaignRow key={campaign.id} campaignId={campaign.id} campaignName={campaign.name} />
+              <PlayerCampaignRow
+                key={campaign.id}
+                campaignId={campaign.id}
+                campaignName={campaign.name}
+              />
             ))}
           </div>
         )}

@@ -106,8 +106,7 @@ type XpAction = XpTransaction["type"];
 
 const XP_SUMMARY_LABEL_CLASS =
   "whitespace-nowrap text-[10px] uppercase tracking-wide text-sky-300/85 sm:text-sm lg:text-base";
-const ACTIVE_RANK_CHOICE_CLASS =
-  `inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold lg:text-base ${colourCareerPathOutline}`;
+const ACTIVE_RANK_CHOICE_CLASS = `inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold lg:text-base ${colourCareerPathOutline}`;
 const RANK_DETAIL_KEYS = ["career", "additional"] as const;
 type RankDetailKey = (typeof RANK_DETAIL_KEYS)[number];
 const RANK_DETAIL_OPTIONS = [
@@ -148,21 +147,15 @@ function XpTransactionModal({
     .filter(Boolean)
     .join("; ");
   const [amountDraft, setAmountDraft] = useState(
-    action === "spend" && existingRankUpCostAmount > 0
-      ? String(existingRankUpCostAmount)
-      : ""
+    action === "spend" && existingRankUpCostAmount > 0 ? String(existingRankUpCostAmount) : ""
   );
-  const [reason, setReason] = useState(
-    action === "spend" ? existingRankUpCostReason : ""
-  );
+  const [reason, setReason] = useState(action === "spend" ? existingRankUpCostReason : "");
   const amount = Number(amountDraft);
   const remaining = experience.total - experience.spent;
   const isSpend = action === "spend";
   const isRemove = action === "remove";
   const isChangingRankUpCost = isSpend && existingRankUpCostAmount > 0;
-  const availableForAction = isSpend
-    ? remaining + existingRankUpCostAmount
-    : remaining;
+  const availableForAction = isSpend ? remaining + existingRankUpCostAmount : remaining;
   const validAmount =
     /^\d+$/.test(amountDraft) &&
     Number.isInteger(amount) &&
@@ -187,7 +180,9 @@ function XpTransactionModal({
         />
       </span>
     </span>
-  ) : title;
+  ) : (
+    title
+  );
 
   const submit = () => {
     if (!validAmount) return;
@@ -274,7 +269,9 @@ function XpTransactionModal({
         <div className="space-y-2 border-t border-slate-700 pt-4">
           <RequiredFieldsNote />
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="neutral" onClick={onClose}>Cancel</Button>
+            <Button variant="neutral" onClick={onClose}>
+              Cancel
+            </Button>
             <Button
               variant={isSpend ? "primary" : isRemove ? "warningOutline" : "successOutline"}
               onClick={submit}
@@ -331,17 +328,12 @@ function RankUpModal({
     if (rankUpExperience !== character.experience) {
       onUpdate(rankUpExperience);
     }
-    onConfirm(
-      applyCareerRankUp(character.header, rankUpExperience.spent, selectedRank.id)
-    );
+    onConfirm(applyCareerRankUp(character.header, rankUpExperience.spent, selectedRank.id));
     onClose();
   };
 
   const cancel = () => {
-    const clearedExperience = clearRankUpXpCost(
-      character.experience,
-      progression.currentRank.id
-    );
+    const clearedExperience = clearRankUpXpCost(character.experience, progression.currentRank.id);
     if (clearedExperience !== character.experience) {
       onUpdate(clearedExperience);
     }
@@ -369,7 +361,9 @@ function RankUpModal({
             <div className={uiTextLabel}>
               {progression.requiresBranchChoice ? "Choose the next Career path" : "Next Rank"}
             </div>
-            <div className={`grid grid-cols-1 gap-2 ${progression.nextRanks.length > 1 ? "sm:grid-cols-2" : ""}`}>
+            <div
+              className={`grid grid-cols-1 gap-2 ${progression.nextRanks.length > 1 ? "sm:grid-cols-2" : ""}`}
+            >
               {progression.nextRanks.length === 1 ? (
                 <div className={ACTIVE_RANK_CHOICE_CLASS} data-testid="single-next-rank">
                   {progression.nextRanks[0].name}
@@ -414,9 +408,13 @@ function RankUpModal({
               <div className="flex flex-col gap-3 rounded-lg border border-slate-700 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between lg:text-base">
                 <div className="grid min-w-0 grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-1">
                   <span className={uiTextLabel}>Amount</span>
-                  <span className={`font-code ${colourTextPrimary}`}>{appliedRankUpCostAmount} XP</span>
+                  <span className={`font-code ${colourTextPrimary}`}>
+                    {appliedRankUpCostAmount} XP
+                  </span>
                   <span className={uiTextLabel}>Reason</span>
-                  <span className={uiTextBody}>{appliedRankUpCostReason || "No reason provided"}</span>
+                  <span className={uiTextBody}>
+                    {appliedRankUpCostReason || "No reason provided"}
+                  </span>
                 </div>
                 <Button
                   className="self-start sm:shrink-0 sm:self-auto"
@@ -431,7 +429,9 @@ function RankUpModal({
           )}
 
           <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
-            <Button variant="neutral" onClick={cancel}>Cancel</Button>
+            <Button variant="neutral" onClick={cancel}>
+              Cancel
+            </Button>
             <Button onClick={confirm} disabled={!selectedRank}>
               Confirm Rank Up
             </Button>
@@ -515,7 +515,9 @@ function CareerPurchaseGroup({
         aria-label={`${expanded ? "Collapse" : "Expand"} ${label} purchases`}
         className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-slate-700/40 lg:px-4 lg:py-3"
       >
-        <span className={`min-w-0 flex-1 truncate text-sm font-semibold lg:text-base ${colourSkyPlain}`}>
+        <span
+          className={`min-w-0 flex-1 truncate text-sm font-semibold lg:text-base ${colourSkyPlain}`}
+        >
           {label}
         </span>
         <ExpandChevron expanded={expanded} />
@@ -573,9 +575,7 @@ function RankLedgerSection({
         <h4 className="text-sm font-semibold uppercase tracking-wide text-red-500 lg:text-base">
           {title}
         </h4>
-        <span className="shrink-0 font-code text-sm text-slate-300">
-          {total} XP
-        </span>
+        <span className="shrink-0 font-code text-sm text-slate-300">{total} XP</span>
       </div>
       {groupCareerPurchases ? (
         <CareerPurchaseList entries={entries} emptyText={emptyText} />
@@ -675,8 +675,7 @@ export function ExperienceTab({
   const canManageXp = isDM && editable;
   const canUseXpAction = xpAction === "add" ? canAddXp : canManageXp;
   const orderedRankCards = [...rankCards].sort(
-    (left, right) =>
-      Number(right.isCurrent) - Number(left.isCurrent) || right.tier - left.tier
+    (left, right) => Number(right.isCurrent) - Number(left.isCurrent) || right.tier - left.tier
   );
 
   const toggleRankCard = (rankId: string) => {
@@ -699,21 +698,27 @@ export function ExperienceTab({
       {!editable && <span className={readOnlyBadgeClass}>Read-only</span>}
 
       <section className="grid grid-cols-3 gap-2 sm:gap-4">
-        <div className={`${uiSectionShell} flex min-w-0 flex-col items-center justify-center p-2 text-center sm:p-3 lg:p-4`}>
+        <div
+          className={`${uiSectionShell} flex min-w-0 flex-col items-center justify-center p-2 text-center sm:p-3 lg:p-4`}
+        >
           <div className={`mb-1 w-full text-center ${XP_SUMMARY_LABEL_CLASS}`}>Total XP</div>
           <div className="w-full text-center font-code text-xl font-semibold text-slate-100 sm:text-2xl lg:text-3xl">
             {experience.total}
           </div>
         </div>
 
-        <div className={`${uiSectionShell} flex min-w-0 flex-col items-center justify-center p-2 text-center sm:p-3 lg:p-4`}>
+        <div
+          className={`${uiSectionShell} flex min-w-0 flex-col items-center justify-center p-2 text-center sm:p-3 lg:p-4`}
+        >
           <div className={`mb-1 w-full text-center ${XP_SUMMARY_LABEL_CLASS}`}>Spent XP</div>
           <div className="w-full text-center font-code text-xl font-semibold text-slate-100 sm:text-2xl lg:text-3xl">
             {experience.spent}
           </div>
         </div>
 
-        <div className={`${uiSectionShell} flex min-w-0 flex-col items-center justify-center p-2 text-center sm:p-3 lg:p-4`}>
+        <div
+          className={`${uiSectionShell} flex min-w-0 flex-col items-center justify-center p-2 text-center sm:p-3 lg:p-4`}
+        >
           <div className={`mb-1 w-full text-center ${XP_SUMMARY_LABEL_CLASS}`}>Remaining XP</div>
           <div
             className={`w-full text-center font-code text-xl font-semibold sm:text-2xl lg:text-3xl ${
@@ -731,9 +736,7 @@ export function ExperienceTab({
           <div className={`${uiSection} space-y-4`}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className={uiTextLabel}>
-                  Current Rank
-                </div>
+                <div className={uiTextLabel}>Current Rank</div>
                 <div className="mt-1 text-lg text-slate-100 lg:text-xl">
                   {progression.currentRank.name}
                 </div>
@@ -763,10 +766,14 @@ export function ExperienceTab({
             )}
 
             {canAddXp && (
-              <div className={`grid gap-2 border-t border-slate-700 pt-4 ${
-                canManageXp ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-1"
-              }`}>
-                <Button variant="successOutline" onClick={() => setXpAction("add")}>Add XP</Button>
+              <div
+                className={`grid gap-2 border-t border-slate-700 pt-4 ${
+                  canManageXp ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-1"
+                }`}
+              >
+                <Button variant="successOutline" onClick={() => setXpAction("add")}>
+                  Add XP
+                </Button>
                 {canManageXp && (
                   <Button
                     variant="warningOutline"
@@ -806,56 +813,52 @@ export function ExperienceTab({
               const expanded = expandedRankIds.has(card.rankId);
               const detailsId = `rank-card-${card.rankId}-details`;
               return (
-              <article
-                key={card.rankId}
-                aria-label={`${card.name} Rank Card`}
-                className={`${uiSection} ${
-                  card.isCurrent ? "border-red-500/70 bg-red-950/10" : ""
-                }`}
-              >
-                <header>
-                  <button
-                    type="button"
-                    aria-expanded={expanded}
-                    aria-controls={detailsId}
-                    aria-label={`${expanded ? "Collapse" : "Expand"} ${card.name} Rank Card`}
-                    onClick={() => toggleRankCard(card.rankId)}
-                    className="flex w-full flex-col gap-2 text-left sm:flex-row sm:items-start sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <h3 className={`${uiItemName} text-lg text-red-500 lg:text-xl`}>{card.name}</h3>
-                      <div className="mt-1 flex flex-wrap gap-1.5">
-                        <Chip className={`${colourRank} font-code`}>
-                          Rank {card.tier}
-                        </Chip>
-                        <Chip className={`${colourValue} font-code`}>
-                          {card.xpLevel} XP
-                        </Chip>
-                        {card.isCurrent && (
-                          <Chip className={colourEmerald}>Current</Chip>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 sm:justify-end">
-                      <div className="sm:text-right">
-                        <div className="text-xs uppercase tracking-wide text-slate-500 lg:text-sm">
-                          Card Spent
-                        </div>
-                        <div className="font-code text-xl text-slate-100 lg:text-2xl">
-                          {card.spentTotal} XP
+                <article
+                  key={card.rankId}
+                  aria-label={`${card.name} Rank Card`}
+                  className={`${uiSection} ${
+                    card.isCurrent ? "border-red-500/70 bg-red-950/10" : ""
+                  }`}
+                >
+                  <header>
+                    <button
+                      type="button"
+                      aria-expanded={expanded}
+                      aria-controls={detailsId}
+                      aria-label={`${expanded ? "Collapse" : "Expand"} ${card.name} Rank Card`}
+                      onClick={() => toggleRankCard(card.rankId)}
+                      className="flex w-full flex-col gap-2 text-left sm:flex-row sm:items-start sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <h3 className={`${uiItemName} text-lg text-red-500 lg:text-xl`}>
+                          {card.name}
+                        </h3>
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          <Chip className={`${colourRank} font-code`}>Rank {card.tier}</Chip>
+                          <Chip className={`${colourValue} font-code`}>{card.xpLevel} XP</Chip>
+                          {card.isCurrent && <Chip className={colourEmerald}>Current</Chip>}
                         </div>
                       </div>
-                      <ExpandChevron expanded={expanded} />
-                    </div>
-                  </button>
-                </header>
+                      <div className="flex items-center justify-between gap-3 sm:justify-end">
+                        <div className="sm:text-right">
+                          <div className="text-xs uppercase tracking-wide text-slate-500 lg:text-sm">
+                            Card Spent
+                          </div>
+                          <div className="font-code text-xl text-slate-100 lg:text-2xl">
+                            {card.spentTotal} XP
+                          </div>
+                        </div>
+                        <ExpandChevron expanded={expanded} />
+                      </div>
+                    </button>
+                  </header>
 
-                {expanded && (
-                <div id={detailsId} className="mt-4">
-                  <RankDetailsSwitcher card={card} />
-                </div>
-                )}
-              </article>
+                  {expanded && (
+                    <div id={detailsId} className="mt-4">
+                      <RankDetailsSwitcher card={card} />
+                    </div>
+                  )}
+                </article>
               );
             })}
           </div>

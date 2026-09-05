@@ -28,8 +28,6 @@ describe("useClaimActions", () => {
     mockClaimCharacter.mockRejectedValue(new Error("Already claimed"));
     const { result } = renderHook(() => useClaimActions());
 
-    await expect(result.current.claimCharacter("DH-AAAA-BBBB")).rejects.toThrow(
-      "Already claimed"
-    );
+    await expect(result.current.claimCharacter("DH-AAAA-BBBB")).rejects.toThrow("Already claimed");
   });
 });

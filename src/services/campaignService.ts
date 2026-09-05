@@ -183,7 +183,8 @@ export async function deleteCampaign(
     driveJobToCompletion(
       jobId,
       async (id) => (await callProcessCampaignDeletionChunk({ jobId: id })).data,
-      (chunk) => onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
+      (chunk) =>
+        onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
     )
   );
 }

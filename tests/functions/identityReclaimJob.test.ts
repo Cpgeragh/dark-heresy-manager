@@ -35,72 +35,64 @@ describe("Functions: identity reclaim job", () => {
     await teardownTestFunctions();
   });
 
-  it(
-    "migrates a DM campaign and a member campaign's owned characters across chunked calls, and transfers the identity documents immediately",
-    async () => {
-      const oldUid = await signInTestUser();
-      await adminDb.collection("userProfiles").doc(oldUid).set({ firstName: "ExistingUser" });
-      const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
-        getTestFunctions(),
-        "registerIdentityCode"
-      );
-      const { data: registered } = await registerIdentityCode({ role: "dm" });
+  it("migrates a DM campaign and a member campaign's owned characters across chunked calls, and transfers the identity documents immediately", async () => {
+    const oldUid = await signInTestUser();
+    await adminDb.collection("userProfiles").doc(oldUid).set({ firstName: "ExistingUser" });
+    const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+      getTestFunctions(),
+      "registerIdentityCode"
+    );
+    const { data: registered } = await registerIdentityCode({ role: "dm" });
 
-      const dmCampaignRef = adminDb.collection("campaigns").doc();
-      await dmCampaignRef.set({ dmId: oldUid, name: "DM Campaign", memberIds: [] });
+    const dmCampaignRef = adminDb.collection("campaigns").doc();
+    await dmCampaignRef.set({ dmId: oldUid, name: "DM Campaign", memberIds: [] });
 
-      const memberCampaignRef = adminDb.collection("campaigns").doc();
-      await memberCampaignRef.set({
-        dmId: "someone-else",
-        name: "Member Campaign",
-        memberIds: [oldUid, "other-player"],
-      });
-      const characterRef = memberCampaignRef.collection("characters").doc();
-      await characterRef.set({ userId: oldUid, name: "Test Character" });
+    const memberCampaignRef = adminDb.collection("campaigns").doc();
+    await memberCampaignRef.set({
+      dmId: "someone-else",
+      name: "Member Campaign",
+      memberIds: [oldUid, "other-player"],
+    });
+    const characterRef = memberCampaignRef.collection("characters").doc();
+    await characterRef.set({ userId: oldUid, name: "Test Character" });
 
-      const newUid = await signInTestUser();
-      const startJob = httpsCallable<
-        { code: string },
-        { jobId: string; totalCount: number; role: string }
-      >(getTestFunctions(), "startIdentityReclaimJob");
-      const { data: started } = await startJob({ code: registered.code });
+    const newUid = await signInTestUser();
+    const startJob = httpsCallable<
+      { code: string },
+      { jobId: string; totalCount: number; role: string }
+    >(getTestFunctions(), "startIdentityReclaimJob");
+    const { data: started } = await startJob({ code: registered.code });
 
-      expect(started.role).toBe("dm");
-      expect(started.totalCount).toBe(3);
+    expect(started.role).toBe("dm");
+    expect(started.totalCount).toBe(3);
 
-      const final = await drainJob(started.jobId);
-      expect(final.done).toBe(true);
-      expect(final.processedCount).toBe(3);
+    const final = await drainJob(started.jobId);
+    expect(final.done).toBe(true);
+    expect(final.processedCount).toBe(3);
 
-      expect((await dmCampaignRef.get()).data()?.dmId).toBe(newUid);
+    expect((await dmCampaignRef.get()).data()?.dmId).toBe(newUid);
 
-      const memberCampaignSnapshot = await memberCampaignRef.get();
-      expect(memberCampaignSnapshot.data()?.memberIds).toEqual(["other-player", newUid]);
+    const memberCampaignSnapshot = await memberCampaignRef.get();
+    expect(memberCampaignSnapshot.data()?.memberIds).toEqual(["other-player", newUid]);
 
-      expect((await characterRef.get()).data()?.userId).toBe(newUid);
+    expect((await characterRef.get()).data()?.userId).toBe(newUid);
 
-      expect(
-        (await adminDb.collection("identitySecret").doc(newUid).get()).data()?.code
-      ).toBe(registered.code);
-      expect((await adminDb.collection("identitySecret").doc(oldUid).get()).exists).toBe(false);
-      expect((await adminDb.collection("userProfiles").doc(newUid).get()).data()).toEqual({
-        firstName: "ExistingUser",
-      });
-      expect((await adminDb.collection("userProfiles").doc(oldUid).get()).exists).toBe(false);
-    },
-    15000
-  );
+    expect((await adminDb.collection("identitySecret").doc(newUid).get()).data()?.code).toBe(
+      registered.code
+    );
+    expect((await adminDb.collection("identitySecret").doc(oldUid).get()).exists).toBe(false);
+    expect((await adminDb.collection("userProfiles").doc(newUid).get()).data()).toEqual({
+      firstName: "ExistingUser",
+    });
+    expect((await adminDb.collection("userProfiles").doc(oldUid).get()).exists).toBe(false);
+  }, 15000);
 
-  it(
-    "rejects a code that does not resolve",
-    async () => {
-      await signInTestUser();
-      const startJob = httpsCallable(getTestFunctions(), "startIdentityReclaimJob");
+  it("rejects a code that does not resolve", async () => {
+    await signInTestUser();
+    const startJob = httpsCallable(getTestFunctions(), "startIdentityReclaimJob");
 
-      await expect(startJob({ code: "DH-0000-0000" })).rejects.toMatchObject({
-        code: "functions/not-found",
-      });
-    },
-    15000
-  );
+    await expect(startJob({ code: "DH-0000-0000" })).rejects.toMatchObject({
+      code: "functions/not-found",
+    });
+  }, 15000);
 });

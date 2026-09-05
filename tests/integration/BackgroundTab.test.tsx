@@ -139,7 +139,9 @@ describe("BackgroundTab", () => {
 
     const modal = screen.getByRole("dialog", { name: "Adept" });
     expect(within(modal).getByText("Forge World Adepts")).toBeInTheDocument();
-    expect(within(modal).getByText(/Forge world Adepts toil among the gathered wisdom/)).toBeInTheDocument();
+    expect(
+      within(modal).getByText(/Forge world Adepts toil among the gathered wisdom/)
+    ).toBeInTheDocument();
   });
 
   it("keeps the Career selector unavailable until a Homeworld is selected", () => {
@@ -199,9 +201,21 @@ describe("BackgroundTab", () => {
     const onUpdateCybernetics = vi.fn();
     const { onUpdateHeader } = renderTab({
       header: { characterName: "Brother Corvus", career: "Imperial Psyker", rank: "Sanctionite" },
-      talents: { homeworld: "feral-world", talents: [], traits: [], careerTraitAcquisition: { sanctioning: { resultId: "optical-rupture", resultName: "Optical Rupture" } } },
+      talents: {
+        homeworld: "feral-world",
+        talents: [],
+        traits: [],
+        careerTraitAcquisition: {
+          sanctioning: { resultId: "optical-rupture", resultName: "Optical Rupture" },
+        },
+      },
       cybernetics: [
-        { id: "sanctioned-eyes", name: "Cybernetic Senses", craftsmanship: "Common", grantedByTalentEntryUid: "career:imperial-psyker:sanctioned-psyker" },
+        {
+          id: "sanctioned-eyes",
+          name: "Cybernetic Senses",
+          craftsmanship: "Common",
+          grantedByTalentEntryUid: "career:imperial-psyker:sanctioned-psyker",
+        },
         { id: "independent", name: "Bionic Arm", craftsmanship: "Common" },
       ],
       onUpdateCybernetics,
@@ -334,7 +348,9 @@ describe("BackgroundTab", () => {
         homeworld: "",
         talents: [],
         traits: [],
-        careerTraitAcquisition: { sanctioning: { resultId: "hunted", resultName: "Hunted", ageIncrease: 10 } },
+        careerTraitAcquisition: {
+          sanctioning: { resultId: "hunted", resultName: "Hunted", ageIncrease: 10 },
+        },
       },
     });
     expect(screen.getAllByRole("button", { name: "Age" })[0]).toHaveTextContent("30");
@@ -433,7 +449,9 @@ describe("BackgroundTab", () => {
     renderTab();
     await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
     const modal = screen.getByRole("dialog", { name: "Skin" });
-    const rows = within(modal).getAllByRole("button").map((el) => el.textContent);
+    const rows = within(modal)
+      .getAllByRole("button")
+      .map((el) => el.textContent);
     expect(rows).toEqual([...rows].sort((a, b) => (a ?? "").localeCompare(b ?? "")));
   });
 
@@ -444,7 +462,9 @@ describe("BackgroundTab", () => {
     await user.click(screen.getByText("Stained (any)"));
     fireEvent.change(screen.getByLabelText("Colour"), { target: { value: "Blue" } });
     await user.click(screen.getByRole("button", { name: "Use This" }));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ skin: "Stained (Blue)" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ skin: "Stained (Blue)" })
+    );
   });
 
   it("uses the '(any)' option as-is when no colour is given", async () => {

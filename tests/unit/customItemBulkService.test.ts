@@ -95,16 +95,26 @@ describe("permanentlyDeleteCustomItem", () => {
 });
 
 describe.each([
-  ["archiveAndRemoveAllCustomItemCopies", archiveAndRemoveAllCustomItemCopies, "archive-and-remove"],
+  [
+    "archiveAndRemoveAllCustomItemCopies",
+    archiveAndRemoveAllCustomItemCopies,
+    "archive-and-remove",
+  ],
   ["publishAndUpdateAllCopies", publishAndUpdateAllCopies, "publish-and-update"],
 ] as const)("%s", (_name, action, mode) => {
   it(`starts a "${mode}" job and drains it, returning the mutated count`, async () => {
-    mockCallStartCustomItemMutationJob.mockResolvedValue({ data: { jobId: "job-1", totalCount: 2 } });
+    mockCallStartCustomItemMutationJob.mockResolvedValue({
+      data: { jobId: "job-1", totalCount: 2 },
+    });
     mockCallProcessCustomItemMutationChunk.mockResolvedValue({
       data: { done: true, processedCount: 2, totalCount: 2, mutatedThisChunk: 1 },
     });
 
-    const result = await action({ campaignId: "camp-1", customItemId: "item-1", actorUserId: "dm-1" });
+    const result = await action({
+      campaignId: "camp-1",
+      customItemId: "item-1",
+      actorUserId: "dm-1",
+    });
 
     expect(mockCallStartCustomItemMutationJob).toHaveBeenCalledWith({
       campaignId: "camp-1",
@@ -117,7 +127,9 @@ describe.each([
   });
 
   it("sums mutatedThisChunk across chunks and reports progress", async () => {
-    mockCallStartCustomItemMutationJob.mockResolvedValue({ data: { jobId: "job-1", totalCount: 900 } });
+    mockCallStartCustomItemMutationJob.mockResolvedValue({
+      data: { jobId: "job-1", totalCount: 900 },
+    });
     mockCallProcessCustomItemMutationChunk
       .mockResolvedValueOnce({
         data: { done: false, processedCount: 400, totalCount: 900, mutatedThisChunk: 12 },
@@ -152,7 +164,9 @@ describe.each([
 
 describe("updateAllCustomItemCopies", () => {
   it('starts an "update" job with the given versionId and drains it', async () => {
-    mockCallStartCustomItemMutationJob.mockResolvedValue({ data: { jobId: "job-1", totalCount: 1 } });
+    mockCallStartCustomItemMutationJob.mockResolvedValue({
+      data: { jobId: "job-1", totalCount: 1 },
+    });
     mockCallProcessCustomItemMutationChunk.mockResolvedValue({
       data: { done: true, processedCount: 1, totalCount: 1, mutatedThisChunk: 1 },
     });
@@ -177,7 +191,9 @@ describe("updateAllCustomItemCopies", () => {
 
 describe("removeAllCustomItemCopies", () => {
   it('starts a "remove" job and drains it', async () => {
-    mockCallStartCustomItemMutationJob.mockResolvedValue({ data: { jobId: "job-1", totalCount: 1 } });
+    mockCallStartCustomItemMutationJob.mockResolvedValue({
+      data: { jobId: "job-1", totalCount: 1 },
+    });
     mockCallProcessCustomItemMutationChunk.mockResolvedValue({
       data: { done: true, processedCount: 1, totalCount: 1, mutatedThisChunk: 1 },
     });

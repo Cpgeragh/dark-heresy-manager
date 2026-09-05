@@ -9,7 +9,11 @@ import { CorruptionMalignancyPicker } from "../../src/mechanics/corruption/Corru
 import { MutationRow } from "../../src/mechanics/corruption/MutationRow";
 import { getCharacteristicModifierTotals } from "../../src/mechanics/corruption/characteristicModifierTotals";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
-import type { Characteristics, CorruptionBlock, CorruptionMalignancyEntry } from "../../src/types/Character";
+import type {
+  Characteristics,
+  CorruptionBlock,
+  CorruptionMalignancyEntry,
+} from "../../src/types/Character";
 
 function Wiring() {
   const [corruption, setCorruption] = useState<CorruptionBlock>({ points: 0, malignancies: [] });
@@ -23,7 +27,8 @@ function Wiring() {
   // Recomputed each render from current `corruption` state, mirroring the real
   // useCharacterHelpers.getEffectiveCharTotal/getCharBonus formulas.
   const modifierTotals = getCharacteristicModifierTotals(corruption);
-  const getEffectiveCharTotal = (k: keyof Characteristics) => Math.max(1, 0 + (modifierTotals[k] ?? 0));
+  const getEffectiveCharTotal = (k: keyof Characteristics) =>
+    Math.max(1, 0 + (modifierTotals[k] ?? 0));
   const getCharBonus = (k: keyof Characteristics) =>
     Math.floor(getEffectiveCharTotal(k) / CHARACTERISTIC_BONUS_DIVISOR);
 
@@ -74,7 +79,8 @@ function EditRollsWiring() {
   });
 
   const modifierTotals = getCharacteristicModifierTotals(corruption);
-  const getEffectiveCharTotal = (k: keyof Characteristics) => Math.max(1, 0 + (modifierTotals[k] ?? 0));
+  const getEffectiveCharTotal = (k: keyof Characteristics) =>
+    Math.max(1, 0 + (modifierTotals[k] ?? 0));
   const getCharBonus = (k: keyof Characteristics) =>
     Math.floor(getEffectiveCharTotal(k) / CHARACTERISTIC_BONUS_DIVISOR);
 
@@ -87,7 +93,9 @@ function EditRollsWiring() {
         onUpdateRolls={(rolledModifiers) =>
           setCorruption((prev) => ({
             ...prev,
-            minorMutations: prev.minorMutations!.map((m) => (m.id === "m1" ? { ...m, rolledModifiers } : m)),
+            minorMutations: prev.minorMutations!.map((m) =>
+              m.id === "m1" ? { ...m, rolledModifiers } : m
+            ),
           }))
         }
       />

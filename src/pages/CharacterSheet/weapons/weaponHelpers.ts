@@ -73,7 +73,9 @@ export function isIntegratedMeleeWeapon(weapon: MeleeWeapon): boolean {
   );
 }
 
-export const NORMAL_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter((ref) => !isIntegratedRangedRef(ref));
+export const NORMAL_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter(
+  (ref) => !isIntegratedRangedRef(ref)
+);
 export const NORMAL_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter((ref) => !isIntegratedMeleeRef(ref));
 export const INTEGRATED_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter(isIntegratedRangedRef);
 export const INTEGRATED_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter(isIntegratedMeleeRef);
@@ -88,13 +90,25 @@ export function compareWeaponEntries(a: ComparableEntry, b: ComparableEntry): nu
   if (a.kind === "cybernetic" && b.kind !== "cybernetic") return -1;
   if (b.kind === "cybernetic" && a.kind !== "cybernetic") return 1;
   const aEq =
-    a.kind === "regular" || a.kind === "integrated" ? (a.weapon.equipped ? 0 : 1)
-    : a.kind === "archeotech" ? (a.item.equipped ? 0 : 1)
-    : 0;
+    a.kind === "regular" || a.kind === "integrated"
+      ? a.weapon.equipped
+        ? 0
+        : 1
+      : a.kind === "archeotech"
+        ? a.item.equipped
+          ? 0
+          : 1
+        : 0;
   const bEq =
-    b.kind === "regular" || b.kind === "integrated" ? (b.weapon.equipped ? 0 : 1)
-    : b.kind === "archeotech" ? (b.item.equipped ? 0 : 1)
-    : 0;
+    b.kind === "regular" || b.kind === "integrated"
+      ? b.weapon.equipped
+        ? 0
+        : 1
+      : b.kind === "archeotech"
+        ? b.item.equipped
+          ? 0
+          : 1
+        : 0;
   if (aEq !== bEq) return aEq - bEq;
   return a.name.localeCompare(b.name);
 }
@@ -226,7 +240,15 @@ export function effectiveRangedStats(
   weapon: RangedWeapon,
   upgradeRefs: WeaponUpgradeRef[],
   loadedAmmoRef?: AmmoRef
-): { damage: string; range: string; clip: string; pen: string; specialRules: string; weight: string; value: string } {
+): {
+  damage: string;
+  range: string;
+  clip: string;
+  pen: string;
+  specialRules: string;
+  weight: string;
+  value: string;
+} {
   let damage = weapon.damage ?? "";
   let range = weapon.range ?? "";
   let clip = weapon.clip ?? "";
@@ -330,7 +352,7 @@ export function getCompatibleUpgrades(
   ammoType?: string,
   ammoTracking?: string,
   specialRules?: string,
-  craftsmanship?: string,
+  craftsmanship?: string
 ): WeaponUpgradeRef[] {
   const cls = weaponClass.toLowerCase();
   const name = weaponName.toLowerCase();
@@ -340,7 +362,8 @@ export function getCompatibleUpgrades(
   const isBolt = ammoLower.includes("bolt");
   const isPrimitive = ammoLower.includes("arrow") || ammoLower.includes("quarrel");
   const isMelta = ammoLower.includes("melta");
-  const hasIntegralCanister = ammoLower.includes("plasma flask") || ammoLower.includes("melta canister");
+  const hasIntegralCanister =
+    ammoLower.includes("plasma flask") || ammoLower.includes("melta canister");
   const hasPrimitiveQuality = /(?:^|,)\s*primitive\b/i.test(specialRules ?? "");
   const goodOrBetter = craftsmanship === "Good" || craftsmanship === "Best";
   const hasSight = currentIds.some(
@@ -380,15 +403,27 @@ export function getCompatibleUpgrades(
       case "cr-telescopic-sight":
         return !isMelee && !hasSight && cls === "basic";
       case "ih-duplus-ammo-clips":
-        return !isMelee && ammoTracking !== "unit" && (cls === "basic" || cls === "pistol" || isSolidProjectile || isLas);
+        return (
+          !isMelee &&
+          ammoTracking !== "unit" &&
+          (cls === "basic" || cls === "pistol" || isSolidProjectile || isLas)
+        );
       case "ih-forearm-weapon-mounting":
-        return !isMelee && cls === "pistol" && (isPrimitive || isLas || isSolidProjectile || isBolt || isMelta);
+        return (
+          !isMelee &&
+          cls === "pistol" &&
+          (isPrimitive || isLas || isSolidProjectile || isBolt || isMelta)
+        );
       case "ih-targeter":
         return !isMelee && (cls === "heavy" || isLas || isSolidProjectile || isBolt);
       case "ih-tripod-and-bipods":
         return !isMelee && (cls === "basic" || cls === "heavy" || hasIntegralCanister);
       case "ih-sanctified-weapon":
-        return isMelee && goodOrBetter && (hasPrimitiveQuality || currentIds.includes("cr-mono") || name.includes("chain"));
+        return (
+          isMelee &&
+          goodOrBetter &&
+          (hasPrimitiveQuality || currentIds.includes("cr-mono") || name.includes("chain"))
+        );
       default:
         return false;
     }
@@ -411,10 +446,15 @@ export function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanshi
   }
 }
 
-export function rangedRulesForCraftsmanship(rules: string, craftsmanship: WeaponCraftsmanship): string {
+export function rangedRulesForCraftsmanship(
+  rules: string,
+  craftsmanship: WeaponCraftsmanship
+): string {
   if (craftsmanship === "Poor") return addSpecialRule(rules, "Unreliable");
   if (craftsmanship === "Good") {
-    const hasUnreliable = rules.split(",").some((entry) => entry.trim().toLowerCase() === "unreliable");
+    const hasUnreliable = rules
+      .split(",")
+      .some((entry) => entry.trim().toLowerCase() === "unreliable");
     if (hasUnreliable) return removeSpecialRule(removeSpecialRule(rules, "Unreliable"), "Reliable");
     return addSpecialRule(rules, "Reliable");
   }
@@ -453,24 +493,41 @@ export function calcEntryWeight(
 
 const WEAPON_CLASS_STYLES: Record<string, { active: string; inactive: string }> = {
   Pistol: { active: colourSky, inactive: "border-sky-500/30 bg-sky-500/5 text-sky-400/50" },
-  Basic:  { active: colourTealLight, inactive: "border-teal-500/30 bg-teal-500/5 text-teal-400/50" },
-  Heavy:  { active: colourViolet, inactive: "border-violet-500/30 bg-violet-500/5 text-violet-400/50" },
-  Thrown: { active: colourAmberFaint, inactive: "border-amber-500/30 bg-amber-500/5 text-amber-400/50" },
-  Exotic: { active: colourFuchsia, inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50" },
+  Basic: { active: colourTealLight, inactive: "border-teal-500/30 bg-teal-500/5 text-teal-400/50" },
+  Heavy: {
+    active: colourViolet,
+    inactive: "border-violet-500/30 bg-violet-500/5 text-violet-400/50",
+  },
+  Thrown: {
+    active: colourAmberFaint,
+    inactive: "border-amber-500/30 bg-amber-500/5 text-amber-400/50",
+  },
+  Exotic: {
+    active: colourFuchsia,
+    inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50",
+  },
 };
 
 const slateFallbackStyle = "border-slate-500/70 bg-slate-700/40 text-slate-300";
 
-export function weaponClassChip(cls?: string): { label: string; active: string; inactive: string } | undefined {
+export function weaponClassChip(
+  cls?: string
+): { label: string; active: string; inactive: string } | undefined {
   if (!cls) return undefined;
   const n = cls.toLowerCase();
   for (const [key, style] of Object.entries(WEAPON_CLASS_STYLES)) {
     if (n.includes(key.toLowerCase())) return { label: key, ...style };
   }
-  return { label: cls, active: slateFallbackStyle, inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50" };
+  return {
+    label: cls,
+    active: slateFallbackStyle,
+    inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50",
+  };
 }
 
-export function ammoFamilyChip(ammoType?: string): { label: string; className: string } | undefined {
+export function ammoFamilyChip(
+  ammoType?: string
+): { label: string; className: string } | undefined {
   if (!ammoType) return undefined;
   const normalized = ammoType.toLowerCase();
   if (normalized === "las" || normalized.includes("charge pack")) {
@@ -498,9 +555,16 @@ export function ammoFamilyChip(ammoType?: string): { label: string; className: s
     return { label: "Plasma", className: colourSky };
   }
   if (normalized === "launcher" || normalized.includes("grenade")) {
-    return { label: "Launcher", className: "border-yellow-500/60 bg-yellow-500/10 text-yellow-300" };
+    return {
+      label: "Launcher",
+      className: "border-yellow-500/60 bg-yellow-500/10 text-yellow-300",
+    };
   }
-  if (normalized === "primitive" || normalized.includes("arrow") || normalized.includes("quarrel")) {
+  if (
+    normalized === "primitive" ||
+    normalized.includes("arrow") ||
+    normalized.includes("quarrel")
+  ) {
     return { label: "Primitive", className: "border-stone-500/70 bg-stone-700/30 text-stone-300" };
   }
   if (normalized === "shuriken" || normalized.includes("shuriken")) {
@@ -624,7 +688,10 @@ export function meleeCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship
   }
 }
 
-export function meleeDamageForCraftsmanship(damage: string, craftsmanship: WeaponCraftsmanship): string {
+export function meleeDamageForCraftsmanship(
+  damage: string,
+  craftsmanship: WeaponCraftsmanship
+): string {
   if (craftsmanship !== "Best") return damage;
   return modifyDamageBonus(damage, 1);
 }

@@ -74,12 +74,12 @@ export function ShieldCard({
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
             <p className={uiCardTitle}>{item.name}</p>
-            {libraryItem && (
-              <StatusBadge status={libraryItem.status} />
-            )}
+            {libraryItem && <StatusBadge status={libraryItem.status} />}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={colourLime}>Shield</Chip>
+            <Chip size="sm" className={colourLime}>
+              Shield
+            </Chip>
           </div>
         </div>
         <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
@@ -150,7 +150,11 @@ export function ShieldCard({
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Rules`}
-                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.notes}</p>}
+                    content={
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {item.notes}
+                      </p>
+                    }
                   />
                 </span>
               ) : (

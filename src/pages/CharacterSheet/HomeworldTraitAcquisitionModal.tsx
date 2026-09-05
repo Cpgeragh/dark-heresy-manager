@@ -51,10 +51,17 @@ export function HomeworldTraitAcquisitionModal({
 
   if (picker) {
     const options = picker === "peer" ? NOBLE_PEER_OPTIONS : WEAPON_OPTIONS;
-    const selected = picker === "peer" ? peerGroup : picker === "basic" ? basicWeaponGroup : pistolWeaponGroup;
+    const selected =
+      picker === "peer" ? peerGroup : picker === "basic" ? basicWeaponGroup : pistolWeaponGroup;
     return (
       <OptionPickerScreen
-        title={picker === "peer" ? "Peer Group" : picker === "basic" ? "Basic Weapon Group" : "Pistol Weapon Group"}
+        title={
+          picker === "peer"
+            ? "Peer Group"
+            : picker === "basic"
+              ? "Basic Weapon Group"
+              : "Pistol Weapon Group"
+        }
         options={options}
         selected={selected}
         onSelect={(value) => {
@@ -72,7 +79,10 @@ export function HomeworldTraitAcquisitionModal({
   const canSubmit =
     (homeworldId === "noble-born" && !!peerGroup) ||
     (homeworldId === "schola-progenium" && !!basicWeaponGroup && !!pistolWeaponGroup) ||
-    (homeworldId === "mind-cleansed" && Number.isInteger(insanityValue) && insanityValue >= 3 && insanityValue <= 7);
+    (homeworldId === "mind-cleansed" &&
+      Number.isInteger(insanityValue) &&
+      insanityValue >= 3 &&
+      insanityValue <= 7);
 
   return (
     <PickerModal
@@ -126,7 +136,9 @@ export function HomeworldTraitAcquisitionModal({
                 type="text"
                 inputMode="numeric"
                 value={startingInsanity}
-                onChange={(event) => setStartingInsanity(sanitizePositiveIntegerInput(event.target.value))}
+                onChange={(event) =>
+                  setStartingInsanity(sanitizePositiveIntegerInput(event.target.value))
+                }
                 placeholder="3–7"
                 className={`${editableInputClass(true)} mt-0.5`}
               />
@@ -136,12 +148,14 @@ export function HomeworldTraitAcquisitionModal({
           <Button
             fullWidth
             disabled={!canSubmit}
-            onClick={() => onComplete({
-              ...(peerGroup ? { peerGroup } : {}),
-              ...(basicWeaponGroup ? { basicWeaponGroup } : {}),
-              ...(pistolWeaponGroup ? { pistolWeaponGroup } : {}),
-              ...(homeworldId === "mind-cleansed" ? { startingInsanity: insanityValue } : {}),
-            })}
+            onClick={() =>
+              onComplete({
+                ...(peerGroup ? { peerGroup } : {}),
+                ...(basicWeaponGroup ? { basicWeaponGroup } : {}),
+                ...(pistolWeaponGroup ? { pistolWeaponGroup } : {}),
+                ...(homeworldId === "mind-cleansed" ? { startingInsanity: insanityValue } : {}),
+              })
+            }
           >
             Apply Homeworld
           </Button>

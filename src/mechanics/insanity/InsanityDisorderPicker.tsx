@@ -7,7 +7,12 @@ import { Chip } from "../../ui/chips/Chip";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../ui/forms/OriginSelector";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../ui/pickers/PickerModal";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../ui/icons/PickerArrows";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
@@ -173,7 +178,11 @@ export function InsanityDisorderPicker({
         </CustomFormSection>
 
         <CustomFormSection title="Origin">
-          <OriginSelector name="custom-disorder-origin" value={customOrigin} onChange={setCustomOrigin} />
+          <OriginSelector
+            name="custom-disorder-origin"
+            value={customOrigin}
+            onChange={setCustomOrigin}
+          />
         </CustomFormSection>
 
         <CustomFormSection title="Rules">
@@ -316,44 +325,44 @@ export function InsanityDisorderPicker({
       }
     >
       <div className="space-y-3 p-3 lg:p-4">
-      {filtered.map((ref) => (
-        <PickerRow
-          key={ref.id}
-          card
-          className={uiSectionShell}
-          interactive={editable}
-          onClick={() => {
-            setSelected(ref);
-            setSeverity(ref.severityOptions[0]);
-            setCustomName("");
-            setNotes("");
-          }}
-        >
-          <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={disorderTypeChipClass(ref.type)}>
-              {ref.type}
-            </Chip>
-          </div>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rules</span>
-            <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
-              <InfoModal
-                title={ref.name}
-                content={
-                  <DisorderInfoContent
-                    type={ref.type}
-                    name={ref.name}
-                    description={ref.description}
-                    typeDescription={ref.typeDescription}
-                  />
-                }
-                as="span"
-              />
-            </span>
-          </div>
-        </PickerRow>
-      ))}
+        {filtered.map((ref) => (
+          <PickerRow
+            key={ref.id}
+            card
+            className={uiSectionShell}
+            interactive={editable}
+            onClick={() => {
+              setSelected(ref);
+              setSeverity(ref.severityOptions[0]);
+              setCustomName("");
+              setNotes("");
+            }}
+          >
+            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <Chip size="sm" className={disorderTypeChipClass(ref.type)}>
+                {ref.type}
+              </Chip>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className={uiTextLabel}>Rules</span>
+              <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+                <InfoModal
+                  title={ref.name}
+                  content={
+                    <DisorderInfoContent
+                      type={ref.type}
+                      name={ref.name}
+                      description={ref.description}
+                      typeDescription={ref.typeDescription}
+                    />
+                  }
+                  as="span"
+                />
+              </span>
+            </div>
+          </PickerRow>
+        ))}
       </div>
     </PickerModal>
   );

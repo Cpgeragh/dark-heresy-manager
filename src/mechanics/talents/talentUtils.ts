@@ -22,9 +22,7 @@ export function getPsyRatingAcquisitionGrants(
 ): { minor: number; major: number; newDiscipline: boolean } {
   const halfBonus = Math.ceil(willpowerBonus / 2);
   const newDiscipline = rating === 3 || route === "new";
-  const minor = rating === 3 || ([4, 6].includes(rating) && !newDiscipline)
-    ? halfBonus
-    : 0;
+  const minor = rating === 3 || ([4, 6].includes(rating) && !newDiscipline) ? halfBonus : 0;
   return {
     minor,
     major: newDiscipline ? 1 : halfBonus,
@@ -43,7 +41,9 @@ export function needsTalentAcquisition(
   if (entry.talentId === "sicarius-tutoring") {
     return ["Guardsman", "Scum"].includes(entry.specialisation ?? "");
   }
-  if (["touched-by-the-fates", "purity-of-flesh", "rite-of-pure-thought"].includes(entry.talentId)) {
+  if (
+    ["touched-by-the-fates", "purity-of-flesh", "rite-of-pure-thought"].includes(entry.talentId)
+  ) {
     return true;
   }
   if (entry.talentId === "reformed-skin") {
@@ -127,7 +127,11 @@ export function isTalentAvailableInPicker(
   }
 }
 
-export function makeTalentEntry(talent: TalentData, specialisation?: string, manualCost?: number): TalentEntry {
+export function makeTalentEntry(
+  talent: TalentData,
+  specialisation?: string,
+  manualCost?: number
+): TalentEntry {
   const trimmed = specialisation?.trim();
   return {
     uid: crypto.randomUUID(),
@@ -157,9 +161,7 @@ export function getAvailablePsychicTalentPurchases(
 ): TalentEntry[] {
   const talentId = PSYCHIC_TALENT_ID_BY_GROUP[group];
   const linked = getLinkedTalentEntryUids(psychic);
-  return talents.talents.filter(
-    (entry) => entry.talentId === talentId && !linked.has(entry.uid)
-  );
+  return talents.talents.filter((entry) => entry.talentId === talentId && !linked.has(entry.uid));
 }
 
 export function linkPowerToTalentPurchase(
@@ -205,9 +207,10 @@ export function getAvailablePsyRatingPowerGrants(
   const field = group === "minor" ? "minorPowers" : "majorPowers";
   return talents.talents.flatMap((entry) => {
     if (!/^psy-rating-[1-6]$/.test(entry.talentId)) return [];
-    const allowed = group === "minor"
-      ? entry.acquisition?.psyRatingMinorPowerGrants ?? 0
-      : entry.acquisition?.psyRatingMajorPowerGrants ?? 0;
+    const allowed =
+      group === "minor"
+        ? (entry.acquisition?.psyRatingMinorPowerGrants ?? 0)
+        : (entry.acquisition?.psyRatingMajorPowerGrants ?? 0);
     const used = psychic[field].filter(
       (power) => power.psyRatingTalentEntryUid === entry.uid
     ).length;
@@ -228,15 +231,17 @@ export function linkPowerToPsyRatingGrant(
       ? "major"
       : null;
   if (!group) return psychic;
-  const target = group === "minor"
-    ? psychic.minorPowers.find((power) => power.id === powerId)
-    : psychic.majorPowers.find((power) => power.id === powerId);
+  const target =
+    group === "minor"
+      ? psychic.minorPowers.find((power) => power.id === powerId)
+      : psychic.majorPowers.find((power) => power.id === powerId);
   if (!target || target.talentEntryUid || target.psyRatingTalentEntryUid) return psychic;
   const grantEntry = talents.talents.find((entry) => entry.uid === psyRatingTalentEntryUid);
   if (
     group === "major" &&
     grantEntry?.acquisition?.psyRatingDiscipline &&
-    target.discipline?.toLocaleLowerCase() !== grantEntry.acquisition.psyRatingDiscipline.toLocaleLowerCase()
+    target.discipline?.toLocaleLowerCase() !==
+      grantEntry.acquisition.psyRatingDiscipline.toLocaleLowerCase()
   ) {
     return psychic;
   }

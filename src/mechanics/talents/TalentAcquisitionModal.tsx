@@ -39,10 +39,7 @@ import { PickerField } from "../../ui/pickers/PickerField";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { defaultCraftsmanship } from "../../pages/CharacterSheet/CyberneticsTab/cyberneticsHelpers";
-import {
-  getGrantedTalentEntries,
-  getGrantedWeaponTrainingIds,
-} from "./talentEffects";
+import { getGrantedTalentEntries, getGrantedWeaponTrainingIds } from "./talentEffects";
 import {
   getPurityFatePoints,
   getPurityRemovalInventory,
@@ -124,7 +121,9 @@ function ResultRow({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded border border-slate-700 bg-slate-900/40 px-3 py-2">
       <span className={uiFormLabel}>{label}</span>
-      <Chip size="lg" className={colourValue}>{value}</Chip>
+      <Chip size="lg" className={colourValue}>
+        {value}
+      </Chip>
     </div>
   );
 }
@@ -133,15 +132,19 @@ function structuredDisorders(insanity: InsanityBlock): InsanityDisorderEntry[] {
   return Array.isArray(insanity.disorders) ? insanity.disorders : [];
 }
 
-function locationOptions(kind: "arm" | "leg" | undefined): { value: ArmourLocationKey; label: string }[] {
-  if (kind === "arm") return [
-    { value: "rightArm", label: "Right Arm" },
-    { value: "leftArm", label: "Left Arm" },
-  ];
-  if (kind === "leg") return [
-    { value: "rightLeg", label: "Right Leg" },
-    { value: "leftLeg", label: "Left Leg" },
-  ];
+function locationOptions(
+  kind: "arm" | "leg" | undefined
+): { value: ArmourLocationKey; label: string }[] {
+  if (kind === "arm")
+    return [
+      { value: "rightArm", label: "Right Arm" },
+      { value: "leftArm", label: "Left Arm" },
+    ];
+  if (kind === "leg")
+    return [
+      { value: "rightLeg", label: "Right Leg" },
+      { value: "leftLeg", label: "Left Leg" },
+    ];
   return [];
 }
 
@@ -175,7 +178,9 @@ export function TalentAcquisitionModal({
   const [fatalReplacements, setFatalReplacements] = useState<Record<string, string>>({});
   const [purityStage, setPurityStage] = useState<"purity" | "reformed-skin">("purity");
   const [activePicker, setActivePicker] = useState<AcquisitionPicker | null>(null);
-  const [homeworldTraitChoices, setHomeworldTraitChoices] = useState<HomeworldTraitChoices | undefined>();
+  const [homeworldTraitChoices, setHomeworldTraitChoices] = useState<
+    HomeworldTraitChoices | undefined
+  >();
   const [showHomeworldTraitAcquisition, setShowHomeworldTraitAcquisition] = useState(false);
   const acquisitionScrollPositionRef = useRef(0);
 
@@ -188,19 +193,26 @@ export function TalentAcquisitionModal({
   const bionicArms = cybernetics.filter((item) => item.referenceId === "cr-bionic-arm");
   const eligibleConcealedWeapons = [
     ...rangedWeapons
-      .filter((weapon) => weapon.class?.toLocaleLowerCase().includes("pistol") && !weapon.concealedBionic)
+      .filter(
+        (weapon) => weapon.class?.toLocaleLowerCase().includes("pistol") && !weapon.concealedBionic
+      )
       .map((weapon) => ({ value: `ranged:${weapon.id}`, label: `${weapon.name} (Ranged)` })),
     ...meleeWeapons
-      .filter((weapon) => !weapon.concealedBionic && !resolveMeleeWeaponReference(weapon.referenceId)?.twoHanded)
+      .filter(
+        (weapon) =>
+          !weapon.concealedBionic && !resolveMeleeWeaponReference(weapon.referenceId)?.twoHanded
+      )
       .map((weapon) => ({ value: `melee:${weapon.id}`, label: `${weapon.name} (Melee)` })),
   ].sort((a, b) => a.label.localeCompare(b.label));
   const disorders = structuredDisorders(insanity);
   const ownedTalentEntries = [...talents.talents, ...getGrantedTalentEntries(talents, career)];
-  const ownsTalent = (talentId: string, specialisation?: string) => ownedTalentEntries.some(
-    (owned) =>
-      owned.talentId === talentId &&
-      (!specialisation || owned.specialisation?.toLocaleLowerCase() === specialisation.toLocaleLowerCase())
-  );
+  const ownsTalent = (talentId: string, specialisation?: string) =>
+    ownedTalentEntries.some(
+      (owned) =>
+        owned.talentId === talentId &&
+        (!specialisation ||
+          owned.specialisation?.toLocaleLowerCase() === specialisation.toLocaleLowerCase())
+    );
   const ownedTraining = new Set([
     ...weaponTraining.trained,
     ...getGrantedWeaponTrainingIds(talents),
@@ -210,7 +222,8 @@ export function TalentAcquisitionModal({
     ["decadence", "Decadence"],
   ] as const;
   const purityEntries = talents.talents.filter(
-    (owned) => owned.talentId === "purity-of-flesh" && (owned.acquisition?.purity?.fatePointsGained ?? 0) > 0
+    (owned) =>
+      owned.talentId === "purity-of-flesh" && (owned.acquisition?.purity?.fatePointsGained ?? 0) > 0
   );
   const purityEntry = purityEntries[0];
   const majorDisciplines = PSYCHIC_DISCIPLINES.filter((discipline) => discipline !== "Minor");
@@ -220,8 +233,8 @@ export function TalentAcquisitionModal({
   const knownDisciplineOptions = majorDisciplines.filter((discipline) =>
     knownDisciplineKeys.has(discipline.toLocaleLowerCase())
   );
-  const newDisciplineOptions = majorDisciplines.filter((discipline) =>
-    !knownDisciplineKeys.has(discipline.toLocaleLowerCase())
+  const newDisciplineOptions = majorDisciplines.filter(
+    (discipline) => !knownDisciplineKeys.has(discipline.toLocaleLowerCase())
   );
   const psyRating = /^psy-rating-[3-6]$/.test(entry.talentId)
     ? Number(entry.talentId.slice(-1))
@@ -249,9 +262,10 @@ export function TalentAcquisitionModal({
     item.name.toLocaleLowerCase().includes(fatalRemovalQuery.trim().toLocaleLowerCase())
   );
 
-  const title = entry.talentId === "purity-of-flesh" && purityStage === "reformed-skin"
-    ? "Reformed Skin Acquisition"
-    : `${entry.name} Acquisition`;
+  const title =
+    entry.talentId === "purity-of-flesh" && purityStage === "reformed-skin"
+      ? "Reformed Skin Acquisition"
+      : `${entry.name} Acquisition`;
 
   const canComplete = (() => {
     if (entry.talentId === "cult-briefing") {
@@ -299,9 +313,10 @@ export function TalentAcquisitionModal({
     if (entry.talentId === "cult-briefing") {
       if (entry.specialisation === "Heretek" && selectedCybernetic) {
         const granted = HERETEK_TALENTS.find(([id]) => id === secondaryChoice);
-        const bodyLocation = selectedCybernetic.requiresLocation && replacement
-          ? [replacement as ArmourLocationKey]
-          : undefined;
+        const bodyLocation =
+          selectedCybernetic.requiresLocation && replacement
+            ? [replacement as ArmourLocationKey]
+            : undefined;
         const craftsmanship = defaultCraftsmanship(selectedCybernetic);
         const cyberneticId = crypto.randomUUID();
         const [concealedWeaponType, concealedWeaponId] = concealedWeaponChoice.split(":") as [
@@ -320,13 +335,15 @@ export function TalentAcquisitionModal({
           grantedByTalentName: entry.name,
           grantedByType: "Talent",
           ...(bodyLocation ? { bodyLocation } : {}),
-          ...(selectingConcealedWeapon ? {
-            concealedWeapon: {
-              armId: replacement,
-              weaponId: concealedWeaponId,
-              weaponType: concealedWeaponType,
-            },
-          } : {}),
+          ...(selectingConcealedWeapon
+            ? {
+                concealedWeapon: {
+                  armId: replacement,
+                  weaponId: concealedWeaponId,
+                  weaponType: concealedWeaponType,
+                },
+              }
+            : {}),
         };
         nextCybernetics = [...cybernetics, augmetic];
         if (selectingConcealedWeapon && concealedWeaponType === "ranged") {
@@ -354,9 +371,15 @@ export function TalentAcquisitionModal({
         };
       } else if (entry.specialisation === "Pleasure") {
         const reference = primaryChoice === "chem-geld" ? "Chem Geld" : "Decadence";
-        completedEntry = { ...entry, acquisition: { grantedTalentId: primaryChoice, grantedTalentName: reference } };
+        completedEntry = {
+          ...entry,
+          acquisition: { grantedTalentId: primaryChoice, grantedTalentName: reference },
+        };
       } else if (entry.specialisation === "Blood") {
-        completedEntry = { ...entry, acquisition: { weaponTrainingId: primaryChoice as WeaponTrainingTalentId } };
+        completedEntry = {
+          ...entry,
+          acquisition: { weaponTrainingId: primaryChoice as WeaponTrainingTalentId },
+        };
       } else if (entry.specialisation === "Culture") {
         completedEntry = {
           ...entry,
@@ -367,16 +390,17 @@ export function TalentAcquisitionModal({
         };
       }
     } else if (entry.talentId === "sicarius-tutoring") {
-      completedEntry = entry.specialisation === "Guardsman"
-        ? { ...entry, acquisition: { exoticWeapon: primaryChoice.trim() } }
-        : {
-            ...entry,
-            acquisition: {
-              grantedTalentId: "peer",
-              grantedTalentName: "Peer",
-              grantedTalentSpecialisation: primaryChoice,
-            },
-          };
+      completedEntry =
+        entry.specialisation === "Guardsman"
+          ? { ...entry, acquisition: { exoticWeapon: primaryChoice.trim() } }
+          : {
+              ...entry,
+              acquisition: {
+                grantedTalentId: "peer",
+                grantedTalentName: "Peer",
+                grantedTalentSpecialisation: primaryChoice,
+              },
+            };
     } else if (entry.talentId === "touched-by-the-fates") {
       completedEntry = {
         ...entry,
@@ -391,20 +415,24 @@ export function TalentAcquisitionModal({
       const removedConcealedWeaponLinks = [
         ...rangedWeapons.flatMap((weapon) =>
           weapon.concealedBionic && removedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-            ? [{
-                weaponId: weapon.id,
-                weaponType: "ranged" as const,
-                ...weapon.concealedBionic,
-              }]
+            ? [
+                {
+                  weaponId: weapon.id,
+                  weaponType: "ranged" as const,
+                  ...weapon.concealedBionic,
+                },
+              ]
             : []
         ),
         ...meleeWeapons.flatMap((weapon) =>
           weapon.concealedBionic && removedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-            ? [{
-                weaponId: weapon.id,
-                weaponType: "melee" as const,
-                ...weapon.concealedBionic,
-              }]
+            ? [
+                {
+                  weaponId: weapon.id,
+                  weaponType: "melee" as const,
+                  ...weapon.concealedBionic,
+                },
+              ]
             : []
         ),
       ];
@@ -414,7 +442,9 @@ export function TalentAcquisitionModal({
           purity: {
             removedCyberneticIds: cybernetics.map((item) => item.id),
             removedCybernetics: cybernetics,
-            ...(removedIntegratedRangedWeapons.length > 0 ? { removedIntegratedRangedWeapons } : {}),
+            ...(removedIntegratedRangedWeapons.length > 0
+              ? { removedIntegratedRangedWeapons }
+              : {}),
             ...(removedIntegratedMeleeWeapons.length > 0 ? { removedIntegratedMeleeWeapons } : {}),
             ...(removedArcheotech.length > 0 ? { removedArcheotech } : {}),
             ...(removedConcealedWeaponLinks.length > 0 ? { removedConcealedWeaponLinks } : {}),
@@ -457,22 +487,23 @@ export function TalentAcquisitionModal({
         }
       }
     } else if (entry.talentId === "reformed-skin") {
-      completedEntry = primaryChoice === "purity"
-        ? {
-            ...entry,
-            acquisition: {
-              ...entry.acquisition,
-              reformedSkinPurityReplacement: true,
-              purityTalentEntryUid: purityEntry?.uid,
-            },
-          }
-        : {
-            ...entry,
-            acquisition: {
-              ...entry.acquisition,
-              reformedSkinPurityReplacement: false,
-            },
-          };
+      completedEntry =
+        primaryChoice === "purity"
+          ? {
+              ...entry,
+              acquisition: {
+                ...entry.acquisition,
+                reformedSkinPurityReplacement: true,
+                purityTalentEntryUid: purityEntry?.uid,
+              },
+            }
+          : {
+              ...entry,
+              acquisition: {
+                ...entry.acquisition,
+                reformedSkinPurityReplacement: false,
+              },
+            };
     } else if (entry.talentId === "rite-of-pure-thought") {
       const retained = disorders.filter((disorder) => !removedDisorderIds.includes(disorder.id));
       const replacements = disorders
@@ -490,7 +521,9 @@ export function TalentAcquisitionModal({
         ...entry,
         acquisition: {
           riteOfPureThoughtReviewed: true,
-          riteOriginalDisorders: disorders.filter((disorder) => removedDisorderIds.includes(disorder.id)),
+          riteOriginalDisorders: disorders.filter((disorder) =>
+            removedDisorderIds.includes(disorder.id)
+          ),
           riteReplacementDisorderIds: replacements.map((disorder) => disorder.id),
         },
       };
@@ -521,11 +554,7 @@ export function TalentAcquisitionModal({
 
   const handleApply = () => {
     if (!canComplete) return;
-    if (
-      entry.talentId === "purity-of-flesh" &&
-      purityStage === "purity" &&
-      hasFatalRemovals
-    ) {
+    if (entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals) {
       setPurityStage("reformed-skin");
       return;
     }
@@ -573,7 +602,11 @@ export function TalentAcquisitionModal({
     case "heretek-talent":
       pickerConfig = {
         title: "Granted Talent",
-        options: HERETEK_TALENTS.map(([value, label]) => ({ value, label, owned: ownsTalent(value) })),
+        options: HERETEK_TALENTS.map(([value, label]) => ({
+          value,
+          label,
+          owned: ownsTalent(value),
+        })),
         selected: secondaryChoice,
         onSelect: setSecondaryChoice,
       };
@@ -581,7 +614,11 @@ export function TalentAcquisitionModal({
     case "pleasure-talent":
       pickerConfig = {
         title: "Granted Talent",
-        options: pleasureTalents.map(([value, label]) => ({ value, label, owned: ownsTalent(value) })),
+        options: pleasureTalents.map(([value, label]) => ({
+          value,
+          label,
+          owned: ownsTalent(value),
+        })),
         selected: primaryChoice,
         onSelect: setPrimaryChoice,
       };
@@ -729,11 +766,13 @@ export function TalentAcquisitionModal({
                 card
                 selected={selected}
                 aria-pressed={selected}
-                onClick={() => setFatalRemovalKeys((current) =>
-                  current.includes(item.key)
-                    ? current.filter((key) => key !== item.key)
-                    : [...current, item.key]
-                )}
+                onClick={() =>
+                  setFatalRemovalKeys((current) =>
+                    current.includes(item.key)
+                      ? current.filter((key) => key !== item.key)
+                      : [...current, item.key]
+                  )
+                }
                 className="rounded-lg border border-slate-600"
               >
                 <div className="flex items-center justify-between gap-3">
@@ -741,7 +780,11 @@ export function TalentAcquisitionModal({
                     <p className={uiTextBody}>{item.name}</p>
                     <p className={uiTextSubtle}>{item.kind}</p>
                   </div>
-                  {selected && <Chip size="sm" className={colourAmberFaint}>Life-critical</Chip>}
+                  {selected && (
+                    <Chip size="sm" className={colourAmberFaint}>
+                      Life-critical
+                    </Chip>
+                  )}
                 </div>
               </PickerRow>
             );
@@ -806,17 +849,26 @@ export function TalentAcquisitionModal({
                   disabled={bionicArms.length === 0}
                   required
                 />
-                {bionicArms.length === 0 && <p className={uiTextError}>Install a Bionic Arm first.</p>}
+                {bionicArms.length === 0 && (
+                  <p className={uiTextError}>Install a Bionic Arm first.</p>
+                )}
                 <PickerField
                   id="cult-briefing-concealed-weapon"
                   label="Eligible Weapon"
-                  value={eligibleConcealedWeapons.find((item) => item.value === concealedWeaponChoice)?.label}
+                  value={
+                    eligibleConcealedWeapons.find((item) => item.value === concealedWeaponChoice)
+                      ?.label
+                  }
                   placeholder="Choose eligible weapon…"
                   onClick={() => setActivePicker("concealed-weapon")}
                   disabled={eligibleConcealedWeapons.length === 0}
                   required
                 />
-                {eligibleConcealedWeapons.length === 0 && <p className={uiTextError}>Add an unmodified pistol or one-handed melee weapon first.</p>}
+                {eligibleConcealedWeapons.length === 0 && (
+                  <p className={uiTextError}>
+                    Add an unmodified pistol or one-handed melee weapon first.
+                  </p>
+                )}
               </>
             )}
             <PickerField
@@ -866,7 +918,12 @@ export function TalentAcquisitionModal({
         )}
 
         {entry.talentId === "sicarius-tutoring" && entry.specialisation === "Guardsman" && (
-          <input className={editableInputClass(true)} value={primaryChoice} onChange={(event) => setPrimaryChoice(event.target.value)} placeholder="Exotic weapon name…" />
+          <input
+            className={editableInputClass(true)}
+            value={primaryChoice}
+            onChange={(event) => setPrimaryChoice(event.target.value)}
+            placeholder="Exotic weapon name…"
+          />
         )}
 
         {entry.talentId === "sicarius-tutoring" && entry.specialisation === "Scum" && (
@@ -882,18 +939,28 @@ export function TalentAcquisitionModal({
 
         {entry.talentId === "touched-by-the-fates" && (
           <label className={`flex items-start gap-3 text-sm ${uiTextBody}`}>
-            <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />
-            <span>Set this NPC’s Fate Points to {Math.ceil(willpowerBonus / 2)} (half Willpower Bonus {willpowerBonus}, rounded up).</span>
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(event) => setConfirmed(event.target.checked)}
+            />
+            <span>
+              Set this NPC’s Fate Points to {Math.ceil(willpowerBonus / 2)} (half Willpower Bonus{" "}
+              {willpowerBonus}, rounded up).
+            </span>
           </label>
         )}
 
         {entry.talentId === "purity-of-flesh" && purityStage === "purity" && (
           <>
             <p className={`text-sm ${uiTextBody}`}>
-              All {purityInventory.length} installed cybernetics, bionics, and integrated weapons will be removed.
+              All {purityInventory.length} installed cybernetics, bionics, and integrated weapons
+              will be removed.
             </p>
             {purityInventory.length === 0 ? (
-              <p className={`text-sm ${uiTextPlaceholder}`}>No removable items are currently installed.</p>
+              <p className={`text-sm ${uiTextPlaceholder}`}>
+                No removable items are currently installed.
+              </p>
             ) : (
               <div className="space-y-2 rounded border border-slate-700 p-3">
                 {purityInventory.map((item) => (
@@ -947,10 +1014,12 @@ export function TalentAcquisitionModal({
                 <input
                   className={editableInputClass(true)}
                   value={fatalReplacements[item.key] ?? ""}
-                  onChange={(event) => setFatalReplacements((current) => ({
-                    ...current,
-                    [item.key]: event.target.value,
-                  }))}
+                  onChange={(event) =>
+                    setFatalReplacements((current) => ({
+                      ...current,
+                      [item.key]: event.target.value,
+                    }))
+                  }
                   placeholder="Replacement limb, organ, or system…"
                 />
               </div>
@@ -966,11 +1035,13 @@ export function TalentAcquisitionModal({
             <PickerField
               id="reformed-skin-cause"
               label="Cause of Replacement"
-              value={primaryChoice === "purity"
-                ? "Purity of Flesh"
-                : primaryChoice === "critical"
-                  ? "Critical Damage"
-                  : ""}
+              value={
+                primaryChoice === "purity"
+                  ? "Purity of Flesh"
+                  : primaryChoice === "critical"
+                    ? "Critical Damage"
+                    : ""
+              }
               placeholder="Choose cause…"
               onClick={() => setActivePicker("reformed-skin-cause")}
               required
@@ -985,22 +1056,57 @@ export function TalentAcquisitionModal({
 
         {entry.talentId === "rite-of-pure-thought" && (
           <>
-            <p className={`text-sm ${uiTextBody}`}>Select only disorders the GM says are no longer relevant. Each must be replaced at the same severity.</p>
-            {disorders.length === 0 && <p className={`text-sm ${uiTextPlaceholder}`}>No structured disorders are currently recorded.</p>}
+            <p className={`text-sm ${uiTextBody}`}>
+              Select only disorders the GM says are no longer relevant. Each must be replaced at the
+              same severity.
+            </p>
+            {disorders.length === 0 && (
+              <p className={`text-sm ${uiTextPlaceholder}`}>
+                No structured disorders are currently recorded.
+              </p>
+            )}
             {disorders.map((disorder) => {
               const selected = removedDisorderIds.includes(disorder.id);
               return (
                 <div key={disorder.id} className="space-y-2 rounded border border-slate-700 p-3">
                   <label className={`flex items-center gap-3 text-sm ${uiTextBody}`}>
-                    <input type="checkbox" checked={selected} onChange={(event) => setRemovedDisorderIds((current) => event.target.checked ? [...current, disorder.id] : current.filter((id) => id !== disorder.id))} />
-                    <span>{disorder.name} ({disorder.severity})</span>
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={(event) =>
+                        setRemovedDisorderIds((current) =>
+                          event.target.checked
+                            ? [...current, disorder.id]
+                            : current.filter((id) => id !== disorder.id)
+                        )
+                      }
+                    />
+                    <span>
+                      {disorder.name} ({disorder.severity})
+                    </span>
                   </label>
-                  {selected && <input className={editableInputClass(true)} value={replacementDisorders[disorder.id] ?? ""} onChange={(event) => setReplacementDisorders((current) => ({ ...current, [disorder.id]: event.target.value }))} placeholder={`Replacement ${disorder.severity} disorder…`} />}
+                  {selected && (
+                    <input
+                      className={editableInputClass(true)}
+                      value={replacementDisorders[disorder.id] ?? ""}
+                      onChange={(event) =>
+                        setReplacementDisorders((current) => ({
+                          ...current,
+                          [disorder.id]: event.target.value,
+                        }))
+                      }
+                      placeholder={`Replacement ${disorder.severity} disorder…`}
+                    />
+                  )}
                 </div>
               );
             })}
             <label className={`flex items-start gap-3 text-sm ${uiTextBody}`}>
-              <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(event) => setConfirmed(event.target.checked)}
+              />
               <span>The GM has reviewed these changes.</span>
             </label>
           </>
@@ -1012,11 +1118,13 @@ export function TalentAcquisitionModal({
               <PickerField
                 id="psy-rating-power-grant"
                 label="Power Grant"
-                value={secondaryChoice === "existing"
-                  ? `Known Discipline: ${halfWillpowerBonus} powers`
-                  : secondaryChoice === "new"
-                    ? "New Discipline: 1 power"
-                    : ""}
+                value={
+                  secondaryChoice === "existing"
+                    ? `Known Discipline: ${halfWillpowerBonus} powers`
+                    : secondaryChoice === "new"
+                      ? "New Discipline: 1 power"
+                      : ""
+                }
                 placeholder="Choose route…"
                 onClick={() => setActivePicker("power-grant")}
                 required
@@ -1026,9 +1134,11 @@ export function TalentAcquisitionModal({
               id="psy-rating-discipline"
               label="Discipline"
               value={primaryChoice}
-              placeholder={entry.talentId === "psy-rating-3" || secondaryChoice
-                ? "Choose Discipline…"
-                : "Choose a power grant first"}
+              placeholder={
+                entry.talentId === "psy-rating-3" || secondaryChoice
+                  ? "Choose Discipline…"
+                  : "Choose a power grant first"
+              }
               onClick={() => setActivePicker("discipline")}
               disabled={entry.talentId !== "psy-rating-3" && !secondaryChoice}
               required

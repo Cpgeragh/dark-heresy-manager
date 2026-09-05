@@ -15,8 +15,7 @@ function getRanksSpent(character: Character): number {
 
 function getDmSpent(character: Character): number {
   return (character.experience.transactions ?? []).reduce(
-    (total, transaction) =>
-      transaction.type === "spend" ? total + transaction.amount : total,
+    (total, transaction) => (transaction.type === "spend" ? total + transaction.amount : total),
     0
   );
 }

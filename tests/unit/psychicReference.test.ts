@@ -67,21 +67,23 @@ describe("psychic power reference data", () => {
   it("stores discipline-wide rules once and includes them when powers are viewed or added", () => {
     expect(PSYCHIC_DISCIPLINE_RULES.Pyromancy).toContain("may also set the target on fire");
     expect(PSYCHIC_DISCIPLINE_RULES.Telepathy).toContain("psychic rot");
-    expect(PSYCHIC_DISCIPLINE_RULES.Telepathy).toContain("1d10 Insanity Points or Corruption Points");
+    expect(PSYCHIC_DISCIPLINE_RULES.Telepathy).toContain(
+      "1d10 Insanity Points or Corruption Points"
+    );
     expect(PSYCHIC_DISCIPLINE_RULES.Telepathy).toContain("second Willpower Test");
 
     expect(getPsychicPowerDescription(power("blinding-flash"))).toContain(
-      "Discipline rule: Any Pyromancy power that inflicts Damage",
+      "Discipline rule: Any Pyromancy power that inflicts Damage"
     );
     expect(getPsychicPowerDescription(power("mind-scan"))).toContain(
-      "Discipline rule: If a Psyker uses a telepathic power",
+      "Discipline rule: If a Psyker uses a telepathic power"
     );
     expect(getPsychicPowerDescription(power("far-sight"))).toBe(power("far-sight").description);
   });
 
   it("does not duplicate the shared Pyromancy rule inside individual source descriptions", () => {
     for (const entry of PSYCHIC_POWER_REFERENCE.filter(
-      (candidate) => candidate.discipline === "Pyromancy",
+      (candidate) => candidate.discipline === "Pyromancy"
     )) {
       expect(entry.description).not.toContain("Any Pyromancy power that inflicts Damage");
     }

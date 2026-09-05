@@ -62,9 +62,7 @@ export function ArcheotechImplantRow({
         />
       </div>
 
-      {editable && (
-        <RemoveButton onClick={onRemove} label="Remove" />
-      )}
+      {editable && <RemoveButton onClick={onRemove} label="Remove" />}
     </div>
   );
 }

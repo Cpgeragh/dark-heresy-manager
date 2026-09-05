@@ -28,34 +28,26 @@ const skills: SkillWithComputed[] = [
 
 describe("useSkillSorting", () => {
   it("sorts by name alphabetically", () => {
-    const { result } = renderHook(() =>
-      useSkillSorting({ skills, sortMode: "name" })
-    );
+    const { result } = renderHook(() => useSkillSorting({ skills, sortMode: "name" }));
     const names = result.current.map((s) => s.name);
     expect(names).toEqual(["Acrobatics", "Intimidate", "Logic", "Stealth"]);
   });
 
   it("sorts by total descending", () => {
-    const { result } = renderHook(() =>
-      useSkillSorting({ skills, sortMode: "total" })
-    );
+    const { result } = renderHook(() => useSkillSorting({ skills, sortMode: "total" }));
     const totals = result.current.map((s) => s.total);
     expect(totals).toEqual([50, 45, 35, 30]);
   });
 
   it("sorts by characteristic in GROUP_ORDER, then name within group", () => {
-    const { result } = renderHook(() =>
-      useSkillSorting({ skills, sortMode: "characteristic" })
-    );
+    const { result } = renderHook(() => useSkillSorting({ skills, sortMode: "characteristic" }));
     const names = result.current.map((s) => s.name);
     // s group: Intimidate; ag group: Acrobatics, Stealth (alphabetical); int group: Logic
     expect(names).toEqual(["Intimidate", "Acrobatics", "Stealth", "Logic"]);
   });
 
   it("sorts by category alphabetically, then name within category", () => {
-    const { result } = renderHook(() =>
-      useSkillSorting({ skills, sortMode: "category" })
-    );
+    const { result } = renderHook(() => useSkillSorting({ skills, sortMode: "category" }));
     const names = result.current.map((s) => s.name);
     // Academic: Logic; Athletic: Acrobatics; Combat: Intimidate, Stealth
     expect(names).toEqual(["Logic", "Acrobatics", "Intimidate", "Stealth"]);
@@ -68,10 +60,7 @@ describe("useSkillSorting", () => {
   });
 
   it("handles skills with no category in category sort", () => {
-    const noCategory = [
-      makeSkill("Zeal", "wp", 30),
-      makeSkill("Awareness", "per", 40),
-    ];
+    const noCategory = [makeSkill("Zeal", "wp", 30), makeSkill("Awareness", "per", 40)];
     const { result } = renderHook(() =>
       useSkillSorting({ skills: noCategory, sortMode: "category" })
     );

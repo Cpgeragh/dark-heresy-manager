@@ -1,10 +1,6 @@
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import { DEFAULT_TOAST_DURATION } from "../../constants/ui";
-import {
-  ToastContext,
-  type Toast,
-  type ToastType,
-} from "./ToastContext";
+import { ToastContext, type Toast, type ToastType } from "./ToastContext";
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -65,9 +61,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <ToastContext.Provider
-      value={{ toasts, addToast, removeToast, success, error, info, warning }}
-    >
+    <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, info, warning }}>
       {children}
     </ToastContext.Provider>
   );

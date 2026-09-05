@@ -116,6 +116,8 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
     await user.type(screen.getByPlaceholderText("0"), "50");
     await user.click(screen.getByRole("button", { name: "Buy Soul-bound" }));
 
-    expect(await screen.findByRole("dialog", { name: "Soul-bound Acquisition" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("dialog", { name: "Soul-bound Acquisition" })
+    ).toBeInTheDocument();
   });
 });

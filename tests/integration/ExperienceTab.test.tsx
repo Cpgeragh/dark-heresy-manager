@@ -74,9 +74,7 @@ function makeCharacter(overrides: Partial<Character> = {}): Character {
   return { ...character, ...overrides };
 }
 
-function renderTab(
-  props: Partial<React.ComponentProps<typeof ExperienceTab>> = {}
-) {
+function renderTab(props: Partial<React.ComponentProps<typeof ExperienceTab>> = {}) {
   const onUpdate = vi.fn();
   const onUpdateHeader = vi.fn();
   render(
@@ -95,10 +93,17 @@ function renderTab(
 describe("ExperienceTab named Career Rank ledger", () => {
   it("shows the Total, Spent, and Remaining XP summary", () => {
     renderTab();
-    expect(screen.getByText("Total XP").closest("section"))
-      .toHaveClass("grid-cols-3", "gap-2", "sm:gap-4");
-    expect(screen.getByText("Remaining XP"))
-      .toHaveClass("w-full", "text-center", "whitespace-nowrap", "text-[10px]");
+    expect(screen.getByText("Total XP").closest("section")).toHaveClass(
+      "grid-cols-3",
+      "gap-2",
+      "sm:gap-4"
+    );
+    expect(screen.getByText("Remaining XP")).toHaveClass(
+      "w-full",
+      "text-center",
+      "whitespace-nowrap",
+      "text-[10px]"
+    );
     expect(screen.getByText("450")).toHaveClass("w-full", "text-center");
     expect(screen.getByText("1000")).toBeInTheDocument();
     expect(screen.getByText("550")).toBeInTheDocument();
@@ -110,25 +115,33 @@ describe("ExperienceTab named Career Rank ledger", () => {
     for (const rank of ["Conscript", "Guard", "Armsman", "Sergeant", "Veteran", "Scout"]) {
       expect(screen.getByRole("article", { name: `${rank} Rank Card` })).toBeInTheDocument();
     }
-    expect(within(screen.getByRole("article", { name: "Scout Rank Card" })).getByText("Current"))
-      .toHaveClass("border-emerald-500/50", "text-emerald-300");
-    expect(within(screen.getByRole("article", { name: "Conscript Rank Card" })).getByText("0–499 XP"))
-      .toHaveClass("border-amber-700/50", "text-amber-400/80");
-    expect(within(screen.getByRole("article", { name: "Conscript Rank Card" })).getByText("Rank 1"))
-      .toHaveClass("border-fuchsia-500/50", "text-fuchsia-300");
-    expect(screen.getAllByRole("article").map((article) => article.getAttribute("aria-label")))
-      .toEqual([
-        "Scout Rank Card",
-        "Veteran Rank Card",
-        "Sergeant Rank Card",
-        "Armsman Rank Card",
-        "Guard Rank Card",
-        "Conscript Rank Card",
-      ]);
-    expect(screen.getByRole("button", { name: "Collapse Scout Rank Card" }))
-      .toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("button", { name: "Expand Veteran Rank Card" }))
-      .toHaveAttribute("aria-expanded", "false");
+    expect(
+      within(screen.getByRole("article", { name: "Scout Rank Card" })).getByText("Current")
+    ).toHaveClass("border-emerald-500/50", "text-emerald-300");
+    expect(
+      within(screen.getByRole("article", { name: "Conscript Rank Card" })).getByText("0–499 XP")
+    ).toHaveClass("border-amber-700/50", "text-amber-400/80");
+    expect(
+      within(screen.getByRole("article", { name: "Conscript Rank Card" })).getByText("Rank 1")
+    ).toHaveClass("border-fuchsia-500/50", "text-fuchsia-300");
+    expect(
+      screen.getAllByRole("article").map((article) => article.getAttribute("aria-label"))
+    ).toEqual([
+      "Scout Rank Card",
+      "Veteran Rank Card",
+      "Sergeant Rank Card",
+      "Armsman Rank Card",
+      "Guard Rank Card",
+      "Conscript Rank Card",
+    ]);
+    expect(screen.getByRole("button", { name: "Collapse Scout Rank Card" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "Expand Veteran Rank Card" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
   });
 
   it("resets expansion to the new current rank when the character ranks up", () => {
@@ -158,10 +171,14 @@ describe("ExperienceTab named Career Rank ledger", () => {
       />
     );
 
-    expect(screen.getByRole("button", { name: "Collapse Scout Rank Card" }))
-      .toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("button", { name: "Expand Veteran Rank Card" }))
-      .toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Collapse Scout Rank Card" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "Expand Veteran Rank Card" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
   });
 
   it("shows career purchases when a previous Rank Card is expanded", async () => {
@@ -171,9 +188,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(conscript.queryByText("Awareness — Trained")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Expand Conscript Rank Card" }));
     expect(conscript.getAllByText("Career Purchases from This Rank").length).toBeGreaterThan(0);
-    const careerPanel = within(
-      conscript.getByRole("tabpanel", { name: "Career Purchases" })
-    );
+    const careerPanel = within(conscript.getByRole("tabpanel", { name: "Career Purchases" }));
     expect(careerPanel.getByText("Skills")).toHaveClass("text-sky-300");
     expect(careerPanel.getByText("Talents")).toHaveClass("text-sky-300");
     expect(careerPanel.getByText("Weapon Training")).toHaveClass("text-sky-300");
@@ -184,8 +199,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(careerPanel.getByText("Awareness — Trained")).toBeInTheDocument();
     expect(careerPanel.getByText("Basic Weapon Training (Las)")).toBeInTheDocument();
     expect(careerPanel.getByText("Sound Constitution")).toBeInTheDocument();
-    expect(careerPanel.queryByRole("button", { name: /Characteristics purchases/ }))
-      .not.toBeInTheDocument();
+    expect(
+      careerPanel.queryByRole("button", { name: /Characteristics purchases/ })
+    ).not.toBeInTheDocument();
     expect(careerPanel.getByText("300 XP")).toBeInTheDocument();
   });
 
@@ -196,16 +212,20 @@ describe("ExperienceTab named Career Rank ledger", () => {
     const mobileTabs = within(
       scout.getByRole("tablist", { name: "Scout Rank purchase categories" })
     );
-    expect(mobileTabs.getByRole("tab", { name: "Career Purchases" }))
-      .toHaveAttribute("aria-selected", "true");
-    await user.click(mobileTabs.getByRole("tab", { name: "Additional XP" }));
-    expect(mobileTabs.getByRole("tab", { name: "Additional XP" }))
-      .toHaveAttribute("aria-selected", "true");
-    const additionalPanel = within(
-      scout.getByRole("tabpanel", { name: "Additional XP" })
+    expect(mobileTabs.getByRole("tab", { name: "Career Purchases" })).toHaveAttribute(
+      "aria-selected",
+      "true"
     );
-    expect(additionalPanel.getByText("Additional XP Spent").closest("section"))
-      .toHaveClass("min-h-[45vh]", "lg:min-h-0");
+    await user.click(mobileTabs.getByRole("tab", { name: "Additional XP" }));
+    expect(mobileTabs.getByRole("tab", { name: "Additional XP" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    const additionalPanel = within(scout.getByRole("tabpanel", { name: "Additional XP" }));
+    expect(additionalPanel.getByText("Additional XP Spent").closest("section")).toHaveClass(
+      "min-h-[45vh]",
+      "lg:min-h-0"
+    );
     expect(additionalPanel.getByText("Weapon Skill — Simple Advance")).toBeInTheDocument();
     expect(additionalPanel.getByText("Off-career Trait")).toBeInTheDocument();
     expect(scout.getAllByText("Additional XP Spent").length).toBeGreaterThan(0);
@@ -284,7 +304,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
       },
     });
     expect(
-      screen.getByText("The required Spent XP has been reached. The DM can now confirm one Rank Up.")
+      screen.getByText(
+        "The required Spent XP has been reached. The DM can now confirm one Rank Up."
+      )
     ).toHaveClass("text-amber-300");
   });
 
@@ -330,39 +352,43 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(dialog.queryByText("Total")).not.toBeInTheDocument();
     expect(dialog.queryByText("Spent")).not.toBeInTheDocument();
     expect(dialog.queryByText("Remaining")).not.toBeInTheDocument();
-    expect(dialog.getByText("The DM may apply an XP cost to ranking up."))
-      .toBeInTheDocument();
+    expect(dialog.getByText("The DM may apply an XP cost to ranking up.")).toBeInTheDocument();
     expect(dialog.queryByRole("button", { name: "Add XP" })).not.toBeInTheDocument();
     const spendButton = dialog.getByRole("button", { name: "Spend XP" });
-    expect(spendButton)
-      .toHaveClass("w-full", "border-amber-500", "text-amber-400");
+    expect(spendButton).toHaveClass("w-full", "border-amber-500", "text-amber-400");
 
     await user.click(spendButton);
     const spendDialog = within(screen.getByRole("dialog", { name: "Spend XP" }));
     const spendAmount = spendDialog.getByRole("textbox", { name: "Spend XP amount" });
     const spendReason = spendDialog.getByRole("textbox", { name: "Spend XP reason" });
-    expect(spendDialog.queryByText("Apply an XP cost to this Rank Up. It will appear under Additional XP Spent on the current Rank card."))
-      .not.toBeInTheDocument();
+    expect(
+      spendDialog.queryByText(
+        "Apply an XP cost to this Rank Up. It will appear under Additional XP Spent on the current Rank card."
+      )
+    ).not.toBeInTheDocument();
     await user.click(
       spendDialog.getByRole("button", { name: "Show information about Rank Up XP Cost" })
     );
     const costInfo = within(screen.getByRole("dialog", { name: "Rank Up XP Cost" }));
-    expect(costInfo.getByText("Apply an XP cost to this Rank Up. It will appear under Additional XP Spent on the current Rank card."))
-      .toBeInTheDocument();
+    expect(
+      costInfo.getByText(
+        "Apply an XP cost to this Rank Up. It will appear under Additional XP Spent on the current Rank card."
+      )
+    ).toBeInTheDocument();
     await user.click(costInfo.getByRole("button", { name: "Close" }));
     expect(spendAmount).toBeRequired();
     expect(spendReason).toBeRequired();
-    expect(spendDialog.getByText("Amount").closest("label"))
-      .toHaveClass("text-sky-300/85");
-    expect(spendDialog.getByText("Reason").closest("label"))
-      .toHaveClass("text-sky-300/85");
+    expect(spendDialog.getByText("Amount").closest("label")).toHaveClass("text-sky-300/85");
+    expect(spendDialog.getByText("Reason").closest("label")).toHaveClass("text-sky-300/85");
     expect(spendDialog.getByText("Required").closest("p")).toHaveClass("text-red-500");
     await user.type(spendAmount, "100");
     expect(spendDialog.getByRole("button", { name: "Confirm Spend" })).toBeDisabled();
     await user.type(spendReason, "Rank ceremony");
     expect(spendDialog.getByText("Spend XP").closest("h2")).toHaveClass("text-red-500");
-    expect(spendDialog.getByRole("button", { name: "Confirm Spend" }))
-      .toHaveClass("border-red-500", "text-red-500");
+    expect(spendDialog.getByRole("button", { name: "Confirm Spend" })).toHaveClass(
+      "border-red-500",
+      "text-red-500"
+    );
     await user.click(spendDialog.getByRole("button", { name: "Confirm Spend" }));
 
     expect(onUpdate).not.toHaveBeenCalled();
@@ -370,8 +396,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(dialog.getByText("100 XP")).toHaveClass("text-slate-100");
     expect(dialog.getByText("Rank ceremony")).toBeInTheDocument();
     expect(dialog.queryByText("Final XP adjustments")).not.toBeInTheDocument();
-    expect(dialog.queryByText("The DM may apply an XP cost to ranking up."))
-      .not.toBeInTheDocument();
+    expect(
+      dialog.queryByText("The DM may apply an XP cost to ranking up.")
+    ).not.toBeInTheDocument();
     expect(dialog.queryByRole("button", { name: "Spend XP" })).not.toBeInTheDocument();
     const changeButton = dialog.getByRole("button", { name: "Change XP Cost" });
     expect(changeButton).not.toHaveClass("w-full");
@@ -389,8 +416,10 @@ describe("ExperienceTab named Career Rank ledger", () => {
     await user.clear(reasonInput);
     await user.type(reasonInput, "Changed cost");
     expect(changeDialog.getByText("Change XP Cost").closest("h2")).toHaveClass("text-red-500");
-    expect(changeDialog.getByRole("button", { name: "Confirm Change" }))
-      .toHaveClass("border-red-500", "text-red-500");
+    expect(changeDialog.getByRole("button", { name: "Confirm Change" })).toHaveClass(
+      "border-red-500",
+      "text-red-500"
+    );
     await user.click(changeDialog.getByRole("button", { name: "Confirm Change" }));
 
     expect(dialog.getByText("150 XP")).toBeInTheDocument();
@@ -526,10 +555,14 @@ describe("ExperienceTab named Career Rank ledger", () => {
 
     await user.click(add);
     const dialog = within(screen.getByRole("dialog", { name: "Add XP" }));
-    expect(dialog.getByRole("button", { name: "Cancel" }))
-      .toHaveClass("border-slate-500", "text-slate-200");
-    expect(dialog.getByRole("button", { name: "Confirm Add XP" }))
-      .toHaveClass("border-emerald-500", "text-emerald-300");
+    expect(dialog.getByRole("button", { name: "Cancel" })).toHaveClass(
+      "border-slate-500",
+      "text-slate-200"
+    );
+    expect(dialog.getByRole("button", { name: "Confirm Add XP" })).toHaveClass(
+      "border-emerald-500",
+      "text-emerald-300"
+    );
   });
 
   it("lets an editable player add XP but keeps DM-only XP actions hidden", async () => {
@@ -558,7 +591,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
   it("shows a clear empty state before Career setup", () => {
     const data = createEmptyCharacterData({ campaignId: "campaign", recoveryCode: "recovery" });
     renderTab({ character: { ...data, id: "character" } });
-    expect(screen.getByText("Select a Career and Rank to begin the Rank ledger.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Select a Career and Rank to begin the Rank ledger.")
+    ).toBeInTheDocument();
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
   });
 });

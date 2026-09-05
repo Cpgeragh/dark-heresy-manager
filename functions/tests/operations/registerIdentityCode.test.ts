@@ -127,9 +127,9 @@ describe("registerIdentityCode", () => {
       reference.collectionName === "userProfiles" ? { exists: false } : { exists: false }
     );
 
-    await expect(
-      registerIdentityCode({ role: "player" }, "user-1", "secret")
-    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
+    await expect(registerIdentityCode({ role: "player" }, "user-1", "secret")).rejects.toThrow(
+      expect.objectContaining({ code: "failed-precondition" })
+    );
 
     expect(mockTransactionSet).not.toHaveBeenCalled();
   });

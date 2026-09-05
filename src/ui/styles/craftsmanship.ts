@@ -1,6 +1,11 @@
 import type { CyberneticCraftsmanship, StandardCraftsmanship } from "../../types/Character";
 
-export const CRAFTSMANSHIP_OPTIONS = ["Poor", "Common", "Good", "Best"] as const satisfies readonly StandardCraftsmanship[];
+export const CRAFTSMANSHIP_OPTIONS = [
+  "Poor",
+  "Common",
+  "Good",
+  "Best",
+] as const satisfies readonly StandardCraftsmanship[];
 export const CYBERNETIC_CRAFTSMANSHIP_OPTIONS = CRAFTSMANSHIP_OPTIONS.filter(
   (option): option is CyberneticCraftsmanship => option !== "Best"
 );

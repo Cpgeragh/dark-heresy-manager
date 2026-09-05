@@ -41,7 +41,11 @@ export function HomeworldInfoContent({ homeworld }: { homeworld: HomeworldData }
                 <span className={`text-sm lg:text-base ${uiTextBody}`}>{skill.name}</span>
                 {SKILL_DESCRIPTIONS[skill.name] && (
                   <span className={uiInfoModalWrapper}>
-                    <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} as="span" />
+                    <InfoModal
+                      title={skill.name}
+                      content={SKILL_DESCRIPTIONS[skill.name]}
+                      as="span"
+                    />
                   </span>
                 )}
               </div>

@@ -86,12 +86,16 @@ export function toCustomShieldData(shield: ShieldItem): CustomShieldData {
   };
 }
 
-export function stripWeaponKind<TData extends CustomWeaponData>(data: TData): Omit<TData, "weaponKind"> {
+export function stripWeaponKind<TData extends CustomWeaponData>(
+  data: TData
+): Omit<TData, "weaponKind"> {
   const { weaponKind: _weaponKind, ...weaponData } = data;
   return weaponData;
 }
 
-export function stripArmourKind<TData extends CustomArmourData>(data: TData): Omit<TData, "armourKind"> {
+export function stripArmourKind<TData extends CustomArmourData>(
+  data: TData
+): Omit<TData, "armourKind"> {
   const { armourKind: _armourKind, ...armourData } = data;
   return armourData;
 }
@@ -105,8 +109,7 @@ export function buildRangedWeaponSnapshot(
 ): RangedWeapon {
   const { weaponKind: _weaponKind, ...weaponData } = data;
   const quantity =
-    copyFields.quantity ??
-    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
+    copyFields.quantity ?? (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
 
   return {
     id,
@@ -129,8 +132,7 @@ export function buildMeleeWeaponSnapshot(
 ): MeleeWeapon {
   const { weaponKind: _weaponKind, ...weaponData } = data;
   const quantity =
-    copyFields.quantity ??
-    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
+    copyFields.quantity ?? (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
 
   return {
     id,

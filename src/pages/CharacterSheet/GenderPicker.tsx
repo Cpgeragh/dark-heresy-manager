@@ -54,7 +54,9 @@ export function GenderPicker({
       >
         <PickerBody>
           <div>
-            <label className={uiFormLabel} htmlFor="gender-custom-name">Rename</label>
+            <label className={uiFormLabel} htmlFor="gender-custom-name">
+              Rename
+            </label>
             <input
               id="gender-custom-name"
               type="text"

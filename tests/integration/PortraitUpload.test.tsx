@@ -23,9 +23,7 @@ vi.mock("../../src/components/Toast", () => ({
 import { PortraitUpload } from "../../src/components/PortraitUpload";
 
 function renderUpload(props: Partial<React.ComponentProps<typeof PortraitUpload>> = {}) {
-  render(
-    <PortraitUpload campaignId="campaign-1" characterId="char-1" canEdit={true} {...props} />
-  );
+  render(<PortraitUpload campaignId="campaign-1" characterId="char-1" canEdit={true} {...props} />);
 }
 
 describe("PortraitUpload", () => {

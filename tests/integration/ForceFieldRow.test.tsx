@@ -27,7 +27,13 @@ function renderRow(props: Partial<React.ComponentProps<typeof ForceFieldRow>> = 
   const onToggle = vi.fn();
   const onRemove = vi.fn();
   render(
-    <ForceFieldRow piece={basePiece} editable={true} onToggle={onToggle} onRemove={onRemove} {...props} />
+    <ForceFieldRow
+      piece={basePiece}
+      editable={true}
+      onToggle={onToggle}
+      onRemove={onRemove}
+      {...props}
+    />
   );
   return { onToggle, onRemove };
 }

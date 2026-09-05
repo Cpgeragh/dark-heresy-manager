@@ -51,38 +51,41 @@ export async function registerIdentityCode(
 
   let newCode = "";
 
-  await db.runTransaction(async (transaction) => {
-    const secretSnapshot = await transaction.get(secretRef);
-    const profileSnapshot = await transaction.get(profileRef);
-    const firstName = profileSnapshot.exists ? profileSnapshot.data()?.firstName : undefined;
-    if (
-      !profileSnapshot.exists ||
-      typeof firstName !== "string" ||
-      firstName.length === 0 ||
-      firstName.length > 50
-    ) {
-      throw new HttpsError(
-        "failed-precondition",
-        "Save a valid first name before creating an identity recovery code."
-      );
-    }
-    const previousCode = secretSnapshot.exists
-      ? (secretSnapshot.data()?.code as string | undefined)
-      : undefined;
+  await db.runTransaction(
+    async (transaction) => {
+      const secretSnapshot = await transaction.get(secretRef);
+      const profileSnapshot = await transaction.get(profileRef);
+      const firstName = profileSnapshot.exists ? profileSnapshot.data()?.firstName : undefined;
+      if (
+        !profileSnapshot.exists ||
+        typeof firstName !== "string" ||
+        firstName.length === 0 ||
+        firstName.length > 50
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Save a valid first name before creating an identity recovery code."
+        );
+      }
+      const previousCode = secretSnapshot.exists
+        ? (secretSnapshot.data()?.code as string | undefined)
+        : undefined;
 
-    newCode = generateRecoveryCode();
-    const newHash = hashRecoveryCode(newCode, hmacSecret);
+      newCode = generateRecoveryCode();
+      const newHash = hashRecoveryCode(newCode, hmacSecret);
 
-    if (previousCode) {
-      const previousHash = hashRecoveryCode(previousCode, hmacSecret);
-      transaction.delete(db.collection(IDENTITY_INDEX_COLLECTION).doc(previousHash));
-    }
-    transaction.set(db.collection(IDENTITY_INDEX_COLLECTION).doc(newHash), {
-      uid: identityUid,
-      role: input.role,
-    });
-    transaction.set(secretRef, { code: newCode });
-  }, { maxAttempts: 5 });
+      if (previousCode) {
+        const previousHash = hashRecoveryCode(previousCode, hmacSecret);
+        transaction.delete(db.collection(IDENTITY_INDEX_COLLECTION).doc(previousHash));
+      }
+      transaction.set(db.collection(IDENTITY_INDEX_COLLECTION).doc(newHash), {
+        uid: identityUid,
+        role: input.role,
+      });
+      transaction.set(secretRef, { code: newCode });
+    },
+    { maxAttempts: 5 }
+  );
 
   return { code: newCode };
 }

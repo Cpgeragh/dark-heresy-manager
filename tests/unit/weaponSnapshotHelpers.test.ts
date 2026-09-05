@@ -142,7 +142,12 @@ describe("buildRangedWeaponSnapshot", () => {
   it("preserves ammoEntries, upgrades, quantity and equipped from copyFields", () => {
     const result = buildRangedWeaponSnapshot(
       "new-id",
-      { ammoEntries: [{ id: "a1", name: "Bullets", clips: 1, rounds: 0, loaded: true }], upgrades: ["cr-mono"], quantity: 5, equipped: true },
+      {
+        ammoEntries: [{ id: "a1", name: "Bullets", clips: 1, rounds: 0, loaded: true }],
+        upgrades: ["cr-mono"],
+        quantity: 5,
+        equipped: true,
+      },
       data,
       "lib1",
       "v1"
@@ -156,13 +161,24 @@ describe("buildRangedWeaponSnapshot", () => {
 
 describe("buildMeleeWeaponSnapshot", () => {
   it("defaults quantity to 1 for a Thrown-class weapon", () => {
-    const data = toCustomMeleeWeaponData({ id: "ignored", name: "Throwing Knife", class: "Thrown", damage: "1d5", pen: "0" });
+    const data = toCustomMeleeWeaponData({
+      id: "ignored",
+      name: "Throwing Knife",
+      class: "Thrown",
+      damage: "1d5",
+      pen: "0",
+    });
     const result = buildMeleeWeaponSnapshot("new-id", {}, data, "lib1", "v1");
     expect(result.quantity).toBe(1);
   });
 
   it("assigns the new id and preserves copyFields.equipped", () => {
-    const data = toCustomMeleeWeaponData({ id: "ignored", name: "Chainsword", damage: "1d10+2", pen: "2" });
+    const data = toCustomMeleeWeaponData({
+      id: "ignored",
+      name: "Chainsword",
+      damage: "1d10+2",
+      pen: "2",
+    });
     const result = buildMeleeWeaponSnapshot("new-id", { equipped: true }, data, "lib1", "v1");
     expect(result.id).toBe("new-id");
     expect(result.equipped).toBe(true);
@@ -195,7 +211,13 @@ describe("buildShieldSnapshot", () => {
 
 describe("buildFallbackWeaponLibraryItem", () => {
   it("infers a draft status when there is no customLibraryVersionId", () => {
-    const weapon: RangedWeapon = { id: "r1", name: "Lasgun", class: "Basic", damage: "1d10+3", pen: "0" };
+    const weapon: RangedWeapon = {
+      id: "r1",
+      name: "Lasgun",
+      class: "Basic",
+      damage: "1d10+3",
+      pen: "0",
+    };
     const item = buildFallbackWeaponLibraryItem({
       campaignId: "camp1",
       weapon,

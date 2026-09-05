@@ -4,7 +4,12 @@ import { useRef, useState } from "react";
 import type { ArmourCraftsmanship } from "../../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { Button } from "../../../ui/buttons/Button";
 import { Chip } from "../../../ui/chips/Chip";
@@ -13,9 +18,7 @@ import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/styles/editable
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { StatChip } from "../../../ui/chips/StatChip";
-import {
-  forceFieldCraftsmanshipDescription,
-} from "./armourHelpers";
+import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
 
 interface Props {
   editable?: boolean;
@@ -73,10 +76,13 @@ export function ForceFieldPicker({
         isEmpty={false}
         hideSearch
         footer={
-          <Button className="w-full" onClick={() => {
-            onSelect(selected, craftsmanship);
-            resetPicker();
-          }}>
+          <Button
+            className="w-full"
+            onClick={() => {
+              onSelect(selected, craftsmanship);
+              resetPicker();
+            }}
+          >
             Add Force Field
           </Button>
         }
@@ -86,7 +92,8 @@ export function ForceFieldPicker({
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select field craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((q) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={q}
                   onClick={() => setCraftsmanship(q)}
                   className={[
@@ -101,7 +108,9 @@ export function ForceFieldPicker({
               ))}
             </div>
           </div>
-          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
+          <div
+            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
+          >
             {forceFieldCraftsmanshipDescription(craftsmanship)}
           </div>
         </PickerBody>
@@ -121,11 +130,7 @@ export function ForceFieldPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (
-          <PickerCustomAction
-            onClick={onCustom}
-          >
-            + Add custom field
-          </PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>+ Add custom field</PickerCustomAction>
         ) : undefined
       }
     >
@@ -134,12 +139,21 @@ export function ForceFieldPicker({
           const ref = entry.ref;
           return (
             <PickerRow key={ref.id} interactive={editable} onClick={() => setSelected(ref)}>
-              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>{ref.name}</span>
+              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
+                {ref.name}
+              </span>
               <div className="flex flex-wrap gap-1.5 mt-1">
-                {ref.protectionRating !== undefined && <StatChip size="sm" label="PR" value={String(ref.protectionRating)} />}
+                {ref.protectionRating !== undefined && (
+                  <StatChip size="sm" label="PR" value={String(ref.protectionRating)} />
+                )}
               </div>
               <div className="flex flex-wrap gap-1.5 mt-1">
-                <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
+                <ItemMetaChips
+                  weight={ref.weight}
+                  value={ref.value}
+                  availability={ref.availability}
+                  source={ref.source}
+                />
               </div>
             </PickerRow>
           );
@@ -158,14 +172,25 @@ export function ForceFieldPicker({
               {item.name}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              {data.protectionRating !== undefined && <StatChip size="sm" label="PR" value={String(data.protectionRating)} />}
+              {data.protectionRating !== undefined && (
+                <StatChip size="sm" label="PR" value={String(data.protectionRating)} />
+              )}
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
               {item.status === "draft" && (
-                <Chip size="sm" className={colourAmberFaint}>Draft</Chip>
+                <Chip size="sm" className={colourAmberFaint}>
+                  Draft
+                </Chip>
               )}
-              <Chip size="sm" className={colourFuchsia}>Custom</Chip>
-              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+              <Chip size="sm" className={colourFuchsia}>
+                Custom
+              </Chip>
+              <ItemMetaChips
+                weight={data.weight}
+                value={data.value}
+                availability={data.availability}
+                source={data.source}
+              />
             </div>
           </PickerRow>
         );

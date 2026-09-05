@@ -23,10 +23,10 @@ export const severityChipClass: Record<InsanityDisorderSeverity, string> = {
 
 const DISORDER_TYPE_COLOURS: Record<string, string> = {
   "The Flesh is Weak": colourBlue,
-  "Phobia": colourOrange,
+  Phobia: colourOrange,
   "Obsession/Compulsion": colourTeal,
   "Visions and Voices": colourFuchsia,
-  "Delusion": colourLime,
+  Delusion: colourLime,
   "Horrific Nightmares": colourPink,
 };
 
@@ -107,21 +107,24 @@ export interface InsanityTimelineSegment {
 
 export const INSANITY_TIMELINE_SEGMENTS: InsanityTimelineSegment[] = INSANITY_TRACK.filter(
   (entry) => !entry.terminal
-).reduce<InsanityTimelineSegment[]>(
-  (segments, entry) => {
-    const width = entry.max !== undefined ? entry.max - entry.min + 1 : 0;
-    const last = segments[segments.length - 1];
-    if (last && last.degree === entry.degree) {
-      last.width += width;
-      return segments;
-    }
-    const colours = degreeSegmentColours(entry.degree);
-    return [...segments, { degree: entry.degree, width, colourClass: colours.bright, dimColourClass: colours.dim }];
-  },
-  []
-);
+).reduce<InsanityTimelineSegment[]>((segments, entry) => {
+  const width = entry.max !== undefined ? entry.max - entry.min + 1 : 0;
+  const last = segments[segments.length - 1];
+  if (last && last.degree === entry.degree) {
+    last.width += width;
+    return segments;
+  }
+  const colours = degreeSegmentColours(entry.degree);
+  return [
+    ...segments,
+    { degree: entry.degree, width, colourClass: colours.bright, dimColourClass: colours.dim },
+  ];
+}, []);
 
-export const INSANITY_TIMELINE_TOTAL_WIDTH = INSANITY_TIMELINE_SEGMENTS.reduce((sum, segment) => sum + segment.width, 0);
+export const INSANITY_TIMELINE_TOTAL_WIDTH = INSANITY_TIMELINE_SEGMENTS.reduce(
+  (sum, segment) => sum + segment.width,
+  0
+);
 
 export function insanityStepperClass(entry: InsanityTrackEntry): string {
   if (entry.terminal) return "text-rose-300 animate-pulse";

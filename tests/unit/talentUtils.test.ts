@@ -11,11 +11,7 @@ import {
   linkPowerToTalentPurchase,
   makeTalentEntry,
 } from "../../src/mechanics/talents/talentUtils";
-import type {
-  PsychicBlock,
-  TalentEntry,
-  TalentsAndTraitsBlock,
-} from "../../src/types/Character";
+import type { PsychicBlock, TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
 
 vi.stubGlobal("crypto", { randomUUID: () => "generated-uid" });
 
@@ -61,8 +57,40 @@ describe("Talent behaviour metadata", () => {
   });
 
   it.each([
-    ["peer", ["Academics", "Adeptus Arbites", "Adeptus Mechanicus", "Administratum", "Astropaths", "Ecclesiarchy", "Feral Worlders", "Government", "Hivers", "Imperial Navy", "Inquisition", "Middle Classes", "Military", "Nobility", "The Insane", "Underworld", "Void Born", "Workers"]],
-    ["good-reputation", ["Administratum", "Ecclesiarchy", "Imperial Guard", "Imperial Navy", "Inquisition", "Underworld"]],
+    [
+      "peer",
+      [
+        "Academics",
+        "Adeptus Arbites",
+        "Adeptus Mechanicus",
+        "Administratum",
+        "Astropaths",
+        "Ecclesiarchy",
+        "Feral Worlders",
+        "Government",
+        "Hivers",
+        "Imperial Navy",
+        "Inquisition",
+        "Middle Classes",
+        "Military",
+        "Nobility",
+        "The Insane",
+        "Underworld",
+        "Void Born",
+        "Workers",
+      ],
+    ],
+    [
+      "good-reputation",
+      [
+        "Administratum",
+        "Ecclesiarchy",
+        "Imperial Guard",
+        "Imperial Navy",
+        "Inquisition",
+        "Underworld",
+      ],
+    ],
     ["heightened-senses", ["Sight", "Sound", "Smell", "Taste", "Touch"]],
     ["mechadendrite-use", ["Gun", "Manipulator", "Medicae", "Optical", "Utility"]],
     ["resistance", ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"]],
@@ -70,7 +98,20 @@ describe("Talent behaviour metadata", () => {
     ["discipline-focus", ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"]],
     ["psychic-supremacy", ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"]],
     ["cult-briefing", ["Political", "Heretek", "Pleasure", "Infestation", "Blood", "Culture"]],
-    ["sicarius-tutoring", ["Adept", "Arbitrator", "Assassin", "Battle Sister", "Cleric", "Guardsman", "Imperial Psyker", "Scum", "Tech-Priest"]],
+    [
+      "sicarius-tutoring",
+      [
+        "Adept",
+        "Arbitrator",
+        "Assassin",
+        "Battle Sister",
+        "Cleric",
+        "Guardsman",
+        "Imperial Psyker",
+        "Scum",
+        "Tech-Priest",
+      ],
+    ],
   ])("contains the exact approved choices for %s", (id, expected) => {
     const behaviour = getTalentBehaviour(talent(id as string));
     expect("options" in behaviour ? behaviour.options : []).toEqual(expected);
@@ -104,9 +145,19 @@ describe("Talent purchase calculations", () => {
     const sound = talent("sound-constitution");
     const powerWell = talent("power-well");
     const flesh = talent("the-flesh-is-weak");
-    expect(isTalentAvailableInPicker(sound, Array.from({ length: 12 }, (_, i) => purchase(`s${i}`, sound.id)))).toBe(true);
+    expect(
+      isTalentAvailableInPicker(
+        sound,
+        Array.from({ length: 12 }, (_, i) => purchase(`s${i}`, sound.id))
+      )
+    ).toBe(true);
     expect(getTalentBehaviour(powerWell)).toEqual({ kind: "ranked" });
-    expect(isTalentAvailableInPicker(powerWell, Array.from({ length: 12 }, (_, i) => purchase(`pw${i}`, powerWell.id)))).toBe(true);
+    expect(
+      isTalentAvailableInPicker(
+        powerWell,
+        Array.from({ length: 12 }, (_, i) => purchase(`pw${i}`, powerWell.id))
+      )
+    ).toBe(true);
     const fleshEntries = Array.from({ length: 4 }, (_, i) => purchase(`f${i}`, flesh.id));
     expect(isTalentAvailableInPicker(flesh, fleshEntries.slice(0, 3))).toBe(true);
     expect(isTalentAvailableInPicker(flesh, fleshEntries)).toBe(false);
@@ -117,8 +168,8 @@ describe("Talent purchase calculations", () => {
     const entries = [purchase("r1", resistance.id, "fear")];
     expect(hasTalentChoice(entries, "Fear")).toBe(true);
     expect(getAvailableTalentChoices(resistance, entries)).not.toContain("Fear");
-    const all = ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"].map((choice, index) =>
-      purchase(`r${index}`, resistance.id, choice)
+    const all = ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"].map(
+      (choice, index) => purchase(`r${index}`, resistance.id, choice)
     );
     expect(isTalentAvailableInPicker(resistance, all)).toBe(false);
   });
@@ -126,7 +177,9 @@ describe("Talent purchase calculations", () => {
   it("removes every remaining option after a fixed-single Talent is purchased", () => {
     const cultBriefing = talent("cult-briefing");
     expect(getAvailableTalentChoices(cultBriefing, [])).toContain("Blood");
-    expect(getAvailableTalentChoices(cultBriefing, [purchase("cb1", cultBriefing.id, "Blood")])).toEqual([]);
+    expect(
+      getAvailableTalentChoices(cultBriefing, [purchase("cb1", cultBriefing.id, "Blood")])
+    ).toEqual([]);
   });
 
   it("trims and formats a purchase without changing the one-entry-per-purchase model", () => {
@@ -149,9 +202,13 @@ describe("Psychic Talent purchase links", () => {
       ...emptyPsychic,
       minorPowers: [{ id: "p1", name: "Power", known: true, talentEntryUid: "minor-1" }],
     };
-    expect(getAvailablePsychicTalentPurchases(block(entries), psychic, "minor").map((entry) => entry.uid)).toEqual(["minor-2"]);
+    expect(
+      getAvailablePsychicTalentPurchases(block(entries), psychic, "minor").map((entry) => entry.uid)
+    ).toEqual(["minor-2"]);
     const afterRemoval = { ...psychic, minorPowers: [] };
-    expect(getAvailablePsychicTalentPurchases(block(entries), afterRemoval, "minor")).toHaveLength(2);
+    expect(getAvailablePsychicTalentPurchases(block(entries), afterRemoval, "minor")).toHaveLength(
+      2
+    );
   });
 
   it("links only a matching, unused purchase to one unlinked power", () => {

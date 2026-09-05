@@ -45,8 +45,10 @@ const WEAPON_TRAINING_GROUP_INACTIVE_STYLE: Record<string, string> = {
 };
 
 const EXOTIC_TRAINING_RGB = "232,121,249"; // fuchsia-400
-const EXOTIC_TRAINING_ACTIVE_STYLE = "border-fuchsia-500/60 bg-fuchsia-950/50 text-fuchsia-300 font-semibold";
-const EXOTIC_TRAINING_INACTIVE_STYLE = "border-fuchsia-700/50 bg-fuchsia-950/15 text-fuchsia-400/50";
+const EXOTIC_TRAINING_ACTIVE_STYLE =
+  "border-fuchsia-500/60 bg-fuchsia-950/50 text-fuchsia-300 font-semibold";
+const EXOTIC_TRAINING_INACTIVE_STYLE =
+  "border-fuchsia-700/50 bg-fuchsia-950/15 text-fuchsia-400/50";
 
 /** CSS custom properties driving the shared `animate-psy-pulse` keyframe (see tailwind.config.cjs). */
 function weaponTrainingPulseVars(rgb: string): CSSProperties {
@@ -92,7 +94,10 @@ export function WeaponTrainingTab({
   const [pendingManualTrain, setPendingManualTrain] = useState<PendingTrain | null>(null);
   const [manualTrainCost, setManualTrainCost] = useState("");
   const [pendingRemoveTraining, setPendingRemoveTraining] = useState<PendingTrain | null>(null);
-  const [pendingRemoveExotic, setPendingRemoveExotic] = useState<{ index: number; name: string } | null>(null);
+  const [pendingRemoveExotic, setPendingRemoveExotic] = useState<{
+    index: number;
+    name: string;
+  } | null>(null);
 
   const [showExoticChoice, setShowExoticChoice] = useState(false);
   const [exoticFormMode, setExoticFormMode] = useState<"slot" | "bonus" | null>(null);
@@ -145,7 +150,10 @@ export function WeaponTrainingTab({
     onUpdate({
       ...weaponTraining,
       trained: [...weaponTraining.trained, pendingManualTrain.id],
-      manualCosts: { ...weaponTraining.manualCosts, [pendingManualTrain.id]: manualTrainCostNumber },
+      manualCosts: {
+        ...weaponTraining.manualCosts,
+        [pendingManualTrain.id]: manualTrainCostNumber,
+      },
       xpPurchases: {
         ...weaponTraining.xpPurchases,
         [pendingManualTrain.id]: makeCurrentRankPurchase(career, rank, manualTrainCostNumber),
@@ -153,7 +161,15 @@ export function WeaponTrainingTab({
     });
     setPendingManualTrain(null);
     setManualTrainCost("");
-  }, [pendingManualTrain, canConfirmManualTrain, manualTrainCostNumber, weaponTraining, career, rank, onUpdate]);
+  }, [
+    pendingManualTrain,
+    canConfirmManualTrain,
+    manualTrainCostNumber,
+    weaponTraining,
+    career,
+    rank,
+    onUpdate,
+  ]);
 
   const nonBonusExoticCount = weaponTraining.exoticWeapons.filter((weapon) => !weapon.bonus).length;
   const unlockedExoticSlots = getUnlockedExoticWeaponSlots(career, rank);
@@ -198,7 +214,17 @@ export function WeaponTrainingTab({
     };
     onUpdate({ ...weaponTraining, exoticWeapons: [...weaponTraining.exoticWeapons, entry] });
     closeExoticForm();
-  }, [canConfirmExotic, exoticFormMode, newExoticName, newExoticCost, weaponTraining, career, rank, onUpdate, closeExoticForm]);
+  }, [
+    canConfirmExotic,
+    exoticFormMode,
+    newExoticName,
+    newExoticCost,
+    weaponTraining,
+    career,
+    rank,
+    onUpdate,
+    closeExoticForm,
+  ]);
 
   const handleRemoveExotic = useCallback(
     (index: number) => {
@@ -227,10 +253,15 @@ export function WeaponTrainingTab({
               const granted = grantedTraining.includes(trainingId);
               const owned = weaponTraining.trained.includes(trainingId);
               const active = owned || granted;
-              const purchase = active ? undefined : getWeaponTrainingPurchase(career, rank, trainingId);
+              const purchase = active
+                ? undefined
+                : getWeaponTrainingPurchase(career, rank, trainingId);
               const cost = purchase?.cost;
               const pulsing = !active && purchase !== undefined;
-              const clickable = editable && !granted && (active || purchase !== undefined || canConfirmManualCostPurchase(isDM));
+              const clickable =
+                editable &&
+                !granted &&
+                (active || purchase !== undefined || canConfirmManualCostPurchase(isDM));
 
               const handleClick = () => {
                 if (!clickable) return;
@@ -253,7 +284,11 @@ export function WeaponTrainingTab({
                   onClick={handleClick}
                   aria-pressed={active}
                   aria-label={`${display}${typeof cost === "number" ? `, ${cost} XP` : ""}`}
-                  style={pulsing ? weaponTrainingPulseVars(WEAPON_TRAINING_GROUP_RGB[group.label]) : undefined}
+                  style={
+                    pulsing
+                      ? weaponTrainingPulseVars(WEAPON_TRAINING_GROUP_RGB[group.label])
+                      : undefined
+                  }
                   className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${
                     pulsing ? "animate-psy-pulse" : ""
                   } ${
@@ -269,7 +304,11 @@ export function WeaponTrainingTab({
           </div>
           {group.items.some((item) => grantedTraining.includes(item.id)) && (
             <p className="mt-1 text-xs text-amber-300">
-              Granted by a Talent, Trait, or Career effect: {group.items.filter((item) => grantedTraining.includes(item.id)).map((item) => item.display).join(", ")}
+              Granted by a Talent, Trait, or Career effect:{" "}
+              {group.items
+                .filter((item) => grantedTraining.includes(item.id))
+                .map((item) => item.display)
+                .join(", ")}
             </p>
           )}
         </div>
@@ -308,7 +347,9 @@ export function WeaponTrainingTab({
             disabled={!exoticTriggerClickable}
             onClick={handleExoticTriggerClick}
             aria-label="Add Exotic Weapon"
-            style={hasAvailableExoticSlot ? weaponTrainingPulseVars(EXOTIC_TRAINING_RGB) : undefined}
+            style={
+              hasAvailableExoticSlot ? weaponTrainingPulseVars(EXOTIC_TRAINING_RGB) : undefined
+            }
             className={`px-2.5 lg:px-3 py-1 lg:py-1.5 min-w-20 rounded border-2 border-dashed text-xs lg:text-sm ${EXOTIC_TRAINING_INACTIVE_STYLE} ${
               hasAvailableExoticSlot ? "animate-psy-pulse" : ""
             } ${exoticTriggerClickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`}
@@ -332,14 +373,19 @@ export function WeaponTrainingTab({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmTrain}>Train</Button>
-              <Button variant="ghost" onClick={() => setPendingTrain(null)}>Cancel</Button>
+              <Button variant="primary" onClick={confirmTrain}>
+                Train
+              </Button>
+              <Button variant="ghost" onClick={() => setPendingTrain(null)}>
+                Cancel
+              </Button>
             </div>
           }
         >
           <PickerBody>
             <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Train {pendingTrain.group} ({pendingTrain.display}) for {pendingTrain.purchase.cost} XP?
+              Train {pendingTrain.group} ({pendingTrain.display}) for {pendingTrain.purchase.cost}{" "}
+              XP?
             </p>
           </PickerBody>
         </PickerModal>
@@ -356,8 +402,16 @@ export function WeaponTrainingTab({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" disabled={!canConfirmManualTrain} onClick={confirmManualTrain}>Train</Button>
-              <Button variant="ghost" onClick={() => setPendingManualTrain(null)}>Cancel</Button>
+              <Button
+                variant="primary"
+                disabled={!canConfirmManualTrain}
+                onClick={confirmManualTrain}
+              >
+                Train
+              </Button>
+              <Button variant="ghost" onClick={() => setPendingManualTrain(null)}>
+                Cancel
+              </Button>
             </div>
           }
         >
@@ -369,7 +423,9 @@ export function WeaponTrainingTab({
               type="text"
               inputMode="numeric"
               value={manualTrainCost}
-              onChange={(event) => setManualTrainCost(sanitizeNonNegativeIntegerInput(event.target.value))}
+              onChange={(event) =>
+                setManualTrainCost(sanitizeNonNegativeIntegerInput(event.target.value))
+              }
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5"}
             />
@@ -388,8 +444,12 @@ export function WeaponTrainingTab({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmRemoveTraining}>Remove</Button>
-              <Button variant="ghost" onClick={() => setPendingRemoveTraining(null)}>Cancel</Button>
+              <Button variant="primary" onClick={confirmRemoveTraining}>
+                Remove
+              </Button>
+              <Button variant="ghost" onClick={() => setPendingRemoveTraining(null)}>
+                Cancel
+              </Button>
             </div>
           }
         >
@@ -412,8 +472,12 @@ export function WeaponTrainingTab({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmRemoveExotic}>Remove</Button>
-              <Button variant="ghost" onClick={() => setPendingRemoveExotic(null)}>Cancel</Button>
+              <Button variant="primary" onClick={confirmRemoveExotic}>
+                Remove
+              </Button>
+              <Button variant="ghost" onClick={() => setPendingRemoveExotic(null)}>
+                Cancel
+              </Button>
             </div>
           }
         >
@@ -478,7 +542,9 @@ export function WeaponTrainingTab({
               type="text"
               inputMode="numeric"
               value={newExoticCost}
-              onChange={(event) => setNewExoticCost(sanitizeNonNegativeIntegerInput(event.target.value))}
+              onChange={(event) =>
+                setNewExoticCost(sanitizeNonNegativeIntegerInput(event.target.value))
+              }
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5"}
             />

@@ -54,7 +54,12 @@ describe("DrugRow", () => {
     const user = userEvent.setup();
     const onUpdateQty = vi.fn();
     render(
-      <DrugRow item={item({ quantity: 2 })} editable={true} onUpdateQty={onUpdateQty} onRemove={vi.fn()} />
+      <DrugRow
+        item={item({ quantity: 2 })}
+        editable={true}
+        onUpdateQty={onUpdateQty}
+        onRemove={vi.fn()}
+      />
     );
 
     await user.click(screen.getByRole("button", { name: "Increase quantity" }));

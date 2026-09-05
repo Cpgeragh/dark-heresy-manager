@@ -19,10 +19,38 @@ export interface CorruptionMalignancyRef {
 }
 
 export const CORRUPTION_TRACK: CorruptionTrackEntry[] = [
-  { min: 1, max: 30, pointsLabel: "01-30", degree: "Tainted", malignancyModifier: "+0", mutation: "-" },
-  { min: 31, max: 60, pointsLabel: "31-60", degree: "Soiled", malignancyModifier: "-10", mutation: "First Test" },
-  { min: 61, max: 90, pointsLabel: "61-90", degree: "Debased", malignancyModifier: "-20", mutation: "Second Test" },
-  { min: 91, max: 99, pointsLabel: "91-99", degree: "Profane", malignancyModifier: "-30", mutation: "Third Test" },
+  {
+    min: 1,
+    max: 30,
+    pointsLabel: "01-30",
+    degree: "Tainted",
+    malignancyModifier: "+0",
+    mutation: "-",
+  },
+  {
+    min: 31,
+    max: 60,
+    pointsLabel: "31-60",
+    degree: "Soiled",
+    malignancyModifier: "-10",
+    mutation: "First Test",
+  },
+  {
+    min: 61,
+    max: 90,
+    pointsLabel: "61-90",
+    degree: "Debased",
+    malignancyModifier: "-20",
+    mutation: "Second Test",
+  },
+  {
+    min: 91,
+    max: 99,
+    pointsLabel: "91-99",
+    degree: "Profane",
+    malignancyModifier: "-30",
+    mutation: "Third Test",
+  },
   {
     min: 100,
     pointsLabel: "100+",
@@ -128,7 +156,8 @@ export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
     id: "night-terrors",
     roll: "61-63",
     name: "Night Terrors",
-    effect: "The character is plagued by Daemonic visions in his sleep. See Horrific Nightmares for details.",
+    effect:
+      "The character is plagued by Daemonic visions in his sleep. See Horrific Nightmares for details.",
   },
   {
     id: "poor-health",
@@ -191,7 +220,9 @@ export function getCorruptionTrackEntry(points: number): CorruptionTrackEntry {
 
   return (
     CORRUPTION_TRACK.find((entry) =>
-      entry.max === undefined ? safePoints >= entry.min : safePoints >= entry.min && safePoints <= entry.max
+      entry.max === undefined
+        ? safePoints >= entry.min
+        : safePoints >= entry.min && safePoints <= entry.max
     ) ?? CORRUPTION_TRACK[0]
   );
 }
@@ -208,7 +239,9 @@ export function getNextMalignancyTestPoints(points: number): number | undefined 
   return Math.floor(safePoints / 10) * 10 + 10;
 }
 
-export function getCorruptionMalignancyRef(referenceId?: string): CorruptionMalignancyRef | undefined {
+export function getCorruptionMalignancyRef(
+  referenceId?: string
+): CorruptionMalignancyRef | undefined {
   if (!referenceId) return undefined;
   return CORRUPTION_MALIGNANCIES.find((malignancy) => malignancy.id === referenceId);
 }

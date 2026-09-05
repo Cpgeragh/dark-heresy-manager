@@ -28,7 +28,11 @@ function submitButton(): HTMLElement {
   return buttons.find((b) => b !== cancelBtn)!;
 }
 
-async function pick(user: ReturnType<typeof userEvent.setup>, fieldText: string, optionText: string) {
+async function pick(
+  user: ReturnType<typeof userEvent.setup>,
+  fieldText: string,
+  optionText: string
+) {
   await user.click(screen.getByText(fieldText));
   await user.click(screen.getByText(optionText));
 }

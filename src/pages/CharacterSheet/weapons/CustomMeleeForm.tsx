@@ -2,7 +2,11 @@
 
 import { useRef, useState } from "react";
 import type { MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiFormLabel,
+} from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -15,14 +19,8 @@ import { PickerField } from "../../../ui/pickers/PickerField";
 import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { sanitizeDiceInput, sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
-import {
-  WeaponQualitySelector,
-} from "./weaponShared";
-import {
-  DAMAGE_TYPE_OPTIONS,
-  formatDamageInput,
-  isValidDiceInput,
-} from "./weaponDamageFormatting";
+import { WeaponQualitySelector } from "./weaponShared";
+import { DAMAGE_TYPE_OPTIONS, formatDamageInput, isValidDiceInput } from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;

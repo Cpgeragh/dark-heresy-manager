@@ -20,7 +20,7 @@ const requiredEnvVars = {
 for (const [key, value] of Object.entries(requiredEnvVars)) {
   if (!value) {
     throw new Error(
-      `Missing Firebase config value "${key}". Check your .env file matches .env.example.`,
+      `Missing Firebase config value "${key}". Check your .env file matches .env.example.`
     );
   }
 }
@@ -37,10 +37,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-if (requiredEnvVars.VITE_FIREBASE_PROJECT_ID === "dark-heresy-manager-staging" && !recaptchaSiteKey) {
-  throw new Error(
-    'Missing Firebase config value "VITE_RECAPTCHA_SITE_KEY" for staging App Check.',
-  );
+if (
+  requiredEnvVars.VITE_FIREBASE_PROJECT_ID === "dark-heresy-manager-staging" &&
+  !recaptchaSiteKey
+) {
+  throw new Error('Missing Firebase config value "VITE_RECAPTCHA_SITE_KEY" for staging App Check.');
 }
 if (recaptchaSiteKey) {
   initializeAppCheck(app, {

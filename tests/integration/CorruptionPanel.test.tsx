@@ -7,9 +7,22 @@ import "@testing-library/jest-dom";
 import { CorruptionPanel } from "../../src/mechanics/corruption/CorruptionPanel";
 import type { CorruptionBlock } from "../../src/types/Character";
 
-function CorruptionWiring({ initial, editable = true }: { initial: CorruptionBlock; editable?: boolean }) {
+function CorruptionWiring({
+  initial,
+  editable = true,
+}: {
+  initial: CorruptionBlock;
+  editable?: boolean;
+}) {
   const [corruption, setCorruption] = useState<CorruptionBlock>(initial);
-  return <CorruptionPanel corruption={corruption} editable={editable} onUpdate={setCorruption} sectionClassName="" />;
+  return (
+    <CorruptionPanel
+      corruption={corruption}
+      editable={editable}
+      onUpdate={setCorruption}
+      sectionClassName=""
+    />
+  );
 }
 
 function findButtonNear(labelText: string, buttonName: string): HTMLElement {
@@ -91,25 +104,29 @@ describe("CorruptionPanel editable=false", () => {
   it("hides Remove actions and disables the stepper", () => {
     render(
       <CorruptionWiring
-        initial={{ points: 20, malignancies: [{ id: "m1", referenceId: "witch-mark", name: "Witch-mark" }] }}
+        initial={{
+          points: 20,
+          malignancies: [{ id: "m1", referenceId: "witch-mark", name: "Witch-mark" }],
+        }}
         editable={false}
       />
     );
 
     expect(screen.queryByRole("button", { name: "Add Malignancy" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("button", { name: "Decrease" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "Decrease" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
   });
 
   it("shows a View Malignancies button that opens the picker in read-only mode", async () => {
     const user = userEvent.setup();
-    render(
-      <CorruptionWiring
-        initial={{ points: 0, malignancies: [] }}
-        editable={false}
-      />
-    );
+    render(<CorruptionWiring initial={{ points: 0, malignancies: [] }} editable={false} />);
 
     await user.click(findButtonNear("Malignancies", "View Malignancies"));
 

@@ -43,9 +43,7 @@ export function ItemRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className={uiItemName}>{item.name}</p>
-            {libraryItem && (
-              <StatusBadge status={libraryItem.status} />
-            )}
+            {libraryItem && <StatusBadge status={libraryItem.status} />}
             {hasDesc && (
               <span className={uiInfoModalWrapper}>
                 <InfoModal
@@ -65,7 +63,9 @@ export function ItemRow({
             className="flex flex-wrap gap-1.5 mt-1"
           />
           {item.grantedByTalentName && (
-            <p className="mt-1 text-xs text-amber-300">{item.grantedByTalentName} ({item.grantedByType}): Granted</p>
+            <p className="mt-1 text-xs text-amber-300">
+              {item.grantedByTalentName} ({item.grantedByType}): Granted
+            </p>
           )}
           {libraryItem && (
             <CustomItemActionButtons

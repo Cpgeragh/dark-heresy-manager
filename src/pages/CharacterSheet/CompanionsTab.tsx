@@ -66,9 +66,15 @@ function CompanionPickerCard({
         />
         <div className={`${uiExpandButton} relative pointer-events-none flex items-center gap-2`}>
           <div className="flex items-center gap-1.5">
-            <span className={`${uiItemName} group-hover:text-white`}>{companionReference.name}</span>
+            <span className={`${uiItemName} group-hover:text-white`}>
+              {companionReference.name}
+            </span>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-              <InfoModal title={companionReference.name} content={companionReference.description} as="span" />
+              <InfoModal
+                title={companionReference.name}
+                content={companionReference.description}
+                as="span"
+              />
             </span>
           </div>
           <button
@@ -85,7 +91,11 @@ function CompanionPickerCard({
 
       {expanded && (
         <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
-          <CompanionProfileDetails companionReference={companionReference} statSize="sm" modalAs="span" />
+          <CompanionProfileDetails
+            companionReference={companionReference}
+            statSize="sm"
+            modalAs="span"
+          />
         </div>
       )}
     </div>
@@ -103,7 +113,9 @@ function CompanionPicker({
   onSelect: (companionReference: CompanionRef) => void;
   onClose: () => void;
 }) {
-  const available = COMPANION_REFERENCE.filter((companionReference) => !currentIds.includes(companionReference.id));
+  const available = COMPANION_REFERENCE.filter(
+    (companionReference) => !currentIds.includes(companionReference.id)
+  );
 
   return (
     <PickerModal
@@ -114,7 +126,11 @@ function CompanionPicker({
       isEmpty={available.length === 0}
       emptyMessage="No companions available."
       hideSearch
-      footer={<Button variant="secondary" fullWidth onClick={onClose}>Done</Button>}
+      footer={
+        <Button variant="secondary" fullWidth onClick={onClose}>
+          Done
+        </Button>
+      }
     >
       {available.map((companionReference) => (
         <CompanionPickerCard
@@ -138,15 +154,13 @@ function skillModalText(entry: string): string {
 
 function talentModalText(entry: string): string {
   const talent = TALENT_LIST.find((item) => item.name === entry);
-  return modalText(talent ? TALENT_DESCRIPTIONS[talent.id] ?? talent.description : undefined);
+  return modalText(talent ? (TALENT_DESCRIPTIONS[talent.id] ?? talent.description) : undefined);
 }
 
 function traitModalText(entry: string): string {
   const traitName = entry.replace(/\s*\(.+\)$/, "");
   const traitId =
-    traitName === "Armour Plated"
-      ? "armour-plating"
-      : traitName.toLowerCase().replace(/\s+/g, "-");
+    traitName === "Armour Plated" ? "armour-plating" : traitName.toLowerCase().replace(/\s+/g, "-");
   return modalText(TRAIT_DESCRIPTIONS[traitId]);
 }
 
@@ -173,7 +187,9 @@ function ProfileEntries({
   modalAs?: "button" | "span";
 }) {
   const descriptions = entries.map(describe);
-  const hasAdditionalRules = descriptions.some((description) => description !== NO_ADDITIONAL_RULES);
+  const hasAdditionalRules = descriptions.some(
+    (description) => description !== NO_ADDITIONAL_RULES
+  );
 
   return (
     <div className="flex items-center gap-1.5">
@@ -186,10 +202,10 @@ function ProfileEntries({
             content={
               <div className="space-y-3">
                 {entries.map((entry, index) => (
-                <div key={entry}>
-                  <p className="font-semibold text-amber-300">{entry}</p>
+                  <div key={entry}>
+                    <p className="font-semibold text-amber-300">{entry}</p>
                     <p className={`mt-1 leading-relaxed ${uiTextBody}`}>{descriptions[index]}</p>
-                </div>
+                  </div>
                 ))}
               </div>
             }
@@ -214,21 +230,48 @@ function CompanionProfileDetails({
     <>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {CHARACTERISTICS.map(({ key, label }) => (
-          <StatChip key={key} size={statSize} label={label} value={companionReference.characteristics[key]} />
+          <StatChip
+            key={key}
+            size={statSize}
+            label={label}
+            value={companionReference.characteristics[key]}
+          />
         ))}
         <StatChip size={statSize} label="Move" value={companionReference.movement} />
         <StatChip size={statSize} label="Wounds" value={companionReference.wounds} />
       </div>
 
       <div className="space-y-1 border-t border-slate-800 pt-2 mt-2">
-        <SectionHeader as="h3" className="mb-2">Abilities</SectionHeader>
-        <ProfileEntries companionName={companionReference.name} title="Skills" entries={companionReference.skills} describe={skillModalText} modalAs={modalAs} />
-        <ProfileEntries companionName={companionReference.name} title="Talents" entries={companionReference.talents} describe={talentModalText} modalAs={modalAs} />
-        <ProfileEntries companionName={companionReference.name} title="Traits" entries={companionReference.traits} describe={traitModalText} modalAs={modalAs} />
+        <SectionHeader as="h3" className="mb-2">
+          Abilities
+        </SectionHeader>
+        <ProfileEntries
+          companionName={companionReference.name}
+          title="Skills"
+          entries={companionReference.skills}
+          describe={skillModalText}
+          modalAs={modalAs}
+        />
+        <ProfileEntries
+          companionName={companionReference.name}
+          title="Talents"
+          entries={companionReference.talents}
+          describe={talentModalText}
+          modalAs={modalAs}
+        />
+        <ProfileEntries
+          companionName={companionReference.name}
+          title="Traits"
+          entries={companionReference.traits}
+          describe={traitModalText}
+          modalAs={modalAs}
+        />
       </div>
 
       <div className="space-y-1 border-t border-slate-800 pt-2 mt-2">
-        <SectionHeader as="h3" className="mb-2">Equipment</SectionHeader>
+        <SectionHeader as="h3" className="mb-2">
+          Equipment
+        </SectionHeader>
         <ProfileEntries
           companionName={companionReference.name}
           title="Armour"
@@ -269,7 +312,9 @@ function CompanionCard({
   onRemove: () => void;
 }) {
   const [expanded, setExpanded] = useState(true);
-  const companionReference = COMPANION_REFERENCE.find((entry) => entry.id === companion.referenceId);
+  const companionReference = COMPANION_REFERENCE.find(
+    (entry) => entry.id === companion.referenceId
+  );
   if (!companionReference) return null;
 
   return (
@@ -353,7 +398,12 @@ export function CompanionsTab({
           onSelect={(companionReference) => {
             onUpdate([
               ...companions,
-              { id: crypto.randomUUID(), referenceId: companionReference.id, name: companionReference.name, source: companionReference.source },
+              {
+                id: crypto.randomUUID(),
+                referenceId: companionReference.id,
+                name: companionReference.name,
+                source: companionReference.source,
+              },
             ]);
           }}
           onClose={() => setShowPicker(false)}

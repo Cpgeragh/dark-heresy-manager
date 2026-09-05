@@ -156,9 +156,11 @@ beforeEach(() => {
 describe("character claiming operations", () => {
   it("starts only one Function call for a duplicate in-flight claim", async () => {
     let finish!: (value: { data: { campaignId: string; characterId: string } }) => void;
-    const pending = new Promise<{ data: { campaignId: string; characterId: string } }>((resolve) => {
-      finish = resolve;
-    });
+    const pending = new Promise<{ data: { campaignId: string; characterId: string } }>(
+      (resolve) => {
+        finish = resolve;
+      }
+    );
     mockCallClaimCharacter.mockReturnValueOnce(pending);
 
     const first = claimCharacter("DH-TEST-0001");
@@ -254,7 +256,6 @@ describe("character claiming operations", () => {
     await expect(claimCharacter("DH-TEST-0004")).rejects.toThrow("Not signed in.");
     expect(mockCallClaimCharacter).not.toHaveBeenCalled();
   });
-
 });
 
 describe("releaseCharacter", () => {
@@ -454,7 +455,10 @@ describe("importCharacter", () => {
 
   it("imports the character with no code yet, then registers one", async () => {
     mockCallRegisterRecoveryCode.mockResolvedValue({ data: { code: "DH-IMPC-0DE1" } });
-    const payload = createEmptyCharacterData({ campaignId: "camp-1", characterName: "Brother Corvus" });
+    const payload = createEmptyCharacterData({
+      campaignId: "camp-1",
+      characterName: "Brother Corvus",
+    });
 
     const name = await importCharacter("camp-1", payload);
 
@@ -464,7 +468,10 @@ describe("importCharacter", () => {
 
   it("writes the imported character and its summary together in one batch", async () => {
     mockCallRegisterRecoveryCode.mockResolvedValue({ data: { code: "DH-IMPC-0DE1" } });
-    const payload = createEmptyCharacterData({ campaignId: "camp-1", characterName: "Brother Corvus" });
+    const payload = createEmptyCharacterData({
+      campaignId: "camp-1",
+      characterName: "Brother Corvus",
+    });
 
     await importCharacter("camp-1", payload);
 
@@ -562,8 +569,12 @@ describe("repairCharacterSummaries", () => {
     mockGetDocs.mockResolvedValue({
       empty: false,
       docs: [
-        { data: () => ({ id: "char-1", campaignId: "camp-1", header: { characterName: "Corvus" } }) },
-        { data: () => ({ id: "char-2", campaignId: "camp-1", header: { characterName: "Thane" } }) },
+        {
+          data: () => ({ id: "char-1", campaignId: "camp-1", header: { characterName: "Corvus" } }),
+        },
+        {
+          data: () => ({ id: "char-2", campaignId: "camp-1", header: { characterName: "Thane" } }),
+        },
       ],
     });
 

@@ -1,7 +1,10 @@
 // src/mechanics/experience/careerAdvanceAccess.ts
 
 import { findCareerByName } from "../../data/reference/careerData";
-import { CAREER_ADVANCES, type CareerAdvanceRef } from "../../data/reference/careerAdvancesReference";
+import {
+  CAREER_ADVANCES,
+  type CareerAdvanceRef,
+} from "../../data/reference/careerAdvancesReference";
 
 export interface AccessibleCareerAdvance {
   rankId: string;

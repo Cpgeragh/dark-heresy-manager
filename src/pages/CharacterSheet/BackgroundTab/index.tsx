@@ -1,7 +1,12 @@
 // src/pages/CharacterSheet/BackgroundTab/index.tsx
 
 import { useCallback, useState } from "react";
-import type { CharacterHeader, CyberneticItem, GearItem, TalentsAndTraitsBlock } from "../../../types/Character";
+import type {
+  CharacterHeader,
+  CyberneticItem,
+  GearItem,
+  TalentsAndTraitsBlock,
+} from "../../../types/Character";
 import { FormField } from "../../../components/FormField";
 import { InfoModal } from "../../../components/InfoModal";
 import {
@@ -13,7 +18,10 @@ import {
   uiTextPlaceholder,
 } from "../../../ui/styles/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
-import { findDivinationByResult, type DivinationData } from "../../../data/reference/divinationData";
+import {
+  findDivinationByResult,
+  type DivinationData,
+} from "../../../data/reference/divinationData";
 import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../../data/reference/appearanceData";
 import { Chip } from "../../../ui/chips/Chip";
 import { colourActiveRose, colourActiveSky, colourMeta } from "../../../ui/styles/colourTokens";
@@ -95,7 +103,8 @@ export function BackgroundTab({
     source: header.weight,
     draft: header.weight !== undefined ? String(header.weight) : "",
   }));
-  const [activeSectionGroup, setActiveSectionGroup] = useState<BackgroundSectionGroup>("appearance");
+  const [activeSectionGroup, setActiveSectionGroup] =
+    useState<BackgroundSectionGroup>("appearance");
 
   const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
     BACKGROUND_SECTION_GROUPS,
@@ -189,13 +198,17 @@ export function BackgroundTab({
 
   const handleRemoveQuirk = useCallback(
     (quirk: string) => {
-      updateHeaderField("quirks", (header.quirks ?? []).filter((q) => q !== quirk));
+      updateHeaderField(
+        "quirks",
+        (header.quirks ?? []).filter((q) => q !== quirk)
+      );
     },
     [header.quirks, updateHeaderField]
   );
 
   const sanctioningAgeIncrease = talents.careerTraitAcquisition?.sanctioning?.ageIncrease;
-  const displayedAge = header.age !== undefined ? header.age + (sanctioningAgeIncrease ?? 0) : undefined;
+  const displayedAge =
+    header.age !== undefined ? header.age + (sanctioningAgeIncrease ?? 0) : undefined;
 
   const appearanceSection = (
     <div>
@@ -230,7 +243,8 @@ export function BackgroundTab({
                 aria-label="Age"
                 value={ageDraft}
                 onChange={(e) => {
-                  if (e.target.value === "" || /^[1-9]\d*$/.test(e.target.value)) setAgeDraft(e.target.value);
+                  if (e.target.value === "" || /^[1-9]\d*$/.test(e.target.value))
+                    setAgeDraft(e.target.value);
                 }}
                 onBlur={() => {
                   if (ageDraft === "" || /^[1-9]\d*$/.test(ageDraft)) {
@@ -256,7 +270,11 @@ export function BackgroundTab({
                 }}
                 className={editableInputClass(editable) + " font-code text-left"}
               >
-                {displayedAge !== undefined ? displayedAge : <span className={uiTextPlaceholder}>e.g. 25</span>}
+                {displayedAge !== undefined ? (
+                  displayedAge
+                ) : (
+                  <span className={uiTextPlaceholder}>e.g. 25</span>
+                )}
               </button>
             )}
           </div>
@@ -367,24 +385,26 @@ export function BackgroundTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
           )}
           <div className="flex flex-wrap gap-1.5">
-            {[...(header.quirks ?? [])].sort((a, b) => a.localeCompare(b)).map((quirk) => (
-              <span
-                key={quirk}
-                className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourMeta}`}
-              >
-                {quirk}
-                {editable && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveQuirk(quirk)}
-                    aria-label={`Remove ${quirk}`}
-                    className={uiDismissButton}
-                  >
-                    <CloseIcon />
-                  </button>
-                )}
-              </span>
-            ))}
+            {[...(header.quirks ?? [])]
+              .sort((a, b) => a.localeCompare(b))
+              .map((quirk) => (
+                <span
+                  key={quirk}
+                  className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourMeta}`}
+                >
+                  {quirk}
+                  {editable && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveQuirk(quirk)}
+                      aria-label={`Remove ${quirk}`}
+                      className={uiDismissButton}
+                    >
+                      <CloseIcon />
+                    </button>
+                  )}
+                </span>
+              ))}
           </div>
         </div>
 
@@ -431,7 +451,9 @@ export function BackgroundTab({
                 <span className={uiItemName}>{selectedDivination.result}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <RollChip>{selectedDivination.roll}</RollChip>
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedDivination.source)}`}>
+                  <Chip
+                    className={`bg-slate-800/40 font-code ${sourceColour(selectedDivination.source)}`}
+                  >
                     {selectedDivination.source}
                   </Chip>
                 </div>
@@ -531,7 +553,10 @@ export function BackgroundTab({
       {showGenderPicker && (
         <GenderPicker
           selected={header.gender}
-          onSelect={(value) => { updateHeaderField("gender", value); setShowGenderPicker(false); }}
+          onSelect={(value) => {
+            updateHeaderField("gender", value);
+            setShowGenderPicker(false);
+          }}
           onClose={() => setShowGenderPicker(false)}
         />
       )}
@@ -541,7 +566,10 @@ export function BackgroundTab({
           title="Skin"
           options={SKIN_OPTIONS}
           selected={header.skin}
-          onSelect={(value) => { updateHeaderField("skin", value); setShowSkinPicker(false); }}
+          onSelect={(value) => {
+            updateHeaderField("skin", value);
+            setShowSkinPicker(false);
+          }}
           onClose={() => setShowSkinPicker(false)}
         />
       )}
@@ -551,7 +579,10 @@ export function BackgroundTab({
           title="Hair"
           options={HAIR_OPTIONS}
           selected={header.hair}
-          onSelect={(value) => { updateHeaderField("hair", value); setShowHairPicker(false); }}
+          onSelect={(value) => {
+            updateHeaderField("hair", value);
+            setShowHairPicker(false);
+          }}
           onClose={() => setShowHairPicker(false)}
         />
       )}
@@ -561,7 +592,10 @@ export function BackgroundTab({
           title="Eyes"
           options={EYE_OPTIONS}
           selected={header.eyes}
-          onSelect={(value) => { updateHeaderField("eyes", value); setShowEyesPicker(false); }}
+          onSelect={(value) => {
+            updateHeaderField("eyes", value);
+            setShowEyesPicker(false);
+          }}
           onClose={() => setShowEyesPicker(false)}
         />
       )}

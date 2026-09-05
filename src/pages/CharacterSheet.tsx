@@ -132,8 +132,7 @@ export default function CharacterSheet({
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
-  const requestedTabIsAllowed =
-    isTabId(requestedTab) && (requestedTab !== "admin" || isDM);
+  const requestedTabIsAllowed = isTabId(requestedTab) && (requestedTab !== "admin" || isDM);
   const activeTab: TabId = requestedTabIsAllowed ? requestedTab : "stats";
 
   useEffect(() => {
@@ -178,9 +177,11 @@ export default function CharacterSheet({
     if (!character || !allowedToEdit) return;
     const computedSpent = getSpentXp(character);
     if (character.experience.spent === computedSpent) return;
-    void reconcileCharacterSpentXp(character.campaignId, character.id, computedSpent).catch((error) => {
-      console.error("Failed to reconcile XP spent:", error);
-    });
+    void reconcileCharacterSpentXp(character.campaignId, character.id, computedSpent).catch(
+      (error) => {
+        console.error("Failed to reconcile XP spent:", error);
+      }
+    );
   }, [character, allowedToEdit]);
 
   useEffect(() => {
@@ -303,10 +304,7 @@ export default function CharacterSheet({
     [patchField]
   );
 
-  const handleUpdateFate = useCallback(
-    (next: FateBlock) => patchField("fate", next),
-    [patchField]
-  );
+  const handleUpdateFate = useCallback((next: FateBlock) => patchField("fate", next), [patchField]);
 
   const handleUpdateInsanity = useCallback(
     (next: InsanityBlock) => patchField("insanity", next),

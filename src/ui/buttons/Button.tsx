@@ -37,8 +37,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    "border border-red-500 text-red-500 enabled:hover:bg-red-500/10",
+  primary: "border border-red-500 text-red-500 enabled:hover:bg-red-500/10",
   careerPath: colourCareerPathOutline,
   careerPathMuted: colourCareerPathOutlineMuted,
   secondary: "border border-transparent bg-slate-700 text-slate-300 enabled:hover:bg-slate-600",
@@ -48,10 +47,10 @@ const VARIANTS: Record<ButtonVariant, string> = {
   dangerGhost: "border border-transparent bg-red-900/40 text-red-400 enabled:hover:bg-red-900/70",
   warning: "border border-transparent bg-amber-600 text-slate-950 enabled:hover:bg-amber-500",
   warningOutline: "border border-amber-500 text-amber-400 enabled:hover:bg-amber-500/10",
-  warningGhost: "border border-transparent bg-amber-900/40 text-amber-400 enabled:hover:bg-amber-900/70",
+  warningGhost:
+    "border border-transparent bg-amber-900/40 text-amber-400 enabled:hover:bg-amber-900/70",
   success: "border border-transparent bg-green-700 text-white enabled:hover:bg-green-600",
-  successOutline:
-    "border border-emerald-500 text-emerald-300 enabled:hover:bg-emerald-500/10",
+  successOutline: "border border-emerald-500 text-emerald-300 enabled:hover:bg-emerald-500/10",
 };
 
 const SIZES: Record<ButtonSize, string> = {

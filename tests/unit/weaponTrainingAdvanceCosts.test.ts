@@ -53,7 +53,9 @@ describe("getUnlockedExoticWeaponSlots", () => {
 
 describe("getWeaponTrainingSpent", () => {
   it("is zero when nothing is trained", () => {
-    expect(getWeaponTrainingSpent(makeCharacter({ career: "Guardsman", rank: "Conscript" }))).toBe(0);
+    expect(getWeaponTrainingSpent(makeCharacter({ career: "Guardsman", rank: "Conscript" }))).toBe(
+      0
+    );
   });
 
   it("sums the real cost of each trained fixed-group id", () => {

@@ -6,9 +6,19 @@ import type { CharField } from "../../src/types/Character";
 
 const BLANK: CharField = { base: 0, advances: 0 };
 
-function makeCharacteristics(overrides: Partial<Record<keyof Characteristics, CharField>> = {}): Characteristics {
+function makeCharacteristics(
+  overrides: Partial<Record<keyof Characteristics, CharField>> = {}
+): Characteristics {
   return {
-    ws: BLANK, bs: BLANK, s: BLANK, t: BLANK, ag: BLANK, int: BLANK, per: BLANK, wp: BLANK, fel: BLANK,
+    ws: BLANK,
+    bs: BLANK,
+    s: BLANK,
+    t: BLANK,
+    ag: BLANK,
+    int: BLANK,
+    per: BLANK,
+    wp: BLANK,
+    fel: BLANK,
     ...overrides,
   };
 }
@@ -20,7 +30,7 @@ const makeCharacter = (overrides: Partial<Character> = {}): Character =>
     corruption: { points: 0, malignancies: [] },
     talentsAndTraits: { homeworld: "", talents: [], traits: [] },
     ...overrides,
-  } as Character);
+  }) as Character;
 
 describe("useCharacterHelpers", () => {
   describe("getEffectiveCharTotal", () => {
@@ -108,7 +118,12 @@ describe("useCharacterHelpers", () => {
           homeworld: "",
           talents: [],
           traits: [
-            { uid: "u1", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Toughness)", specialisation: "Toughness" },
+            {
+              uid: "u1",
+              talentId: "unnatural-characteristic",
+              name: "Unnatural Characteristic (Toughness)",
+              specialisation: "Toughness",
+            },
           ],
         },
       });
@@ -123,8 +138,18 @@ describe("useCharacterHelpers", () => {
           homeworld: "",
           talents: [],
           traits: [
-            { uid: "u1", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Toughness)", specialisation: "Toughness" },
-            { uid: "u2", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Toughness)", specialisation: "Toughness" },
+            {
+              uid: "u1",
+              talentId: "unnatural-characteristic",
+              name: "Unnatural Characteristic (Toughness)",
+              specialisation: "Toughness",
+            },
+            {
+              uid: "u2",
+              talentId: "unnatural-characteristic",
+              name: "Unnatural Characteristic (Toughness)",
+              specialisation: "Toughness",
+            },
           ],
         },
       });
@@ -134,12 +159,20 @@ describe("useCharacterHelpers", () => {
 
     it("doesn't apply the multiplier to a different characteristic", () => {
       const character = makeCharacter({
-        characteristics: makeCharacteristics({ t: { base: 40, advances: 0 }, s: { base: 40, advances: 0 } }),
+        characteristics: makeCharacteristics({
+          t: { base: 40, advances: 0 },
+          s: { base: 40, advances: 0 },
+        }),
         talentsAndTraits: {
           homeworld: "",
           talents: [],
           traits: [
-            { uid: "u1", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Toughness)", specialisation: "Toughness" },
+            {
+              uid: "u1",
+              talentId: "unnatural-characteristic",
+              name: "Unnatural Characteristic (Toughness)",
+              specialisation: "Toughness",
+            },
           ],
         },
       });

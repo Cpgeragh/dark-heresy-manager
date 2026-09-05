@@ -1,5 +1,12 @@
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextLabel,
+  uiTextMuted,
+  uiTextPlaceholder,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -63,9 +70,7 @@ export function ForceFieldRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} truncate`}>{piece.name}</span>
-          {libraryItem && (
-            <StatusBadge status={libraryItem.status} />
-          )}
+          {libraryItem && <StatusBadge status={libraryItem.status} />}
         </div>
 
         <div className="mt-1 flex flex-wrap gap-1.5">
@@ -143,7 +148,8 @@ export function ForceFieldRow({
       </div>
 
       {editable && (
-        <button type="button"
+        <button
+          type="button"
           onClick={() => onToggle(piece.id)}
           className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
         >
@@ -151,9 +157,7 @@ export function ForceFieldRow({
         </button>
       )}
 
-      {editable && (
-        <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />
-      )}
+      {editable && <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />}
     </div>
   );
 }

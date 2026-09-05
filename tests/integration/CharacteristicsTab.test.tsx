@@ -14,7 +14,15 @@ import type { Characteristics, CorruptionBlock } from "../../src/types/Character
 // ag=55 → AB=5 → Half=5, Full=10, Charge=15, Run=30
 // fel=99 → FB=9  int=66 → IB=6
 const TOTALS: Record<keyof Characteristics, number> = {
-  ws: 11, bs: 22, s: 33, t: 44, ag: 55, int: 66, per: 77, wp: 88, fel: 99,
+  ws: 11,
+  bs: 22,
+  s: 33,
+  t: 44,
+  ag: 55,
+  int: 66,
+  per: 77,
+  wp: 88,
+  fel: 99,
 };
 
 const BLANK_FIELD: CharField = { base: 0, advances: 0 };
@@ -160,7 +168,9 @@ describe("CharacteristicsTab", () => {
 
   it("uses the passed-in getEffectiveCharTotal/getCharBonus for each characteristic — not a local reimplementation", () => {
     const effectiveSpy = vi.fn((k: keyof Characteristics) => TOTALS[k]);
-    const bonusSpy = vi.fn((k: keyof Characteristics) => Math.floor(TOTALS[k] / CHARACTERISTIC_BONUS_DIVISOR));
+    const bonusSpy = vi.fn((k: keyof Characteristics) =>
+      Math.floor(TOTALS[k] / CHARACTERISTIC_BONUS_DIVISOR)
+    );
     render(
       <CharacteristicsTab
         getCharField={getCharField}
@@ -172,7 +182,17 @@ describe("CharacteristicsTab", () => {
       />
     );
 
-    const allKeys: (keyof Characteristics)[] = ["ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel"];
+    const allKeys: (keyof Characteristics)[] = [
+      "ws",
+      "bs",
+      "s",
+      "t",
+      "ag",
+      "int",
+      "per",
+      "wp",
+      "fel",
+    ];
     for (const key of allKeys) {
       expect(effectiveSpy).toHaveBeenCalledWith(key);
     }
@@ -264,16 +284,29 @@ describe("CharacteristicsTab", () => {
 
   it("shows a Talent adjustment and its source", async () => {
     const user = userEvent.setup();
-    renderTab(undefined, { points: 0, malignancies: [] }, {
-      homeworld: "",
-      talents: [{ uid: "m1", talentId: "machinator-array", name: "Machinator Array" }],
-      traits: [],
-    });
+    renderTab(
+      undefined,
+      { points: 0, malignancies: [] },
+      {
+        homeworld: "",
+        talents: [{ uid: "m1", talentId: "machinator-array", name: "Machinator Array" }],
+        traits: [],
+      }
+    );
     const strengthCard = screen.getByText("Strength (S)").closest("div")!;
     expect(within(strengthCard).getByText("(+10)")).toBeInTheDocument();
-    await user.click(within(strengthCard).getByRole("button", { name: /Show information about Strength.*Adjustments/ }));
+    await user.click(
+      within(strengthCard).getByRole("button", {
+        name: /Show information about Strength.*Adjustments/,
+      })
+    );
     const dialog = screen.getByRole("dialog", { name: /Strength.*Adjustments/ });
-    expect(within(dialog).getByText((_, element) => element?.tagName === "LI" && element.textContent === "Machinator Array (Talent): +10")).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(
+        (_, element) =>
+          element?.tagName === "LI" && element.textContent === "Machinator Array (Talent): +10"
+      )
+    ).toBeInTheDocument();
   });
 });
 
@@ -283,7 +316,9 @@ describe("CharacteristicsTab adjustment source breakdown", () => {
     renderTab(undefined, {
       points: 0,
       malignancies: [{ id: "m1", referenceId: "palsy", name: "Palsy", rolledModifiers: { ag: 6 } }],
-      minorMutations: [{ id: "mm1", referenceId: "misshapen", name: "Misshapen", rolledModifiers: { ag: 3 } }],
+      minorMutations: [
+        { id: "mm1", referenceId: "misshapen", name: "Misshapen", rolledModifiers: { ag: 3 } },
+      ],
     });
 
     await user.click(
@@ -305,7 +340,9 @@ describe("CharacteristicsTab adjustment source breakdown", () => {
     renderTab();
 
     const wsCard = screen.getAllByText("Weapon Skill (WS)")[0].closest("div")!;
-    expect(within(wsCard).queryByRole("button", { name: /Show information about/ })).not.toBeInTheDocument();
+    expect(
+      within(wsCard).queryByRole("button", { name: /Show information about/ })
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -313,10 +350,14 @@ describe("CharacteristicsTab mobile peek carousel", () => {
   it("wraps to Fellowship on one side and Ballistic Skill on the other for the default Weapon Skill view", () => {
     renderTab();
 
-    const felPeek = screen.getAllByText("Fellowship (Fel)").find((el) => el.closest('[aria-hidden="true"]'));
+    const felPeek = screen
+      .getAllByText("Fellowship (Fel)")
+      .find((el) => el.closest('[aria-hidden="true"]'));
     expect(felPeek).toBeInTheDocument();
 
-    const bsPeek = screen.getAllByText("Ballistic Skill (BS)").find((el) => el.closest('[aria-hidden="true"]'));
+    const bsPeek = screen
+      .getAllByText("Ballistic Skill (BS)")
+      .find((el) => el.closest('[aria-hidden="true"]'));
     expect(bsPeek).toBeInTheDocument();
   });
 });

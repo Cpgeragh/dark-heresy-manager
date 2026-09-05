@@ -1346,8 +1346,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "ih-beetle-tent-extra-armour",
     name: "Beetle Tent (Extra Armour)",
     source: SkillSource.IH,
-    description:
-      "Extra armour for a beetle tent increases its AP value to 12.",
+    description: "Extra armour for a beetle tent increases its AP value to 12.",
     weight: "+8 kg",
     value: "80 Thrones",
     availability: "Rare",
@@ -1756,8 +1755,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "ih-thurible",
     name: "Thurible",
     source: SkillSource.IH,
-    description:
-      "A self-heating metal censer suspended on chains, used to burn Drusine Incense.",
+    description: "A self-heating metal censer suspended on chains, used to burn Drusine Incense.",
     weight: "5 kg",
     value: "500 Thrones",
     availability: "Rare",
@@ -1787,7 +1785,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "ih-det-cord-and-det-tape",
     name: "Det-Cord and Det-Tape",
     source: SkillSource.IH,
-    description: "Det-cord and det-tape are the two most common types of timer material, often used in conjunction with tube-charges. The delay is set by either peeling back the tape or cutting the cord to the desired length. Both can be used as a low-grade explosive material in an emergency, inflicting 1d5 X Damage for every one kilogram used with a blast radius of twice its weight in kilograms.",
+    description:
+      "Det-cord and det-tape are the two most common types of timer material, often used in conjunction with tube-charges. The delay is set by either peeling back the tape or cutting the cord to the desired length. Both can be used as a low-grade explosive material in an emergency, inflicting 1d5 X Damage for every one kilogram used with a blast radius of twice its weight in kilograms.",
     weight: "1 kg",
     value: "20 Thrones",
     availability: "Common",
@@ -1796,7 +1795,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "ih-fyceline",
     name: "Fyceline",
     source: SkillSource.IH,
-    description: "A chemical used in many standard Imperial explosives, it is mined from rare ores and its production often becomes the primary tithe for many planets. Refined fyceline can be used to fashion crude explosives. Fyceline explosives inflict 1d10+5 X Damage for every kilogram used in their construction and have a blast radius of five times their weight in kilograms.",
+    description:
+      "A chemical used in many standard Imperial explosives, it is mined from rare ores and its production often becomes the primary tithe for many planets. Refined fyceline can be used to fashion crude explosives. Fyceline explosives inflict 1d10+5 X Damage for every kilogram used in their construction and have a blast radius of five times their weight in kilograms.",
     weight: "1 kg",
     value: "70 Thrones",
     availability: "Average",
@@ -1805,7 +1805,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "ih-promethium",
     name: "Promethium",
     source: SkillSource.IH,
-    description: "Petrochem-based liquid fuel, promethium is the jelly-like substance used to power flamer weapons. It can also be used to create anti-personnel explosives and bombs as it is highly flammable. Promethium explosives inflict 2d10 E Damage for every kilogram used in their construction and have a blast radius of four times their weight in kilograms. In addition, anyone caught in the radius of a promethium explosion must make an Agility Test or catch on fire.",
+    description:
+      "Petrochem-based liquid fuel, promethium is the jelly-like substance used to power flamer weapons. It can also be used to create anti-personnel explosives and bombs as it is highly flammable. Promethium explosives inflict 2d10 E Damage for every kilogram used in their construction and have a blast radius of four times their weight in kilograms. In addition, anyone caught in the radius of a promethium explosion must make an Agility Test or catch on fire.",
     weight: "1 kg",
     value: "60 Thrones",
     availability: "Scarce",

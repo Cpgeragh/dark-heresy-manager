@@ -112,8 +112,7 @@ export function CareerPicker({
     (career) =>
       homeworld.careers.some(
         (homeworldCareer) => (homeworldCareer.careerName ?? homeworldCareer.name) === career.name
-      ) &&
-      career.name.toLowerCase().includes(normalizedQuery)
+      ) && career.name.toLowerCase().includes(normalizedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (

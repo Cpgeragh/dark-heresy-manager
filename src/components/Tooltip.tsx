@@ -70,7 +70,8 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
 
   return (
     <>
-      <button type="button"
+      <button
+        type="button"
         ref={triggerRef}
         onClick={toggle}
         aria-expanded={open}

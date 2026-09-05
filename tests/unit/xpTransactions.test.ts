@@ -172,12 +172,8 @@ describe("Career rank-up", () => {
   });
 
   it("rejects an invalid branch and insufficient Spent XP", () => {
-    expect(() => applyCareerRankUp(guardsman, 6_000, "captain")).toThrow(
-      "not a valid next step"
-    );
-    expect(() => applyCareerRankUp(guardsman, 5_999, "scout")).toThrow(
-      "not spent enough XP"
-    );
+    expect(() => applyCareerRankUp(guardsman, 6_000, "captain")).toThrow("not a valid next step");
+    expect(() => applyCareerRankUp(guardsman, 5_999, "scout")).toThrow("not spent enough XP");
   });
 
   it("preserves an Adept branch through the shared Scholar rank", () => {

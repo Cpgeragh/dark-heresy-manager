@@ -9,16 +9,8 @@ import { ModalShell } from "../modals/ModalShell";
 import { PlusIcon } from "../icons/PlusIcon";
 import { uiPickerPressFeedback } from "../styles/buttonStyles";
 
-export function PickerBody({
-  className = "",
-  ...props
-}: HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={`p-4 lg:p-5 space-y-4 ${className}`.trim()}
-      {...props}
-    />
-  );
+export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={`p-4 lg:p-5 space-y-4 ${className}`.trim()} {...props} />;
 }
 
 export type PickerRowProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -67,9 +59,7 @@ export function PickerCustomAction({
   type = "button",
   ...props
 }: PickerCustomActionProps) {
-  const label = typeof children === "string"
-    ? children.trim().replace(/^\+\s*/, "")
-    : children;
+  const label = typeof children === "string" ? children.trim().replace(/^\+\s*/, "") : children;
 
   return (
     <button
@@ -78,10 +68,7 @@ export function PickerCustomAction({
       {...props}
     >
       <PlusIcon className="h-4 w-4 shrink-0" />
-      <span
-        className="font-bold capitalize"
-        style={{ WebkitTextStroke: "0.35px currentColor" }}
-      >
+      <span className="font-bold capitalize" style={{ WebkitTextStroke: "0.35px currentColor" }}>
         {label}
       </span>
     </button>
@@ -209,17 +196,25 @@ export function PickerModal({
         ref={listRef}
         onScroll={
           scrollPositionRef
-            ? (event) => { scrollPositionRef.current = event.currentTarget.scrollTop; }
+            ? (event) => {
+                scrollPositionRef.current = event.currentTarget.scrollTop;
+              }
             : undefined
         }
         className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800"
       >
-        {isEmpty && <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">{emptyMessage}</p>}
+        {isEmpty && (
+          <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">
+            {emptyMessage}
+          </p>
+        )}
         {children}
       </div>
 
       {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
-      {footer && <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">{footer}</div>}
+      {footer && (
+        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">{footer}</div>
+      )}
     </ModalShell>
   );
 }

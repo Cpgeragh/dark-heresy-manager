@@ -39,10 +39,7 @@ function getLimit(kind: ClientCodeAttemptKind): number {
  * is a cost/UI guard rather than the security boundary; server-side limits
  * still apply if browser storage is unavailable or altered.
  */
-export function recordClientCodeAttempt(
-  kind: ClientCodeAttemptKind,
-  now = Date.now()
-): void {
+export function recordClientCodeAttempt(kind: ClientCodeAttemptKind, now = Date.now()): void {
   const storage = getStorage();
   if (!storage) return;
 

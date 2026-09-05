@@ -161,7 +161,9 @@ function InsanityStatusChips({ points }: { points: number }) {
       <InsanityTimeline points={safePoints} />
 
       <div className="flex justify-center items-center gap-1.5">
-        <Chip size="lg" className={insanityDegreeChipClass(entry)}>{entry.degree}</Chip>
+        <Chip size="lg" className={insanityDegreeChipClass(entry)}>
+          {entry.degree}
+        </Chip>
         <span className={uiInfoModalWrapper}>
           <InfoModal
             title="Degree of Madness"
@@ -208,7 +210,10 @@ function InsanityStatusChips({ points }: { points: number }) {
             <div className="flex flex-col items-center gap-1">
               {next && (
                 <p className="text-xs lg:text-sm text-slate-300 text-center">
-                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">{next.min - safePoints}</span> pt{next.min - safePoints === 1 ? "" : "s"} until Trauma Test{" "}
+                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">
+                    {next.min - safePoints}
+                  </span>{" "}
+                  pt{next.min - safePoints === 1 ? "" : "s"} until Trauma Test{" "}
                   <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
                     <InfoModal
                       title="Mental Trauma"
@@ -223,7 +228,11 @@ function InsanityStatusChips({ points }: { points: number }) {
               )}
               {nextDegree && (
                 <p className="text-xs lg:text-sm text-slate-300 text-center">
-                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">{nextDegree.min - safePoints}</span> pt{nextDegree.min - safePoints === 1 ? "" : "s"} until <span className="whitespace-nowrap">{nextDegree.degree}</span>
+                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">
+                    {nextDegree.min - safePoints}
+                  </span>{" "}
+                  pt{nextDegree.min - safePoints === 1 ? "" : "s"} until{" "}
+                  <span className="whitespace-nowrap">{nextDegree.degree}</span>
                 </p>
               )}
             </div>
@@ -256,9 +265,13 @@ function DisorderRow({
         <div className="min-w-0">
           <span className={uiItemName}>{disorder.name}</span>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={disorderTypeChipClass(disorder.type)}>{disorder.type}</Chip>
+            <Chip size="sm" className={disorderTypeChipClass(disorder.type)}>
+              {disorder.type}
+            </Chip>
             <span className="inline-flex items-center gap-1">
-              <Chip size="sm" className={severityChipClass[disorder.severity]}>{disorder.severity}</Chip>
+              <Chip size="sm" className={severityChipClass[disorder.severity]}>
+                {disorder.severity}
+              </Chip>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={disorder.severity}
@@ -271,7 +284,10 @@ function DisorderRow({
               </span>
             </span>
             {disorder.source && (
-              <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(disorder.source)}`}>
+              <Chip
+                size="sm"
+                className={`bg-slate-800/40 font-code ${sourceColour(disorder.source)}`}
+              >
                 {disorder.source}
               </Chip>
             )}
@@ -325,7 +341,9 @@ function DisorderRow({
               >
                 Escalate
               </Button>
-              <Button variant="ghost" onClick={() => setEscalateArmed(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setEscalateArmed(false)}>
+                Cancel
+              </Button>
             </div>
           }
         >
@@ -347,8 +365,12 @@ function DisorderRow({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={onRemove}>Delete</Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+              <Button variant="primary" onClick={onRemove}>
+                Delete
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                Cancel
+              </Button>
             </div>
           }
         >
@@ -391,7 +413,10 @@ function TraumaRow({
             <div className="mt-1 flex flex-wrap gap-1.5">
               {roll && <RollChip>{roll}</RollChip>}
               {trauma.source && (
-                <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(trauma.source)}`}>
+                <Chip
+                  size="sm"
+                  className={`bg-slate-800/40 font-code ${sourceColour(trauma.source)}`}
+                >
                   {trauma.source}
                 </Chip>
               )}
@@ -402,14 +427,14 @@ function TraumaRow({
             <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={name}
-                content={<p className="text-sm leading-relaxed text-slate-300 lg:text-base">{effect}</p>}
+                content={
+                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">{effect}</p>
+                }
               />
             </span>
           </div>
         </div>
-        {editable && (
-          <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />
-        )}
+        {editable && <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />}
       </div>
       {deleteArmed && (
         <PickerModal
@@ -422,8 +447,12 @@ function TraumaRow({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={onRemove}>Delete</Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+              <Button variant="primary" onClick={onRemove}>
+                Delete
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                Cancel
+              </Button>
             </div>
           }
         >
@@ -438,13 +467,7 @@ function TraumaRow({
   );
 }
 
-function TraumaHeader({
-  editable,
-  onAdd,
-}: {
-  editable: boolean;
-  onAdd: () => void;
-}) {
+function TraumaHeader({ editable, onAdd }: { editable: boolean; onAdd: () => void }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="inline-flex items-center gap-1.5">
@@ -479,24 +502,27 @@ function TraumaList({
   onRemove: (id: string) => void;
 }) {
   if (trauma.length === 0) {
-    return <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No temporary trauma recorded.</p>;
+    return (
+      <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No temporary trauma recorded.</p>
+    );
   }
   return (
     <div className="space-y-2">
-      {[...trauma].sort((a, b) => traumaDisplayName(a).localeCompare(traumaDisplayName(b))).map((entry) => (
-        <TraumaRow key={entry.id} trauma={entry} editable={editable} onRemove={() => onRemove(entry.id)} />
-      ))}
+      {[...trauma]
+        .sort((a, b) => traumaDisplayName(a).localeCompare(traumaDisplayName(b)))
+        .map((entry) => (
+          <TraumaRow
+            key={entry.id}
+            trauma={entry}
+            editable={editable}
+            onRemove={() => onRemove(entry.id)}
+          />
+        ))}
     </div>
   );
 }
 
-function DisordersHeader({
-  editable,
-  onAdd,
-}: {
-  editable: boolean;
-  onAdd: () => void;
-}) {
+function DisordersHeader({ editable, onAdd }: { editable: boolean; onAdd: () => void }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <SectionHeader>Disorders</SectionHeader>
@@ -570,15 +596,22 @@ function DisordersList({
   return <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No disorders recorded.</p>;
 }
 
-export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, talents, career }: InsanityPanelProps) {
-  const value = useMemo(
-    () => insanity ?? { points: 0, disorders: [] },
-    [insanity]
-  );
+export function InsanityPanel({
+  insanity,
+  editable,
+  onUpdate,
+  sectionClassName,
+  talents,
+  career,
+}: InsanityPanelProps) {
+  const value = useMemo(() => insanity ?? { points: 0, disorders: [] }, [insanity]);
   const [showDisorderPicker, setShowDisorderPicker] = useState(false);
   const [showTraumaPicker, setShowTraumaPicker] = useState(false);
   const recordedSources = talents
-    ? [...getTalentInsanityModifierSources(talents), ...getTraitInsanityModifierSources(talents, career)]
+    ? [
+        ...getTalentInsanityModifierSources(talents),
+        ...getTraitInsanityModifierSources(talents, career),
+      ]
     : [];
   const recordedAdjustment = recordedSources.reduce((total, source) => total + source.amount, 0);
   const effectivePoints = Math.min(100, Math.max(0, value.points + recordedAdjustment));
@@ -589,11 +622,9 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
   const existingDisorderReferenceIds = new Set(
     structuredDisorders.map((d) => d.referenceId).filter((id): id is string => Boolean(id))
   );
-  const legacyDisorders = typeof value.disorders === "string" ? value.disorders : value.disorderNotes ?? "";
-  const structuredTrauma = useMemo(
-    () => value.currentTrauma ?? [],
-    [value.currentTrauma]
-  );
+  const legacyDisorders =
+    typeof value.disorders === "string" ? value.disorders : (value.disorderNotes ?? "");
+  const structuredTrauma = useMemo(() => value.currentTrauma ?? [], [value.currentTrauma]);
   const existingTraumaReferenceIds = new Set(
     structuredTrauma.map((t) => t.referenceId).filter((id): id is string => Boolean(id))
   );
@@ -640,7 +671,9 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
     (id: string, severity: InsanityDisorderSeverity) =>
       onUpdate({
         ...value,
-        disorders: structuredDisorders.map((entry) => (entry.id === id ? { ...entry, severity } : entry)),
+        disorders: structuredDisorders.map((entry) =>
+          entry.id === id ? { ...entry, severity } : entry
+        ),
       }),
     [value, structuredDisorders, onUpdate]
   );
@@ -679,7 +712,9 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
                   content={
                     <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
                       {recordedSources.map((source, index) => (
-                        <li key={index}>{source.name} ({source.type}): +{source.amount}</li>
+                        <li key={index}>
+                          {source.name} ({source.type}): +{source.amount}
+                        </li>
                       ))}
                     </ul>
                   }
@@ -699,10 +734,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
       </div>
 
       {/* Mobile — tab switcher between Temporary Trauma and Disorders */}
-      <div
-        ref={containerRef}
-        className="lg:hidden space-y-4"
-      >
+      <div ref={containerRef} className="lg:hidden space-y-4">
         <SegmentedTabs
           id={INSANITY_TABS_ID}
           ariaLabel="Insanity entry groups"
@@ -721,7 +753,11 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
           {activeGroup === "trauma" ? (
             <>
               <TraumaHeader editable={editable} onAdd={() => setShowTraumaPicker(true)} />
-              <TraumaList trauma={structuredTrauma} editable={editable} onRemove={handleRemoveTrauma} />
+              <TraumaList
+                trauma={structuredTrauma}
+                editable={editable}
+                onRemove={handleRemoveTrauma}
+              />
             </>
           ) : (
             <>

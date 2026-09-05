@@ -120,12 +120,7 @@ describe("bounded Firestore hooks", () => {
   it("subscribes the DM to bounded full session documents", () => {
     renderHook(() => useSessions("campaign-1", true));
 
-    expect(mockCollection).toHaveBeenCalledWith(
-      "db",
-      "campaigns",
-      "campaign-1",
-      "sessions"
-    );
+    expect(mockCollection).toHaveBeenCalledWith("db", "campaigns", "campaign-1", "sessions");
     expect(mockLimit).toHaveBeenCalledWith(200);
     expect(mockUseQuerySubscription).toHaveBeenCalledWith(
       expect.anything(),

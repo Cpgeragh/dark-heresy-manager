@@ -40,51 +40,54 @@ export async function claimCharacter(
   const hash = hashRecoveryCode(input.code, hmacSecret);
   const indexRef = db.collection(RECOVERY_INDEX_COLLECTION).doc(hash);
 
-  return db.runTransaction(async (transaction) => {
-    const indexSnapshot = await transaction.get(indexRef);
-    if (!indexSnapshot.exists) {
-      throw new HttpsError("not-found", "Recovery Code not found.");
-    }
+  return db.runTransaction(
+    async (transaction) => {
+      const indexSnapshot = await transaction.get(indexRef);
+      if (!indexSnapshot.exists) {
+        throw new HttpsError("not-found", "Recovery Code not found.");
+      }
 
-    const { campaignId, characterId } = indexSnapshot.data() as {
-      campaignId: string;
-      characterId: string;
-    };
-    const campaignRef = db.collection("campaigns").doc(campaignId);
-    const characterRef = campaignRef.collection("characters").doc(characterId);
-    const [campaignSnapshot, characterSnapshot] = await Promise.all([
-      transaction.get(campaignRef),
-      transaction.get(characterRef),
-    ]);
+      const { campaignId, characterId } = indexSnapshot.data() as {
+        campaignId: string;
+        characterId: string;
+      };
+      const campaignRef = db.collection("campaigns").doc(campaignId);
+      const characterRef = campaignRef.collection("characters").doc(characterId);
+      const [campaignSnapshot, characterSnapshot] = await Promise.all([
+        transaction.get(campaignRef),
+        transaction.get(characterRef),
+      ]);
 
-    if (!campaignSnapshot.exists || !characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Recovery Code not found.");
-    }
+      if (!campaignSnapshot.exists || !characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Recovery Code not found.");
+      }
 
-    const character = characterSnapshot.data();
-    if (character?.recoveryCode !== input.code) {
-      throw new HttpsError("not-found", "Recovery Code not found.");
-    }
-    if (character.userId) {
-      throw new HttpsError("failed-precondition", "This character has already been claimed.");
-    }
+      const character = characterSnapshot.data();
+      if (character?.recoveryCode !== input.code) {
+        throw new HttpsError("not-found", "Recovery Code not found.");
+      }
+      if (character.userId) {
+        throw new HttpsError("failed-precondition", "This character has already been claimed.");
+      }
 
-    rotateRecoveryCodeInTransaction(
-      transaction,
-      db,
-      characterRef,
-      campaignId,
-      characterId,
-      input.code,
-      hmacSecret,
-      { userId: callerUid }
-    );
-    transaction.update(campaignRef, { memberIds: FieldValue.arrayUnion(callerUid) });
-    transaction.set(
-      characterRef.collection("claimLog").doc(),
-      buildClaimLogPayload("claim", callerUid, null, callerUid)
-    );
+      rotateRecoveryCodeInTransaction(
+        transaction,
+        db,
+        characterRef,
+        campaignId,
+        characterId,
+        input.code,
+        hmacSecret,
+        { userId: callerUid }
+      );
+      transaction.update(campaignRef, { memberIds: FieldValue.arrayUnion(callerUid) });
+      transaction.set(
+        characterRef.collection("claimLog").doc(),
+        buildClaimLogPayload("claim", callerUid, null, callerUid)
+      );
 
-    return { campaignId, characterId };
-  }, { maxAttempts: 5 });
+      return { campaignId, characterId };
+    },
+    { maxAttempts: 5 }
+  );
 }

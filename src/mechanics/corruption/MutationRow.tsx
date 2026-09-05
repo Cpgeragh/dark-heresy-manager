@@ -7,7 +7,13 @@ import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { RollChip } from "../../ui/chips/RollChip";
 import { colourRose, colourSky } from "../../ui/styles/colourTokens";
-import { uiInfoModalWrapper, uiItemName, uiSection, uiTextBody, uiTextLabel } from "../../ui/styles/editableStyles";
+import {
+  uiInfoModalWrapper,
+  uiItemName,
+  uiSection,
+  uiTextBody,
+  uiTextLabel,
+} from "../../ui/styles/editableStyles";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
@@ -44,7 +50,10 @@ export function MutationRow({
             <div className="mt-1 flex flex-wrap gap-1.5">
               {display.roll && <RollChip>{display.roll}</RollChip>}
               {mutation.source && (
-                <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(mutation.source)}`}>
+                <Chip
+                  size="sm"
+                  className={`bg-slate-800/40 font-code ${sourceColour(mutation.source)}`}
+                >
                   {mutation.source}
                 </Chip>
               )}
@@ -53,7 +62,11 @@ export function MutationRow({
           {rollEntries.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1.5">
               {rollEntries.map((entry) => (
-                <Chip key={entry.characteristic} size="sm" className={entry.value === undefined ? colourRose : colourSky}>
+                <Chip
+                  key={entry.characteristic}
+                  size="sm"
+                  className={entry.value === undefined ? colourRose : colourSky}
+                >
                   {entry.label}: {entry.value ?? "not recorded"}
                 </Chip>
               ))}
@@ -103,8 +116,12 @@ export function MutationRow({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={onRemove}>Delete</Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+              <Button variant="primary" onClick={onRemove}>
+                Delete
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                Cancel
+              </Button>
             </div>
           }
         >

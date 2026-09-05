@@ -571,7 +571,8 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     cost: "50 Thrones",
     purchaseAmount: "1",
     availability: "Rare",
-    description: "Specially constructed 15 centimetre adamantine-silver alloy stakes, diamantine-tipped and micro-etched with prayers of anathema against witches and Daemons. They count as Holy and gain Tearing against targets with a Psy Rating or Sorcery. If more than 5 Damage is dealt after Armour and Toughness Bonus, the bolt becomes embedded; removing it by force deals an additional 1d5 Damage ignoring Armour and Toughness Bonus. Stake-bolts are only obtainable through the Holy Ordos.",
+    description:
+      "Specially constructed 15 centimetre adamantine-silver alloy stakes, diamantine-tipped and micro-etched with prayers of anathema against witches and Daemons. They count as Holy and gain Tearing against targets with a Psy Rating or Sorcery. If more than 5 Damage is dealt after Armour and Toughness Bonus, the bolt becomes embedded; removing it by force deals an additional 1d5 Damage ignoring Armour and Toughness Bonus. Stake-bolts are only obtainable through the Holy Ordos.",
   },
   {
     id: "lw-purity-round",

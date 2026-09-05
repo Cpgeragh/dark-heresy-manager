@@ -30,7 +30,9 @@ describe("Firestore Rules: closed XP proposal surface", () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await setup(env);
 
-    await expect(dbAs(env, "dm-1").collection(proposalsPath).doc("prop-1").get()).resolves.toBeDefined();
+    await expect(
+      dbAs(env, "dm-1").collection(proposalsPath).doc("prop-1").get()
+    ).resolves.toBeDefined();
     await expect(
       dbAs(env, "player-1").collection(proposalsPath).doc("prop-1").get()
     ).resolves.toBeDefined();

@@ -14,7 +14,10 @@ const careerRankIdsById = new Map(
   CAREER_LIST.map((career) => [career.id, new Set(career.ranks.map((rank) => rank.id))])
 );
 const weaponTrainingOptionsByTalentName = new Map(
-  WEAPON_TRAINING_GROUPS.map((group) => [group.label, new Set(group.items.map((item) => item.display))])
+  WEAPON_TRAINING_GROUPS.map((group) => [
+    group.label,
+    new Set(group.items.map((item) => item.display)),
+  ])
 );
 
 describe("careerAdvancesReference data", () => {
@@ -32,7 +35,9 @@ describe("careerAdvancesReference data", () => {
         for (const table of career.rankTables) {
           for (const advance of table.advances) {
             if (advance.kind !== "skill") continue;
-            expect(skillIds.has(advance.skillId!), `${table.rankId}: ${advance.skillId}`).toBe(true);
+            expect(skillIds.has(advance.skillId!), `${table.rankId}: ${advance.skillId}`).toBe(
+              true
+            );
           }
         }
       });
@@ -41,7 +46,9 @@ describe("careerAdvancesReference data", () => {
         for (const table of career.rankTables) {
           for (const advance of table.advances) {
             if (advance.kind !== "talent") continue;
-            expect(talentById.has(advance.talentId!), `${table.rankId}: ${advance.talentId}`).toBe(true);
+            expect(talentById.has(advance.talentId!), `${table.rankId}: ${advance.talentId}`).toBe(
+              true
+            );
           }
         }
       });
@@ -50,7 +57,9 @@ describe("careerAdvancesReference data", () => {
         for (const table of career.rankTables) {
           for (const advance of table.advances) {
             if (advance.kind !== "trait") continue;
-            expect(traitIds.has(advance.traitId!), `${table.rankId}: ${advance.traitId}`).toBe(true);
+            expect(traitIds.has(advance.traitId!), `${table.rankId}: ${advance.traitId}`).toBe(
+              true
+            );
           }
         }
       });
@@ -74,7 +83,10 @@ describe("careerAdvancesReference data", () => {
             }
 
             const behaviour = talent?.behaviour;
-            if (behaviour && (behaviour.kind === "fixed-repeatable" || behaviour.kind === "fixed-single")) {
+            if (
+              behaviour &&
+              (behaviour.kind === "fixed-repeatable" || behaviour.kind === "fixed-single")
+            ) {
               expect(behaviour.options.includes(advance.specialisation), label).toBe(true);
             }
           }

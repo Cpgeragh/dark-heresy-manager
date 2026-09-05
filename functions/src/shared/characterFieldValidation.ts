@@ -36,7 +36,10 @@ export function assertFieldNestedBounds(value: unknown, label: string): void {
     throw new HttpsError("invalid-argument", `${label} must be serialisable.`);
   }
   if (Buffer.byteLength(serialised, "utf8") > CHARACTER_FIELD_BYTES) {
-    throw new HttpsError("invalid-argument", `${label} exceeds its ${CHARACTER_FIELD_BYTES}-byte limit.`);
+    throw new HttpsError(
+      "invalid-argument",
+      `${label} exceeds its ${CHARACTER_FIELD_BYTES}-byte limit.`
+    );
   }
 
   const visit = (entry: unknown, depth: number, path: string): void => {
@@ -194,7 +197,10 @@ function assertCharacteristicsValue(value: unknown): void {
       );
     }
     if (typeof field.base !== "number" || !Number.isFinite(field.base)) {
-      throw new HttpsError("invalid-argument", `Characteristic "${key}".base must be a finite number.`);
+      throw new HttpsError(
+        "invalid-argument",
+        `Characteristic "${key}".base must be a finite number.`
+      );
     }
     if (typeof field.advances !== "number" || !Number.isInteger(field.advances)) {
       throw new HttpsError(

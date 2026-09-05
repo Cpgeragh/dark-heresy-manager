@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CharField } from "../../types/Character";
-import type { Characteristics, CorruptionBlock, TalentsAndTraitsBlock } from "../../types/Character";
+import type {
+  Characteristics,
+  CorruptionBlock,
+  TalentsAndTraitsBlock,
+} from "../../types/Character";
 import {
   getCharacteristicModifierTotals,
   getCharacteristicModifierSources,
@@ -31,7 +35,10 @@ import {
   uiInfoModalWrapper,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
-import { getTraitMovementEffects, getWaryInitiativeBonus } from "../../mechanics/traits/traitEffects";
+import {
+  getTraitMovementEffects,
+  getWaryInitiativeBonus,
+} from "../../mechanics/traits/traitEffects";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -82,7 +89,8 @@ function StatBlock({
                   <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
                     {sources.map((source, i) => (
                       <li key={i}>
-                        {source.name} ({source.type}): {source.amount > 0 ? "+" : ""}{source.amount}
+                        {source.name} ({source.type}): {source.amount > 0 ? "+" : ""}
+                        {source.amount}
                       </li>
                     ))}
                   </ul>
@@ -94,8 +102,11 @@ function StatBlock({
         <span className="text-xl lg:text-2xl font-semibold font-code text-slate-100">
           {effectiveTotal}
           {adjustment !== 0 && (
-            <span className={`ml-1 text-xs lg:text-sm font-code ${adjustment > 0 ? "text-emerald-400" : "text-red-400"}`}>
-              ({adjustment > 0 ? "+" : ""}{adjustment})
+            <span
+              className={`ml-1 text-xs lg:text-sm font-code ${adjustment > 0 ? "text-emerald-400" : "text-red-400"}`}
+            >
+              ({adjustment > 0 ? "+" : ""}
+              {adjustment})
             </span>
           )}
         </span>
@@ -116,7 +127,17 @@ function StatBlock({
 
 // ─── CharacteristicsTab ───────────────────────────────────────────────────────
 
-const STAT_KEYS = ["ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel"] as const satisfies readonly (keyof Characteristics)[];
+const STAT_KEYS = [
+  "ws",
+  "bs",
+  "s",
+  "t",
+  "ag",
+  "int",
+  "per",
+  "wp",
+  "fel",
+] as const satisfies readonly (keyof Characteristics)[];
 
 const STAT_LABELS: Record<keyof Characteristics, string> = {
   ws: "Weapon Skill (WS)",
@@ -163,7 +184,9 @@ export function CharacteristicsTab({
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const touchRef = useRef<{ startX: number; startY: number; isHorizontal: boolean | null } | null>(null);
+  const touchRef = useRef<{ startX: number; startY: number; isHorizontal: boolean | null } | null>(
+    null
+  );
   const dragOffsetRef = useRef(0);
   const animationRef = useRef<number | null>(null);
   const pendingCompleteRef = useRef<(() => void) | null>(null);
@@ -346,9 +369,7 @@ export function CharacteristicsTab({
 
       updateCharacteristic(
         statKey,
-        Object.keys(purchases).length > 0
-          ? { ...next, advancePurchases: purchases }
-          : next
+        Object.keys(purchases).length > 0 ? { ...next, advancePurchases: purchases } : next
       );
     },
     [career, getCharField, rank, updateCharacteristic]
@@ -389,7 +410,9 @@ export function CharacteristicsTab({
             <InfoModal
               title="Characteristic Bonuses"
               content={
-                <div>Each Bonus = its Characteristic ÷ {CHARACTERISTIC_BONUS_DIVISOR}, rounded down.</div>
+                <div>
+                  Each Bonus = its Characteristic ÷ {CHARACTERISTIC_BONUS_DIVISOR}, rounded down.
+                </div>
               }
             />
           </span>
@@ -443,9 +466,7 @@ export function CharacteristicsTab({
                       </ul>
                     </div>
                   )}
-                  {waryInitiative > 0 && (
-                    <div>Initiative: +{waryInitiative} from Wary.</div>
-                  )}
+                  {waryInitiative > 0 && <div>Initiative: +{waryInitiative} from Wary.</div>}
                 </>
               }
             />
@@ -468,7 +489,10 @@ export function CharacteristicsTab({
           <div className="mt-2 space-y-2">
             <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
               {movementEffects.modes.map((mode) => (
-                <div key={`${mode.name}:${mode.source}`} className={`${uiCell} text-center py-1.5 px-2`}>
+                <div
+                  key={`${mode.name}:${mode.source}`}
+                  className={`${uiCell} text-center py-1.5 px-2`}
+                >
                   <div className={uiCellLabel}>{mode.name}</div>
                   <div className={uiCellValueSm}>{mode.speed}</div>
                 </div>
@@ -480,7 +504,11 @@ export function CharacteristicsTab({
 
       {/* Main stats — mobile swiper */}
       <div ref={containerRef} className="lg:hidden overflow-x-hidden py-3">
-        <div ref={trackRef} className="flex" style={{ transform: `translateX(${restingOffset}px)` }}>
+        <div
+          ref={trackRef}
+          className="flex"
+          style={{ transform: `translateX(${restingOffset}px)` }}
+        >
           <div
             aria-hidden="true"
             className="pointer-events-none opacity-50"
@@ -498,7 +526,10 @@ export function CharacteristicsTab({
               updateCharacteristic={updateCharacteristicWithPurchase}
             />
           </div>
-          <div className="rounded-lg shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]" style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}>
+          <div
+            className="rounded-lg shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]"
+            style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
+          >
             <StatBlock
               key={activeStat}
               label={STAT_LABELS[activeStat]}
@@ -543,7 +574,7 @@ export function CharacteristicsTab({
             sources={getCharacteristicModifierSources(corruption, key, talents, career)}
             tierCosts={getCharacteristicTierCosts(career, key)}
             getCharField={getCharField}
-              updateCharacteristic={updateCharacteristicWithPurchase}
+            updateCharacteristic={updateCharacteristicWithPurchase}
           />
         ))}
       </div>

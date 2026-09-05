@@ -87,7 +87,10 @@ describe("CorruptionMalignancyPicker roll-capture sub-screen", () => {
     await user.click(screen.getByRole("radio", { name: "Custom" }));
     expect(addButton).toBeDisabled();
 
-    await user.type(screen.getByPlaceholderText("What this malignancy does..."), "Eyes that weep blood.");
+    await user.type(
+      screen.getByPlaceholderText("What this malignancy does..."),
+      "Eyes that weep blood."
+    );
     expect(addButton).not.toBeDisabled();
 
     await user.click(addButton);

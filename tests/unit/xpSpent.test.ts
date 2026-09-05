@@ -26,7 +26,13 @@ describe("getSpentXp", () => {
         total: 1000,
         spent: 0,
         ranks: [
-          { rank: 1, advances: [{ id: "a1", name: "+5 WS", cost: 100 }, { id: "a2", name: "Dodge", cost: 100 }] },
+          {
+            rank: 1,
+            advances: [
+              { id: "a1", name: "+5 WS", cost: 100 },
+              { id: "a2", name: "Dodge", cost: 100 },
+            ],
+          },
           { rank: 2, advances: [{ id: "a3", name: "Quick Draw", cost: 100 }] },
         ],
       },

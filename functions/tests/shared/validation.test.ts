@@ -12,9 +12,9 @@ describe("assertRequestFields", () => {
   });
 
   it("rejects an unexpected field", () => {
-    expect(() =>
-      assertRequestFields({ code: "DH-ABCD-1234", extra: true }, ["code"])
-    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+    expect(() => assertRequestFields({ code: "DH-ABCD-1234", extra: true }, ["code"])).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
   });
 
   it("rejects data missing a required field", () => {

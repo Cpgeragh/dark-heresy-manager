@@ -65,10 +65,7 @@ import {
   type ProcessIdentityReclaimChunkInput,
   type ProcessIdentityReclaimChunkResult,
 } from "./operations/identityReclaimJob.js";
-import {
-  linkDevice as runLinkDevice,
-  type LinkDeviceInput,
-} from "./operations/linkDevice.js";
+import { linkDevice as runLinkDevice, type LinkDeviceInput } from "./operations/linkDevice.js";
 import {
   getIdentityRecoveryMode as runGetIdentityRecoveryMode,
   type GetIdentityRecoveryModeInput,
@@ -141,7 +138,8 @@ export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
           windowMs: 60 * 60 * 1000,
         },
       ],
-      handler: ({ uid, data }) => runRegisterRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
+      handler: ({ uid, data }) =>
+        runRegisterRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
     })
 );
 
@@ -158,7 +156,8 @@ export const registerIdentityCode = onCall<RegisterIdentityCodeInput>(
       rateLimits: [
         { key: `register-identity-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      handler: ({ uid, data }) => runRegisterIdentityCode(data, uid, identityCodeHmacSecret.value()),
+      handler: ({ uid, data }) =>
+        runRegisterIdentityCode(data, uid, identityCodeHmacSecret.value()),
     });
   }
 );
@@ -212,11 +211,7 @@ export const revokeRecoveryCode = onCall<RevokeRecoveryCodeInput>(
       rateLimits: [
         { key: `revoke-recovery-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      idempotencyKey: buildOperationIdempotencyKey(
-        "revoke-recovery-code",
-        callerUid,
-        operationId
-      ),
+      idempotencyKey: buildOperationIdempotencyKey("revoke-recovery-code", callerUid, operationId),
       handler: ({ uid, data }) => runRevokeRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
     });
   }
@@ -241,7 +236,9 @@ export const claimCharacter = onCall<ClaimCharacterInput>(
       ],
       idempotencyKey: `claim-character:${callerUid}:${codeHash}`,
       handler: ({ uid, data }) =>
-        withMinimumDuration(250, () => runClaimCharacter(data, uid, recoveryCodeHmacSecret.value())),
+        withMinimumDuration(250, () =>
+          runClaimCharacter(data, uid, recoveryCodeHmacSecret.value())
+        ),
     });
   }
 );
@@ -321,10 +318,7 @@ export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
     const codeHash = hashForKey(request.data?.code ?? "");
     const idempotencyKey = `start-identity-reclaim-job:${callerUid}:${codeHash}`;
 
-    return protectedCallable<
-      StartIdentityReclaimJobInput,
-      StartIdentityReclaimJobResult
-    >({
+    return protectedCallable<StartIdentityReclaimJobInput, StartIdentityReclaimJobResult>({
       request,
       operation: "start-identity-reclaim-job",
       allowedFields: ["code"],
@@ -352,7 +346,11 @@ export const processIdentityReclaimChunk = onCall<ProcessIdentityReclaimChunkInp
       requiredFields: ["jobId"],
       fieldShapes: { jobId: "string" },
       rateLimits: [
-        { key: `process-identity-reclaim-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+        {
+          key: `process-identity-reclaim-chunk:${callerUid}`,
+          limit: 300,
+          windowMs: 60 * 60 * 1000,
+        },
       ],
       handler: ({ uid, data }) => runProcessIdentityReclaimChunk(data, uid),
     });
@@ -385,19 +383,21 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const idempotencyKey = `start-character-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`;
-    return protectedCallable<StartCharacterDeletionJobInput, { jobId: string; totalCount: number }>({
-      request,
-      operation: "start-character-deletion-job",
-      allowedFields: ["campaignId", "characterId"],
-      requiredFields: ["campaignId", "characterId"],
-      fieldShapes: { campaignId: "string", characterId: "string" },
-      rateLimits: [
-        { key: `start-character-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
-      ],
-      idempotencyKey,
-      handler: ({ uid, data }) =>
-        runStartCharacterDeletionJob(data, uid, idempotencyKey, recoveryCodeHmacSecret.value()),
-    });
+    return protectedCallable<StartCharacterDeletionJobInput, { jobId: string; totalCount: number }>(
+      {
+        request,
+        operation: "start-character-deletion-job",
+        allowedFields: ["campaignId", "characterId"],
+        requiredFields: ["campaignId", "characterId"],
+        fieldShapes: { campaignId: "string", characterId: "string" },
+        rateLimits: [
+          { key: `start-character-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+        ],
+        idempotencyKey,
+        handler: ({ uid, data }) =>
+          runStartCharacterDeletionJob(data, uid, idempotencyKey, recoveryCodeHmacSecret.value()),
+      }
+    );
   }
 );
 
@@ -405,14 +405,21 @@ export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChun
   { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
-    return protectedCallable<ProcessCharacterDeletionChunkInput, ProcessCharacterDeletionChunkResult>({
+    return protectedCallable<
+      ProcessCharacterDeletionChunkInput,
+      ProcessCharacterDeletionChunkResult
+    >({
       request,
       operation: "process-character-deletion-chunk",
       allowedFields: ["jobId"],
       requiredFields: ["jobId"],
       fieldShapes: { jobId: "string" },
       rateLimits: [
-        { key: `process-character-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+        {
+          key: `process-character-deletion-chunk:${callerUid}`,
+          limit: 300,
+          windowMs: 60 * 60 * 1000,
+        },
       ],
       handler: ({ uid, data }) => runProcessCharacterDeletionChunk(data, uid),
     });
@@ -444,18 +451,24 @@ export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkI
   { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
-    return protectedCallable<ProcessCampaignDeletionChunkInput, ProcessCampaignDeletionChunkResult>({
-      request,
-      operation: "process-campaign-deletion-chunk",
-      allowedFields: ["jobId"],
-      requiredFields: ["jobId"],
-      fieldShapes: { jobId: "string" },
-      rateLimits: [
-        { key: `process-campaign-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
-      ],
-      handler: ({ uid, data }) =>
-        runProcessCampaignDeletionChunk(data, uid, recoveryCodeHmacSecret.value()),
-    });
+    return protectedCallable<ProcessCampaignDeletionChunkInput, ProcessCampaignDeletionChunkResult>(
+      {
+        request,
+        operation: "process-campaign-deletion-chunk",
+        allowedFields: ["jobId"],
+        requiredFields: ["jobId"],
+        fieldShapes: { jobId: "string" },
+        rateLimits: [
+          {
+            key: `process-campaign-deletion-chunk:${callerUid}`,
+            limit: 300,
+            windowMs: 60 * 60 * 1000,
+          },
+        ],
+        handler: ({ uid, data }) =>
+          runProcessCampaignDeletionChunk(data, uid, recoveryCodeHmacSecret.value()),
+      }
+    );
   }
 );
 
@@ -464,7 +477,10 @@ export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const idempotencyKey = `start-custom-item-mutation-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.customItemId ?? ""}:${request.data?.mode ?? ""}`;
-    return protectedCallable<StartCustomItemMutationJobInput, { jobId: string; totalCount: number }>({
+    return protectedCallable<
+      StartCustomItemMutationJobInput,
+      { jobId: string; totalCount: number }
+    >({
       request,
       operation: "start-custom-item-mutation-job",
       allowedFields: ["campaignId", "customItemId", "mode", "versionId", "actorUserId"],
@@ -489,14 +505,21 @@ export const processCustomItemMutationChunk = onCall<ProcessCustomItemMutationCh
   { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
-    return protectedCallable<ProcessCustomItemMutationChunkInput, ProcessCustomItemMutationChunkResult>({
+    return protectedCallable<
+      ProcessCustomItemMutationChunkInput,
+      ProcessCustomItemMutationChunkResult
+    >({
       request,
       operation: "process-custom-item-mutation-chunk",
       allowedFields: ["jobId"],
       requiredFields: ["jobId"],
       fieldShapes: { jobId: "string" },
       rateLimits: [
-        { key: `process-custom-item-mutation-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+        {
+          key: `process-custom-item-mutation-chunk:${callerUid}`,
+          limit: 300,
+          windowMs: 60 * 60 * 1000,
+        },
       ],
       handler: ({ uid, data }) => runProcessCustomItemMutationChunk(data, uid),
     });
@@ -564,9 +587,7 @@ export const deleteAccount = onCall(
       request,
       operation: "delete-account",
       allowedFields: [],
-      rateLimits: [
-        { key: `delete-account:${callerUid}`, limit: 3, windowMs: 24 * 60 * 60 * 1000 },
-      ],
+      rateLimits: [{ key: `delete-account:${callerUid}`, limit: 3, windowMs: 24 * 60 * 60 * 1000 }],
       handler: ({ uid }) => runDeleteAccount(uid, identityCodeHmacSecret.value()),
     });
   }

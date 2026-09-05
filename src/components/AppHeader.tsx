@@ -65,12 +65,13 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
               </svg>
             </Link>
           )}
-
         </div>
 
         {/* App name — centred */}
         <div className="flex items-center justify-center pointer-events-none">
-          <span className="font-cinzel font-bold text-slate-200 text-base tracking-wide">Dark Heresy Manager</span>
+          <span className="font-cinzel font-bold text-slate-200 text-base tracking-wide">
+            Dark Heresy Manager
+          </span>
         </div>
 
         {/* Settings + kebab */}
@@ -107,7 +108,8 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
           {/* Kebab menu */}
           {kebabContent && (
             <div className="relative" ref={kebabRef}>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setKebabOpen((v) => !v)}
                 aria-label="Options"
                 className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-base leading-none"

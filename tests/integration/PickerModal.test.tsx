@@ -88,7 +88,11 @@ describe("PickerModal", () => {
   it("does not treat every enabled button in a picker as a selectable card", () => {
     setup({
       filterRow: <button type="button">Bespoke filter</button>,
-      footer: <button type="button" disabled>Disabled action</button>,
+      footer: (
+        <button type="button" disabled>
+          Disabled action
+        </button>
+      ),
     });
 
     expect(screen.getByRole("dialog", { name: "Add Item" }).className).not.toContain(

@@ -223,10 +223,9 @@ describe("session write operations", () => {
     await updateSession("camp-1", "session-1", { dmNotes: "Private change" });
 
     expect(mockBatchUpdate).toHaveBeenCalledOnce();
-    expect(mockBatchUpdate).toHaveBeenCalledWith(
-      ref("campaigns/camp-1/sessions/session-1"),
-      { dmNotes: "Private change" }
-    );
+    expect(mockBatchUpdate).toHaveBeenCalledWith(ref("campaigns/camp-1/sessions/session-1"), {
+      dmNotes: "Private change",
+    });
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
 });

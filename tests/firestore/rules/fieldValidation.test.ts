@@ -84,10 +84,7 @@ describe("Firestore Rules: bounded field validation", () => {
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
     await expect(
-      dmDb
-        .collection("campaigns/c1/characters")
-        .doc("char1")
-        .set(validCharacterDocument("c1", ""))
+      dmDb.collection("campaigns/c1/characters").doc("char1").set(validCharacterDocument("c1", ""))
     ).resolves.toBeUndefined();
   });
 

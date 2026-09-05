@@ -15,39 +15,35 @@ describe("Functions: identity recovery mode", () => {
     await teardownTestFunctions();
   });
 
-  it(
-    "selects reclaim with no links, then link after a secondary device is connected",
-    async () => {
-      const primaryUid = await signInTestUser();
-      await adminDb.collection("userProfiles").doc(primaryUid).set({ firstName: "Primary" });
-      const registerIdentityCode = httpsCallable<{ role: "player" }, { code: string }>(
-        getTestFunctions(),
-        "registerIdentityCode"
-      );
-      const { data: registered } = await registerIdentityCode({ role: "player" });
+  it("selects reclaim with no links, then link after a secondary device is connected", async () => {
+    const primaryUid = await signInTestUser();
+    await adminDb.collection("userProfiles").doc(primaryUid).set({ firstName: "Primary" });
+    const registerIdentityCode = httpsCallable<{ role: "player" }, { code: string }>(
+      getTestFunctions(),
+      "registerIdentityCode"
+    );
+    const { data: registered } = await registerIdentityCode({ role: "player" });
 
-      await signInTestUser();
-      const getMode = httpsCallable<
-        { code: string },
-        { status: "found"; mode: "link" | "reclaim" }
-      >(getTestFunctions(), "getIdentityRecoveryMode");
-      await expect(getMode({ code: registered.code })).resolves.toMatchObject({
-        data: { status: "found", mode: "reclaim" },
-      });
+    await signInTestUser();
+    const getMode = httpsCallable<{ code: string }, { status: "found"; mode: "link" | "reclaim" }>(
+      getTestFunctions(),
+      "getIdentityRecoveryMode"
+    );
+    await expect(getMode({ code: registered.code })).resolves.toMatchObject({
+      data: { status: "found", mode: "reclaim" },
+    });
 
-      const linkDevice = httpsCallable<{ code: string }, void>(getTestFunctions(), "linkDevice");
-      await linkDevice({ code: registered.code });
+    const linkDevice = httpsCallable<{ code: string }, void>(getTestFunctions(), "linkDevice");
+    await linkDevice({ code: registered.code });
 
-      await signInTestUser();
-      await expect(getMode({ code: registered.code })).resolves.toMatchObject({
-        data: { status: "found", mode: "link" },
-      });
+    await signInTestUser();
+    await expect(getMode({ code: registered.code })).resolves.toMatchObject({
+      data: { status: "found", mode: "link" },
+    });
 
-      const startReclaim = httpsCallable(getTestFunctions(), "startIdentityReclaimJob");
-      await expect(startReclaim({ code: registered.code })).rejects.toMatchObject({
-        code: "functions/failed-precondition",
-      });
-    },
-    20_000
-  );
+    const startReclaim = httpsCallable(getTestFunctions(), "startIdentityReclaimJob");
+    await expect(startReclaim({ code: registered.code })).rejects.toMatchObject({
+      code: "functions/failed-precondition",
+    });
+  }, 20_000);
 });

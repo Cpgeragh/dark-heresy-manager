@@ -40,7 +40,8 @@ export function ItemMetaChips({
   if (!weight && !value && !purchaseAmount && !availability && !source) return null;
 
   const displayedWeight = weight ? formatWeightForDisplay(weight) : undefined;
-  const displayedValue = value !== undefined && value !== null ? formatMoneyForDisplay(value) : undefined;
+  const displayedValue =
+    value !== undefined && value !== null ? formatMoneyForDisplay(value) : undefined;
 
   const chips = (
     <>

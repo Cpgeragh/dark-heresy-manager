@@ -9,7 +9,10 @@ import { HOMEWORLD_LIST } from "../../../data/reference/homeworldData";
 import { findCareerByName, type CareerData } from "../../../data/reference/careerData";
 import { SANCTIONING_RESULTS } from "../../../mechanics/traits/sanctioningReference";
 import { TRAIT_LIST } from "../../../data/reference/traitData";
-import { applyTechPriestImplants, careerNeedsStartingChoice } from "../../../mechanics/career/careerStartingBenefits";
+import {
+  applyTechPriestImplants,
+  careerNeedsStartingChoice,
+} from "../../../mechanics/career/careerStartingBenefits";
 import { Chip } from "../../../ui/chips/Chip";
 import { colourMeta, colourRank } from "../../../ui/styles/colourTokens";
 import { RollChip } from "../../../ui/chips/RollChip";
@@ -51,7 +54,9 @@ export function BackgroundSetupFields({
   const [showCareerPicker, setShowCareerPicker] = useState(false);
   const [pendingHomeworldId, setPendingHomeworldId] = useState<string | null>(null);
   const [pendingCareer, setPendingCareer] = useState<CareerData | null>(null);
-  const [pendingStartingChoiceCareer, setPendingStartingChoiceCareer] = useState<CareerData | null>(null);
+  const [pendingStartingChoiceCareer, setPendingStartingChoiceCareer] = useState<CareerData | null>(
+    null
+  );
 
   const selectedHomeworld = HOMEWORLD_LIST.find((homeworld) => homeworld.id === talents.homeworld);
   const selectedCareer = findCareerByName(header.career);
@@ -68,10 +73,7 @@ export function BackgroundSetupFields({
       return {
         ...header,
         career: career.name,
-        rank:
-          sameCareer && currentRankBelongsToCareer
-            ? header.rank
-            : career.startingRank,
+        rank: sameCareer && currentRankBelongsToCareer ? header.rank : career.startingRank,
         careerPath: sameCareer ? header.careerPath : undefined,
       };
     },
@@ -88,9 +90,7 @@ export function BackgroundSetupFields({
       const homeworld = HOMEWORLD_LIST.find((entry) => entry.id === value);
       const currentCareerIsAllowed =
         !header.career ||
-        homeworld?.careers.some(
-          (career) => (career.careerName ?? career.name) === header.career
-        );
+        homeworld?.careers.some((career) => (career.careerName ?? career.name) === header.career);
 
       onUpdateTalents({
         ...talents,
@@ -101,9 +101,11 @@ export function BackgroundSetupFields({
       if (!currentCareerIsAllowed) {
         onUpdateHeader({ ...header, career: "", rank: "", careerPath: undefined });
         if (onUpdateCybernetics) {
-          void onUpdateCybernetics(cybernetics.filter(
-            (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-          ));
+          void onUpdateCybernetics(
+            cybernetics.filter(
+              (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+            )
+          );
         }
       }
       setShowHomeworldPicker(false);
@@ -161,7 +163,9 @@ export function BackgroundSetupFields({
                 <span className={`${uiItemName} truncate`}>{selectedHomeworld.name}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <RollChip>{selectedHomeworld.roll}</RollChip>
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedHomeworld.source)}`}>
+                  <Chip
+                    className={`bg-slate-800/40 font-code ${sourceColour(selectedHomeworld.source)}`}
+                  >
                     {selectedHomeworld.source}
                   </Chip>
                 </div>
@@ -194,7 +198,9 @@ export function BackgroundSetupFields({
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={`${uiItemName} truncate`}>{selectedCareer.name}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
+                  <Chip
+                    className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}
+                  >
                     {selectedCareer.source}
                   </Chip>
                 </div>
@@ -210,7 +216,9 @@ export function BackgroundSetupFields({
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={selectedCareer.name}
-                  content={<CareerInfoContent career={selectedCareer} homeworld={selectedHomeworld} />}
+                  content={
+                    <CareerInfoContent career={selectedCareer} homeworld={selectedHomeworld} />
+                  }
                 />
               </span>
             )
@@ -226,7 +234,9 @@ export function BackgroundSetupFields({
                 <span className={`${uiItemName} truncate`}>{sanctioning.resultName}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
                   {sanctioningRef && <RollChip>{sanctioningRef.roll}</RollChip>}
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
+                  <Chip
+                    className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}
+                  >
                     {selectedCareer.source}
                   </Chip>
                 </div>
@@ -259,10 +269,13 @@ export function BackgroundSetupFields({
                   <Chip className={colourMeta}>{selectedRank.xpLevel} XP</Chip>
                   {selectedRank.paths?.length && (
                     <Chip className={colourMeta}>
-                      {selectedRank.paths.length > 1 ? "Paths" : "Path"}: {selectedRank.paths.join(" / ")}
+                      {selectedRank.paths.length > 1 ? "Paths" : "Path"}:{" "}
+                      {selectedRank.paths.join(" / ")}
                     </Chip>
                   )}
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
+                  <Chip
+                    className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}
+                  >
                     {selectedCareer.source}
                   </Chip>
                 </div>
@@ -323,9 +336,12 @@ export function BackgroundSetupFields({
             if (!currentCareerIsAllowed) {
               onUpdateHeader({ ...header, career: "", rank: "", careerPath: undefined });
               if (onUpdateCybernetics) {
-                void onUpdateCybernetics(cybernetics.filter(
-                  (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-                ));
+                void onUpdateCybernetics(
+                  cybernetics.filter(
+                    (item) =>
+                      item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+                  )
+                );
               }
             }
             setPendingHomeworldId(null);
@@ -337,43 +353,44 @@ export function BackgroundSetupFields({
         />
       )}
 
-      {pendingCareer && (() => {
-        const trait = TRAIT_LIST.find((item) => item.id === "sanctioned-psyker");
-        if (!trait) return null;
-        return (
-          <TraitAcquisitionModal
-            trait={trait}
-            entry={{
-              uid: "career:imperial-psyker:sanctioned-psyker",
-              talentId: trait.id,
-              name: trait.name,
-            }}
-            cybernetics={cybernetics}
-            gear={gear}
-            onComplete={(result) => {
-              onUpdateHeader(headerForCareer(pendingCareer));
-              onUpdateTalents({
-                ...talents,
-                careerTraitAcquisition: result.entry.acquisition?.trait,
-                careerStartingChoices: undefined,
-              });
-              if (onUpdateCybernetics) {
-                void onUpdateCybernetics(
-                  applyTechPriestImplants(result.cybernetics ?? cybernetics, pendingCareer.name)
-                );
-              }
-              if (result.gear && onUpdateGear) {
-                void onUpdateGear(result.gear);
-              }
-              setPendingCareer(null);
-            }}
-            onClose={() => {
-              setPendingCareer(null);
-              setShowCareerPicker(true);
-            }}
-          />
-        );
-      })()}
+      {pendingCareer &&
+        (() => {
+          const trait = TRAIT_LIST.find((item) => item.id === "sanctioned-psyker");
+          if (!trait) return null;
+          return (
+            <TraitAcquisitionModal
+              trait={trait}
+              entry={{
+                uid: "career:imperial-psyker:sanctioned-psyker",
+                talentId: trait.id,
+                name: trait.name,
+              }}
+              cybernetics={cybernetics}
+              gear={gear}
+              onComplete={(result) => {
+                onUpdateHeader(headerForCareer(pendingCareer));
+                onUpdateTalents({
+                  ...talents,
+                  careerTraitAcquisition: result.entry.acquisition?.trait,
+                  careerStartingChoices: undefined,
+                });
+                if (onUpdateCybernetics) {
+                  void onUpdateCybernetics(
+                    applyTechPriestImplants(result.cybernetics ?? cybernetics, pendingCareer.name)
+                  );
+                }
+                if (result.gear && onUpdateGear) {
+                  void onUpdateGear(result.gear);
+                }
+                setPendingCareer(null);
+              }}
+              onClose={() => {
+                setPendingCareer(null);
+                setShowCareerPicker(true);
+              }}
+            />
+          );
+        })()}
 
       {pendingStartingChoiceCareer && (
         <CareerStartingChoiceModal
@@ -389,7 +406,8 @@ export function BackgroundSetupFields({
               void onUpdateCybernetics(
                 applyTechPriestImplants(
                   cybernetics.filter(
-                    (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+                    (item) =>
+                      item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
                   ),
                   pendingStartingChoiceCareer.name
                 )

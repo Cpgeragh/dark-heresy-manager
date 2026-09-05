@@ -44,7 +44,9 @@ describe("CompanionsTab", () => {
     render(<CompanionsTab companions={[]} editable={false} onUpdate={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "View companions" }));
-    fireEvent.click(screen.getByRole("button", { name: "Expand Adeptus Arbites Cyber-Mastiff details" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Expand Adeptus Arbites Cyber-Mastiff details" })
+    );
 
     expect(screen.getByRole("dialog", { name: "View Companions" })).toBeInTheDocument();
     expect(screen.getByText("4/8/12/24")).toBeInTheDocument();

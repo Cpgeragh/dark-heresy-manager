@@ -28,26 +28,32 @@ export async function forceReleaseCharacter(
     throw new HttpsError("not-found", "Campaign not found.");
   }
   if (!(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))) {
-    throw new HttpsError("permission-denied", "Only the campaign DM can force-release a character.");
+    throw new HttpsError(
+      "permission-denied",
+      "Only the campaign DM can force-release a character."
+    );
   }
 
-  await db.runTransaction(async (transaction) => {
-    const characterSnapshot = await transaction.get(characterRef);
-    if (!characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Character not found.");
-    }
-    const currentOwner = (characterSnapshot.data()?.userId as string | null | undefined) ?? null;
+  await db.runTransaction(
+    async (transaction) => {
+      const characterSnapshot = await transaction.get(characterRef);
+      if (!characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Character not found.");
+      }
+      const currentOwner = (characterSnapshot.data()?.userId as string | null | undefined) ?? null;
 
-    await applyOwnershipTransition(
-      transaction,
-      campaignRef,
-      characterRef,
-      "force-release",
-      callerUid,
-      currentOwner,
-      null
-    );
-  // See releaseCharacter.ts: the membership-removal check there widens this
-  // transaction's read set, so it gets the same extra retry headroom.
-  }, { maxAttempts: 10 });
+      await applyOwnershipTransition(
+        transaction,
+        campaignRef,
+        characterRef,
+        "force-release",
+        callerUid,
+        currentOwner,
+        null
+      );
+      // See releaseCharacter.ts: the membership-removal check there widens this
+      // transaction's read set, so it gets the same extra retry headroom.
+    },
+    { maxAttempts: 10 }
+  );
 }

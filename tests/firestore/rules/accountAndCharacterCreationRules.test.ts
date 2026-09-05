@@ -51,19 +51,23 @@ describe("Firestore Rules: account and character-creation protections", () => {
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
     const logs = dbAs(env, "player-1").collection("campaigns/c1/characters/char1/claimLog");
 
-    await expect(logs.doc("release").set({
-      action: "release",
-      actorUid: "player-1",
-      previousOwnerUid: "player-1",
-      newOwnerUid: null,
-      timestamp: new Date(),
-    })).rejects.toThrow();
-    await expect(logs.doc("claim").set({
-      action: "claim",
-      actorUid: "player-1",
-      previousOwnerUid: null,
-      newOwnerUid: "player-1",
-      timestamp: new Date(),
-    })).rejects.toThrow();
+    await expect(
+      logs.doc("release").set({
+        action: "release",
+        actorUid: "player-1",
+        previousOwnerUid: "player-1",
+        newOwnerUid: null,
+        timestamp: new Date(),
+      })
+    ).rejects.toThrow();
+    await expect(
+      logs.doc("claim").set({
+        action: "claim",
+        actorUid: "player-1",
+        previousOwnerUid: null,
+        newOwnerUid: "player-1",
+        timestamp: new Date(),
+      })
+    ).rejects.toThrow();
   });
 });

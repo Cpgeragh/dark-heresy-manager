@@ -36,7 +36,11 @@ describe("recordAuditEntry", () => {
   });
 
   it("defaults metadata to an empty object when omitted", async () => {
-    await recordAuditEntry({ operation: "character:claim", actorUid: "user-1", outcome: "failure" });
+    await recordAuditEntry({
+      operation: "character:claim",
+      actorUid: "user-1",
+      outcome: "failure",
+    });
 
     expect(mockAdd).toHaveBeenCalledWith(expect.objectContaining({ metadata: {} }));
   });

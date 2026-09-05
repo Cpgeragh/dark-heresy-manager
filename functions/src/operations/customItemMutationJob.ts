@@ -82,67 +82,70 @@ async function publishTargetVersionAndCreateJob(
   totalCount: number,
   idempotencyKey: string | null
 ): Promise<{ targetVersionId: string; jobId: string }> {
-  return db.runTransaction(async (transaction) => {
-    const itemSnapshot = await transaction.get(itemRef);
-    if (!itemSnapshot.exists) throw new HttpsError("not-found", "Custom item not found.");
-    const item = itemSnapshot.data() as {
-      draftVersionId?: string | null;
-      latestVersionId?: string | null;
-    };
-    const targetVersionId = requestedVersionId ?? item.draftVersionId ?? item.latestVersionId;
-    if (!targetVersionId) {
-      throw new HttpsError("failed-precondition", "Custom item has no version to publish.");
-    }
+  return db.runTransaction(
+    async (transaction) => {
+      const itemSnapshot = await transaction.get(itemRef);
+      if (!itemSnapshot.exists) throw new HttpsError("not-found", "Custom item not found.");
+      const item = itemSnapshot.data() as {
+        draftVersionId?: string | null;
+        latestVersionId?: string | null;
+      };
+      const targetVersionId = requestedVersionId ?? item.draftVersionId ?? item.latestVersionId;
+      if (!targetVersionId) {
+        throw new HttpsError("failed-precondition", "Custom item has no version to publish.");
+      }
 
-    const versionRef = itemRef.collection("versions").doc(targetVersionId);
-    const versionSnapshot = await transaction.get(versionRef);
-    if (!versionSnapshot.exists) {
-      throw new HttpsError("failed-precondition", "Custom item version not found.");
-    }
-    const version = versionSnapshot.data() as {
-      data: { name: string };
-      versionNumber: number;
-    };
-    const timestamp = FieldValue.serverTimestamp();
-    const preparedJob = prepareBulkJob(
-      db,
-      "custom-item-mutation",
-      callerUid,
-      {
-        campaignId,
-        customItemId,
-        mode: "publish-and-update",
-        targetVersionId,
-        actorUserId,
-      },
-      totalCount,
-      idempotencyKey
-    );
+      const versionRef = itemRef.collection("versions").doc(targetVersionId);
+      const versionSnapshot = await transaction.get(versionRef);
+      if (!versionSnapshot.exists) {
+        throw new HttpsError("failed-precondition", "Custom item version not found.");
+      }
+      const version = versionSnapshot.data() as {
+        data: { name: string };
+        versionNumber: number;
+      };
+      const timestamp = FieldValue.serverTimestamp();
+      const preparedJob = prepareBulkJob(
+        db,
+        "custom-item-mutation",
+        callerUid,
+        {
+          campaignId,
+          customItemId,
+          mode: "publish-and-update",
+          targetVersionId,
+          actorUserId,
+        },
+        totalCount,
+        idempotencyKey
+      );
 
-    transaction.update(versionRef, {
-      status: "published",
-      publishedAt: timestamp,
-      publishedByUserId: actorUserId,
-      updatedAt: timestamp,
-      updatedBy: { userId: actorUserId },
-    });
-    transaction.update(itemRef, {
-      status: "published",
-      name: version.data.name.trim(),
-      data: version.data,
-      publishedVersionId: targetVersionId,
-      draftVersionId: null,
-      latestVersionId: targetVersionId,
-      latestVersionNumber: version.versionNumber,
-      archivedAt: null,
-      archivedByUserId: null,
-      updatedAt: timestamp,
-      updatedBy: { userId: actorUserId },
-    });
-    transaction.set(preparedJob.ref, preparedJob.record);
+      transaction.update(versionRef, {
+        status: "published",
+        publishedAt: timestamp,
+        publishedByUserId: actorUserId,
+        updatedAt: timestamp,
+        updatedBy: { userId: actorUserId },
+      });
+      transaction.update(itemRef, {
+        status: "published",
+        name: version.data.name.trim(),
+        data: version.data,
+        publishedVersionId: targetVersionId,
+        draftVersionId: null,
+        latestVersionId: targetVersionId,
+        latestVersionNumber: version.versionNumber,
+        archivedAt: null,
+        archivedByUserId: null,
+        updatedAt: timestamp,
+        updatedBy: { userId: actorUserId },
+      });
+      transaction.set(preparedJob.ref, preparedJob.record);
 
-    return { targetVersionId, jobId: preparedJob.jobId };
-  }, { maxAttempts: 5 });
+      return { targetVersionId, jobId: preparedJob.jobId };
+    },
+    { maxAttempts: 5 }
+  );
 }
 
 async function resolveUpdateTargetVersionId(
@@ -307,7 +310,10 @@ export async function processCustomItemMutationChunk(
       if (!versionSnapshot.exists) {
         throw new HttpsError("failed-precondition", "Custom item version no longer exists.");
       }
-      const version = versionSnapshot.data() as { category: CustomItemCategory; data: Record<string, unknown> };
+      const version = versionSnapshot.data() as {
+        category: CustomItemCategory;
+        data: Record<string, unknown>;
+      };
       category = version.category;
       versionData = version.data;
     }
@@ -327,13 +333,20 @@ export async function processCustomItemMutationChunk(
         const character = docSnapshot.data() as CharacterItemArrays;
         const result =
           mode === "publish-and-update" || mode === "update"
-            ? buildCharacterCopyUpdate(character, category!, customItemId, targetVersionId!, versionData!)
+            ? buildCharacterCopyUpdate(
+                character,
+                category!,
+                customItemId,
+                targetVersionId!,
+                versionData!
+              )
             : buildCharacterCopyRemoval(character, customItemId);
         if (!result) continue;
-        const { updatedCopies: _updatedCopies, removedCopies: _removedCopies, ...fields } = result as Record<
-          string,
-          unknown
-        >;
+        const {
+          updatedCopies: _updatedCopies,
+          removedCopies: _removedCopies,
+          ...fields
+        } = result as Record<string, unknown>;
         batch.update(docSnapshot.ref, fields);
         mutatedThisChunk += 1;
       }
@@ -364,7 +377,12 @@ export async function processCustomItemMutationChunk(
   } catch (error) {
     const message = error instanceof HttpsError ? error.message : "Unexpected error.";
     if (await handleChunkFailure(input.jobId, leaseId, job, error, message)) {
-      return { done: false, processedCount: job.processedCount, totalCount: job.totalCount, mutatedThisChunk: 0 };
+      return {
+        done: false,
+        processedCount: job.processedCount,
+        totalCount: job.totalCount,
+        mutatedThisChunk: 0,
+      };
     }
     throw error;
   }

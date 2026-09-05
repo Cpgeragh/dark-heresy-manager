@@ -6,7 +6,9 @@ import "@testing-library/jest-dom";
 import { MalignancyRow } from "../../src/mechanics/corruption/MalignancyRow";
 import type { CorruptionMalignancyEntry } from "../../src/types/Character";
 
-function palsyLikeEntry(overrides: Partial<CorruptionMalignancyEntry> = {}): CorruptionMalignancyEntry {
+function palsyLikeEntry(
+  overrides: Partial<CorruptionMalignancyEntry> = {}
+): CorruptionMalignancyEntry {
   return { id: "m1", referenceId: "palsy", name: "Palsy", ...overrides };
 }
 
@@ -28,7 +30,14 @@ describe("MalignancyRow", () => {
   it("flags a missing roll as not recorded, and edits it via the Edit Rolls button", async () => {
     const user = userEvent.setup();
     const onUpdateRolls = vi.fn();
-    render(<MalignancyRow malignancy={palsyLikeEntry()} editable onRemove={vi.fn()} onUpdateRolls={onUpdateRolls} />);
+    render(
+      <MalignancyRow
+        malignancy={palsyLikeEntry()}
+        editable
+        onRemove={vi.fn()}
+        onUpdateRolls={onUpdateRolls}
+      />
+    );
 
     expect(screen.getByText("Agility: not recorded")).toBeInTheDocument();
 
@@ -55,7 +64,13 @@ describe("MalignancyRow", () => {
   it("shows a source chip for a custom malignancy with an origin", () => {
     render(
       <MalignancyRow
-        malignancy={{ id: "m3", name: "Weeping Eyes", effect: "Eyes that weep blood.", source: "Custom", custom: true }}
+        malignancy={{
+          id: "m3",
+          name: "Weeping Eyes",
+          effect: "Eyes that weep blood.",
+          source: "Custom",
+          custom: true,
+        }}
         editable
         onRemove={vi.fn()}
         onUpdateRolls={vi.fn()}
@@ -68,7 +83,14 @@ describe("MalignancyRow", () => {
   it("arms a confirm step on Remove instead of deleting immediately", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<MalignancyRow malignancy={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+    render(
+      <MalignancyRow
+        malignancy={palsyLikeEntry()}
+        editable
+        onRemove={onRemove}
+        onUpdateRolls={vi.fn()}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
@@ -80,7 +102,14 @@ describe("MalignancyRow", () => {
   it("deletes only after confirming", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<MalignancyRow malignancy={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+    render(
+      <MalignancyRow
+        malignancy={palsyLikeEntry()}
+        editable
+        onRemove={onRemove}
+        onUpdateRolls={vi.fn()}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
@@ -91,7 +120,14 @@ describe("MalignancyRow", () => {
   it("cancels without deleting", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<MalignancyRow malignancy={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+    render(
+      <MalignancyRow
+        malignancy={palsyLikeEntry()}
+        editable
+        onRemove={onRemove}
+        onUpdateRolls={vi.fn()}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));

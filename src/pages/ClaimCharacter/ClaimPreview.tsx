@@ -12,7 +12,12 @@ interface ClaimPreviewProps {
   onClaim: () => Promise<void> | void;
 }
 
-export function ClaimPreview({ characterName, campaignName, ownership, onClaim }: ClaimPreviewProps) {
+export function ClaimPreview({
+  characterName,
+  campaignName,
+  ownership,
+  onClaim,
+}: ClaimPreviewProps) {
   function renderStatus() {
     switch (ownership) {
       case "unclaimed":

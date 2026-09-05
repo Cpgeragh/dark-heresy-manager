@@ -46,9 +46,7 @@ vi.mock("../../src/components/MessageInput", () => ({
 import { DMInbox } from "../../src/pages/CampaignOverview/DMInbox";
 import type { CharacterListItem } from "../../src/types/Firestore";
 
-const characters = [
-  { id: "char-1", header: { characterName: "Vex" } } as CharacterListItem,
-];
+const characters = [{ id: "char-1", header: { characterName: "Vex" } } as CharacterListItem];
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -71,7 +69,9 @@ describe("DMInbox", () => {
   it("shows an error state", () => {
     useThreadsMock.mockReturnValue({ threads: [], loading: false, error: new Error("boom") });
     renderInbox();
-    expect(screen.getByText("Unable to load messages. Please refresh the page.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Unable to load messages. Please refresh the page.")
+    ).toBeInTheDocument();
   });
 
   it("shows a loading state", () => {

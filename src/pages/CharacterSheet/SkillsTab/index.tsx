@@ -1,12 +1,20 @@
 // src/pages/CharacterSheet/SkillsTab/index.tsx
 
 import { useState, useCallback, useMemo } from "react";
-import type { Characteristics, CorruptionBlock, SkillEntry, TalentsAndTraitsBlock } from "../../../types/Character";
+import type {
+  Characteristics,
+  CorruptionBlock,
+  SkillEntry,
+  TalentsAndTraitsBlock,
+} from "../../../types/Character";
 import type { CharField } from "../../../types/Character";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../mechanics/corruption/characteristicModifierTotals";
-import { getNextSkillTierAccess, getUnlockedSkillTrainingCosts } from "../../../mechanics/experience/skillAdvanceCosts";
+import {
+  getNextSkillTierAccess,
+  getUnlockedSkillTrainingCosts,
+} from "../../../mechanics/experience/skillAdvanceCosts";
 import { makeCurrentRankPurchase } from "../../../mechanics/experience/purchaseAttribution";
 import { buildSkillCatalogue, getSkillDefinition } from "../../../utils/skillUtils";
 import { AddButton } from "../../../ui/buttons/AddButton";
@@ -57,7 +65,8 @@ const SKILLS_TABS = [
   {
     value: "advanced",
     label: "Advanced",
-    activeClassName: "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
+    activeClassName:
+      "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
   },
 ] as const satisfies readonly SegmentedTabOption<SkillsView>[];
 
@@ -66,13 +75,25 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
   const title = basic ? "Basic Skills" : "Advanced Skills";
   const content = basic ? (
     <div className={`space-y-3 text-sm leading-relaxed lg:text-base ${uiTextBody}`}>
-      <p>Basic Skills can be attempted while Untrained using half the relevant Characteristic, rounded down.</p>
-      <p>The first acquisition makes the Skill Trained and uses the full Characteristic. Further acquisitions increase its Total by +10 and then +20.</p>
+      <p>
+        Basic Skills can be attempted while Untrained using half the relevant Characteristic,
+        rounded down.
+      </p>
+      <p>
+        The first acquisition makes the Skill Trained and uses the full Characteristic. Further
+        acquisitions increase its Total by +10 and then +20.
+      </p>
     </div>
   ) : (
     <div className={`space-y-3 text-sm leading-relaxed lg:text-base ${uiTextBody}`}>
-      <p>Advanced Skills cannot be attempted while Untrained. The displayed Total shows the Characteristic value the Skill will use once it becomes Trained.</p>
-      <p>The first acquisition makes the Skill Trained. Further acquisitions increase its Total by +10 and then +20.</p>
+      <p>
+        Advanced Skills cannot be attempted while Untrained. The displayed Total shows the
+        Characteristic value the Skill will use once it becomes Trained.
+      </p>
+      <p>
+        The first acquisition makes the Skill Trained. Further acquisitions increase its Total by
+        +10 and then +20.
+      </p>
     </div>
   );
 
@@ -92,7 +113,17 @@ function skillTierIndex(level: SkillEntry["level"]): number {
   return level === "untrained" ? -1 : PURCHASED_SKILL_TIERS.indexOf(level);
 }
 
-export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption, talents, career, rank, isDM = false }: SkillsTabProps) {
+export function SkillsTab({
+  skills,
+  editable,
+  onUpdate,
+  getCharField,
+  corruption,
+  talents,
+  career,
+  rank,
+  isDM = false,
+}: SkillsTabProps) {
   const canUseDmActions = isDM && editable;
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
@@ -103,11 +134,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
     [career, rank]
   );
   const [activeView, setActiveView] = useState<SkillsView>("basic");
-  const { containerRef, transitionClass, switchTo: switchView } = useSwipeableTabs(
-    SKILLS_VIEWS,
-    activeView,
-    setActiveView
-  );
+  const {
+    containerRef,
+    transitionClass,
+    switchTo: switchView,
+  } = useSwipeableTabs(SKILLS_VIEWS, activeView, setActiveView);
 
   const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
   const catalogueSkills = useMemo(() => buildSkillCatalogue(skills), [skills]);
@@ -222,9 +253,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
       };
       onUpdate(
-        owned
-          ? skills.map((skill) => (skill.id === id ? updated : skill))
-          : [...skills, updated]
+        owned ? skills.map((skill) => (skill.id === id ? updated : skill)) : [...skills, updated]
       );
     },
     [career, computedSkills, onUpdate, rank, skills]
@@ -257,7 +286,8 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   );
 
   const getNextTierAccess = useCallback(
-    (skillId: string, level: SkillEntry["level"]) => getNextSkillTierAccess(career, rank, skillId, level),
+    (skillId: string, level: SkillEntry["level"]) =>
+      getNextSkillTierAccess(career, rank, skillId, level),
     [career, rank]
   );
 
@@ -277,9 +307,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         },
       };
       onUpdate(
-        owned
-          ? skills.map((skill) => (skill.id === id ? updated : skill))
-          : [...skills, updated]
+        owned ? skills.map((skill) => (skill.id === id ? updated : skill)) : [...skills, updated]
       );
     },
     [career, onUpdate, rank, skills]
@@ -311,9 +339,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
       )
     );
 
-  const renderBasicSection = () => (
-    <div className="space-y-2">{renderItems(basicItems)}</div>
-  );
+  const renderBasicSection = () => <div className="space-y-2">{renderItems(basicItems)}</div>;
 
   return (
     <div className="space-y-4 text-slate-100">
@@ -340,14 +366,15 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
               editable ? (
                 <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
               ) : (
-                <ViewButton label="View basic skills" onClick={() => setIsUntrainedBasicOpen(true)} />
+                <ViewButton
+                  label="View basic skills"
+                  onClick={() => setIsUntrainedBasicOpen(true)}
+                />
               )
+            ) : editable ? (
+              <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
             ) : (
-              editable ? (
-                <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
-              ) : (
-                <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
-              )
+              <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
             )}
           </div>
           {activeView === "basic" ? (

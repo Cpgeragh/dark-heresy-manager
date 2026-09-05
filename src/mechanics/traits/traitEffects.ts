@@ -42,8 +42,12 @@ export function notesForSanctioning(result: SanctioningAcquisition): string {
     : result.rolledValue
       ? `Insanity Points gained: ${result.rolledValue}`
       : undefined;
-  const resultGroup = [`${result.resultName} (Sanctioning Side Effect)`, effect].filter(Boolean).join("\n");
-  const rollGroup = ["Roll Results", detail, `Age increased by ${result.ageIncrease} years`].filter(Boolean).join("\n");
+  const resultGroup = [`${result.resultName} (Sanctioning Side Effect)`, effect]
+    .filter(Boolean)
+    .join("\n");
+  const rollGroup = ["Roll Results", detail, `Age increased by ${result.ageIncrease} years`]
+    .filter(Boolean)
+    .join("\n");
   return [resultGroup, rollGroup].join("\n\n");
 }
 
@@ -75,32 +79,41 @@ export function getDerivedTraitEntries(
   const grants: TalentEntry[] = [];
   const selectedHomeworld = HOMEWORLD_LIST.find((homeworld) => homeworld.id === talents.homeworld);
   if (selectedHomeworld) {
-    grants.push(...homeworldEntries(
-      selectedHomeworld,
-      talents.homeworldTraitChoices,
-      `homeworld:${selectedHomeworld.id}`,
-      selectedHomeworld.name,
-      "Homeworld"
-    ));
+    grants.push(
+      ...homeworldEntries(
+        selectedHomeworld,
+        talents.homeworldTraitChoices,
+        `homeworld:${selectedHomeworld.id}`,
+        selectedHomeworld.name,
+        "Homeworld"
+      )
+    );
   }
 
   for (const origin of talents.talents.filter(
-    (entry) => entry.talentId === "cult-briefing" && entry.specialisation?.toLocaleLowerCase() === "culture"
+    (entry) =>
+      entry.talentId === "cult-briefing" && entry.specialisation?.toLocaleLowerCase() === "culture"
   )) {
     const homeworld = HOMEWORLD_LIST.find((item) => item.id === origin.acquisition?.homeworldId);
     if (!homeworld) continue;
-    grants.push(...homeworldEntries(
-      homeworld,
-      origin.acquisition?.homeworldTraitChoices,
-      `culture:${origin.uid}`,
-      `Cult Briefing (Culture: ${homeworld.name})`,
-      "Talent"
-    ));
+    grants.push(
+      ...homeworldEntries(
+        homeworld,
+        origin.acquisition?.homeworldTraitChoices,
+        `culture:${origin.uid}`,
+        `Cult Briefing (Culture: ${homeworld.name})`,
+        "Talent"
+      )
+    );
   }
 
-  const fleshRank = talents.talents.filter((entry) => entry.talentId === "the-flesh-is-weak").length;
+  const fleshRank = talents.talents.filter(
+    (entry) => entry.talentId === "the-flesh-is-weak"
+  ).length;
   if (fleshRank > 0) {
-    const origin = talents.talents.filter((entry) => entry.talentId === "the-flesh-is-weak")[fleshRank - 1];
+    const origin = talents.talents.filter((entry) => entry.talentId === "the-flesh-is-weak")[
+      fleshRank - 1
+    ];
     grants.push({
       uid: `grant:${origin.uid}:machine:${fleshRank}`,
       talentId: "machine",
@@ -220,7 +233,11 @@ export function getTraitCharacteristicModifierSources(
     if (entry.talentId === "homeworld-superior-origins" && characteristic === "wp") {
       addSource(sources, entry, "Superior Origins", 3);
     }
-    if (entry.talentId === "homeworld-fit-for-purpose" && !labourerBuild && CAREER_FIT[career ?? ""] === characteristic) {
+    if (
+      entry.talentId === "homeworld-fit-for-purpose" &&
+      !labourerBuild &&
+      CAREER_FIT[career ?? ""] === characteristic
+    ) {
       addSource(sources, entry, "Fit For Purpose", 3);
     }
     const soulBound = entry.acquisition?.trait?.soulBound;
@@ -232,7 +249,12 @@ export function getTraitCharacteristicModifierSources(
       addSource(sources, entry, "Soul-bound", -(soulBound.rolledValue ?? 0));
     }
     if (entry.talentId === "sanctioned-psyker") {
-      addSource(sources, entry, `Sanctioned Psyker (${entry.acquisition?.trait?.sanctioning?.resultName ?? "Side Effect"})`, sanctioningModifier(entry, characteristic));
+      addSource(
+        sources,
+        entry,
+        `Sanctioned Psyker (${entry.acquisition?.trait?.sanctioning?.resultName ?? "Side Effect"})`,
+        sanctioningModifier(entry, characteristic)
+      );
     }
   }
   return sources;
@@ -244,8 +266,10 @@ export function getTraitCharacteristicModifierTotals(
 ): Partial<Record<keyof Characteristics, number>> {
   const totals: Partial<Record<keyof Characteristics, number>> = {};
   for (const key of ["ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel"] as const) {
-    totals[key] = getTraitCharacteristicModifierSources(talents, key, career)
-      .reduce((total, source) => total + source.amount, 0);
+    totals[key] = getTraitCharacteristicModifierSources(talents, key, career).reduce(
+      (total, source) => total + source.amount,
+      0
+    );
   }
   return totals;
 }
@@ -274,7 +298,10 @@ export function getTraitSkillEffects(
     effects.sources.push({ name, type, amount });
   };
 
-  if (talents.homeworld === "forge-world" && matchesAny(skill, ["common-tech", "common-machine-cult"])) {
+  if (
+    talents.homeworld === "forge-world" &&
+    matchesAny(skill, ["common-tech", "common-machine-cult"])
+  ) {
     applyBasic("Forge World", "Homeworld");
   }
 
@@ -285,7 +312,8 @@ export function getTraitSkillEffects(
         if (skill.id === "tech-use") applyModifier("Primitive", -10, type);
         break;
       case "homeworld-wilderness-savvy":
-        if (matchesAny(skill, ["navigation-surface", "survival", "tracking"])) applyBasic("Wilderness Savvy", type);
+        if (matchesAny(skill, ["navigation-surface", "survival", "tracking"]))
+          applyBasic("Wilderness Savvy", type);
         break;
       case "homeworld-caves-of-steel":
         if (skill.id === "tech-use") applyBasic("Caves of Steel", type);
@@ -297,19 +325,29 @@ export function getTraitSkillEffects(
         if (skill.category === "Forbidden Lore") applyModifier("Blessed Ignorance", -5, type);
         break;
       case "homeworld-hagiography":
-        if (matchesAny(skill, ["common-imperial-creed", "common-imperium", "common-war"])) applyBasic("Hagiography", type);
+        if (matchesAny(skill, ["common-imperial-creed", "common-imperium", "common-war"]))
+          applyBasic("Hagiography", type);
         break;
       case "homeworld-liturgical-familiarity":
-        if (matchesAny(skill, ["literacy", "speak-high-gothic"])) applyBasic("Liturgical Familiarity", type);
+        if (matchesAny(skill, ["literacy", "speak-high-gothic"]))
+          applyBasic("Liturgical Familiarity", type);
         break;
       case "homeworld-shipwise":
-        if (matchesAny(skill, ["navigation-stellar", "pilot-spacecraft"])) applyBasic("Shipwise", type);
+        if (matchesAny(skill, ["navigation-stellar", "pilot-spacecraft"]))
+          applyBasic("Shipwise", type);
         break;
       case "homeworld-schola-education":
-        if (matchesAny(skill, [
-          "common-administratum", "common-ecclesiarchy", "common-imperial-creed",
-          "common-imperium", "common-war", "scholastic-philosophy",
-        ])) applyBasic("Schola Education", type);
+        if (
+          matchesAny(skill, [
+            "common-administratum",
+            "common-ecclesiarchy",
+            "common-imperial-creed",
+            "common-imperium",
+            "common-war",
+            "scholastic-philosophy",
+          ])
+        )
+          applyBasic("Schola Education", type);
         break;
       case "homeworld-engram-implantation":
         if (matchesAny(skill, ["deceive", "intimidate"])) applyTrained("Engram Implantation", type);
@@ -333,7 +371,12 @@ export function getTraitInsanityModifierSources(
   const sources: TraitModifierSource[] = [];
   for (const entry of getActiveTraitEntries(talents, career)) {
     if (entry.talentId === "homeworld-through-a-mirror-darkly") {
-      addSource(sources, entry, "Through a Mirror Darkly", entry.acquisition?.homeworldTraitChoices?.startingInsanity ?? 0);
+      addSource(
+        sources,
+        entry,
+        "Through a Mirror Darkly",
+        entry.acquisition?.homeworldTraitChoices?.startingInsanity ?? 0
+      );
     }
     const soulBound = entry.acquisition?.trait?.soulBound;
     if (entry.talentId === "soul-bound" && soulBound?.consequence === "insanity") {
@@ -342,7 +385,12 @@ export function getTraitInsanityModifierSources(
     if (entry.talentId === "sanctioned-psyker") {
       const result = entry.acquisition?.trait?.sanctioning;
       if (["hunted", "unlovely-memories", "the-horror"].includes(result?.resultId ?? "")) {
-        addSource(sources, entry, `Sanctioned Psyker (${result?.resultName})`, result?.rolledValue ?? 0);
+        addSource(
+          sources,
+          entry,
+          `Sanctioned Psyker (${result?.resultName})`,
+          result?.rolledValue ?? 0
+        );
       }
     }
   }
@@ -362,17 +410,30 @@ export function getTraitArmourSources(
   const natural = entries.find((entry) => entry.talentId === "natural-armour");
   const naturalAmount = Number(natural?.specialisation ?? 0);
   if (natural && Number.isInteger(naturalAmount) && naturalAmount > 0) {
-    sources.push({ name: "Natural Armour", type: sourceType(natural), amount: naturalAmount, kind: "natural" });
+    sources.push({
+      name: "Natural Armour",
+      type: sourceType(natural),
+      amount: naturalAmount,
+      kind: "natural",
+    });
   }
   const armourPlating = entries.find((entry) => entry.talentId === "armour-plating");
   if (armourPlating) {
-    sources.push({ name: "Armour Plating", type: sourceType(armourPlating), amount: 2, kind: "plating" });
+    sources.push({
+      name: "Armour Plating",
+      type: sourceType(armourPlating),
+      amount: 2,
+      kind: "plating",
+    });
   }
   const machineEntries = entries.filter((entry) => entry.talentId === "machine");
-  const machine = machineEntries.reduce<{ entry?: TalentEntry; amount: number }>((best, entry) => {
-    const amount = Number(entry.specialisation ?? 0);
-    return Number.isInteger(amount) && amount > best.amount ? { entry, amount } : best;
-  }, { amount: 0 });
+  const machine = machineEntries.reduce<{ entry?: TalentEntry; amount: number }>(
+    (best, entry) => {
+      const amount = Number(entry.specialisation ?? 0);
+      return Number.isInteger(amount) && amount > best.amount ? { entry, amount } : best;
+    },
+    { amount: 0 }
+  );
   if (machine.entry) {
     sources.push({
       name: machine.entry.grantedByTalentName ?? "Machine",
@@ -435,7 +496,9 @@ export function getTraitMovementEffects(
     const names = { burrower: "Burrow", flyer: "Fly", hoverer: "Hover" } as const;
     const name = names[entry.talentId as keyof typeof names];
     const speed = Number(entry.specialisation ?? 0);
-    return name && Number.isInteger(speed) && speed > 0 ? [{ name, speed, source: entry.name }] : [];
+    return name && Number.isInteger(speed) && speed > 0
+      ? [{ name, speed, source: entry.name }]
+      : [];
   });
   return { agilityBonus: bonus, sources, modes };
 }
@@ -444,7 +507,8 @@ export function getTraitGrantedTalentSpecs(
   talents: TalentsAndTraitsBlock,
   career?: string
 ): Array<{ id: string; name: string; specialisation?: string; origin: TalentEntry }> {
-  const grants: Array<{ id: string; name: string; specialisation?: string; origin: TalentEntry }> = [];
+  const grants: Array<{ id: string; name: string; specialisation?: string; origin: TalentEntry }> =
+    [];
   for (const entry of getActiveTraitEntries(talents, career)) {
     if (entry.talentId === "homeworld-credo-omnissiah") {
       grants.push({ id: "technical-knock", name: "Technical Knock", origin: entry });
@@ -464,10 +528,7 @@ export function getTraitGrantedTalentSpecs(
       grants.push({ id: "chem-geld", name: "Chem Geld", origin: entry });
     }
   }
-  if (
-    !career &&
-    talents.careerTraitAcquisition?.sanctioning?.resultId === "throne-wed"
-  ) {
+  if (!career && talents.careerTraitAcquisition?.sanctioning?.resultId === "throne-wed") {
     grants.push({
       id: "chem-geld",
       name: "Chem Geld",
@@ -493,9 +554,13 @@ export function getTraitGrantedWeaponTrainingIds(
   for (const entry of getActiveTraitEntries(talents, career)) {
     const choices = entry.acquisition?.homeworldTraitChoices;
     if (entry.talentId === "homeworld-skill-at-arms") {
-      if (choices?.basicWeaponGroup) ids.push(`basic-${choices.basicWeaponGroup.toLocaleLowerCase()}` as WeaponTrainingTalentId);
+      if (choices?.basicWeaponGroup)
+        ids.push(`basic-${choices.basicWeaponGroup.toLocaleLowerCase()}` as WeaponTrainingTalentId);
       ids.push("melee-primitive");
-      if (choices?.pistolWeaponGroup) ids.push(`pistol-${choices.pistolWeaponGroup.toLocaleLowerCase()}` as WeaponTrainingTalentId);
+      if (choices?.pistolWeaponGroup)
+        ids.push(
+          `pistol-${choices.pistolWeaponGroup.toLocaleLowerCase()}` as WeaponTrainingTalentId
+        );
     }
     if (entry.talentId === "homeworld-engram-implantation") {
       ids.push("pistol-sp", "pistol-las");
@@ -505,5 +570,7 @@ export function getTraitGrantedWeaponTrainingIds(
 }
 
 export function getWaryInitiativeBonus(talents: TalentsAndTraitsBlock, career?: string): number {
-  return getActiveTraitEntries(talents, career).some((entry) => entry.talentId === "homeworld-wary") ? 1 : 0;
+  return getActiveTraitEntries(talents, career).some((entry) => entry.talentId === "homeworld-wary")
+    ? 1
+    : 0;
 }

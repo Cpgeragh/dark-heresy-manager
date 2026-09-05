@@ -2,7 +2,11 @@
 
 import { useRef, useState } from "react";
 import type { GearItem } from "../../../types/Character";
-import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiFormLabel,
+} from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";

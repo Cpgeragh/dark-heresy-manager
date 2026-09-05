@@ -111,7 +111,8 @@ describe("SkillsTab", () => {
     expect(screen.getAllByText("Basic Skills").length).toBeGreaterThan(0);
     // Name also appears in the (closed) InfoModal dialog title, so match either.
     expect(screen.getAllByText("Awareness").length).toBeGreaterThan(0);
-    const skillRows = screen.getAllByText("Awareness")
+    const skillRows = screen
+      .getAllByText("Awareness")
       .map((name) => name.closest("div.group"))
       .filter((row): row is HTMLElement => row instanceof HTMLElement);
     expect(skillRows.length).toBeGreaterThan(0);
@@ -125,15 +126,29 @@ describe("SkillsTab", () => {
     renderTab({
       skills: [
         skill(),
-        skill({ id: "tech-use", name: "Tech-Use", characteristic: "int", advanced: true, level: "untrained" }),
+        skill({
+          id: "tech-use",
+          name: "Tech-Use",
+          characteristic: "int",
+          advanced: true,
+          level: "untrained",
+        }),
       ],
     });
 
-    await user.click(screen.getAllByRole("button", { name: "Show information about Basic Skills" })[0]);
+    await user.click(
+      screen.getAllByRole("button", { name: "Show information about Basic Skills" })[0]
+    );
     expect(screen.getByText(/half the relevant Characteristic, rounded down/)).toBeInTheDocument();
-    await user.click(within(screen.getByRole("dialog", { name: "Basic Skills" })).getByRole("button", { name: "Close" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Basic Skills" })).getByRole("button", {
+        name: "Close",
+      })
+    );
 
-    await user.click(screen.getAllByRole("button", { name: "Show information about Advanced Skills" })[0]);
+    await user.click(
+      screen.getAllByRole("button", { name: "Show information about Advanced Skills" })[0]
+    );
     expect(screen.getByText(/cannot be attempted while Untrained/)).toBeInTheDocument();
     expect(screen.getByText(/displayed Total shows the Characteristic value/)).toBeInTheDocument();
   });
@@ -169,7 +184,9 @@ describe("SkillsTab", () => {
       } else {
         desktopLayouts += 1;
         expect(controls).toHaveClass("flex", "items-center");
-        expect(within(controls as HTMLElement).getByRole("button", { name: "Delete Awareness" })).toBeInTheDocument();
+        expect(
+          within(controls as HTMLElement).getByRole("button", { name: "Delete Awareness" })
+        ).toBeInTheDocument();
         const headerRow = controls?.parentElement;
         expect(headerRow).toHaveClass("justify-between");
         metadataRow = headerRow?.nextElementSibling;
@@ -253,16 +270,12 @@ describe("SkillsTab", () => {
     }
 
     await user.click(deleteButtons[0]);
-    expect(
-      screen.getByText("Delete Awareness from this character?")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Delete Awareness from this character?")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Downgrade to/ })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onUpdate).not.toHaveBeenCalled();
-    expect(
-      screen.queryByText("Delete Awareness from this character?")
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Delete Awareness from this character?")).not.toBeInTheDocument();
 
     await user.click(deleteButtons[0]);
     await user.click(screen.getByRole("button", { name: "Delete" }));
@@ -276,25 +289,28 @@ describe("SkillsTab", () => {
   it.each([
     { level: "+10" as const, target: "trained" as const, label: "Trained" },
     { level: "+20" as const, target: "+10" as const, label: "+10" },
-  ])("offers Downgrade to $label or full deletion from $level", async ({ level, target, label }) => {
-    const user = userEvent.setup();
-    const { onUpdate } = renderTab({ skills: [skill({ level })] });
+  ])(
+    "offers Downgrade to $label or full deletion from $level",
+    async ({ level, target, label }) => {
+      const user = userEvent.setup();
+      const { onUpdate } = renderTab({ skills: [skill({ level })] });
 
-    await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
-    const dialog = screen.getByRole("dialog", { name: "Manage Skill" });
-    const downgradeButton = within(dialog).getByRole("button", { name: `Downgrade to ${label}` });
-    expect(downgradeButton).toHaveClass("border-amber-500", "text-amber-400");
-    expect(downgradeButton).not.toHaveClass("bg-amber-900/40");
-    expect(within(dialog).getByRole("button", { name: "Delete Skill" })).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+      await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
+      const dialog = screen.getByRole("dialog", { name: "Manage Skill" });
+      const downgradeButton = within(dialog).getByRole("button", { name: `Downgrade to ${label}` });
+      expect(downgradeButton).toHaveClass("border-amber-500", "text-amber-400");
+      expect(downgradeButton).not.toHaveClass("bg-amber-900/40");
+      expect(within(dialog).getByRole("button", { name: "Delete Skill" })).toBeInTheDocument();
+      expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
 
-    await user.click(within(dialog).getByRole("button", { name: `Downgrade to ${label}` }));
+      await user.click(within(dialog).getByRole("button", { name: `Downgrade to ${label}` }));
 
-    expect(onUpdate).toHaveBeenCalledTimes(1);
-    const next = onUpdate.mock.calls[0][0] as SkillEntry[];
-    expect(next.find((entry) => entry.id === "s1")?.level).toBe(target);
-    expect(screen.queryByRole("dialog", { name: "Manage Skill" })).not.toBeInTheDocument();
-  });
+      expect(onUpdate).toHaveBeenCalledTimes(1);
+      const next = onUpdate.mock.calls[0][0] as SkillEntry[];
+      expect(next.find((entry) => entry.id === "s1")?.level).toBe(target);
+      expect(screen.queryByRole("dialog", { name: "Manage Skill" })).not.toBeInTheDocument();
+    }
+  );
 
   it("shows the add affordance when editable", () => {
     renderTab();
@@ -318,17 +334,15 @@ describe("SkillsTab", () => {
     await user.click(within(dialog).getByRole("button", { name: "Select Awareness" }));
     const openDialog = screen.getByRole("dialog", { name: "Available Untrained Basic Skills" });
     expect(openDialog).toBeInTheDocument();
-    expect(within(openDialog).queryByRole("button", { name: "Select Awareness" })).not.toBeInTheDocument();
+    expect(
+      within(openDialog).queryByRole("button", { name: "Select Awareness" })
+    ).not.toBeInTheDocument();
     expect(within(openDialog).getByRole("button", { name: "Select Dodge" })).toBeInTheDocument();
   });
 
   it("restores the Skill list position after returning from a grouped category", async () => {
     const user = userEvent.setup();
-    render(
-      <StatefulSkillsTab
-        initialSkills={[]}
-      />
-    );
+    render(<StatefulSkillsTab initialSkills={[]} />);
     await user.click(screen.getByRole("button", { name: "Add advanced skill" }));
 
     const dialog = screen.getByRole("dialog", { name: "Available Untrained Advanced Skills" });
@@ -358,12 +372,18 @@ describe("SkillsTab", () => {
     );
 
     await user.click(screen.getAllByRole("button", { name: "Add basic skill" })[0]);
-    const availableDialog = screen.getByRole("dialog", { name: "Available Untrained Basic Skills" });
+    const availableDialog = screen.getByRole("dialog", {
+      name: "Available Untrained Basic Skills",
+    });
     await user.click(within(availableDialog).getByRole("button", { name: /Common Lore/ }));
 
     const availableCategory = screen.getByRole("dialog", { name: "Common Lore" });
-    expect(within(availableCategory).getByRole("button", { name: "Select Common Lore (Imperial Creed)" })).toBeInTheDocument();
-    expect(within(availableCategory).getByRole("button", { name: "Select Common Lore (Imperium)" })).toBeInTheDocument();
+    expect(
+      within(availableCategory).getByRole("button", { name: "Select Common Lore (Imperial Creed)" })
+    ).toBeInTheDocument();
+    expect(
+      within(availableCategory).getByRole("button", { name: "Select Common Lore (Imperium)" })
+    ).toBeInTheDocument();
     expect(
       within(availableCategory).getAllByText(
         "Hagiography (Homeworld): counts Common Lore (Imperial Creed) as Basic"
@@ -398,7 +418,9 @@ describe("SkillsTab", () => {
     expect(within(allCategory).getAllByText("Imperial Creed").length).toBeGreaterThan(0);
     expect(within(allCategory).getAllByText("Imperium").length).toBeGreaterThan(0);
     expect(within(allCategory).getAllByText("War").length).toBeGreaterThan(0);
-    expect(within(allCategory).queryByRole("button", { name: /Select Common Lore/ })).not.toBeInTheDocument();
+    expect(
+      within(allCategory).queryByRole("button", { name: /Select Common Lore/ })
+    ).not.toBeInTheDocument();
   });
 
   it("returns to the available picker after training the final skill in an open category", async () => {
@@ -417,7 +439,9 @@ describe("SkillsTab", () => {
     await user.click(screen.getByRole("button", { name: "Select Common Lore (Imperial Creed)" }));
     await user.click(screen.getByRole("button", { name: "Select Common Lore (Imperium)" }));
 
-    expect(await screen.findByRole("dialog", { name: "Available Untrained Basic Skills" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("dialog", { name: "Available Untrained Basic Skills" })
+    ).toBeInTheDocument();
     expect(screen.queryByText("No matches.")).not.toBeInTheDocument();
   });
 
@@ -442,7 +466,9 @@ describe("SkillsTab", () => {
   it("shows 'View Skills' and no add button in read-only mode", () => {
     renderTab({ editable: false });
     expect(screen.getAllByRole("button", { name: "View basic skills" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "View advanced skills" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "View advanced skills" }).length).toBeGreaterThan(
+      0
+    );
     expect(screen.queryByRole("button", { name: "Add basic skill" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add advanced skill" })).not.toBeInTheDocument();
   });
@@ -551,10 +577,11 @@ describe("SkillsTab", () => {
     });
 
     await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
-    await user.click(within(screen.getByRole("dialog", { name: "Manage Skill" })).getByRole(
-      "button",
-      { name: "Downgrade to +10" }
-    ));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage Skill" })).getByRole("button", {
+        name: "Downgrade to +10",
+      })
+    );
 
     const updated = (onUpdate.mock.calls[0][0] as SkillEntry[])[0];
     expect(updated.level).toBe("+10");
@@ -579,14 +606,22 @@ describe("SkillsTab", () => {
   it("shows Talent skill adjustments and keeps granted training read-only", async () => {
     const user = userEvent.setup();
     renderTab({
-      skills: [
-        skill({ id: "awareness", name: "Awareness", level: "trained" }),
-      ],
+      skills: [skill({ id: "awareness", name: "Awareness", level: "trained" })],
       talents: {
         homeworld: "",
         talents: [
-          { uid: "tal", talentId: "talented", name: "Talented (Awareness)", specialisation: "Awareness" },
-          { uid: "cult", talentId: "cult-briefing", name: "Cult Briefing (Heretek)", specialisation: "Heretek" },
+          {
+            uid: "tal",
+            talentId: "talented",
+            name: "Talented (Awareness)",
+            specialisation: "Awareness",
+          },
+          {
+            uid: "cult",
+            talentId: "cult-briefing",
+            name: "Cult Briefing (Heretek)",
+            specialisation: "Heretek",
+          },
         ],
         traits: [],
       },
@@ -596,12 +631,14 @@ describe("SkillsTab", () => {
     expect(
       screen.getAllByText("Cult Briefing (Heretek) (Talent): counts Tech-Use as trained").length
     ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText("Talented (Awareness) (Talent): +10").length
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("Talented (Awareness) (Talent): +10").length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Delete Tech-Use" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Show information about Awareness Adjustments" })).not.toBeInTheDocument();
-    await user.click(screen.getAllByRole("button", { name: "Show information about Awareness" })[0]);
+    expect(
+      screen.queryByRole("button", { name: "Show information about Awareness Adjustments" })
+    ).not.toBeInTheDocument();
+    await user.click(
+      screen.getAllByRole("button", { name: "Show information about Awareness" })[0]
+    );
     const awarenessInfo = screen.getByRole("dialog", { name: "Awareness" });
     expect(within(awarenessInfo).getByText("Effects")).toBeInTheDocument();
     expect(
@@ -620,9 +657,7 @@ describe("SkillsTab", () => {
     // The mobile and desktop layouts coexist in the DOM, with one card in each.
     expect(screen.getAllByText("Drive (Ground Vehicle)")).toHaveLength(2);
     expect(
-      screen.getAllByText(
-        "Career: Guardsman (Career): counts Drive (Ground Vehicle) as trained"
-      )
+      screen.getAllByText("Career: Guardsman (Career): counts Drive (Ground Vehicle) as trained")
     ).toHaveLength(2);
     expect(
       screen.queryByRole("button", { name: "Delete Drive (Ground Vehicle)" })
@@ -705,9 +740,7 @@ describe("SkillsTab", () => {
       talents: GUARDSMAN_DRIVE_GRANT,
     });
 
-    await user.click(
-      screen.getAllByRole("button", { name: "Delete Drive (Ground Vehicle)" })[0]
-    );
+    await user.click(screen.getAllByRole("button", { name: "Delete Drive (Ground Vehicle)" })[0]);
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage Skill" })).getByRole("button", {
         name: "Downgrade to Trained",
@@ -722,7 +755,12 @@ describe("SkillsTab", () => {
     const talents = {
       homeworld: "",
       talents: [
-        { uid: "cult", talentId: "cult-briefing", name: "Cult Briefing (Heretek)", specialisation: "Heretek" },
+        {
+          uid: "cult",
+          talentId: "cult-briefing",
+          name: "Cult Briefing (Heretek)",
+          specialisation: "Heretek",
+        },
       ],
       traits: [],
     };
@@ -741,7 +779,9 @@ describe("SkillsTab", () => {
       />
     );
 
-    expect(screen.queryByText(/Cult Briefing \(Heretek\) \(Talent\): Trained/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Cult Briefing \(Heretek\) \(Talent\): Trained/)
+    ).not.toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Delete Tech-Use" }).length).toBeGreaterThan(0);
 
     await user.click(screen.getAllByRole("button", { name: "Delete Tech-Use" })[0]);

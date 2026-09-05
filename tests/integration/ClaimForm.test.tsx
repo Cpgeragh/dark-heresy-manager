@@ -5,10 +5,7 @@ import "@testing-library/jest-dom";
 import { useState } from "react";
 import { ClaimForm } from "../../src/pages/ClaimCharacter/ClaimForm";
 
-function Wrapper(props: {
-  initialCode?: string;
-  onSubmit?: () => void;
-}) {
+function Wrapper(props: { initialCode?: string; onSubmit?: () => void }) {
   const [code, setCode] = useState(props.initialCode ?? "");
 
   return (

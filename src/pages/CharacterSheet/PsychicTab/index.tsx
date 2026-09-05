@@ -23,7 +23,12 @@ import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { PowerCard } from "./PowerCard";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../../ui/pickers/PickerModal";
 import { ArrowLeft, ArrowRight } from "../../../ui/icons/PickerArrows";
 import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";

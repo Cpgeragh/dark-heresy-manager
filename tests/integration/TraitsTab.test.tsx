@@ -55,7 +55,13 @@ const { MOCK_TRAIT_LIST } = vi.hoisted(() => {
       hasSpecialisation: true,
       specialisationLabel: "Size Category",
       specialisationOptions: [
-        "Minuscule", "Puny", "Scrawny", "Average", "Hulking", "Enormous", "Massive",
+        "Minuscule",
+        "Puny",
+        "Scrawny",
+        "Average",
+        "Hulking",
+        "Enormous",
+        "Massive",
       ],
     },
     {
@@ -156,7 +162,13 @@ describe("TraitsTab", () => {
         uid: "skin-3",
         talentId: "skin-of-iron",
         name: "Skin of Iron",
-        acquisition: { trait: { skinOfIronGrants: [{ rank: 3, kind: "upgrade", cyberneticId: "lungs", previousCraftsmanship: "Common" }] } },
+        acquisition: {
+          trait: {
+            skinOfIronGrants: [
+              { rank: 3, kind: "upgrade", cyberneticId: "lungs", previousCraftsmanship: "Common" },
+            ],
+          },
+        },
       },
     ];
     renderTab({
@@ -166,7 +178,11 @@ describe("TraitsTab", () => {
     });
     expect(screen.getByText("Owned: 2/4")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Delete Skin of Iron" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Delete Trait" })).getByRole("button", { name: "Delete" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Delete Trait" })).getByRole("button", {
+        name: "Delete",
+      })
+    );
     expect(onUpdateCybernetics).toHaveBeenCalledWith([
       expect.objectContaining({ id: "lungs", craftsmanship: "Common" }),
     ]);
@@ -219,8 +235,18 @@ describe("TraitsTab", () => {
     renderTab({
       talents: makeTalents({
         traits: [
-          { uid: "u1", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Weapon Skill)", specialisation: "Weapon Skill" },
-          { uid: "u2", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Weapon Skill)", specialisation: "Weapon Skill" },
+          {
+            uid: "u1",
+            talentId: "unnatural-characteristic",
+            name: "Unnatural Characteristic (Weapon Skill)",
+            specialisation: "Weapon Skill",
+          },
+          {
+            uid: "u2",
+            talentId: "unnatural-characteristic",
+            name: "Unnatural Characteristic (Weapon Skill)",
+            specialisation: "Weapon Skill",
+          },
         ],
       }),
     });
@@ -233,9 +259,24 @@ describe("TraitsTab", () => {
     renderTab({
       talents: makeTalents({
         traits: [
-          { uid: "u1", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Weapon Skill)", specialisation: "Weapon Skill" },
-          { uid: "u2", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Weapon Skill)", specialisation: "Weapon Skill" },
-          { uid: "u3", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Perception)", specialisation: "Perception" },
+          {
+            uid: "u1",
+            talentId: "unnatural-characteristic",
+            name: "Unnatural Characteristic (Weapon Skill)",
+            specialisation: "Weapon Skill",
+          },
+          {
+            uid: "u2",
+            talentId: "unnatural-characteristic",
+            name: "Unnatural Characteristic (Weapon Skill)",
+            specialisation: "Weapon Skill",
+          },
+          {
+            uid: "u3",
+            talentId: "unnatural-characteristic",
+            name: "Unnatural Characteristic (Perception)",
+            specialisation: "Perception",
+          },
         ],
       }),
     });
@@ -273,12 +314,24 @@ describe("TraitsTab", () => {
   it("deletes only one acquisition from a repeated Unnatural Characteristic", async () => {
     const user = userEvent.setup();
     const traits: TalentEntry[] = [
-      { uid: "u1", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Weapon Skill)", specialisation: "Weapon Skill" },
-      { uid: "u2", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Weapon Skill)", specialisation: "Weapon Skill" },
+      {
+        uid: "u1",
+        talentId: "unnatural-characteristic",
+        name: "Unnatural Characteristic (Weapon Skill)",
+        specialisation: "Weapon Skill",
+      },
+      {
+        uid: "u2",
+        talentId: "unnatural-characteristic",
+        name: "Unnatural Characteristic (Weapon Skill)",
+        specialisation: "Weapon Skill",
+      },
     ];
     const { onUpdateTalents } = renderTab({ talents: makeTalents({ traits }) });
 
-    await user.click(screen.getByRole("button", { name: "Delete Unnatural Characteristic (Weapon Skill)" }));
+    await user.click(
+      screen.getByRole("button", { name: "Delete Unnatural Characteristic (Weapon Skill)" })
+    );
     await user.click(screen.getByRole("button", { name: "Delete" }));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
     expect(next.traits).toHaveLength(1);
@@ -296,11 +349,14 @@ describe("TraitsTab", () => {
       "2 — Frightening (−10)",
       "3 — Horrifying (−20)",
       "4 — Terrifying (−30)",
-    ]) expect(screen.getByText(label)).toBeInTheDocument();
+    ])
+      expect(screen.getByText(label)).toBeInTheDocument();
 
     await user.click(screen.getByText("2 — Frightening (−10)"));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
-    expect(next.traits[0]).toEqual(expect.objectContaining({ name: "Fear (2)", specialisation: "2" }));
+    expect(next.traits[0]).toEqual(
+      expect.objectContaining({ name: "Fear (2)", specialisation: "2" })
+    );
   });
 
   it("returns to the Trait list after a non-repeatable choice is added", async () => {
@@ -356,7 +412,9 @@ describe("TraitsTab", () => {
     await user.click(addButton);
 
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
-    expect(next.traits[0]).toEqual(expect.objectContaining({ name: "Natural Armour (3)", specialisation: "3" }));
+    expect(next.traits[0]).toEqual(
+      expect.objectContaining({ name: "Natural Armour (3)", specialisation: "3" })
+    );
   });
 
   it("uses the same strict positive-integer entry for Machine", async () => {
@@ -378,7 +436,9 @@ describe("TraitsTab", () => {
     await user.click(addButton);
 
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
-    expect(next.traits[0]).toEqual(expect.objectContaining({ name: "Machine (4)", specialisation: "4" }));
+    expect(next.traits[0]).toEqual(
+      expect.objectContaining({ name: "Machine (4)", specialisation: "4" })
+    );
   });
 
   it("uses the exact seven Size choices", async () => {
@@ -387,12 +447,22 @@ describe("TraitsTab", () => {
     await user.click(screen.getByRole("button", { name: "Add Trait" }));
     await user.click(screen.getByText("Size"));
 
-    for (const size of ["Minuscule", "Puny", "Scrawny", "Average", "Hulking", "Enormous", "Massive"]) {
+    for (const size of [
+      "Minuscule",
+      "Puny",
+      "Scrawny",
+      "Average",
+      "Hulking",
+      "Enormous",
+      "Massive",
+    ]) {
       expect(screen.getByText(size)).toBeInTheDocument();
     }
     await user.click(screen.getByText("Hulking"));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
-    expect(next.traits[0]).toEqual(expect.objectContaining({ name: "Size (Hulking)", specialisation: "Hulking" }));
+    expect(next.traits[0]).toEqual(
+      expect.objectContaining({ name: "Size (Hulking)", specialisation: "Hulking" })
+    );
   });
 
   it("flows cards into natural-height columns without reserving row space", () => {

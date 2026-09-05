@@ -106,7 +106,9 @@ describe("registerRecoveryCode", () => {
       campaignId: "c1",
       characterId: "char-1",
     });
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { recoveryCode: result.code });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      recoveryCode: result.code,
+    });
     expect(mockHistoryCollection).not.toHaveBeenCalled();
   });
 

@@ -106,13 +106,15 @@ function makeCharacter(id: string, campaignRef: { path: string }) {
   return { id, ref, logRef };
 }
 
-function setDefaultReads(options: {
-  owned?: boolean;
-  linked?: boolean;
-  characters?: ReturnType<typeof makeCharacter>[];
-  inboundLinks?: Array<{ ref: { path: string } }>;
-  identityCode?: string;
-} = {}) {
+function setDefaultReads(
+  options: {
+    owned?: boolean;
+    linked?: boolean;
+    characters?: ReturnType<typeof makeCharacter>[];
+    inboundLinks?: Array<{ ref: { path: string } }>;
+    identityCode?: string;
+  } = {}
+) {
   const characters = options.characters ?? [];
   const inboundLinks = options.inboundLinks ?? [];
   mockTransactionGet.mockImplementation((ref: unknown) => {

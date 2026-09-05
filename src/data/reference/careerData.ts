@@ -105,7 +105,12 @@ export const CAREER_LIST: readonly CareerData[] = [
           { talentId: "pistol-training", specialisation: "SP" },
         ],
       },
-      { options: [{ talentId: "light-sleeper" }, { talentId: "resistance", specialisation: "Cold" }] },
+      {
+        options: [
+          { talentId: "light-sleeper" },
+          { talentId: "resistance", specialisation: "Cold" },
+        ],
+      },
       { options: [{ talentId: "sprint" }, { talentId: "unremarkable" }] },
     ],
     startingGear:

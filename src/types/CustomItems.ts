@@ -101,20 +101,12 @@ export type CustomGrenadeData = Omit<
   weaponKind: "grenade";
 };
 
-export type CustomWeaponData =
-  | CustomRangedWeaponData
-  | CustomMeleeWeaponData
-  | CustomGrenadeData;
+export type CustomWeaponData = CustomRangedWeaponData | CustomMeleeWeaponData | CustomGrenadeData;
 
 export type CustomArmourData =
   | (Omit<
       WornArmourPiece,
-      | "id"
-      | "referenceId"
-      | "customLibraryId"
-      | "customLibraryVersionId"
-      | "worn"
-      | "upgrades"
+      "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "worn" | "upgrades"
     > & {
       armourKind: "worn";
     })

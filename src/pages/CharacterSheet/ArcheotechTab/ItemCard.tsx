@@ -102,10 +102,7 @@ export function ItemCard({
           <div className={hasBody ? "px-3 pb-3 lg:px-4 lg:pb-4" : ""}>
             {editable && hasBody && (
               <div className="flex justify-end">
-                <RemoveButton
-                  onClick={onRemove}
-                  label="Remove"
-                />
+                <RemoveButton onClick={onRemove} label="Remove" />
               </div>
             )}
 
@@ -199,11 +196,7 @@ export function ItemCard({
         </div>
 
         {editable && !hasBody && (
-          <RemoveButton
-            onClick={onRemove}
-            label="Remove"
-            className="mt-0.5"
-          />
+          <RemoveButton onClick={onRemove} label="Remove" className="mt-0.5" />
         )}
       </div>
     </div>

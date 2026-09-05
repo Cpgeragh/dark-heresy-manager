@@ -167,7 +167,9 @@ describe("getIdentityRecoveryMode", () => {
   });
 
   it("returns reclaim when no connected device records remain", async () => {
-    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { status: "found", mode: "reclaim" } });
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({
+      data: { status: "found", mode: "reclaim" },
+    });
 
     await expect(getIdentityRecoveryMode("DH-C0DE-0001")).resolves.toBe("reclaim");
   });

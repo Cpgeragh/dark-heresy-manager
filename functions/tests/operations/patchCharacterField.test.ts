@@ -7,7 +7,11 @@ const mockTransactionGet = vi.fn();
 const mockTransactionUpdate = vi.fn();
 const mockTransactionSet = vi.fn();
 const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<void>) => {
-  await callback({ get: mockTransactionGet, update: mockTransactionUpdate, set: mockTransactionSet });
+  await callback({
+    get: mockTransactionGet,
+    update: mockTransactionUpdate,
+    set: mockTransactionSet,
+  });
 });
 
 const mockCharacterRef = {};
@@ -60,7 +64,10 @@ describe("patchCharacterField", () => {
     mockCampaignGet.mockResolvedValue({ exists: false });
 
     await expect(
-      patchCharacterField({ campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" }, "dm-1")
+      patchCharacterField(
+        { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -69,7 +76,10 @@ describe("patchCharacterField", () => {
     mockTransactionGet.mockResolvedValue({ exists: false });
 
     await expect(
-      patchCharacterField({ campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" }, "dm-1")
+      patchCharacterField(
+        { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -80,7 +90,10 @@ describe("patchCharacterField", () => {
       data: () => ({ userId: "player-1", isEditableByPlayer: false }),
     });
 
-    await patchCharacterField({ campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" }, "dm-1");
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+      "dm-1"
+    );
 
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { notes: "hi" });
   });
@@ -93,7 +106,12 @@ describe("patchCharacterField", () => {
     });
 
     await patchCharacterField(
-      { campaignId: "c1", characterId: "char-1", field: "header", value: { characterName: "Brother Corvus" } },
+      {
+        campaignId: "c1",
+        characterId: "char-1",
+        field: "header",
+        value: { characterName: "Brother Corvus" },
+      },
       "dm-1"
     );
 
@@ -115,7 +133,12 @@ describe("patchCharacterField", () => {
     });
 
     await patchCharacterField(
-      { campaignId: "c1", characterId: "char-1", field: "header", value: { characterName: "Brother Corvus" } },
+      {
+        campaignId: "c1",
+        characterId: "char-1",
+        field: "header",
+        value: { characterName: "Brother Corvus" },
+      },
       "dm-1"
     );
 
@@ -196,7 +219,10 @@ describe("patchCharacterField", () => {
       "dm-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { talentsAndTraits, psychic });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      talentsAndTraits,
+      psychic,
+    });
   });
 
   it("rejects the whole multi-field patch when one field is invalid, writing nothing", async () => {
@@ -265,7 +291,10 @@ describe("patchCharacterField", () => {
       data: () => ({ userId: "player-1", isEditableByPlayer: false }),
     });
 
-    await patchCharacterField({ campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" }, "dm-1");
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+      "dm-1"
+    );
 
     expect(mockTransactionSet).not.toHaveBeenCalled();
   });
@@ -318,7 +347,10 @@ describe("patchCharacterField", () => {
 
   it("rejects an invalid value for a registered field before touching Firestore", async () => {
     await expect(
-      patchCharacterField({ campaignId: "c1", characterId: "char-1", field: "notes", value: 42 }, "dm-1")
+      patchCharacterField(
+        { campaignId: "c1", characterId: "char-1", field: "notes", value: 42 },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
     expect(mockCampaignGet).not.toHaveBeenCalled();
     expect(mockTransactionGet).not.toHaveBeenCalled();

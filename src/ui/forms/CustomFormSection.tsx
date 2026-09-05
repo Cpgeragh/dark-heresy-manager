@@ -23,9 +23,7 @@ export function CustomFormSection({
   return (
     <>
       <SectionHeader as="h3">{title}</SectionHeader>
-      <div className={`${uiSection} space-y-3 ${contentClassName}`.trim()}>
-        {children}
-      </div>
+      <div className={`${uiSection} space-y-3 ${contentClassName}`.trim()}>{children}</div>
     </>
   );
 }

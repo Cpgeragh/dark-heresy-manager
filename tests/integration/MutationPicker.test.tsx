@@ -152,7 +152,9 @@ describe("MutationPicker editable=false", () => {
     const { onAdd } = setup("minor", false);
 
     expect(screen.getByRole("dialog", { name: "View Minor Mutations" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add custom minor mutation" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Add custom minor mutation" })
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByText("Tough Hide", { selector: "span" }));
     expect(onAdd).not.toHaveBeenCalled();

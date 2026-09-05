@@ -59,7 +59,9 @@ describe("getTalentsSpent", () => {
     const char = makeCharacter({
       career: "Guardsman",
       rank: "Conscript",
-      talents: [talentEntry({ uid: "c1", talentId: "chem-geld", name: "Chem Geld", manualCost: 250 })],
+      talents: [
+        talentEntry({ uid: "c1", talentId: "chem-geld", name: "Chem Geld", manualCost: 250 }),
+      ],
     });
     expect(getTalentsSpent(char)).toBe(250);
   });
@@ -91,7 +93,14 @@ describe("getTalentsSpent", () => {
     const char = makeCharacter({
       career: "Guardsman",
       rank: "Conscript",
-      talents: [talentEntry({ uid: "g1", talentId: "chem-geld", name: "Chem Geld", grantedByTalentEntryUid: "other-uid" })],
+      talents: [
+        talentEntry({
+          uid: "g1",
+          talentId: "chem-geld",
+          name: "Chem Geld",
+          grantedByTalentEntryUid: "other-uid",
+        }),
+      ],
     });
     expect(getTalentsSpent(char)).toBe(0);
   });
@@ -101,7 +110,14 @@ describe("getTalentsSpent", () => {
     const char = makeCharacter({
       career: "Adept",
       rank: "Sage Logister",
-      traits: [{ uid: "u1", talentId: "unnatural-characteristic", name: "Unnatural Characteristic (Intelligence)", specialisation: "Intelligence" }],
+      traits: [
+        {
+          uid: "u1",
+          talentId: "unnatural-characteristic",
+          name: "Unnatural Characteristic (Intelligence)",
+          specialisation: "Intelligence",
+        },
+      ],
     });
     expect(getTalentsSpent(char)).toBe(500);
   });

@@ -17,9 +17,7 @@ const psychicWithPowers: PsychicBlock = {
     { id: "p1", name: "Sense Presence", known: true, isMinor: true },
     { id: "p2", name: "Deja Vu", known: true, isMinor: true },
   ],
-  majorPowers: [
-    { id: "p3", name: "Mind Probe", known: true, isMinor: false },
-  ],
+  majorPowers: [{ id: "p3", name: "Mind Probe", known: true, isMinor: false }],
 };
 
 describe("usePsychicPowers", () => {

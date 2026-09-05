@@ -44,19 +44,22 @@ export async function reconcileCharacterSpentXp(
   }
   const dmId = campaignSnapshot.data()?.dmId;
 
-  return db.runTransaction(async (transaction) => {
-    const characterSnapshot = await transaction.get(characterRef);
-    if (!characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Character not found.");
-    }
-    const characterData = characterSnapshot.data() ?? {};
-    await assertCanEditCharacter(db, callerUid, dmId, characterData);
+  return db.runTransaction(
+    async (transaction) => {
+      const characterSnapshot = await transaction.get(characterRef);
+      if (!characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Character not found.");
+      }
+      const characterData = characterSnapshot.data() ?? {};
+      await assertCanEditCharacter(db, callerUid, dmId, characterData);
 
-    const experience = (characterData.experience ?? {}) as Record<string, unknown>;
-    if (experience.spent === input.spent) {
-      return { updated: false };
-    }
-    transaction.update(characterRef, { "experience.spent": input.spent });
-    return { updated: true };
-  }, { maxAttempts: 5 });
+      const experience = (characterData.experience ?? {}) as Record<string, unknown>;
+      if (experience.spent === input.spent) {
+        return { updated: false };
+      }
+      transaction.update(characterRef, { "experience.spent": input.spent });
+      return { updated: true };
+    },
+    { maxAttempts: 5 }
+  );
 }

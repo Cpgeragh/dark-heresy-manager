@@ -19,7 +19,13 @@ import {
   uiCardTitle,
 } from "../../../ui/styles/editableStyles";
 import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourEmerald, colourCyan, colourOrange, colourViolet, colourTealLight } from "../../../ui/styles/colourTokens";
+import {
+  colourEmerald,
+  colourCyan,
+  colourOrange,
+  colourViolet,
+  colourTealLight,
+} from "../../../ui/styles/colourTokens";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -62,8 +68,7 @@ export function GrenadeCard({
   isStowedCard?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
   const expansionSource = !isStowedCard && isEquipped;
-  const [previousExpansionSource, setPreviousExpansionSource] =
-    useState(expansionSource);
+  const [previousExpansionSource, setPreviousExpansionSource] = useState(expansionSource);
   const [expanded, setExpanded] = useState(expansionSource);
 
   if (previousExpansionSource !== expansionSource) {
@@ -77,8 +82,12 @@ export function GrenadeCard({
       <div className={uiSection + " opacity-60"}>
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-sm lg:text-base font-semibold text-slate-400 truncate">{item.name}</p>
-            <p className={`text-xs lg:text-sm ${uiTextSubtle}`}>Stowed · {item.quantity} remaining</p>
+            <p className="text-sm lg:text-base font-semibold text-slate-400 truncate">
+              {item.name}
+            </p>
+            <p className={`text-xs lg:text-sm ${uiTextSubtle}`}>
+              Stowed · {item.quantity} remaining
+            </p>
           </div>
           <Chip size="sm" className="border-slate-600 bg-slate-800/40 text-slate-300 shrink-0">
             Stowed
@@ -116,17 +125,29 @@ export function GrenadeCard({
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
             <p className={`${uiCardTitle} truncate`}>{item.name}</p>
-            {libraryItem && (
-              <StatusBadge status={libraryItem.status} />
-            )}
+            {libraryItem && <StatusBadge status={libraryItem.status} />}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={item.type === "Mine" ? colourViolet : item.type === "Missile" ? colourOrange : colourCyan}>
+            <Chip
+              size="sm"
+              className={
+                item.type === "Mine"
+                  ? colourViolet
+                  : item.type === "Missile"
+                    ? colourOrange
+                    : colourCyan
+              }
+            >
               {item.type ?? "Grenade"}
             </Chip>
-            {(() => { const c = weaponClassChip(item.class); return c ? (
-              <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
-            ) : null; })()}
+            {(() => {
+              const c = weaponClassChip(item.class);
+              return c ? (
+                <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>
+                  {c.label}
+                </Chip>
+              ) : null;
+            })()}
             {isEquipped && (
               <Chip size="sm" className={colourEmerald}>
                 {equippedCount} ready
@@ -171,10 +192,10 @@ export function GrenadeCard({
 
           {/* Stat chips */}
           <div className="flex flex-wrap gap-1.5">
-            {item.type !== "Mine" && item.type !== "Missile" && <StatChip label="Range" value={thrownRange} />}
-            {(!item.damage || item.damage === "—") && (
-              <StatChip label="Damage" value="—" />
+            {item.type !== "Mine" && item.type !== "Missile" && (
+              <StatChip label="Range" value={thrownRange} />
             )}
+            {(!item.damage || item.damage === "—") && <StatChip label="Damage" value="—" />}
             {item.damage && item.damage !== "—" && item.damage !== "Special" && (
               <>
                 <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
@@ -184,7 +205,9 @@ export function GrenadeCard({
             {item.damage === "Special" && (
               <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
                 <span className={uiTextLabel}>Damage</span>
-                <span className="text-sm lg:text-base font-code text-amber-400 mt-0.5">Special</span>
+                <span className="text-sm lg:text-base font-code text-amber-400 mt-0.5">
+                  Special
+                </span>
               </div>
             )}
             <StatChip label="Pen" value={item.pen && item.pen !== "—" ? item.pen : "—"} />
@@ -213,7 +236,9 @@ export function GrenadeCard({
                   <InfoModal
                     title={`${item.name} Rules`}
                     content={
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{rulesDescription}</p>
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {rulesDescription}
+                      </p>
                     }
                   />
                 </span>
@@ -241,7 +266,9 @@ export function GrenadeCard({
               onUpdate={onUpdateQty}
             />
             {isEquipped && item.quantity > 3 && (
-              <span className={`text-[10px] lg:text-xs ${uiTextMuted} italic ml-1`}>3 ready, rest stowed</span>
+              <span className={`text-[10px] lg:text-xs ${uiTextMuted} italic ml-1`}>
+                3 ready, rest stowed
+              </span>
             )}
           </div>
 

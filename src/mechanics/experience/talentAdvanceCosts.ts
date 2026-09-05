@@ -31,7 +31,10 @@ export function getNextTalentPurchase(
   ownedEntries: readonly TalentEntry[]
 ): XpPurchaseRecord | undefined {
   const slots = getUnlockedCareerAdvances(career, rank)
-    .filter((entry) => isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation))
+    .filter(
+      (entry) =>
+        isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation)
+    )
     .flatMap((entry) =>
       Array.from({ length: entry.advance.repeatableAtThisRank ?? 1 }, () => ({
         cost: entry.advance.cost,
@@ -64,7 +67,10 @@ export function isTalentMaxedAtCurrentRank(
   ownedEntries: readonly TalentEntry[]
 ): boolean {
   const unlockedSlotCount = getUnlockedCareerAdvances(career, rank)
-    .filter((entry) => isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation))
+    .filter(
+      (entry) =>
+        isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation)
+    )
     .reduce((total, entry) => total + (entry.advance.repeatableAtThisRank ?? 1), 0);
   if (unlockedSlotCount === 0) return false;
   const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
@@ -88,7 +94,8 @@ export function hasAnyUnlockedTalentOption(
       .map((entry) => entry.advance.specialisation ?? "")
   );
   for (const spec of specialisations) {
-    if (getNextTalentCost(career, rank, talentId, spec || undefined, ownedEntries) !== undefined) return true;
+    if (getNextTalentCost(career, rank, talentId, spec || undefined, ownedEntries) !== undefined)
+      return true;
   }
   return false;
 }
@@ -105,7 +112,8 @@ export function getTalentRankChips(
   const seen = new Set<string>();
   const chips: string[] = [];
   for (const entry of getAllCareerAdvances(career)) {
-    if (!isTalentOrTraitAdvance(entry.advance) || !matches(entry.advance, talentId, specialisation)) continue;
+    if (!isTalentOrTraitAdvance(entry.advance) || !matches(entry.advance, talentId, specialisation))
+      continue;
     const name = rankNames.get(entry.rankId);
     if (name && !seen.has(name)) {
       seen.add(name);
@@ -121,9 +129,18 @@ export function getTalentsSpent(character: Character): number {
   const rank = character.header.rank;
   const counted: TalentEntry[] = [];
   let total = 0;
-  for (const entry of [...character.talentsAndTraits.talents, ...character.talentsAndTraits.traits]) {
+  for (const entry of [
+    ...character.talentsAndTraits.talents,
+    ...character.talentsAndTraits.traits,
+  ]) {
     if (entry.grantedByTalentEntryUid) continue;
-    const legacyRealCost = getNextTalentCost(career, rank, entry.talentId, entry.specialisation, counted);
+    const legacyRealCost = getNextTalentCost(
+      career,
+      rank,
+      entry.talentId,
+      entry.specialisation,
+      counted
+    );
     total += entry.xpPurchase?.cost ?? legacyRealCost ?? entry.manualCost ?? 0;
     counted.push(entry);
   }

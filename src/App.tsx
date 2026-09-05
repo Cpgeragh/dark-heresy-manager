@@ -113,9 +113,7 @@ export default function App() {
         <UpdateStallNotice />
         <div className="min-h-screen bg-slate-950 text-slate-100">
           {/* HEADER */}
-          <AppHeader
-            currentPath={location.pathname}
-          />
+          <AppHeader currentPath={location.pathname} />
 
           {/* ROUTES */}
           <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>

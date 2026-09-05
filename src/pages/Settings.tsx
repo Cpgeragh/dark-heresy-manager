@@ -167,7 +167,9 @@ export default function Settings({
       await deleteCurrentAccount();
     } catch (err) {
       console.error("Failed to delete account:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to delete account. Please try again.");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to delete account. Please try again."
+      );
     } finally {
       deletingAccountRef.current = false;
       setDeletingAccount(false);

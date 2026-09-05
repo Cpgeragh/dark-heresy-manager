@@ -11,7 +11,7 @@ const makeCharacter = (overrides: Partial<Character> = {}): Character =>
     campaignId: "campaign-1",
     recoveryCode: "DH-TEST-CODE",
     ...overrides,
-  } as Character);
+  }) as Character;
 
 describe("useCharacterPermissions", () => {
   describe("allowedToEdit", () => {

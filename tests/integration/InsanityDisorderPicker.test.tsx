@@ -110,7 +110,10 @@ describe("InsanityDisorderPicker", () => {
     await user.click(screen.getByRole("radio", { name: "2nd Ed" }));
     expect(screen.getByRole("button", { name: "Add Disorder" })).toBeDisabled();
 
-    await user.type(screen.getByPlaceholderText("What this disorder does…"), "Fear of something specific.");
+    await user.type(
+      screen.getByPlaceholderText("What this disorder does…"),
+      "Fear of something specific."
+    );
     expect(screen.getByRole("button", { name: "Add Disorder" })).not.toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: "Add Disorder" }));

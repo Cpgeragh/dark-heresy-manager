@@ -9,7 +9,10 @@ import type {
   GrenadeItem,
   ArcheotechItem,
 } from "../../../types/Character";
-import { RANGED_WEAPON_REFERENCE, resolveRangedWeaponReference } from "../../../data/reference/weaponReference";
+import {
+  RANGED_WEAPON_REFERENCE,
+  resolveRangedWeaponReference,
+} from "../../../data/reference/weaponReference";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
@@ -146,11 +149,7 @@ export function AmmoEntryRow({
           )}
         </div>
         {editable && (
-          <Button
-            size="xs"
-            onClick={onRemove}
-            className="shrink-0"
-          >
+          <Button size="xs" onClick={onRemove} className="shrink-0">
             Remove
           </Button>
         )}
@@ -164,7 +163,13 @@ export function AmmoEntryRow({
             </Chip>
           )}
           {ammoRef && (
-            <ItemMetaChips value={ammoRef.cost} purchaseAmount={ammoRef.purchaseAmount} availability={ammoRef.availability} size="sm" bare />
+            <ItemMetaChips
+              value={ammoRef.cost}
+              purchaseAmount={ammoRef.purchaseAmount}
+              availability={ammoRef.availability}
+              size="sm"
+              bare
+            />
           )}
           <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
             ⚖ {formatWeightForDisplay(formatWeight(weightKg ?? 0))}
@@ -181,11 +186,15 @@ export function AmmoEntryRow({
               content={
                 <div className="space-y-2">
                   {ammoRef?.description && (
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ammoRef.description}</p>
+                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                      {ammoRef.description}
+                    </p>
                   )}
                   {isChargePack && (
                     <div className="space-y-1">
-                      <p className="text-sm lg:text-base font-semibold text-slate-100">Recharging Power Packs</p>
+                      <p className="text-sm lg:text-base font-semibold text-slate-100">
+                        Recharging Power Packs
+                      </p>
                       <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
                         {RECHARGING_POWER_PACKS_TEXT}
                       </p>
@@ -299,13 +308,17 @@ export function AmmoPicker({
                     else setCustomName("");
                   }
                 }}
-                disabled={!customName.trim() || (!allowDuplicates && existingNames.has(customName.trim()))}
+                disabled={
+                  !customName.trim() || (!allowDuplicates && existingNames.has(customName.trim()))
+                }
               >
                 Add
               </Button>
             </div>
             {!closeOnSelect && (
-              <Button variant="secondary" fullWidth onClick={onClose}>Done</Button>
+              <Button variant="secondary" fullWidth onClick={onClose}>
+                Done
+              </Button>
             )}
           </div>
         ) : undefined
@@ -326,11 +339,18 @@ export function AmmoPicker({
               {formatAmmoName(ammo.name)}
             </span>
             <div className="flex items-center gap-1.5 shrink-0">
-              <ItemMetaChips availability={ammo.availability} value={ammo.cost} purchaseAmount={ammo.purchaseAmount} bare />
+              <ItemMetaChips
+                availability={ammo.availability}
+                value={ammo.cost}
+                purchaseAmount={ammo.purchaseAmount}
+                bare
+              />
             </div>
           </div>
           {ammo.description && (
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>{ammo.description}</p>
+            <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>
+              {ammo.description}
+            </p>
           )}
         </PickerRow>
       ))}
@@ -410,25 +430,25 @@ export function RangedCard({
   const [activeMeleeProfileIndex, setActiveMeleeProfileIndex] = useState<number | null>(null);
 
   const upgradeIds = weapon.upgrades ?? [];
-  const upgradeRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) =>
-    upgradeIds.includes(upgrade.id)
-  );
+  const upgradeRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) => upgradeIds.includes(upgrade.id));
   // Resolve reference data first — source of truth for stats, avoids stale stored character data
   const weaponRef = weapon.referenceId
     ? resolveRangedWeaponReference(weapon.referenceId)
     : RANGED_WEAPON_REFERENCE.find(
         (r) => r.name === weapon.name && (!weapon.source || r.source === weapon.source)
-  );
+      );
   const alternateProfiles = weaponRef?.alternateProfiles ?? [];
   const alternateMeleeProfiles = weaponRef?.alternateMeleeProfiles ?? [];
-  const activeMeleeProfile = activeMeleeProfileIndex === null
-    ? undefined
-    : alternateMeleeProfiles[activeMeleeProfileIndex];
+  const activeMeleeProfile =
+    activeMeleeProfileIndex === null ? undefined : alternateMeleeProfiles[activeMeleeProfileIndex];
   const isMeleeProfile = !!activeMeleeProfile;
-  const activeProfile = !isMeleeProfile && activeProfileIndex > 0
-    ? alternateProfiles[activeProfileIndex - 1]
-    : undefined;
-  const activeProfileKey = isMeleeProfile ? activeMeleeProfile.label : activeProfile?.label ?? "Primary";
+  const activeProfile =
+    !isMeleeProfile && activeProfileIndex > 0
+      ? alternateProfiles[activeProfileIndex - 1]
+      : undefined;
+  const activeProfileKey = isMeleeProfile
+    ? activeMeleeProfile.label
+    : (activeProfile?.label ?? "Primary");
   const concealedBionicQuality = weapon.concealedBionic?.craftsmanship;
   const craftsmanship = concealedBionicQuality ?? weapon.craftsmanship ?? "Common";
   const effectiveCraftsmanship = concealedBionicQuality === "Good" ? "Best" : craftsmanship;
@@ -453,43 +473,54 @@ export function RangedCard({
         specialRules: activeProfile.specialRules,
       }
     : { ...weapon, specialRules: baseSpecialRules };
-  const magazineSlotCount = activeProfile ? 0 : weaponRef?.magazineSlots ?? 0;
+  const magazineSlotCount = activeProfile ? 0 : (weaponRef?.magazineSlots ?? 0);
   const usesMagazineSlots = magazineSlotCount > 0;
   const magazineCapacity = Math.max(0, parseFloat(baseWeapon.clip ?? "0") || 0);
   const magazineSlots = usesMagazineSlots
-    ? Array.from({ length: magazineSlotCount }, (_, index) =>
-        weapon.magazineSlots?.find((slot) => slot.id === `magazine-${index + 1}`)
-        ?? { id: `magazine-${index + 1}`, rounds: 0 }
+    ? Array.from(
+        { length: magazineSlotCount },
+        (_, index) =>
+          weapon.magazineSlots?.find((slot) => slot.id === `magazine-${index + 1}`) ?? {
+            id: `magazine-${index + 1}`,
+            rounds: 0,
+          }
       )
     : [];
-  const activeMagazineSlot = magazineSlots.find((slot) => slot.id === weapon.activeMagazineSlotId)
-    ?? magazineSlots.find((slot) => slot.referenceId);
+  const activeMagazineSlot =
+    magazineSlots.find((slot) => slot.id === weapon.activeMagazineSlotId) ??
+    magazineSlots.find((slot) => slot.referenceId);
   const ammoTracking: AmmoTrackingMode = weapon.ammoTracking ?? weaponRef?.ammoTracking ?? "clip";
   const resolvedAmmoType = activeProfile?.ammoType ?? weaponRef?.ammoType ?? weapon.ammoType;
   const profileCompatibleAmmoIds = compatibleAmmoIdsWithIH(
     activeProfile?.ammoType === "Shells"
       ? ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"]
-      : weaponRef?.compatibleAmmoIds ?? compatibleAmmoIdsForAmmoType(weapon.ammoType),
+      : (weaponRef?.compatibleAmmoIds ?? compatibleAmmoIdsForAmmoType(weapon.ammoType)),
     resolvedAmmoType,
     weaponRef?.class ?? weapon.class
   );
   const isMultiProfileWeapon = alternateProfiles.length > 0;
   const ammoEntries = weapon.ammoEntries ?? [];
-  const visibleAmmoEntries = ammoEntries.filter((entry) =>
-    (!isMultiProfileWeapon || (entry.profile ?? "Primary") === activeProfileKey) &&
-    (!profileCompatibleAmmoIds || (entry.referenceId != null && profileCompatibleAmmoIds.includes(entry.referenceId)))
+  const visibleAmmoEntries = ammoEntries.filter(
+    (entry) =>
+      (!isMultiProfileWeapon || (entry.profile ?? "Primary") === activeProfileKey) &&
+      (!profileCompatibleAmmoIds ||
+        (entry.referenceId != null && profileCompatibleAmmoIds.includes(entry.referenceId)))
   );
-  const loadedAmmoEntry = visibleAmmoEntries.find((entry) => entry.id === weapon.loadedAmmoByProfile?.[activeProfileKey])
-    ?? visibleAmmoEntries.find((entry) => entry.loaded);
+  const loadedAmmoEntry =
+    visibleAmmoEntries.find(
+      (entry) => entry.id === weapon.loadedAmmoByProfile?.[activeProfileKey]
+    ) ?? visibleAmmoEntries.find((entry) => entry.loaded);
   const loadedAmmoReferenceId = usesMagazineSlots
     ? activeMagazineSlot?.referenceId
     : loadedAmmoEntry?.referenceId;
   const loadedAmmoRefCandidate = loadedAmmoReferenceId
     ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedAmmoReferenceId)
     : undefined;
-  const loadedAmmoRef = loadedAmmoRefCandidate && (
-    !profileCompatibleAmmoIds || profileCompatibleAmmoIds.includes(loadedAmmoRefCandidate.id)
-  ) ? loadedAmmoRefCandidate : undefined;
+  const loadedAmmoRef =
+    loadedAmmoRefCandidate &&
+    (!profileCompatibleAmmoIds || profileCompatibleAmmoIds.includes(loadedAmmoRefCandidate.id))
+      ? loadedAmmoRefCandidate
+      : undefined;
   const baseEffective = effectiveRangedStats(baseWeapon, upgradeRefs, loadedAmmoRef);
   const loadedAmmoCapacity = ammoCapacityForWeapon(
     loadedAmmoRef,
@@ -500,8 +531,22 @@ export function RangedCard({
     ...baseEffective,
     clip: loadedAmmoCapacity ?? baseEffective.clip,
   };
-  const addableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, upgradeIds, resolvedAmmoType, ammoTracking);
-  const viewableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, [], resolvedAmmoType, ammoTracking);
+  const addableCompatible = getCompatibleUpgrades(
+    weapon.class ?? "",
+    weapon.name,
+    false,
+    upgradeIds,
+    resolvedAmmoType,
+    ammoTracking
+  );
+  const viewableCompatible = getCompatibleUpgrades(
+    weapon.class ?? "",
+    weapon.name,
+    false,
+    [],
+    resolvedAmmoType,
+    ammoTracking
+  );
   const visibleCompatible = allowUpgrades
     ? editable
       ? addableCompatible
@@ -515,9 +560,7 @@ export function RangedCard({
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
   const activeAmmoFamily = isMeleeProfile ? undefined : ammoFamilyChip(resolvedAmmoType);
   const rulesDescription = weaponRef?.description ?? weapon.description;
-  const hasQualities = Boolean(
-    rulesText && rulesText !== "—" && rulesText !== "-"
-  );
+  const hasQualities = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
   const hasQualityModal = ruleNamesInLookup.length > 0;
   const hasItemRules = !!weapon.concealedBionic;
   const concealedBionicEffect =
@@ -535,7 +578,10 @@ export function RangedCard({
   const isGrenadeLauncher =
     weapon.referenceId === "cr-grenade-launcher" || weapon.referenceId === "cr-rpg-launcher";
   const hasAmmo =
-    !isMeleeProfile && !isThrown && !isGrenadeLauncher && !!(weaponRef?.ammoType || weapon.ammoType || weapon.custom);
+    !isMeleeProfile &&
+    !isThrown &&
+    !isGrenadeLauncher &&
+    !!(weaponRef?.ammoType || weapon.ammoType || weapon.custom);
 
   const existingAmmoNames = new Set(visibleAmmoEntries.map((entry) => formatAmmoName(entry.name)));
 
@@ -546,16 +592,17 @@ export function RangedCard({
     const ammoRef = referenceId
       ? AMMO_REFERENCE.find((ammo) => ammo.id === referenceId)
       : undefined;
-    const entryAmmoTracking: AmmoTrackingMode = isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? "clip" : ammoTracking;
+    const entryAmmoTracking: AmmoTrackingMode =
+      isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? "clip" : ammoTracking;
     const usesUnitTracking = entryAmmoTracking === "clip" && usesUnitAmmoTracking(ammoRef);
     onUpdateAmmoEntries([
       ...ammoEntries,
       {
-          id: crypto.randomUUID(),
-          referenceId,
-          name,
-          profile: isMultiProfileWeapon ? activeProfileKey : undefined,
-          clips: usesUnitTracking || isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? 1 : 0,
+        id: crypto.randomUUID(),
+        referenceId,
+        name,
+        profile: isMultiProfileWeapon ? activeProfileKey : undefined,
+        clips: usesUnitTracking || isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? 1 : 0,
         rounds: 0,
         loaded: isFirst,
       },
@@ -564,11 +611,15 @@ export function RangedCard({
 
   function handleRemoveAmmo(entryId: string) {
     const next = ammoEntries.filter((e) => e.id !== entryId);
-    const removedWasLoaded = entryId === weapon.loadedAmmoByProfile?.[activeProfileKey]
-      || (!weapon.loadedAmmoByProfile?.[activeProfileKey] && ammoEntries.find((entry) => entry.id === entryId)?.loaded);
-    const replacement = next.find((entry) =>
-      (!isMultiProfileWeapon || (entry.profile ?? "Primary") === activeProfileKey) &&
-      (!profileCompatibleAmmoIds || (entry.referenceId != null && profileCompatibleAmmoIds.includes(entry.referenceId)))
+    const removedWasLoaded =
+      entryId === weapon.loadedAmmoByProfile?.[activeProfileKey] ||
+      (!weapon.loadedAmmoByProfile?.[activeProfileKey] &&
+        ammoEntries.find((entry) => entry.id === entryId)?.loaded);
+    const replacement = next.find(
+      (entry) =>
+        (!isMultiProfileWeapon || (entry.profile ?? "Primary") === activeProfileKey) &&
+        (!profileCompatibleAmmoIds ||
+          (entry.referenceId != null && profileCompatibleAmmoIds.includes(entry.referenceId)))
     );
     if (removedWasLoaded && replacement) {
       const replacementIndex = next.findIndex((entry) => entry.id === replacement.id);
@@ -591,9 +642,7 @@ export function RangedCard({
 
   function handleSelectMagazineAmmo(slotId: string, name: string, referenceId?: string) {
     const next = magazineSlots.map((slot) =>
-      slot.id === slotId
-        ? { ...slot, name, referenceId, rounds: magazineCapacity }
-        : slot
+      slot.id === slotId ? { ...slot, name, referenceId, rounds: magazineCapacity } : slot
     );
     onUpdateMagazineSlots?.(next, weapon.activeMagazineSlotId ?? slotId);
   }
@@ -614,7 +663,9 @@ export function RangedCard({
   }
 
   return (
-    <div className={`${weapon.concealedBionic ? "border border-pink-500/60 bg-pink-900/10" : uiSectionShell} overflow-hidden`}>
+    <div
+      className={`${weapon.concealedBionic ? "border border-pink-500/60 bg-pink-900/10" : uiSectionShell} overflow-hidden`}
+    >
       {/* Header — always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
         {!forceExpanded && (
@@ -622,7 +673,11 @@ export function RangedCard({
             type="button"
             onClick={onSelect ?? (() => setExpanded((e) => !e))}
             aria-expanded={onSelect ? undefined : expanded}
-            aria-label={onSelect ? `Select ${weapon.name}` : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+            aria-label={
+              onSelect
+                ? `Select ${weapon.name}`
+                : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`
+            }
             className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
           />
         )}
@@ -633,13 +688,15 @@ export function RangedCard({
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
                   title={weapon.name}
-                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{rulesDescription}</p>}
+                  content={
+                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                      {rulesDescription}
+                    </p>
+                  }
                 />
               </span>
             )}
-            {libraryItem && (
-              <StatusBadge status={libraryItem.status} />
-            )}
+            {libraryItem && <StatusBadge status={libraryItem.status} />}
             {integrated && (
               <Chip size="sm" className={colourViolet}>
                 Integrated
@@ -653,10 +710,19 @@ export function RangedCard({
                   Concealed Bionic
                 </Chip>
               )}
-              {weapon.concealedBionic && <Chip size="sm" className={colourPink}>Cybernetic</Chip>}
-              {(() => { const c = weaponClassChip(weapon.class); return c ? (
-                <Chip size="sm" className={c.active}>{c.label}</Chip>
-              ) : null; })()}
+              {weapon.concealedBionic && (
+                <Chip size="sm" className={colourPink}>
+                  Cybernetic
+                </Chip>
+              )}
+              {(() => {
+                const c = weaponClassChip(weapon.class);
+                return c ? (
+                  <Chip size="sm" className={c.active}>
+                    {c.label}
+                  </Chip>
+                ) : null;
+              })()}
             </div>
           )}
         </div>
@@ -669,11 +735,20 @@ export function RangedCard({
               onChange={onToggleEquip}
             />
           )}
-          {!forceExpanded && (onSelect ? (
-            <button type="button" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`} className="relative z-10 pointer-events-auto p-1 -m-1">
+          {!forceExpanded &&
+            (onSelect ? (
+              <button
+                type="button"
+                onClick={() => setExpanded((e) => !e)}
+                aria-expanded={expanded}
+                aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+                className="relative z-10 pointer-events-auto p-1 -m-1"
+              >
+                <ExpandChevron expanded={expanded} />
+              </button>
+            ) : (
               <ExpandChevron expanded={expanded} />
-            </button>
-          ) : <ExpandChevron expanded={expanded} />)}
+            ))}
         </div>
       </div>
 
@@ -701,16 +776,39 @@ export function RangedCard({
 
           {(alternateProfiles.length > 0 || alternateMeleeProfiles.length > 0) && (
             <div className="flex flex-wrap gap-1.5">
-              <button type="button" onClick={() => { setActiveProfileIndex(0); setActiveMeleeProfileIndex(null); }} className={`rounded border px-2 py-1 text-xs lg:text-sm ${!isMeleeProfile && activeProfileIndex === 0 ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveProfileIndex(0);
+                  setActiveMeleeProfileIndex(null);
+                }}
+                className={`rounded border px-2 py-1 text-xs lg:text-sm ${!isMeleeProfile && activeProfileIndex === 0 ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}
+              >
                 {alternateMeleeProfiles.length > 0 ? "Ranged" : "Primary"}
               </button>
               {alternateProfiles.map((profile, index) => (
-                <button key={profile.label} type="button" onClick={() => { setActiveProfileIndex(index + 1); setActiveMeleeProfileIndex(null); }} className={`rounded border px-2 py-1 text-xs lg:text-sm ${!isMeleeProfile && activeProfileIndex === index + 1 ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}>
+                <button
+                  key={profile.label}
+                  type="button"
+                  onClick={() => {
+                    setActiveProfileIndex(index + 1);
+                    setActiveMeleeProfileIndex(null);
+                  }}
+                  className={`rounded border px-2 py-1 text-xs lg:text-sm ${!isMeleeProfile && activeProfileIndex === index + 1 ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}
+                >
                   {profile.label}
                 </button>
               ))}
               {alternateMeleeProfiles.map((profile, index) => (
-                <button key={profile.label} type="button" onClick={() => { setActiveProfileIndex(0); setActiveMeleeProfileIndex(index); }} className={`rounded border px-2 py-1 text-xs lg:text-sm ${activeMeleeProfileIndex === index ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}>
+                <button
+                  key={profile.label}
+                  type="button"
+                  onClick={() => {
+                    setActiveProfileIndex(0);
+                    setActiveMeleeProfileIndex(index);
+                  }}
+                  className={`rounded border px-2 py-1 text-xs lg:text-sm ${activeMeleeProfileIndex === index ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}
+                >
                   {profile.label}
                 </button>
               ))}
@@ -720,18 +818,27 @@ export function RangedCard({
           {/* Stats grid */}
           {isMeleeProfile && activeMeleeProfile ? (
             <div className="flex flex-wrap gap-1.5">
-              <StatChip label="Damage" value={activeMeleeProfile.damage.replace(/\s*[IREX]$/i, "").trim()} />
+              <StatChip
+                label="Damage"
+                value={activeMeleeProfile.damage.replace(/\s*[IREX]$/i, "").trim()}
+              />
               <DamageTypeChip damage={activeMeleeProfile.damage} />
               <StatChip label="Pen" value={activeMeleeProfile.pen} />
               <StatChip label="SB" value={`+${strengthBonus}`} />
-              <StatChip label="Total" value={computeMeleeTotalDamage(activeMeleeProfile.damage, strengthBonus)} />
+              <StatChip
+                label="Total"
+                value={computeMeleeTotalDamage(activeMeleeProfile.damage, strengthBonus)}
+              />
             </div>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {effective.range && <StatChip label="Range" value={effective.range} />}
               {baseWeapon.rof && <StatChip label="RoF" value={baseWeapon.rof} />}
               {effective.damage && (
-                <StatChip label="Damage" value={effective.damage.replace(/\s*[IREX]$/i, "").trim()} />
+                <StatChip
+                  label="Damage"
+                  value={effective.damage.replace(/\s*[IREX]$/i, "").trim()}
+                />
               )}
               {effective.damage && <DamageTypeChip damage={effective.damage} />}
               {effective.pen && <StatChip label="Pen" value={effective.pen} />}
@@ -763,9 +870,14 @@ export function RangedCard({
                     title={`${weapon.name} Rules`}
                     content={
                       <div className="space-y-3">
-                        <p className="text-sm lg:text-base font-semibold text-amber-300">Concealed Weapon Bionic</p>
+                        <p className="text-sm lg:text-base font-semibold text-amber-300">
+                          Concealed Weapon Bionic
+                        </p>
                         {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                          <p key={rule} className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          <p
+                            key={rule}
+                            className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}
+                          >
                             {rule}
                           </p>
                         ))}
@@ -773,12 +885,12 @@ export function RangedCard({
                     }
                   />
                 </span>
-              ) : <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>}
+              ) : (
+                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
+              )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>
-                Craftsmanship
-              </span>
+              <span className={uiTextLabel}>Craftsmanship</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
@@ -879,7 +991,9 @@ export function RangedCard({
               <span className={uiTextLabel}>Magazines</span>
               {activeAmmoFamily && (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip size="sm" className={activeAmmoFamily.className}>{activeAmmoFamily.label}</Chip>
+                  <Chip size="sm" className={activeAmmoFamily.className}>
+                    {activeAmmoFamily.label}
+                  </Chip>
                 </div>
               )}
               <div className="space-y-1.5">
@@ -889,11 +1003,17 @@ export function RangedCard({
                     : undefined;
                   const isActive = slot.id === activeMagazineSlot?.id;
                   const displayName = ammoRef ? formatAmmoName(ammoRef.name) : slot.name;
-                  const magazineWeight = magazineCapacity > 0
-                    ? (parseFloat(effective.weight ?? "0") || 0) * 0.1 * (slot.rounds / magazineCapacity)
-                    : 0;
+                  const magazineWeight =
+                    magazineCapacity > 0
+                      ? (parseFloat(effective.weight ?? "0") || 0) *
+                        0.1 *
+                        (slot.rounds / magazineCapacity)
+                      : 0;
                   return (
-                    <div key={slot.id} className="rounded border border-slate-500 bg-slate-800/60 px-2 lg:px-3 py-2 space-y-1.5">
+                    <div
+                      key={slot.id}
+                      className="rounded border border-slate-500 bg-slate-800/60 px-2 lg:px-3 py-2 space-y-1.5"
+                    >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                           <span className={uiTextLabel}>Magazine {index + 1}</span>
@@ -906,7 +1026,13 @@ export function RangedCard({
                             <span className={uiInfoModalWrapper}>
                               <InfoModal
                                 title={displayName ?? `Magazine ${index + 1}`}
-                                content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ammoRef.description}</p>}
+                                content={
+                                  <p
+                                    className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}
+                                  >
+                                    {ammoRef.description}
+                                  </p>
+                                }
                               />
                             </span>
                           )}
@@ -916,15 +1042,18 @@ export function RangedCard({
                             <span className="inline-flex items-center justify-center rounded-lg border border-green-500 px-2 py-0.5 text-xs font-semibold text-green-400 lg:text-sm shrink-0">
                               Loaded
                             </span>
-                          ) : editable && slot.referenceId && (
-                            <Button
-                              size="xs"
-                              variant="ghost"
-                              className={colourButtonOutlineOrange}
-                              onClick={() => handleSelectActiveMagazine(slot.id)}
-                            >
-                              Select
-                            </Button>
+                          ) : (
+                            editable &&
+                            slot.referenceId && (
+                              <Button
+                                size="xs"
+                                variant="ghost"
+                                className={colourButtonOutlineOrange}
+                                onClick={() => handleSelectActiveMagazine(slot.id)}
+                              >
+                                Select
+                              </Button>
+                            )
                           )}
                           {editable && (
                             <Button
@@ -949,7 +1078,10 @@ export function RangedCard({
                               bare
                             />
                           )}
-                          <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
+                          <Chip
+                            size="sm"
+                            className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}
+                          >
                             ⚖ {formatWeightForDisplay(formatWeight(magazineWeight))}
                           </Chip>
                         </div>
@@ -985,7 +1117,9 @@ export function RangedCard({
 
               {activeAmmoFamily && (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip size="sm" className={activeAmmoFamily.className}>{activeAmmoFamily.label}</Chip>
+                  <Chip size="sm" className={activeAmmoFamily.className}>
+                    {activeAmmoFamily.label}
+                  </Chip>
                 </div>
               )}
 
@@ -997,33 +1131,41 @@ export function RangedCard({
                     const entryAmmoRef = entry.referenceId
                       ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
                       : undefined;
-                    const entryAmmoTracking: AmmoTrackingMode = isSoldAsFullClip(entryAmmoRef) || entryAmmoRef?.isBackpackFeed ? "clip" : ammoTracking;
+                    const entryAmmoTracking: AmmoTrackingMode =
+                      isSoldAsFullClip(entryAmmoRef) || entryAmmoRef?.isBackpackFeed
+                        ? "clip"
+                        : ammoTracking;
                     const entryCapacity = ammoCapacityForWeapon(
                       entryAmmoRef,
                       weapon.referenceId,
                       effective.clip
                     );
                     return (
-                    <AmmoEntryRow
-                      key={entry.id}
-                      entry={entry}
-                      isLoaded={entry.id === weapon.loadedAmmoByProfile?.[activeProfileKey] || (!weapon.loadedAmmoByProfile?.[activeProfileKey] && entry.loaded)}
-                      editable={editable}
-                      clipSize={entryCapacity}
-                      ammoTracking={entryAmmoTracking}
-                      weightKg={calcEntryWeight(
-                        effective.weight,
-                        effective.clip,
-                        entry,
-                        entryAmmoTracking,
-                        entryCapacity
-                      )}
-                      onSetLoaded={() => handleSetLoaded(entry.id)}
-                      onRemove={() => handleRemoveAmmo(entry.id)}
-                      onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
-                      onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
-                      onSetLooseRounds={(qty) => handleUpdateEntry(entry.id, { clips: 0, rounds: qty })}
-                    />
+                      <AmmoEntryRow
+                        key={entry.id}
+                        entry={entry}
+                        isLoaded={
+                          entry.id === weapon.loadedAmmoByProfile?.[activeProfileKey] ||
+                          (!weapon.loadedAmmoByProfile?.[activeProfileKey] && entry.loaded)
+                        }
+                        editable={editable}
+                        clipSize={entryCapacity}
+                        ammoTracking={entryAmmoTracking}
+                        weightKg={calcEntryWeight(
+                          effective.weight,
+                          effective.clip,
+                          entry,
+                          entryAmmoTracking,
+                          entryCapacity
+                        )}
+                        onSetLoaded={() => handleSetLoaded(entry.id)}
+                        onRemove={() => handleRemoveAmmo(entry.id)}
+                        onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
+                        onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
+                        onSetLooseRounds={(qty) =>
+                          handleUpdateEntry(entry.id, { clips: 0, rounds: qty })
+                        }
+                      />
                     );
                   })}
                 </div>
@@ -1036,13 +1178,18 @@ export function RangedCard({
             <div className="border-t border-slate-800 pt-2 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Upgrades</span>
-                {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-                  editable ? (
-                    <AddButton label="Add upgrade" size="sm" onClick={() => setShowUpgradePicker(true)} />
+                {(editable
+                  ? visibleCompatible.length > 0
+                  : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
+                  (editable ? (
+                    <AddButton
+                      label="Add upgrade"
+                      size="sm"
+                      onClick={() => setShowUpgradePicker(true)}
+                    />
                   ) : (
                     <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
-                  )
-                )}
+                  ))}
               </div>
               {upgradeRefs.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
@@ -1090,7 +1237,9 @@ export function RangedCard({
               existingNames={new Set()}
               allowDuplicates
               editable={editable}
-              onSelect={(name, referenceId) => handleSelectMagazineAmmo(magazineSlotPickerId, name, referenceId)}
+              onSelect={(name, referenceId) =>
+                handleSelectMagazineAmmo(magazineSlotPickerId, name, referenceId)
+              }
               onClose={() => setMagazineSlotPickerId(null)}
             />
           )}

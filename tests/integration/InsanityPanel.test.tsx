@@ -7,9 +7,22 @@ import "@testing-library/jest-dom";
 import { InsanityPanel } from "../../src/mechanics/insanity/InsanityPanel";
 import type { InsanityBlock } from "../../src/types/Character";
 
-function InsanityWiring({ initial, editable = true }: { initial: InsanityBlock; editable?: boolean }) {
+function InsanityWiring({
+  initial,
+  editable = true,
+}: {
+  initial: InsanityBlock;
+  editable?: boolean;
+}) {
   const [insanity, setInsanity] = useState<InsanityBlock>(initial);
-  return <InsanityPanel insanity={insanity} editable={editable} onUpdate={setInsanity} sectionClassName="" />;
+  return (
+    <InsanityPanel
+      insanity={insanity}
+      editable={editable}
+      onUpdate={setInsanity}
+      sectionClassName=""
+    />
+  );
 }
 
 function findButtonNear(labelText: string, buttonName: string): HTMLElement {
@@ -51,7 +64,9 @@ describe("InsanityPanel points wiring", () => {
       />
     );
     expect(screen.getAllByText("5").length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Show information about Insanity Point Adjustments" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show information about Insanity Point Adjustments" })
+    ).toBeInTheDocument();
   });
 });
 
@@ -98,7 +113,13 @@ describe("InsanityPanel editable=false", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+            {
+              id: "d1",
+              referenceId: "phobia-fear-of-the-dead",
+              type: "Phobia",
+              name: "Fear of the Dead",
+              severity: "Minor",
+            },
           ],
         }}
         editable={false}
@@ -108,8 +129,14 @@ describe("InsanityPanel editable=false", () => {
     expect(screen.queryByRole("button", { name: "Add Disorder" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add Trauma" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("button", { name: "Decrease" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "Decrease" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
   });
 
   it("shows a View Disorders button that opens the picker in read-only mode", async () => {
@@ -139,7 +166,13 @@ describe("InsanityPanel disorder severity escalation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+            {
+              id: "d1",
+              referenceId: "phobia-fear-of-the-dead",
+              type: "Phobia",
+              name: "Fear of the Dead",
+              severity: "Minor",
+            },
           ],
         }}
       />
@@ -163,7 +196,13 @@ describe("InsanityPanel disorder severity escalation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+            {
+              id: "d1",
+              referenceId: "phobia-fear-of-the-dead",
+              type: "Phobia",
+              name: "Fear of the Dead",
+              severity: "Minor",
+            },
           ],
         }}
       />
@@ -182,7 +221,13 @@ describe("InsanityPanel disorder severity escalation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Acute" },
+            {
+              id: "d1",
+              referenceId: "phobia-fear-of-the-dead",
+              type: "Phobia",
+              name: "Fear of the Dead",
+              severity: "Acute",
+            },
           ],
         }}
       />
@@ -197,7 +242,13 @@ describe("InsanityPanel disorder severity escalation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", type: "Horrific Nightmares", name: "Recurring Dream", severity: "Severe", custom: true },
+            {
+              id: "d1",
+              type: "Horrific Nightmares",
+              name: "Recurring Dream",
+              severity: "Severe",
+              custom: true,
+            },
           ],
         }}
       />
@@ -212,7 +263,13 @@ describe("InsanityPanel disorder severity escalation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "flesh-is-weak", type: "The Flesh is Weak", name: "The Flesh is Weak", severity: "Severe" },
+            {
+              id: "d1",
+              referenceId: "flesh-is-weak",
+              type: "The Flesh is Weak",
+              name: "The Flesh is Weak",
+              severity: "Severe",
+            },
           ],
         }}
       />
@@ -227,7 +284,13 @@ describe("InsanityPanel disorder severity escalation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+            {
+              id: "d1",
+              referenceId: "phobia-fear-of-the-dead",
+              type: "Phobia",
+              name: "Fear of the Dead",
+              severity: "Minor",
+            },
           ],
         }}
         editable={false}
@@ -246,7 +309,13 @@ describe("InsanityPanel delete confirmation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+            {
+              id: "d1",
+              referenceId: "phobia-fear-of-the-dead",
+              type: "Phobia",
+              name: "Fear of the Dead",
+              severity: "Minor",
+            },
           ],
         }}
       />
@@ -269,7 +338,13 @@ describe("InsanityPanel delete confirmation", () => {
         initial={{
           points: 20,
           disorders: [
-            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+            {
+              id: "d1",
+              referenceId: "phobia-fear-of-the-dead",
+              type: "Phobia",
+              name: "Fear of the Dead",
+              severity: "Minor",
+            },
           ],
         }}
       />
@@ -289,7 +364,9 @@ describe("InsanityPanel delete confirmation", () => {
         initial={{
           points: 0,
           disorders: [],
-          currentTrauma: [{ id: "t1", referenceId: "01-40", roll: "01-40", name: "Withdrawn and Quiet" }],
+          currentTrauma: [
+            { id: "t1", referenceId: "01-40", roll: "01-40", name: "Withdrawn and Quiet" },
+          ],
         }}
       />
     );

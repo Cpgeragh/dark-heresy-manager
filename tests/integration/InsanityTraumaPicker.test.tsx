@@ -9,7 +9,12 @@ function setup(editable = true) {
   const onAdd = vi.fn();
   const onClose = vi.fn();
   render(
-    <InsanityTraumaPicker existingReferenceIds={new Set()} editable={editable} onAdd={onAdd} onClose={onClose} />
+    <InsanityTraumaPicker
+      existingReferenceIds={new Set()}
+      editable={editable}
+      onAdd={onAdd}
+      onClose={onClose}
+    />
   );
   return { onAdd, onClose };
 }
@@ -78,7 +83,10 @@ describe("InsanityTraumaPicker custom trauma", () => {
     await user.click(screen.getByRole("radio", { name: "2nd Ed" }));
     expect(addButton).toBeDisabled();
 
-    await user.type(screen.getByPlaceholderText("What this trauma does..."), "The character freezes for 1 round.");
+    await user.type(
+      screen.getByPlaceholderText("What this trauma does..."),
+      "The character freezes for 1 round."
+    );
     expect(addButton).not.toBeDisabled();
 
     await user.click(addButton);

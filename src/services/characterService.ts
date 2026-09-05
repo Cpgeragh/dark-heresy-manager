@@ -96,7 +96,10 @@ export async function writeCharacterFieldsWithSummary(
     if (!snapshot.exists()) throw new Error("Character not found.");
     const merged = { ...snapshot.data(), ...partial } as Character;
     transaction.update(ref, partial as UpdateData<Character>);
-    transaction.set(characterSummaryDocRef(campaignId, characterId), computeCharacterSummary(merged));
+    transaction.set(
+      characterSummaryDocRef(campaignId, characterId),
+      computeCharacterSummary(merged)
+    );
   });
 }
 
@@ -110,14 +113,20 @@ export async function repairCharacterSummaries(campaignId: string): Promise<numb
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   return runSingleFlight("character:repair-summaries", [campaignId], async () => {
     const snapshot = await getDocs(
-      query(charactersCollectionRef(campaignId), limit(FIRESTORE_QUERY_LIMITS.charactersPerCampaign))
+      query(
+        charactersCollectionRef(campaignId),
+        limit(FIRESTORE_QUERY_LIMITS.charactersPerCampaign)
+      )
     );
     if (snapshot.empty) return 0;
 
     const batch = writeBatch(db);
     snapshot.docs.forEach((docSnapshot) => {
       const character = docSnapshot.data();
-      batch.set(characterSummaryDocRef(campaignId, character.id), computeCharacterSummary(character));
+      batch.set(
+        characterSummaryDocRef(campaignId, character.id),
+        computeCharacterSummary(character)
+      );
     });
     await batch.commit();
 
@@ -169,21 +178,25 @@ export async function reconcileCharacterSpentXp(
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
 
-  return runSingleFlight("character:reconcile-spent-xp", [campaignId, characterId, spent], async () => {
-    const { data } = await callReconcileCharacterSpentXp({
-      campaignId,
-      characterId,
-      spent,
-      operationId: createLocalId("reconcile-character-spent-xp"),
-    });
-    return data.updated;
-  });
+  return runSingleFlight(
+    "character:reconcile-spent-xp",
+    [campaignId, characterId, spent],
+    async () => {
+      const { data } = await callReconcileCharacterSpentXp({
+        campaignId,
+        characterId,
+        spent,
+        operationId: createLocalId("reconcile-character-spent-xp"),
+      });
+      return data.updated;
+    }
+  );
 }
 
-const callClaimCharacter = httpsCallable<{ code: string }, { campaignId: string; characterId: string }>(
-  functions,
-  "claimCharacter"
-);
+const callClaimCharacter = httpsCallable<
+  { code: string },
+  { campaignId: string; characterId: string }
+>(functions, "claimCharacter");
 
 export async function claimCharacter(
   code: string
@@ -201,10 +214,7 @@ export async function claimCharacter(
 const callReleaseCharacter = httpsCallable<
   { campaignId: string; characterId: string; operationId: string },
   void
->(
-  functions,
-  "releaseCharacter"
-);
+>(functions, "releaseCharacter");
 
 export async function releaseCharacter(campaignId: string, characterId: string): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
@@ -224,12 +234,12 @@ export async function releaseCharacter(campaignId: string, characterId: string):
 const callForceReleaseCharacter = httpsCallable<
   { campaignId: string; characterId: string; operationId: string },
   void
->(
-  functions,
-  "forceReleaseCharacter"
-);
+>(functions, "forceReleaseCharacter");
 
-export async function forceReleaseCharacter(campaignId: string, characterId: string): Promise<void> {
+export async function forceReleaseCharacter(
+  campaignId: string,
+  characterId: string
+): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
   const user = auth.currentUser;
@@ -260,14 +270,18 @@ export async function forceAssignCharacter(
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  await runSingleFlight("character:force-assign", [campaignId, characterId, targetUid], async () => {
-    await callForceAssignCharacter({
-      campaignId,
-      characterId,
-      targetUid,
-      operationId: createLocalId("force-assign-character"),
-    });
-  });
+  await runSingleFlight(
+    "character:force-assign",
+    [campaignId, characterId, targetUid],
+    async () => {
+      await callForceAssignCharacter({
+        campaignId,
+        characterId,
+        targetUid,
+        operationId: createLocalId("force-assign-character"),
+      });
+    }
+  );
 }
 
 const callStartCharacterDeletionJob = httpsCallable<
@@ -309,7 +323,8 @@ export async function deleteCharacter(
     driveJobToCompletion(
       jobId,
       async (id) => (await callProcessCharacterDeletionChunk({ jobId: id })).data,
-      (chunk) => onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
+      (chunk) =>
+        onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
     )
   );
 }
@@ -320,7 +335,10 @@ const callRegisterRecoveryCode = httpsCallable<
 >(functions, "registerRecoveryCode");
 
 /** Generates (or regenerates) a character's Recovery Code via the protected server-side operation. */
-export async function registerRecoveryCode(campaignId: string, characterId: string): Promise<string> {
+export async function registerRecoveryCode(
+  campaignId: string,
+  characterId: string
+): Promise<string> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
   const { data } = await callRegisterRecoveryCode({ campaignId, characterId });
@@ -330,10 +348,7 @@ export async function registerRecoveryCode(campaignId: string, characterId: stri
 const callRevokeRecoveryCode = httpsCallable<
   { campaignId: string; characterId: string; operationId: string },
   void
->(
-  functions,
-  "revokeRecoveryCode"
-);
+>(functions, "revokeRecoveryCode");
 
 /** Invalidates a character's current Recovery Code without issuing a replacement. */
 export async function revokeRecoveryCode(campaignId: string, characterId: string): Promise<void> {

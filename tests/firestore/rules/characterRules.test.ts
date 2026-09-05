@@ -15,7 +15,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("the owning player may read their own character", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
@@ -28,7 +28,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("the DM may read any character in their campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
@@ -41,7 +41,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("an unrelated authenticated user cannot read someone else's character", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
@@ -64,15 +64,12 @@ describe("Firestore Rules: Character Rules", () => {
     });
 
     await expect(
-      dbAs(env, "player-2")
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc("char1")
-        .get()
+      dbAs(env, "player-2").collection(`campaigns/${campaignId}/characters`).doc("char1").get()
     ).rejects.toThrow();
   });
 
   it("the DM may list all characters in their own campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
@@ -90,7 +87,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("an unrelated authenticated user cannot list characters in a campaign they're not in", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
@@ -103,7 +100,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("player may update their own character when editable", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -122,7 +119,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("player may update multiple normal editable fields at once", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -133,19 +130,16 @@ describe("Firestore Rules: Character Rules", () => {
     const playerDb = dbAs(env, "player-1");
 
     await expect(
-      playerDb
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc("char1")
-        .update({
-          backgroundComplete: true,
-          userId: "player-1", // protected but same, proves a multi-key write still succeeds
-          isEditableByPlayer: true, // protected but same
-        })
+      playerDb.collection(`campaigns/${campaignId}/characters`).doc("char1").update({
+        backgroundComplete: true,
+        userId: "player-1", // protected but same, proves a multi-key write still succeeds
+        isEditableByPlayer: true, // protected but same
+      })
     ).resolves.toBeUndefined();
   });
 
   it("player cannot update their character when NOT editable", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -164,7 +158,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("player cannot update another user's character even if editable", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -183,7 +177,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change notes with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -200,7 +194,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("an editable player cannot change notes with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -217,7 +211,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change header with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -234,7 +228,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("an editable player cannot change header with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -251,7 +245,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change portraitUrl with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -268,7 +262,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("an editable player cannot change portraitUrl with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -285,7 +279,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change characteristics with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -302,7 +296,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("an editable player cannot change characteristics with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -319,7 +313,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change talentsAndTraits with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -336,7 +330,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change weaponTraining with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -353,7 +347,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change psychic with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -370,7 +364,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change insanity with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -387,7 +381,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change cybernetics with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -404,7 +398,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change rangedWeapons with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -421,7 +415,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change meleeWeapons with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -438,7 +432,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change archeotech with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -455,7 +449,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change gear with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -472,7 +466,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change consumables with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -489,7 +483,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change drugs with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -506,7 +500,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change grenades with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -523,7 +517,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change shields with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -540,7 +534,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change armour with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -557,7 +551,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change companions with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -574,7 +568,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change skills with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -591,7 +585,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change wounds with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -608,7 +602,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change fate with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -625,7 +619,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change corruption with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -642,7 +636,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change movement with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -659,7 +653,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot change experience with a direct write", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -676,7 +670,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM can update any character", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -695,21 +689,22 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM can create a character in an existing campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
 
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb.collection(`campaigns/${campaignId}/characters`).doc("dm-char").set(
-        createEmptyCharacterData({ campaignId, characterName: "New Acolyte" })
-      )
+      dmDb
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("dm-char")
+        .set(createEmptyCharacterData({ campaignId, characterName: "New Acolyte" }))
     ).resolves.toBeUndefined();
   });
 
   it("DM cannot pre-populate a Recovery Code during character creation", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
 
@@ -728,7 +723,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM can edit a character after its Recovery Code is revoked", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "revoked-char", {
@@ -745,24 +740,21 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM cannot create a character in a non-existent campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb
-        .collection(`campaigns/nonexistent/characters`)
-        .doc("dm-char")
-        .set({
-          userId: "player-1",
-          isEditableByPlayer: false,
-          recoveryCode: "RCODE",
-        })
+      dmDb.collection(`campaigns/nonexistent/characters`).doc("dm-char").set({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        recoveryCode: "RCODE",
+      })
     ).rejects.toThrow();
   });
 
   it("player cannot create a character directly", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
 
@@ -776,7 +768,7 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("player cannot delete their character even if editable", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
@@ -787,11 +779,7 @@ describe("Firestore Rules: Character Rules", () => {
     const playerDb = dbAs(env, "player-1");
 
     await expect(
-      playerDb
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc("char1")
-        .delete()
+      playerDb.collection(`campaigns/${campaignId}/characters`).doc("char1").delete()
     ).rejects.toThrow();
   });
-
 });

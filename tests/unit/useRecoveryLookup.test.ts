@@ -71,8 +71,6 @@ describe("useRecoveryLookup", () => {
     const { result } = renderHook(() => useRecoveryLookup());
     await act(() => result.current.lookup("DH-TEST-0005"));
 
-    expect(result.current.error).toBe(
-      "Too many recovery-code attempts. Try again in 15 minutes."
-    );
+    expect(result.current.error).toBe("Too many recovery-code attempts. Try again in 15 minutes.");
   });
 });

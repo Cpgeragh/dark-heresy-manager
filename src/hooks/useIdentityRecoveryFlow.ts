@@ -15,7 +15,9 @@ export function useIdentityRecoveryFlow() {
   const [code, setStoredCode] = useState("");
   const [mode, setMode] = useState<IdentityRecoveryMode | null>(null);
   const [phase, setPhase] = useState<IdentityRecoveryPhase>("idle");
-  const [progress, setProgress] = useState<{ processedCount: number; totalCount: number } | null>(null);
+  const [progress, setProgress] = useState<{ processedCount: number; totalCount: number } | null>(
+    null
+  );
   const [localError, setLocalError] = useState<string | null>(null);
   const operationRef = useRef(false);
 

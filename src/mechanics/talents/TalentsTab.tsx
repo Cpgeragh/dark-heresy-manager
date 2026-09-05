@@ -22,21 +22,14 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/styles/segmentedTabStyles";
-import {
-  EntryCard,
-  TalentGroupCard,
-  TalentPickerModal,
-} from "./talentComponents";
+import { EntryCard, TalentGroupCard, TalentPickerModal } from "./talentComponents";
 import {
   getAvailablePsychicTalentPurchases,
   getTalentBehaviour,
   needsTalentAcquisition,
 } from "./talentUtils";
 import { getGrantedTalentEntries, filterTalentEntriesCoveredByGrants } from "./talentEffects";
-import {
-  TalentAcquisitionModal,
-  type TalentAcquisitionResult,
-} from "./TalentAcquisitionModal";
+import { TalentAcquisitionModal, type TalentAcquisitionResult } from "./TalentAcquisitionModal";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import { Button } from "../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
@@ -78,7 +71,8 @@ const TALENT_TABS = [
   {
     value: "faith",
     label: "Faith Talents",
-    activeClassName: "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
+    activeClassName:
+      "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
   },
 ] as const satisfies readonly SegmentedTabOption<ViewGroup>[];
 const TALENT_TABS_ID = "talent-groups";
@@ -227,9 +221,11 @@ function TalentCards({
             statusChip={`Owned: ${talentEntries.length}`}
             editable={editable}
             removable={available.length > 0}
-            deletionBlockedMessage={available.length === 0
-              ? "This Talent cannot be deleted until its linked Psychic powers are deleted."
-              : undefined}
+            deletionBlockedMessage={
+              available.length === 0
+                ? "This Talent cannot be deleted until its linked Psychic powers are deleted."
+                : undefined
+            }
             onRemove={onRemove}
             confirmDeletion
             statusAfterSource
@@ -320,7 +316,12 @@ function RegularTalentSection({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
         )}
         <div className={`grid gap-2 ${columns === 2 ? "lg:grid-cols-2" : "grid-cols-1"}`}>
-          <TalentCards entries={entries} psychic={psychic} editable={editable} onRemove={onRemove} />
+          <TalentCards
+            entries={entries}
+            psychic={psychic}
+            editable={editable}
+            onRemove={onRemove}
+          />
         </div>
         {showPicker && (
           <TalentPickerModal
@@ -365,9 +366,8 @@ export function TalentsTab({
     (entry: TalentEntry) => {
       const psyRatingMatch = entry.talentId.match(/^psy-rating-[1-6]$/);
       const psyRating = psyRatingMatch ? Number(entry.talentId.slice(-1)) : 0;
-      const minorGrants = psyRating === 1 || psyRating === 2
-        ? Math.ceil(willpowerBonus / 2)
-        : undefined;
+      const minorGrants =
+        psyRating === 1 || psyRating === 2 ? Math.ceil(willpowerBonus / 2) : undefined;
       const preparedEntry = psyRatingMatch
         ? {
             ...entry,
@@ -391,18 +391,15 @@ export function TalentsTab({
     (result: TalentAcquisitionResult) => {
       const nextTalents = {
         ...talents,
-        talents: [
-          ...talents.talents,
-          result.entry,
-          ...(result.additionalTalentEntries ?? []),
-        ],
+        talents: [...talents.talents, result.entry, ...(result.additionalTalentEntries ?? [])],
       };
       const grantedDiscipline = result.entry.acquisition?.psyRatingNewDiscipline
         ? result.entry.acquisition.psyRatingDiscipline
         : undefined;
-      const nextPsychic = grantedDiscipline && !(psychic.disciplines ?? []).includes(grantedDiscipline)
-        ? { ...psychic, disciplines: [...(psychic.disciplines ?? []), grantedDiscipline] }
-        : psychic;
+      const nextPsychic =
+        grantedDiscipline && !(psychic.disciplines ?? []).includes(grantedDiscipline)
+          ? { ...psychic, disciplines: [...(psychic.disciplines ?? []), grantedDiscipline] }
+          : psychic;
       if (onUpdateCharacter) {
         onUpdateCharacter({
           talentsAndTraits: nextTalents,
@@ -437,14 +434,16 @@ export function TalentsTab({
                 removedDiscipline.toLocaleLowerCase()
           )
         : false;
-      const nextPsychic = removedDiscipline && !disciplineStillGranted
-        ? {
-            ...psychic,
-            disciplines: (psychic.disciplines ?? []).filter(
-              (discipline) => discipline.toLocaleLowerCase() !== removedDiscipline.toLocaleLowerCase()
-            ),
-          }
-        : psychic;
+      const nextPsychic =
+        removedDiscipline && !disciplineStillGranted
+          ? {
+              ...psychic,
+              disciplines: (psychic.disciplines ?? []).filter(
+                (discipline) =>
+                  discipline.toLocaleLowerCase() !== removedDiscipline.toLocaleLowerCase()
+              ),
+            }
+          : psychic;
       const grantedCyberneticIds = new Set(
         cybernetics
           .filter((item) => item.grantedByTalentEntryUid === entry.uid)
@@ -454,20 +453,24 @@ export function TalentsTab({
         (item) => item.grantedByTalentEntryUid !== entry.uid
       );
       let nextInsanity = insanity;
-      let nextRangedWeapons = grantedCyberneticIds.size > 0
-        ? rangedWeapons.map((weapon) =>
-            weapon.concealedBionic && grantedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-              ? { ...weapon, concealedBionic: undefined }
-              : weapon
-          )
-        : rangedWeapons;
-      let nextMeleeWeapons = grantedCyberneticIds.size > 0
-        ? meleeWeapons.map((weapon) =>
-            weapon.concealedBionic && grantedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-              ? { ...weapon, concealedBionic: undefined }
-              : weapon
-          )
-        : meleeWeapons;
+      let nextRangedWeapons =
+        grantedCyberneticIds.size > 0
+          ? rangedWeapons.map((weapon) =>
+              weapon.concealedBionic &&
+              grantedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
+                ? { ...weapon, concealedBionic: undefined }
+                : weapon
+            )
+          : rangedWeapons;
+      let nextMeleeWeapons =
+        grantedCyberneticIds.size > 0
+          ? meleeWeapons.map((weapon) =>
+              weapon.concealedBionic &&
+              grantedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
+                ? { ...weapon, concealedBionic: undefined }
+                : weapon
+            )
+          : meleeWeapons;
       let nextArcheotech = archeotech;
 
       if (restoreOneTimeEffects && entry.talentId === "purity-of-flesh") {
@@ -492,7 +495,13 @@ export function TalentsTab({
         ].map((weapon) => {
           const link = rangedLinks.get(weapon.id);
           return link && !weapon.concealedBionic
-            ? { ...weapon, concealedBionic: { cyberneticId: link.cyberneticId, craftsmanship: link.craftsmanship } }
+            ? {
+                ...weapon,
+                concealedBionic: {
+                  cyberneticId: link.cyberneticId,
+                  craftsmanship: link.craftsmanship,
+                },
+              }
             : weapon;
         });
         const removedMelee = entry.acquisition?.purity?.removedIntegratedMeleeWeapons ?? [];
@@ -503,7 +512,13 @@ export function TalentsTab({
         ].map((weapon) => {
           const link = meleeLinks.get(weapon.id);
           return link && !weapon.concealedBionic
-            ? { ...weapon, concealedBionic: { cyberneticId: link.cyberneticId, craftsmanship: link.craftsmanship } }
+            ? {
+                ...weapon,
+                concealedBionic: {
+                  cyberneticId: link.cyberneticId,
+                  craftsmanship: link.craftsmanship,
+                },
+              }
             : weapon;
         });
         const removedArcheotech = entry.acquisition?.purity?.removedArcheotech ?? [];
@@ -541,7 +556,17 @@ export function TalentsTab({
       }
       setPendingEffectDeletion(null);
     },
-    [talents, psychic, cybernetics, insanity, rangedWeapons, meleeWeapons, archeotech, onUpdateCharacter, onUpdateTalents]
+    [
+      talents,
+      psychic,
+      cybernetics,
+      insanity,
+      rangedWeapons,
+      meleeWeapons,
+      archeotech,
+      onUpdateCharacter,
+      onUpdateTalents,
+    ]
   );
 
   const handleRemoveTalent = useCallback(
@@ -549,13 +574,13 @@ export function TalentsTab({
       const entry = talents.talents.find((talent) => talent.uid === uid);
       if (!entry) return;
       const hasRestorableEffect =
-        (entry.talentId === "purity-of-flesh" && (
-          (entry.acquisition?.purity?.removedCybernetics?.length ?? 0) > 0 ||
-          (entry.acquisition?.purity?.removedIntegratedRangedWeapons?.length ?? 0) > 0 ||
-          (entry.acquisition?.purity?.removedIntegratedMeleeWeapons?.length ?? 0) > 0 ||
-          (entry.acquisition?.purity?.removedArcheotech?.length ?? 0) > 0
-        )) ||
-        (entry.talentId === "rite-of-pure-thought" && (entry.acquisition?.riteOriginalDisorders?.length ?? 0) > 0);
+        (entry.talentId === "purity-of-flesh" &&
+          ((entry.acquisition?.purity?.removedCybernetics?.length ?? 0) > 0 ||
+            (entry.acquisition?.purity?.removedIntegratedRangedWeapons?.length ?? 0) > 0 ||
+            (entry.acquisition?.purity?.removedIntegratedMeleeWeapons?.length ?? 0) > 0 ||
+            (entry.acquisition?.purity?.removedArcheotech?.length ?? 0) > 0)) ||
+        (entry.talentId === "rite-of-pure-thought" &&
+          (entry.acquisition?.riteOriginalDisorders?.length ?? 0) > 0);
       if (hasRestorableEffect) {
         setPendingEffectDeletion(entry);
         return;
@@ -647,7 +672,9 @@ export function TalentsTab({
         )}
       </div>
 
-      <div className={`hidden lg:grid lg:gap-6 lg:items-start ${showFaith ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
+      <div
+        className={`hidden lg:grid lg:gap-6 lg:items-start ${showFaith ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}
+      >
         <RegularTalentSection
           entries={regularEntries}
           psychic={psychic}
@@ -705,13 +732,18 @@ export function TalentsTab({
         >
           <PickerBody>
             <p className={`text-sm ${uiTextBody}`}>
-              This Talent recorded a one-time change. Choose whether deleting the Talent should also restore what that acquisition changed.
+              This Talent recorded a one-time change. Choose whether deleting the Talent should also
+              restore what that acquisition changed.
             </p>
             <div className="space-y-2">
               <Button fullWidth onClick={() => applyTalentRemoval(pendingEffectDeletion, true)}>
                 Delete and restore recorded changes
               </Button>
-              <Button fullWidth variant="ghost" onClick={() => applyTalentRemoval(pendingEffectDeletion, false)}>
+              <Button
+                fullWidth
+                variant="ghost"
+                onClick={() => applyTalentRemoval(pendingEffectDeletion, false)}
+              >
                 Delete Talent only
               </Button>
               <Button fullWidth variant="ghost" onClick={() => setPendingEffectDeletion(null)}>

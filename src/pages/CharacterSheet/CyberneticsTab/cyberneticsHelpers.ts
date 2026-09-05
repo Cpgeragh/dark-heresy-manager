@@ -71,10 +71,7 @@ export function concealedWeaponBionicDescription(
   return `${base}\n\n- Ranged weapon: it never jams or overheats; a roll that would cause either is a miss instead.\n- Melee weapon: +10 to attack Tests and +1 Damage.`;
 }
 
-export function craftsmanshipValue(
-  ref: CyberneticRef,
-  quality: CyberneticCraftsmanship
-): string {
+export function craftsmanshipValue(ref: CyberneticRef, quality: CyberneticCraftsmanship): string {
   if (quality === "Poor") return ref.poorValue ?? ref.value;
   if (quality === "Good") return ref.goodValue ?? ref.value;
   return ref.value;

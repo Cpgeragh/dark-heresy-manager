@@ -24,19 +24,22 @@ export const SANCTIONING_RESULTS: SanctioningResultRef[] = [
     id: "unlovely-memories",
     roll: "15–25",
     name: "Unlovely Memories",
-    effect: "Such was your sanctioning, that you visibly twitch and grimace whenever Holy Terra is mentioned. Gain 1d5 Insanity Points.",
+    effect:
+      "Such was your sanctioning, that you visibly twitch and grimace whenever Holy Terra is mentioned. Gain 1d5 Insanity Points.",
   },
   {
     id: "the-horror",
     roll: "26–35",
     name: "The Horror, the Horror",
-    effect: "Your hair is pure white, you occasionally gibber quietly to yourself and you endure terrible nightmares every night. Gain 1d5 Insanity Points.",
+    effect:
+      "Your hair is pure white, you occasionally gibber quietly to yourself and you endure terrible nightmares every night. Gain 1d5 Insanity Points.",
   },
   {
     id: "pain-through-nerve-induction",
     roll: "36–42",
     name: "Pain through Nerve Induction",
-    effect: "The skin on the back of your right hand is horribly scarred. You are uncomfortable around bald, robed women.",
+    effect:
+      "The skin on the back of your right hand is horribly scarred. You are uncomfortable around bald, robed women.",
   },
   {
     id: "dental-probes",
@@ -63,7 +66,8 @@ export const SANCTIONING_RESULTS: SanctioningResultRef[] = [
     id: "irradiance",
     roll: "64–70",
     name: "Irradiance",
-    effect: "You have seen the true power of the Golden Throne. You have no hair anywhere upon your body, face or head.",
+    effect:
+      "You have seen the true power of the Golden Throne. You have no hair anywhere upon your body, face or head.",
   },
   {
     id: "tongue-bound",
@@ -76,18 +80,21 @@ export const SANCTIONING_RESULTS: SanctioningResultRef[] = [
     id: "throne-wed",
     roll: "76–88",
     name: "Throne Wed",
-    effect: "You cleave only unto the Emperor. You gain the Chem Geld talent and a chattallium ring, worth 100 Thrones.",
+    effect:
+      "You cleave only unto the Emperor. You gain the Chem Geld talent and a chattallium ring, worth 100 Thrones.",
   },
   {
     id: "witch-prickling",
     roll: "89–94",
     name: "Witch Prickling",
-    effect: "Your body is covered in thousands of tiny scars. You have a thorough dislike of needles. Increase your Toughness by 3.",
+    effect:
+      "Your body is covered in thousands of tiny scars. You have a thorough dislike of needles. Increase your Toughness by 3.",
   },
   {
     id: "hypno-doctrination",
     roll: "95–00",
     name: "Hypno-doctrination",
-    effect: "Powerful conditioning causes you to chant the Litany of Protection in a whispered voice whenever you are asleep or unconscious. Increase your Willpower by 3.",
+    effect:
+      "Powerful conditioning causes you to chant the Litany of Protection in a whispered voice whenever you are asleep or unconscious. Increase your Willpower by 3.",
   },
 ];

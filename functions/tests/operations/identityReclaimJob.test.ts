@@ -31,7 +31,11 @@ const {
   const mockIndexGet = vi.fn();
   const mockProfileGet = vi.fn();
   const mockLinksGet = vi.fn();
-  const mockIndexDoc = vi.fn((id: string) => ({ id, collectionName: "identityRecoveryIndex", get: mockIndexGet }));
+  const mockIndexDoc = vi.fn((id: string) => ({
+    id,
+    collectionName: "identityRecoveryIndex",
+    get: mockIndexGet,
+  }));
   const mockBatchUpdate = vi.fn();
   const mockBatchSet = vi.fn();
   const mockBatchDelete = vi.fn();
@@ -287,7 +291,10 @@ describe("processIdentityReclaimChunk", () => {
   });
 
   it("rejects when the job is not an identity-reclaim job, without touching the migration helper", async () => {
-    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ type: "other-job" }), leaseId: "lease-1" });
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ type: "other-job" }),
+      leaseId: "lease-1",
+    });
 
     await expect(processIdentityReclaimChunk({ jobId: "job-1" }, "new-uid")).rejects.toThrow(
       expect.objectContaining({ code: "failed-precondition" })
@@ -371,7 +378,10 @@ describe("processIdentityReclaimChunk", () => {
 
   it("completes with zero writes when the plan has no campaigns", async () => {
     mockAcquireJobLease.mockResolvedValue({
-      job: makeJob({ data: { oldUid: "old-uid", newUid: "new-uid", campaigns: [] }, totalCount: 0 }),
+      job: makeJob({
+        data: { oldUid: "old-uid", newUid: "new-uid", campaigns: [] },
+        totalCount: 0,
+      }),
       leaseId: "lease-1",
     });
 

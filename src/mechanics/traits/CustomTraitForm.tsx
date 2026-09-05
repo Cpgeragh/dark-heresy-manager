@@ -28,7 +28,9 @@ export function CustomTraitForm({
   const [name, setName] = useState(initialTrait?.name ?? "");
   const [description, setDescription] = useState(initialTrait?.description ?? "");
   const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
-    initialTrait?.source === "Custom" || initialTrait?.source === "2nd Ed" ? initialTrait.source : ""
+    initialTrait?.source === "Custom" || initialTrait?.source === "2nd Ed"
+      ? initialTrait.source
+      : ""
   );
 
   const canAdd = Boolean(name.trim()) && Boolean(description.trim()) && Boolean(origin);

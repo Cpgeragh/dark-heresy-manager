@@ -42,9 +42,7 @@ const CATEGORIES: {
   },
   {
     label: "Combat",
-    tabs: [
-      { id: "vitals", label: "Vitals" },
-    ],
+    tabs: [{ id: "vitals", label: "Vitals" }],
   },
   {
     label: "Companions",
@@ -76,13 +74,9 @@ interface SectionDrawerProps {
   onExternalClose?: () => void;
 }
 
-export function SectionDrawer({
-  ...props
-}: SectionDrawerProps) {
+export function SectionDrawer({ ...props }: SectionDrawerProps) {
   const externalRequest =
-    props.externalOpen && props.externalCategoryLabel
-      ? props.externalCategoryLabel
-      : "local";
+    props.externalOpen && props.externalCategoryLabel ? props.externalCategoryLabel : "local";
   const drawerStateKey = `${props.isDM ? "dm" : "player"}:${externalRequest}`;
 
   return <SectionDrawerContent key={drawerStateKey} {...props} />;
@@ -155,7 +149,8 @@ function SectionDrawerContent({
   return (
     <>
       {/* Trigger — hamburger only */}
-      <button type="button"
+      <button
+        type="button"
         onClick={open}
         aria-label="Open section navigation"
         className="flex h-10 w-11 items-center justify-center rounded-lg border border-slate-500 bg-slate-800 text-base leading-none text-slate-200 transition hover:bg-slate-700"
@@ -188,10 +183,7 @@ function SectionDrawerContent({
           <span className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
             Navigate
           </span>
-          <CloseButton
-            onClick={close}
-            ariaLabel="Close navigation"
-          />
+          <CloseButton onClick={close} ariaLabel="Close navigation" />
         </div>
 
         {/* Sliding panels */}
@@ -205,7 +197,8 @@ function SectionDrawerContent({
             <ul className="py-2">
               {visibleCategories.map((cat, index) => (
                 <li key={cat.label}>
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => openCategory(index)}
                     className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-200 hover:bg-slate-800 transition text-left"
                   >
@@ -226,7 +219,8 @@ function SectionDrawerContent({
             {activeCategory && (
               <>
                 {/* Back button */}
-                <button type="button"
+                <button
+                  type="button"
                   onClick={goBack}
                   aria-label={`Back to categories from ${activeCategory.label}`}
                   className="flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b border-slate-700"
@@ -239,7 +233,8 @@ function SectionDrawerContent({
                 <ul className="py-2">
                   {activeCategory.tabs.map((tab) => (
                     <li key={tab.id}>
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => selectTab(tab.id)}
                         className={`w-full px-4 py-3 text-sm text-left transition ${
                           activeTab === tab.id

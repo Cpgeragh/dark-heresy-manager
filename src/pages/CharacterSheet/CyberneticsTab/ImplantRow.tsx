@@ -89,8 +89,8 @@ export function ImplantRow({
                     {item.notes && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                      <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.notes}</p>
-                    </div>
+                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.notes}</p>
+                      </div>
                     )}
                   </div>
                 }
@@ -107,18 +107,25 @@ export function ImplantRow({
           <ItemMetaChips
             bare
             value={item.value ?? (isVariableMeta(ref?.value) ? undefined : ref?.value)}
-            availability={item.availability ?? (isVariableMeta(ref?.availability) ? undefined : ref?.availability)}
+            availability={
+              item.availability ??
+              (isVariableMeta(ref?.availability) ? undefined : ref?.availability)
+            }
             source={item.source ?? ref?.source}
           />
         </div>
         {item.grantedByTalentName && (
-          <p className="mt-1 text-xs text-amber-300">{item.grantedByTalentName} ({item.grantedByType}): Granted</p>
+          <p className="mt-1 text-xs text-amber-300">
+            {item.grantedByTalentName} ({item.grantedByType}): Granted
+          </p>
         )}
         {linkedArmName && linkedWeaponName && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className={uiTextLabel}>Linked</span>
             <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">{linkedArmName}</Chip>
-            <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">{linkedWeaponName}</Chip>
+            <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">
+              {linkedWeaponName}
+            </Chip>
           </div>
         )}
         {item.craftsmanship && (
@@ -145,7 +152,11 @@ export function ImplantRow({
             <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={`${displayedCraftsmanship} ${item.name}`}
-                content={<p className={`whitespace-pre-line text-sm ${uiTextBody} leading-relaxed`}>{qualityDescription}</p>}
+                content={
+                  <p className={`whitespace-pre-line text-sm ${uiTextBody} leading-relaxed`}>
+                    {qualityDescription}
+                  </p>
+                }
               />
             </span>
           </div>

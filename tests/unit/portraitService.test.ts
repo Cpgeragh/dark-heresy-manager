@@ -5,7 +5,8 @@ const { mockPatchCharacterField } = vi.hoisted(() => ({
 }));
 
 vi.mock("../../src/services/characterService", () => ({
-  patchCharacterField: (...args: [string, string, string, unknown]) => mockPatchCharacterField(...args),
+  patchCharacterField: (...args: [string, string, string, unknown]) =>
+    mockPatchCharacterField(...args),
 }));
 
 import { uploadPortrait } from "../../src/services/portraitService";

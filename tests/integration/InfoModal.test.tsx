@@ -9,7 +9,9 @@ import { InfoModal } from "../../src/components/InfoModal";
 describe("InfoModal", () => {
   it("renders a real button by default", () => {
     render(<InfoModal title="Frag Grenade" content={<p>Boom.</p>} />);
-    expect(screen.getByRole("button", { name: "Show information about Frag Grenade" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show information about Frag Grenade" })
+    ).toBeInTheDocument();
   });
 
   it("opens the dialog and shows title/content when the default button is clicked", async () => {

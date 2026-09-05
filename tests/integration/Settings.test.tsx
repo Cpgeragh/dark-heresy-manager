@@ -175,7 +175,9 @@ describe("Settings recovery code", () => {
 
     expect(rotateRecoveryCodeMock).toHaveBeenCalledWith("user-1");
     expect(await screen.findByText("DH-EEEE-FFFF")).toBeInTheDocument();
-    expect(mockToastSuccess).toHaveBeenCalledWith("Recovery code rotated. Write down your new code.");
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Recovery code rotated. Write down your new code."
+    );
   });
 
   it("shows an error toast when rotation fails", async () => {
@@ -190,7 +192,9 @@ describe("Settings recovery code", () => {
     await user.click(screen.getByRole("button", { name: "Yes, rotate" }));
 
     await waitFor(() =>
-      expect(mockToastError).toHaveBeenCalledWith("Failed to rotate recovery code. Please try again.")
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Failed to rotate recovery code. Please try again."
+      )
     );
   });
 
@@ -233,7 +237,9 @@ describe("Settings linked device", () => {
     await user.click(screen.getByRole("button", { name: "Link This Device" }));
 
     expect(linkDeviceMock).toHaveBeenCalledWith("DH-AAAA-BBBB");
-    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Device linked successfully."));
+    await waitFor(() =>
+      expect(mockToastSuccess).toHaveBeenCalledWith("Device linked successfully.")
+    );
   });
 
   it("disables Link This Device until a code is typed", () => {

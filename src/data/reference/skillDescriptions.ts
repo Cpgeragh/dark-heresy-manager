@@ -72,8 +72,7 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
     "Palm objects, pick pockets or perform tricks with small items. Usually Opposed against the target's Awareness or half Perception; smaller objects are easier. Can substitute for Gamble to cheat. Half Action; can be attempted as a Free Action at −10 Difficulty.",
   Survival:
     "Subsist in the wild through hunting, fishing, fire-making and shelter construction. Difficulty depends on the environment. Failing by 5+ degrees causes spectacular failure — rockslides, stirring hostile wildlife or consuming poison. Normally takes one hour, reduced by ten minutes per degree of success. In urgent circumstances, the GM may increase the Difficulty and reduce the time to one minute.",
-  Swim:
-    "Swim and dive. Normal conditions need no Test; Tests are required in rough water or for extended periods. Unusual substances may increase the Difficulty, and the Skill neither protects against harmful liquids nor removes the need for protective clothing. Free Action made as part of a Move Action.",
+  Swim: "Swim and dive. Normal conditions need no Test; Tests are required in rough water or for extended periods. Unusual substances may increase the Difficulty, and the Skill neither protects against harmful liquids nor removes the need for protective clothing. Free Action made as part of a Move Action.",
   "Tech-Use":
     "Operate unusual or malfunctioning technology, repair damaged equipment and sometimes build an item from scratch, although a relevant Trade skill is normally more appropriate for construction. No Test for basic equipment under normal conditions. Understanding an unfamiliar item typically takes one minute. Repairing an item typically takes one hour, reduced by ten minutes per degree of success.",
   Tracking:

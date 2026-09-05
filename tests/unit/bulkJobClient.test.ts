@@ -3,7 +3,9 @@ import { driveJobToCompletion } from "../../src/firestore/bulkJobClient";
 
 describe("driveJobToCompletion", () => {
   it("calls processChunk exactly once when the first chunk already reports done", async () => {
-    const processChunk = vi.fn().mockResolvedValue({ done: true, processedCount: 5, totalCount: 5 });
+    const processChunk = vi
+      .fn()
+      .mockResolvedValue({ done: true, processedCount: 5, totalCount: 5 });
 
     const result = await driveJobToCompletion("job-1", processChunk);
 
@@ -35,7 +37,11 @@ describe("driveJobToCompletion", () => {
     await driveJobToCompletion("job-1", processChunk, onProgress);
 
     expect(onProgress).toHaveBeenCalledTimes(2);
-    expect(onProgress).toHaveBeenNthCalledWith(1, { done: false, processedCount: 2, totalCount: 4 });
+    expect(onProgress).toHaveBeenNthCalledWith(1, {
+      done: false,
+      processedCount: 2,
+      totalCount: 4,
+    });
     expect(onProgress).toHaveBeenNthCalledWith(2, { done: true, processedCount: 4, totalCount: 4 });
   });
 

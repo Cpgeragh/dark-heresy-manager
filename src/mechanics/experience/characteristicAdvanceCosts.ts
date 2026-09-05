@@ -2,7 +2,10 @@
 
 import type { Character, CharacteristicAdvanceTier, Characteristics } from "../../types/Character";
 import { findCareerByName } from "../../data/reference/careerData";
-import { CAREER_ADVANCES, type CharacteristicKey } from "../../data/reference/careerAdvancesReference";
+import {
+  CAREER_ADVANCES,
+  type CharacteristicKey,
+} from "../../data/reference/careerAdvancesReference";
 
 export const CHARACTERISTIC_ADVANCE_TIERS = [
   "simple",

@@ -71,9 +71,7 @@ export function PickerField({
           label ? "mt-0.5" : ""
         } appearance-none text-left flex items-center justify-between ${uiPickerPressFeedback(!disabled)} ${buttonClassName}`.trim()}
       >
-        <span className={value ? "" : "text-slate-500"}>
-          {value || placeholder}
-        </span>
+        <span className={value ? "" : "text-slate-500"}>{value || placeholder}</span>
         <ArrowRight />
       </button>
     </div>

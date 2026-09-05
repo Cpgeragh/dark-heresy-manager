@@ -6,28 +6,111 @@ import { useState } from "react";
 
 const { MOCK_TALENT_LIST } = vi.hoisted(() => ({
   MOCK_TALENT_LIST: [
-    { id: "plain-talent", name: "Plain Talent", source: "CR", prerequisites: "Fel 30", hasSpecialisation: false },
-    { id: "spec-talent", name: "Spec Talent", source: "CR", hasSpecialisation: true, specialisationLabel: "Skill" },
-    { id: "sound-constitution", name: "Sound Constitution", source: "CR", hasSpecialisation: false, repeatable: true, behaviour: { kind: "ranked" } },
-    { id: "the-flesh-is-weak", name: "The Flesh is Weak", source: "LW", hasSpecialisation: false, repeatable: true, behaviour: { kind: "ranked", maxPurchases: 4 } },
-    { id: "resistance", name: "Resistance", source: "CR", hasSpecialisation: true, repeatable: true, behaviour: { kind: "fixed-repeatable", options: ["Cold", "Fear"] } },
-    { id: "hatred", name: "Hatred", source: "CR", hasSpecialisation: true, repeatable: true, specialisationLabel: "Group", behaviour: { kind: "hybrid", options: [
-      { label: "Criminals", value: "Criminals" },
-      { label: "Cult (specific)", detailLabel: "Cult", displayPrefix: "Cult" },
-      { label: "Xeno (specific)", detailLabel: "Xeno", displayPrefix: "Xeno" },
-    ] } },
-    { id: "reformed-skin", name: "Reformed Skin", source: "LW", hasSpecialisation: true, repeatable: true, specialisationLabel: "Replacement", behaviour: { kind: "repeatable-free-text", detailLabel: "Replacement" } },
-    { id: "minor-psychic-power", name: "Minor Psychic Power", source: "CR", hasSpecialisation: false, repeatable: true, behaviour: { kind: "psychic-purchase", powerGroup: "minor" } },
+    {
+      id: "plain-talent",
+      name: "Plain Talent",
+      source: "CR",
+      prerequisites: "Fel 30",
+      hasSpecialisation: false,
+    },
+    {
+      id: "spec-talent",
+      name: "Spec Talent",
+      source: "CR",
+      hasSpecialisation: true,
+      specialisationLabel: "Skill",
+    },
+    {
+      id: "sound-constitution",
+      name: "Sound Constitution",
+      source: "CR",
+      hasSpecialisation: false,
+      repeatable: true,
+      behaviour: { kind: "ranked" },
+    },
+    {
+      id: "the-flesh-is-weak",
+      name: "The Flesh is Weak",
+      source: "LW",
+      hasSpecialisation: false,
+      repeatable: true,
+      behaviour: { kind: "ranked", maxPurchases: 4 },
+    },
+    {
+      id: "resistance",
+      name: "Resistance",
+      source: "CR",
+      hasSpecialisation: true,
+      repeatable: true,
+      behaviour: { kind: "fixed-repeatable", options: ["Cold", "Fear"] },
+    },
+    {
+      id: "hatred",
+      name: "Hatred",
+      source: "CR",
+      hasSpecialisation: true,
+      repeatable: true,
+      specialisationLabel: "Group",
+      behaviour: {
+        kind: "hybrid",
+        options: [
+          { label: "Criminals", value: "Criminals" },
+          { label: "Cult (specific)", detailLabel: "Cult", displayPrefix: "Cult" },
+          { label: "Xeno (specific)", detailLabel: "Xeno", displayPrefix: "Xeno" },
+        ],
+      },
+    },
+    {
+      id: "reformed-skin",
+      name: "Reformed Skin",
+      source: "LW",
+      hasSpecialisation: true,
+      repeatable: true,
+      specialisationLabel: "Replacement",
+      behaviour: { kind: "repeatable-free-text", detailLabel: "Replacement" },
+    },
+    {
+      id: "minor-psychic-power",
+      name: "Minor Psychic Power",
+      source: "CR",
+      hasSpecialisation: false,
+      repeatable: true,
+      behaviour: { kind: "psychic-purchase", powerGroup: "minor" },
+    },
     { id: "psy-rating-1", name: "Psy Rating 1", source: "CR", hasSpecialisation: false },
     { id: "psy-rating-3", name: "Psy Rating 3", source: "CR", hasSpecialisation: false },
     { id: "psy-rating-4", name: "Psy Rating 4", source: "CR", hasSpecialisation: false },
     { id: "psy-rating-5", name: "Psy Rating 5", source: "CR", hasSpecialisation: false },
     { id: "psy-rating-6", name: "Psy Rating 6", source: "CR", hasSpecialisation: false },
-    { id: "touched-by-the-fates", name: "Touched by the Fates", source: "DotDG", hasSpecialisation: false },
+    {
+      id: "touched-by-the-fates",
+      name: "Touched by the Fates",
+      source: "DotDG",
+      hasSpecialisation: false,
+    },
     { id: "purity-of-flesh", name: "Purity of Flesh", source: "LW", hasSpecialisation: false },
-    { id: "cult-briefing", name: "Cult Briefing", source: "DH", hasSpecialisation: true, behaviour: { kind: "fixed-single", options: ["Blood", "Culture", "Heretek", "Pleasure"] } },
-    { id: "sicarius-tutoring", name: "Sicarius Tutoring", source: "DH", hasSpecialisation: true, behaviour: { kind: "fixed-single", options: ["Scum"] } },
-    { id: "peer", name: "Peer", source: "CR", hasSpecialisation: true, repeatable: true, behaviour: { kind: "fixed-repeatable", options: ["Academics", "Workers"] } },
+    {
+      id: "cult-briefing",
+      name: "Cult Briefing",
+      source: "DH",
+      hasSpecialisation: true,
+      behaviour: { kind: "fixed-single", options: ["Blood", "Culture", "Heretek", "Pleasure"] },
+    },
+    {
+      id: "sicarius-tutoring",
+      name: "Sicarius Tutoring",
+      source: "DH",
+      hasSpecialisation: true,
+      behaviour: { kind: "fixed-single", options: ["Scum"] },
+    },
+    {
+      id: "peer",
+      name: "Peer",
+      source: "CR",
+      hasSpecialisation: true,
+      repeatable: true,
+      behaviour: { kind: "fixed-repeatable", options: ["Academics", "Workers"] },
+    },
     { id: "chem-geld", name: "Chem Geld", source: "CR", hasSpecialisation: false },
     { id: "decadence", name: "Decadence", source: "CR", hasSpecialisation: false },
     { id: "autosanguine", name: "Autosanguine", source: "IH", hasSpecialisation: false },
@@ -35,8 +118,21 @@ const { MOCK_TALENT_LIST } = vi.hoisted(() => ({
     { id: "orthoproxy", name: "Orthoproxy", source: "IH", hasSpecialisation: false },
     { id: "technical-knock", name: "Technical Knock", source: "CR", hasSpecialisation: false },
     { id: "the-power-within", name: "The Power Within", source: "LW", hasSpecialisation: false },
-    { id: "basic-weapon-training", name: "Basic Weapon Training", source: "CR", hasSpecialisation: true, repeatable: true, behaviour: { kind: "managed-elsewhere" } },
-    { id: "faith-talent", name: "Faith Talent", source: "BoM", hasSpecialisation: false, faithGroup: "mercy" },
+    {
+      id: "basic-weapon-training",
+      name: "Basic Weapon Training",
+      source: "CR",
+      hasSpecialisation: true,
+      repeatable: true,
+      behaviour: { kind: "managed-elsewhere" },
+    },
+    {
+      id: "faith-talent",
+      name: "Faith Talent",
+      source: "BoM",
+      hasSpecialisation: false,
+      faithGroup: "mercy",
+    },
   ],
 }));
 
@@ -70,7 +166,9 @@ function renderTab(props: Partial<React.ComponentProps<typeof TalentsTab>> = {})
 }
 
 function modalScrollContainer(name: string): HTMLElement {
-  const container = screen.getByRole("dialog", { name }).querySelector<HTMLElement>(".overflow-y-auto");
+  const container = screen
+    .getByRole("dialog", { name })
+    .querySelector<HTMLElement>(".overflow-y-auto");
   if (!container) throw new Error(`No scroll container found in ${name}`);
   return container;
 }
@@ -94,18 +192,37 @@ function StatefulTalentsTab() {
 describe("TalentsTab", () => {
   it("uses the shared plus and eye controls", () => {
     const { unmount } = render(
-      <TalentsTab talents={makeTalents()} psychic={emptyPsychic} editable onUpdateTalents={() => undefined} />
+      <TalentsTab
+        talents={makeTalents()}
+        psychic={emptyPsychic}
+        editable
+        onUpdateTalents={() => undefined}
+      />
     );
     expect(screen.getAllByRole("button", { name: "Add Talent" }).length).toBeGreaterThan(0);
     unmount();
-    render(<TalentsTab talents={makeTalents()} psychic={emptyPsychic} editable={false} onUpdateTalents={() => undefined} />);
+    render(
+      <TalentsTab
+        talents={makeTalents()}
+        psychic={emptyPsychic}
+        editable={false}
+        onUpdateTalents={() => undefined}
+      />
+    );
     expect(screen.getAllByRole("button", { name: "View Talents" }).length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Add Talent" })).not.toBeInTheDocument();
   });
 
   it("does not show selection feedback on Talent cards in View mode", async () => {
     const user = userEvent.setup();
-    render(<TalentsTab talents={makeTalents()} psychic={emptyPsychic} editable={false} onUpdateTalents={() => undefined} />);
+    render(
+      <TalentsTab
+        talents={makeTalents()}
+        psychic={emptyPsychic}
+        editable={false}
+        onUpdateTalents={() => undefined}
+      />
+    );
     await user.click(screen.getAllByRole("button", { name: "View Talents" })[0]);
 
     const card = screen.getByText("Plain Talent").closest("button");
@@ -129,7 +246,9 @@ describe("TalentsTab", () => {
     expect(add).toBeDisabled();
     await user.type(within(dialog).getByRole("textbox"), "Something");
     await user.click(add);
-    expect(specialised.onUpdateTalents.mock.calls[0][0].talents[0].name).toBe("Spec Talent (Something)");
+    expect(specialised.onUpdateTalents.mock.calls[0][0].talents[0].name).toBe(
+      "Spec Talent (Something)"
+    );
   });
 
   it("keeps the Talent picker open, removes finite choices, and retains repeatable Talents", async () => {
@@ -159,7 +278,9 @@ describe("TalentsTab", () => {
     const list = modalScrollContainer("Add Talent");
     list.scrollTop = 180;
     fireEvent.scroll(list);
-    await user.click(within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Resistance"));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Resistance")
+    );
     await user.click(screen.getByRole("button", { name: "Back" }));
 
     expect(modalScrollContainer("Add Talent").scrollTop).toBe(180);
@@ -167,10 +288,12 @@ describe("TalentsTab", () => {
 
   it("shows limited ranked ownership as a chip in the Talent picker", async () => {
     const user = userEvent.setup();
-    const talents = makeTalents({ talents: [
-      entry("f1", "the-flesh-is-weak", "The Flesh is Weak"),
-      entry("f2", "the-flesh-is-weak", "The Flesh is Weak"),
-    ] });
+    const talents = makeTalents({
+      talents: [
+        entry("f1", "the-flesh-is-weak", "The Flesh is Weak"),
+        entry("f2", "the-flesh-is-weak", "The Flesh is Weak"),
+      ],
+    });
     renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     const card = screen.getByText("The Flesh is Weak").closest("button");
@@ -181,7 +304,9 @@ describe("TalentsTab", () => {
     const user = userEvent.setup();
     render(<StatefulTalentsTab />);
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
-    await user.click(within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Touched by the Fates"));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Touched by the Fates")
+    );
     await user.click(screen.getByRole("checkbox"));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
@@ -193,7 +318,9 @@ describe("TalentsTab", () => {
     const user = userEvent.setup();
     render(<StatefulTalentsTab />);
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
-    await user.click(within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Touched by the Fates"));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Touched by the Fates")
+    );
     const acquisition = screen.getByRole("dialog", { name: "Touched by the Fates Acquisition" });
     expect(within(acquisition).getByRole("button", { name: "Back" })).toBeInTheDocument();
     expect(within(acquisition).queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
@@ -250,7 +377,9 @@ describe("TalentsTab", () => {
 
   it("hides owned fixed choices and adds an available choice", async () => {
     const user = userEvent.setup();
-    const talents = makeTalents({ talents: [entry("r1", "resistance", "Resistance (Fear)", "Fear")] });
+    const talents = makeTalents({
+      talents: [entry("r1", "resistance", "Resistance (Fear)", "Fear")],
+    });
     const { onUpdateTalents } = renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     await user.click(screen.getByText("Resistance"));
@@ -294,7 +423,9 @@ describe("TalentsTab", () => {
     await user.click(screen.getByText("Cult (specific)"));
     await user.type(screen.getByPlaceholderText("Enter cult…"), "Red Redemption");
     await user.click(screen.getByRole("button", { name: "Add Hatred" }));
-    expect(cult.onUpdateTalents.mock.calls[0][0].talents[0].name).toBe("Hatred (Cult: Red Redemption)");
+    expect(cult.onUpdateTalents.mock.calls[0][0].talents[0].name).toBe(
+      "Hatred (Cult: Red Redemption)"
+    );
 
     cleanup();
     const xeno = renderTab();
@@ -308,7 +439,9 @@ describe("TalentsTab", () => {
 
   it("requires a distinct Reformed Skin replacement case-insensitively", async () => {
     const user = userEvent.setup();
-    const talents = makeTalents({ talents: [entry("rs1", "reformed-skin", "Reformed Skin (Left Arm)", "Left Arm")] });
+    const talents = makeTalents({
+      talents: [entry("rs1", "reformed-skin", "Reformed Skin (Left Arm)", "Left Arm")],
+    });
     renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     await user.click(screen.getByText("Reformed Skin"));
@@ -369,7 +502,11 @@ describe("TalentsTab", () => {
     await user.click(screen.getByText("Blood"));
     expect(screen.getByText("Required")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Melee Weapon Training" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Melee Weapon Training" })).getByRole("button", { name: "Chain" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Melee Weapon Training" })).getByRole("button", {
+        name: "Chain",
+      })
+    );
     expect(screen.getByText("Required")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
     expect(onUpdateCharacter).toHaveBeenCalledWith(
@@ -389,33 +526,38 @@ describe("TalentsTab", () => {
     await user.click(screen.getByText("Cult Briefing"));
     await user.click(screen.getByText("Culture"));
     await user.click(screen.getByRole("button", { name: "Another Home World" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Another Home World" })).getByRole("button", { name: "Noble Born" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Another Home World" })).getByRole("button", {
+        name: "Noble Born",
+      })
+    );
     await user.click(screen.getByRole("button", { name: /Additional Peer group/ }));
     await user.click(screen.getByText("Mercantile"));
     await user.click(screen.getByRole("button", { name: "Apply Homeworld" }));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({
-        talents: expect.arrayContaining([
-          expect.objectContaining({
-            acquisition: expect.objectContaining({
-              homeworldId: "noble-born",
-              homeworldTraitChoices: { peerGroup: "Mercantile" },
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: expect.arrayContaining([
+            expect.objectContaining({
+              acquisition: expect.objectContaining({
+                homeworldId: "noble-born",
+                homeworldTraitChoices: { peerGroup: "Mercantile" },
+              }),
             }),
-          }),
-        ]),
-      }),
-    }));
+          ]),
+        }),
+      })
+    );
   });
 
   it("allows an already-owned Cult Briefing Pleasure reward and records its source", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn();
     renderTab({
-      talents: makeTalents({ talents: [
-        entry("chem", "chem-geld", "Chem Geld"),
-        entry("dec", "decadence", "Decadence"),
-      ] }),
+      talents: makeTalents({
+        talents: [entry("chem", "chem-geld", "Chem Geld"), entry("dec", "decadence", "Decadence")],
+      }),
       onUpdateCharacter,
     });
 
@@ -429,28 +571,32 @@ describe("TalentsTab", () => {
     await user.click(within(rewardPicker).getByRole("button", { name: /Chem Geld\s*Owned/ }));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({
-        talents: expect.arrayContaining([
-          expect.objectContaining({
-            talentId: "cult-briefing",
-            acquisition: expect.objectContaining({ grantedTalentId: "chem-geld" }),
-          }),
-        ]),
-      }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: expect.arrayContaining([
+            expect.objectContaining({
+              talentId: "cult-briefing",
+              acquisition: expect.objectContaining({ grantedTalentId: "chem-geld" }),
+            }),
+          ]),
+        }),
+      })
+    );
   });
 
   it("allows an already-owned Cult Briefing Heretek reward", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn();
     renderTab({
-      talents: makeTalents({ talents: [
-        entry("a", "autosanguine", "Autosanguine"),
-        entry("l", "logis-implant", "Logis Implant"),
-        entry("o", "orthoproxy", "Orthoproxy"),
-        entry("t", "technical-knock", "Technical Knock"),
-      ] }),
+      talents: makeTalents({
+        talents: [
+          entry("a", "autosanguine", "Autosanguine"),
+          entry("l", "logis-implant", "Logis Implant"),
+          entry("o", "orthoproxy", "Orthoproxy"),
+          entry("t", "technical-knock", "Technical Knock"),
+        ],
+      }),
       onUpdateCharacter,
     });
 
@@ -458,7 +604,11 @@ describe("TalentsTab", () => {
     await user.click(screen.getByText("Cult Briefing"));
     await user.click(screen.getByText("Heretek"));
     await user.click(screen.getByRole("button", { name: "Granted Augmetic" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Granted Augmetic" })).getByRole("button", { name: "Optical Mechadendrite" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Granted Augmetic" })).getByRole("button", {
+        name: "Optical Mechadendrite",
+      })
+    );
     await user.click(screen.getByRole("button", { name: "Granted Talent" }));
 
     const rewardPicker = screen.getByRole("dialog", { name: "Granted Talent" });
@@ -466,13 +616,17 @@ describe("TalentsTab", () => {
     await user.click(within(rewardPicker).getByRole("button", { name: /Technical Knock\s*Owned/ }));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({
-        talents: expect.arrayContaining([
-          expect.objectContaining({ acquisition: expect.objectContaining({ grantedTalentId: "technical-knock" }) }),
-        ]),
-      }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: expect.arrayContaining([
+            expect.objectContaining({
+              acquisition: expect.objectContaining({ grantedTalentId: "technical-knock" }),
+            }),
+          ]),
+        }),
+      })
+    );
   });
 
   it("allows already-owned Cult Briefing Blood training", async () => {
@@ -496,23 +650,27 @@ describe("TalentsTab", () => {
     await user.click(within(trainingPicker).getByRole("button", { name: /Chain\s*Owned/ }));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({
-        talents: expect.arrayContaining([
-          expect.objectContaining({ acquisition: { weaponTrainingId: "melee-chain" } }),
-        ]),
-      }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: expect.arrayContaining([
+            expect.objectContaining({ acquisition: { weaponTrainingId: "melee-chain" } }),
+          ]),
+        }),
+      })
+    );
   });
 
   it("allows an already-owned Sicarius Tutoring Scum Peer reward", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn();
     renderTab({
-      talents: makeTalents({ talents: [
-        entry("pa", "peer", "Peer (Academics)", "Academics"),
-        entry("pw", "peer", "Peer (Workers)", "Workers"),
-      ] }),
+      talents: makeTalents({
+        talents: [
+          entry("pa", "peer", "Peer (Academics)", "Academics"),
+          entry("pw", "peer", "Peer (Workers)", "Workers"),
+        ],
+      }),
       onUpdateCharacter,
     });
 
@@ -526,18 +684,20 @@ describe("TalentsTab", () => {
     await user.click(within(peerPicker).getByRole("button", { name: /Academics\s*Owned/ }));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({
-        talents: expect.arrayContaining([
-          expect.objectContaining({
-            acquisition: expect.objectContaining({
-              grantedTalentId: "peer",
-              grantedTalentSpecialisation: "Academics",
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: expect.arrayContaining([
+            expect.objectContaining({
+              acquisition: expect.objectContaining({
+                grantedTalentId: "peer",
+                grantedTalentSpecialisation: "Academics",
+              }),
             }),
-          }),
-        ]),
-      }),
-    }));
+          ]),
+        }),
+      })
+    );
   });
 
   it("installs and links the Cult Briefing Heretek concealed weapon augmetic", async () => {
@@ -545,12 +705,14 @@ describe("TalentsTab", () => {
     const onUpdateCharacter = vi.fn();
     renderTab({
       onUpdateCharacter,
-      cybernetics: [{
-        id: "arm-1",
-        referenceId: "cr-bionic-arm",
-        name: "Bionic Arm",
-        craftsmanship: "Common",
-      }],
+      cybernetics: [
+        {
+          id: "arm-1",
+          referenceId: "cr-bionic-arm",
+          name: "Bionic Arm",
+          craftsmanship: "Common",
+        },
+      ],
       rangedWeapons: [{ id: "pistol-1", name: "Autopistol", class: "Pistol" }],
     });
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
@@ -562,26 +724,48 @@ describe("TalentsTab", () => {
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Granted Augmetic" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Granted Augmetic" })).getByRole("button", { name: "Concealed Weapon Bionic" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Granted Augmetic" })).getByRole("button", {
+        name: "Concealed Weapon Bionic",
+      })
+    );
     await user.click(screen.getByRole("button", { name: "Existing Bionic Arm" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Existing Bionic Arm" })).getByRole("button", { name: "Bionic Arm" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Existing Bionic Arm" })).getByRole("button", {
+        name: "Bionic Arm",
+      })
+    );
     await user.click(screen.getByRole("button", { name: "Eligible Weapon" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Eligible Weapon" })).getByRole("button", { name: "Autopistol (Ranged)" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Eligible Weapon" })).getByRole("button", {
+        name: "Autopistol (Ranged)",
+      })
+    );
     await user.click(screen.getByRole("button", { name: "Granted Talent" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Granted Talent" })).getByRole("button", { name: "Autosanguine" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Granted Talent" })).getByRole("button", {
+        name: "Autosanguine",
+      })
+    );
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      cybernetics: expect.arrayContaining([expect.objectContaining({
-        referenceId: "ih-concealed-weapon-bionic",
-        grantedByTalentEntryUid: expect.any(String),
-        concealedWeapon: { armId: "arm-1", weaponId: "pistol-1", weaponType: "ranged" },
-      })]),
-      rangedWeapons: [expect.objectContaining({
-        id: "pistol-1",
-        concealedBionic: expect.objectContaining({ craftsmanship: "Common" }),
-      })],
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cybernetics: expect.arrayContaining([
+          expect.objectContaining({
+            referenceId: "ih-concealed-weapon-bionic",
+            grantedByTalentEntryUid: expect.any(String),
+            concealedWeapon: { armId: "arm-1", weaponId: "pistol-1", weaponType: "ranged" },
+          }),
+        ]),
+        rangedWeapons: [
+          expect.objectContaining({
+            id: "pistol-1",
+            concealedBionic: expect.objectContaining({ craftsmanship: "Common" }),
+          }),
+        ],
+      })
+    );
   });
 
   it("shows blocking Heretek requirements as readable errors", async () => {
@@ -591,10 +775,16 @@ describe("TalentsTab", () => {
     await user.click(screen.getByText("Cult Briefing"));
     await user.click(screen.getByText("Heretek"));
     await user.click(screen.getByRole("button", { name: "Granted Augmetic" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Granted Augmetic" })).getByRole("button", { name: "Concealed Weapon Bionic" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Granted Augmetic" })).getByRole("button", {
+        name: "Concealed Weapon Bionic",
+      })
+    );
 
     expect(screen.getByText("Install a Bionic Arm first.")).toHaveClass("text-red-400");
-    expect(screen.getByText("Add an unmodified pistol or one-handed melee weapon first.")).toHaveClass("text-red-400");
+    expect(
+      screen.getByText("Add an unmodified pistol or one-handed melee weapon first.")
+    ).toHaveClass("text-red-400");
     expect(screen.getByRole("button", { name: "Existing Bionic Arm" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Eligible Weapon" })).toBeDisabled();
   });
@@ -607,7 +797,9 @@ describe("TalentsTab", () => {
 
     expect(screen.getByText("Willpower Bonus Recorded:")).toBeInTheDocument();
     expect(screen.getByText("Minor Powers Granted:")).toBeInTheDocument();
-    expect(within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("0")).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("0")
+    ).toBeInTheDocument();
     expect(screen.getByText("Major Powers Granted:")).toBeInTheDocument();
     expect(screen.queryByText(/No Minor Powers are granted/)).not.toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
@@ -628,28 +820,40 @@ describe("TalentsTab", () => {
 
     await user.click(screen.getByRole("button", { name: "Power Grant" }));
     const routePicker = screen.getByRole("dialog", { name: "Power Grant" });
-    await user.click(within(routePicker).getByRole("button", { name: "Known Discipline: 3 powers" }));
+    await user.click(
+      within(routePicker).getByRole("button", { name: "Known Discipline: 3 powers" })
+    );
     await user.click(screen.getByRole("button", { name: "Discipline" }));
     const knownPicker = screen.getByRole("dialog", { name: "Discipline" });
     expect(within(knownPicker).getByRole("button", { name: "Biomancy" })).toBeInTheDocument();
-    expect(within(knownPicker).queryByRole("button", { name: "Telepathy" })).not.toBeInTheDocument();
+    expect(
+      within(knownPicker).queryByRole("button", { name: "Telepathy" })
+    ).not.toBeInTheDocument();
     await user.click(within(knownPicker).getByRole("button", { name: "Biomancy" }));
 
-    expect(within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("3")).toBeInTheDocument();
-    expect(within(screen.getByText("Major Powers Granted:").parentElement!).getByText("3")).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("3")
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Major Powers Granted:").parentElement!).getByText("3")
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({
-        talents: [expect.objectContaining({
-          acquisition: expect.objectContaining({
-            psyRatingDiscipline: "Biomancy",
-            psyRatingNewDiscipline: false,
-            psyRatingMinorPowerGrants: 3,
-            psyRatingMajorPowerGrants: 3,
-          }),
-        })],
-      }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: [
+            expect.objectContaining({
+              acquisition: expect.objectContaining({
+                psyRatingDiscipline: "Biomancy",
+                psyRatingNewDiscipline: false,
+                psyRatingMinorPowerGrants: 3,
+                psyRatingMajorPowerGrants: 3,
+              }),
+            }),
+          ],
+        }),
+      })
+    );
   });
 
   it("requires Psy Rating 3 to introduce an unknown Discipline", async () => {
@@ -666,14 +870,22 @@ describe("TalentsTab", () => {
     expect(screen.queryByRole("button", { name: "Power Grant" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Discipline" }));
     const disciplinePicker = screen.getByRole("dialog", { name: "Discipline" });
-    expect(within(disciplinePicker).queryByRole("button", { name: "Biomancy" })).not.toBeInTheDocument();
+    expect(
+      within(disciplinePicker).queryByRole("button", { name: "Biomancy" })
+    ).not.toBeInTheDocument();
     await user.click(within(disciplinePicker).getByRole("button", { name: "Divination" }));
-    expect(within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("3")).toBeInTheDocument();
-    expect(within(screen.getByText("Major Powers Granted:").parentElement!).getByText("1")).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("3")
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Major Powers Granted:").parentElement!).getByText("1")
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      psychic: expect.objectContaining({ disciplines: ["Biomancy", "Divination"] }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        psychic: expect.objectContaining({ disciplines: ["Biomancy", "Divination"] }),
+      })
+    );
   });
 
   it("excludes known Disciplines from the New route and grants only one major power", async () => {
@@ -688,27 +900,41 @@ describe("TalentsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     await user.click(screen.getByText("Psy Rating 6"));
     await user.click(screen.getByRole("button", { name: "Power Grant" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Power Grant" })).getByRole("button", { name: "New Discipline: 1 power" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Power Grant" })).getByRole("button", {
+        name: "New Discipline: 1 power",
+      })
+    );
     await user.click(screen.getByRole("button", { name: "Discipline" }));
     const disciplinePicker = screen.getByRole("dialog", { name: "Discipline" });
-    expect(within(disciplinePicker).queryByRole("button", { name: "Biomancy" })).not.toBeInTheDocument();
+    expect(
+      within(disciplinePicker).queryByRole("button", { name: "Biomancy" })
+    ).not.toBeInTheDocument();
     await user.click(within(disciplinePicker).getByRole("button", { name: "Telepathy" }));
 
-    expect(within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("0")).toBeInTheDocument();
-    expect(within(screen.getByText("Major Powers Granted:").parentElement!).getByText("1")).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Minor Powers Granted:").parentElement!).getByText("0")
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Major Powers Granted:").parentElement!).getByText("1")
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      psychic: expect.objectContaining({ disciplines: ["Biomancy", "Telepathy"] }),
-      talentsAndTraits: expect.objectContaining({
-        talents: [expect.objectContaining({
-          acquisition: expect.objectContaining({
-            psyRatingNewDiscipline: true,
-            psyRatingMinorPowerGrants: 0,
-            psyRatingMajorPowerGrants: 1,
-          }),
-        })],
-      }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        psychic: expect.objectContaining({ disciplines: ["Biomancy", "Telepathy"] }),
+        talentsAndTraits: expect.objectContaining({
+          talents: [
+            expect.objectContaining({
+              acquisition: expect.objectContaining({
+                psyRatingNewDiscipline: true,
+                psyRatingMinorPowerGrants: 0,
+                psyRatingMajorPowerGrants: 1,
+              }),
+            }),
+          ],
+        }),
+      })
+    );
   });
 
   it("deactivates a Discipline when its introducing Psy Rating Talent is deleted", async () => {
@@ -731,10 +957,12 @@ describe("TalentsTab", () => {
 
     await user.click(screen.getAllByRole("button", { name: "Delete Psy Rating 3" })[0]);
     await user.click(screen.getByRole("button", { name: "Delete" }));
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({ talents: [] }),
-      psychic: expect.objectContaining({ disciplines: [] }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({ talents: [] }),
+        psychic: expect.objectContaining({ disciplines: [] }),
+      })
+    );
   });
 
   it("removes Purity cybernetics and their concealed-weapon links together", async () => {
@@ -743,35 +971,45 @@ describe("TalentsTab", () => {
     renderTab({
       onUpdateCharacter,
       cybernetics: [{ id: "cyber-1", name: "Concealed Weapon Bionic", craftsmanship: "Common" }],
-      rangedWeapons: [{
-        id: "weapon-1",
-        name: "Autopistol",
-        concealedBionic: { cyberneticId: "cyber-1", craftsmanship: "Common" },
-      }],
+      rangedWeapons: [
+        {
+          id: "weapon-1",
+          name: "Autopistol",
+          concealedBionic: { cyberneticId: "cyber-1", craftsmanship: "Common" },
+        },
+      ],
     });
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     await user.click(screen.getByText("Purity of Flesh"));
-    expect(screen.queryByRole("checkbox", { name: /reviewed the removals/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("checkbox", { name: /reviewed the removals/i })
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      cybernetics: [],
-      rangedWeapons: [expect.objectContaining({ id: "weapon-1", concealedBionic: undefined })],
-      talentsAndTraits: expect.objectContaining({
-        talents: [expect.objectContaining({
-          acquisition: expect.objectContaining({
-            purity: expect.objectContaining({
-              removedCyberneticIds: ["cyber-1"],
-              removedConcealedWeaponLinks: [expect.objectContaining({
-                weaponId: "weapon-1",
-                weaponType: "ranged",
-                cyberneticId: "cyber-1",
-              })],
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cybernetics: [],
+        rangedWeapons: [expect.objectContaining({ id: "weapon-1", concealedBionic: undefined })],
+        talentsAndTraits: expect.objectContaining({
+          talents: [
+            expect.objectContaining({
+              acquisition: expect.objectContaining({
+                purity: expect.objectContaining({
+                  removedCyberneticIds: ["cyber-1"],
+                  removedConcealedWeaponLinks: [
+                    expect.objectContaining({
+                      weaponId: "weapon-1",
+                      weaponType: "ranged",
+                      cyberneticId: "cyber-1",
+                    }),
+                  ],
+                }),
+              }),
             }),
-          }),
-        })],
-      }),
-    }));
+          ],
+        }),
+      })
+    );
   });
 
   it("automatically counts and removes installed implants and a custom integrated weapon", async () => {
@@ -781,7 +1019,12 @@ describe("TalentsTab", () => {
       onUpdateCharacter,
       cybernetics: [
         { id: "arm", referenceId: "cr-bionic-arm", name: "Bionic Arm", craftsmanship: "Common" },
-        { id: "leg", referenceId: "cr-bionic-locomotion", name: "Bionic Locomotion", craftsmanship: "Common" },
+        {
+          id: "leg",
+          referenceId: "cr-bionic-locomotion",
+          name: "Bionic Locomotion",
+          craftsmanship: "Common",
+        },
       ],
       meleeWeapons: [
         { id: "claw", name: "Claw", integrated: true, custom: true },
@@ -792,7 +1035,11 @@ describe("TalentsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     await user.click(screen.getByText("Purity of Flesh"));
 
-    expect(screen.getByText("All 3 installed cybernetics, bionics, and integrated weapons will be removed.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "All 3 installed cybernetics, bionics, and integrated weapons will be removed."
+      )
+    ).toBeInTheDocument();
     expect(screen.getAllByText("Qualifies for Fate")).toHaveLength(3);
     expect(screen.getByText("Fate Points Gained:")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
@@ -800,21 +1047,25 @@ describe("TalentsTab", () => {
 
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      cybernetics: [],
-      meleeWeapons: [{ id: "sword", name: "Sword" }],
-      talentsAndTraits: expect.objectContaining({
-        talents: [expect.objectContaining({
-          acquisition: expect.objectContaining({
-            purity: expect.objectContaining({
-              qualifyingBionicsRemoved: 3,
-              fatePointsGained: 1,
-              removedIntegratedMeleeWeapons: [expect.objectContaining({ id: "claw" })],
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cybernetics: [],
+        meleeWeapons: [{ id: "sword", name: "Sword" }],
+        talentsAndTraits: expect.objectContaining({
+          talents: [
+            expect.objectContaining({
+              acquisition: expect.objectContaining({
+                purity: expect.objectContaining({
+                  qualifyingBionicsRemoved: 3,
+                  fatePointsGained: 1,
+                  removedIntegratedMeleeWeapons: [expect.objectContaining({ id: "claw" })],
+                }),
+              }),
             }),
-          }),
-        })],
-      }),
-    }));
+          ],
+        }),
+      })
+    );
   });
 
   it("selects life-critical removals from a large inventory and records separate Reformed Skin entries", async () => {
@@ -845,19 +1096,27 @@ describe("TalentsTab", () => {
     await user.click(screen.getByRole("button", { name: "Life-Critical Removals" }));
     const reopenedFatalDialog = screen.getByRole("dialog", { name: "Life-Critical Removals" });
     await user.click(within(reopenedFatalDialog).getByRole("button", { name: /Implant 7/ }));
-    await user.click(within(reopenedFatalDialog).getByRole("button", { name: "Done (2 selected)" }));
+    await user.click(
+      within(reopenedFatalDialog).getByRole("button", { name: "Done (2 selected)" })
+    );
 
     expect(screen.getByText("Wounds Lost:")).toBeInTheDocument();
     expect(screen.queryByText(/Required replacements are recorded/)).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Permanent Toughness Loss (1d5)" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Permanent Toughness Loss" })).getByRole("button", { name: "4" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Permanent Toughness Loss" })).getByRole("button", {
+        name: "4",
+      })
+    );
     await user.click(screen.getByRole("button", { name: "Continue to Reformed Skin" }));
     expect(onUpdateCharacter).not.toHaveBeenCalled();
 
     const reformedDialog = screen.getByRole("dialog", { name: "Reformed Skin Acquisition" });
     const replacements = within(reformedDialog).getAllByRole("textbox");
     expect(replacements).toHaveLength(2);
-    expect(within(reformedDialog).getByRole("button", { name: "Apply and add Talent" })).toBeDisabled();
+    expect(
+      within(reformedDialog).getByRole("button", { name: "Apply and add Talent" })
+    ).toBeDisabled();
     await user.type(replacements[0], "Respiratory System");
     await user.type(replacements[1], "Heart");
     await user.click(within(reformedDialog).getByRole("button", { name: "Apply and add Talent" }));
@@ -908,18 +1167,20 @@ describe("TalentsTab", () => {
     await user.click(within(causePicker).getByRole("button", { name: "Critical Damage" }));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      talentsAndTraits: expect.objectContaining({
-        talents: expect.arrayContaining([
-          expect.objectContaining({
-            talentId: "reformed-skin",
-            acquisition: expect.objectContaining({
-              reformedSkinPurityReplacement: false,
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: expect.arrayContaining([
+            expect.objectContaining({
+              talentId: "reformed-skin",
+              acquisition: expect.objectContaining({
+                reformedSkinPurityReplacement: false,
+              }),
             }),
-          }),
-        ]),
-      }),
-    }));
+          ]),
+        }),
+      })
+    );
     const added = onUpdateCharacter.mock.calls[0][0].talentsAndTraits.talents[1];
     expect(added.acquisition.purityTalentEntryUid).toBeUndefined();
   });
@@ -943,17 +1204,27 @@ describe("TalentsTab", () => {
     await user.click(screen.getByText("Reformed Skin"));
     await user.type(screen.getByPlaceholderText("Enter replacement…"), "Left Arm");
     await user.click(screen.getByRole("button", { name: "Add Reformed Skin" }));
-    expect(screen.queryByRole("button", { name: "Purity of Flesh Purchase" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Purity of Flesh Purchase" })
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Cause of Replacement" }));
-    await user.click(within(screen.getByRole("dialog", { name: "Cause of Replacement" })).getByRole("button", { name: "Purity of Flesh" }));
-    expect(screen.getByText("All Fate Points gained from Purity of Flesh will be lost.")).toBeInTheDocument();
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Cause of Replacement" })).getByRole("button", {
+        name: "Purity of Flesh",
+      })
+    );
+    expect(
+      screen.getByText("All Fate Points gained from Purity of Flesh will be lost.")
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
     const added = onUpdateCharacter.mock.calls[0][0].talentsAndTraits.talents[1];
-    expect(added.acquisition).toEqual(expect.objectContaining({
-      reformedSkinPurityReplacement: true,
-      purityTalentEntryUid: "purity-1",
-    }));
+    expect(added.acquisition).toEqual(
+      expect.objectContaining({
+        reformedSkinPurityReplacement: true,
+        purityTalentEntryUid: "purity-1",
+      })
+    );
   });
 
   it("removes Mechadendrites and archeotech but excludes Mechadendrites from Fate", async () => {
@@ -963,7 +1234,12 @@ describe("TalentsTab", () => {
       onUpdateCharacter,
       cybernetics: [
         { id: "arm", referenceId: "cr-bionic-arm", name: "Bionic Arm", craftsmanship: "Common" },
-        { id: "mech", referenceId: "cr-optical-mechadendrite", name: "Optical Mechadendrite", craftsmanship: "Good" },
+        {
+          id: "mech",
+          referenceId: "cr-optical-mechadendrite",
+          name: "Optical Mechadendrite",
+          craftsmanship: "Good",
+        },
       ],
       rangedWeapons: [
         { id: "integrated", name: "Built-in Pistol", integrated: true },
@@ -984,11 +1260,13 @@ describe("TalentsTab", () => {
     expect(screen.getByText("Removed — no Fate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      cybernetics: [],
-      rangedWeapons: [{ id: "lasgun", name: "Lasgun" }],
-      archeotech: [{ id: "relic", name: "Unrelated Relic", type: "Weapon" }],
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cybernetics: [],
+        rangedWeapons: [{ id: "lasgun", name: "Lasgun" }],
+        archeotech: [{ id: "relic", name: "Unrelated Relic", type: "Weapon" }],
+      })
+    );
   });
 
   it("can restore Purity cybernetics and concealed-weapon links when deleting", async () => {
@@ -999,15 +1277,19 @@ describe("TalentsTab", () => {
       acquisition: {
         purity: {
           removedCyberneticIds: ["cyber-1"],
-          removedCybernetics: [{ id: "cyber-1", name: "Concealed Weapon Bionic", craftsmanship: "Common" as const }],
+          removedCybernetics: [
+            { id: "cyber-1", name: "Concealed Weapon Bionic", craftsmanship: "Common" as const },
+          ],
           removedIntegratedMeleeWeapons: [{ id: "claw", name: "Claw", integrated: true }],
           removedArcheotech: [{ id: "eye", name: "Ancient Eye", type: "Cybernetic" }],
-          removedConcealedWeaponLinks: [{
-            weaponId: "weapon-1",
-            weaponType: "ranged" as const,
-            cyberneticId: "cyber-1",
-            craftsmanship: "Common" as const,
-          }],
+          removedConcealedWeaponLinks: [
+            {
+              weaponId: "weapon-1",
+              weaponType: "ranged" as const,
+              cyberneticId: "cyber-1",
+              craftsmanship: "Common" as const,
+            },
+          ],
           qualifyingBionicsRemoved: 1,
           fatePointsGained: 0,
         },
@@ -1025,22 +1307,26 @@ describe("TalentsTab", () => {
     await user.click(screen.getByRole("button", { name: "Delete" }));
     await user.click(screen.getByRole("button", { name: "Delete and restore recorded changes" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
-      cybernetics: [expect.objectContaining({ id: "cyber-1" })],
-      rangedWeapons: [expect.objectContaining({
-        id: "weapon-1",
-        concealedBionic: { cyberneticId: "cyber-1", craftsmanship: "Common" },
-      })],
-      meleeWeapons: [
-        expect.objectContaining({ id: "sword" }),
-        expect.objectContaining({ id: "claw", integrated: true }),
-      ],
-      archeotech: [
-        expect.objectContaining({ id: "relic" }),
-        expect.objectContaining({ id: "eye", type: "Cybernetic" }),
-      ],
-      talentsAndTraits: expect.objectContaining({ talents: [] }),
-    }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cybernetics: [expect.objectContaining({ id: "cyber-1" })],
+        rangedWeapons: [
+          expect.objectContaining({
+            id: "weapon-1",
+            concealedBionic: { cyberneticId: "cyber-1", craftsmanship: "Common" },
+          }),
+        ],
+        meleeWeapons: [
+          expect.objectContaining({ id: "sword" }),
+          expect.objectContaining({ id: "claw", integrated: true }),
+        ],
+        archeotech: [
+          expect.objectContaining({ id: "relic" }),
+          expect.objectContaining({ id: "eye", type: "Cybernetic" }),
+        ],
+        talentsAndTraits: expect.objectContaining({ talents: [] }),
+      })
+    );
   });
 
   it("shows automatically granted Talents as read-only with their source", () => {
@@ -1048,7 +1334,9 @@ describe("TalentsTab", () => {
     renderTab({ talents });
     expect(screen.getAllByText("Resistance (Psychic Powers)").length).toBeGreaterThan(0);
     expect(screen.getAllByText("The Power Within (Talent): Granted").length).toBeGreaterThan(0);
-    expect(screen.queryByRole("button", { name: "Delete Resistance (Psychic Powers)" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Delete Resistance (Psychic Powers)" })
+    ).not.toBeInTheDocument();
     for (const grantedText of screen.getAllByText("The Power Within (Talent): Granted")) {
       const cardContent = grantedText.parentElement;
       const sourceChip = within(cardContent!).getByText("CR");
@@ -1080,10 +1368,12 @@ describe("TalentsTab", () => {
 
   it("groups multiple choices and deletes only the chosen child", async () => {
     const user = userEvent.setup();
-    const talents = makeTalents({ talents: [
-      entry("r1", "resistance", "Resistance (Fear)", "Fear"),
-      entry("r2", "resistance", "Resistance (Cold)", "Cold"),
-    ] });
+    const talents = makeTalents({
+      talents: [
+        entry("r1", "resistance", "Resistance (Fear)", "Fear"),
+        entry("r2", "resistance", "Resistance (Cold)", "Cold"),
+      ],
+    });
     const { onUpdateTalents } = renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Expand Resistance" })[0]);
     expect(screen.getByText("Resistance (Fear)")).toBeInTheDocument();
@@ -1094,10 +1384,12 @@ describe("TalentsTab", () => {
 
   it("shows Psychic purchase ownership and warns before attempting to delete a linked purchase", async () => {
     const user = userEvent.setup();
-    const talents = makeTalents({ talents: [
-      entry("p1", "minor-psychic-power", "Minor Psychic Power"),
-      entry("p2", "minor-psychic-power", "Minor Psychic Power"),
-    ] });
+    const talents = makeTalents({
+      talents: [
+        entry("p1", "minor-psychic-power", "Minor Psychic Power"),
+        entry("p2", "minor-psychic-power", "Minor Psychic Power"),
+      ],
+    });
     const psychic: PsychicBlock = {
       ...emptyPsychic,
       minorPowers: [{ id: "power-1", name: "Power", known: true, talentEntryUid: "p1" }],
@@ -1106,7 +1398,9 @@ describe("TalentsTab", () => {
       <TalentsTab talents={talents} psychic={psychic} editable onUpdateTalents={() => undefined} />
     );
     expect(screen.getAllByText("Owned: 2").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "Delete Minor Psychic Power" }).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole("button", { name: "Delete Minor Psychic Power" }).length
+    ).toBeGreaterThan(0);
     unmount();
     render(
       <TalentsTab
@@ -1117,11 +1411,17 @@ describe("TalentsTab", () => {
       />
     );
     expect(screen.getAllByText("Owned: 1").length).toBeGreaterThan(0);
-    expect(screen.queryByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "This Talent cannot be deleted until its linked Psychic powers are deleted."
+      )
+    ).not.toBeInTheDocument();
     await user.click(screen.getAllByRole("button", { name: "Delete Minor Psychic Power" })[0]);
     const blockedDialog = screen.getByRole("dialog", { name: "Cannot Delete Talent" });
     expect(blockedDialog).toBeInTheDocument();
-    expect(screen.getByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")).toBeInTheDocument();
+    expect(
+      screen.getByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
     expect(within(blockedDialog).getByText("Close")).toBeInTheDocument();
   });
@@ -1131,12 +1431,14 @@ describe("TalentsTab", () => {
     const psyRating = entry("psy-3", "psy-rating-3", "Psy Rating 3");
     const psychic: PsychicBlock = {
       ...emptyPsychic,
-      majorPowers: [{
-        id: "power-1",
-        name: "Power",
-        known: true,
-        psyRatingTalentEntryUid: psyRating.uid,
-      }],
+      majorPowers: [
+        {
+          id: "power-1",
+          name: "Power",
+          known: true,
+          psyRatingTalentEntryUid: psyRating.uid,
+        },
+      ],
     };
 
     render(
@@ -1148,19 +1450,27 @@ describe("TalentsTab", () => {
       />
     );
 
-    expect(screen.queryByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "This Talent cannot be deleted until its linked Psychic powers are deleted."
+      )
+    ).not.toBeInTheDocument();
     await user.click(screen.getAllByRole("button", { name: "Delete Psy Rating 3" })[0]);
     expect(screen.getByRole("dialog", { name: "Cannot Delete Talent" })).toBeInTheDocument();
-    expect(screen.getByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")).toBeInTheDocument();
+    expect(
+      screen.getByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
   });
 
   it("shows Psychic purchase ownership in the Talent picker", async () => {
     const user = userEvent.setup();
-    const talents = makeTalents({ talents: [
-      entry("p1", "minor-psychic-power", "Minor Psychic Power"),
-      entry("p2", "minor-psychic-power", "Minor Psychic Power"),
-    ] });
+    const talents = makeTalents({
+      talents: [
+        entry("p1", "minor-psychic-power", "Minor Psychic Power"),
+        entry("p2", "minor-psychic-power", "Minor Psychic Power"),
+      ],
+    });
     renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Add Talent" });
@@ -1170,7 +1480,9 @@ describe("TalentsTab", () => {
 
   it("allows an unused Psychic purchase to be deleted with confirmation", async () => {
     const user = userEvent.setup();
-    const talents = makeTalents({ talents: [entry("p1", "minor-psychic-power", "Minor Psychic Power")] });
+    const talents = makeTalents({
+      talents: [entry("p1", "minor-psychic-power", "Minor Psychic Power")],
+    });
     const { onUpdateTalents } = renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Delete Minor Psychic Power" })[0]);
     await user.click(screen.getByRole("button", { name: "Delete" }));

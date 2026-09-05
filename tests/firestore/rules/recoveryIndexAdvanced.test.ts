@@ -33,14 +33,13 @@ describe("Firestore Rules: Recovery Index abuse resistance", () => {
 
   it("denies all Recovery Index queries, including filtered or bounded queries", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createRecoveryIndexEntry(env, "hmac-derived-index-id", { campaignId: "c1", characterId: "char1" });
+    await createRecoveryIndexEntry(env, "hmac-derived-index-id", {
+      campaignId: "c1",
+      characterId: "char1",
+    });
 
     await expect(
-      dbAs(env, "user-1")
-        .collection("recoveryIndex")
-        .where("campaignId", "==", "c1")
-        .limit(1)
-        .get()
+      dbAs(env, "user-1").collection("recoveryIndex").where("campaignId", "==", "c1").limit(1).get()
     ).rejects.toThrow();
   });
 });

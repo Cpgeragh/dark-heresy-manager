@@ -155,7 +155,13 @@ export function buildCharacterCopyUpdate(
         data
       );
     case "drug":
-      return updateLinkedArray("drugs", character.drugs, customItemId, customLibraryVersionId, data);
+      return updateLinkedArray(
+        "drugs",
+        character.drugs,
+        customItemId,
+        customLibraryVersionId,
+        data
+      );
     case "cybernetic":
       return updateLinkedArray(
         "cybernetics",

@@ -1,12 +1,20 @@
 // src/hooks/useSkillComputation.ts
 
 import { useMemo } from "react";
-import type { SkillEntry, Characteristics, SkillAdvanceLevel, TalentsAndTraitsBlock } from "../types/Character";
+import type {
+  SkillEntry,
+  Characteristics,
+  SkillAdvanceLevel,
+  TalentsAndTraitsBlock,
+} from "../types/Character";
 import type { CharField } from "../types/Character";
 import type { CharacteristicTotals } from "../mechanics/corruption/characteristicModifierTotals";
 import { SKILL_ADVANCE_VALUES, SKILL_HALF_DIVISOR } from "../constants/gameRules";
 import { calculateCharacteristicTotal } from "../utils/stats";
-import { getTalentSkillEffects, type TalentModifierSource } from "../mechanics/talents/talentEffects";
+import {
+  getTalentSkillEffects,
+  type TalentModifierSource,
+} from "../mechanics/talents/talentEffects";
 
 export type SkillWithComputed = SkillEntry & {
   total: number | null;
@@ -36,9 +44,10 @@ function computeTotal(
   const rawCharTotal = calculateCharacteristicTotal(charField.base, charField.advances);
   const charTotal = Math.max(1, rawCharTotal + (modifierTotals[characteristic] ?? 0));
   const advanced = talentEffects?.countsAsBasic ? false : skill.advanced;
-  const level = talentEffects?.minimumLevel && LEVEL_RANK[talentEffects.minimumLevel] > LEVEL_RANK[skill.level]
-    ? talentEffects.minimumLevel
-    : skill.level;
+  const level =
+    talentEffects?.minimumLevel && LEVEL_RANK[talentEffects.minimumLevel] > LEVEL_RANK[skill.level]
+      ? talentEffects.minimumLevel
+      : skill.level;
 
   if (level === "untrained") {
     const untrainedTotal = advanced
@@ -76,9 +85,10 @@ export function useSkillComputation({
     () =>
       skills.map((s) => {
         const effects = talents ? getTalentSkillEffects(talents, s, career) : undefined;
-        const effectiveLevel = effects?.minimumLevel && LEVEL_RANK[effects.minimumLevel] > LEVEL_RANK[s.level]
-          ? effects.minimumLevel
-          : s.level;
+        const effectiveLevel =
+          effects?.minimumLevel && LEVEL_RANK[effects.minimumLevel] > LEVEL_RANK[s.level]
+            ? effects.minimumLevel
+            : s.level;
         const total = computeTotal(s, getCharField, modifierTotals, talents, career);
         return {
           ...s,
@@ -87,9 +97,7 @@ export function useSkillComputation({
           level: effectiveLevel,
           baseLevel: s.level,
           total,
-          ...(effects?.minimumLevel
-            ? { talentMinimumLevel: effects.minimumLevel }
-            : {}),
+          ...(effects?.minimumLevel ? { talentMinimumLevel: effects.minimumLevel } : {}),
           ...(effects && effects.sources.length > 0
             ? {
                 talentAdjustment: effects.modifier,

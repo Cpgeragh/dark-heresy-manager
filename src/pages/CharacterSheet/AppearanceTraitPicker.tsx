@@ -45,13 +45,19 @@ export function AppearanceTraitPicker({
         isEmpty={false}
         footer={
           <div className="flex gap-2">
-            <button type="button" onClick={() => setQualifying(null)} className={uiPickerBackButton}>
+            <button
+              type="button"
+              onClick={() => setQualifying(null)}
+              className={uiPickerBackButton}
+            >
               Back
             </button>
             <Button
               size="sm"
               type="button"
-              onClick={() => onSelect(qualifier.trim() ? `${base} (${qualifier.trim()})` : qualifying)}
+              onClick={() =>
+                onSelect(qualifier.trim() ? `${base} (${qualifier.trim()})` : qualifying)
+              }
               className="flex-1"
             >
               Use This
@@ -61,7 +67,9 @@ export function AppearanceTraitPicker({
       >
         <PickerBody>
           <div>
-            <label className={uiFormLabel} htmlFor="appearance-qualifier">Colour</label>
+            <label className={uiFormLabel} htmlFor="appearance-qualifier">
+              Colour
+            </label>
             <input
               id="appearance-qualifier"
               type="text"

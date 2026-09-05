@@ -110,7 +110,9 @@ describe("character import validation", () => {
   it("rejects a nested character field over the per-string character limit", () => {
     expect(() =>
       assertCharacterPayload({
-        gear: [{ id: "gear-1", description: "x".repeat(PRODUCT_LIMITS.characterFieldCharacters + 1) }],
+        gear: [
+          { id: "gear-1", description: "x".repeat(PRODUCT_LIMITS.characterFieldCharacters + 1) },
+        ],
       })
     ).toThrow(`cannot exceed ${PRODUCT_LIMITS.characterFieldCharacters} characters`);
   });

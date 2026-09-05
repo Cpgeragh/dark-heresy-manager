@@ -36,23 +36,26 @@ export async function registerRecoveryCode(
 
   let newCode = "";
 
-  await db.runTransaction(async (transaction) => {
-    const characterSnapshot = await transaction.get(characterRef);
-    if (!characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Character not found.");
-    }
+  await db.runTransaction(
+    async (transaction) => {
+      const characterSnapshot = await transaction.get(characterRef);
+      if (!characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Character not found.");
+      }
 
-    const previousCode = characterSnapshot.data()?.recoveryCode as string | undefined;
-    newCode = rotateRecoveryCodeInTransaction(
-      transaction,
-      db,
-      characterRef,
-      input.campaignId,
-      input.characterId,
-      previousCode,
-      hmacSecret
-    );
-  }, { maxAttempts: 5 });
+      const previousCode = characterSnapshot.data()?.recoveryCode as string | undefined;
+      newCode = rotateRecoveryCodeInTransaction(
+        transaction,
+        db,
+        characterRef,
+        input.campaignId,
+        input.characterId,
+        previousCode,
+        hmacSecret
+      );
+    },
+    { maxAttempts: 5 }
+  );
 
   return { code: newCode };
 }

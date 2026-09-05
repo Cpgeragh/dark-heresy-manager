@@ -51,7 +51,10 @@ function setupTransactionGet(
     if (ref === mockMembershipQuery) {
       return Promise.resolve({ docs: otherOwnedCharacterIds.map((id) => ({ id })) });
     }
-    return Promise.resolve({ exists: character.exists, data: () => ({ userId: character.userId }) });
+    return Promise.resolve({
+      exists: character.exists,
+      data: () => ({ userId: character.userId }),
+    });
   });
 }
 

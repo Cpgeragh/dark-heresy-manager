@@ -101,13 +101,7 @@ vi.mock("../../src/pages/ClaimCharacter/ClaimForm", () => ({
 }));
 
 vi.mock("../../src/pages/ClaimCharacter/ClaimPreview", () => ({
-  ClaimPreview: ({
-    characterName,
-    onClaim,
-  }: {
-    characterName: string;
-    onClaim: () => void;
-  }) => (
+  ClaimPreview: ({ characterName, onClaim }: { characterName: string; onClaim: () => void }) => (
     <div>
       Mock ClaimPreview: {characterName}
       <button onClick={onClaim}>Mock Claim</button>
@@ -149,7 +143,12 @@ beforeEach(() => {
     playerError: null,
   });
   useArchivedCampaignsMock.mockReturnValue({ campaigns: [], loading: false, error: null });
-  useRecoveryLookupMock.mockReturnValue({ loading: false, error: null, data: null, lookup: vi.fn() });
+  useRecoveryLookupMock.mockReturnValue({
+    loading: false,
+    error: null,
+    data: null,
+    lookup: vi.fn(),
+  });
 });
 
 describe("Dashboard DM campaign list", () => {
@@ -161,7 +160,9 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Create" }));
 
     expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", "user-1", "Alice", undefined);
-    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Campaign created successfully"));
+    await waitFor(() =>
+      expect(mockToastSuccess).toHaveBeenCalledWith("Campaign created successfully")
+    );
   });
 
   it("passes a typed Inquisitor Name through to createCampaign", async () => {
@@ -323,9 +324,7 @@ describe("Dashboard QR panel", () => {
 describe("Dashboard player section", () => {
   it("shows a message when the player has no campaigns", () => {
     renderDashboard();
-    expect(
-      screen.getByText(/You are not part of any campaigns yet/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/You are not part of any campaigns yet/)).toBeInTheDocument();
   });
 
   it("renders a clickable row for each campaign the player is in", () => {

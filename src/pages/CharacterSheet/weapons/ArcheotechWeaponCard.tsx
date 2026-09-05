@@ -22,11 +22,7 @@ import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButto
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip } from "../../../ui/chips/StatChip";
-import {
-  DamageTypeChip,
-  SpecialRulesContent,
-  EquipToggle,
-} from "./weaponShared";
+import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
 import { weaponClassChip } from "./weaponHelpers";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
@@ -67,18 +63,18 @@ export function ArcheotechWeaponCard({
 
   const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId);
   const specialRules = item.specialRules ?? ref?.specialRules;
-  const description  = item.description  ?? ref?.description;
-  const weight       = item.weight       ?? ref?.weight;
-  const value        = item.value        ?? ref?.value;
+  const description = item.description ?? ref?.description;
+  const weight = item.weight ?? ref?.weight;
+  const value = item.value ?? ref?.value;
   const availability = item.availability ?? ref?.availability;
-  const source       = item.source       ?? ref?.source;
-  const weaponClass  = item.weaponClass  ?? ref?.weaponClass;
-  const damage       = item.damage       ?? ref?.damage;
-  const range        = item.range        ?? ref?.range;
-  const rof          = item.rof          ?? ref?.rof;
-  const pen          = item.pen          ?? ref?.pen;
-  const clip         = item.clip         ?? ref?.clip;
-  const rld          = item.rld          ?? ref?.rld;
+  const source = item.source ?? ref?.source;
+  const weaponClass = item.weaponClass ?? ref?.weaponClass;
+  const damage = item.damage ?? ref?.damage;
+  const range = item.range ?? ref?.range;
+  const rof = item.rof ?? ref?.rof;
+  const pen = item.pen ?? ref?.pen;
+  const clip = item.clip ?? ref?.clip;
+  const rld = item.rld ?? ref?.rld;
 
   const hasRules = !!specialRules?.trim();
   const ruleNamesInLookup = (specialRules ?? "")
@@ -116,11 +112,18 @@ export function ArcheotechWeaponCard({
                 </Chip>
               )}
               {weaponClass === "Melee" ? (
-                <Chip size="sm" className={colourOrange}>Melee</Chip>
+                <Chip size="sm" className={colourOrange}>
+                  Melee
+                </Chip>
               ) : weaponClass ? (
-                (() => { const c = weaponClassChip(weaponClass); return c ? (
-                  <Chip size="sm" className={c.active}>{c.label}</Chip>
-                ) : null; })()
+                (() => {
+                  const c = weaponClassChip(weaponClass);
+                  return c ? (
+                    <Chip size="sm" className={c.active}>
+                      {c.label}
+                    </Chip>
+                  ) : null;
+                })()
               ) : null}
             </div>
           )}
@@ -176,7 +179,9 @@ export function ArcheotechWeaponCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{hasRules ? specialRules : "-"}</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+                {hasRules ? specialRules : "-"}
+              </span>
               {ruleNamesInLookup.length > 0 && (
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
@@ -192,7 +197,11 @@ export function ArcheotechWeaponCard({
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Rules`}
-                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{description}</p>}
+                    content={
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {description}
+                      </p>
+                    }
                   />
                 </span>
               ) : (

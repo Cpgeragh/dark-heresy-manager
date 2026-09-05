@@ -135,10 +135,7 @@ describe("Firestore Rules: characterSummaries", () => {
     await createCharacter(env, "c1", "char2", { userId: "player-2" });
 
     const dmDb = dbAs(env, "dm-1");
-    const charactersSnapshot = await dmDb
-      .collection("campaigns/c1/characters")
-      .limit(100)
-      .get();
+    const charactersSnapshot = await dmDb.collection("campaigns/c1/characters").limit(100).get();
     expect(charactersSnapshot.docs.length).toBe(2);
 
     const batch = dmDb.batch();

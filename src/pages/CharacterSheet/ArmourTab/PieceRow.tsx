@@ -1,6 +1,13 @@
 import { useState } from "react";
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextLabel,
+  uiTextMuted,
+  uiTextPlaceholder,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -20,10 +27,7 @@ import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { ARMOUR_UPGRADE_REFERENCE } from "../../../data/reference/armourUpgradeReference";
-import {
-  ArmourUpgradeCard,
-  ArmourUpgradePicker,
-} from "./ArmourUpgradePicker";
+import { ArmourUpgradeCard, ArmourUpgradePicker } from "./ArmourUpgradePicker";
 
 interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
@@ -86,9 +90,7 @@ export function PieceRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} truncate`}>{piece.name}</span>
-          {libraryItem && (
-            <StatusBadge status={libraryItem.status} />
-          )}
+          {libraryItem && <StatusBadge status={libraryItem.status} />}
         </div>
 
         <div className="mt-1 space-y-1">
@@ -144,7 +146,11 @@ export function PieceRow({
             <div className="flex items-center justify-between">
               <span className={uiTextLabel}>Upgrades</span>
               {editable ? (
-                <AddButton label="Add upgrade" size="sm" onClick={() => setShowUpgradePicker(true)} />
+                <AddButton
+                  label="Add upgrade"
+                  size="sm"
+                  onClick={() => setShowUpgradePicker(true)}
+                />
               ) : (
                 <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
               )}
@@ -181,7 +187,8 @@ export function PieceRow({
       </div>
 
       {editable && (
-        <button type="button"
+        <button
+          type="button"
           onClick={() => onToggle(piece.id)}
           className="text-xs lg:text-sm px-2 lg:px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
         >
@@ -189,9 +196,7 @@ export function PieceRow({
         </button>
       )}
 
-      {editable && (
-        <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />
-      )}
+      {editable && <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />}
 
       {showUpgradePicker && (
         <ArmourUpgradePicker

@@ -56,11 +56,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     characters,
     loading: charactersLoading,
     error: charactersError,
-  } = useCampaignCharacters(
-    campaignId ?? null,
-    effectiveUserId,
-    campaign ? isDM : null
-  );
+  } = useCampaignCharacters(campaignId ?? null, effectiveUserId, campaign ? isDM : null);
   const {
     summaries: partySummaries,
     loading: partySummariesLoading,
@@ -155,7 +151,9 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       } catch (err) {
         console.error("Failed to import character:", err);
         toast.error(
-          err instanceof Error ? err.message : "Failed to import character. Check the file and try again."
+          err instanceof Error
+            ? err.message
+            : "Failed to import character. Check the file and try again."
         );
       } finally {
         importingCharacterRef.current = false;

@@ -241,10 +241,7 @@ export function UpgradeCard({
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         {editable && (
-          <RemoveButton
-            onClick={() => onRemove(upgrade.id)}
-            label={`Remove ${upgrade.name}`}
-          />
+          <RemoveButton onClick={() => onRemove(upgrade.id)} label={`Remove ${upgrade.name}`} />
         )}
       </div>
       <div className="flex flex-wrap gap-1 mt-1">

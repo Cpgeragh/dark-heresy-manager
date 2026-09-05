@@ -80,7 +80,9 @@ describe("Talent cross-page effects", () => {
       { name: "Machinator Array", type: "Talent", amount: -5 },
       { name: "Cult Briefing (Pleasure)", type: "Talent", amount: 5 },
     ]);
-    expect(getTalentCharacteristicModifierSources(talents, "t").map((source) => source.amount)).toEqual([10, -3]);
+    expect(
+      getTalentCharacteristicModifierSources(talents, "t").map((source) => source.amount)
+    ).toEqual([10, -3]);
   });
 
   it("aggregates and labels Wound modifiers", () => {
@@ -125,26 +127,41 @@ describe("Talent cross-page effects", () => {
       entry("a1", "sicarius-tutoring", "Sicarius Tutoring (Adept)", "Adept"),
     ]);
     expect(getTalentSkillEffects(talents, skill({ name: "Awareness" })).modifier).toBe(10);
-    expect(getTalentSkillEffects(talents, skill({ id: "silent-move", name: "Silent Move" })).modifier).toBe(-10);
+    expect(
+      getTalentSkillEffects(talents, skill({ id: "silent-move", name: "Silent Move" })).modifier
+    ).toBe(-10);
     const politicalCommonLore = getTalentSkillEffects(
       talents,
-      skill({ id: "common-lore-imperium", name: "Common Lore (Imperium)", category: "Common Lore", advanced: true })
+      skill({
+        id: "common-lore-imperium",
+        name: "Common Lore (Imperium)",
+        category: "Common Lore",
+        advanced: true,
+      })
     );
     expect(politicalCommonLore.countsAsBasic).toBe(true);
-    expect(politicalCommonLore.sources).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        name: "Cult Briefing (Political)",
-        detail: "counts Common Lore (Imperium) as Basic",
-      }),
-    ]));
-    expect(getTalentSkillEffects(talents, skill({ id: "tech-use", name: "Tech-Use", advanced: true })).minimumLevel).toBe("trained");
-    expect(getTalentSkillEffects(talents, skill({ id: "deceive", name: "Deceive", characteristic: "fel" })).characteristic).toBe("int");
+    expect(politicalCommonLore.sources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Cult Briefing (Political)",
+          detail: "counts Common Lore (Imperium) as Basic",
+        }),
+      ])
+    );
+    expect(
+      getTalentSkillEffects(talents, skill({ id: "tech-use", name: "Tech-Use", advanced: true }))
+        .minimumLevel
+    ).toBe("trained");
+    expect(
+      getTalentSkillEffects(
+        talents,
+        skill({ id: "deceive", name: "Deceive", characteristic: "fel" })
+      ).characteristic
+    ).toBe("int");
   });
 
   it("shows Cult Briefing training only when it supplies otherwise-missing training", () => {
-    const heretek = block([
-      entry("h1", "cult-briefing", "Cult Briefing (Heretek)", "Heretek"),
-    ]);
+    const heretek = block([entry("h1", "cult-briefing", "Cult Briefing (Heretek)", "Heretek")]);
     const infestation = block([
       entry("i1", "cult-briefing", "Cult Briefing (Infestation)", "Infestation"),
     ]);
@@ -154,10 +171,19 @@ describe("Talent cross-page effects", () => {
       skill({ id: "tech-use", name: "Tech-Use", advanced: true, level: "untrained" })
     );
     expect(untrainedTechUse.minimumLevel).toBe("trained");
-    expect(untrainedTechUse.sources).toEqual(expect.arrayContaining([
-      expect.objectContaining({ name: "Cult Briefing (Heretek)", detail: "counts Tech-Use as trained" }),
-      expect.objectContaining({ name: "Caves of Steel", type: "Homeworld", detail: "counts Tech-Use as Basic" }),
-    ]));
+    expect(untrainedTechUse.sources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Cult Briefing (Heretek)",
+          detail: "counts Tech-Use as trained",
+        }),
+        expect.objectContaining({
+          name: "Caves of Steel",
+          type: "Homeworld",
+          detail: "counts Tech-Use as Basic",
+        }),
+      ])
+    );
 
     for (const level of ["trained", "+10", "+20"] as const) {
       const trainedTechUse = getTalentSkillEffects(
@@ -169,7 +195,11 @@ describe("Talent cross-page effects", () => {
       // remains hidden once the saved Skill is already trained.
       expect(trainedTechUse.minimumLevel).toBe("trained");
       expect(trainedTechUse.sources).toEqual([
-        expect.objectContaining({ name: "Caves of Steel", type: "Homeworld", detail: "counts Tech-Use as Basic" }),
+        expect.objectContaining({
+          name: "Caves of Steel",
+          type: "Homeworld",
+          detail: "counts Tech-Use as Basic",
+        }),
       ]);
     }
 
@@ -179,7 +209,10 @@ describe("Talent cross-page effects", () => {
     );
     expect(untrainedMedicae.minimumLevel).toBe("trained");
     expect(untrainedMedicae.sources).toEqual([
-      expect.objectContaining({ name: "Cult Briefing (Infestation)", detail: "counts Medicae as trained" }),
+      expect.objectContaining({
+        name: "Cult Briefing (Infestation)",
+        detail: "counts Medicae as trained",
+      }),
     ]);
     expect(
       getTalentSkillEffects(
@@ -194,15 +227,29 @@ describe("Talent cross-page effects", () => {
       entry("pw", "the-power-within", "The Power Within"),
       entry("fw1", "the-flesh-is-weak", "The Flesh is Weak"),
       entry("fw2", "the-flesh-is-weak", "The Flesh is Weak"),
-      entry("b", "cult-briefing", "Cult Briefing (Blood)", "Blood", { weaponTrainingId: "melee-chain" }),
-      entry("g", "sicarius-tutoring", "Sicarius Tutoring (Guardsman)", "Guardsman", { exoticWeapon: "Needle Pistol" }),
+      entry("b", "cult-briefing", "Cult Briefing (Blood)", "Blood", {
+        weaponTrainingId: "melee-chain",
+      }),
+      entry("g", "sicarius-tutoring", "Sicarius Tutoring (Guardsman)", "Guardsman", {
+        exoticWeapon: "Needle Pistol",
+      }),
     ]);
-    expect(getGrantedTalentEntries(talents)).toEqual(expect.arrayContaining([
-      expect.objectContaining({ talentId: "resistance", specialisation: "Psychic Powers", grantedByTalentEntryUid: "pw" }),
-      expect.objectContaining({ talentId: "frenzy", grantedByTalentEntryUid: "b" }),
-    ]));
+    expect(getGrantedTalentEntries(talents)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          talentId: "resistance",
+          specialisation: "Psychic Powers",
+          grantedByTalentEntryUid: "pw",
+        }),
+        expect.objectContaining({ talentId: "frenzy", grantedByTalentEntryUid: "b" }),
+      ])
+    );
     expect(getGrantedTraitEntries(talents)).toEqual([
-      expect.objectContaining({ talentId: "machine", specialisation: "2", grantedByTalentEntryUid: "fw2" }),
+      expect.objectContaining({
+        talentId: "machine",
+        specialisation: "2",
+        grantedByTalentEntryUid: "fw2",
+      }),
     ]);
     expect(getMachineArmourSource(talents)?.amount).toBe(2);
     expect(getGrantedWeaponTrainingIds(talents)).toEqual(["melee-chain"]);
@@ -219,7 +266,9 @@ describe("Talent cross-page effects", () => {
         }),
       ],
     };
-    const chemGeld = getGrantedTalentEntries(talents).find((grant) => grant.talentId === "chem-geld");
+    const chemGeld = getGrantedTalentEntries(talents).find(
+      (grant) => grant.talentId === "chem-geld"
+    );
     expect(chemGeld?.grantedByTalentName).toBe("Sanctioned Psyker");
     expect(chemGeld?.grantedByType).toBe("Trait");
   });
@@ -251,7 +300,9 @@ describe("Talent cross-page effects", () => {
 
   it("tracks Touched by the Fates and reverses Purity Fate through linked Reformed Skin", () => {
     const talents = block([
-      entry("t", "touched-by-the-fates", "Touched by the Fates", undefined, { touchedByFatesPoints: 3 }),
+      entry("t", "touched-by-the-fates", "Touched by the Fates", undefined, {
+        touchedByFatesPoints: 3,
+      }),
       entry("p", "purity-of-flesh", "Purity of Flesh", undefined, {
         purity: { removedCyberneticIds: [], qualifyingBionicsRemoved: 4, fatePointsGained: 2 },
       }),
@@ -286,7 +337,9 @@ describe("Talent cross-page effects", () => {
       reformedSkinPurityReplacement: false,
     });
 
-    expect(getTalentFateEffects(block([purity, first, second, criticalDamage])).modifierSources).toEqual([
+    expect(
+      getTalentFateEffects(block([purity, first, second, criticalDamage])).modifierSources
+    ).toEqual([
       { name: "Purity of Flesh", type: "Talent", amount: 2 },
       { name: "Reformed Skin", type: "Talent", amount: -2 },
     ]);

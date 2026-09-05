@@ -16,7 +16,9 @@ export function Panel({
   const spacingClass = spacing === "compact" ? "space-y-4" : "space-y-6";
 
   return (
-    <div className={`border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg ${spacingClass} ${className}`.trim()}>
+    <div
+      className={`border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg ${spacingClass} ${className}`.trim()}
+    >
       {children}
     </div>
   );

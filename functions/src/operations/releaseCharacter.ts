@@ -22,29 +22,32 @@ export async function releaseCharacter(
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
   const characterRef = campaignRef.collection("characters").doc(input.characterId);
 
-  await db.runTransaction(async (transaction) => {
-    const characterSnapshot = await transaction.get(characterRef);
-    if (!characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Character not found.");
-    }
-    const currentOwner = characterSnapshot.data()?.userId as string | null | undefined;
-    if (currentOwner !== callerUid) {
-      throw new HttpsError("permission-denied", "You do not own this character.");
-    }
+  await db.runTransaction(
+    async (transaction) => {
+      const characterSnapshot = await transaction.get(characterRef);
+      if (!characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Character not found.");
+      }
+      const currentOwner = characterSnapshot.data()?.userId as string | null | undefined;
+      if (currentOwner !== callerUid) {
+        throw new HttpsError("permission-denied", "You do not own this character.");
+      }
 
-    await applyOwnershipTransition(
-      transaction,
-      campaignRef,
-      characterRef,
-      "release",
-      callerUid,
-      currentOwner,
-      null
-    );
-  // The membership-removal check below queries the characters subcollection,
-  // widening this transaction's read set beyond the single document it used
-  // to touch, and racing against another ownership-transition on the same
-  // character (which runs the same query) increases retry contention.
-  // Padding maxAttempts beyond the SDK's own default of 5 accounts for that.
-  }, { maxAttempts: 10 });
+      await applyOwnershipTransition(
+        transaction,
+        campaignRef,
+        characterRef,
+        "release",
+        callerUid,
+        currentOwner,
+        null
+      );
+      // The membership-removal check below queries the characters subcollection,
+      // widening this transaction's read set beyond the single document it used
+      // to touch, and racing against another ownership-transition on the same
+      // character (which runs the same query) increases retry contention.
+      // Padding maxAttempts beyond the SDK's own default of 5 accounts for that.
+    },
+    { maxAttempts: 10 }
+  );
 }

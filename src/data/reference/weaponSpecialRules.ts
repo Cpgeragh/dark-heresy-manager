@@ -188,8 +188,7 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "Gains +20 to hit when fired and uses twice the normal ammunition. On a successful attack " +
     "with two or more Degrees of Success, scores one additional hit. Reload time is doubled.",
 
-  "Two-Handed":
-    "This weapon requires two hands to use.",
+  "Two-Handed": "This weapon requires two hands to use.",
 
   Unbalanced:
     "Heavy and difficult to ready after an attack, these kinds of weapons impose a –10% penalty " +

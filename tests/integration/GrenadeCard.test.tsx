@@ -95,9 +95,7 @@ describe("GrenadeCard equip toggle", () => {
     };
     const { rerender } = render(<GrenadeCard {...props} isEquipped={false} />);
 
-    expect(
-      screen.getByRole("button", { name: "Expand Custom Frag details" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Expand Custom Frag details" })).toBeInTheDocument();
 
     rerender(<GrenadeCard {...props} isEquipped />);
     expect(

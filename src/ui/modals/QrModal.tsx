@@ -12,7 +12,11 @@ interface Props {
 
 export function QrModal({ title, url, onClose }: Props) {
   return (
-    <ModalShell ariaLabel={title} onClose={onClose} className="max-w-xs lg:max-w-sm overflow-y-auto">
+    <ModalShell
+      ariaLabel={title}
+      onClose={onClose}
+      className="max-w-xs lg:max-w-sm overflow-y-auto"
+    >
       <ModalHeader title={title} onClose={onClose} />
       <div className="p-5 lg:p-6 space-y-4">
         <div className="p-3 bg-white rounded-lg flex justify-center">

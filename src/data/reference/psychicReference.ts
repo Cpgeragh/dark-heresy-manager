@@ -37,8 +37,7 @@ export interface PsychicPowerRef {
 }
 
 export const PSYCHIC_DISCIPLINE_RULES: Partial<Record<PsychicDiscipline, string>> = {
-  Pyromancy:
-    "Any Pyromancy power that inflicts Damage may also set the target on fire.",
+  Pyromancy: "Any Pyromancy power that inflicts Damage may also set the target on fire.",
   Telepathy:
     "If a Psyker uses a telepathic power on a target who has twice the Psyker's own Insanity Points or twice the Psyker's own Corruption Points, " +
     "the Psyker must make a Willpower Test. On a failure, psychic rot inflicts 1d10 Insanity Points or Corruption Points, " +
@@ -48,9 +47,7 @@ export const PSYCHIC_DISCIPLINE_RULES: Partial<Record<PsychicDiscipline, string>
 
 export function getPsychicPowerDescription(ref: PsychicPowerRef): string {
   const disciplineRule = PSYCHIC_DISCIPLINE_RULES[ref.discipline];
-  return disciplineRule
-    ? `${ref.description} Discipline rule: ${disciplineRule}`
-    : ref.description;
+  return disciplineRule ? `${ref.description} Discipline rule: ${disciplineRule}` : ref.description;
 }
 
 // ─── Psychic Power Reference ─────────────────────────────────────────────────

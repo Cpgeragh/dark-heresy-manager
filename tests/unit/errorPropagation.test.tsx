@@ -82,12 +82,7 @@ beforeEach(() => {
 function renderCodeStep(onComplete = vi.fn()) {
   render(
     <MemoryRouter initialEntries={["/?step=show-code"]}>
-      <Onboarding
-        user={user}
-        effectiveUserId="user-1"
-        firstName={null}
-        onComplete={onComplete}
-      />
+      <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={onComplete} />
     </MemoryRouter>
   );
   return onComplete;
@@ -187,12 +182,7 @@ describe("new-device linking", () => {
   it("presents linking as the normal returning-user action", () => {
     render(
       <MemoryRouter>
-        <Onboarding
-          user={user}
-          effectiveUserId="user-1"
-          firstName={null}
-          onComplete={vi.fn()}
-        />
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
       </MemoryRouter>
     );
 

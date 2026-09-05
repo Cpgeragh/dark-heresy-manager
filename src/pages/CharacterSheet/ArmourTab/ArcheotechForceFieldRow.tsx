@@ -2,7 +2,13 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
-import { uiSection, uiCardTitle, uiTextLabel, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiCardTitle,
+  uiTextLabel,
+  uiTextPlaceholder,
+  uiInfoModalWrapper,
+} from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { colourArcheotech } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -17,7 +23,13 @@ interface Props {
   highlightAsArcheotech?: boolean;
 }
 
-export function ArcheotechForceFieldRow({ item, editable, onToggleEquip, onRemove, highlightAsArcheotech = true }: Props) {
+export function ArcheotechForceFieldRow({
+  item,
+  editable,
+  onToggleEquip,
+  onRemove,
+  highlightAsArcheotech = true,
+}: Props) {
   const active = item.equipped ?? false;
 
   const containerClass = highlightAsArcheotech
@@ -26,19 +38,13 @@ export function ArcheotechForceFieldRow({ item, editable, onToggleEquip, onRemov
 
   return (
     <div
-      className={[
-        containerClass,
-        "flex items-start gap-3",
-        !active ? "opacity-60" : "",
-      ].join(" ")}
+      className={[containerClass, "flex items-start gap-3", !active ? "opacity-60" : ""].join(" ")}
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={uiCardTitle}>{item.name}</span>
           {highlightAsArcheotech && (
-            <Chip className={`${colourArcheotech} shrink-0`}>
-              Archeotech
-            </Chip>
+            <Chip className={`${colourArcheotech} shrink-0`}>Archeotech</Chip>
           )}
         </div>
         {item.protectionRating !== undefined && (
@@ -65,7 +71,8 @@ export function ArcheotechForceFieldRow({ item, editable, onToggleEquip, onRemov
       </div>
 
       {editable && onToggleEquip && (
-        <button type="button"
+        <button
+          type="button"
           onClick={onToggleEquip}
           className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
         >
@@ -73,9 +80,7 @@ export function ArcheotechForceFieldRow({ item, editable, onToggleEquip, onRemov
         </button>
       )}
 
-      {editable && (
-        <RemoveButton onClick={onRemove} label="Remove" />
-      )}
+      {editable && <RemoveButton onClick={onRemove} label="Remove" />}
     </div>
   );
 }

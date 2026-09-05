@@ -25,9 +25,7 @@ describe("SectionDrawer", () => {
     );
     expect(screen.getByRole("button", { name: "Weapons" })).toBeInTheDocument();
 
-    await user.click(
-      screen.getByRole("button", { name: "Back to categories from Equipment" })
-    );
+    await user.click(screen.getByRole("button", { name: "Back to categories from Equipment" }));
     expect(screen.getByRole("button", { name: "Abilities" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Close navigation" }));

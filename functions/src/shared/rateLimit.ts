@@ -20,21 +20,24 @@ export async function enforceRateLimit({ key, limit, windowMs }: RateLimitOption
   const db = getFirestore();
   const ref = db.collection(RATE_LIMITS_COLLECTION).doc(key);
 
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
-    const now = Date.now();
-    const existing =
-      (snapshot.exists ? (snapshot.data()?.attempts as number[] | undefined) : undefined) ?? [];
-    const recent = existing.filter((timestamp) => now - timestamp < windowMs);
+  await db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      const now = Date.now();
+      const existing =
+        (snapshot.exists ? (snapshot.data()?.attempts as number[] | undefined) : undefined) ?? [];
+      const recent = existing.filter((timestamp) => now - timestamp < windowMs);
 
-    if (recent.length >= limit) {
-      throw new HttpsError(
-        "resource-exhausted",
-        "Too many attempts. Please wait before trying again."
-      );
-    }
+      if (recent.length >= limit) {
+        throw new HttpsError(
+          "resource-exhausted",
+          "Too many attempts. Please wait before trying again."
+        );
+      }
 
-    recent.push(now);
-    transaction.set(ref, { attempts: recent });
-  }, { maxAttempts: 5 });
+      recent.push(now);
+      transaction.set(ref, { attempts: recent });
+    },
+    { maxAttempts: 5 }
+  );
 }

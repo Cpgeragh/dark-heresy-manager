@@ -121,7 +121,11 @@ describe("useCharacterSheet", () => {
     const characterError = new Error("character failed");
     const campaignError = new Error("campaign failed");
     useCampaignMock.mockReturnValue({ campaign: undefined, loading: false, error: campaignError });
-    useCharacterDataMock.mockReturnValue({ character: undefined, loading: false, error: characterError });
+    useCharacterDataMock.mockReturnValue({
+      character: undefined,
+      loading: false,
+      error: characterError,
+    });
     const { result } = renderSheetHook();
     expect(result.current.characterError).toBe(characterError);
   });
@@ -135,7 +139,11 @@ describe("useCharacterSheet", () => {
   });
 
   it("defaults memberIds to an empty array when the campaign has none", () => {
-    useCampaignMock.mockReturnValue({ campaign: { id: "campaign-1" }, loading: false, error: null });
+    useCampaignMock.mockReturnValue({
+      campaign: { id: "campaign-1" },
+      loading: false,
+      error: null,
+    });
     const { result } = renderSheetHook();
     expect(result.current.memberIds).toEqual([]);
   });

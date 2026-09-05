@@ -203,7 +203,8 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     availability: "Average",
     description:
       "These attachments are for heavier weapons or those using integral ammunition canisters rather than a backpack-mounted source (such as plasma guns or meltaguns). Resting the weapon on the ground increases accuracy but sacrifices mobility, thus making them more common in static defence lines. Bipods and tripods allow a weapon to be braced anywhere there is a reasonably flat surface. A weapon braced on a bipod has a 90-degree fire arc while one on a tripod has a 180-degree arc. Bracing with a tripod requires a Full Action. Bracing with a bipod requires a Half Action.",
-    applicableTo: "Heavier weapons or weapons using integral ammunition canisters rather than a backpack-mounted source.",
+    applicableTo:
+      "Heavier weapons or weapons using integral ammunition canisters rather than a backpack-mounted source.",
   },
   {
     id: "ih-sanctified-weapon",
@@ -214,7 +215,8 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     availability: "Very Rare",
     description:
       "The prayers and blessing of those of true faith in the God-Emperor of Mankind, coupled with the ancient lore of Ecclesiastical alchemistry, is able to turn mere mundane bullets and blades into weapons that are capable of harming the foul denizens of the warp and other such unnatural horrors. The sole effect of these upgrades is to make the Damage caused by the weapon in question counted as “Holy”, which has certain effects on some Daemonic and warp creatures (as will be noted in their description). Obtaining such items is only possible through the Holy Ordos or high-ranking members of the Ecclesiarchy, and the cost and rarity shown reflects this.",
-    applicableTo: "Any Primitive weapon (including Mono upgraded weapons) or Chain weapon of at least Good quality craftsmanship.",
+    applicableTo:
+      "Any Primitive weapon (including Mono upgraded weapons) or Chain weapon of at least Good quality craftsmanship.",
   },
 
   {

@@ -4,7 +4,8 @@ import { useSkillComputation } from "../../src/hooks/useSkillComputation";
 import type { Characteristics, SkillEntry } from "../../src/types/Character";
 import type { CharField } from "../../src/types/Character";
 
-const makeGetCharField = (base: number, advances: number) =>
+const makeGetCharField =
+  (base: number, advances: number) =>
   (_key: keyof Characteristics): CharField => ({ base, advances });
 
 const makeSkill = (
@@ -66,10 +67,7 @@ describe("useSkillComputation", () => {
   it("handles multiple skills independently", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
-        skills: [
-          makeSkill("Acrobatics", "trained"),
-          makeSkill("Athletics", "+10"),
-        ],
+        skills: [makeSkill("Acrobatics", "trained"), makeSkill("Athletics", "+10")],
         getCharField: makeGetCharField(25, 0),
       })
     );

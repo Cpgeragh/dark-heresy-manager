@@ -19,7 +19,14 @@ interface StepperProps {
  * - Enter or blur commits; Escape cancels.
  * - Invalid/negative input is clamped to `min`.
  */
-export function Stepper({ value, min = 0, max, editable, onChange, dangerClassName }: StepperProps) {
+export function Stepper({
+  value,
+  min = 0,
+  max,
+  editable,
+  onChange,
+  dangerClassName,
+}: StepperProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -72,7 +79,8 @@ export function Stepper({ value, min = 0, max, editable, onChange, dangerClassNa
         editable ? "border-slate-600 bg-slate-800" : "border-slate-700 bg-slate-800/50"
       }`}
     >
-      <button type="button"
+      <button
+        type="button"
         aria-disabled={!editable}
         onClick={() => adjust(-1)}
         aria-label="Decrease"
@@ -114,7 +122,8 @@ export function Stepper({ value, min = 0, max, editable, onChange, dangerClassNa
 
       <div className={dividerClass} />
 
-      <button type="button"
+      <button
+        type="button"
         aria-disabled={!editable}
         onClick={() => adjust(1)}
         aria-label="Increase"

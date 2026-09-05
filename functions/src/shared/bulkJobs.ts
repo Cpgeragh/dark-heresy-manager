@@ -130,44 +130,54 @@ export async function acquireJobLease(
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
   const leaseId = randomUUID();
 
-  return db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
-    if (!snapshot.exists) {
-      throw new HttpsError("not-found", "Job not found.");
-    }
-    const job = snapshot.data() as BulkJobRecord;
+  return db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists) {
+        throw new HttpsError("not-found", "Job not found.");
+      }
+      const job = snapshot.data() as BulkJobRecord;
 
-    if (job.actorUid !== actorUid) {
-      throw new HttpsError("permission-denied", "This job belongs to a different caller.");
-    }
-    if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
-      throw new HttpsError("failed-precondition", `Job already ${job.status}.`);
-    }
+      if (job.actorUid !== actorUid) {
+        throw new HttpsError("permission-denied", "This job belongs to a different caller.");
+      }
+      if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
+        throw new HttpsError("failed-precondition", `Job already ${job.status}.`);
+      }
 
-    const now = Date.now();
+      const now = Date.now();
 
-    if (now - job.createdAt > JOB_EXPIRY_MS) {
-      markJobTerminalInTransaction(db, transaction, ref, job, "failed", "Job expired without completing.");
-      throw new HttpsError(
-        "failed-precondition",
-        "This job expired without completing. Start a new one."
-      );
-    }
+      if (now - job.createdAt > JOB_EXPIRY_MS) {
+        markJobTerminalInTransaction(
+          db,
+          transaction,
+          ref,
+          job,
+          "failed",
+          "Job expired without completing."
+        );
+        throw new HttpsError(
+          "failed-precondition",
+          "This job expired without completing. Start a new one."
+        );
+      }
 
-    const leaseHeld = job.leaseExpiresAt !== null && job.leaseExpiresAt > now;
-    if (leaseHeld) {
-      throw new HttpsError("aborted", "This job is already being processed.");
-    }
+      const leaseHeld = job.leaseExpiresAt !== null && job.leaseExpiresAt > now;
+      if (leaseHeld) {
+        throw new HttpsError("aborted", "This job is already being processed.");
+      }
 
-    transaction.update(ref, {
-      status: "running",
-      leaseOwner: leaseId,
-      leaseExpiresAt: now + LEASE_DURATION_MS,
-      updatedAt: now,
-    });
+      transaction.update(ref, {
+        status: "running",
+        leaseOwner: leaseId,
+        leaseExpiresAt: now + LEASE_DURATION_MS,
+        updatedAt: now,
+      });
 
-    return { job, leaseId };
-  }, { maxAttempts: 5 });
+      return { job, leaseId };
+    },
+    { maxAttempts: 5 }
+  );
 }
 
 export async function advanceJobCheckpoint(
@@ -179,41 +189,47 @@ export async function advanceJobCheckpoint(
   const db = getFirestore();
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
 
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
-    if (!snapshot.exists) return;
-    const job = snapshot.data() as BulkJobRecord;
-    if (job.leaseOwner !== leaseId) {
-      throw new HttpsError("aborted", "Lease no longer held; another call took over this job.");
-    }
+  await db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists) return;
+      const job = snapshot.data() as BulkJobRecord;
+      if (job.leaseOwner !== leaseId) {
+        throw new HttpsError("aborted", "Lease no longer held; another call took over this job.");
+      }
 
-    transaction.update(ref, {
-      checkpoint,
-      processedCount: FieldValue.increment(processedIncrement),
-      leaseOwner: null,
-      leaseExpiresAt: null,
-      retryCount: 0,
-      lastError: null,
-      updatedAt: Date.now(),
-    });
-  }, { maxAttempts: 5 });
+      transaction.update(ref, {
+        checkpoint,
+        processedCount: FieldValue.increment(processedIncrement),
+        leaseOwner: null,
+        leaseExpiresAt: null,
+        retryCount: 0,
+        lastError: null,
+        updatedAt: Date.now(),
+      });
+    },
+    { maxAttempts: 5 }
+  );
 }
 
 export async function completeJob(jobId: string, leaseId: string): Promise<void> {
   const db = getFirestore();
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
-    if (!snapshot.exists) return;
-    const job = snapshot.data() as BulkJobRecord;
-    if (job.leaseOwner !== leaseId) return;
-    transaction.update(ref, {
-      status: "completed",
-      leaseOwner: null,
-      leaseExpiresAt: null,
-      updatedAt: Date.now(),
-    });
-  }, { maxAttempts: 5 });
+  await db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists) return;
+      const job = snapshot.data() as BulkJobRecord;
+      if (job.leaseOwner !== leaseId) return;
+      transaction.update(ref, {
+        status: "completed",
+        leaseOwner: null,
+        leaseExpiresAt: null,
+        updatedAt: Date.now(),
+      });
+    },
+    { maxAttempts: 5 }
+  );
 }
 
 // Shared by failJob, cancelBulkJob, and acquireJobLease's expiry check: marks
@@ -244,13 +260,16 @@ function markJobTerminalInTransaction(
 export async function failJob(jobId: string, leaseId: string, error: string): Promise<void> {
   const db = getFirestore();
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
-    if (!snapshot.exists) return;
-    const job = snapshot.data() as BulkJobRecord;
-    if (job.leaseOwner !== leaseId) return;
-    markJobTerminalInTransaction(db, transaction, ref, job, "failed", error);
-  }, { maxAttempts: 5 });
+  await db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists) return;
+      const job = snapshot.data() as BulkJobRecord;
+      if (job.leaseOwner !== leaseId) return;
+      markJobTerminalInTransaction(db, transaction, ref, job, "failed", error);
+    },
+    { maxAttempts: 5 }
+  );
 }
 
 /**
@@ -267,20 +286,30 @@ export async function failJob(jobId: string, leaseId: string, error: string): Pr
 export async function cancelBulkJob(jobId: string, actorUid: string): Promise<void> {
   const db = getFirestore();
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
-    if (!snapshot.exists) {
-      throw new HttpsError("not-found", "Job not found.");
-    }
-    const job = snapshot.data() as BulkJobRecord;
-    if (job.actorUid !== actorUid) {
-      throw new HttpsError("permission-denied", "This job belongs to a different caller.");
-    }
-    if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
-      return;
-    }
-    markJobTerminalInTransaction(db, transaction, ref, job, "cancelled", "Cancelled by the user.");
-  }, { maxAttempts: 5 });
+  await db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists) {
+        throw new HttpsError("not-found", "Job not found.");
+      }
+      const job = snapshot.data() as BulkJobRecord;
+      if (job.actorUid !== actorUid) {
+        throw new HttpsError("permission-denied", "This job belongs to a different caller.");
+      }
+      if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
+        return;
+      }
+      markJobTerminalInTransaction(
+        db,
+        transaction,
+        ref,
+        job,
+        "cancelled",
+        "Cancelled by the user."
+      );
+    },
+    { maxAttempts: 5 }
+  );
 }
 
 // A chunk failure is retried automatically, rather than permanently failing
@@ -307,19 +336,22 @@ export function isRetriableChunkError(error: unknown): boolean {
 async function releaseLeaseForRetry(jobId: string, leaseId: string, error: string): Promise<void> {
   const db = getFirestore();
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
-    if (!snapshot.exists) return;
-    const current = snapshot.data() as BulkJobRecord;
-    if (current.leaseOwner !== leaseId) return;
-    transaction.update(ref, {
-      retryCount: FieldValue.increment(1),
-      lastError: error,
-      leaseOwner: null,
-      leaseExpiresAt: null,
-      updatedAt: Date.now(),
-    });
-  }, { maxAttempts: 5 });
+  await db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists) return;
+      const current = snapshot.data() as BulkJobRecord;
+      if (current.leaseOwner !== leaseId) return;
+      transaction.update(ref, {
+        retryCount: FieldValue.increment(1),
+        lastError: error,
+        leaseOwner: null,
+        leaseExpiresAt: null,
+        updatedAt: Date.now(),
+      });
+    },
+    { maxAttempts: 5 }
+  );
 }
 
 /**

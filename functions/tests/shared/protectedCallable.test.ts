@@ -100,8 +100,16 @@ describe("protectedCallable", () => {
       handler: async () => "ok",
     });
 
-    expect(enforceRateLimit).toHaveBeenNthCalledWith(1, { key: "key-a", limit: 5, windowMs: 900_000 });
-    expect(enforceRateLimit).toHaveBeenNthCalledWith(2, { key: "key-b", limit: 10, windowMs: 60_000 });
+    expect(enforceRateLimit).toHaveBeenNthCalledWith(1, {
+      key: "key-a",
+      limit: 5,
+      windowMs: 900_000,
+    });
+    expect(enforceRateLimit).toHaveBeenNthCalledWith(2, {
+      key: "key-b",
+      limit: 10,
+      windowMs: 60_000,
+    });
   });
 
   it("does not enforce any rate limit when none are configured", async () => {

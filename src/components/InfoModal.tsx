@@ -16,7 +16,8 @@ interface InfoModalProps {
 export function InfoModal({ title, content, hideTitle = false, as = "button" }: InfoModalProps) {
   const [open, setOpen] = useState(false);
 
-  const triggerClassName = "inline-flex h-[13.5px] w-[18px] shrink-0 items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 text-sm leading-none hover:bg-slate-600";
+  const triggerClassName =
+    "inline-flex h-[13.5px] w-[18px] shrink-0 items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 text-sm leading-none hover:bg-slate-600";
   const triggerIcon = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -85,10 +86,7 @@ export function InfoModal({ title, content, hideTitle = false, as = "button" }: 
           )}
           <div className="px-4 lg:px-5 py-3 lg:py-4 text-sm lg:text-base text-slate-300 space-y-1.5 lg:space-y-2">
             {hideTitle && (
-              <CloseButton
-                onClick={() => setOpen(false)}
-                className="float-right ml-3 mb-1"
-              />
+              <CloseButton onClick={() => setOpen(false)} className="float-right ml-3 mb-1" />
             )}
             {content}
           </div>

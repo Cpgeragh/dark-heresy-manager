@@ -39,7 +39,8 @@ async function loadEmulatedClient() {
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 
-  const { claimCharacter, registerRecoveryCode } = await import("../../src/services/characterService");
+  const { claimCharacter, registerRecoveryCode } =
+    await import("../../src/services/characterService");
   const { lookupRecoveryCharacter } = await import("../../src/services/recoveryLookupService");
 
   return { auth, claimCharacter, registerRecoveryCode, lookupRecoveryCharacter };
@@ -50,46 +51,42 @@ afterEach(() => {
 });
 
 describe("Client service functions against the real emulator", () => {
-  it(
-    "registers, looks up, and claims a real character through the actual client service functions",
-    async () => {
-      const { auth, claimCharacter, registerRecoveryCode, lookupRecoveryCharacter } =
-        await loadEmulatedClient();
+  it("registers, looks up, and claims a real character through the actual client service functions", async () => {
+    const { auth, claimCharacter, registerRecoveryCode, lookupRecoveryCharacter } =
+      await loadEmulatedClient();
 
-      const campaignRef = adminDb.collection("campaigns").doc();
-      const characterRef = campaignRef.collection("characters").doc();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
 
-      const dmCredential = await signInAnonymously(auth);
-      await campaignRef.set({ dmId: dmCredential.user.uid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({
+    const dmCredential = await signInAnonymously(auth);
+    await campaignRef.set({ dmId: dmCredential.user.uid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({
+      campaignId: campaignRef.id,
+      header: { characterName: "Brother Corvus" },
+    });
+
+    const code = await registerRecoveryCode(campaignRef.id, characterRef.id);
+    expect(code).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+
+    await signOut(auth);
+    await signInAnonymously(auth);
+
+    const lookup = await lookupRecoveryCharacter(code);
+    expect(lookup).toEqual({
+      status: "found",
+      result: {
         campaignId: campaignRef.id,
-        header: { characterName: "Brother Corvus" },
-      });
+        characterId: characterRef.id,
+        characterName: "Brother Corvus",
+        campaignName: "Test Campaign",
+        ownership: "unclaimed",
+      },
+    });
 
-      const code = await registerRecoveryCode(campaignRef.id, characterRef.id);
-      expect(code).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+    const claimResult = await claimCharacter(code);
+    expect(claimResult).toEqual({ campaignId: campaignRef.id, characterId: characterRef.id });
 
-      await signOut(auth);
-      await signInAnonymously(auth);
-
-      const lookup = await lookupRecoveryCharacter(code);
-      expect(lookup).toEqual({
-        status: "found",
-        result: {
-          campaignId: campaignRef.id,
-          characterId: characterRef.id,
-          characterName: "Brother Corvus",
-          campaignName: "Test Campaign",
-          ownership: "unclaimed",
-        },
-      });
-
-      const claimResult = await claimCharacter(code);
-      expect(claimResult).toEqual({ campaignId: campaignRef.id, characterId: characterRef.id });
-
-      const characterSnapshot = await characterRef.get();
-      expect(characterSnapshot.data()?.userId).toBe(auth.currentUser?.uid);
-    },
-    20000
-  );
+    const characterSnapshot = await characterRef.get();
+    expect(characterSnapshot.data()?.userId).toBe(auth.currentUser?.uid);
+  }, 20000);
 });

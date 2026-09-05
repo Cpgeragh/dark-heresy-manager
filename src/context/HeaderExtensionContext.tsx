@@ -10,10 +10,7 @@ export function HeaderExtensionProvider({ children }: { children: ReactNode }) {
 
   const setBackHref = useCallback((href: string) => setBackHrefState(href), []);
   const clearBackHref = useCallback(() => setBackHrefState(null), []);
-  const setKebabContent = useCallback(
-    (content: ReactNode) => setKebabContentState(content),
-    []
-  );
+  const setKebabContent = useCallback((content: ReactNode) => setKebabContentState(content), []);
   const clearKebabContent = useCallback(() => setKebabContentState(null), []);
 
   return (

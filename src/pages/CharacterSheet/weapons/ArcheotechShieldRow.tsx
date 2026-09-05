@@ -63,7 +63,9 @@ export function ArcheotechShieldRow({
                 Archeotech
               </Chip>
             )}
-            <Chip size="sm" className={colourLime}>Shield</Chip>
+            <Chip size="sm" className={colourLime}>
+              Shield
+            </Chip>
           </div>
         </div>
         <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
@@ -87,7 +89,9 @@ export function ArcheotechShieldRow({
             </div>
           )}
           <div className="mt-1 flex flex-wrap gap-1.5">
-            {locations.length > 0 && <StatChip size="sm" label="Location" value={locationLabel(locations)} />}
+            {locations.length > 0 && (
+              <StatChip size="sm" label="Location" value={locationLabel(locations)} />
+            )}
             {item.ap !== undefined && <StatChip size="sm" label="AP" value={String(item.ap)} />}
           </div>
           <ItemMetaChips

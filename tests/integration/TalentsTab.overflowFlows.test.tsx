@@ -44,7 +44,9 @@ describe("TalentsTab, acquisition and Psychic-purchase flows through the overflo
     await user.type(screen.getByPlaceholderText("0"), "50");
     await user.click(screen.getByRole("button", { name: "Buy Touched by the Fates" }));
 
-    expect(await screen.findByRole("dialog", { name: "Touched by the Fates Acquisition" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("dialog", { name: "Touched by the Fates Acquisition" })
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("checkbox"));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
 

@@ -52,10 +52,9 @@ export function getDerivedCareerTalentGrants(
 export function careerNeedsStartingChoice(careerName: string | undefined): boolean {
   const career = findCareer(careerName);
   if (!career) return false;
-  return [
-    ...(career.startingSkillGrants ?? []),
-    ...(career.startingTalentGrants ?? []),
-  ].some((grant) => grant.options.length > 1);
+  return [...(career.startingSkillGrants ?? []), ...(career.startingTalentGrants ?? [])].some(
+    (grant) => grant.options.length > 1
+  );
 }
 
 export const TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID = "career:tech-priest:mechanicus-implants";

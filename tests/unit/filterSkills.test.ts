@@ -21,10 +21,34 @@ const makeSkill = (overrides: Partial<SkillEntry>): SkillEntry => ({
 });
 
 const skills: SkillEntry[] = [
-  makeSkill({ id: "a", category: "Athletic", source: SkillSource.CR, characteristic: "ag", advanced: false }),
-  makeSkill({ id: "b", category: "Academic", source: SkillSource.IH, characteristic: "int", advanced: true }),
-  makeSkill({ id: "c", category: "Athletic", source: SkillSource.CR, characteristic: "ag", advanced: false }),
-  makeSkill({ id: "d", category: "Combat", source: SkillSource.BoM, characteristic: "wp", advanced: true }),
+  makeSkill({
+    id: "a",
+    category: "Athletic",
+    source: SkillSource.CR,
+    characteristic: "ag",
+    advanced: false,
+  }),
+  makeSkill({
+    id: "b",
+    category: "Academic",
+    source: SkillSource.IH,
+    characteristic: "int",
+    advanced: true,
+  }),
+  makeSkill({
+    id: "c",
+    category: "Athletic",
+    source: SkillSource.CR,
+    characteristic: "ag",
+    advanced: false,
+  }),
+  makeSkill({
+    id: "d",
+    category: "Combat",
+    source: SkillSource.BoM,
+    characteristic: "wp",
+    advanced: true,
+  }),
 ];
 
 describe("filterSkills", () => {
@@ -92,7 +116,9 @@ describe("filterSkills", () => {
 
     it("returns empty array when combined filters match nothing", () => {
       // No Athletic skill from BoM
-      expect(filterSkills(skills, { category: "Athletic", source: SkillSource.BoM })).toHaveLength(0);
+      expect(filterSkills(skills, { category: "Athletic", source: SkillSource.BoM })).toHaveLength(
+        0
+      );
     });
 
     it("applies all four filters simultaneously", () => {

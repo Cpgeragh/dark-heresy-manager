@@ -102,15 +102,21 @@ export async function startCharacterDeletionJob(
   const recoveryRef = db.collection("recoveryIndex").doc(recoveryIndexId);
   const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
 
-  const [claimLogCount, xpProposalsCount, messagesCount, threadSnapshot, recoverySnapshot, summarySnapshot] =
-    await Promise.all([
-      characterRef.collection("claimLog").count().get(),
-      characterRef.collection("xpProposals").count().get(),
-      threadRef.collection("messages").count().get(),
-      threadRef.get(),
-      recoveryRef.get(),
-      summaryRef.get(),
-    ]);
+  const [
+    claimLogCount,
+    xpProposalsCount,
+    messagesCount,
+    threadSnapshot,
+    recoverySnapshot,
+    summarySnapshot,
+  ] = await Promise.all([
+    characterRef.collection("claimLog").count().get(),
+    characterRef.collection("xpProposals").count().get(),
+    threadRef.collection("messages").count().get(),
+    threadRef.get(),
+    recoveryRef.get(),
+    summaryRef.get(),
+  ]);
 
   const totalCount =
     claimLogCount.data().count +
@@ -163,7 +169,10 @@ async function processPhase(
       const snapshot = await pageQuery.get();
 
       if (snapshot.empty) {
-        return { processed: 0, nextCheckpoint: { phase: nextPhase(checkpoint.phase)!, cursor: null } };
+        return {
+          processed: 0,
+          nextCheckpoint: { phase: nextPhase(checkpoint.phase)!, cursor: null },
+        };
       }
 
       const batch = db.batch();
@@ -182,7 +191,10 @@ async function processPhase(
       const threadRef = campaignRef.collection("threads").doc(characterId);
       const threadSnapshot = await threadRef.get();
       if (threadSnapshot.exists) await threadRef.delete();
-      return { processed: threadSnapshot.exists ? 1 : 0, nextCheckpoint: { phase: nextPhase("thread")!, cursor: null } };
+      return {
+        processed: threadSnapshot.exists ? 1 : 0,
+        nextCheckpoint: { phase: nextPhase("thread")!, cursor: null },
+      };
     }
     case "recoveryIndex": {
       const recoveryRef = db.collection("recoveryIndex").doc(recoveryIndexId);
@@ -255,11 +267,19 @@ export async function processCharacterDeletionChunk(
 
     if (nextCheckpoint === null) {
       await completeJob(input.jobId, leaseId);
-      return { done: true, processedCount: job.processedCount + processed, totalCount: job.totalCount };
+      return {
+        done: true,
+        processedCount: job.processedCount + processed,
+        totalCount: job.totalCount,
+      };
     }
 
     await advanceJobCheckpoint(input.jobId, leaseId, JSON.stringify(nextCheckpoint), processed);
-    return { done: false, processedCount: job.processedCount + processed, totalCount: job.totalCount };
+    return {
+      done: false,
+      processedCount: job.processedCount + processed,
+      totalCount: job.totalCount,
+    };
   } catch (error) {
     const message = error instanceof HttpsError ? error.message : "Unexpected error.";
     if (await handleChunkFailure(input.jobId, leaseId, job, error, message)) {

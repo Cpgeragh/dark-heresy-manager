@@ -26,7 +26,9 @@ describe("CareerStartingChoiceModal", () => {
     // Adept has 2 skill choices and 3 talent choices, each a pair of options.
     // Options render in adjacent pairs, so the first button of each pair is
     // every even index.
-    const allOptionButtons = screen.getAllByRole("button").filter((b) => b.hasAttribute("aria-pressed"));
+    const allOptionButtons = screen
+      .getAllByRole("button")
+      .filter((b) => b.hasAttribute("aria-pressed"));
     expect(allOptionButtons).toHaveLength(2 * 2 + 3 * 2); // 2 skill pairs + 3 talent pairs
 
     // Pick the first button of each pair (indices 0, 2, 4, 6, 8).
@@ -40,7 +42,9 @@ describe("CareerStartingChoiceModal", () => {
   it("marks a clicked option as pressed", async () => {
     const user = userEvent.setup();
     render(<CareerStartingChoiceModal career={ADEPT} onComplete={vi.fn()} onClose={vi.fn()} />);
-    const allOptionButtons = screen.getAllByRole("button").filter((b) => b.hasAttribute("aria-pressed"));
+    const allOptionButtons = screen
+      .getAllByRole("button")
+      .filter((b) => b.hasAttribute("aria-pressed"));
 
     await user.click(allOptionButtons[0]);
 
@@ -51,7 +55,9 @@ describe("CareerStartingChoiceModal", () => {
     const user = userEvent.setup();
     const onComplete = vi.fn();
     render(<CareerStartingChoiceModal career={ADEPT} onComplete={onComplete} onClose={vi.fn()} />);
-    const allOptionButtons = screen.getAllByRole("button").filter((b) => b.hasAttribute("aria-pressed"));
+    const allOptionButtons = screen
+      .getAllByRole("button")
+      .filter((b) => b.hasAttribute("aria-pressed"));
 
     // Pick the second option (index 1) of every pair this time.
     for (let i = 1; i < allOptionButtons.length; i += 2) {

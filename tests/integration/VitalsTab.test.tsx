@@ -7,7 +7,9 @@ import { VitalsTab } from "../../src/pages/CharacterSheet/VitalsTab";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, WoundsBlock, FateBlock } from "../../src/types/Character";
 
-function makeCharacter(overrides: Partial<{ wounds: WoundsBlock; fate: FateBlock }> = {}): Character {
+function makeCharacter(
+  overrides: Partial<{ wounds: WoundsBlock; fate: FateBlock }> = {}
+): Character {
   return {
     id: "char-1",
     ...createEmptyCharacterData({ campaignId: "c1", recoveryCode: "DH-TEST-0001" }),
@@ -17,7 +19,10 @@ function makeCharacter(overrides: Partial<{ wounds: WoundsBlock; fate: FateBlock
   };
 }
 
-function renderTab(overrides: Partial<{ wounds: WoundsBlock; fate: FateBlock }> = {}, toughnessBonus = 4) {
+function renderTab(
+  overrides: Partial<{ wounds: WoundsBlock; fate: FateBlock }> = {},
+  toughnessBonus = 4
+) {
   const onUpdateWounds = vi.fn();
   const onUpdateFate = vi.fn();
   render(
@@ -35,7 +40,9 @@ function renderTab(overrides: Partial<{ wounds: WoundsBlock; fate: FateBlock }> 
 describe("VitalsTab", () => {
   it("caps Current Wounds at Total Wounds", async () => {
     const user = userEvent.setup();
-    const { onUpdateWounds } = renderTab({ wounds: { total: 10, current: 10, criticalDamage: 0, fatigue: 0 } });
+    const { onUpdateWounds } = renderTab({
+      wounds: { total: 10, current: 10, criticalDamage: 0, fatigue: 0 },
+    });
 
     const woundsSection = screen.getByText("Current Wounds").parentElement!;
     await user.click(within(woundsSection).getByRole("button", { name: "Increase" }));
@@ -65,9 +72,15 @@ describe("VitalsTab", () => {
 
   it("shows the Critical Damage, Fatigue, and Fate Points rule info modals", () => {
     renderTab();
-    expect(screen.getByRole("button", { name: "Show information about Critical Damage" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Show information about Fatigue" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Show information about Using Fate Points" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show information about Critical Damage" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show information about Fatigue" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show information about Using Fate Points" })
+    ).toBeInTheDocument();
   });
 
   it("shows effective Wounds and the Talent sources without overwriting the base", () => {

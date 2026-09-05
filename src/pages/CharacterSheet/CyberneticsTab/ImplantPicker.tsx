@@ -6,7 +6,12 @@ import {
   CYBERNETICS_REFERENCE,
   type CyberneticRef,
 } from "../../../data/reference/cyberneticsReference";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../../ui/pickers/PickerModal";
 import { Button } from "../../../ui/buttons/Button";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
@@ -331,74 +336,86 @@ export function ImplantPicker({
         ) : undefined
       }
     >
-      {pickerEntries.map((entry) => entry.kind === "custom" ? (
-        <PickerRow
-          key={`custom-${entry.item.id}`}
-          interactive={editable}
-          onClick={() => onSelectCustomItem?.(entry.item)}
-        >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {entry.item.name}
-            </span>
-            <StatusBadge status={entry.item.status} />
-            {entry.item.data.notes && (
-              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                <InfoModal
-                  title={entry.item.name}
-                  content={
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {entry.item.data.notes}
-                    </p>
-                  }
-                  as="span"
-                />
+      {pickerEntries.map((entry) =>
+        entry.kind === "custom" ? (
+          <PickerRow
+            key={`custom-${entry.item.id}`}
+            interactive={editable}
+            onClick={() => onSelectCustomItem?.(entry.item)}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
+              >
+                {entry.item.name}
               </span>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-            <ItemMetaChips
-              bare
-              value={entry.item.data.value}
-              availability={entry.item.data.availability}
-              source={entry.item.data.source}
-            />
-            <Chip className={CRAFTSMANSHIP_STYLE[entry.item.data.craftsmanship ?? "Common"]}>
-              {entry.item.data.craftsmanship ?? "Common"}
-            </Chip>
-          </div>
-        </PickerRow>
-      ) : (
-        <PickerRow key={entry.ref.id} interactive={editable} onClick={() => selectImplant(entry.ref)}>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {entry.ref.name}
-            </span>
-            {(entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good) && (
-              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                <InfoModal title={entry.ref.name} content={implantInfo(entry.ref)} as="span" />
+              <StatusBadge status={entry.item.status} />
+              {entry.item.data.notes && (
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                  <InfoModal
+                    title={entry.item.name}
+                    content={
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {entry.item.data.notes}
+                      </p>
+                    }
+                    as="span"
+                  />
+                </span>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+              <ItemMetaChips
+                bare
+                value={entry.item.data.value}
+                availability={entry.item.data.availability}
+                source={entry.item.data.source}
+              />
+              <Chip className={CRAFTSMANSHIP_STYLE[entry.item.data.craftsmanship ?? "Common"]}>
+                {entry.item.data.craftsmanship ?? "Common"}
+              </Chip>
+            </div>
+          </PickerRow>
+        ) : (
+          <PickerRow
+            key={entry.ref.id}
+            interactive={editable}
+            onClick={() => selectImplant(entry.ref)}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
+              >
+                {entry.ref.name}
               </span>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-            <ItemMetaChips
-              bare
-              value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
-              availability={isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability}
-              source={entry.ref.source}
-            />
-            {isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
-              <span className={uiTextGMNote}>Cost and availability assigned on add</span>
-            )}
-            {isVariableMeta(entry.ref.value) && !isVariableMeta(entry.ref.availability) && (
-              <span className={uiTextGMNote}>Cost assigned on add</span>
-            )}
-            {!isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
-              <span className={uiTextGMNote}>Availability assigned on add</span>
-            )}
-          </div>
-        </PickerRow>
-      ))}
+              {(entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good) && (
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                  <InfoModal title={entry.ref.name} content={implantInfo(entry.ref)} as="span" />
+                </span>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+              <ItemMetaChips
+                bare
+                value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
+                availability={
+                  isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability
+                }
+                source={entry.ref.source}
+              />
+              {isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
+                <span className={uiTextGMNote}>Cost and availability assigned on add</span>
+              )}
+              {isVariableMeta(entry.ref.value) && !isVariableMeta(entry.ref.availability) && (
+                <span className={uiTextGMNote}>Cost assigned on add</span>
+              )}
+              {!isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
+                <span className={uiTextGMNote}>Availability assigned on add</span>
+              )}
+            </div>
+          </PickerRow>
+        )
+      )}
     </PickerModal>
   );
 }

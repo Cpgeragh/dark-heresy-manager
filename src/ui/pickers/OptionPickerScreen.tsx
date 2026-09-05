@@ -6,16 +6,18 @@ import { uiItemName } from "../styles/editableStyles";
 import { Chip } from "../chips/Chip";
 import { colourAmberFaint, colourRank, colourValue } from "../styles/colourTokens";
 
-export type PickerOption = string | {
-  value: string;
-  label: string;
-  owned?: boolean;
-  ownedCount?: number;
-  /** Real XP cost, shown as a chip when known. */
-  cost?: number;
-  /** Rank names this option is granted at, shown as their own chip row below the option, when known. */
-  rankChips?: readonly string[];
-};
+export type PickerOption =
+  | string
+  | {
+      value: string;
+      label: string;
+      owned?: boolean;
+      ownedCount?: number;
+      /** Real XP cost, shown as a chip when known. */
+      cost?: number;
+      /** Rank names this option is granted at, shown as their own chip row below the option, when known. */
+      rankChips?: readonly string[];
+    };
 
 export function OptionPickerScreen({
   title,
@@ -49,11 +51,7 @@ export function OptionPickerScreen({
         const cost = typeof option === "string" ? undefined : option.cost;
         const rankChips = typeof option === "string" ? undefined : option.rankChips;
         return (
-          <PickerRow
-            key={value}
-            onClick={() => onSelect(value)}
-            selected={value === selected}
-          >
+          <PickerRow key={value} onClick={() => onSelect(value)} selected={value === selected}>
             <span className="flex w-full flex-col gap-1.5">
               <span className="flex w-full items-center justify-between gap-3">
                 <span className={`${uiItemName} group-hover:text-white`}>{label}</span>

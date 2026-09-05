@@ -14,7 +14,10 @@ import {
 
 type SessionWithId = SessionListDocument & { id: string };
 
-export function useSessions(campaignId: string | undefined, isDM: boolean | null): {
+export function useSessions(
+  campaignId: string | undefined,
+  isDM: boolean | null
+): {
   sessions: SessionWithId[];
   loading: boolean;
   error: Error | null;

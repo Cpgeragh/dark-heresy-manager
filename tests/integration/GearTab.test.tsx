@@ -127,95 +127,75 @@ describe("GearTab", () => {
     expect(screen.queryByRole("button", { name: "Add consumable" })).not.toBeInTheDocument();
   });
 
-  it(
-    "adds a real gear item from the reference picker",
-    async () => {
-      const user = userEvent.setup();
-      const { onUpdate } = renderTab();
+  it("adds a real gear item from the reference picker", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
 
-      await user.click(screen.getByRole("button", { name: "Add item" }));
-      await user.click(screen.getByText(GEAR_NAME));
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByText(GEAR_NAME));
 
-      expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })]);
-    },
-    15000
-  );
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })]);
+  }, 15000);
 
-  it(
-    "adds a real consumable from the reference picker",
-    async () => {
-      const user = userEvent.setup();
-      const { onUpdateConsumables } = renderTab();
+  it("adds a real consumable from the reference picker", async () => {
+    const user = userEvent.setup();
+    const { onUpdateConsumables } = renderTab();
 
-      await user.click(screen.getByRole("button", { name: "Add consumable" }));
-      await user.click(screen.getByText(CONSUMABLE_NAME));
+    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByText(CONSUMABLE_NAME));
 
-      expect(onUpdateConsumables).toHaveBeenCalledWith([
-        expect.objectContaining({ name: CONSUMABLE_NAME, quantity: 1 }),
-      ]);
-    },
-    15000
-  );
+    expect(onUpdateConsumables).toHaveBeenCalledWith([
+      expect.objectContaining({ name: CONSUMABLE_NAME, quantity: 1 }),
+    ]);
+  }, 15000);
 
-  it(
-    "creates a custom gear item, updates the character, and returns to the picker",
-    async () => {
-      const user = userEvent.setup();
-      createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });
-      const { onUpdate } = renderTab();
+  it("creates a custom gear item, updates the character, and returns to the picker", async () => {
+    const user = userEvent.setup();
+    createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });
+    const { onUpdate } = renderTab();
 
-      await user.click(screen.getByRole("button", { name: "Add item" }));
-      await user.click(screen.getByRole("button", { name: "Add custom item" }));
-      await user.click(screen.getByText("Mock Submit Custom Gear"));
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add custom item" }));
+    await user.click(screen.getByText("Mock Submit Custom Gear"));
 
-      expect(createDraftCustomItemMock).toHaveBeenCalledWith(
-        expect.objectContaining({ campaignId: "campaign-1", category: "gear" })
-      );
-      await screen.findByRole("dialog", { name: "Add Item" });
-      expect(onUpdate).toHaveBeenCalledWith([
-        expect.objectContaining({ customLibraryId: "lib-1", customLibraryVersionId: "v1" }),
-      ]);
-    },
-    15000
-  );
+    expect(createDraftCustomItemMock).toHaveBeenCalledWith(
+      expect.objectContaining({ campaignId: "campaign-1", category: "gear" })
+    );
+    await screen.findByRole("dialog", { name: "Add Item" });
+    expect(onUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({ customLibraryId: "lib-1", customLibraryVersionId: "v1" }),
+    ]);
+  }, 15000);
 
-  it(
-    "creates a custom consumable, updates the character, and returns to the picker",
-    async () => {
-      const user = userEvent.setup();
-      createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-2", versionId: "v2" });
-      const { onUpdateConsumables } = renderTab();
+  it("creates a custom consumable, updates the character, and returns to the picker", async () => {
+    const user = userEvent.setup();
+    createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-2", versionId: "v2" });
+    const { onUpdateConsumables } = renderTab();
 
-      await user.click(screen.getByRole("button", { name: "Add consumable" }));
-      await user.click(screen.getByRole("button", { name: "Add custom consumable" }));
-      await user.click(screen.getByText("Mock Submit Custom Consumable"));
+    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByRole("button", { name: "Add custom consumable" }));
+    await user.click(screen.getByText("Mock Submit Custom Consumable"));
 
-      expect(createDraftCustomItemMock).toHaveBeenCalledWith(
-        expect.objectContaining({ campaignId: "campaign-1", category: "consumable" })
-      );
-      await screen.findByRole("dialog", { name: "Add Consumable" });
-      expect(onUpdateConsumables).toHaveBeenCalledWith([
-        expect.objectContaining({ customLibraryId: "lib-2", customLibraryVersionId: "v2" }),
-      ]);
-    },
-    15000
-  );
+    expect(createDraftCustomItemMock).toHaveBeenCalledWith(
+      expect.objectContaining({ campaignId: "campaign-1", category: "consumable" })
+    );
+    await screen.findByRole("dialog", { name: "Add Consumable" });
+    expect(onUpdateConsumables).toHaveBeenCalledWith([
+      expect.objectContaining({ customLibraryId: "lib-2", customLibraryVersionId: "v2" }),
+    ]);
+  }, 15000);
 
-  it(
-    "blocks custom-gear creation with a toast when no one is signed in",
-    async () => {
-      const user = userEvent.setup();
-      const { onUpdate } = renderTab({ userId: null });
+  it("blocks custom-gear creation with a toast when no one is signed in", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({ userId: null });
 
-      await user.click(screen.getByRole("button", { name: "Add item" }));
-      await user.click(screen.getByRole("button", { name: "Add custom item" }));
-      await user.click(screen.getByText("Mock Submit Custom Gear"));
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add custom item" }));
+    await user.click(screen.getByText("Mock Submit Custom Gear"));
 
-      expect(createDraftCustomItemMock).not.toHaveBeenCalled();
-      expect(onUpdate).not.toHaveBeenCalled();
-    },
-    15000
-  );
+    expect(createDraftCustomItemMock).not.toHaveBeenCalled();
+    expect(onUpdate).not.toHaveBeenCalled();
+  }, 15000);
 
   it("removes an existing gear item", async () => {
     const user = userEvent.setup();

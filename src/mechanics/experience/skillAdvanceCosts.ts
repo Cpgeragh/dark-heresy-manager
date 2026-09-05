@@ -78,8 +78,11 @@ export function getNextSkillTierAccess(
     };
   }
 
-  const existsAnywhere = findSkillCost(getAllCareerAdvances(career), skillId, nextTier) !== undefined;
-  return existsAnywhere ? { status: "locked", level: nextTier } : { status: "not-on-career", level: nextTier };
+  const existsAnywhere =
+    findSkillCost(getAllCareerAdvances(career), skillId, nextTier) !== undefined;
+  return existsAnywhere
+    ? { status: "locked", level: nextTier }
+    : { status: "not-on-career", level: nextTier };
 }
 
 /** Total XP currently spent training Skills, using only persisted purchase records. */

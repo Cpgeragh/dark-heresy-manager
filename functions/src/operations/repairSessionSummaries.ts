@@ -14,10 +14,7 @@ export interface RepairSessionSummariesResult {
 
 function validDocumentId(value: unknown): value is string {
   return (
-    typeof value === "string" &&
-    value.length > 0 &&
-    value.length <= 1_500 &&
-    !value.includes("/")
+    typeof value === "string" && value.length > 0 && value.length <= 1_500 && !value.includes("/")
   );
 }
 
@@ -81,10 +78,7 @@ export async function repairSessionSummaries(
   }
   const dmId = campaignSnapshot.data()?.dmId;
   if (!(await callerIsPrimaryOrLinked(db, callerUid, dmId))) {
-    throw new HttpsError(
-      "permission-denied",
-      "Only the campaign DM can repair session summaries."
-    );
+    throw new HttpsError("permission-denied", "Only the campaign DM can repair session summaries.");
   }
 
   const sessionsSnapshot = await campaignRef

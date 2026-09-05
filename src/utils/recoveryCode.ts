@@ -39,7 +39,10 @@ export function formatRecoveryCodeInput(raw: string): string {
   const maxChars =
     RECOVERY_CODE_PREFIX.length + RECOVERY_CODE_SEGMENTS * RECOVERY_CODE_SEGMENT_LENGTH;
 
-  const clean = raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, maxChars);
+  const clean = raw
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, maxChars);
 
   const parts: string[] = [clean.slice(0, RECOVERY_CODE_PREFIX.length)];
   for (let i = 0; i < RECOVERY_CODE_SEGMENTS; i++) {

@@ -44,7 +44,10 @@ describe("Stepper", () => {
     const onChange = vi.fn();
     render(<Stepper value={5} editable={false} onChange={onChange} />);
 
-    expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
     await user.click(screen.getByRole("button", { name: "Increase" }));
     expect(onChange).not.toHaveBeenCalled();
   });

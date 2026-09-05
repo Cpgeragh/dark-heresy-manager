@@ -13,15 +13,18 @@ import type { TalentEntry } from "../../src/types/Character";
 const soundConstitution = TALENT_LIST.find((t) => t.id === "sound-constitution")!;
 const mechadendriteUse = TALENT_LIST.find((t) => t.id === "mechadendrite-use")!;
 const mechadendriteOptions =
-  mechadendriteUse.behaviour?.kind === "fixed-repeatable"
-    ? mechadendriteUse.behaviour.options
-    : [];
+  mechadendriteUse.behaviour?.kind === "fixed-repeatable" ? mechadendriteUse.behaviour.options : [];
 // Ordinary, non-repeatable, no career association at all, real precedent for
 // "already owned once, should never reappear even on the overflow screen".
 const chemGeld = TALENT_LIST.find((t) => t.id === "chem-geld")!;
 // Real managed-elsewhere Weapon Training talent, excluded from this picker entirely.
 const basicWeaponTraining = TALENT_LIST.find((t) => t.id === "basic-weapon-training")!;
-const listData: AnyListItem[] = [soundConstitution, mechadendriteUse, chemGeld, basicWeaponTraining];
+const listData: AnyListItem[] = [
+  soundConstitution,
+  mechadendriteUse,
+  chemGeld,
+  basicWeaponTraining,
+];
 
 function renderPicker(overrides: Partial<React.ComponentProps<typeof TalentPickerModal>> = {}) {
   const onAdd = vi.fn();
@@ -98,10 +101,12 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     const user = userEvent.setup();
     const { onAdd } = renderPicker();
     await user.click(screen.getByText("Sound Constitution"));
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
-      talentId: "sound-constitution",
-      xpPurchase: { cost: 100, careerId: "guardsman", sourceRankId: "conscript" },
-    }));
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentId: "sound-constitution",
+        xpPurchase: { cost: 100, careerId: "guardsman", sourceRankId: "conscript" },
+      })
+    );
     expect(screen.queryByText("XP Cost")).not.toBeInTheDocument();
   });
 
@@ -142,11 +147,13 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     await user.type(screen.getByPlaceholderText("0"), "0");
     expect(confirm).toBeEnabled();
     await user.click(confirm);
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
-      talentId: "sound-constitution",
-      manualCost: 0,
-      xpPurchase: { cost: 0, careerId: "guardsman", purchasedAtRankId: "conscript" },
-    }));
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentId: "sound-constitution",
+        manualCost: 0,
+        xpPurchase: { cost: 0, careerId: "guardsman", purchasedAtRankId: "conscript" },
+      })
+    );
   });
 
   it("still opens the choice screen first for a grouped talent on the overflow screen, then manual-cost after choosing", async () => {
@@ -219,13 +226,15 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
   it("moves custom items onto the overflow screen only, not the ranks screen", async () => {
     const user = userEvent.setup();
     const onSelectCustomItem = vi.fn();
-    const customItems = [{
-      id: "custom-1",
-      status: "draft" as const,
-      name: "Homebrew Talent",
-      creator: { userId: "u1" },
-      data: {},
-    }];
+    const customItems = [
+      {
+        id: "custom-1",
+        status: "draft" as const,
+        name: "Homebrew Talent",
+        creator: { userId: "u1" },
+        data: {},
+      },
+    ];
     renderPicker({ customItems: customItems as never, onSelectCustomItem });
     expect(screen.queryByText("Homebrew Talent")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Show all" }));

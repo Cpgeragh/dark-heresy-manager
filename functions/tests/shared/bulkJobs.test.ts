@@ -19,7 +19,11 @@ const mockTransactionGet = vi.fn();
 const mockTransactionUpdate = vi.fn();
 const mockTransactionDelete = vi.fn();
 const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<unknown>) =>
-  callback({ get: mockTransactionGet, update: mockTransactionUpdate, delete: mockTransactionDelete })
+  callback({
+    get: mockTransactionGet,
+    update: mockTransactionUpdate,
+    delete: mockTransactionDelete,
+  })
 );
 const mockCollection = vi.fn((collectionName: string) => ({
   doc: (id: string) => ({ id, collectionName, set: mockSet }),
@@ -110,7 +114,10 @@ describe("acquireJobLease", () => {
   });
 
   it("rejects when the caller did not start the job", async () => {
-    mockTransactionGet.mockResolvedValue({ exists: true, data: () => makeJob({ actorUid: "other" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ actorUid: "other" }),
+    });
 
     await expect(acquireJobLease("job-1", "user-1")).rejects.toThrow(
       expect.objectContaining({ code: "permission-denied" })
@@ -394,7 +401,10 @@ describe("cancelBulkJob", () => {
   });
 
   it("rejects when the caller did not start the job", async () => {
-    mockTransactionGet.mockResolvedValue({ exists: true, data: () => makeJob({ actorUid: "other" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ actorUid: "other" }),
+    });
 
     await expect(cancelBulkJob("job-1", "user-1")).rejects.toThrow(
       expect.objectContaining({ code: "permission-denied" })

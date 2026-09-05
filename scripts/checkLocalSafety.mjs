@@ -46,9 +46,7 @@ const GITHUB_TOKEN = new RegExp(
 const AWS_ACCESS_KEY = new RegExp(joinPattern("AK", "IA[0-9A-Z]{16}"));
 const SLACK_TOKEN = new RegExp(joinPattern("xox", "[baprs]-[A-Za-z0-9-]{20,}"));
 const STRIPE_SECRET = new RegExp(joinPattern("sk_", "live_[A-Za-z0-9]{16,}"));
-const GOOGLE_OAUTH_ACCESS_TOKEN = new RegExp(
-  joinPattern("ya", "29\\.[A-Za-z0-9._~-]{20,}")
-);
+const GOOGLE_OAUTH_ACCESS_TOKEN = new RegExp(joinPattern("ya", "29\\.[A-Za-z0-9._~-]{20,}"));
 const REFRESH_TOKEN_FIELD = new RegExp(
   joinPattern('"refresh', '_token"\\s*:\\s*"[^"\\r\\n]{10,}"')
 );

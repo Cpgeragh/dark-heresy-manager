@@ -2,25 +2,27 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getIdentityRecoveryMode } from "../../src/operations/getIdentityRecoveryMode";
 import { hashRecoveryCode } from "../../src/shared/recoveryCode";
 
-const { mockIndexGet, mockProfileGet, mockLinksGet, mockIndexDoc, mockCollection } = vi.hoisted(() => {
-  const mockIndexGet = vi.fn();
-  const mockProfileGet = vi.fn();
-  const mockLinksGet = vi.fn();
-  const mockIndexDoc = vi.fn((id: string) => ({ id, get: mockIndexGet }));
-  const mockCollection = vi.fn((name: string) => {
-    if (name === "identityRecoveryIndex") return { doc: mockIndexDoc };
-    if (name === "userProfiles") return { doc: vi.fn(() => ({ get: mockProfileGet })) };
-    if (name === "userLinks") {
-      return {
-        where: vi.fn(() => ({
-          limit: vi.fn(() => ({ get: mockLinksGet })),
-        })),
-      };
-    }
-    throw new Error(`Unexpected collection: ${name}`);
-  });
-  return { mockIndexGet, mockProfileGet, mockLinksGet, mockIndexDoc, mockCollection };
-});
+const { mockIndexGet, mockProfileGet, mockLinksGet, mockIndexDoc, mockCollection } = vi.hoisted(
+  () => {
+    const mockIndexGet = vi.fn();
+    const mockProfileGet = vi.fn();
+    const mockLinksGet = vi.fn();
+    const mockIndexDoc = vi.fn((id: string) => ({ id, get: mockIndexGet }));
+    const mockCollection = vi.fn((name: string) => {
+      if (name === "identityRecoveryIndex") return { doc: mockIndexDoc };
+      if (name === "userProfiles") return { doc: vi.fn(() => ({ get: mockProfileGet })) };
+      if (name === "userLinks") {
+        return {
+          where: vi.fn(() => ({
+            limit: vi.fn(() => ({ get: mockLinksGet })),
+          })),
+        };
+      }
+      throw new Error(`Unexpected collection: ${name}`);
+    });
+    return { mockIndexGet, mockProfileGet, mockLinksGet, mockIndexDoc, mockCollection };
+  }
+);
 
 vi.mock("firebase-admin/firestore", () => ({
   getFirestore: () => ({ collection: mockCollection }),

@@ -45,7 +45,8 @@ export function InsanityTraumaPicker({
     const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
     return !existingReferenceIds.has(ref.roll) && searchable.includes(query.trim().toLowerCase());
   }).sort((a, b) => a.name.localeCompare(b.name));
-  const canAddCustom = Boolean(customName.trim()) && Boolean(customOrigin) && Boolean(customDetails.trim());
+  const canAddCustom =
+    Boolean(customName.trim()) && Boolean(customOrigin) && Boolean(customDetails.trim());
 
   function addReferenceTrauma(ref: MentalTraumaEntry, name: string) {
     onAdd({
@@ -123,7 +124,11 @@ export function InsanityTraumaPicker({
         </CustomFormSection>
 
         <CustomFormSection title="Origin">
-          <OriginSelector name="custom-trauma-origin" value={customOrigin} onChange={setCustomOrigin} />
+          <OriginSelector
+            name="custom-trauma-origin"
+            value={customOrigin}
+            onChange={setCustomOrigin}
+          />
         </CustomFormSection>
 
         <CustomFormSection title="Rules">
@@ -169,34 +174,34 @@ export function InsanityTraumaPicker({
       }
     >
       <div className="space-y-3 p-3 lg:p-4">
-      {filtered.map((ref) => (
-        <PickerRow
-          key={ref.roll}
-          card
-          className={uiSectionShell}
-          interactive={editable}
-          onClick={() => handleSelect(ref)}
-        >
-          <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <RollChip>{ref.roll}</RollChip>
-          </div>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rules</span>
-            <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
-              <InfoModal
-                title={ref.name}
-                content={
-                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
-                    {ref.effect}
-                  </p>
-                }
-                as="span"
-              />
-            </span>
-          </div>
-        </PickerRow>
-      ))}
+        {filtered.map((ref) => (
+          <PickerRow
+            key={ref.roll}
+            card
+            className={uiSectionShell}
+            interactive={editable}
+            onClick={() => handleSelect(ref)}
+          >
+            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <RollChip>{ref.roll}</RollChip>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className={uiTextLabel}>Rules</span>
+              <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+                <InfoModal
+                  title={ref.name}
+                  content={
+                    <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                      {ref.effect}
+                    </p>
+                  }
+                  as="span"
+                />
+              </span>
+            </div>
+          </PickerRow>
+        ))}
       </div>
     </PickerModal>
   );

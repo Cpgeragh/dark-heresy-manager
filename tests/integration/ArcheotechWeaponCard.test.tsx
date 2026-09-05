@@ -15,7 +15,11 @@ function renderCard(item: ArcheotechItem) {
 describe("ArcheotechWeaponCard weapon-class chip", () => {
   it("shows an orange Melee chip for a melee weapon", () => {
     // Real reference entry: Midath-Pattern Power Glove, weaponClass "Melee".
-    renderCard({ id: "a1", name: "Midath-Pattern Power Glove", referenceId: "lw-midath-power-glove" });
+    renderCard({
+      id: "a1",
+      name: "Midath-Pattern Power Glove",
+      referenceId: "lw-midath-power-glove",
+    });
     expect(screen.getByText("Melee")).toBeInTheDocument();
   });
 

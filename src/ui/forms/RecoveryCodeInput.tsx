@@ -9,8 +9,7 @@ import { validateRecoveryCode } from "../../utils/validation";
 import { uiSectionHeader } from "../styles/editableStyles";
 
 const RECOVERY_CODE_FORMATTED_LENGTH =
-  RECOVERY_CODE_PREFIX.length +
-  RECOVERY_CODE_SEGMENTS * (RECOVERY_CODE_SEGMENT_LENGTH + 1);
+  RECOVERY_CODE_PREFIX.length + RECOVERY_CODE_SEGMENTS * (RECOVERY_CODE_SEGMENT_LENGTH + 1);
 
 interface RecoveryCodeInputProps {
   value: string;

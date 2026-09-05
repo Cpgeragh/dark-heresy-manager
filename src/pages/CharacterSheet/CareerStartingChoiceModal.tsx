@@ -48,7 +48,11 @@ export function CareerStartingChoiceModal({
       hideSearch
       maxWidth="max-w-md"
       footer={
-        <Button variant="primary" disabled={!allResolved} onClick={() => onComplete({ skillChoices, talentChoices })}>
+        <Button
+          variant="primary"
+          disabled={!allResolved}
+          onClick={() => onComplete({ skillChoices, talentChoices })}
+        >
           Confirm
         </Button>
       }

@@ -127,80 +127,90 @@ export function GearPicker({
         ) : undefined
       }
     >
-      {pickerEntries.map((entry) => entry.kind === "custom" ? (
-        <PickerRow
-          key={`custom-${entry.item.id}`}
-          interactive={editable}
-          onClick={() => onSelectCustomItem?.(entry.item)}
-        >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {entry.item.name}
-            </span>
-            <StatusBadge status={entry.item.status} />
-            {entry.item.data.description && (
-              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                <InfoModal
-                  title={entry.item.name}
-                  content={
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {entry.item.data.description}
-                    </p>
-                  }
-                  as="span"
-                />
-              </span>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-            <ItemMetaChips
-              bare
-              weight={entry.item.data.weight}
-              value={entry.item.data.value}
-              availability={entry.item.data.availability}
-              source={entry.item.data.source}
-            />
-          </div>
-        </PickerRow>
-      ) : (
-        <PickerRow key={entry.ref.id} interactive={editable} onClick={() => handleSelect(entry.ref)}>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span
-              className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
-            >
-              {entry.ref.name}
-            </span>
-            {entry.ref.description && (
+      {pickerEntries.map((entry) =>
+        entry.kind === "custom" ? (
+          <PickerRow
+            key={`custom-${entry.item.id}`}
+            interactive={editable}
+            onClick={() => onSelectCustomItem?.(entry.item)}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
               <span
-                className="inline-flex items-center -translate-y-[1.4px]"
-                onClick={(e) => e.stopPropagation()}
+                className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
               >
-                <InfoModal
-                  title={entry.ref.name}
-                  content={
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {entry.ref.description}
-                    </p>
-                  }
-                  as="span"
-                />
+                {entry.item.name}
               </span>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-            <ItemMetaChips
-              bare
-              weight={entry.ref.weight}
-              value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
-              availability={isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability}
-              source={entry.ref.source}
-            />
-            {isVariableMeta(entry.ref.value) && (
-              <span className={uiTextGMNote}>Cost assigned on add</span>
-            )}
-          </div>
-        </PickerRow>
-      ))}
+              <StatusBadge status={entry.item.status} />
+              {entry.item.data.description && (
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                  <InfoModal
+                    title={entry.item.name}
+                    content={
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {entry.item.data.description}
+                      </p>
+                    }
+                    as="span"
+                  />
+                </span>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+              <ItemMetaChips
+                bare
+                weight={entry.item.data.weight}
+                value={entry.item.data.value}
+                availability={entry.item.data.availability}
+                source={entry.item.data.source}
+              />
+            </div>
+          </PickerRow>
+        ) : (
+          <PickerRow
+            key={entry.ref.id}
+            interactive={editable}
+            onClick={() => handleSelect(entry.ref)}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+              >
+                {entry.ref.name}
+              </span>
+              {entry.ref.description && (
+                <span
+                  className="inline-flex items-center -translate-y-[1.4px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <InfoModal
+                    title={entry.ref.name}
+                    content={
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {entry.ref.description}
+                      </p>
+                    }
+                    as="span"
+                  />
+                </span>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+              <ItemMetaChips
+                bare
+                weight={entry.ref.weight}
+                value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
+                availability={
+                  isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability
+                }
+                source={entry.ref.source}
+              />
+              {isVariableMeta(entry.ref.value) && (
+                <span className={uiTextGMNote}>Cost assigned on add</span>
+              )}
+            </div>
+          </PickerRow>
+        )
+      )}
     </PickerModal>
   );
 }

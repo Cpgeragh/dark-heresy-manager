@@ -85,10 +85,7 @@ export async function startIdentityReclaimJob(
     role?: "dm" | "player";
   };
   if (oldUid === callerUid) {
-    throw new HttpsError(
-      "failed-precondition",
-      "This code is already registered to your account."
-    );
+    throw new HttpsError("failed-precondition", "This code is already registered to your account.");
   }
 
   // Reclaim is destructive: it moves the primary identity and invalidates the
@@ -117,9 +114,7 @@ export async function startIdentityReclaimJob(
   // complete with the original name stranded under oldUid.
   const oldProfileRef = db.collection("userProfiles").doc(oldUid);
   const oldProfileSnapshot = await oldProfileRef.get();
-  const firstName = oldProfileSnapshot.exists
-    ? oldProfileSnapshot.data()?.firstName
-    : undefined;
+  const firstName = oldProfileSnapshot.exists ? oldProfileSnapshot.data()?.firstName : undefined;
   if (
     !oldProfileSnapshot.exists ||
     typeof firstName !== "string" ||

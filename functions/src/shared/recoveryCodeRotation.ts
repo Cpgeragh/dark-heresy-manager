@@ -9,7 +9,10 @@
 
 import type { Firestore, Transaction, DocumentReference } from "firebase-admin/firestore";
 import { generateRecoveryCode, hashRecoveryCode } from "./recoveryCode.js";
-import { RECOVERY_CODE_HISTORY_COLLECTION, buildRecoveryCodeHistoryPayload } from "./recoveryCodeHistory.js";
+import {
+  RECOVERY_CODE_HISTORY_COLLECTION,
+  buildRecoveryCodeHistoryPayload,
+} from "./recoveryCodeHistory.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 

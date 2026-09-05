@@ -195,7 +195,12 @@ describe("startCustomItemMutationJob", () => {
 
     await expect(
       startCustomItemMutationJob(
-        { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
+        {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "remove",
+          actorUserId: DM_UID,
+        },
         DM_UID,
         "idem-key"
       )
@@ -207,7 +212,12 @@ describe("startCustomItemMutationJob", () => {
 
     await expect(
       startCustomItemMutationJob(
-        { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
+        {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "remove",
+          actorUserId: DM_UID,
+        },
         DM_UID,
         "idem-key"
       )
@@ -220,7 +230,12 @@ describe("startCustomItemMutationJob", () => {
 
     await expect(
       startCustomItemMutationJob(
-        { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
+        {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "remove",
+          actorUserId: DM_UID,
+        },
         DM_UID,
         "idem-key"
       )
@@ -255,7 +270,12 @@ describe("startCustomItemMutationJob", () => {
     mockCreateBulkJob.mockResolvedValue("job-1");
 
     const result = await startCustomItemMutationJob(
-      { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
+      {
+        campaignId: CAMPAIGN_ID,
+        customItemId: CUSTOM_ITEM_ID,
+        mode: "remove",
+        actorUserId: DM_UID,
+      },
       DM_UID,
       "idem-key"
     );
@@ -344,7 +364,12 @@ describe("startCustomItemMutationJob", () => {
     mockCreateBulkJob.mockResolvedValue("job-1");
 
     const result = await startCustomItemMutationJob(
-      { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "update", actorUserId: DM_UID },
+      {
+        campaignId: CAMPAIGN_ID,
+        customItemId: CUSTOM_ITEM_ID,
+        mode: "update",
+        actorUserId: DM_UID,
+      },
       DM_UID,
       "idem-key"
     );
@@ -369,7 +394,12 @@ describe("startCustomItemMutationJob", () => {
 
     await expect(
       startCustomItemMutationJob(
-        { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "update", actorUserId: DM_UID },
+        {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "update",
+          actorUserId: DM_UID,
+        },
         DM_UID,
         "idem-key"
       )
@@ -380,7 +410,10 @@ describe("startCustomItemMutationJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     mockItemGet.mockResolvedValue({ exists: true });
     mockTransactionGet
-      .mockResolvedValueOnce({ exists: true, data: () => ({ draftVersionId: "v2", latestVersionId: "v2" }) })
+      .mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ draftVersionId: "v2", latestVersionId: "v2" }),
+      })
       .mockResolvedValueOnce({
         exists: true,
         data: () => ({ data: { name: "Blade" }, versionNumber: 2 }),
@@ -425,7 +458,10 @@ describe("startCustomItemMutationJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     mockItemGet.mockResolvedValue({ exists: true });
     mockTransactionGet
-      .mockResolvedValueOnce({ exists: true, data: () => ({ draftVersionId: "v2", latestVersionId: "v1" }) })
+      .mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ draftVersionId: "v2", latestVersionId: "v1" }),
+      })
       .mockResolvedValueOnce({
         exists: true,
         data: () => ({ data: { name: "Blade" }, versionNumber: 2 }),
@@ -454,7 +490,10 @@ describe("startCustomItemMutationJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     mockItemGet.mockResolvedValue({ exists: true });
     mockTransactionGet
-      .mockResolvedValueOnce({ exists: true, data: () => ({ draftVersionId: "v2", latestVersionId: "v2" }) })
+      .mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ draftVersionId: "v2", latestVersionId: "v2" }),
+      })
       .mockResolvedValueOnce({
         exists: true,
         data: () => ({ data: { name: "Blade" }, versionNumber: 2 }),
@@ -490,7 +529,10 @@ describe("processCustomItemMutationChunk", () => {
   });
 
   it("rejects when the job is not a custom-item-mutation job, without touching Firestore", async () => {
-    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ type: "other-job" }), leaseId: "lease-1" });
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ type: "other-job" }),
+      leaseId: "lease-1",
+    });
 
     await expect(processCustomItemMutationChunk({ jobId: "job-1" }, DM_UID)).rejects.toThrow(
       expect.objectContaining({ code: "failed-precondition" })
@@ -532,7 +574,10 @@ describe("processCustomItemMutationChunk", () => {
   });
 
   it("returns an in-progress result instead of throwing when handleChunkFailure signals a retry", async () => {
-    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ processedCount: 3 }), leaseId: "lease-1" });
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ processedCount: 3 }),
+      leaseId: "lease-1",
+    });
     mockCampaignGet.mockRejectedValue(new Error("transient"));
     mockHandleChunkFailure.mockResolvedValueOnce(true);
 
@@ -573,7 +618,15 @@ describe("processCustomItemMutationChunk", () => {
 
   it("mode update: re-reads the target version and applies matching updates", async () => {
     mockAcquireJobLease.mockResolvedValue({
-      job: makeJob({ data: { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "update", targetVersionId: "v1", actorUserId: DM_UID } }),
+      job: makeJob({
+        data: {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "update",
+          targetVersionId: "v1",
+          actorUserId: DM_UID,
+        },
+      }),
       leaseId: "lease-1",
     });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
@@ -604,7 +657,15 @@ describe("processCustomItemMutationChunk", () => {
 
   it("mode update: rejects when the target version no longer exists", async () => {
     mockAcquireJobLease.mockResolvedValue({
-      job: makeJob({ data: { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "update", targetVersionId: "v1", actorUserId: DM_UID } }),
+      job: makeJob({
+        data: {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "update",
+          targetVersionId: "v1",
+          actorUserId: DM_UID,
+        },
+      }),
       leaseId: "lease-1",
     });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });

@@ -9,13 +9,11 @@ import type {
   FateBlock,
   TalentsAndTraitsBlock,
 } from "../../types/Character";
-import { getTalentFateEffects, getTalentWoundModifierSources } from "../../mechanics/talents/talentEffects";
 import {
-  uiSection,
-  uiCell,
-  uiCellValue,
-  uiInfoModalWrapper,
-} from "../../ui/styles/editableStyles";
+  getTalentFateEffects,
+  getTalentWoundModifierSources,
+} from "../../mechanics/talents/talentEffects";
+import { uiSection, uiCell, uiCellValue, uiInfoModalWrapper } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
 
@@ -51,7 +49,10 @@ export function VitalsTab({
   const woundAdjustment = woundSources.reduce((total, source) => total + source.amount, 0);
   const effectiveWoundsTotal = Math.max(1, wounds.total + woundAdjustment);
   const fateEffects = talents ? getTalentFateEffects(talents) : { modifierSources: [] };
-  const fateAdjustment = fateEffects.modifierSources.reduce((total, source) => total + source.amount, 0);
+  const fateAdjustment = fateEffects.modifierSources.reduce(
+    (total, source) => total + source.amount,
+    0
+  );
   const effectiveFateTotal = Math.max(
     0,
     (fateEffects.overrideTotal ?? fate.total) + fateAdjustment
@@ -130,7 +131,8 @@ export function VitalsTab({
                         <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
                           {woundSources.map((source, index) => (
                             <li key={index}>
-                              {source.name} (Talent): {source.amount > 0 ? "+" : ""}{source.amount}
+                              {source.name} (Talent): {source.amount > 0 ? "+" : ""}
+                              {source.amount}
                             </li>
                           ))}
                         </ul>
@@ -145,7 +147,12 @@ export function VitalsTab({
                     type="text"
                     inputMode="numeric"
                     className={totalInputClass}
-                    value={woundsTotalDraft ?? (Number.isFinite(wounds.total) && wounds.total >= 1 ? String(wounds.total) : "")}
+                    value={
+                      woundsTotalDraft ??
+                      (Number.isFinite(wounds.total) && wounds.total >= 1
+                        ? String(wounds.total)
+                        : "")
+                    }
                     onChange={handleWoundsTotalChange}
                     onBlur={() => setWoundsTotalDraft(null)}
                     onFocus={(e) => e.target.select()}
@@ -156,8 +163,11 @@ export function VitalsTab({
                   <div className={uiCellValue}>{effectiveWoundsTotal}</div>
                 )}
                 {editable && woundAdjustment !== 0 && (
-                  <span className={`ml-1 text-xs font-code ${woundAdjustment > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                    = {effectiveWoundsTotal} ({woundAdjustment > 0 ? "+" : ""}{woundAdjustment})
+                  <span
+                    className={`ml-1 text-xs font-code ${woundAdjustment > 0 ? "text-emerald-400" : "text-red-400"}`}
+                  >
+                    = {effectiveWoundsTotal} ({woundAdjustment > 0 ? "+" : ""}
+                    {woundAdjustment})
                   </span>
                 )}
               </div>
@@ -238,10 +248,17 @@ export function VitalsTab({
               content={
                 <div className="space-y-2">
                   <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
-                    Fate Points allow you to turn luck to your advantage, hitting with that bolter shot when you would have otherwise missed, or cracking the security code on a door just in time to make a hasty escape. Using these twists of fate, you can take a few more risks, which makes the game faster and far more exciting than would otherwise be the case.
+                    Fate Points allow you to turn luck to your advantage, hitting with that bolter
+                    shot when you would have otherwise missed, or cracking the security code on a
+                    door just in time to make a hasty escape. Using these twists of fate, you can
+                    take a few more risks, which makes the game faster and far more exciting than
+                    would otherwise be the case.
                   </p>
                   <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
-                    That said, you have a limited pool of Fate Points and whenever you spend a Fate Point, you reduce your pool by one, so choose wisely. Fate Points are restored at the start of the next gaming session. Spending a Fate Point allows a character to do one of the following things:
+                    That said, you have a limited pool of Fate Points and whenever you spend a Fate
+                    Point, you reduce your pool by one, so choose wisely. Fate Points are restored
+                    at the start of the next gaming session. Spending a Fate Point allows a
+                    character to do one of the following things:
                   </p>
                   <ul className="list-disc list-inside text-sm leading-relaxed text-slate-300 lg:text-base space-y-1">
                     <li>Re-roll any one failed Test. The results of the re-roll are final.</li>
@@ -267,10 +284,16 @@ export function VitalsTab({
                       content={
                         <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
                           {fateEffects.overrideSource && (
-                            <li>{fateEffects.overrideSource} (Talent): set to {fateEffects.overrideTotal}</li>
+                            <li>
+                              {fateEffects.overrideSource} (Talent): set to{" "}
+                              {fateEffects.overrideTotal}
+                            </li>
                           )}
                           {fateEffects.modifierSources.map((source, index) => (
-                            <li key={index}>{source.name} (Talent): {source.amount > 0 ? "+" : ""}{source.amount}</li>
+                            <li key={index}>
+                              {source.name} (Talent): {source.amount > 0 ? "+" : ""}
+                              {source.amount}
+                            </li>
                           ))}
                         </ul>
                       }
@@ -295,7 +318,9 @@ export function VitalsTab({
                   <div className={uiCellValue}>{effectiveFateTotal}</div>
                 )}
                 {editable && effectiveFateTotal !== fate.total && (
-                  <span className="ml-1 text-xs font-code text-emerald-400">= {effectiveFateTotal}</span>
+                  <span className="ml-1 text-xs font-code text-emerald-400">
+                    = {effectiveFateTotal}
+                  </span>
                 )}
               </div>
             </div>

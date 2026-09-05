@@ -11,11 +11,9 @@ export function uiPickerPressFeedback(interactive = true): string {
   return interactive ? PICKER_PRESS_FEEDBACK : "";
 }
 
-export const uiDismissButton =
-  "text-slate-400 hover:text-slate-200 text-lg leading-none";
+export const uiDismissButton = "text-slate-400 hover:text-slate-200 text-lg leading-none";
 
-export const uiExpandButton =
-  "flex-1 min-w-0 text-left";
+export const uiExpandButton = "flex-1 min-w-0 text-left";
 
 export const uiIconRemoveButton =
   "inline-flex items-center justify-center rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition p-1 shrink-0";

@@ -117,9 +117,9 @@ describe("repairSessionSummaries", () => {
     });
     mockSessionsGet.mockResolvedValue({ docs: [session("s1")] });
 
-    await expect(
-      repairSessionSummaries({ campaignId: "c1" }, "linked-device")
-    ).resolves.toEqual({ repairedCount: 1 });
+    await expect(repairSessionSummaries({ campaignId: "c1" }, "linked-device")).resolves.toEqual({
+      repairedCount: 1,
+    });
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
 
@@ -129,9 +129,9 @@ describe("repairSessionSummaries", () => {
       data: () => ({ primaryUid: "other-user" }),
     });
 
-    await expect(
-      repairSessionSummaries({ campaignId: "c1" }, "linked-device")
-    ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
+    await expect(repairSessionSummaries({ campaignId: "c1" }, "linked-device")).rejects.toThrow(
+      expect.objectContaining({ code: "permission-denied" })
+    );
     expect(mockSessionsGet).not.toHaveBeenCalled();
   });
 
@@ -170,7 +170,9 @@ describe("repairSessionSummaries", () => {
   });
 
   it("stops before any write when historical source data is invalid", async () => {
-    mockSessionsGet.mockResolvedValue({ docs: [session("valid"), session("bad", { attendees: ["bad/id"] })] });
+    mockSessionsGet.mockResolvedValue({
+      docs: [session("valid"), session("bad", { attendees: ["bad/id"] })],
+    });
 
     await expect(repairSessionSummaries({ campaignId: "c1" }, "dm-1")).rejects.toThrow(
       expect.objectContaining({ code: "failed-precondition" })

@@ -3,13 +3,23 @@ import {
   getCharacteristicModifierTotals,
   getCharacteristicModifierSources,
 } from "../../src/mechanics/corruption/characteristicModifierTotals";
-import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../src/types/Character";
+import type {
+  CorruptionBlock,
+  CorruptionMalignancyEntry,
+  CorruptionMutationEntry,
+} from "../../src/types/Character";
 
-function malignancy(referenceId: string, extra: Partial<CorruptionMalignancyEntry> = {}): CorruptionMalignancyEntry {
+function malignancy(
+  referenceId: string,
+  extra: Partial<CorruptionMalignancyEntry> = {}
+): CorruptionMalignancyEntry {
   return { id: referenceId, referenceId, name: referenceId, ...extra };
 }
 
-function mutation(referenceId: string, extra: Partial<CorruptionMutationEntry> = {}): CorruptionMutationEntry {
+function mutation(
+  referenceId: string,
+  extra: Partial<CorruptionMutationEntry> = {}
+): CorruptionMutationEntry {
   return { id: referenceId, referenceId, name: referenceId, ...extra };
 }
 
@@ -19,7 +29,11 @@ describe("getCharacteristicModifierTotals", () => {
   });
 
   it("sums flat modifiers across multiple characteristics (Brute: +10 S, +10 T, -10 Ag)", () => {
-    const corruption: CorruptionBlock = { points: 0, malignancies: [], minorMutations: [mutation("brute")] };
+    const corruption: CorruptionBlock = {
+      points: 0,
+      malignancies: [],
+      minorMutations: [mutation("brute")],
+    };
     expect(getCharacteristicModifierTotals(corruption)).toEqual({ s: 10, t: 10, ag: -10 });
   });
 
@@ -92,7 +106,12 @@ describe("getCharacteristicModifierTotals", () => {
       malignancies: [],
       majorMutations: [mutation("aberration", { rolledModifiers: { int: 4 } })],
     };
-    expect(getCharacteristicModifierTotals(corruption)).toEqual({ s: 10, ag: 10, int: -4, fel: -10 });
+    expect(getCharacteristicModifierTotals(corruption)).toEqual({
+      s: 10,
+      ag: 10,
+      int: -4,
+      fel: -10,
+    });
   });
 });
 
@@ -138,7 +157,9 @@ describe("getCharacteristicModifierSources", () => {
   it("uses the reference name, not whatever name is stored on the entry", () => {
     const corruption: CorruptionBlock = {
       points: 0,
-      malignancies: [malignancy("palsy", { name: "some-stale-stored-name", rolledModifiers: { ag: 6 } })],
+      malignancies: [
+        malignancy("palsy", { name: "some-stale-stored-name", rolledModifiers: { ag: 6 } }),
+      ],
     };
     expect(getCharacteristicModifierSources(corruption, "ag")).toEqual([
       { name: "Palsy", type: "Malignancy", amount: -6 },

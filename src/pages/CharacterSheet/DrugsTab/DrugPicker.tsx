@@ -5,7 +5,13 @@ import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE, type DrugRef } from "../../../data/reference/drugsReference";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
-import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 
@@ -14,17 +20,13 @@ function drugInfoContent(ref: DrugRef) {
     <>
       {ref.duration && (
         <div>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>
-            Duration
-          </p>
+          <p className={`${uiTextLabel} font-semibold mb-1`}>Duration</p>
           <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.duration}</p>
         </div>
       )}
       {ref.effect && (
         <div>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>
-            Effect
-          </p>
+          <p className={`${uiTextLabel} font-semibold mb-1`}>Effect</p>
           <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.effect}</p>
         </div>
       )}
@@ -88,11 +90,7 @@ export function DrugPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (
-          <PickerCustomAction
-            onClick={onCustom}
-          >
-            + Add custom drug
-          </PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>+ Add custom drug</PickerCustomAction>
         ) : undefined
       }
     >
@@ -112,7 +110,11 @@ export function DrugPicker({
                   <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                     <InfoModal
                       title={item.name}
-                      content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.notes}</p>}
+                      content={
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {item.data.notes}
+                        </p>
+                      }
                       as="span"
                     />
                   </span>
@@ -135,20 +137,11 @@ export function DrugPicker({
         const hasInfo = !!(ref.duration || ref.effect || ref.sideEffect || ref.notes);
 
         return (
-          <PickerRow
-            key={ref.id}
-            interactive={editable}
-            onClick={() => onSelect(ref)}
-          >
+          <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className={`${uiItemName} group-hover:text-white truncate`}>
-                {ref.name}
-              </span>
+              <span className={`${uiItemName} group-hover:text-white truncate`}>{ref.name}</span>
               {hasInfo && (
-                <span
-                  className={uiInfoModalWrapper}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                   <InfoModal title={ref.name} content={drugInfoContent(ref)} as="span" />
                 </span>
               )}

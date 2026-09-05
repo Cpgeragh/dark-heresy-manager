@@ -23,7 +23,13 @@ function renderRow(props: Partial<React.ComponentProps<typeof ArcheotechForceFie
   const onToggleEquip = vi.fn();
   const onRemove = vi.fn();
   render(
-    <ArcheotechForceFieldRow item={baseItem} editable={true} onToggleEquip={onToggleEquip} onRemove={onRemove} {...props} />
+    <ArcheotechForceFieldRow
+      item={baseItem}
+      editable={true}
+      onToggleEquip={onToggleEquip}
+      onRemove={onRemove}
+      {...props}
+    />
   );
   return { onToggleEquip, onRemove };
 }

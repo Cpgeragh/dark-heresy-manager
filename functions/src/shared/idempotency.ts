@@ -16,20 +16,23 @@ export async function withIdempotency<T>(key: string, handler: () => Promise<T>)
   const db = getFirestore();
   const ref = db.collection(IDEMPOTENCY_COLLECTION).doc(key);
 
-  const claim = await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(ref);
+  const claim = await db.runTransaction(
+    async (transaction) => {
+      const snapshot = await transaction.get(ref);
 
-    if (snapshot.exists) {
-      const status = snapshot.data()?.status as string | undefined;
-      if (status === "completed") {
-        return { alreadyCompleted: true, result: snapshot.data()?.result as T };
+      if (snapshot.exists) {
+        const status = snapshot.data()?.status as string | undefined;
+        if (status === "completed") {
+          return { alreadyCompleted: true, result: snapshot.data()?.result as T };
+        }
+        throw new HttpsError("aborted", "This request is already being processed.");
       }
-      throw new HttpsError("aborted", "This request is already being processed.");
-    }
 
-    transaction.set(ref, { status: "in-progress", startedAt: Date.now() });
-    return { alreadyCompleted: false, result: undefined as T };
-  }, { maxAttempts: 5 });
+      transaction.set(ref, { status: "in-progress", startedAt: Date.now() });
+      return { alreadyCompleted: false, result: undefined as T };
+    },
+    { maxAttempts: 5 }
+  );
 
   if (claim.alreadyCompleted) {
     return claim.result;

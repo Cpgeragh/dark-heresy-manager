@@ -2,10 +2,7 @@
 
 import { describe, it, expect } from "vitest";
 import { getTestEnv } from "../setup";
-import type {
-  RulesTestEnvironment,
-  RulesTestContext,
-} from "@firebase/rules-unit-testing";
+import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
 import { dbAs, dbAnon } from "../helpers";
 
 describe("Firestore Rules: Users", () => {
@@ -23,9 +20,7 @@ describe("Firestore Rules: Users", () => {
 
     const u1Db = dbAs(env, "u1");
 
-    await expect(
-      u1Db.collection("users").doc("u1").get()
-    ).resolves.toBeDefined();
+    await expect(u1Db.collection("users").doc("u1").get()).resolves.toBeDefined();
   });
 
   it("user cannot read another user's document", async () => {
@@ -34,9 +29,7 @@ describe("Firestore Rules: Users", () => {
 
     const u1Db = dbAs(env, "u1");
 
-    await expect(
-      u1Db.collection("users").doc("u2").get()
-    ).rejects.toThrow();
+    await expect(u1Db.collection("users").doc("u2").get()).rejects.toThrow();
   });
 
   it("user cannot write to another user's document", async () => {
@@ -45,9 +38,7 @@ describe("Firestore Rules: Users", () => {
 
     const u1Db = dbAs(env, "u1");
 
-    await expect(
-      u1Db.collection("users").doc("u2").update({ role: "hacker" })
-    ).rejects.toThrow();
+    await expect(u1Db.collection("users").doc("u2").update({ role: "hacker" })).rejects.toThrow();
   });
 
   it("user can write only their own user document", async () => {
@@ -67,9 +58,7 @@ describe("Firestore Rules: Users", () => {
 
     const u1Db = dbAs(env, "u1");
 
-    await expect(
-      u1Db.collection("users").doc("u2").delete()
-    ).rejects.toThrow();
+    await expect(u1Db.collection("users").doc("u2").delete()).rejects.toThrow();
   });
 
   it("user can create their own user document", async () => {
@@ -88,9 +77,7 @@ describe("Firestore Rules: Users", () => {
 
     const u1Db = dbAs(env, "u1");
 
-    await expect(
-      u1Db.collection("users").get()
-    ).rejects.toThrow();
+    await expect(u1Db.collection("users").get()).rejects.toThrow();
   });
 
   it("unauthenticated users cannot read any users", async () => {
@@ -99,9 +86,7 @@ describe("Firestore Rules: Users", () => {
 
     const anonDb = dbAnon(env);
 
-    await expect(
-      anonDb.collection("users").doc("u1").get()
-    ).rejects.toThrow();
+    await expect(anonDb.collection("users").doc("u1").get()).rejects.toThrow();
   });
 
   it("allows authenticated exact profile reads but denies profile listing", async () => {
@@ -120,6 +105,8 @@ describe("Firestore Rules: Users", () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     const profile = dbAs(env, "u1").collection("userProfiles").doc("u1");
     await expect(profile.set({ firstName: "x".repeat(51) })).rejects.toThrow();
-    await expect(profile.set({ firstName: "Iona", email: "private@example.test" })).rejects.toThrow();
+    await expect(
+      profile.set({ firstName: "Iona", email: "private@example.test" })
+    ).rejects.toThrow();
   });
 });

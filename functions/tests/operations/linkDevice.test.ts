@@ -55,7 +55,10 @@ describe("linkDevice", () => {
 
     await linkDevice({ code: CODE }, "device-uid", SECRET);
 
-    expect(mockSet).toHaveBeenCalledWith({ primaryUid: "primary-uid", linkedAt: "server-timestamp" });
+    expect(mockSet).toHaveBeenCalledWith({
+      primaryUid: "primary-uid",
+      linkedAt: "server-timestamp",
+    });
   });
 
   it("resolves the target by the code's HMAC hash, not the raw code", async () => {

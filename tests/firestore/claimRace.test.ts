@@ -1,10 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import {
-  createCampaign,
-  createCharacter,
-  dbAs,
-} from "./helpers";
+import { createCampaign, createCharacter, dbAs } from "./helpers";
 import { getTestEnv } from "./setup";
 
 describe("Claim race safety", () => {
@@ -31,13 +27,7 @@ describe("Claim race safety", () => {
 
     try {
       await setDoc(
-        doc(
-          dbAs(env, playerB),
-          "campaigns",
-          campaignId,
-          "characters",
-          characterId
-        ),
+        doc(dbAs(env, playerB), "campaigns", campaignId, "characters", characterId),
         { userId: playerB },
         { merge: true }
       );
@@ -49,13 +39,7 @@ describe("Claim race safety", () => {
 
     // Ownership remains with Player A
     const snap = await getDoc(
-      doc(
-        dbAs(env, dmUid),
-        "campaigns",
-        campaignId,
-        "characters",
-        characterId
-      )
+      doc(dbAs(env, dmUid), "campaigns", campaignId, "characters", characterId)
     );
 
     expect(snap.data()?.userId).toBe(playerA);

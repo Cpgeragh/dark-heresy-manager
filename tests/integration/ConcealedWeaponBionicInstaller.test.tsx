@@ -9,7 +9,9 @@ import type { CyberneticItem, RangedWeapon } from "../../src/types/Character";
 // "cr-bionic-arm" is the real Bionic Arm reference id (src/data/reference/cyberneticsReference.ts).
 const BIONIC_ARM_REF_ID = "cr-bionic-arm";
 
-function renderInstaller(props: Partial<React.ComponentProps<typeof ConcealedWeaponBionicInstaller>> = {}) {
+function renderInstaller(
+  props: Partial<React.ComponentProps<typeof ConcealedWeaponBionicInstaller>> = {}
+) {
   const onInstall = vi.fn();
   const onClose = vi.fn();
   render(
@@ -107,7 +109,11 @@ describe("ConcealedWeaponBionicInstaller", () => {
     await user.click(screen.getByRole("button", { name: "Select Bionic Arm" }));
     await user.click(screen.getByRole("button", { name: "Select Weapon" }));
 
-    expect(onInstall).toHaveBeenCalledWith("arm-1", { id: "r1", type: "ranged", name: "Laspistol" });
+    expect(onInstall).toHaveBeenCalledWith("arm-1", {
+      id: "r1",
+      type: "ranged",
+      name: "Laspistol",
+    });
   });
 
   it("returns to arm selection via Back", async () => {

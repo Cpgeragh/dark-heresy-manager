@@ -32,7 +32,10 @@ describe("withSafeErrors", () => {
       withSafeErrors("test-op", async () => {
         throw new Error("raw internal detail");
       })
-    ).rejects.toMatchObject({ code: "internal", message: "Something went wrong. Please try again." });
+    ).rejects.toMatchObject({
+      code: "internal",
+      message: "Something went wrong. Please try again.",
+    });
   });
 
   it("logs only bounded error type and code, never the error's sensitive details", async () => {

@@ -35,175 +35,159 @@ describe("Functions: character deletion job", () => {
     await teardownTestFunctions();
   });
 
-  it(
-    "deletes a character and every dependent document across chunked calls",
-    async () => {
-      const dmUid = await signInTestUser();
-      const campaignRef = adminDb.collection("campaigns").doc();
-      const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id });
-      const registerRecoveryCode = httpsCallable<
-        { campaignId: string; characterId: string },
-        { code: string }
-      >(getTestFunctions(), "registerRecoveryCode");
-      const { data: registered } = await registerRecoveryCode({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-      });
-      const recoveryCode = registered.code;
-      await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
-      const threadRef = campaignRef.collection("threads").doc(characterRef.id);
-      await threadRef.set({ characterId: characterRef.id });
-      await threadRef.collection("messages").add({ text: "hello" });
-      await threadRef.collection("messages").add({ text: "world" });
-      const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
-      await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
+  it("deletes a character and every dependent document across chunked calls", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({ campaignId: campaignRef.id });
+    const registerRecoveryCode = httpsCallable<
+      { campaignId: string; characterId: string },
+      { code: string }
+    >(getTestFunctions(), "registerRecoveryCode");
+    const { data: registered } = await registerRecoveryCode({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
+    const recoveryCode = registered.code;
+    await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
+    const threadRef = campaignRef.collection("threads").doc(characterRef.id);
+    await threadRef.set({ characterId: characterRef.id });
+    await threadRef.collection("messages").add({ text: "hello" });
+    await threadRef.collection("messages").add({ text: "world" });
+    const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
+    await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
 
-      const startJob = httpsCallable<
-        { campaignId: string; characterId: string },
-        { jobId: string; totalCount: number }
-      >(getTestFunctions(), "startCharacterDeletionJob");
-      const { data: started } = await startJob({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-      });
+    const startJob = httpsCallable<
+      { campaignId: string; characterId: string },
+      { jobId: string; totalCount: number }
+    >(getTestFunctions(), "startCharacterDeletionJob");
+    const { data: started } = await startJob({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
 
-      expect(started.totalCount).toBe(7);
+    expect(started.totalCount).toBe(7);
 
-      const final = await drainJob(started.jobId);
-      expect(final.done).toBe(true);
-      expect(final.processedCount).toBe(7);
+    const final = await drainJob(started.jobId);
+    expect(final.done).toBe(true);
+    expect(final.processedCount).toBe(7);
 
-      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
-        getTestFunctions(),
-        "lookupRecoveryCode"
-      );
-      expect((await characterRef.get()).exists).toBe(false);
-      expect((await threadRef.get()).exists).toBe(false);
-      expect((await summaryRef.get()).exists).toBe(false);
-      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
-      expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
-      expect((await threadRef.collection("messages").get()).empty).toBe(true);
-    },
-    30000
-  );
+    const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+      getTestFunctions(),
+      "lookupRecoveryCode"
+    );
+    expect((await characterRef.get()).exists).toBe(false);
+    expect((await threadRef.get()).exists).toBe(false);
+    expect((await summaryRef.get()).exists).toBe(false);
+    expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
+    expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
+    expect((await threadRef.collection("messages").get()).empty).toBe(true);
+  }, 30000);
 
-  it(
-    "resumes correctly after being interrupted partway through, leaving a consistent partial state in between",
-    async () => {
-      const dmUid = await signInTestUser();
-      const campaignRef = adminDb.collection("campaigns").doc();
-      const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id });
-      const registerRecoveryCode = httpsCallable<
-        { campaignId: string; characterId: string },
-        { code: string }
-      >(getTestFunctions(), "registerRecoveryCode");
-      const { data: registered } = await registerRecoveryCode({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-      });
-      const recoveryCode = registered.code;
-      await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
-      await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
-      const threadRef = campaignRef.collection("threads").doc(characterRef.id);
-      await threadRef.set({ characterId: characterRef.id });
-      await threadRef.collection("messages").add({ text: "hello" });
-      const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
-      await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
+  it("resumes correctly after being interrupted partway through, leaving a consistent partial state in between", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({ campaignId: campaignRef.id });
+    const registerRecoveryCode = httpsCallable<
+      { campaignId: string; characterId: string },
+      { code: string }
+    >(getTestFunctions(), "registerRecoveryCode");
+    const { data: registered } = await registerRecoveryCode({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
+    const recoveryCode = registered.code;
+    await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
+    await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
+    const threadRef = campaignRef.collection("threads").doc(characterRef.id);
+    await threadRef.set({ characterId: characterRef.id });
+    await threadRef.collection("messages").add({ text: "hello" });
+    const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
+    await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
 
-      const startJob = httpsCallable<
-        { campaignId: string; characterId: string },
-        { jobId: string; totalCount: number }
-      >(getTestFunctions(), "startCharacterDeletionJob");
-      const { data: started } = await startJob({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-      });
+    const startJob = httpsCallable<
+      { campaignId: string; characterId: string },
+      { jobId: string; totalCount: number }
+    >(getTestFunctions(), "startCharacterDeletionJob");
+    const { data: started } = await startJob({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
 
-      // 2 claimLog + 0 xpProposals + 1 message + 1 thread + 1 recoveryIndex
-      // + 1 characterSummary + 1 character = 7
-      expect(started.totalCount).toBe(7);
+    // 2 claimLog + 0 xpProposals + 1 message + 1 thread + 1 recoveryIndex
+    // + 1 characterSummary + 1 character = 7
+    expect(started.totalCount).toBe(7);
 
-      const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
-        getTestFunctions(),
-        "processCharacterDeletionChunk"
-      );
-      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
-        getTestFunctions(),
-        "lookupRecoveryCode"
-      );
+    const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
+      getTestFunctions(),
+      "processCharacterDeletionChunk"
+    );
+    const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+      getTestFunctions(),
+      "lookupRecoveryCode"
+    );
 
-      // Process exactly the claimLog phase, then stop, simulating a dropped
-      // connection or closed tab right after the first phase finishes.
-      const afterFirstChunk = await processChunk({ jobId: started.jobId });
-      expect(afterFirstChunk.data.done).toBe(false);
-      expect(afterFirstChunk.data.processedCount).toBe(2);
+    // Process exactly the claimLog phase, then stop, simulating a dropped
+    // connection or closed tab right after the first phase finishes.
+    const afterFirstChunk = await processChunk({ jobId: started.jobId });
+    expect(afterFirstChunk.data.done).toBe(false);
+    expect(afterFirstChunk.data.processedCount).toBe(2);
 
-      // The interrupted, partial state must itself be correct, not just
-      // "eventually converges": claimLog genuinely gone, everything else
-      // genuinely untouched.
-      expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
-      expect((await threadRef.collection("messages").get()).docs).toHaveLength(1);
-      expect((await threadRef.get()).exists).toBe(true);
-      expect((await summaryRef.get()).exists).toBe(true);
-      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("found");
-      expect((await characterRef.get()).exists).toBe(true);
+    // The interrupted, partial state must itself be correct, not just
+    // "eventually converges": claimLog genuinely gone, everything else
+    // genuinely untouched.
+    expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
+    expect((await threadRef.collection("messages").get()).docs).toHaveLength(1);
+    expect((await threadRef.get()).exists).toBe(true);
+    expect((await summaryRef.get()).exists).toBe(true);
+    expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("found");
+    expect((await characterRef.get()).exists).toBe(true);
 
-      // Resume later (a fresh call, exactly what a reconnecting client would
-      // do) and confirm it picks up from the checkpoint and finishes cleanly.
-      let result = afterFirstChunk.data;
-      while (!result.done) {
-        const response = await processChunk({ jobId: started.jobId });
-        result = response.data;
-      }
+    // Resume later (a fresh call, exactly what a reconnecting client would
+    // do) and confirm it picks up from the checkpoint and finishes cleanly.
+    let result = afterFirstChunk.data;
+    while (!result.done) {
+      const response = await processChunk({ jobId: started.jobId });
+      result = response.data;
+    }
 
-      expect(result.processedCount).toBe(7);
-      expect((await characterRef.get()).exists).toBe(false);
-      expect((await threadRef.get()).exists).toBe(false);
-      expect((await summaryRef.get()).exists).toBe(false);
-      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
-      expect((await threadRef.collection("messages").get()).empty).toBe(true);
-    },
-    15000
-  );
+    expect(result.processedCount).toBe(7);
+    expect((await characterRef.get()).exists).toBe(false);
+    expect((await threadRef.get()).exists).toBe(false);
+    expect((await summaryRef.get()).exists).toBe(false);
+    expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
+    expect((await threadRef.collection("messages").get()).empty).toBe(true);
+  }, 15000);
 
-  it(
-    "rejects starting a deletion job for a caller who is not the campaign DM",
-    async () => {
-      const dmUid = await signInTestUser();
-      const campaignRef = adminDb.collection("campaigns").doc();
-      const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id, recoveryCode: "DH-TEST-0002" });
+  it("rejects starting a deletion job for a caller who is not the campaign DM", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({ campaignId: campaignRef.id, recoveryCode: "DH-TEST-0002" });
 
-      await signInTestUser();
-      const startJob = httpsCallable(getTestFunctions(), "startCharacterDeletionJob");
+    await signInTestUser();
+    const startJob = httpsCallable(getTestFunctions(), "startCharacterDeletionJob");
 
-      await expect(
-        startJob({ campaignId: campaignRef.id, characterId: characterRef.id })
-      ).rejects.toMatchObject({ code: "functions/permission-denied" });
-    },
-    15000
-  );
+    await expect(
+      startJob({ campaignId: campaignRef.id, characterId: characterRef.id })
+    ).rejects.toMatchObject({ code: "functions/permission-denied" });
+  }, 15000);
 
-  it(
-    "rejects starting a deletion job for a character with no Recovery Code",
-    async () => {
-      const dmUid = await signInTestUser();
-      const campaignRef = adminDb.collection("campaigns").doc();
-      const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id });
+  it("rejects starting a deletion job for a character with no Recovery Code", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({ campaignId: campaignRef.id });
 
-      const startJob = httpsCallable(getTestFunctions(), "startCharacterDeletionJob");
+    const startJob = httpsCallable(getTestFunctions(), "startCharacterDeletionJob");
 
-      await expect(
-        startJob({ campaignId: campaignRef.id, characterId: characterRef.id })
-      ).rejects.toMatchObject({ code: "functions/failed-precondition" });
-    },
-    15000
-  );
+    await expect(
+      startJob({ campaignId: campaignRef.id, characterId: characterRef.id })
+    ).rejects.toMatchObject({ code: "functions/failed-precondition" });
+  }, 15000);
 });

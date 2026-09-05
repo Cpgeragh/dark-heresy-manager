@@ -33,39 +33,42 @@ export async function forceAssignCharacter(
     throw new HttpsError("permission-denied", "Only the campaign DM can force-assign a character.");
   }
 
-  await db.runTransaction(async (transaction) => {
-    const freshCampaignSnapshot = await transaction.get(campaignRef);
-    const memberIds = (freshCampaignSnapshot.data()?.memberIds as string[] | undefined) ?? [];
-    if (!memberIds.includes(input.targetUid)) {
-      throw new HttpsError(
-        "failed-precondition",
-        "The selected player is no longer a member of this campaign."
-      );
-    }
+  await db.runTransaction(
+    async (transaction) => {
+      const freshCampaignSnapshot = await transaction.get(campaignRef);
+      const memberIds = (freshCampaignSnapshot.data()?.memberIds as string[] | undefined) ?? [];
+      if (!memberIds.includes(input.targetUid)) {
+        throw new HttpsError(
+          "failed-precondition",
+          "The selected player is no longer a member of this campaign."
+        );
+      }
 
-    const characterSnapshot = await transaction.get(characterRef);
-    if (!characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Character not found.");
-    }
-    const currentOwner = (characterSnapshot.data()?.userId as string | null | undefined) ?? null;
-    if (currentOwner !== null) {
-      throw new HttpsError(
-        "failed-precondition",
-        "This character is already assigned. Release it before assigning another player."
-      );
-    }
+      const characterSnapshot = await transaction.get(characterRef);
+      if (!characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Character not found.");
+      }
+      const currentOwner = (characterSnapshot.data()?.userId as string | null | undefined) ?? null;
+      if (currentOwner !== null) {
+        throw new HttpsError(
+          "failed-precondition",
+          "This character is already assigned. Release it before assigning another player."
+        );
+      }
 
-    await applyOwnershipTransition(
-      transaction,
-      campaignRef,
-      characterRef,
-      "force-assign",
-      callerUid,
-      null,
-      input.targetUid,
-      { newOwnerAlreadyMember: true }
-    );
-  // See releaseCharacter.ts: the membership-removal check there widens this
-  // transaction's read set, so it gets the same extra retry headroom.
-  }, { maxAttempts: 10 });
+      await applyOwnershipTransition(
+        transaction,
+        campaignRef,
+        characterRef,
+        "force-assign",
+        callerUid,
+        null,
+        input.targetUid,
+        { newOwnerAlreadyMember: true }
+      );
+      // See releaseCharacter.ts: the membership-removal check there widens this
+      // transaction's read set, so it gets the same extra retry headroom.
+    },
+    { maxAttempts: 10 }
+  );
 }

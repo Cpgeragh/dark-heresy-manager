@@ -29,7 +29,12 @@ describe("MutationRow", () => {
     const user = userEvent.setup();
     const onUpdateRolls = vi.fn();
     render(
-      <MutationRow mutation={palsyLikeEntry()} editable onRemove={vi.fn()} onUpdateRolls={onUpdateRolls} />
+      <MutationRow
+        mutation={palsyLikeEntry()}
+        editable
+        onRemove={vi.fn()}
+        onUpdateRolls={onUpdateRolls}
+      />
     );
 
     expect(screen.getByText("Agility: not recorded")).toBeInTheDocument();
@@ -57,7 +62,13 @@ describe("MutationRow", () => {
   it("shows a source chip for a custom mutation with an origin", () => {
     render(
       <MutationRow
-        mutation={{ id: "m3", name: "Extra Toes", effect: "Just weird toes.", source: "2nd Ed", custom: true }}
+        mutation={{
+          id: "m3",
+          name: "Extra Toes",
+          effect: "Just weird toes.",
+          source: "2nd Ed",
+          custom: true,
+        }}
         editable
         onRemove={vi.fn()}
         onUpdateRolls={vi.fn()}
@@ -70,7 +81,14 @@ describe("MutationRow", () => {
   it("arms a confirm step on Remove instead of deleting immediately", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<MutationRow mutation={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+    render(
+      <MutationRow
+        mutation={palsyLikeEntry()}
+        editable
+        onRemove={onRemove}
+        onUpdateRolls={vi.fn()}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
@@ -82,7 +100,14 @@ describe("MutationRow", () => {
   it("deletes only after confirming", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<MutationRow mutation={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+    render(
+      <MutationRow
+        mutation={palsyLikeEntry()}
+        editable
+        onRemove={onRemove}
+        onUpdateRolls={vi.fn()}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
@@ -93,7 +118,14 @@ describe("MutationRow", () => {
   it("cancels without deleting", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<MutationRow mutation={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+    render(
+      <MutationRow
+        mutation={palsyLikeEntry()}
+        editable
+        onRemove={onRemove}
+        onUpdateRolls={vi.fn()}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));

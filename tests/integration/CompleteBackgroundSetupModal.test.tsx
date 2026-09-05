@@ -4,11 +4,13 @@ import userEvent from "@testing-library/user-event";
 import type { CharacterHeader, TalentsAndTraitsBlock } from "../../src/types/Character";
 import { CompleteBackgroundSetupModal } from "../../src/pages/CharacterSheet/BackgroundTab/CompleteBackgroundSetupModal";
 
-function modalProps(overrides: {
-  header?: CharacterHeader;
-  talents?: TalentsAndTraitsBlock;
-  editable?: boolean;
-} = {}) {
+function modalProps(
+  overrides: {
+    header?: CharacterHeader;
+    talents?: TalentsAndTraitsBlock;
+    editable?: boolean;
+  } = {}
+) {
   return {
     header: overrides.header ?? { characterName: "Brother Corvus" },
     talents: overrides.talents ?? { homeworld: "", talents: [], traits: [] },

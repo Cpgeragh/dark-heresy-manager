@@ -52,7 +52,10 @@ export function MalignancyRow({
             <div className="mt-1 flex flex-wrap gap-1.5">
               {display.roll && <RollChip>{display.roll}</RollChip>}
               {malignancy.source && (
-                <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(malignancy.source)}`}>
+                <Chip
+                  size="sm"
+                  className={`bg-slate-800/40 font-code ${sourceColour(malignancy.source)}`}
+                >
                   {malignancy.source}
                 </Chip>
               )}
@@ -61,7 +64,11 @@ export function MalignancyRow({
           {rollEntries.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1.5">
               {rollEntries.map((entry) => (
-                <Chip key={entry.characteristic} size="sm" className={entry.value === undefined ? colourRose : colourSky}>
+                <Chip
+                  key={entry.characteristic}
+                  size="sm"
+                  className={entry.value === undefined ? colourRose : colourSky}
+                >
                   {entry.label}: {entry.value ?? "not recorded"}
                 </Chip>
               ))}
@@ -111,8 +118,12 @@ export function MalignancyRow({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={onRemove}>Delete</Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+              <Button variant="primary" onClick={onRemove}>
+                Delete
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                Cancel
+              </Button>
             </div>
           }
         >

@@ -6,7 +6,12 @@ import { Button } from "../../ui/buttons/Button";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../ui/forms/OriginSelector";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
@@ -49,7 +54,8 @@ export function CorruptionMalignancyPicker({
     const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
     return !existingReferenceIds.has(ref.id) && searchable.includes(query.trim().toLowerCase());
   }).sort((a, b) => a.name.localeCompare(b.name));
-  const canAddCustom = Boolean(customName.trim()) && Boolean(customDetails.trim()) && Boolean(customOrigin);
+  const canAddCustom =
+    Boolean(customName.trim()) && Boolean(customDetails.trim()) && Boolean(customOrigin);
 
   function addReferenceMalignancy(ref: CorruptionMalignancyRef) {
     onAdd({
@@ -101,7 +107,11 @@ export function CorruptionMalignancyPicker({
         </CustomFormSection>
 
         <CustomFormSection title="Origin">
-          <OriginSelector name="custom-malignancy-origin" value={customOrigin} onChange={setCustomOrigin} />
+          <OriginSelector
+            name="custom-malignancy-origin"
+            value={customOrigin}
+            onChange={setCustomOrigin}
+          />
         </CustomFormSection>
 
         <CustomFormSection title="Rules">
@@ -200,37 +210,37 @@ export function CorruptionMalignancyPicker({
       }
     >
       <div className="space-y-3 p-3 lg:p-4">
-      {filtered.map((ref) => (
-        <PickerRow
-          key={ref.id}
-          card
-          className={uiSectionShell}
-          interactive={editable}
-          onClick={() => {
-            if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
-              addReferenceMalignancy(ref);
-            } else {
-              setRolls({});
-              setSelected(ref);
-            }
-          }}
-        >
-          <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <RollChip>{ref.roll}</RollChip>
-          </div>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rules</span>
-            <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
-              <InfoModal
-                title={ref.name}
-                content={<MalignancyInfoContent malignancy={ref} />}
-                as="span"
-              />
-            </span>
-          </div>
-        </PickerRow>
-      ))}
+        {filtered.map((ref) => (
+          <PickerRow
+            key={ref.id}
+            card
+            className={uiSectionShell}
+            interactive={editable}
+            onClick={() => {
+              if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
+                addReferenceMalignancy(ref);
+              } else {
+                setRolls({});
+                setSelected(ref);
+              }
+            }}
+          >
+            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <RollChip>{ref.roll}</RollChip>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className={uiTextLabel}>Rules</span>
+              <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+                <InfoModal
+                  title={ref.name}
+                  content={<MalignancyInfoContent malignancy={ref} />}
+                  as="span"
+                />
+              </span>
+            </div>
+          </PickerRow>
+        ))}
       </div>
     </PickerModal>
   );

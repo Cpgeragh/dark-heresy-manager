@@ -5,7 +5,11 @@ import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
-import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../types/Character";
+import type {
+  CorruptionBlock,
+  CorruptionMalignancyEntry,
+  CorruptionMutationEntry,
+} from "../../types/Character";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { Chip } from "../../ui/chips/Chip";
 import { ViewButton } from "../../ui/buttons/ViewButton";
@@ -55,7 +59,11 @@ interface CorruptionPanelProps {
 }
 
 type EntryGroup = "malignancies" | "minorMutations" | "majorMutations";
-const ENTRY_GROUPS = ["malignancies", "minorMutations", "majorMutations"] as const satisfies readonly EntryGroup[];
+const ENTRY_GROUPS = [
+  "malignancies",
+  "minorMutations",
+  "majorMutations",
+] as const satisfies readonly EntryGroup[];
 
 const GROUP_LABELS: Record<EntryGroup, string> = {
   malignancies: "Malignancies",
@@ -144,7 +152,9 @@ function CorruptionStatusChips({ points }: { points: number }) {
       <CorruptionTimeline points={safePoints} />
 
       <div className="flex justify-center items-center gap-1.5">
-        <Chip size="lg" className={corruptionDegreeChipClass(entry)}>{entry.degree}</Chip>
+        <Chip size="lg" className={corruptionDegreeChipClass(entry)}>
+          {entry.degree}
+        </Chip>
         <span className={uiInfoModalWrapper}>
           <InfoModal
             title="Degree of Corruption"
@@ -344,11 +354,13 @@ function MutationsList({
   );
 }
 
-export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassName }: CorruptionPanelProps) {
-  const value = useMemo(
-    () => corruption ?? { points: 0, malignancies: [] },
-    [corruption]
-  );
+export function CorruptionPanel({
+  corruption,
+  editable,
+  onUpdate,
+  sectionClassName,
+}: CorruptionPanelProps) {
+  const value = useMemo(() => corruption ?? { points: 0, malignancies: [] }, [corruption]);
   const [showMalignancyPicker, setShowMalignancyPicker] = useState(false);
   const [showMinorMutationPicker, setShowMinorMutationPicker] = useState(false);
   const [showMajorMutationPicker, setShowMajorMutationPicker] = useState(false);
@@ -357,22 +369,17 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     () => (Array.isArray(value.malignancies) ? value.malignancies : []),
     [value.malignancies]
   );
-  const legacyMalignancies = typeof value.malignancies === "string" ? value.malignancies : value.malignancyNotes ?? "";
+  const legacyMalignancies =
+    typeof value.malignancies === "string" ? value.malignancies : (value.malignancyNotes ?? "");
   const existingMalignancyReferenceIds = new Set(
     structuredMalignancies.map((m) => m.referenceId).filter((id): id is string => Boolean(id))
   );
 
-  const minorMutations = useMemo(
-    () => value.minorMutations ?? [],
-    [value.minorMutations]
-  );
+  const minorMutations = useMemo(() => value.minorMutations ?? [], [value.minorMutations]);
   const existingMinorMutationReferenceIds = new Set(
     minorMutations.map((m) => m.referenceId).filter((id): id is string => Boolean(id))
   );
-  const majorMutations = useMemo(
-    () => value.majorMutations ?? [],
-    [value.majorMutations]
-  );
+  const majorMutations = useMemo(() => value.majorMutations ?? [], [value.majorMutations]);
   const existingMajorMutationReferenceIds = new Set(
     majorMutations.map((m) => m.referenceId).filter((id): id is string => Boolean(id))
   );
@@ -430,12 +437,14 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
   );
 
   const handleAddMinorMutation = useCallback(
-    (entry: CorruptionMutationEntry) => onUpdate({ ...value, minorMutations: [...minorMutations, entry] }),
+    (entry: CorruptionMutationEntry) =>
+      onUpdate({ ...value, minorMutations: [...minorMutations, entry] }),
     [value, minorMutations, onUpdate]
   );
 
   const handleRemoveMinorMutation = useCallback(
-    (id: string) => onUpdate({ ...value, minorMutations: minorMutations.filter((entry) => entry.id !== id) }),
+    (id: string) =>
+      onUpdate({ ...value, minorMutations: minorMutations.filter((entry) => entry.id !== id) }),
     [value, minorMutations, onUpdate]
   );
 
@@ -443,18 +452,22 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     (id: string, rolledModifiers: Record<string, number>) =>
       onUpdate({
         ...value,
-        minorMutations: minorMutations.map((entry) => (entry.id === id ? { ...entry, rolledModifiers } : entry)),
+        minorMutations: minorMutations.map((entry) =>
+          entry.id === id ? { ...entry, rolledModifiers } : entry
+        ),
       }),
     [value, minorMutations, onUpdate]
   );
 
   const handleAddMajorMutation = useCallback(
-    (entry: CorruptionMutationEntry) => onUpdate({ ...value, majorMutations: [...majorMutations, entry] }),
+    (entry: CorruptionMutationEntry) =>
+      onUpdate({ ...value, majorMutations: [...majorMutations, entry] }),
     [value, majorMutations, onUpdate]
   );
 
   const handleRemoveMajorMutation = useCallback(
-    (id: string) => onUpdate({ ...value, majorMutations: majorMutations.filter((entry) => entry.id !== id) }),
+    (id: string) =>
+      onUpdate({ ...value, majorMutations: majorMutations.filter((entry) => entry.id !== id) }),
     [value, majorMutations, onUpdate]
   );
 
@@ -462,7 +475,9 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     (id: string, rolledModifiers: Record<string, number>) =>
       onUpdate({
         ...value,
-        majorMutations: majorMutations.map((entry) => (entry.id === id ? { ...entry, rolledModifiers } : entry)),
+        majorMutations: majorMutations.map((entry) =>
+          entry.id === id ? { ...entry, rolledModifiers } : entry
+        ),
       }),
     [value, majorMutations, onUpdate]
   );
@@ -572,8 +587,12 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
       {/* Desktop — side by side */}
       <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
         <section className={`${sectionClassName} space-y-2`}>{renderGroup("malignancies")}</section>
-        <section className={`${sectionClassName} space-y-2`}>{renderGroup("minorMutations")}</section>
-        <section className={`${sectionClassName} space-y-2`}>{renderGroup("majorMutations")}</section>
+        <section className={`${sectionClassName} space-y-2`}>
+          {renderGroup("minorMutations")}
+        </section>
+        <section className={`${sectionClassName} space-y-2`}>
+          {renderGroup("majorMutations")}
+        </section>
       </div>
 
       {showMalignancyPicker && (

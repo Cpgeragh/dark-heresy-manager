@@ -7,26 +7,35 @@ import {
   type MeleeWeaponRef,
 } from "../../../data/reference/weaponReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import {
-  uiTextBody,
-  uiTextMuted,
-  uiItemName,
-} from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextMuted, uiItemName } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import {
+  PickerBody,
+  PickerCustomAction,
+  PickerModal,
+  PickerRow,
+} from "../../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip } from "./weaponShared";
 import { MeleeCard } from "./MeleeCard";
-import {
-  meleeCraftsmanshipDescription,
-} from "./weaponHelpers";
+import { meleeCraftsmanshipDescription } from "./weaponHelpers";
 
-function MeleeWeaponCardPickerRow({ weaponReference, editable, strengthBonus, onSelect }: { weaponReference: MeleeWeaponRef; editable: boolean; strengthBonus: number; onSelect: () => void }) {
+function MeleeWeaponCardPickerRow({
+  weaponReference,
+  editable,
+  strengthBonus,
+  onSelect,
+}: {
+  weaponReference: MeleeWeaponRef;
+  editable: boolean;
+  strengthBonus: number;
+  onSelect: () => void;
+}) {
   const weapon: MeleeWeapon = {
     id: `picker-${weaponReference.id}`,
     referenceId: weaponReference.id,
@@ -42,7 +51,20 @@ function MeleeWeaponCardPickerRow({ weaponReference, editable, strengthBonus, on
     craftsmanship: "Common",
     upgrades: [],
   };
-  return <MeleeCard weapon={weapon} editable={false} pickerMode strengthBonus={strengthBonus} onSelect={editable ? onSelect : undefined} onRemove={() => {}} onAddUpgrade={() => {}} onRemoveUpgrade={() => {}} onUpdateQuantity={() => {}} allowUpgrades={false} />;
+  return (
+    <MeleeCard
+      weapon={weapon}
+      editable={false}
+      pickerMode
+      strengthBonus={strengthBonus}
+      onSelect={editable ? onSelect : undefined}
+      onRemove={() => {}}
+      onAddUpgrade={() => {}}
+      onRemoveUpgrade={() => {}}
+      onUpdateQuantity={() => {}}
+      allowUpgrades={false}
+    />
+  );
 }
 
 /*
@@ -138,9 +160,9 @@ export function MeleePicker({
   customItems?: CampaignCustomItem<"weapon">[];
   onSelect: (weaponReference: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
-    onCustom: () => void;
-    onClose: () => void;
-    suspended?: boolean;
+  onCustom: () => void;
+  onClose: () => void;
+  suspended?: boolean;
   references?: MeleeWeaponRef[];
   title?: string;
   placeholder?: string;
@@ -160,7 +182,11 @@ export function MeleePicker({
     .sort((a, b) => a.name.localeCompare(b.name));
   const pickerEntries = [
     ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
-    ...filtered.map((weaponReference) => ({ kind: "reference" as const, name: weaponReference.name, weaponReference })),
+    ...filtered.map((weaponReference) => ({
+      kind: "reference" as const,
+      name: weaponReference.name,
+      weaponReference,
+    })),
   ].sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : `${title.replace(/^Add /, "View ")}s`;
 
@@ -182,10 +208,13 @@ export function MeleePicker({
         isEmpty={false}
         hideSearch
         footer={
-          <Button className="w-full" onClick={() => {
-            onSelect(selected, craftsmanship);
-            resetPicker();
-          }}>
+          <Button
+            className="w-full"
+            onClick={() => {
+              onSelect(selected, craftsmanship);
+              resetPicker();
+            }}
+          >
             Add Weapon
           </Button>
         }
@@ -195,7 +224,8 @@ export function MeleePicker({
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((q) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={q}
                   onClick={() => setCraftsmanship(q)}
                   className={[
@@ -210,7 +240,9 @@ export function MeleePicker({
               ))}
             </div>
           </div>
-          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
+          <div
+            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
+          >
             {meleeCraftsmanshipDescription(craftsmanship)}
           </div>
         </PickerBody>
@@ -230,11 +262,7 @@ export function MeleePicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && showCustom ? (
-          <PickerCustomAction
-            onClick={onCustom}
-          >
-            + Add custom weapon
-          </PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>+ Add custom weapon</PickerCustomAction>
         ) : undefined
       }
     >
@@ -260,9 +288,7 @@ export function MeleePicker({
             interactive={editable}
             onClick={() => onSelectCustomItem?.(item)}
           >
-            <span
-              className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
-            >
+            <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
               {item.name}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
@@ -271,11 +297,20 @@ export function MeleePicker({
               {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+              <ItemMetaChips
+                weight={data.weight}
+                value={data.value}
+                availability={data.availability}
+                source={data.source}
+              />
               {item.status === "draft" && (
-                <Chip size="sm" className={colourAmberFaint}>Draft</Chip>
+                <Chip size="sm" className={colourAmberFaint}>
+                  Draft
+                </Chip>
               )}
-              <Chip size="sm" className={colourFuchsia}>Custom</Chip>
+              <Chip size="sm" className={colourFuchsia}>
+                Custom
+              </Chip>
             </div>
           </PickerRow>
         );

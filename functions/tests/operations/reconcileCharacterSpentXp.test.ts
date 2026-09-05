@@ -51,7 +51,10 @@ describe("reconcileCharacterSpentXp", () => {
 
   it("rejects a spent value over the maximum", async () => {
     await expect(
-      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1", spent: 10_000_001 }, "dm-1")
+      reconcileCharacterSpentXp(
+        { campaignId: "c1", characterId: "char-1", spent: 10_000_001 },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 
@@ -76,7 +79,11 @@ describe("reconcileCharacterSpentXp", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: false, experience: { total: 500, spent: 50 } }),
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 500, spent: 50 },
+      }),
     });
 
     const result = await reconcileCharacterSpentXp(
@@ -85,14 +92,20 @@ describe("reconcileCharacterSpentXp", () => {
     );
 
     expect(result).toEqual({ updated: true });
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { "experience.spent": 100 });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      "experience.spent": 100,
+    });
   });
 
   it("allows the owning player to correct their own character when editable", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: true, experience: { total: 500, spent: 50 } }),
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        experience: { total: 500, spent: 50 },
+      }),
     });
 
     const result = await reconcileCharacterSpentXp(
@@ -107,7 +120,11 @@ describe("reconcileCharacterSpentXp", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: false, experience: { total: 500, spent: 50 } }),
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 500, spent: 50 },
+      }),
     });
 
     await expect(
@@ -120,7 +137,11 @@ describe("reconcileCharacterSpentXp", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: false, experience: { total: 500, spent: 100 } }),
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 500, spent: 100 },
+      }),
     });
 
     const result = await reconcileCharacterSpentXp(
@@ -143,9 +164,14 @@ describe("reconcileCharacterSpentXp", () => {
       }),
     });
 
-    await reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1", spent: 100 }, "dm-1");
+    await reconcileCharacterSpentXp(
+      { campaignId: "c1", characterId: "char-1", spent: 100 },
+      "dm-1"
+    );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { "experience.spent": 100 });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      "experience.spent": 100,
+    });
     expect(mockTransactionUpdate).not.toHaveBeenCalledWith(
       mockCharacterRef,
       expect.objectContaining({ experience: expect.anything() })

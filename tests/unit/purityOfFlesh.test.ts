@@ -9,7 +9,12 @@ describe("Purity of Flesh removal inventory", () => {
     const inventory = getPurityRemovalInventory(
       [
         { id: "arm", referenceId: "cr-bionic-arm", name: "Bionic Arm", craftsmanship: "Common" },
-        { id: "mech", referenceId: "cr-optical-mechadendrite", name: "Renamed implant", craftsmanship: "Good" },
+        {
+          id: "mech",
+          referenceId: "cr-optical-mechadendrite",
+          name: "Renamed implant",
+          craftsmanship: "Good",
+        },
       ],
       [
         { id: "integrated-ranged", name: "Built-in Pistol", integrated: true },

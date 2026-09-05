@@ -10,7 +10,12 @@ describe("assertValidCharacterFieldValue: notes", () => {
   it("accepts a well-formed array of note entries", () => {
     expect(() =>
       assertValidCharacterFieldValue("notes", [
-        { id: "n1", title: "Session 1", text: "Met the Inquisitor.", updatedAt: "2026-09-02T00:00:00.000Z" },
+        {
+          id: "n1",
+          title: "Session 1",
+          text: "Met the Inquisitor.",
+          updatedAt: "2026-09-02T00:00:00.000Z",
+        },
       ])
     ).not.toThrow();
   });
@@ -78,7 +83,9 @@ describe("assertValidCharacterFieldValue: header", () => {
   });
 
   it("accepts a header with only characterName", () => {
-    expect(() => assertValidCharacterFieldValue("header", { characterName: "Brother Corvus" })).not.toThrow();
+    expect(() =>
+      assertValidCharacterFieldValue("header", { characterName: "Brother Corvus" })
+    ).not.toThrow();
   });
 
   it("rejects a header missing characterName", () => {
@@ -180,7 +187,9 @@ function makeCharacteristics(overrides: Record<string, unknown> = {}) {
 
 describe("assertValidCharacterFieldValue: characteristics", () => {
   it("accepts a well-formed set of all nine characteristics", () => {
-    expect(() => assertValidCharacterFieldValue("characteristics", makeCharacteristics())).not.toThrow();
+    expect(() =>
+      assertValidCharacterFieldValue("characteristics", makeCharacteristics())
+    ).not.toThrow();
   });
 
   it("accepts advancePurchases as an extra allowed field", () => {
@@ -188,7 +197,11 @@ describe("assertValidCharacterFieldValue: characteristics", () => {
       assertValidCharacterFieldValue(
         "characteristics",
         makeCharacteristics({
-          ws: { base: 30, advances: 1, advancePurchases: { simple: { rankId: "conscript", xpCost: 100 } } },
+          ws: {
+            base: 30,
+            advances: 1,
+            advancePurchases: { simple: { rankId: "conscript", xpCost: 100 } },
+          },
         })
       )
     ).not.toThrow();
@@ -209,19 +222,28 @@ describe("assertValidCharacterFieldValue: characteristics", () => {
 
   it("rejects an unexpected top-level stat key", () => {
     expect(() =>
-      assertValidCharacterFieldValue("characteristics", makeCharacteristics({ notAStat: { base: 30, advances: 0 } }))
+      assertValidCharacterFieldValue(
+        "characteristics",
+        makeCharacteristics({ notAStat: { base: 30, advances: 0 } })
+      )
     ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 
   it("rejects a non-finite base", () => {
     expect(() =>
-      assertValidCharacterFieldValue("characteristics", makeCharacteristics({ ws: { base: NaN, advances: 0 } }))
+      assertValidCharacterFieldValue(
+        "characteristics",
+        makeCharacteristics({ ws: { base: NaN, advances: 0 } })
+      )
     ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 
   it("rejects a non-integer advances", () => {
     expect(() =>
-      assertValidCharacterFieldValue("characteristics", makeCharacteristics({ ws: { base: 30, advances: 1.5 } }))
+      assertValidCharacterFieldValue(
+        "characteristics",
+        makeCharacteristics({ ws: { base: 30, advances: 1.5 } })
+      )
     ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 

@@ -3,7 +3,14 @@
 import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -39,62 +46,64 @@ export function DrugRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className={uiItemName}>{item.name}</p>
-          {libraryItem && (
-            <StatusBadge status={libraryItem.status} />
-          )}
+          {libraryItem && <StatusBadge status={libraryItem.status} />}
           {hasInfo && (
             <span className={uiInfoModalWrapper}>
-            <InfoModal
-              title={item.name}
-              content={
-                <>
-                  {ref?.duration && (
-                    <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>
-                        Duration
-                      </p>
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.duration}</p>
-                    </div>
-                  )}
-                  {ref?.effect && (
-                    <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>
-                        Effect
-                      </p>
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.effect}</p>
-                    </div>
-                  )}
-                  {ref?.sideEffect && (
-                    <div>
-                      <p className="text-xs lg:text-sm font-semibold text-red-500/70 uppercase tracking-wide mb-1">
-                        Side Effects
-                      </p>
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.sideEffect}</p>
-                    </div>
-                  )}
-                  {ref?.notes && (
-                    <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>
-                        Notes
-                      </p>
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
-                    </div>
-                  )}
-                  {item.notes && (
-                    <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>
-                        Player Notes
-                      </p>
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.notes}</p>
-                    </div>
-                  )}
-                </>
-              }
-            />
+              <InfoModal
+                title={item.name}
+                content={
+                  <>
+                    {ref?.duration && (
+                      <div>
+                        <p className={`${uiTextLabel} font-semibold mb-1`}>Duration</p>
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {ref.duration}
+                        </p>
+                      </div>
+                    )}
+                    {ref?.effect && (
+                      <div>
+                        <p className={`${uiTextLabel} font-semibold mb-1`}>Effect</p>
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {ref.effect}
+                        </p>
+                      </div>
+                    )}
+                    {ref?.sideEffect && (
+                      <div>
+                        <p className="text-xs lg:text-sm font-semibold text-red-500/70 uppercase tracking-wide mb-1">
+                          Side Effects
+                        </p>
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {ref.sideEffect}
+                        </p>
+                      </div>
+                    )}
+                    {ref?.notes && (
+                      <div>
+                        <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {ref.notes}
+                        </p>
+                      </div>
+                    )}
+                    {item.notes && (
+                      <div>
+                        <p className={`${uiTextLabel} font-semibold mb-1`}>Player Notes</p>
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {item.notes}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                }
+              />
             </span>
           )}
         </div>
-        {ref?.duration && <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>Duration: {ref.duration}</p>}
+        {ref?.duration && (
+          <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>Duration: {ref.duration}</p>
+        )}
         <ItemMetaChips
           weight={item.weight ?? ref?.weight ?? "0 kg"}
           value={item.value ?? ref?.value}
@@ -124,9 +133,7 @@ export function DrugRow({
       />
 
       {/* Remove */}
-      {editable && (
-        <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />
-      )}
+      {editable && <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />}
     </div>
   );
 }

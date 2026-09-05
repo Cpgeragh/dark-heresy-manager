@@ -56,7 +56,9 @@ describe("ToastItem", () => {
     await user.click(screen.getByRole("button", { name: "Copy message to clipboard" }));
 
     await waitFor(() => expect(writeTextMock).toHaveBeenCalledWith("DH-AAAA-BBBB"));
-    expect(screen.getByRole("button", { name: "Copy message to clipboard" })).toHaveTextContent("✓");
+    expect(screen.getByRole("button", { name: "Copy message to clipboard" })).toHaveTextContent(
+      "✓"
+    );
   });
 
   it("reverts the copied indicator after the feedback duration", async () => {
@@ -88,7 +90,10 @@ describe("ToastItem", () => {
     const { user, writeTextMock } = setupUserWithClipboardSpy();
     render(
       <ToastItem
-        toast={toast({ message: "Character created!\n\nRecovery Code: DH-AAAA-BBBB", copyText: "DH-AAAA-BBBB" })}
+        toast={toast({
+          message: "Character created!\n\nRecovery Code: DH-AAAA-BBBB",
+          copyText: "DH-AAAA-BBBB",
+        })}
       />
     );
 

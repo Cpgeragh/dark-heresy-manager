@@ -30,7 +30,13 @@ function renderCard(weapon: CyberneticWeapon, craftsmanship: WeaponCraftsmanship
 
 describe("CyberneticWeaponCard origin", () => {
   it("shows the implant name under a labeled Gained From row", () => {
-    renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
+    renderCard({
+      type: "ranged",
+      name: "Laspistol (Compact)",
+      class: "Pistol",
+      damage: "1d10+1 E",
+      pen: "0",
+    });
     expect(screen.getByText("Gained From")).toBeInTheDocument();
     expect(screen.getByText("Test Mechadendrite")).toBeInTheDocument();
   });
@@ -38,12 +44,24 @@ describe("CyberneticWeaponCard origin", () => {
 
 describe("CyberneticWeaponCard weapon-class chip", () => {
   it("shows an orange Melee chip for a melee cybernetic weapon", () => {
-    renderCard({ type: "melee", name: "Motive Claw", class: "Melee", damage: "1d10+2 R", pen: "2" });
+    renderCard({
+      type: "melee",
+      name: "Motive Claw",
+      class: "Melee",
+      damage: "1d10+2 R",
+      pen: "2",
+    });
     expect(screen.getByText("Melee")).toBeInTheDocument();
   });
 
   it("shows the real Ranged sub-class chip for a ranged cybernetic weapon (e.g. Pistol)", () => {
-    renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
+    renderCard({
+      type: "ranged",
+      name: "Laspistol (Compact)",
+      class: "Pistol",
+      damage: "1d10+1 E",
+      pen: "0",
+    });
     expect(screen.getByText("Pistol")).toBeInTheDocument();
   });
 
@@ -57,7 +75,13 @@ describe("CyberneticWeaponCard weapon-class chip", () => {
 describe("CyberneticWeaponCard craftsmanship effect", () => {
   it("shows the chosen craftsmanship and adds Unreliable for a Poor ranged weapon", () => {
     renderCard(
-      { type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" },
+      {
+        type: "ranged",
+        name: "Laspistol (Compact)",
+        class: "Pistol",
+        damage: "1d10+1 E",
+        pen: "0",
+      },
       "Poor"
     );
     expect(screen.getByText("Poor")).toBeInTheDocument();
@@ -66,7 +90,13 @@ describe("CyberneticWeaponCard craftsmanship effect", () => {
 
   it("adds Reliable for a Good ranged weapon", () => {
     renderCard(
-      { type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" },
+      {
+        type: "ranged",
+        name: "Laspistol (Compact)",
+        class: "Pistol",
+        damage: "1d10+1 E",
+        pen: "0",
+      },
       "Good"
     );
     expect(visibleText("Reliable")).toBeInTheDocument();
@@ -74,7 +104,13 @@ describe("CyberneticWeaponCard craftsmanship effect", () => {
 
   it("does not add a quality for a Common ranged weapon", () => {
     renderCard(
-      { type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" },
+      {
+        type: "ranged",
+        name: "Laspistol (Compact)",
+        class: "Pistol",
+        damage: "1d10+1 E",
+        pen: "0",
+      },
       "Common"
     );
     expect(screen.queryByText("Unreliable")).not.toBeInTheDocument();
@@ -82,12 +118,18 @@ describe("CyberneticWeaponCard craftsmanship effect", () => {
   });
 
   it("adds +1 damage for a Best melee weapon, matching meleeDamageForCraftsmanship", () => {
-    renderCard({ type: "melee", name: "Motive Claw", class: "Melee", damage: "1d10+2 R", pen: "2" }, "Best");
+    renderCard(
+      { type: "melee", name: "Motive Claw", class: "Melee", damage: "1d10+2 R", pen: "2" },
+      "Best"
+    );
     expect(screen.getByText("1d10+3")).toBeInTheDocument();
   });
 
   it("leaves melee damage unchanged for Poor/Common/Good", () => {
-    renderCard({ type: "melee", name: "Motive Claw", class: "Melee", damage: "1d10+2 R", pen: "2" }, "Good");
+    renderCard(
+      { type: "melee", name: "Motive Claw", class: "Melee", damage: "1d10+2 R", pen: "2" },
+      "Good"
+    );
     expect(screen.getByText("1d10+2")).toBeInTheDocument();
   });
 });
@@ -95,7 +137,13 @@ describe("CyberneticWeaponCard craftsmanship effect", () => {
 describe("CyberneticWeaponCard expand/collapse", () => {
   it("starts expanded and hides the stats/qualities section when collapsed", async () => {
     const user = userEvent.setup();
-    renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
+    renderCard({
+      type: "ranged",
+      name: "Laspistol (Compact)",
+      class: "Pistol",
+      damage: "1d10+1 E",
+      pen: "0",
+    });
     expect(screen.getByText("Damage")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Laspistol \(Compact\)/ }));
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
@@ -103,7 +151,13 @@ describe("CyberneticWeaponCard expand/collapse", () => {
 
   it("shows the section again when expanded a second time", async () => {
     const user = userEvent.setup();
-    renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
+    renderCard({
+      type: "ranged",
+      name: "Laspistol (Compact)",
+      class: "Pistol",
+      damage: "1d10+1 E",
+      pen: "0",
+    });
     const header = screen.getByRole("button", { name: /Laspistol \(Compact\)/ });
     await user.click(header);
     await user.click(header);

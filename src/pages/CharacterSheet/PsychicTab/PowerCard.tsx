@@ -43,7 +43,8 @@ function PowerIdentityChips({
   talentSourceName?: string;
 }) {
   const sourceLabel = power.source ?? power.origin;
-  if (!sourceLabel && !power.discipline && !power.talentEntryUid && !power.psyRatingTalentEntryUid) return null;
+  if (!sourceLabel && !power.discipline && !power.talentEntryUid && !power.psyRatingTalentEntryUid)
+    return null;
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">

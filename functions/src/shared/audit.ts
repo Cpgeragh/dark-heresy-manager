@@ -28,7 +28,9 @@ function assertBoundedMetadata(metadata: Record<string, string | number | boolea
   }
   for (const [key, value] of Object.entries(metadata)) {
     if (typeof value === "string" && value.length > MAX_METADATA_VALUE_LENGTH) {
-      throw new Error(`Audit metadata field "${key}" exceeds ${MAX_METADATA_VALUE_LENGTH} characters.`);
+      throw new Error(
+        `Audit metadata field "${key}" exceeds ${MAX_METADATA_VALUE_LENGTH} characters.`
+      );
     }
   }
 }

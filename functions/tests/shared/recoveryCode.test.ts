@@ -16,7 +16,9 @@ describe("generateRecoveryCode", () => {
 
 describe("hashRecoveryCode", () => {
   it("produces the same hash for the same code and secret", () => {
-    expect(hashRecoveryCode("DH-ABCD-1234", "secret")).toBe(hashRecoveryCode("DH-ABCD-1234", "secret"));
+    expect(hashRecoveryCode("DH-ABCD-1234", "secret")).toBe(
+      hashRecoveryCode("DH-ABCD-1234", "secret")
+    );
   });
 
   it("produces different hashes for different codes with the same secret", () => {

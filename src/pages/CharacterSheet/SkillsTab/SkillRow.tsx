@@ -21,7 +21,12 @@ import {
   uiTextBody,
 } from "../../../ui/styles/editableStyles";
 import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
-import { colourAmberPlain, colourPurple, colourTeal, colourValue } from "../../../ui/styles/colourTokens";
+import {
+  colourAmberPlain,
+  colourPurple,
+  colourTeal,
+  colourValue,
+} from "../../../ui/styles/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 
 interface SkillRowProps {
@@ -68,14 +73,15 @@ export function SkillRow({
   const levelBadgeClass = LEVEL_BADGE[skill.level] ?? "";
   const talentSources = skill.talentSources ?? [];
   const talentSourceSummary = talentSources
-    .map((source) =>
-      `${source.name} (${source.type})${
-        source.detail
-          ? `: ${source.detail}`
-          : source.amount !== 0
-            ? `: ${source.amount > 0 ? "+" : ""}${source.amount}`
-            : ""
-      }`
+    .map(
+      (source) =>
+        `${source.name} (${source.type})${
+          source.detail
+            ? `: ${source.detail}`
+            : source.amount !== 0
+              ? `: ${source.amount > 0 ? "+" : ""}${source.amount}`
+              : ""
+        }`
     )
     .join(" · ");
   const skillDescription = SKILL_DESCRIPTIONS[skill.name];
@@ -91,7 +97,12 @@ export function SkillRow({
           <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
             {talentSources.map((source, index) => (
               <li key={index}>
-                {source.name} ({source.type}){source.detail ? `: ${source.detail}` : source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
+                {source.name} ({source.type})
+                {source.detail
+                  ? `: ${source.detail}`
+                  : source.amount !== 0
+                    ? `: ${source.amount > 0 ? "+" : ""}${source.amount}`
+                    : ""}
               </li>
             ))}
           </ul>
@@ -101,7 +112,11 @@ export function SkillRow({
   );
 
   const displayName = indented
-    ? skill.name.slice(skill.category.length).trim().replace(/^\(|\)$/g, "").trim() || skill.name
+    ? skill.name
+        .slice(skill.category.length)
+        .trim()
+        .replace(/^\(|\)$/g, "")
+        .trim() || skill.name
     : skill.name;
 
   const handleRemove = useCallback(
@@ -119,7 +134,10 @@ export function SkillRow({
 
   const manualUpgradeCostNumber = Number(manualUpgradeCost);
   const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "";
-  const canDelete = editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained");
+  const canDelete =
+    editable &&
+    skill.level !== "untrained" &&
+    !(skill.talentMinimumLevel && skill.baseLevel === "untrained");
   const hasCareerUpgrade = editable && nextTierAccess?.status === "unlocked";
   const hasManualUpgrade = editable && isDM && nextTierAccess?.status === "not-on-career";
   const hasUpgrade = hasCareerUpgrade || hasManualUpgrade;
@@ -127,9 +145,11 @@ export function SkillRow({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* COLLAPSED ROW */}
-      <div className={`relative w-full text-left group ${onSelect ? "hover:bg-slate-700/40 transition" : ""} ${
-        previewMode ? "p-3 lg:p-4" : "px-3 lg:px-4 py-2.5 lg:py-3"
-      }`}>
+      <div
+        className={`relative w-full text-left group ${onSelect ? "hover:bg-slate-700/40 transition" : ""} ${
+          previewMode ? "p-3 lg:p-4" : "px-3 lg:px-4 py-2.5 lg:py-3"
+        }`}
+      >
         {onSelect && (
           <button
             type="button"
@@ -142,7 +162,11 @@ export function SkillRow({
         <div className="relative pointer-events-none lg:hidden space-y-2.5">
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className={`${uiItemName} break-words ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
+              <span
+                className={`${uiItemName} break-words ${onSelect ? "group-hover:text-white" : ""}`}
+              >
+                {displayName}
+              </span>
               {hasSkillInfo && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal title={skill.name} content={skillInfoContent} as="span" />
@@ -151,10 +175,7 @@ export function SkillRow({
             </div>
             {canDelete && (
               <div className="relative z-20 shrink-0 pointer-events-auto">
-                <RemoveButton
-                  onClick={() => setDeleteArmed(true)}
-                  label={`Delete ${skill.name}`}
-                />
+                <RemoveButton onClick={() => setDeleteArmed(true)} label={`Delete ${skill.name}`} />
               </div>
             )}
           </div>
@@ -166,10 +187,7 @@ export function SkillRow({
                 </Button>
               )}
               {hasManualUpgrade && nextTierAccess?.status === "not-on-career" && (
-                <Button
-                  size="xs"
-                  onClick={() => setManualUpgradeArmed(true)}
-                >
+                <Button size="xs" onClick={() => setManualUpgradeArmed(true)}>
                   Upgrade to {nextTierAccess.level}
                 </Button>
               )}
@@ -178,7 +196,10 @@ export function SkillRow({
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <div className="flex flex-wrap items-center gap-1.5">
               {previewMode && skill.source && (
-                <Chip size="sm" className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
+                <Chip
+                  size="sm"
+                  className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}
+                >
                   {skill.source}
                 </Chip>
               )}
@@ -187,7 +208,10 @@ export function SkillRow({
                   {cost} XP
                 </Chip>
               )}
-              <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
+              <Chip
+                size="sm"
+                className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}
+              >
                 {CHAR_LABEL[skill.characteristic]}
               </Chip>
               <Chip size="sm" className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}>
@@ -195,16 +219,18 @@ export function SkillRow({
               </Chip>
               {!hideLevelChip && (
                 <Chip size="sm" className={`shrink-0 ${levelBadgeClass}`}>
-                  {skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level}
+                  {skill.level === "trained"
+                    ? "Trained"
+                    : skill.level === "untrained"
+                      ? "Untrained"
+                      : skill.level}
                 </Chip>
               )}
             </div>
             <StatChip label="Total" value={skill.total ?? "—"} />
           </div>
           {talentSourceSummary && (
-            <p className={`text-xs leading-snug ${colourAmberPlain}`}>
-              {talentSourceSummary}
-            </p>
+            <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
           )}
         </div>
 
@@ -212,7 +238,11 @@ export function SkillRow({
         <div className="relative pointer-events-none hidden lg:block lg:space-y-2.5">
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
+              <span
+                className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}
+              >
+                {displayName}
+              </span>
               {hasSkillInfo && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal title={skill.name} content={skillInfoContent} as="span" />
@@ -243,16 +273,18 @@ export function SkillRow({
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <div className="flex flex-wrap items-center gap-1.5">
               {previewMode && skill.source && (
-                <Chip className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
+                <Chip
+                  className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}
+                >
                   {skill.source}
                 </Chip>
               )}
               {previewMode && cost !== undefined && (
-                <Chip className={`font-code shrink-0 ${colourValue}`}>
-                  {cost} XP
-                </Chip>
+                <Chip className={`font-code shrink-0 ${colourValue}`}>{cost} XP</Chip>
               )}
-              <Chip className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
+              <Chip
+                className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}
+              >
                 {CHAR_LABEL[skill.characteristic]}
               </Chip>
               <Chip className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}>
@@ -260,16 +292,18 @@ export function SkillRow({
               </Chip>
               {!hideLevelChip && (
                 <Chip className={`shrink-0 ${levelBadgeClass}`}>
-                  {skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level}
+                  {skill.level === "trained"
+                    ? "Trained"
+                    : skill.level === "untrained"
+                      ? "Untrained"
+                      : skill.level}
                 </Chip>
               )}
             </div>
             <StatChip label="Total" value={skill.total ?? "—"} />
           </div>
           {talentSourceSummary && (
-            <p className={`text-xs leading-snug ${colourAmberPlain}`}>
-              {talentSourceSummary}
-            </p>
+            <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
           )}
         </div>
       </div>
@@ -344,7 +378,9 @@ export function SkillRow({
               type="text"
               inputMode="numeric"
               value={manualUpgradeCost}
-              onChange={(event) => setManualUpgradeCost(sanitizeNonNegativeIntegerInput(event.target.value))}
+              onChange={(event) =>
+                setManualUpgradeCost(sanitizeNonNegativeIntegerInput(event.target.value))
+              }
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5"}
             />
@@ -382,7 +418,11 @@ export function SkillRow({
                 >
                   Delete Skill
                 </Button>
-                <Button className="col-span-2" variant="ghost" onClick={() => setDeleteArmed(false)}>
+                <Button
+                  className="col-span-2"
+                  variant="ghost"
+                  onClick={() => setDeleteArmed(false)}
+                >
                   Cancel
                 </Button>
               </div>

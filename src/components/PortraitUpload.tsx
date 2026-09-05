@@ -8,7 +8,10 @@ import { Button } from "../ui/buttons/Button";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { useToast } from "./Toast";
-import { ACCEPTED_PORTRAIT_MIME_TYPES, assertPortraitSource } from "../firestore/firebaseValidation";
+import {
+  ACCEPTED_PORTRAIT_MIME_TYPES,
+  assertPortraitSource,
+} from "../firestore/firebaseValidation";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 

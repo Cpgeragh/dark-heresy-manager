@@ -66,18 +66,21 @@ export async function patchCharacterField(
   }
   const dmId = campaignSnapshot.data()?.dmId;
 
-  await db.runTransaction(async (transaction) => {
-    const characterSnapshot = await transaction.get(characterRef);
-    if (!characterSnapshot.exists) {
-      throw new HttpsError("not-found", "Character not found.");
-    }
-    const characterData = characterSnapshot.data() ?? {};
-    await assertCanEditCharacter(db, callerUid, dmId, characterData);
-    transaction.update(characterRef, patch);
-    if (Object.keys(patch).some(isSummaryRelevantField)) {
-      const merged = { ...characterData, ...patch };
-      const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
-      transaction.set(summaryRef, computeCharacterSummary(merged));
-    }
-  }, { maxAttempts: 5 });
+  await db.runTransaction(
+    async (transaction) => {
+      const characterSnapshot = await transaction.get(characterRef);
+      if (!characterSnapshot.exists) {
+        throw new HttpsError("not-found", "Character not found.");
+      }
+      const characterData = characterSnapshot.data() ?? {};
+      await assertCanEditCharacter(db, callerUid, dmId, characterData);
+      transaction.update(characterRef, patch);
+      if (Object.keys(patch).some(isSummaryRelevantField)) {
+        const merged = { ...characterData, ...patch };
+        const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
+        transaction.set(summaryRef, computeCharacterSummary(merged));
+      }
+    },
+    { maxAttempts: 5 }
+  );
 }

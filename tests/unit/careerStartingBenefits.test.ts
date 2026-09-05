@@ -38,7 +38,11 @@ describe("getDerivedCareerSkillIds", () => {
 describe("getDerivedCareerTalentGrants", () => {
   it("resolves fixed grants without needing a choice", () => {
     const grants = getDerivedCareerTalentGrants("Guardsman", undefined);
-    expect(grants).toContainEqual({ talentId: "melee-weapon-training", specialisation: "Primitive", grantIndex: 0 });
+    expect(grants).toContainEqual({
+      talentId: "melee-weapon-training",
+      specialisation: "Primitive",
+      grantIndex: 0,
+    });
   });
 
   it("leaves an unresolved 'or' choice out until a pick is captured", () => {
@@ -48,7 +52,11 @@ describe("getDerivedCareerTalentGrants", () => {
 
   it("resolves an 'or' choice once captured", () => {
     const grants = getDerivedCareerTalentGrants("Guardsman", { talentChoices: { 1: 1 } });
-    expect(grants).toContainEqual({ talentId: "pistol-training", specialisation: "Las", grantIndex: 1 });
+    expect(grants).toContainEqual({
+      talentId: "pistol-training",
+      specialisation: "Las",
+      grantIndex: 1,
+    });
   });
 });
 

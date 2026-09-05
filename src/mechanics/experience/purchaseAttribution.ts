@@ -42,8 +42,6 @@ export function makeCurrentRankPurchase(
   const current = getCurrentCareerRank(career, rank);
   return {
     cost,
-    ...(current
-      ? { careerId: current.careerId, purchasedAtRankId: current.rankId }
-      : {}),
+    ...(current ? { careerId: current.careerId, purchasedAtRankId: current.rankId } : {}),
   };
 }

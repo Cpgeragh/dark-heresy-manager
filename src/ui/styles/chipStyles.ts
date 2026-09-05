@@ -14,9 +14,6 @@ export interface ChipStyleOptions {
   className?: string;
 }
 
-export function chipClassName({
-  size = "md",
-  className,
-}: ChipStyleOptions = {}) {
+export function chipClassName({ size = "md", className }: ChipStyleOptions = {}) {
   return [BASE_CLASS, SIZE_CLASSES[size], className].filter(Boolean).join(" ");
 }

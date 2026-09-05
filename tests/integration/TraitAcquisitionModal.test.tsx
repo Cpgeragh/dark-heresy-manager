@@ -29,13 +29,21 @@ describe("TraitAcquisitionModal", () => {
     await user.click(screen.getByText("Gain 1d10 Insanity Points"));
     await user.type(screen.getByLabelText(/Rolled result/), "6");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
-    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({
-      entry: expect.objectContaining({
-        acquisition: expect.objectContaining({
-          trait: { soulBound: expect.objectContaining({ entity: "The Emperor", consequence: "insanity", rolledValue: 6 }) },
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entry: expect.objectContaining({
+          acquisition: expect.objectContaining({
+            trait: {
+              soulBound: expect.objectContaining({
+                entity: "The Emperor",
+                consequence: "insanity",
+                rolledValue: 6,
+              }),
+            },
+          }),
         }),
-      }),
-    }));
+      })
+    );
   });
 
   it("requires exactly three Blank Slate Skills", async () => {
@@ -58,10 +66,12 @@ describe("TraitAcquisitionModal", () => {
     await user.click(screen.getByText("Witch Prickling"));
     await user.type(screen.getByLabelText(/Starting age increase/), "18");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
-    expect(onComplete.mock.calls[0][0].entry.acquisition.trait.sanctioning).toEqual(expect.objectContaining({
-      resultId: "witch-prickling",
-      ageIncrease: 18,
-    }));
+    expect(onComplete.mock.calls[0][0].entry.acquisition.trait.sanctioning).toEqual(
+      expect.objectContaining({
+        resultId: "witch-prickling",
+        ageIncrease: 18,
+      })
+    );
   });
 
   it("grants Carven Dentures when Dental Probes is rolled", async () => {
@@ -118,7 +128,14 @@ describe("TraitAcquisitionModal", () => {
         trait={trait}
         entry={{ uid: "skin-rank-3", talentId: trait.id, name: trait.name }}
         ownedTraitEntries={[{ uid: "skin-rank-1", talentId: trait.id, name: trait.name }]}
-        cybernetics={[{ id: "lungs", referenceId: "cr-bionic-respiratory-system", name: "Bionic Respiratory System", craftsmanship: "Common" }]}
+        cybernetics={[
+          {
+            id: "lungs",
+            referenceId: "cr-bionic-respiratory-system",
+            name: "Bionic Respiratory System",
+            craftsmanship: "Common",
+          },
+        ]}
         onComplete={onComplete}
         onClose={vi.fn()}
       />
@@ -128,13 +145,24 @@ describe("TraitAcquisitionModal", () => {
     await user.click(screen.getByRole("button", { name: /Cybernetic to upgrade/ }));
     await user.click(screen.getByText("Bionic Respiratory System (Common)"));
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
-    expect(onComplete.mock.calls[0][0]).toEqual(expect.objectContaining({
-      cybernetics: [expect.objectContaining({ id: "lungs", craftsmanship: "Good" })],
-      entry: expect.objectContaining({
-        acquisition: expect.objectContaining({
-          trait: { skinOfIronGrants: [expect.objectContaining({ rank: 3, kind: "upgrade", cyberneticId: "lungs", previousCraftsmanship: "Common" })] },
+    expect(onComplete.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        cybernetics: [expect.objectContaining({ id: "lungs", craftsmanship: "Good" })],
+        entry: expect.objectContaining({
+          acquisition: expect.objectContaining({
+            trait: {
+              skinOfIronGrants: [
+                expect.objectContaining({
+                  rank: 3,
+                  kind: "upgrade",
+                  cyberneticId: "lungs",
+                  previousCraftsmanship: "Common",
+                }),
+              ],
+            },
+          }),
         }),
-      }),
-    }));
+      })
+    );
   });
 });

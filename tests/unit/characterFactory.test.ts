@@ -96,7 +96,9 @@ describe("isBackgroundComplete", () => {
   });
 
   it("is false when only some of the three are set", () => {
-    expect(isBackgroundComplete(makeCharacter({ homeworld: "hive-world", career: "Guardsman" }))).toBe(false);
+    expect(
+      isBackgroundComplete(makeCharacter({ homeworld: "hive-world", career: "Guardsman" }))
+    ).toBe(false);
   });
 
   it("remains false until the player confirms, even when all required selections exist", () => {

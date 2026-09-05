@@ -198,13 +198,26 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
   };
 }
 
-function makeCharacterDoc(id: string, recoveryCode: string, claimLogCount: number, xpCount: number) {
+function makeCharacterDoc(
+  id: string,
+  recoveryCode: string,
+  claimLogCount: number,
+  xpCount: number
+) {
   return {
     id,
     ref: {
       collection: (name: string) => {
-        if (name === "claimLog") return { count: () => ({ get: () => Promise.resolve({ data: () => ({ count: claimLogCount }) }) }) };
-        if (name === "xpProposals") return { count: () => ({ get: () => Promise.resolve({ data: () => ({ count: xpCount }) }) }) };
+        if (name === "claimLog")
+          return {
+            count: () => ({
+              get: () => Promise.resolve({ data: () => ({ count: claimLogCount }) }),
+            }),
+          };
+        if (name === "xpProposals")
+          return {
+            count: () => ({ get: () => Promise.resolve({ data: () => ({ count: xpCount }) }) }),
+          };
         throw new Error(`Unexpected: ${name}`);
       },
     },
@@ -221,17 +234,17 @@ describe("startCampaignDeletionJob", () => {
   it("rejects when the campaign does not exist", async () => {
     mockCampaignGet.mockResolvedValue({ exists: false });
 
-    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret")).rejects.toThrow(
-      expect.objectContaining({ code: "not-found" })
-    );
+    await expect(
+      startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret")
+    ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
   it("rejects when the caller is not the campaign DM", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "someone-else" }) });
 
-    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret")).rejects.toThrow(
-      expect.objectContaining({ code: "permission-denied" })
-    );
+    await expect(
+      startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret")
+    ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
   });
 
   it("rejects when a character has no usable Recovery Code", async () => {
@@ -240,9 +253,9 @@ describe("startCampaignDeletionJob", () => {
       docs: [makeCharacterDoc("char-1", "not-a-code", 0, 0)],
     });
 
-    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret")).rejects.toThrow(
-      expect.objectContaining({ code: "failed-precondition" })
-    );
+    await expect(
+      startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret")
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
   });
 
   it("computes the exact preflight total across every dependent collection", async () => {
@@ -254,10 +267,26 @@ describe("startCampaignDeletionJob", () => {
       ],
     });
     threads.pageGet.mockResolvedValue({
-      docs: [{ ref: { collection: () => ({ count: () => ({ get: () => Promise.resolve({ data: () => ({ count: 5 }) }) }) }) } }],
+      docs: [
+        {
+          ref: {
+            collection: () => ({
+              count: () => ({ get: () => Promise.resolve({ data: () => ({ count: 5 }) }) }),
+            }),
+          },
+        },
+      ],
     });
     customItems.pageGet.mockResolvedValue({
-      docs: [{ ref: { collection: () => ({ count: () => ({ get: () => Promise.resolve({ data: () => ({ count: 3 }) }) }) }) } }],
+      docs: [
+        {
+          ref: {
+            collection: () => ({
+              count: () => ({ get: () => Promise.resolve({ data: () => ({ count: 3 }) }) }),
+            }),
+          },
+        },
+      ],
     });
     sessions.countGet.mockResolvedValue({ data: () => ({ count: 4 }) });
     sessionSummaries.countGet.mockResolvedValue({ data: () => ({ count: 4 }) });
@@ -267,7 +296,12 @@ describe("startCampaignDeletionJob", () => {
     );
     mockCreateBulkJob.mockResolvedValue("job-1");
 
-    const result = await startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret");
+    const result = await startCampaignDeletionJob(
+      { campaignId: CAMPAIGN_ID },
+      DM_UID,
+      "idem-key",
+      "secret"
+    );
 
     // 2 characters + (2+1 claimLog/xp for char-1) + (0+0 for char-2)
     // + 1 recoveryIndex entry (only char-1's exists) + 2 characterSummaries
@@ -306,11 +340,14 @@ describe("processCampaignDeletionChunk", () => {
   });
 
   it("rejects when the job is not a campaign-deletion job, without touching Firestore", async () => {
-    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ type: "other-job" }), leaseId: "lease-1" });
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ type: "other-job" }),
+      leaseId: "lease-1",
+    });
 
-    await expect(processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret")).rejects.toThrow(
-      expect.objectContaining({ code: "failed-precondition" })
-    );
+    await expect(
+      processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret")
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
     expect(mockFailJob).not.toHaveBeenCalled();
     expect(mockCampaignGet).not.toHaveBeenCalled();
   });
@@ -319,9 +356,9 @@ describe("processCampaignDeletionChunk", () => {
     mockAcquireJobLease.mockResolvedValue({ job: makeJob(), leaseId: "lease-1" });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "someone-else" }) });
 
-    await expect(processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret")).rejects.toThrow(
-      expect.objectContaining({ code: "permission-denied" })
-    );
+    await expect(
+      processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret")
+    ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
     expect(mockHandleChunkFailure).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
@@ -335,9 +372,9 @@ describe("processCampaignDeletionChunk", () => {
     mockAcquireJobLease.mockResolvedValue({ job: makeJob(), leaseId: "lease-1" });
     mockCampaignGet.mockRejectedValue(new Error("firestore is down"));
 
-    await expect(processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret")).rejects.toThrow(
-      "firestore is down"
-    );
+    await expect(
+      processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret")
+    ).rejects.toThrow("firestore is down");
     expect(mockHandleChunkFailure).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
@@ -348,7 +385,10 @@ describe("processCampaignDeletionChunk", () => {
   });
 
   it("returns an in-progress result instead of throwing when handleChunkFailure signals a retry", async () => {
-    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ processedCount: 3 }), leaseId: "lease-1" });
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ processedCount: 3 }),
+      leaseId: "lease-1",
+    });
     mockCampaignGet.mockRejectedValue(new Error("transient"));
     mockHandleChunkFailure.mockResolvedValueOnce(true);
 
@@ -380,14 +420,21 @@ describe("processCampaignDeletionChunk", () => {
   it("moves to the next character when the current one's subcollection page is short", async () => {
     mockAcquireJobLease.mockResolvedValue({
       job: makeJob({
-        checkpoint: JSON.stringify({ phase: "characterClaimLogs", parentCursor: "char-1", cursor: null }),
+        checkpoint: JSON.stringify({
+          phase: "characterClaimLogs",
+          parentCursor: "char-1",
+          cursor: null,
+        }),
       }),
       leaseId: "lease-1",
     });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     claimLogChild.pageGet.mockResolvedValue({
       empty: false,
-      docs: [{ id: "c0", ref: {} }, { id: "c1", ref: {} }],
+      docs: [
+        { id: "c0", ref: {} },
+        { id: "c1", ref: {} },
+      ],
     });
     characters.pageGet.mockResolvedValue({ empty: false, docs: [{ id: "char-2" }] });
 
@@ -405,7 +452,11 @@ describe("processCampaignDeletionChunk", () => {
   it("moves to the next phase when the last character's subcollection is exhausted", async () => {
     mockAcquireJobLease.mockResolvedValue({
       job: makeJob({
-        checkpoint: JSON.stringify({ phase: "characterClaimLogs", parentCursor: "char-1", cursor: null }),
+        checkpoint: JSON.stringify({
+          phase: "characterClaimLogs",
+          parentCursor: "char-1",
+          cursor: null,
+        }),
       }),
       leaseId: "lease-1",
     });
@@ -443,7 +494,11 @@ describe("processCampaignDeletionChunk", () => {
   it("deletes only the recoveryIndex entries that actually exist for the page's characters", async () => {
     mockAcquireJobLease.mockResolvedValue({
       job: makeJob({
-        checkpoint: JSON.stringify({ phase: "characterRecoveryIndex", parentCursor: null, cursor: null }),
+        checkpoint: JSON.stringify({
+          phase: "characterRecoveryIndex",
+          parentCursor: null,
+          cursor: null,
+        }),
       }),
       leaseId: "lease-1",
     });
@@ -470,12 +525,19 @@ describe("processCampaignDeletionChunk", () => {
   it("deletes a flat characterSummaries page and moves to the next phase when short", async () => {
     mockAcquireJobLease.mockResolvedValue({
       job: makeJob({
-        checkpoint: JSON.stringify({ phase: "characterSummaries", parentCursor: null, cursor: null }),
+        checkpoint: JSON.stringify({
+          phase: "characterSummaries",
+          parentCursor: null,
+          cursor: null,
+        }),
       }),
       leaseId: "lease-1",
     });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
-    characterSummaries.pageGet.mockResolvedValue({ empty: false, docs: [{ id: "char-1", ref: {} }] });
+    characterSummaries.pageGet.mockResolvedValue({
+      empty: false,
+      docs: [{ id: "char-1", ref: {} }],
+    });
 
     await processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
 
@@ -490,7 +552,9 @@ describe("processCampaignDeletionChunk", () => {
 
   it("deletes the campaign document and completes the job in the final phase", async () => {
     mockAcquireJobLease.mockResolvedValue({
-      job: makeJob({ checkpoint: JSON.stringify({ phase: "campaign", parentCursor: null, cursor: null }) }),
+      job: makeJob({
+        checkpoint: JSON.stringify({ phase: "campaign", parentCursor: null, cursor: null }),
+      }),
       leaseId: "lease-1",
     });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
@@ -504,7 +568,9 @@ describe("processCampaignDeletionChunk", () => {
 
   it("deletes a flat sessions page and moves to the next phase when short", async () => {
     mockAcquireJobLease.mockResolvedValue({
-      job: makeJob({ checkpoint: JSON.stringify({ phase: "sessions", parentCursor: null, cursor: null }) }),
+      job: makeJob({
+        checkpoint: JSON.stringify({ phase: "sessions", parentCursor: null, cursor: null }),
+      }),
       leaseId: "lease-1",
     });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });

@@ -123,10 +123,9 @@ describe("buildRankCards", () => {
   });
 
   it("excludes granted entries rather than treating them as purchases", () => {
-    const names = buildRankCards(makeCharacter()).flatMap((card) => [
-      ...card.careerPurchases,
-      ...card.rankUpXpSpent,
-    ]).map((entry) => entry.name);
+    const names = buildRankCards(makeCharacter())
+      .flatMap((card) => [...card.careerPurchases, ...card.rankUpXpSpent])
+      .map((entry) => entry.name);
     expect(names).not.toContain("Granted Chem Geld");
   });
 
@@ -147,10 +146,9 @@ describe("buildRankCards", () => {
       },
     ];
 
-    const names = buildRankCards(character).flatMap((card) => [
-      ...card.careerPurchases,
-      ...card.rankUpXpSpent,
-    ]).map((entry) => entry.name);
+    const names = buildRankCards(character)
+      .flatMap((card) => [...card.careerPurchases, ...card.rankUpXpSpent])
+      .map((entry) => entry.name);
     expect(names).toContain("Drive (Ground Vehicle) — +10");
     expect(names).not.toContain("Drive (Ground Vehicle) — Trained");
   });

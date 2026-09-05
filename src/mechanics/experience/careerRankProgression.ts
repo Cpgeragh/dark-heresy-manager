@@ -78,7 +78,8 @@ export function getValidNextCareerRanks(
   if (currentRank.paths && currentRank.paths.length > 1) {
     return candidates.filter(
       (rank) =>
-        !rank.paths || rank.paths.some((candidatePath) => currentRank.paths?.includes(candidatePath))
+        !rank.paths ||
+        rank.paths.some((candidatePath) => currentRank.paths?.includes(candidatePath))
     );
   }
 
