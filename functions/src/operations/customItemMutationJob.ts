@@ -1,9 +1,10 @@
 // functions/src/operations/customItemMutationJob.ts
 //
-// A resumable bulk job, replacing the client's "scans
-// every character, refused above charactersPerCampaign (100)" ceiling for
-// custom-item propagation and removal (src/services/customItemService.ts)
-// with a chunked, checkpointed job that can finish a sweep of any size.
+// A resumable bulk job for custom-item propagation and removal
+// (src/services/customItemService.ts's four client entry points). Chunked
+// and checkpointed so it can finish a sweep of any campaign size, unlike
+// the client's own direct scan, which is capped at charactersPerCampaign
+// (100).
 //
 // One job type covers all four client entry points, since they share
 // identical mechanics (scan characters, compute a per-character mutation,

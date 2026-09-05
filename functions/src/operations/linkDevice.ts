@@ -1,11 +1,9 @@
 // functions/src/operations/linkDevice.ts
 //
-// Links a secondary device to a primary
-// account using an identity recovery code. Looks the code up by its
-// HMAC-derived hash in identityRecoveryIndex — the same trust boundary
-// claimCharacter already relies on for character codes, a hash match alone
-// is proof the caller knew the real code, so the old second identitySecret
-// plaintext cross-check is no longer needed and has been removed.
+// Links a secondary device to a primary account using an identity recovery
+// code. Looks the code up by its HMAC-derived hash in identityRecoveryIndex
+// — the same trust boundary claimCharacter relies on for character codes: a
+// hash match alone is proof the caller knew the real code.
 
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";

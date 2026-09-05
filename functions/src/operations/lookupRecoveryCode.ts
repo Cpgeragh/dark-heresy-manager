@@ -2,8 +2,8 @@
 //
 // Resolves a raw Recovery Code to a minimal, safe claim preview
 // server-side. Only the fields ClaimPreview.tsx actually renders are
-// returned — never the full character or campaign document, unlike the
-// current client-side lookup this will eventually replace.
+// returned, never the full character or campaign document, so a claim
+// preview can't be used to read data beyond what the UI shows.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";

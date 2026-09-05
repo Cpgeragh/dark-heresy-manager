@@ -1,19 +1,17 @@
 // functions/src/operations/identityReclaimJob.ts
 //
-// reclaimIdentity's original single-batch
-// approach refused outright past 440 combined writes, with no way to
-// actually recover an account past that point. Replaced with a resumable
-// bulkJobs.ts job, chunking the ownership migration the same way
-// character/campaign deletion already do. The identity documents
+// A resumable bulkJobs.ts job migrates campaign/character ownership across
+// however many campaigns the old identity owns, chunking the same way
+// character/campaign deletion already do — nothing here is capped by
+// Firestore's per-batch write ceiling. The identity documents
 // (identityRecoveryIndex/identitySecret/users.onboarded) transfer
 // immediately in start, before the job is created — a second reclaim
 // attempt on the same code while a job is still mid-flight then chains onto
 // the new owner instead of racing it for the same campaigns/characters.
 //
-// The code lookup moved from the raw-code-keyed
-// identityRecovery collection to the HMAC-hashed identityRecoveryIndex —
-// same trust boundary claimCharacter already relies on, a hash match alone
-// is proof the caller knew the real code.
+// The code lookup goes through the HMAC-hashed identityRecoveryIndex — the
+// same trust boundary claimCharacter relies on for character codes, since a
+// hash match alone is proof the caller knew the real code.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";

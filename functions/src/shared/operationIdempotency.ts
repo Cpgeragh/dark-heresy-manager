@@ -1,9 +1,10 @@
 import { hashForKey } from "./recoveryCode.js";
 
 /**
- * Builds a retry key for one explicit client operation. Older clients may omit
- * the operation ID during a staged rollout; those calls remain transactional
- * but deliberately skip persistent idempotency rather than reusing a stale key.
+ * Builds a retry key for one explicit client operation. A caller that omits
+ * the operation ID gets no persistent idempotency key — its calls stay
+ * transactional but aren't deduplicated across retries, rather than being
+ * given a stale or reused key.
  */
 export function buildOperationIdempotencyKey(
   operation: string,

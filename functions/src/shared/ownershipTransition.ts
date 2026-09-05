@@ -5,10 +5,12 @@
 // check and its own fresh-inside-transaction precondition check; this only
 // bundles the write shape once that's verified.
 //
-// Also removes the previous owner from the campaign's memberIds
-// when this transition takes away their last character in the campaign,
-// covering release and force-release, since either can leave someone with
-// no characters left here. Force-assign now accepts only unclaimed characters.
+// Also removes the previous owner from the campaign's memberIds when this
+// transition takes away their last character in the campaign — covering
+// release and force-release, since either can leave someone with no
+// characters left here. Force-assign only ever targets an unclaimed
+// character, so previousOwnerUid is always null there and this removal
+// never applies to it.
 
 import { FieldValue } from "firebase-admin/firestore";
 import type { Transaction, DocumentReference } from "firebase-admin/firestore";

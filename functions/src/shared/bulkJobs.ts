@@ -22,15 +22,14 @@ import { IDEMPOTENCY_COLLECTION } from "./idempotency.js";
 const BULK_JOBS_COLLECTION = "bulkJobs";
 const LEASE_DURATION_MS = 60 * 1000;
 // A job untouched this long since creation is treated as abandoned the next
-// time anything tries to access it. Lazy, access-triggered expiry only, not
-// a proactive sweep — a real sweep (scheduled function or Firestore TTL
-// policy) needs configuring against the actual deployed project, which is
-// out of scope until this app is actually deployed.
+// time anything tries to access it — expiry is lazy and access-triggered
+// only, not a proactive sweep, so an abandoned job's Firestore row lingers
+// until something happens to read it again.
 const JOB_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
-// Cost is no longer the constraint on Blaze (even 100,000 deletes costs
-// cents) — this ceiling now exists to keep a single job's processing time
-// and blast radius bounded, not to protect a shared free-tier quota.
+// Bounds a single job's processing time and blast radius. At Blaze pricing
+// even 100,000 document operations costs cents, so this ceiling isn't
+// protecting a cost quota — it's keeping any one job's scope contained.
 export const MAX_JOB_TOTAL_COUNT = 100_000;
 
 export type BulkJobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
@@ -323,10 +322,10 @@ export async function cancelBulkJob(jobId: string, actorUid: string): Promise<vo
 
 // A chunk failure is retried automatically, rather than permanently failing
 // the job, when it looks transient (a Firestore/gRPC blip) and the job
-// hasn't already used up its retry budget. Everything else, a deliberate
+// hasn't already used up its retry budget. Everything else — a deliberate
 // HttpsError like permission-denied/not-found/failed-precondition, or any
-// error with no recognisable code, is treated as permanent, matching the
-// behaviour before retries existed.
+// error with no recognisable code — is treated as permanent, since only a
+// genuinely transient failure deserves an automatic retry.
 export const MAX_CHUNK_RETRIES = 5;
 
 // Numeric: raw @google-cloud/firestore/gRPC errors (batch.commit, transactions,
@@ -368,9 +367,9 @@ async function releaseLeaseForRetry(jobId: string, leaseId: string, error: strin
  * failJob directly. A retriable-looking error under the retry cap releases
  * the lease and leaves the job resumable (checkpoint untouched) instead of
  * failing it, returning true so the caller can return its normal in-progress
- * result rather than throwing. Anything else, a non-retriable error or one
- * that's exhausted the cap, permanently fails the job via failJob (unchanged)
- * and returns false so the caller rethrows exactly as before this existed.
+ * result rather than throwing. Anything else — a non-retriable error, or
+ * one that's exhausted the retry cap — permanently fails the job via
+ * failJob, returning false so the caller rethrows it.
  */
 export async function handleChunkFailure(
   jobId: string,
