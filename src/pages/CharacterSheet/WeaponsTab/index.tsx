@@ -17,8 +17,6 @@ import type {
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
-import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
-import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import {
   type RangedWeaponRef,
   type MeleeWeaponRef,
@@ -42,13 +40,10 @@ import { CyberneticWeaponCard } from "../weapons/CyberneticWeaponCard";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 import {
-  isIntegratedRangedWeapon,
-  isIntegratedMeleeWeapon,
   NORMAL_RANGED_REFS,
   NORMAL_MELEE_REFS,
   rangedRulesForCraftsmanship,
   meleeDamageForCraftsmanship,
-  compareWeaponEntries,
 } from "../weapons/weaponHelpers";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../../ui/styles/editableStyles";
@@ -86,6 +81,12 @@ import {
   buildFallbackGrenadeLibraryItem,
   buildFallbackShieldLibraryItem,
 } from "../weapons/weaponSnapshotHelpers";
+import {
+  buildWeaponInventoryModel,
+  getMeleeSlots,
+  getRangedSlots,
+  MAX_GRENADE_TYPES,
+} from "./weaponInventoryModel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -151,18 +152,6 @@ const MOBILE_WEAPON_SECTIONS = [
 ] as const satisfies readonly SegmentedTabOption<WeaponMobileSection>[];
 const MOBILE_WEAPON_SECTION_IDS = MOBILE_WEAPON_SECTIONS.map((section) => section.value);
 const WEAPON_TABS_ID = "weapon-sections";
-
-// ─── Slot System ─────────────────────────────────────────────────────────────
-
-const MAX_WEAPON_SLOTS = 4;
-const MAX_GRENADE_TYPES = 2;
-
-function getRangedSlots(weapon: RangedWeapon): number {
-  return (weapon.class ?? "").toLowerCase().includes("heavy") ? 2 : 1;
-}
-function getMeleeSlots(weapon: MeleeWeapon): number {
-  return (weapon.class ?? "").toLowerCase().includes("two-handed") ? 2 : 1;
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -258,154 +247,23 @@ export function WeaponsTab({
     [campaignCustomArmour]
   );
 
-  // ── Archeotech weapons ─────────────────────────────────────────────────────
-  const archeotechGrenadeItems = (archeotech ?? []).filter((a) => a.type === "Grenade");
-  const archeotechMineItems = (archeotech ?? []).filter((a) => a.type === "Mine");
-  const archeotechWeaponItems = (archeotech ?? []).filter((a) => a.type === "Weapon");
-  const archeotechIntegratedWeaponItems = (archeotech ?? []).filter(
-    (a) => a.type === "Integrated Weapon"
-  );
-  const archeotechShieldItems = (archeotech ?? []).filter((a) => a.type === "Shield");
-  const archeotechRangedItems = archeotechWeaponItems.filter((a) => {
-    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
-    return (a.weaponClass ?? ref?.weaponClass) !== "Melee";
+  const {
+    allRangedEntries,
+    allMeleeEntries,
+    allGrenadeEntries,
+    sortedShields,
+    archeotechShieldItems,
+    archeotechGrenadeItems,
+    slotsRemaining,
+    equippedGrenadeTypes,
+  } = buildWeaponInventoryModel({
+    rangedWeapons,
+    meleeWeapons,
+    grenades,
+    cybernetics,
+    shields,
+    archeotech,
   });
-  const archeotechMeleeWeaponItems = archeotechWeaponItems.filter((a) => {
-    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
-    return (a.weaponClass ?? ref?.weaponClass) === "Melee";
-  });
-  const archeotechIntegratedRangedItems = archeotechIntegratedWeaponItems.filter((a) => {
-    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
-    return (a.weaponClass ?? ref?.weaponClass) !== "Melee" && a.equipped;
-  });
-  const archeotechIntegratedMeleeItems = archeotechIntegratedWeaponItems.filter((a) => {
-    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
-    return (a.weaponClass ?? ref?.weaponClass) === "Melee" && a.equipped;
-  });
-
-  // ── Cybernetic weapons ─────────────────────────────────────────────────────
-  const cyberneticWeaponItems = (cybernetics ?? []).flatMap((c) => {
-    const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
-    if (!ref?.weapon) return [];
-    return [{ cybernetic: c, weapon: ref.weapon }];
-  });
-  const cyberneticRangedItems = cyberneticWeaponItems.filter(
-    ({ weapon }) => weapon.type === "ranged"
-  );
-  const cyberneticMeleeItems = cyberneticWeaponItems.filter(
-    ({ weapon }) => weapon.type === "melee"
-  );
-
-  const normalRangedWeapons = rangedWeapons
-    .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => !isIntegratedRangedWeapon(weapon));
-  const equippedIntegratedRanged = rangedWeapons
-    .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => isIntegratedRangedWeapon(weapon) && weapon.equipped);
-  const normalMeleeWeapons = meleeWeapons
-    .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => !isIntegratedMeleeWeapon(weapon));
-  const equippedIntegratedMelee = meleeWeapons
-    .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => isIntegratedMeleeWeapon(weapon) && weapon.equipped);
-
-  // ── Unified sorted lists ───────────────────────────────────────────────────
-  const allRangedEntries = [
-    ...normalRangedWeapons.map(({ weapon, index }) => ({
-      kind: "regular" as const,
-      weapon,
-      index,
-      name: weapon.name,
-    })),
-    ...cyberneticRangedItems.map(({ cybernetic, weapon }) => ({
-      kind: "cybernetic" as const,
-      cybernetic,
-      weapon,
-      name: weapon.name,
-    })),
-    ...archeotechRangedItems.map((item) => ({
-      kind: "archeotech" as const,
-      item,
-      name: item.name,
-    })),
-    ...archeotechIntegratedRangedItems.map((item) => ({
-      kind: "archeotech" as const,
-      item,
-      name: item.name,
-    })),
-    ...equippedIntegratedRanged.map(({ weapon, index }) => ({
-      kind: "integrated" as const,
-      weapon,
-      index,
-      name: weapon.name,
-    })),
-  ].sort(compareWeaponEntries);
-
-  const allMeleeEntries = [
-    ...normalMeleeWeapons.map(({ weapon, index }) => ({
-      kind: "regular" as const,
-      weapon,
-      index,
-      name: weapon.name,
-    })),
-    ...cyberneticMeleeItems.map(({ cybernetic, weapon }) => ({
-      kind: "cybernetic" as const,
-      cybernetic,
-      weapon,
-      name: weapon.name,
-    })),
-    ...archeotechMeleeWeaponItems.map((item) => ({
-      kind: "archeotech" as const,
-      item,
-      name: item.name,
-    })),
-    ...archeotechIntegratedMeleeItems.map((item) => ({
-      kind: "archeotech" as const,
-      item,
-      name: item.name,
-    })),
-    ...equippedIntegratedMelee.map(({ weapon, index }) => ({
-      kind: "integrated" as const,
-      weapon,
-      index,
-      name: weapon.name,
-    })),
-  ].sort(compareWeaponEntries);
-
-  const allGrenadeEntries = [
-    ...grenades.map((item) => ({ kind: "regular" as const, item, name: item.name })),
-    ...archeotechGrenadeItems.map((item) => ({
-      kind: "archeotech" as const,
-      item,
-      name: item.name,
-    })),
-    ...archeotechMineItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
-  ].sort((a, b) => {
-    const aEq = a.item.equipped ? 0 : 1;
-    const bEq = b.item.equipped ? 0 : 1;
-    if (aEq !== bEq) return aEq - bEq;
-    return a.name.localeCompare(b.name);
-  });
-
-  // ── Slot counting ──────────────────────────────────────────────────────────
-  const equippedWeaponSlots =
-    normalRangedWeapons
-      .filter(({ weapon }) => weapon.equipped)
-      .reduce((sum, { weapon }) => sum + getRangedSlots(weapon), 0) +
-    normalMeleeWeapons
-      .filter(({ weapon }) => weapon.equipped)
-      .reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
-    archeotechRangedItems.filter((a) => a.equipped).length +
-    archeotechMeleeWeaponItems.filter((a) => a.equipped).length +
-    archeotechIntegratedWeaponItems.filter((a) => a.equipped).length +
-    archeotechShieldItems.filter((a) => a.equipped).length +
-    equippedIntegratedRanged.reduce((sum, { weapon }) => sum + getRangedSlots(weapon), 0) +
-    equippedIntegratedMelee.reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
-    (shields ?? []).filter((s) => s.equipped).length;
-  const slotsRemaining = MAX_WEAPON_SLOTS - equippedWeaponSlots;
-  const equippedGrenadeTypes =
-    grenades.filter((g) => g.equipped).length +
-    [...archeotechGrenadeItems, ...archeotechMineItems].filter((a) => a.equipped).length;
 
   // ── Grenade handlers ───────────────────────────────────────────────────────
 
@@ -1626,43 +1484,31 @@ export function WeaponsTab({
         )}
 
         <IndependentCardGrid
-          items={[...(shields ?? [])]
-            .sort((a, b) => {
-              if (a.equipped && !b.equipped) return -1;
-              if (!a.equipped && b.equipped) return 1;
-              return a.name.localeCompare(b.name);
-            })
-            .map((item) => (
-              <ShieldCard
-                key={item.id}
-                item={item}
-                editable={editable}
-                {...getShieldLibraryProps(item)}
-                onRemove={() => removeShield(item.id)}
-                isEquipped={item.equipped ?? false}
-                onToggleEquip={() => toggleEquipShield(item.id)}
-                slotsDisabled={!item.equipped && slotsRemaining < 1}
-              />
-            ))}
+          items={sortedShields.map((item) => (
+            <ShieldCard
+              key={item.id}
+              item={item}
+              editable={editable}
+              {...getShieldLibraryProps(item)}
+              onRemove={() => removeShield(item.id)}
+              isEquipped={item.equipped ?? false}
+              onToggleEquip={() => toggleEquipShield(item.id)}
+              slotsDisabled={!item.equipped && slotsRemaining < 1}
+            />
+          ))}
         />
         <IndependentCardGrid
-          items={[...archeotechShieldItems]
-            .sort((a, b) => {
-              if (a.equipped && !b.equipped) return -1;
-              if (!a.equipped && b.equipped) return 1;
-              return a.name.localeCompare(b.name);
-            })
-            .map((item) => (
-              <ArcheotechShieldRow
-                key={item.id}
-                item={item}
-                editable={editable}
-                isEquipped={item.equipped ?? false}
-                onToggleEquip={() => toggleEquipArcheotech(item.id)}
-                slotsDisabled={!item.equipped && slotsRemaining < 1}
-                onRemove={() => removeArcheotech(item.id)}
-              />
-            ))}
+          items={archeotechShieldItems.map((item) => (
+            <ArcheotechShieldRow
+              key={item.id}
+              item={item}
+              editable={editable}
+              isEquipped={item.equipped ?? false}
+              onToggleEquip={() => toggleEquipArcheotech(item.id)}
+              slotsDisabled={!item.equipped && slotsRemaining < 1}
+              onRemove={() => removeArcheotech(item.id)}
+            />
+          ))}
         />
       </section>
 
