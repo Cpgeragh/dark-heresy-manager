@@ -30,6 +30,7 @@
 import { FieldPath, FieldValue, getFirestore, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 import {
   acquireJobLease,
   advanceJobCheckpoint,
@@ -80,9 +81,12 @@ async function publishTargetVersionAndCreateJob(
   campaignId: string,
   customItemId: string,
   totalCount: number,
-  idempotencyKey: string | null
-): Promise<{ targetVersionId: string; jobId: string }> {
-  return db.runTransaction(
+  idempotencyKey: string | null,
+  idempotency: IdempotencyExecution<{ jobId: string; totalCount: number }> | null
+): Promise<{ jobId: string; totalCount: number }> {
+  return runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const itemSnapshot = await transaction.get(itemRef);
       if (!itemSnapshot.exists) throw new HttpsError("not-found", "Custom item not found.");
@@ -142,7 +146,7 @@ async function publishTargetVersionAndCreateJob(
       });
       transaction.set(preparedJob.ref, preparedJob.record);
 
-      return { targetVersionId, jobId: preparedJob.jobId };
+      return { jobId: preparedJob.jobId, totalCount };
     },
     { maxAttempts: 5 }
   );
@@ -174,7 +178,8 @@ async function resolveUpdateTargetVersionId(
 export async function startCustomItemMutationJob(
   input: StartCustomItemMutationJobInput,
   callerUid: string,
-  idempotencyKey: string | null
+  idempotencyKey: string | null,
+  idempotency: IdempotencyExecution<{ jobId: string; totalCount: number }> | null = null
 ): Promise<{ jobId: string; totalCount: number }> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -213,9 +218,10 @@ export async function startCustomItemMutationJob(
       input.campaignId,
       input.customItemId,
       totalCount,
-      idempotencyKey
+      idempotencyKey,
+      idempotency
     );
-    return { jobId: published.jobId, totalCount };
+    return published;
   } else if (input.mode === "update") {
     targetVersionId = await resolveUpdateTargetVersionId(itemRef, input.versionId);
   } else if (input.mode === "archive-and-remove") {
@@ -233,17 +239,47 @@ export async function startCustomItemMutationJob(
       totalCount,
       idempotencyKey
     );
-    const batch = db.batch();
-    batch.update(itemRef, {
+    const itemArchive = {
       status: "archived",
       archivedAt: FieldValue.serverTimestamp(),
       archivedByUserId: input.actorUserId,
       updatedAt: FieldValue.serverTimestamp(),
       updatedBy: { userId: input.actorUserId },
-    });
+    };
+    if (idempotency) {
+      return idempotency.runTransaction(async (transaction) => {
+        transaction.update(itemRef, itemArchive);
+        transaction.set(preparedJob.ref, preparedJob.record);
+        return { jobId: preparedJob.jobId, totalCount };
+      });
+    }
+
+    const batch = db.batch();
+    batch.update(itemRef, itemArchive);
     batch.set(preparedJob.ref, preparedJob.record);
     await batch.commit();
     return { jobId: preparedJob.jobId, totalCount };
+  }
+
+  if (idempotency) {
+    const preparedJob = prepareBulkJob(
+      db,
+      "custom-item-mutation",
+      callerUid,
+      {
+        campaignId: input.campaignId,
+        customItemId: input.customItemId,
+        mode: input.mode,
+        targetVersionId,
+        actorUserId: input.actorUserId,
+      },
+      totalCount,
+      idempotencyKey
+    );
+    return idempotency.runTransaction(async (transaction) => {
+      transaction.set(preparedJob.ref, preparedJob.record);
+      return { jobId: preparedJob.jobId, totalCount };
+    });
   }
 
   const jobId = await createBulkJob(
@@ -357,7 +393,7 @@ export async function processCustomItemMutationChunk(
     const processed = page.docs.length;
 
     if (isLastPage) {
-      await completeJob(input.jobId, leaseId);
+      await completeJob(input.jobId, leaseId, processed);
       return {
         done: true,
         processedCount: job.processedCount + processed,

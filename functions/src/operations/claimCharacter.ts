@@ -14,6 +14,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import { buildClaimLogPayload } from "../shared/claimLog.js";
 import { rotateRecoveryCodeInTransaction } from "../shared/recoveryCodeRotation.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
@@ -30,7 +31,8 @@ export interface ClaimCharacterResult {
 export async function claimCharacter(
   input: ClaimCharacterInput,
   callerUid: string,
-  hmacSecret: string
+  hmacSecret: string,
+  idempotency: IdempotencyExecution<ClaimCharacterResult> | null = null
 ): Promise<ClaimCharacterResult> {
   if (!CODE_FORMAT.test(input.code)) {
     throw new HttpsError("not-found", "Recovery Code not found.");
@@ -40,7 +42,9 @@ export async function claimCharacter(
   const hash = hashRecoveryCode(input.code, hmacSecret);
   const indexRef = db.collection(RECOVERY_INDEX_COLLECTION).doc(hash);
 
-  return db.runTransaction(
+  return runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const indexSnapshot = await transaction.get(indexRef);
       if (!indexSnapshot.exists) {

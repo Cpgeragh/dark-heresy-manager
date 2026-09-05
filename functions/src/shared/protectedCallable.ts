@@ -23,6 +23,7 @@ import {
 } from "./validation.js";
 import { enforceRateLimit } from "./rateLimit.js";
 import { withIdempotency } from "./idempotency.js";
+import type { IdempotencyExecution } from "./idempotency.js";
 import { recordAuditEntry } from "./audit.js";
 import { recordUsageMetric } from "./metrics.js";
 
@@ -35,7 +36,12 @@ export interface ProtectedCallableOptions<TData, TResult> {
   payloadBounds?: { maxBytes: number; maxStringCharacters: number };
   rateLimits?: readonly { key: string; limit: number; windowMs: number }[];
   idempotencyKey?: string;
-  handler: (context: { uid: string; appCheckVerified: boolean; data: TData }) => Promise<TResult>;
+  handler: (context: {
+    uid: string;
+    appCheckVerified: boolean;
+    data: TData;
+    idempotency: IdempotencyExecution<TResult> | null;
+  }) => Promise<TResult>;
 }
 
 async function recordOutcome(
@@ -71,12 +77,13 @@ export async function protectedCallable<TData, TResult>(
       }
     }
 
-    const run = () => options.handler({ uid, appCheckVerified, data: options.request.data });
+    const run = (idempotency: IdempotencyExecution<TResult> | null) =>
+      options.handler({ uid, appCheckVerified, data: options.request.data, idempotency });
 
     try {
       const result = options.idempotencyKey
         ? await withIdempotency(options.idempotencyKey, run)
-        : await run();
+        : await run(null);
       await recordOutcome(options.operation, uid, "success");
       return result;
     } catch (error) {

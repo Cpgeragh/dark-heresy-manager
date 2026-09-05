@@ -12,6 +12,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { assertCanEditCharacter } from "../shared/characterAuthorization.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
 const MAX_EXPERIENCE = 10_000_000;
 
@@ -24,7 +25,8 @@ export interface ReconcileCharacterSpentXpInput {
 
 export async function reconcileCharacterSpentXp(
   input: ReconcileCharacterSpentXpInput,
-  callerUid: string
+  callerUid: string,
+  idempotency: IdempotencyExecution<{ updated: boolean }> | null = null
 ): Promise<{ updated: boolean }> {
   if (!Number.isInteger(input.spent) || input.spent < 0 || input.spent > MAX_EXPERIENCE) {
     throw new HttpsError(
@@ -43,7 +45,9 @@ export async function reconcileCharacterSpentXp(
   }
   const dmId = campaignSnapshot.data()?.dmId;
 
-  return db.runTransaction(
+  return runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const characterSnapshot = await transaction.get(characterRef);
       if (!characterSnapshot.exists) {

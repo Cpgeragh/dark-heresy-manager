@@ -26,7 +26,12 @@ vi.mock("../../src/shared/validation", () => ({
 }));
 vi.mock("../../src/shared/rateLimit", () => ({ enforceRateLimit: vi.fn() }));
 vi.mock("../../src/shared/idempotency", () => ({
-  withIdempotency: vi.fn((_key: string, handler: () => Promise<unknown>) => handler()),
+  withIdempotency: vi.fn(
+    (
+      _key: string,
+      handler: (execution: { runTransaction: ReturnType<typeof vi.fn> }) => Promise<unknown>
+    ) => handler({ runTransaction: vi.fn() })
+  ),
 }));
 vi.mock("../../src/shared/audit", () => ({ recordAuditEntry: vi.fn() }));
 vi.mock("../../src/shared/metrics", () => ({ recordUsageMetric: vi.fn() }));
@@ -61,6 +66,7 @@ describe("protectedCallable", () => {
       uid: "user-1",
       appCheckVerified: true,
       data: { code: "DH-ABCD-1234" },
+      idempotency: null,
     });
     expect(recordAuditEntry).toHaveBeenCalledWith(
       expect.objectContaining({ operation: "test-op", actorUid: "user-1", outcome: "success" })

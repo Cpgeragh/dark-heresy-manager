@@ -319,8 +319,8 @@ describe("processIdentityReclaimChunk", () => {
 
     expect(identityMigration.migrateCampaignOwnership).toHaveBeenCalledTimes(2);
     expect(mockBatchCommit).toHaveBeenCalledOnce();
-    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith("job-1", "lease-1", null, 4);
-    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1");
+    expect(mockAdvanceJobCheckpoint).not.toHaveBeenCalled();
+    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1", 4);
     expect(result).toEqual({ done: true, processedCount: 4, totalCount: 4 });
   });
 
@@ -388,7 +388,7 @@ describe("processIdentityReclaimChunk", () => {
     const result = await processIdentityReclaimChunk({ jobId: "job-1" }, "new-uid");
 
     expect(mockBatchCommit).not.toHaveBeenCalled();
-    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1");
+    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1", 0);
     expect(result).toEqual({ done: true, processedCount: 0, totalCount: 0 });
   });
 

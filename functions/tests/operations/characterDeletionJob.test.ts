@@ -478,7 +478,7 @@ describe("processCharacterDeletionChunk", () => {
     const result = await processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID);
 
     expect(mockCharacterDelete).toHaveBeenCalled();
-    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1");
+    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1", 1);
     expect(mockAdvanceJobCheckpoint).not.toHaveBeenCalled();
     expect(result).toEqual({ done: true, processedCount: 1, totalCount: 10 });
   });

@@ -9,6 +9,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
 export interface ForceAssignCharacterInput {
   campaignId: string;
@@ -19,7 +20,8 @@ export interface ForceAssignCharacterInput {
 
 export async function forceAssignCharacter(
   input: ForceAssignCharacterInput,
-  callerUid: string
+  callerUid: string,
+  idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -33,7 +35,9 @@ export async function forceAssignCharacter(
     throw new HttpsError("permission-denied", "Only the campaign DM can force-assign a character.");
   }
 
-  await db.runTransaction(
+  await runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const freshCampaignSnapshot = await transaction.get(campaignRef);
       const memberIds = (freshCampaignSnapshot.data()?.memberIds as string[] | undefined) ?? [];

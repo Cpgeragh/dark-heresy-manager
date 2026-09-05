@@ -87,6 +87,13 @@ describe("Functions: custom item mutation job", () => {
     const totalMutated = await drainJob(started.jobId);
     expect(totalMutated).toBe(1);
 
+    const idempotencyKey = `start-custom-item-mutation-job:${dmUid}:${campaignRef.id}:${itemRef.id}:publish-and-update`;
+    const idempotencySnapshot = await adminDb
+      .collection("idempotencyKeys")
+      .doc(idempotencyKey)
+      .get();
+    expect(idempotencySnapshot.exists).toBe(false);
+
     const itemSnapshot = await itemRef.get();
     expect(itemSnapshot.data()?.status).toBe("published");
     expect(itemSnapshot.data()?.publishedVersionId).toBe(versionRef.id);

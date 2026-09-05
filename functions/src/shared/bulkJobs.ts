@@ -212,7 +212,11 @@ export async function advanceJobCheckpoint(
   );
 }
 
-export async function completeJob(jobId: string, leaseId: string): Promise<void> {
+export async function completeJob(
+  jobId: string,
+  leaseId: string,
+  processedIncrement = 0
+): Promise<void> {
   const db = getFirestore();
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
   await db.runTransaction(
@@ -223,10 +227,15 @@ export async function completeJob(jobId: string, leaseId: string): Promise<void>
       if (job.leaseOwner !== leaseId) return;
       transaction.update(ref, {
         status: "completed",
+        processedCount: FieldValue.increment(processedIncrement),
+        checkpoint: null,
         leaseOwner: null,
         leaseExpiresAt: null,
         updatedAt: Date.now(),
       });
+      if (job.idempotencyKey) {
+        transaction.delete(db.collection(IDEMPOTENCY_COLLECTION).doc(job.idempotencyKey));
+      }
     },
     { maxAttempts: 5 }
   );

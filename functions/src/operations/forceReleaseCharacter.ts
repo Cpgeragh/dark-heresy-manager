@@ -8,6 +8,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
 export interface ForceReleaseCharacterInput {
   campaignId: string;
@@ -17,7 +18,8 @@ export interface ForceReleaseCharacterInput {
 
 export async function forceReleaseCharacter(
   input: ForceReleaseCharacterInput,
-  callerUid: string
+  callerUid: string,
+  idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -34,7 +36,9 @@ export async function forceReleaseCharacter(
     );
   }
 
-  await db.runTransaction(
+  await runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const characterSnapshot = await transaction.get(characterRef);
       if (!characterSnapshot.exists) {

@@ -212,7 +212,8 @@ export const revokeRecoveryCode = onCall<RevokeRecoveryCodeInput>(
         { key: `revoke-recovery-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
       idempotencyKey: buildOperationIdempotencyKey("revoke-recovery-code", callerUid, operationId),
-      handler: ({ uid, data }) => runRevokeRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
+      handler: ({ uid, data, idempotency }) =>
+        runRevokeRecoveryCode(data, uid, recoveryCodeHmacSecret.value(), idempotency),
     });
   }
 );
@@ -235,9 +236,9 @@ export const claimCharacter = onCall<ClaimCharacterInput>(
         { key: "claim-character:global", limit: 500, windowMs: 60 * 60 * 1000 },
       ],
       idempotencyKey: `claim-character:${callerUid}:${codeHash}`,
-      handler: ({ uid, data }) =>
+      handler: ({ uid, data, idempotency }) =>
         withMinimumDuration(250, () =>
-          runClaimCharacter(data, uid, recoveryCodeHmacSecret.value())
+          runClaimCharacter(data, uid, recoveryCodeHmacSecret.value(), idempotency)
         ),
     });
   }
@@ -254,7 +255,7 @@ export const releaseCharacter = onCall<ReleaseCharacterInput>({ timeoutSeconds: 
     fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
     rateLimits: [{ key: `release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
     idempotencyKey: buildOperationIdempotencyKey("release-character", callerUid, operationId),
-    handler: ({ uid, data }) => runReleaseCharacter(data, uid),
+    handler: ({ uid, data, idempotency }) => runReleaseCharacter(data, uid, idempotency),
   });
 });
 
@@ -277,7 +278,7 @@ export const forceReleaseCharacter = onCall<ForceReleaseCharacterInput>(
         callerUid,
         operationId
       ),
-      handler: ({ uid, data }) => runForceReleaseCharacter(data, uid),
+      handler: ({ uid, data, idempotency }) => runForceReleaseCharacter(data, uid, idempotency),
     });
   }
 );
@@ -306,7 +307,7 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
         callerUid,
         operationId
       ),
-      handler: ({ uid, data }) => runForceAssignCharacter(data, uid),
+      handler: ({ uid, data, idempotency }) => runForceAssignCharacter(data, uid, idempotency),
     });
   }
 );
@@ -329,8 +330,14 @@ export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
         { key: `start-identity-reclaim-job:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
       ],
       idempotencyKey,
-      handler: ({ uid, data }) =>
-        runStartIdentityReclaimJob(data, uid, idempotencyKey, identityCodeHmacSecret.value()),
+      handler: ({ uid, data, idempotency }) =>
+        runStartIdentityReclaimJob(
+          data,
+          uid,
+          idempotencyKey,
+          identityCodeHmacSecret.value(),
+          idempotency
+        ),
     });
   }
 );
@@ -394,8 +401,14 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
           { key: `start-character-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
         ],
         idempotencyKey,
-        handler: ({ uid, data }) =>
-          runStartCharacterDeletionJob(data, uid, idempotencyKey, recoveryCodeHmacSecret.value()),
+        handler: ({ uid, data, idempotency }) =>
+          runStartCharacterDeletionJob(
+            data,
+            uid,
+            idempotencyKey,
+            recoveryCodeHmacSecret.value(),
+            idempotency
+          ),
       }
     );
   }
@@ -441,8 +454,14 @@ export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>(
         { key: `start-campaign-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
       idempotencyKey,
-      handler: ({ uid, data }) =>
-        runStartCampaignDeletionJob(data, uid, idempotencyKey, recoveryCodeHmacSecret.value()),
+      handler: ({ uid, data, idempotency }) =>
+        runStartCampaignDeletionJob(
+          data,
+          uid,
+          idempotencyKey,
+          recoveryCodeHmacSecret.value(),
+          idempotency
+        ),
     });
   }
 );
@@ -496,7 +515,8 @@ export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput
         { key: `start-custom-item-mutation-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
       idempotencyKey,
-      handler: ({ uid, data }) => runStartCustomItemMutationJob(data, uid, idempotencyKey),
+      handler: ({ uid, data, idempotency }) =>
+        runStartCustomItemMutationJob(data, uid, idempotencyKey, idempotency),
     });
   }
 );
@@ -667,7 +687,7 @@ export const patchCharacterField = onCall<PatchCharacterFieldInput>(
         callerUid,
         (request.data as PatchCharacterFieldInput | undefined)?.operationId
       ),
-      handler: ({ uid, data }) => runPatchCharacterField(data, uid),
+      handler: ({ uid, data, idempotency }) => runPatchCharacterField(data, uid, idempotency),
     });
   }
 );
@@ -690,7 +710,7 @@ export const reconcileCharacterSpentXp = onCall<ReconcileCharacterSpentXpInput>(
         callerUid,
         (request.data as ReconcileCharacterSpentXpInput | undefined)?.operationId
       ),
-      handler: ({ uid, data }) => runReconcileCharacterSpentXp(data, uid),
+      handler: ({ uid, data, idempotency }) => runReconcileCharacterSpentXp(data, uid, idempotency),
     });
   }
 );

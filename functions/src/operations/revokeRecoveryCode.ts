@@ -13,6 +13,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 import {
   RECOVERY_CODE_HISTORY_COLLECTION,
   buildRecoveryCodeHistoryPayload,
@@ -30,7 +31,8 @@ export interface RevokeRecoveryCodeInput {
 export async function revokeRecoveryCode(
   input: RevokeRecoveryCodeInput,
   callerUid: string,
-  hmacSecret: string
+  hmacSecret: string,
+  idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -44,7 +46,9 @@ export async function revokeRecoveryCode(
     throw new HttpsError("permission-denied", "Only the campaign DM can revoke a Recovery Code.");
   }
 
-  await db.runTransaction(
+  await runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const characterSnapshot = await transaction.get(characterRef);
       if (!characterSnapshot.exists) {

@@ -18,6 +18,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
+import type { IdempotencyExecution } from "../shared/idempotency.js";
 import {
   prepareBulkJob,
   acquireJobLease,
@@ -68,7 +69,8 @@ export async function startIdentityReclaimJob(
   input: StartIdentityReclaimJobInput,
   callerUid: string,
   idempotencyKey: string | null,
-  hmacSecret: string
+  hmacSecret: string,
+  idempotency: IdempotencyExecution<StartIdentityReclaimJobResult> | null = null
 ): Promise<StartIdentityReclaimJobResult> {
   const db = getFirestore();
   const code = input.code.trim();
@@ -137,6 +139,28 @@ export async function startIdentityReclaimJob(
     idempotencyKey
   );
 
+  const result: StartIdentityReclaimJobResult = {
+    jobId: preparedJob.jobId,
+    totalCount: plan.totalWriteCount,
+    role: role ?? "player",
+    profileTransferred: true,
+  };
+
+  if (idempotency) {
+    return idempotency.runTransaction(async (transaction) => {
+      transaction.update(indexRef, { uid: callerUid });
+      transaction.set(db.collection("identitySecret").doc(callerUid), { code });
+      transaction.delete(db.collection("identitySecret").doc(oldUid));
+      transaction.set(db.collection("users").doc(callerUid), { onboarded: true }, { merge: true });
+      transaction.set(db.collection("userProfiles").doc(callerUid), {
+        firstName: recoveredFirstName,
+      });
+      transaction.delete(oldProfileRef);
+      transaction.set(preparedJob.ref, preparedJob.record);
+      return result;
+    });
+  }
+
   const transferBatch = db.batch();
   transferBatch.update(indexRef, { uid: callerUid });
   transferBatch.set(db.collection("identitySecret").doc(callerUid), { code });
@@ -148,13 +172,7 @@ export async function startIdentityReclaimJob(
   transferBatch.delete(oldProfileRef);
   transferBatch.set(preparedJob.ref, preparedJob.record);
   await transferBatch.commit();
-
-  return {
-    jobId: preparedJob.jobId,
-    totalCount: plan.totalWriteCount,
-    role: role ?? "player",
-    profileTransferred: true,
-  };
+  return result;
 }
 
 export async function processIdentityReclaimChunk(
@@ -184,10 +202,10 @@ export async function processIdentityReclaimChunk(
     }
 
     const done = index >= campaigns.length;
-    await advanceJobCheckpoint(input.jobId, leaseId, done ? null : String(index), writesInChunk);
-
     if (done) {
-      await completeJob(input.jobId, leaseId);
+      await completeJob(input.jobId, leaseId, writesInChunk);
+    } else {
+      await advanceJobCheckpoint(input.jobId, leaseId, String(index), writesInChunk);
     }
 
     return {

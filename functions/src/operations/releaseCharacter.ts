@@ -7,6 +7,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
 export interface ReleaseCharacterInput {
   campaignId: string;
@@ -16,13 +17,16 @@ export interface ReleaseCharacterInput {
 
 export async function releaseCharacter(
   input: ReleaseCharacterInput,
-  callerUid: string
+  callerUid: string,
+  idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
   const characterRef = campaignRef.collection("characters").doc(input.characterId);
 
-  await db.runTransaction(
+  await runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const characterSnapshot = await transaction.get(characterRef);
       if (!characterSnapshot.exists) {

@@ -11,6 +11,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { assertCanEditCharacter } from "../shared/characterAuthorization.js";
 import { assertValidCharacterFieldValue } from "../shared/characterFieldValidation.js";
 import { computeCharacterSummary, isSummaryRelevantField } from "../shared/characterSummary.js";
+import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
 export interface PatchCharacterFieldInput {
   campaignId: string;
@@ -45,7 +46,8 @@ function normalizePatch(input: PatchCharacterFieldInput): Record<string, unknown
 
 export async function patchCharacterField(
   input: PatchCharacterFieldInput,
-  callerUid: string
+  callerUid: string,
+  idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const patch = normalizePatch(input);
   for (const [field, value] of Object.entries(patch)) {
@@ -62,7 +64,9 @@ export async function patchCharacterField(
   }
   const dmId = campaignSnapshot.data()?.dmId;
 
-  await db.runTransaction(
+  await runOperationTransaction(
+    db,
+    idempotency,
     async (transaction) => {
       const characterSnapshot = await transaction.get(characterRef);
       if (!characterSnapshot.exists) {

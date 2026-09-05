@@ -259,11 +259,29 @@ describe("completeJob / failJob", () => {
       data: () => makeJob({ leaseOwner: "lease-1" }),
     });
 
-    await completeJob("job-1", "lease-1");
+    await completeJob("job-1", "lease-1", 3);
 
     expect(mockTransactionUpdate).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ status: "completed", leaseOwner: null })
+      expect.objectContaining({
+        status: "completed",
+        processedCount: { __increment: 3 },
+        checkpoint: null,
+        leaseOwner: null,
+      })
+    );
+  });
+
+  it("clears the job's idempotency key when completion makes a fresh start safe", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ leaseOwner: "lease-1", idempotencyKey: "start-test-job:user-1:c1" }),
+    });
+
+    await completeJob("job-1", "lease-1");
+
+    expect(mockTransactionDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ collectionName: "idempotencyKeys", id: "start-test-job:user-1:c1" })
     );
   });
 

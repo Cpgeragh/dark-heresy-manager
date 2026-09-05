@@ -693,7 +693,7 @@ describe("processCustomItemMutationChunk", () => {
     const result = await processCustomItemMutationChunk({ jobId: "job-1" }, DM_UID);
 
     expect(mockBatchCommit).not.toHaveBeenCalled();
-    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1");
+    expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1", 1);
     expect(result).toEqual({ done: true, processedCount: 1, totalCount: 10, mutatedThisChunk: 0 });
   });
 });

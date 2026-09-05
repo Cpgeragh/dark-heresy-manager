@@ -32,7 +32,9 @@ import {
   createBulkJob,
   handleChunkFailure,
   MAX_JOB_TOTAL_COUNT,
+  prepareBulkJob,
 } from "../shared/bulkJobs.js";
+import type { IdempotencyExecution } from "../shared/idempotency.js";
 
 const CHUNK_SIZE = 400;
 const RECOVERY_CODE_PATTERN = /^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
@@ -89,7 +91,8 @@ export async function startCampaignDeletionJob(
   input: StartCampaignDeletionJobInput,
   callerUid: string,
   idempotencyKey: string | null,
-  hmacSecret: string
+  hmacSecret: string,
+  idempotency: IdempotencyExecution<{ jobId: string; totalCount: number }> | null = null
 ): Promise<{ jobId: string; totalCount: number }> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -168,10 +171,26 @@ export async function startCampaignDeletionJob(
     );
   }
 
+  const jobData = { campaignId: input.campaignId };
+  if (idempotency) {
+    const prepared = prepareBulkJob(
+      db,
+      "campaign-deletion",
+      callerUid,
+      jobData,
+      totalCount,
+      idempotencyKey
+    );
+    return idempotency.runTransaction(async (transaction) => {
+      transaction.set(prepared.ref, prepared.record);
+      return { jobId: prepared.jobId, totalCount };
+    });
+  }
+
   const jobId = await createBulkJob(
     "campaign-deletion",
     callerUid,
-    { campaignId: input.campaignId },
+    jobData,
     totalCount,
     idempotencyKey
   );
@@ -424,7 +443,7 @@ export async function processCampaignDeletionChunk(
     );
 
     if (nextCheckpoint === null) {
-      await completeJob(input.jobId, leaseId);
+      await completeJob(input.jobId, leaseId, processed);
       return {
         done: true,
         processedCount: job.processedCount + processed,

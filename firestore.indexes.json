@@ -35,6 +35,12 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "idempotencyKeys",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
       "collectionGroup": "characters",
       "fieldPath": "userId",
       "indexes": [
