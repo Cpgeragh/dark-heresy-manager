@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# Dark Heresy Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A campaign and character management app for Dark Heresy (1st Edition), built as an installable Progressive Web App. A Game Master runs one or more campaigns; players claim and manage their own character sheets within them.
 
-Currently, two official plugins are available:
+## Tech stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19 + TypeScript, built with Vite
+- Tailwind CSS
+- Firebase: Firestore (data), Authentication (anonymous sign-in), Cloud Functions (protected server-side operations), Firebase Hosting
+- Vite PWA plugin for offline support and installability
 
-## React Compiler
+## Project structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/` — the React application (pages, character-sheet tabs, hooks, services, Firestore data layer, game-rules reference data)
+- `functions/` — an independent Cloud Functions project for server-side operations that can't be trusted to the client (recovery codes, ownership transfers, resumable bulk jobs)
+- `billing-guard/` — a small standalone Cloud Function that acts as an automatic billing kill switch
+- `tests/` — unit, integration, Firestore-rules, and Cloud Functions test suites
+- `docs/` — architecture, security, backup, and deployment documentation (see below)
 
-## Expanding the ESLint configuration
+## Getting started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**App**
+- `npm run dev` — start the Vite dev server
+- `npm run build` — typecheck and build for production
+- `npm run lint` — run ESLint
+- `npm run format` / `npm run format:check` — run or check Prettier across the app, tests, Functions, and billing-guard
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+**Tests**
+- `npm run test` — Vitest in watch mode (fast suite)
+- `npm run test:run` — the fast suite plus the heavier integration files, once
+- `npm run test:rules` — Firestore security-rules tests against the local emulator
+- `npm run test:functions` — Cloud Functions tests against the local emulator
+- `npm run test:functions:unit` — Cloud Functions unit tests (mocked Firestore, no emulator)
+- `npm run test:all` — every suite above
+
+**Safety checks**
+- `npm run check:safety` — local secret-scanning and lockfile-consistency checks
+- `npm run check:deployment:local` — safety checks, production build, and the full test suite
+
+## Documentation
+
+- [`docs/architecture.md`](docs/architecture.md) — system overview, data model, and the authoritative product-limits table
+- [`SECURITY_RULES.md`](SECURITY_RULES.md) — Firestore security rules reference
+- [`docs/manual-test-checklist.md`](docs/manual-test-checklist.md) — manual functional test checklist
+- [`docs/accessibility-test-checklist.md`](docs/accessibility-test-checklist.md) — accessibility test checklist
+- [`docs/backup-policy.md`](docs/backup-policy.md) — backup configuration and retention
+- [`docs/data-lifecycle-policy.md`](docs/data-lifecycle-policy.md) — what happens to data over time (retention, deletion, cleanup)
+- [`docs/deployment-readiness-checklist.md`](docs/deployment-readiness-checklist.md) — pre-deployment checklist
+- [`docs/billing-kill-switch.md`](docs/billing-kill-switch.md) — the automatic billing kill switch
+- [`docs/dependency-security-assessment.md`](docs/dependency-security-assessment.md) — dependency security assessment
