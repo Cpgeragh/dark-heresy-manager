@@ -54,4 +54,40 @@ describe("CustomDrugForm", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it("retains quantity and maps rules to notes when quantity editing is hidden", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = renderForm({
+      title: "Edit Custom Drug",
+      submitLabel: "Save Draft",
+      includeQuantity: false,
+      initialItem: {
+        id: "drug-1",
+        name: "Slaught",
+        quantity: 4,
+        source: "Custom",
+        availability: "Very Rare",
+        weight: "0.1 kg",
+        value: "300 Thrones",
+        notes: "Old notes",
+        customLibraryId: "library-3",
+        customLibraryVersionId: "version-3",
+      },
+    });
+
+    expect(screen.queryByLabelText("Quantity")).not.toBeInTheDocument();
+    await user.clear(screen.getByLabelText("Rules"));
+    await user.type(screen.getByLabelText("Rules"), "  Updated notes  ");
+    await user.click(screen.getByRole("button", { name: "Save Draft" }));
+
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "drug-1",
+        quantity: 4,
+        notes: "Updated notes",
+        customLibraryId: "library-3",
+        customLibraryVersionId: "version-3",
+      })
+    );
+  });
 });

@@ -54,4 +54,38 @@ describe("CustomConsumableForm", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it("retains quantity and library identifiers when quantity editing is hidden", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = renderForm({
+      title: "Edit Custom Consumable",
+      submitLabel: "Save Draft",
+      includeQuantity: false,
+      initialItem: {
+        id: "consumable-1",
+        name: "Med Patch",
+        quantity: 7,
+        source: "2nd Ed",
+        availability: "Rare",
+        weight: "0.1 kg",
+        value: "20 Thrones",
+        description: "Restore one Wound",
+        customLibraryId: "library-2",
+        customLibraryVersionId: "version-2",
+      },
+    });
+
+    expect(screen.queryByLabelText("Quantity")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Save Draft" }));
+
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "consumable-1",
+        quantity: 7,
+        description: "Restore one Wound",
+        customLibraryId: "library-2",
+        customLibraryVersionId: "version-2",
+      })
+    );
+  });
 });

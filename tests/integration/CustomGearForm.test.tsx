@@ -52,4 +52,36 @@ describe("CustomGearForm", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it("preserves edit identifiers and maps trimmed rules to description", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = renderForm({
+      title: "Edit Custom Item",
+      submitLabel: "Save Draft",
+      initialItem: {
+        id: "gear-1",
+        name: "Auspex",
+        source: "Custom",
+        availability: "Scarce",
+        weight: "0.5 kg",
+        value: "145 Thrones",
+        description: "Old rules",
+        customLibraryId: "library-1",
+        customLibraryVersionId: "version-1",
+      },
+    });
+
+    await user.clear(screen.getByLabelText("Rules"));
+    await user.type(screen.getByLabelText("Rules"), "  Revised rules  ");
+    await user.click(screen.getByRole("button", { name: "Save Draft" }));
+
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "gear-1",
+        description: "Revised rules",
+        customLibraryId: "library-1",
+        customLibraryVersionId: "version-1",
+      })
+    );
+  });
 });
