@@ -6,6 +6,7 @@ import {
   getSkillGroupCharacteristics,
   type SkillWithComputed,
 } from "./skillsConstants";
+import type { SkillSource } from "../../../types/SkillSource";
 import { charColour, sourceColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { Button } from "../../../ui/buttons/Button";
@@ -225,17 +226,19 @@ export function AddSkillModal({
             {item.category}
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
-            {[...new Set(item.skills.map((skill) => skill.source).filter(Boolean))].map(
-              (source) => (
-                <Chip
-                  key={source}
-                  size="sm"
-                  className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(source!)}`}
-                >
-                  {source}
-                </Chip>
-              )
-            )}
+            {[
+              ...new Set(
+                item.skills.map((skill) => skill.source).filter((s): s is SkillSource => Boolean(s))
+              ),
+            ].map((source) => (
+              <Chip
+                key={source}
+                size="sm"
+                className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(source)}`}
+              >
+                {source}
+              </Chip>
+            ))}
             {getSkillGroupCharacteristics(item.skills).map((characteristic) => (
               <Chip
                 key={characteristic}

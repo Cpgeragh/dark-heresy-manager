@@ -9,7 +9,7 @@ import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal
 
 const GENDER_OPTIONS = ["Male", "Female", "Other"] as const;
 
-function isCustomGender(value?: string): boolean {
+function isCustomGender(value?: string): value is string {
   return !!value && value !== "Male" && value !== "Female";
 }
 
@@ -23,7 +23,7 @@ export function GenderPicker({
   onClose: () => void;
 }) {
   const [naming, setNaming] = useState(false);
-  const [customName, setCustomName] = useState(isCustomGender(selected) ? selected! : "");
+  const [customName, setCustomName] = useState(isCustomGender(selected) ? selected : "");
 
   if (naming) {
     return (

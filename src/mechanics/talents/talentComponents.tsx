@@ -211,21 +211,21 @@ export function TalentPickerModal({
         })()
       : (() => {
           if (!traitData) return [];
+          const trait = traitData;
           const atPurchaseLimit =
-            (!traitData.repeatable && ownedForPicked.length > 0) ||
-            (traitData.maxPurchases !== undefined &&
-              ownedForPicked.length >= traitData.maxPurchases);
+            (!trait.repeatable && ownedForPicked.length > 0) ||
+            (trait.maxPurchases !== undefined && ownedForPicked.length >= trait.maxPurchases);
           if (atPurchaseLimit) return [];
-          const base = (traitData.specialisationOptions ?? [])
+          const base = (trait.specialisationOptions ?? [])
             .filter((option) => {
-              if (traitData.repeatableSpecialisation) return true;
+              if (trait.repeatableSpecialisation) return true;
               const value = typeof option === "string" ? option : option.value;
               return !hasTalentChoice(ownedForPicked, value);
             })
             .map((option) => {
               const value = typeof option === "string" ? option : option.value;
               const label = typeof option === "string" ? option : option.label;
-              if (!traitData.repeatableSpecialisation) return option;
+              if (!trait.repeatableSpecialisation) return option;
               const ownedCount = ownedForPicked.filter(
                 (entry) =>
                   entry.specialisation?.trim().toLocaleLowerCase() === value.toLocaleLowerCase()
@@ -245,8 +245,8 @@ export function TalentPickerModal({
                 value,
                 label,
                 ...(ownedCount !== undefined ? { ownedCount } : {}),
-                cost: getNextTalentCost(career, rank, traitData!.id, value, entries),
-                rankChips: getTalentRankChips(career, traitData!.id, value),
+                cost: getNextTalentCost(career, rank, trait.id, value, entries),
+                rankChips: getTalentRankChips(career, trait.id, value),
               };
             })
             .filter((option) => showOverflow || option.cost !== undefined);

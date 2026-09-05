@@ -102,7 +102,7 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
 }> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertCustomItemCreator(creator);
-  const cleanData = stripUndefined(data) as CustomItemDataByCategory[TCategory];
+  const cleanData = stripUndefined(data);
   assertCustomItemData(category, cleanData);
   const itemRef = doc(customItemsCollectionRef(campaignId));
   const versionRef = doc(customItemVersionsCollectionRef(campaignId, itemRef.id));
@@ -163,7 +163,7 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertCustomItemCreator(editor, "Custom-item editor");
-  const cleanData = stripUndefined(data) as CustomItemDataByCategory[TCategory];
+  const cleanData = stripUndefined(data);
   assertCustomItemData(category, cleanData);
   const itemRef = customItemDocRef(campaignId, customItemId);
 

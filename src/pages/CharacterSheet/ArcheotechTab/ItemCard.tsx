@@ -131,8 +131,8 @@ export function ItemCard({
             {/* Type-specific stat chips */}
             {item.type === "Armour" && (
               <div className="mt-1 flex flex-wrap gap-1.5">
-                {(item.locations ?? []).length > 0 && (
-                  <StatChip label="Location" value={locationLabel(item.locations!)} />
+                {item.locations && item.locations.length > 0 && (
+                  <StatChip label="Location" value={locationLabel(item.locations)} />
                 )}
                 {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
                 {item.stacks && <Chip className={colourStacks}>Stacks</Chip>}
@@ -145,19 +145,19 @@ export function ItemCard({
             )}
             {item.type === "Shield" && (
               <div className="mt-1 flex flex-wrap gap-1.5">
-                {(item.locations ?? []).length > 0 && (
-                  <StatChip label="Location" value={locationLabel(item.locations!)} />
+                {item.locations && item.locations.length > 0 && (
+                  <StatChip label="Location" value={locationLabel(item.locations)} />
                 )}
                 {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
               </div>
             )}
             {item.type === "Cybernetic" && (
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                {(item.bodyLocation ?? []).length > 0 && (
+                {item.bodyLocation && item.bodyLocation.length > 0 && (
                   <StatChip
                     label="Location"
-                    value={item
-                      .bodyLocation!.map((location) => ARMOUR_LOCATION_LABELS[location])
+                    value={item.bodyLocation
+                      .map((location) => ARMOUR_LOCATION_LABELS[location])
                       .join(" & ")}
                   />
                 )}
