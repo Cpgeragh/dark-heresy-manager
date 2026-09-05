@@ -22,6 +22,7 @@ import {
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
+import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -235,11 +236,6 @@ export function ArcheotechTab({
     () => [...archeotech].sort((a, b) => a.name.localeCompare(b.name)),
     [archeotech]
   );
-  const archeotechColumns = [
-    sortedArcheotech.filter((_, index) => index % 2 === 0),
-    sortedArcheotech.filter((_, index) => index % 2 === 1),
-  ];
-
   const renderItemCard = (item: ArcheotechItem) => {
     const linkedLibraryItem = item.customLibraryId
       ? campaignCustomArcheotechById.get(item.customLibraryId)
@@ -315,15 +311,7 @@ export function ArcheotechTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No archeotech recorded.</p>
         )}
 
-        <div className="space-y-3 sm:hidden">{sortedArcheotech.map(renderItemCard)}</div>
-
-        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
-          {archeotechColumns.map((column, index) => (
-            <div key={index} className="space-y-3">
-              {column.map(renderItemCard)}
-            </div>
-          ))}
-        </div>
+        <IndependentCardGrid items={sortedArcheotech.map(renderItemCard)} />
 
         {showCustomForm && (
           <CustomArcheotechForm

@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet/ArmourTab/index.tsx
 
-import { useState, useCallback, useMemo, type ReactNode } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type {
   WornArmourPiece,
   CyberneticItem,
@@ -43,6 +43,7 @@ import {
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 import { getTraitArmourSources } from "../../../mechanics/traits/traitEffects";
+import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -97,58 +98,6 @@ function applyCraftsmanshipToRef(ref: ArmourRef, craftsmanship: ArmourCraftsmans
     apOverrides,
     weight: halveWeight(ref.weight),
   };
-}
-
-function ArmourPieceGrid({
-  pieces,
-  renderPiece,
-}: {
-  pieces: WornArmourPiece[];
-  renderPiece: (piece: WornArmourPiece) => ReactNode;
-}) {
-  const columns = [
-    pieces.filter((_, index) => index % 2 === 0),
-    pieces.filter((_, index) => index % 2 === 1),
-  ];
-
-  return (
-    <>
-      <div className="space-y-2 sm:hidden">{pieces.map(renderPiece)}</div>
-      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-2 sm:items-start">
-        {columns.map((column, index) => (
-          <div key={index} className="space-y-2">
-            {column.map(renderPiece)}
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
-
-function ForceFieldGrid({
-  pieces,
-  renderPiece,
-}: {
-  pieces: WornArmourPiece[];
-  renderPiece: (piece: WornArmourPiece) => ReactNode;
-}) {
-  const columns = [
-    pieces.filter((_, index) => index % 2 === 0),
-    pieces.filter((_, index) => index % 2 === 1),
-  ];
-
-  return (
-    <>
-      <div className="space-y-2 sm:hidden">{pieces.map(renderPiece)}</div>
-      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-2 sm:items-start">
-        {columns.map((column, index) => (
-          <div key={index} className="space-y-2">
-            {column.map(renderPiece)}
-          </div>
-        ))}
-      </div>
-    </>
-  );
 }
 
 export function ArmourTab({
@@ -686,7 +635,10 @@ export function ArmourTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour worn.</p>
         )}
         {worn.length > 0 && (
-          <ArmourPieceGrid pieces={worn} renderPiece={(piece) => renderArmourRow(piece, true)} />
+          <IndependentCardGrid
+            items={worn.map((piece) => renderArmourRow(piece, true))}
+            spacing={2}
+          />
         )}
         {archeotechArmourWorn.length > 0 && (
           <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start">
@@ -720,7 +672,10 @@ export function ArmourTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour stowed.</p>
         )}
         {stowed.length > 0 && (
-          <ArmourPieceGrid pieces={stowed} renderPiece={(piece) => renderArmourRow(piece, false)} />
+          <IndependentCardGrid
+            items={stowed.map((piece) => renderArmourRow(piece, false))}
+            spacing={2}
+          />
         )}
         {archeotechArmourStowed.length > 0 && (
           <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start">
@@ -750,7 +705,7 @@ export function ArmourTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No force field equipped.</p>
         )}
         {forceFields.length > 0 && (
-          <ForceFieldGrid pieces={forceFields} renderPiece={renderForceFieldRow} />
+          <IndependentCardGrid items={forceFields.map(renderForceFieldRow)} spacing={2} />
         )}
         {archeotechForceFieldItems.map((item) => (
           <ArcheotechForceFieldRow

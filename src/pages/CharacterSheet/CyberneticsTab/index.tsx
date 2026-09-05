@@ -42,7 +42,7 @@ import { RangedCard } from "../weapons/RangedCard";
 import { CustomRangedForm } from "../weapons/CustomRangedForm";
 import { MeleeCard } from "../weapons/MeleeCard";
 import { CustomMeleeForm } from "../weapons/CustomMeleeForm";
-import { IndependentCardGrid } from "../weapons/IndependentCardGrid";
+import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import {
   buildMeleeWeaponSnapshot,
@@ -677,11 +677,6 @@ export function CyberneticsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
-  const cyberneticColumns = [
-    sortedCybernetics.filter((_, index) => index % 2 === 0),
-    sortedCybernetics.filter((_, index) => index % 2 === 1),
-  ];
-
   const renderImplantRow = (item: CyberneticItem) => {
     const linkedArm = item.concealedWeapon
       ? cybernetics.find((candidate) => candidate.id === item.concealedWeapon?.armId)
@@ -876,15 +871,7 @@ export function CyberneticsTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No cybernetics installed.</p>
         )}
 
-        <div className="space-y-3 sm:hidden">{sortedCybernetics.map(renderImplantRow)}</div>
-
-        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
-          {cyberneticColumns.map((column, index) => (
-            <div key={index} className="space-y-3">
-              {column.map(renderImplantRow)}
-            </div>
-          ))}
-        </div>
+        <IndependentCardGrid items={sortedCybernetics.map(renderImplantRow)} />
         {archeotechCyberneticItems.map((item) => (
           <ArcheotechImplantRow
             key={item.id}

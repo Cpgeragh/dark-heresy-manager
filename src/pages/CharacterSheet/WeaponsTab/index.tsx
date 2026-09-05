@@ -40,7 +40,7 @@ import { CustomShieldForm } from "../weapons/CustomShieldForm";
 import { ArcheotechShieldRow } from "../weapons/ArcheotechShieldRow";
 import { CyberneticWeaponCard } from "../weapons/CyberneticWeaponCard";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
-import { IndependentCardGrid } from "../weapons/IndependentCardGrid";
+import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 import {
   isIntegratedRangedWeapon,
   isIntegratedMeleeWeapon,

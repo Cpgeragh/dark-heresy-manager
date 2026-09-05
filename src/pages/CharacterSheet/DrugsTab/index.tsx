@@ -21,6 +21,7 @@ import {
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
+import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 
 interface DrugsTabProps {
   campaignId: string;
@@ -212,11 +213,6 @@ export function DrugsTab({
     [editable, drugs, onUpdate]
   );
 
-  const drugColumns = [
-    sortedDrugs.filter((_, index) => index % 2 === 0),
-    sortedDrugs.filter((_, index) => index % 2 === 1),
-  ];
-
   const renderDrugRow = (item: DrugItem) => {
     const linkedLibraryItem = item.customLibraryId
       ? campaignCustomDrugsById.get(item.customLibraryId)
@@ -292,15 +288,7 @@ export function DrugsTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No drugs carried.</p>
         )}
 
-        <div className="space-y-3 sm:hidden">{sortedDrugs.map(renderDrugRow)}</div>
-
-        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
-          {drugColumns.map((column, index) => (
-            <div key={index} className="space-y-3">
-              {column.map(renderDrugRow)}
-            </div>
-          ))}
-        </div>
+        <IndependentCardGrid items={sortedDrugs.map(renderDrugRow)} />
       </section>
 
       {showPicker && (
