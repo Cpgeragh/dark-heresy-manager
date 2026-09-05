@@ -368,16 +368,24 @@ export async function processCustomItemMutationChunk(
       const batch = db.batch();
       for (const docSnapshot of page.docs) {
         const character = docSnapshot.data() as CharacterItemArrays;
-        const result =
-          mode === "publish-and-update" || mode === "update"
-            ? buildCharacterCopyUpdate(
-                character,
-                category!,
-                customItemId,
-                targetVersionId!,
-                versionData!
-              )
-            : buildCharacterCopyRemoval(character, customItemId);
+        let result;
+        if (mode === "publish-and-update" || mode === "update") {
+          if (category === null || versionData === null || targetVersionId === null) {
+            throw new HttpsError(
+              "failed-precondition",
+              "This job is missing the target version data needed to apply the mutation."
+            );
+          }
+          result = buildCharacterCopyUpdate(
+            character,
+            category,
+            customItemId,
+            targetVersionId,
+            versionData
+          );
+        } else {
+          result = buildCharacterCopyRemoval(character, customItemId);
+        }
         if (!result) continue;
         const {
           updatedCopies: _updatedCopies,

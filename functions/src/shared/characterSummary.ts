@@ -25,9 +25,15 @@ export function computeCharacterSummary(
   characterData: Record<string, unknown>
 ): CharacterSummaryFields {
   const header = (characterData.header ?? {}) as Record<string, unknown>;
+  if (typeof characterData.campaignId !== "string") {
+    throw new Error("Character data is missing a valid campaignId.");
+  }
+  if (typeof header.characterName !== "string") {
+    throw new Error("Character data is missing a valid header.characterName.");
+  }
   const summary: CharacterSummaryFields = {
-    campaignId: characterData.campaignId as string,
-    characterName: header.characterName as string,
+    campaignId: characterData.campaignId,
+    characterName: header.characterName,
   };
   if (typeof header.playerName === "string") summary.playerName = header.playerName;
   if (typeof header.career === "string") summary.career = header.career;
