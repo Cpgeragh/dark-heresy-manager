@@ -15,8 +15,6 @@ import {
   validateRecoveryCode,
   validateCampaignName,
   validateCharacterName,
-  parseAndValidateInt,
-  sanitizeNumericInput,
 } from "../../src/utils/validation";
 
 describe("validateNumberRange", () => {
@@ -149,24 +147,4 @@ describe("validateCharacterName", () => {
   it("rejects whitespace-only", () => expect(validateCharacterName("   ").isValid).toBe(false));
   it("rejects over 100 characters", () =>
     expect(validateCharacterName("A".repeat(101)).isValid).toBe(false));
-});
-
-describe("parseAndValidateInt", () => {
-  it("parses valid integer string", () =>
-    expect(parseAndValidateInt("5", 0, 10)).toEqual({ value: 5 }));
-  it("returns error for non-numeric string", () =>
-    expect(parseAndValidateInt("abc", 0, 10).error).toBeDefined());
-  it("returns error below min", () => expect(parseAndValidateInt("-1", 0, 10).error).toBeDefined());
-  it("returns error above max", () => expect(parseAndValidateInt("11", 0, 10).error).toBeDefined());
-  it("parses boundary min", () => expect(parseAndValidateInt("0", 0, 10)).toEqual({ value: 0 }));
-  it("parses boundary max", () => expect(parseAndValidateInt("10", 0, 10)).toEqual({ value: 10 }));
-});
-
-describe("sanitizeNumericInput", () => {
-  it("removes non-digit characters", () => expect(sanitizeNumericInput("12a3b4")).toBe("1234"));
-  it("removes minus when not allowed", () => expect(sanitizeNumericInput("-5")).toBe("5"));
-  it("keeps minus when allowed", () => expect(sanitizeNumericInput("-5", true)).toBe("-5"));
-  it("removes letters when negative allowed", () =>
-    expect(sanitizeNumericInput("-5abc", true)).toBe("-5"));
-  it("returns empty string for all letters", () => expect(sanitizeNumericInput("abc")).toBe(""));
 });

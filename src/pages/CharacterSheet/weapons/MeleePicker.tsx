@@ -67,80 +67,6 @@ function MeleeWeaponCardPickerRow({
   );
 }
 
-/*
-function MeleeReferenceRow({
-  ref,
-  editable,
-  onSelect,
-}: {
-  ref: MeleeWeaponRef;
-  editable: boolean;
-  onSelect: () => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const toggle = () => setExpanded((value) => !value);
-
-  return (
-    <div className={uiSectionShell + " overflow-hidden"}>
-      <div className="relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group">
-        <button
-          type="button"
-          onClick={editable ? onSelect : toggle}
-          aria-label={editable ? `Select ${ref.name}` : `${expanded ? "Collapse" : "Expand"} ${ref.name}`}
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
-        />
-        <div className="relative pointer-events-none flex items-center gap-3">
-          <div className="flex-1 min-w-0 space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>{ref.name}</span>
-              {ref.description && (
-                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                  <InfoModal title={ref.name} content={ref.description} as="span" />
-                </span>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
-            </div>
-          </div>
-          {editable ? (
-            <button
-              type="button"
-              onClick={toggle}
-              aria-expanded={expanded}
-              aria-label={`${expanded ? "Collapse" : "Expand"} ${ref.name} details`}
-              className="relative z-10 pointer-events-auto p-1 -m-1"
-            >
-              <ExpandChevron expanded={expanded} />
-            </button>
-          ) : (
-            <ExpandChevron expanded={expanded} />
-          )}
-        </div>
-      </div>
-      {expanded && (
-        <div className="border-t border-slate-600 px-3 lg:px-4 py-3 space-y-2">
-          <div className="flex flex-wrap gap-1.5">
-            <StatChip size="sm" label="Dmg" value={ref.damage} />
-            <DamageTypeChip size="sm" damage={ref.damage} />
-            <StatChip size="sm" label="Pen" value={ref.pen} />
-          </div>
-          {ref.specialRules && ref.specialRules !== "—" && (
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} as="span" />
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-*/
-
 export function MeleePicker({
   editable = true,
   strengthBonus = 0,
@@ -315,46 +241,6 @@ export function MeleePicker({
           </PickerRow>
         );
       })}
-      {/* Previous flat picker row retained below while the new expandable row is verified.
-      {false && filtered.map((ref) => (
-        <PickerRow
-          key={ref.id}
-          interactive={editable}
-          onClick={() => setSelected(ref)}
-        >
-          <span
-            className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
-          >
-            {ref.name}
-          </span>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            <StatChip size="sm" label="Dmg" value={ref.damage} />
-            <DamageTypeChip size="sm" damage={ref.damage} />
-            <StatChip size="sm" label="Pen" value={ref.pen} />
-          </div>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
-          </div>
-          {ref.specialRules && ref.specialRules !== "—" && (
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} as="span" />
-              </span>
-            </div>
-          )}
-          {ref.description && (
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className={uiTextLabel}>Rules</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} as="span" />
-              </span>
-            </div>
-          )}
-        </PickerRow>
-      ))}
-      */}
     </PickerModal>
   );
 }

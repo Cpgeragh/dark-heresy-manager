@@ -250,39 +250,3 @@ export function validateCharacterName(name: string): ValidationResult {
   return validateStringLength(name, 1, PRODUCT_LIMITS.characterNameCharacters, "Character name");
 }
 
-// ============================================
-// PARSE & VALIDATE HELPERS
-// ============================================
-
-/**
- * Parse string to integer with validation
- */
-export function parseAndValidateInt(
-  value: string,
-  min: number,
-  max: number,
-  fieldName: string = "Value"
-): { value: number; error?: string } {
-  const parsed = parseInt(value, 10);
-
-  if (isNaN(parsed)) {
-    return { value: 0, error: `${fieldName} must be a number` };
-  }
-
-  const validation = validateNumberRange(parsed, min, max, fieldName);
-  if (!validation.isValid) {
-    return { value: parsed, error: validation.error };
-  }
-
-  return { value: parsed };
-}
-
-/**
- * Sanitize numeric input (allows only digits, optional minus)
- */
-export function sanitizeNumericInput(value: string, allowNegative = false): string {
-  if (allowNegative) {
-    return value.replace(/[^0-9-]/g, "");
-  }
-  return value.replace(/[^0-9]/g, "");
-}

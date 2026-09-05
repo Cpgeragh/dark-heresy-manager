@@ -21,7 +21,6 @@ describe("hard product limits", () => {
       sessionDmNotesCharacters: 4_000,
       sessionXpAward: 100_000,
       sessionAttendees: 100,
-      xpProposalsPerCharacter: 50,
       customItemsPerCampaign: 200,
       customItemNameCharacters: 100,
       customItemTextCharacters: 4_000,

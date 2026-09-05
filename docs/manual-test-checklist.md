@@ -1181,8 +1181,8 @@ behind §23), `PortraitUpload.tsx`/`portraitService.ts` (crop to 256 px and
 base64 storage on the character document), the Toast system
 (`ToastProvider`/`ToastItem`/`ToastContainer`/`ToastContext`), and the
 shared form primitives containing application logic:
-`CharacteristicField.tsx`, `FormField.tsx`, `ValidatedNumberInput.tsx`,
-`Tooltip.tsx`, plus `validation.ts`, `recoveryCode.ts`, `claimLog.ts`,
+`CharacteristicField.tsx`, `FormField.tsx`, `Tooltip.tsx`,
+plus `validation.ts`, `recoveryCode.ts`, `claimLog.ts`,
 `characterFactory.ts`, `weaponUtils.ts`, `stats.ts`, `skillUtils.ts`,
 `exportCharacter.ts`, `armourLocations.ts`, `createLocalId.ts`,
 `formInput.ts`, and `gameRules.ts`.

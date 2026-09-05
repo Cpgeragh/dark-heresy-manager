@@ -26,7 +26,6 @@ export const PRODUCT_LIMITS = {
   sessionXpAward: 100_000,
   sessionAttendees: 100,
 
-  xpProposalsPerCharacter: 50,
   customItemsPerCampaign: 200,
   customItemNameCharacters: 100,
   customItemTextCharacters: 4_000,

@@ -25,6 +25,3 @@ if (!HTMLDialogElement.prototype.close) {
     this.dispatchEvent(new Event("close"));
   };
 }
-
-// Optional: silence console.logs in tests
-// console.log = () => {};

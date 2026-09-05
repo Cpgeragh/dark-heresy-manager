@@ -19,7 +19,6 @@ import {
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
-import { SectionHeader } from "../../ui/SectionHeader";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { InfoModal } from "../../components/InfoModal";
@@ -1015,63 +1014,6 @@ export function TalentGroupCard({
             ))}
         </div>
       )}
-    </div>
-  );
-}
-
-interface EntrySectionProps {
-  title: string;
-  singular: string;
-  entries: TalentEntry[];
-  listData: readonly AnyListItem[];
-  editable: boolean;
-  columns?: 1 | 2;
-  onAdd: (entry: TalentEntry) => void;
-  onRemove: (uid: string) => void;
-}
-
-export function EntrySection({
-  title,
-  singular,
-  entries,
-  listData,
-  editable,
-  columns = 1,
-  onAdd,
-  onRemove,
-}: EntrySectionProps) {
-  const [showPicker, setShowPicker] = useState(false);
-
-  return (
-    <div>
-      <div className="mb-3 flex items-center justify-between">
-        <SectionHeader>{title}</SectionHeader>
-        <Button size="sm" onClick={() => setShowPicker(true)}>
-          {editable ? `+ Add ${singular}` : `View ${singular}s`}
-        </Button>
-      </div>
-      <section className={uiSection + " space-y-2"}>
-        {entries.length === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
-        )}
-        <div className={`grid gap-2 ${columns === 2 ? "lg:grid-cols-2" : "grid-cols-1"}`}>
-          {[...entries]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((entry) => (
-              <EntryCard key={entry.uid} entry={entry} editable={editable} onRemove={onRemove} />
-            ))}
-        </div>
-        {showPicker && (
-          <TalentPickerModal
-            title={editable ? `Add ${singular}` : `View ${singular}s`}
-            listData={listData}
-            entries={entries}
-            editable={editable}
-            onAdd={onAdd}
-            onClose={() => setShowPicker(false)}
-          />
-        )}
-      </section>
     </div>
   );
 }
