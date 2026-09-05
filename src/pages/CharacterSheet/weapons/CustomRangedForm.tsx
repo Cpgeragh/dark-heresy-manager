@@ -24,37 +24,21 @@ import {
   sanitizePositiveIntegerInput,
 } from "../../../utils/formInput";
 import { WeaponQualitySelector } from "./weaponShared";
-import { DAMAGE_TYPE_OPTIONS, formatDamageInput, isValidDiceInput } from "./weaponDamageFormatting";
+import {
+  DAMAGE_TYPE_OPTIONS,
+  formatDamageInput,
+  isValidDiceInput,
+  parseWeaponDamage,
+  splitWeaponQualities,
+} from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 import { CUSTOM_AMMO_FAMILY_OPTIONS, type AmmoTrackingMode } from "./weaponHelpers";
 
 const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const;
 const RELOAD_TYPE_OPTIONS = ["Half", "Full", "Round", "Special", "—"] as const;
 
-function splitWeaponQualities(value?: string): string[] {
-  if (!value || value === "-") return [];
-  return value
-    .split(",")
-    .map((quality) => quality.trim())
-    .filter(Boolean);
-}
-
 function stripMeters(value?: string): string {
   return value?.replace(/\s*m$/i, "").trim() ?? "";
-}
-
-function parseWeaponDamage(
-  value: string | undefined,
-  fallbackType: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
-) {
-  const match = value?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s*([IREX])?$/i);
-  return {
-    base: match?.[1] ?? "1d10",
-    plus: match?.[2] ?? "0",
-    type:
-      (match?.[3]?.toUpperCase() as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"] | undefined) ??
-      fallbackType,
-  };
 }
 
 function parseRofInput(value?: string) {

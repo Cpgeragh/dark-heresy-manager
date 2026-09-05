@@ -23,7 +23,7 @@ import {
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/styles/colourTokens";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
-import { parseDamageType } from "./weaponDamageFormatting";
+import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 
 export function WeaponQualitySelector({
   selected,
@@ -200,10 +200,7 @@ export function SpecialRulesContent({
   rules: string;
   description?: string;
 }) {
-  const ruleNames = rules
-    .split(",")
-    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ruleNames = getKnownSpecialRuleNames(rules);
 
   return (
     <div className="space-y-4">

@@ -7,7 +7,6 @@ import { resolveMeleeWeaponReference } from "../../../data/reference/weaponRefer
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
-import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
   AMMO_REFERENCE,
@@ -42,7 +41,7 @@ import {
   UpgradeCard,
   EquipToggle,
 } from "./weaponShared";
-import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
+import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import {
   addSpecialRule,
   ammoFamilyChip,
@@ -214,10 +213,7 @@ export function MeleeCard({
             .filter((part) => part && part !== "—" && part !== "-")
             .join(", ")
         : baseRulesText;
-  const ruleNamesInLookup = rulesText
-    .split(",")
-    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ruleNamesInLookup = getKnownSpecialRuleNames(rulesText);
   const hasQualities = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
   const rulesDescription = weaponRef?.description ?? weapon.description;
   const hasQualityModal = ruleNamesInLookup.length > 0;

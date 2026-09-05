@@ -20,10 +20,9 @@ import { uiExpandButton } from "../../../ui/styles/buttonStyles";
 import { colourArcheotech, colourOrange } from "../../../ui/styles/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
-import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
-import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
+import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { weaponClassChip } from "./weaponHelpers";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -77,10 +76,7 @@ export function ArcheotechWeaponCard({
   const rld = item.rld ?? ref?.rld;
 
   const hasRules = !!specialRules?.trim();
-  const ruleNamesInLookup = (specialRules ?? "")
-    .split(",")
-    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ruleNamesInLookup = getKnownSpecialRuleNames(specialRules);
 
   const hasWeaponStats = !!(damage || weaponClass);
   const showMishaps = item.type === "Grenade";

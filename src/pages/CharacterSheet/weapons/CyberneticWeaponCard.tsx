@@ -5,7 +5,6 @@ import { useState } from "react";
 import type { CyberneticWeapon } from "../../../data/reference/cyberneticsReference";
 import type { WeaponCraftsmanship } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
-import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { Chip } from "../../../ui/chips/Chip";
 import {
   uiTextLabel,
@@ -18,7 +17,7 @@ import { uiExpandButton } from "../../../ui/styles/buttonStyles";
 import { colourPink, colourOrange } from "../../../ui/styles/colourTokens";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
-import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
+import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import {
   weaponClassChip,
   rangedCraftsmanshipDescription,
@@ -48,10 +47,7 @@ export function CyberneticWeaponCard({
       ? meleeDamageForCraftsmanship(weapon.damage, craftsmanship)
       : weapon.damage;
   const hasRules = !!effectiveSpecialRules?.trim();
-  const ruleNamesInLookup = (effectiveSpecialRules ?? "")
-    .split(",")
-    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ruleNamesInLookup = getKnownSpecialRuleNames(effectiveSpecialRules);
   const [expanded, setExpanded] = useState(true);
 
   return (

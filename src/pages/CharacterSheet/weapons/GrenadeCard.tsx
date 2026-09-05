@@ -30,10 +30,10 @@ import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
-import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
+import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
@@ -102,10 +102,7 @@ export function GrenadeCard({
   const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
   const rulesDescription = ref?.description ?? item.description;
   const hasInfo = !!rulesDescription;
-  const ruleNamesInLookup = (item.specialRules ?? "")
-    .split(",")
-    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ruleNamesInLookup = getKnownSpecialRuleNames(item.specialRules);
 
   const equippedCount = isEquipped ? Math.min(item.quantity, 3) : item.quantity;
   const showMishaps = item.type !== "Mine" && item.type !== "Missile";

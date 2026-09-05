@@ -11,11 +11,7 @@ import type {
 } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
-import type {
-  CampaignCustomItem,
-  CustomCyberneticData,
-  CustomWeaponData,
-} from "../../../types/CustomItems";
+import type { CampaignCustomItem, CustomCyberneticData } from "../../../types/CustomItems";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
@@ -51,6 +47,8 @@ import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import {
   buildMeleeWeaponSnapshot,
   buildRangedWeaponSnapshot,
+  toCustomRangedWeaponData,
+  toCustomMeleeWeaponData,
 } from "../weapons/weaponSnapshotHelpers";
 import { ArcheotechImplantRow } from "./ArcheotechImplantRow";
 import { ConcealedWeaponBionicInstaller } from "./ConcealedWeaponBionicInstaller";
@@ -1012,38 +1010,6 @@ export function CyberneticsTab({
       )}
     </div>
   );
-}
-
-type CustomRangedWeaponData = Extract<CustomWeaponData, { weaponKind: "ranged" }>;
-type CustomMeleeWeaponData = Extract<CustomWeaponData, { weaponKind: "melee" }>;
-
-function toCustomRangedWeaponData(weapon: RangedWeapon): CustomRangedWeaponData {
-  const {
-    id: _id,
-    referenceId: _referenceId,
-    customLibraryId: _customLibraryId,
-    customLibraryVersionId: _customLibraryVersionId,
-    ammoEntries: _ammoEntries,
-    equipped: _equipped,
-    quantity: _quantity,
-    upgrades: _upgrades,
-    ...data
-  } = weapon;
-  return { ...data, weaponKind: "ranged" };
-}
-
-function toCustomMeleeWeaponData(weapon: MeleeWeapon): CustomMeleeWeaponData {
-  const {
-    id: _id,
-    referenceId: _referenceId,
-    customLibraryId: _customLibraryId,
-    customLibraryVersionId: _customLibraryVersionId,
-    equipped: _equipped,
-    quantity: _quantity,
-    upgrades: _upgrades,
-    ...data
-  } = weapon;
-  return { ...data, weaponKind: "melee" };
 }
 
 function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticData {

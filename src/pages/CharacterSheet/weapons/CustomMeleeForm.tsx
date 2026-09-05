@@ -20,32 +20,16 @@ import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { sanitizeDiceInput, sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { WeaponQualitySelector } from "./weaponShared";
-import { DAMAGE_TYPE_OPTIONS, formatDamageInput, isValidDiceInput } from "./weaponDamageFormatting";
+import {
+  DAMAGE_TYPE_OPTIONS,
+  formatDamageInput,
+  isValidDiceInput,
+  parseWeaponDamage,
+  splitWeaponQualities,
+} from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;
-
-function splitWeaponQualities(value?: string): string[] {
-  if (!value || value === "-") return [];
-  return value
-    .split(",")
-    .map((quality) => quality.trim())
-    .filter(Boolean);
-}
-
-function parseWeaponDamage(
-  value: string | undefined,
-  fallbackType: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
-) {
-  const match = value?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s*([IREX])?$/i);
-  return {
-    base: match?.[1] ?? "1d10",
-    plus: match?.[2] ?? "0",
-    type:
-      (match?.[3]?.toUpperCase() as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"] | undefined) ??
-      fallbackType,
-  };
-}
 
 export function CustomMeleeForm({
   onAdd,

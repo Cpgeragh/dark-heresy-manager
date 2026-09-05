@@ -20,9 +20,9 @@ import { Chip } from "../../../ui/chips/Chip";
 import { colourLime } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
-import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
+import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 
@@ -55,10 +55,7 @@ export function ShieldCard({
   }, [isEquipped]);
 
   const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
-  const ruleNamesInLookup = (item.specialRules ?? "")
-    .split(",")
-    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ruleNamesInLookup = getKnownSpecialRuleNames(item.specialRules);
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>

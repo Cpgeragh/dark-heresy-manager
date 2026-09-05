@@ -63,7 +63,6 @@ import {
   UpgradeCard,
   EquipToggle,
 } from "./weaponShared";
-import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import {
   effectiveRangedStats,
   getCompatibleUpgrades,
@@ -78,7 +77,7 @@ import {
   removeSpecialRule,
   calcEntryWeight,
 } from "./weaponHelpers";
-import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
+import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
 
 // ─── Ammo Entry Row ───────────────────────────────────────────────────────────
@@ -554,10 +553,7 @@ export function RangedCard({
     : [];
 
   const rulesText = (activeMeleeProfile?.specialRules ?? effective.specialRules ?? "").trim();
-  const ruleNamesInLookup = rulesText
-    .split(",")
-    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ruleNamesInLookup = getKnownSpecialRuleNames(rulesText);
   const activeAmmoFamily = isMeleeProfile ? undefined : ammoFamilyChip(resolvedAmmoType);
   const rulesDescription = weaponRef?.description ?? weapon.description;
   const hasQualities = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");

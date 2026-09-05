@@ -55,3 +55,37 @@ export function computeMeleeTotalDamage(
   if (total === 0) return dice;
   return `${dice}${total > 0 ? "+" : ""}${total}`;
 }
+
+export function splitWeaponQualities(value?: string): string[] {
+  if (!value || value === "-") return [];
+  return value
+    .split(",")
+    .map((quality) => quality.trim())
+    .filter(Boolean);
+}
+
+export function parseWeaponDamage(
+  value: string | undefined,
+  fallbackType: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
+): {
+  base: string;
+  plus: string;
+  type: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"];
+} {
+  const match = value?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s*([IREX])?$/i);
+  return {
+    base: match?.[1] ?? "1d10",
+    plus: match?.[2] ?? "0",
+    type:
+      (match?.[3]?.toUpperCase() as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"] | undefined) ??
+      fallbackType,
+  };
+}
+
+/** The special-rule names in `rules` that have a real entry in WEAPON_SPECIAL_RULES. */
+export function getKnownSpecialRuleNames(rules: string | undefined): string[] {
+  return (rules ?? "")
+    .split(",")
+    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
+    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+}
