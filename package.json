@@ -23,7 +23,8 @@
     "check:lockfile": "node scripts/checkLocalSafety.mjs --lockfile",
     "check:safety": "node scripts/checkLocalSafety.mjs",
     "check:deployment:local": "npm run check:safety && npm run build && npm run test:all",
-    "format": "prettier --write src/"
+    "format": "prettier --write src tests functions/src functions/tests billing-guard/src billing-guard/tests scripts",
+    "format:check": "prettier --check src tests functions/src functions/tests billing-guard/src billing-guard/tests scripts"
   },
   "dependencies": {
     "@fontsource/im-fell-english": "^5.2.6",
