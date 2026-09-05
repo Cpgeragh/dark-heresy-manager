@@ -2,8 +2,8 @@
 //
 // useCharacterSheet is mocked entirely (already has its own dedicated unit
 // test). All 20 tab components, AdminTab, CompleteBackgroundSetupModal,
-// SectionDrawer, and CharacterKebabContent are mocked too — each already has,
-// or is separately queued for, its own coverage. This file is scoped to
+// SectionDrawer, and CharacterKebabContent are mocked too — each already has
+// its own coverage. This file is scoped to
 // CharacterSheet's own orchestration: loading/error/not-found states, the
 // mandatory Background-setup gate, tab switching via the URL, the DM
 // override bar, the kebab-content wiring, and the XP-reconciliation effect.

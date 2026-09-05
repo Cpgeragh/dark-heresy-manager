@@ -1,9 +1,8 @@
 // tests/integration/SessionForm.test.tsx
 //
 // Date/XP inputs and the Summary/DM Notes textareas have no htmlFor/id
-// association with their labels in the real component (a pre-existing gap,
-// not something to paper over), so this file queries them directly rather
-// than via getByLabelText.
+// association with their labels in the real component, so this file queries
+// them directly rather than via getByLabelText.
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

@@ -1,9 +1,9 @@
 // tests/integration/Dashboard.test.tsx
 //
 // PortraitUpload, RecoveryBackupBanner, QrModal, ClaimForm, and ClaimPreview are
-// all mocked — each already has (or is separately queued for) its own dedicated
-// test file. useRecoveryLookup and useClaimActions are also mocked directly, same
-// reasoning. This file is scoped to Dashboard's own orchestration: DM campaign
+// all mocked — each already has its own dedicated test file. useRecoveryLookup
+// and useClaimActions are also mocked directly, same reasoning. This file is
+// scoped to Dashboard's own orchestration: DM campaign
 // CRUD (create/edit/archive/delete-with-preflight-progress/restore), the QR panel
 // gating, the player campaign list, and the claim-a-character flow including the
 // ?code= URL auto-lookup.

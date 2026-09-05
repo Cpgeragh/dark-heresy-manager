@@ -1,8 +1,8 @@
 // tests/integration/CampaignOverview.test.tsx
 //
 // CharacterRow, SessionForm, SessionCard, DMInbox, and CustomItemLibraryAdmin are
-// all mocked — each already has (or is separately queued for) its own dedicated
-// test file. This file is scoped to CampaignOverview's own orchestration:
+// all mocked — each already has its own dedicated test file. This file is
+// scoped to CampaignOverview's own orchestration:
 // character creation/import, the repair-summaries action, search filtering, and
 // DM-only wiring (including the kebab-menu content, which isn't rendered inside
 // this component's own tree — it's handed to a header-extension setter to be

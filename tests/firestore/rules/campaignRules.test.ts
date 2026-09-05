@@ -214,7 +214,7 @@ describe("Firestore Rules: Campaigns", () => {
 
     const dmDb = dbAs(env, "dm-1");
 
-    // Note: we only change name; dmId stays the same in resource.
+    // Note: only name changes here; dmId stays the same in resource.
     await expect(
       dmDb.collection("campaigns").doc("c1").update({
         name: "DM Updated",

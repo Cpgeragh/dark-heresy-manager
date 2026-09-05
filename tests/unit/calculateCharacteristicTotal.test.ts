@@ -1,4 +1,4 @@
-// src/tests/unit/calculateCharacteristicTotal.test.ts
+// tests/unit/calculateCharacteristicTotal.test.ts
 
 import { describe, it, expect } from "vitest";
 import { calculateCharacteristicTotal } from "../../src/utils/stats";

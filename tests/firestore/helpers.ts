@@ -46,8 +46,8 @@ export function validCharacterDocument(
 /**
  * Create a campaign document bypassing security rules.
  *
- * IMPORTANT: This now waits to ensure the campaign is readable
- * before returning, preventing "Service call error" in child documents.
+ * IMPORTANT: Waits to ensure the campaign is readable before returning,
+ * preventing "Service call error" in child documents.
  */
 export async function createCampaign(
   env: RulesTestEnvironment,
