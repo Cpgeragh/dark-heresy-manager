@@ -1,5 +1,5 @@
 // Fast feedback config for app tests that are safe to isolate across workers.
-// The resource-heavy TalentsTab suite runs separately via `npm run test:heavy`.
+// Resource-heavy UI suites run separately via `npm run test:heavy`.
 
 import { defineConfig, configDefaults } from "vitest/config";
 import react from "@vitejs/plugin-react";
@@ -15,6 +15,7 @@ export default defineConfig({
       ...configDefaults.exclude,
       "tests/firestore/**",
       "tests/functions/**",
+      "tests/integration/GearTab.test.tsx",
       "tests/integration/TalentsTab.test.tsx",
       "tests/integration/TalentsTab.overflowFlows.test.tsx",
     ],

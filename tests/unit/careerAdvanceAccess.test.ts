@@ -44,6 +44,27 @@ describe("getUnlockedCareerAdvances", () => {
     expect(rankIds.has("commander")).toBe(false);
   });
 
+  it("unlocks Scholar Materium on only the Imperial Psyker scholar branch", () => {
+    const atScholarMaterium = new Set(
+      getUnlockedCareerAdvances("Imperial Psyker", "Scholar Materium").map((entry) => entry.rankId)
+    );
+    expect(atScholarMaterium).toEqual(
+      new Set(["sanctionite", "neonate", "aspirant", "scholar-materium"])
+    );
+
+    const atScholarMedicae = new Set(
+      getUnlockedCareerAdvances("Imperial Psyker", "Scholar Medicae").map((entry) => entry.rankId)
+    );
+    expect(atScholarMedicae).toEqual(
+      new Set(["sanctionite", "neonate", "aspirant", "scholar-materium", "scholar-medicae"])
+    );
+
+    const atSavantWarrant = new Set(
+      getUnlockedCareerAdvances("Imperial Psyker", "Savant Warrant").map((entry) => entry.rankId)
+    );
+    expect(atSavantWarrant.has("scholar-materium")).toBe(false);
+  });
+
   it("returns an empty array for an unrecognised rank name", () => {
     expect(getUnlockedCareerAdvances("Guardsman", "Not A Real Rank")).toEqual([]);
   });

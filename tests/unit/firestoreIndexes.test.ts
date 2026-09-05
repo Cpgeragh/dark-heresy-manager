@@ -17,6 +17,7 @@ type CompositeIndex = {
 type FieldOverride = {
   collectionGroup: string;
   fieldPath: string;
+  ttl?: boolean;
   indexes: Array<{
     order?: "ASCENDING" | "DESCENDING";
     arrayConfig?: "CONTAINS";
@@ -59,16 +60,23 @@ describe("reviewed Firestore index configuration", () => {
   });
 
   it("enables the userId single-field index for collection-group ownership lookups", () => {
-    expect(indexes.fieldOverrides).toEqual([
-      {
-        collectionGroup: "characters",
-        fieldPath: "userId",
-        indexes: [
-          { order: "ASCENDING", queryScope: "COLLECTION" },
-          { order: "ASCENDING", queryScope: "COLLECTION_GROUP" },
-        ],
-      },
-    ]);
+    expect(indexes.fieldOverrides).toContainEqual({
+      collectionGroup: "characters",
+      fieldPath: "userId",
+      indexes: [
+        { order: "ASCENDING", queryScope: "COLLECTION" },
+        { order: "ASCENDING", queryScope: "COLLECTION_GROUP" },
+      ],
+    });
+  });
+
+  it("enables TTL cleanup for expired idempotency records", () => {
+    expect(indexes.fieldOverrides).toContainEqual({
+      collectionGroup: "idempotencyKeys",
+      fieldPath: "expiresAt",
+      ttl: true,
+      indexes: [],
+    });
   });
 
   it("does not contain duplicate composite definitions", () => {
