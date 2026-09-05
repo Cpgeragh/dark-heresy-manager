@@ -91,12 +91,10 @@ export function usePsychicPowers({ psychic, editable, onUpdate }: UsePsychicPowe
   );
 
   return {
-    // Generic operations (can be used for new power types in the future)
     addPower,
     removePower,
     updatePower,
 
-    // Specific operations (backwards compatible with original code)
     addMinorPower,
     addMajorPower,
     removeMinorPower,

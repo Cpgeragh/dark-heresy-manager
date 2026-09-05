@@ -33,7 +33,7 @@ interface AddSkillModalProps {
   untrainedSkills: SkillWithComputed[];
   onAdd: (id: string, manualCost?: number) => void;
   hideLevelChip?: boolean;
-  /** Real training cost for whichever skills are unlocked for this character. When omitted, every skill shows with no restriction, matching the old behaviour. */
+  /** Real training cost for whichever skills are unlocked for this character. When omitted, every skill shows with no restriction. */
   unlockedCosts?: Map<string, number>;
   isDM?: boolean;
 }

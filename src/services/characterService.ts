@@ -136,10 +136,9 @@ export async function repairCharacterSummaries(campaignId: string): Promise<numb
 
 /**
  * Patch update a character document with a partial object.
- * Only the fields in `partial` will be updated.
- *
- * We pass Partial<Character> and let Firestore handle it.
- * `id` in partial (if present) is ignored by the converter.
+ * Only the fields in `partial` will be updated — Firestore merges the
+ * partial object at the field level. `id` in partial (if present) is
+ * ignored by the converter.
  */
 export async function updateCharacter(
   campaignId: string,
@@ -408,10 +407,12 @@ export async function patchCharacterFields(
 const REGISTER_CODE_RETRY_ATTEMPTS = 3;
 
 /**
- * Character creation and code registration are no longer atomic (the code is
- * generated server-side). Retries a few times to smooth over a transient
- * Function failure right after creation; if every attempt fails, the caller
- * can still generate a code later from the character's own menu.
+ * Character creation and Recovery Code registration are two separate
+ * operations, since the code is generated server-side rather than written
+ * by the client alongside the character document. Retries a few times to
+ * smooth over a transient Function failure right after creation; if every
+ * attempt fails, the caller can still generate a code later from the
+ * character's own menu.
  */
 async function registerRecoveryCodeAfterCreate(
   campaignId: string,

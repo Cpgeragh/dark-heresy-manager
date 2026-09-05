@@ -1,6 +1,5 @@
-// src/data/defaultSkills.ts
-// Dark Heresy 1e skill list from completed Skills DOCXs.
-// Sources currently verified: CR, LW.
+// src/data/reference/defaultSkills.ts
+// Dark Heresy 1e skill list, sourced from the CR and LW sourcebooks.
 
 import type { SkillEntry } from "../../types/Character";
 

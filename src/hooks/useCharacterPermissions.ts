@@ -36,7 +36,6 @@ export function useCharacterPermissions({
     }
   }, [character, userId, isDM, dmReadOnly]);
 
-  // Player can release if they own it and are not DM
   const canPlayerRelease = useMemo(() => {
     return isOwner && !isDM;
   }, [isOwner, isDM]);

@@ -46,8 +46,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Default is 2 MiB; the main bundle has grown past that. Raised with
-        // headroom since it'll keep growing through the rest of the XP rework.
+        // Default is 2 MiB; the main bundle exceeds that already and keeps
+        // growing as features are added, so this is raised with headroom
+        // rather than tuned to the current exact size.
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
     }),
