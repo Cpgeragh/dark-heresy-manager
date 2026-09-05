@@ -416,9 +416,9 @@ These ceilings are safety boundaries rather than product entitlements. They prev
 
 ### Firebase deployment configuration
 
-`firebase.json` binds both `firestore.rules` and `firestore.indexes.json` so a future approved Firebase deployment reads the reviewed rules and index definitions from the same configuration. No production deployment is performed merely by editing or testing these files.
+`firebase.json` binds both `firestore.rules` and `firestore.indexes.json` so a Firebase deployment reads the reviewed rules and index definitions from the same configuration. No production deployment is performed merely by editing or testing these files.
 
-The local index file is the reviewed production correction. Its complete non-automatic index inventory is:
+The local index file is the source of truth for production. Its complete non-automatic index inventory is:
 
 | Query surface                            | Required index                                        | Reason                                                                                                                                |
 | ---------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -431,9 +431,9 @@ The local index file is the reviewed production correction. Its complete non-aut
 
 All other current local queries use Firestore's automatic single-field indexes or document-ID ordering and do not need a composite definition. Unit tests lock this exact reviewed inventory and the `firebase.json` binding. Emulator tests separately exercise the player membership query and a collection-group ownership query spanning multiple campaigns. The emulator verifies query shape, results and rules; the configuration test is what proves the production composite is present because the emulator does not reliably reproduce production missing-index failures.
 
-When deployment is separately approved, the prepared index-only correction is applied with `firebase deploy --only firestore:indexes` and then verified in the Firebase console before relying on the affected production queries. That command has not been run during this stage.
+An index-only change is deployed with `firebase deploy --only firestore:indexes` and verified in the Firebase console before relying on the affected production queries.
 
-Hosting responses are configured with a restrictive Content Security Policy, clickjacking protection, MIME sniffing protection, a no-referrer policy, disabled camera/geolocation/microphone permissions and same-origin isolation headers. HTML, service-worker and manifest files retain revalidation-oriented caching, while hashed assets remain immutable. These are repository settings only until an approved deployment; deployed-header verification belongs to the deployment checks and restore/test stage.
+Hosting responses are configured with a restrictive Content Security Policy, clickjacking protection, MIME sniffing protection, a no-referrer policy, disabled camera/geolocation/microphone permissions and same-origin isolation headers. HTML, service-worker and manifest files retain revalidation-oriented caching, while hashed assets remain immutable.
 
 ### Local dependency and secret safety
 
@@ -452,7 +452,7 @@ The repeatable commands are:
 - `npm run check:safety` for both local scopes;
 - `npm run check:deployment:local` for the safety checks followed by the production build and both existing automated test suites.
 
-The safety gate passes cleanly now that `serviceAccountKey.json` has been removed from the project folder; Cloud Functions get their runtime credentials automatically once deployed, so no local key file is needed for that.
+The safety gate requires no `serviceAccountKey.json` in the project folder — Cloud Functions get their runtime credentials automatically once deployed, so no local key file is needed for that.
 
 An online dependency-vulnerability audit is deliberately absent from the local gate. It may contact a package registry and disclose dependency metadata, so it requires separate network approval and must never be represented as part of an offline check. No source or secrets may be submitted to any external scanning service.
 

@@ -601,7 +601,7 @@ service cloud.firestore {
         }
 
         // Only the owning player (or a linked device) or the campaign's DM can
-        // read a character. Claim preview no longer needs a direct read here —
+        // read a character. A claim preview doesn't need a direct read here —
         // lookupRecoveryCode returns its own minimal preview server-side.
         allow get: if playerOwnsOrLinked(resource.data.userId) || dmOwnsCampaign();
         allow list: if (dmOwnsCampaign() || playerOwnsOrLinked(resource.data.userId)) && boundedQuery(100);
@@ -616,9 +616,9 @@ service cloud.firestore {
         // Fields migrated to patchCharacterField (see functions/src/operations/
         // patchCharacterField.ts) are frozen against direct client writes here.
         // A single MapDiff check keeps this cheap regardless of how many fields
-        // are listed — each field used to cost its own get()+get()+== triplet,
-        // which is what pushed a real update past Firestore's 1,000-expression
-        // evaluation ceiling once enough fields had been migrated.
+        // are listed — checking each field individually would cost its own
+        // get()+get()+== triplet, risking Firestore's 1,000-expression
+        // evaluation ceiling on a large update.
         function noPatchedFieldsChanged() {
           let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
           let patchedFields = [
@@ -632,10 +632,10 @@ service cloud.firestore {
         }
 
         // Ownership changes (claim, release, force-release, force-assign) all
-        // go through their own dedicated Cloud Functions now, none of which
-        // touch this rule (Admin SDK bypasses rules entirely). Direct writes
-        // never legitimately change userId any more, for either the DM or
-        // the owning player, so it's pinned unconditionally here.
+        // go through their own dedicated Cloud Functions, none of which touch
+        // this rule (Admin SDK bypasses rules entirely). Direct writes never
+        // legitimately change userId, for either the DM or the owning player,
+        // so it's pinned unconditionally here.
         allow update:
           if validCharacterData(request.resource.data, campaignId) &&
              request.resource.data.recoveryCode == resource.data.recoveryCode &&

@@ -97,8 +97,8 @@ confusing output:
 - [ ] `SessionForm.tsx` (new session) and `SessionCard.tsx` (edit mode) both have Date,
       XP Awarded, Summary, and DM Notes `<label>` elements with no `htmlFor`, and
       matching inputs with no `id` — none of the four labels in either file are
-      actually associated with their field. Confirms an already-known gap recorded
-      elsewhere in memory that was never added to this checklist.
+      actually associated with their field. This is an already-known gap that was
+      never added to this checklist until now.
 
 - [ ] `NotesTab.tsx`'s note-search input has no `aria-label` or associated `<label>`,
       only `placeholder="Search notes…"` — same gap as the other search boxes above,
