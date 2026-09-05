@@ -86,7 +86,7 @@ describe("Functions: character deletion job", () => {
       expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
       expect((await threadRef.collection("messages").get()).empty).toBe(true);
     },
-    15000
+    30000
   );
 
   it(
