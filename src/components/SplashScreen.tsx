@@ -10,7 +10,7 @@ export function SplashScreen({ label }: SplashScreenProps) {
       <div className="flex flex-col items-center gap-3">
         <div className="h-20 w-[51px] flex items-center justify-center">
           <img
-            src="/icon-1026%20x%201600.png"
+            src="/splash-inquisition-emblem.webp"
             alt=""
             className="h-20 w-[51px] object-contain"
             loading="eager"
@@ -32,7 +32,7 @@ export function SplashScreen({ label }: SplashScreenProps) {
         <div className="flex-1 border-t-4 border-double border-slate-800" />
         <div className="h-4 w-[43px] flex items-center justify-center">
           <img
-            src="/Icon-eagle.png"
+            src="/splash-aquila-divider.webp"
             alt=""
             className="h-4 w-[43px] object-contain opacity-60"
             loading="eager"
