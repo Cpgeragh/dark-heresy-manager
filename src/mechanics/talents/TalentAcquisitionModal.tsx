@@ -18,10 +18,6 @@ import type {
   WeaponTrainingBlock,
   HomeworldTraitChoices,
 } from "../../types/Character";
-import {
-  isIntegratedMeleeWeapon,
-  isIntegratedRangedWeapon,
-} from "../../pages/CharacterSheet/weapons/weaponHelpers";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { colourAmberFaint, colourInactive, colourValue } from "../../ui/styles/colourTokens";
@@ -38,26 +34,17 @@ import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPi
 import { PickerField } from "../../ui/pickers/PickerField";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
-import { defaultCraftsmanship } from "../../pages/CharacterSheet/CyberneticsTab/cyberneticsHelpers";
 import { getGrantedTalentEntries, getGrantedWeaponTrainingIds } from "./talentEffects";
-import {
-  getPurityFatePoints,
-  getPurityRemovalInventory,
-  isPurityArcheotech,
-} from "./purityOfFlesh";
+import { getPurityFatePoints, getPurityRemovalInventory } from "./purityOfFlesh";
 import { getPsyRatingAcquisitionGrants } from "./talentUtils";
 import { HomeworldTraitAcquisitionModal } from "../../pages/CharacterSheet/HomeworldTraitAcquisitionModal";
 import { homeworldNeedsTraitAcquisition } from "../traits/traitEffects";
+import {
+  buildTalentAcquisitionResult,
+  type TalentAcquisitionResult,
+} from "./talentAcquisitionResult";
 
-export interface TalentAcquisitionResult {
-  entry: TalentEntry;
-  cybernetics?: CyberneticItem[];
-  rangedWeapons?: RangedWeapon[];
-  meleeWeapons?: MeleeWeapon[];
-  archeotech?: ArcheotechItem[];
-  insanity?: InsanityBlock;
-  additionalTalentEntries?: TalentEntry[];
-}
+export type { TalentAcquisitionResult } from "./talentAcquisitionResult";
 
 interface Props {
   entry: TalentEntry;
@@ -221,11 +208,6 @@ export function TalentAcquisitionModal({
     ["chem-geld", "Chem Geld"],
     ["decadence", "Decadence"],
   ] as const;
-  const purityEntries = talents.talents.filter(
-    (owned) =>
-      owned.talentId === "purity-of-flesh" && (owned.acquisition?.purity?.fatePointsGained ?? 0) > 0
-  );
-  const purityEntry = purityEntries[0];
   const majorDisciplines = PSYCHIC_DISCIPLINES.filter((discipline) => discipline !== "Minor");
   const knownDisciplineKeys = new Set(
     knownDisciplines.map((discipline) => discipline.toLocaleLowerCase())
@@ -254,7 +236,6 @@ export function TalentAcquisitionModal({
     meleeWeapons,
     archeotech
   );
-  const qualifyingBionics = purityInventory.filter((item) => item.qualifiesForFate).length;
   const purityFatePoints = getPurityFatePoints(purityInventory);
   const fatalRemovalItems = purityInventory.filter((item) => fatalRemovalKeys.includes(item.key));
   const hasFatalRemovals = fatalRemovalItems.length > 0;
@@ -302,254 +283,31 @@ export function TalentAcquisitionModal({
 
   const complete = () => {
     if (!canComplete) return;
-    let completedEntry = entry;
-    let nextCybernetics: CyberneticItem[] | undefined;
-    let nextRangedWeapons: RangedWeapon[] | undefined;
-    let nextMeleeWeapons: MeleeWeapon[] | undefined;
-    let nextArcheotech: ArcheotechItem[] | undefined;
-    let nextInsanity: InsanityBlock | undefined;
-    const additionalTalentEntries: TalentEntry[] = [];
-
-    if (entry.talentId === "cult-briefing") {
-      if (entry.specialisation === "Heretek" && selectedCybernetic) {
-        const granted = HERETEK_TALENTS.find(([id]) => id === secondaryChoice);
-        const bodyLocation =
-          selectedCybernetic.requiresLocation && replacement
-            ? [replacement as ArmourLocationKey]
-            : undefined;
-        const craftsmanship = defaultCraftsmanship(selectedCybernetic);
-        const cyberneticId = crypto.randomUUID();
-        const [concealedWeaponType, concealedWeaponId] = concealedWeaponChoice.split(":") as [
-          "ranged" | "melee",
-          string,
-        ];
-        const augmetic: CyberneticItem = {
-          id: cyberneticId,
-          referenceId: selectedCybernetic.id,
-          name: selectedCybernetic.name,
-          craftsmanship,
-          value: selectedCybernetic.value,
-          availability: selectedCybernetic.availability,
-          source: selectedCybernetic.source,
-          grantedByTalentEntryUid: entry.uid,
-          grantedByTalentName: entry.name,
-          grantedByType: "Talent",
-          ...(bodyLocation ? { bodyLocation } : {}),
-          ...(selectingConcealedWeapon
-            ? {
-                concealedWeapon: {
-                  armId: replacement,
-                  weaponId: concealedWeaponId,
-                  weaponType: concealedWeaponType,
-                },
-              }
-            : {}),
-        };
-        nextCybernetics = [...cybernetics, augmetic];
-        if (selectingConcealedWeapon && concealedWeaponType === "ranged") {
-          nextRangedWeapons = rangedWeapons.map((weapon) =>
-            weapon.id === concealedWeaponId
-              ? { ...weapon, concealedBionic: { cyberneticId, craftsmanship } }
-              : weapon
-          );
-        }
-        if (selectingConcealedWeapon && concealedWeaponType === "melee") {
-          nextMeleeWeapons = meleeWeapons.map((weapon) =>
-            weapon.id === concealedWeaponId
-              ? { ...weapon, concealedBionic: { cyberneticId, craftsmanship } }
-              : weapon
-          );
-        }
-        completedEntry = {
-          ...entry,
-          acquisition: {
-            grantedTalentId: granted?.[0],
-            grantedTalentName: granted?.[1],
-            augmeticName: selectedCybernetic.name,
-            augmeticReferenceId: selectedCybernetic.id,
-          },
-        };
-      } else if (entry.specialisation === "Pleasure") {
-        const reference = primaryChoice === "chem-geld" ? "Chem Geld" : "Decadence";
-        completedEntry = {
-          ...entry,
-          acquisition: { grantedTalentId: primaryChoice, grantedTalentName: reference },
-        };
-      } else if (entry.specialisation === "Blood") {
-        completedEntry = {
-          ...entry,
-          acquisition: { weaponTrainingId: primaryChoice as WeaponTrainingTalentId },
-        };
-      } else if (entry.specialisation === "Culture") {
-        completedEntry = {
-          ...entry,
-          acquisition: {
-            homeworldId: primaryChoice,
-            ...(homeworldTraitChoices ? { homeworldTraitChoices } : {}),
-          },
-        };
-      }
-    } else if (entry.talentId === "sicarius-tutoring") {
-      completedEntry =
-        entry.specialisation === "Guardsman"
-          ? { ...entry, acquisition: { exoticWeapon: primaryChoice.trim() } }
-          : {
-              ...entry,
-              acquisition: {
-                grantedTalentId: "peer",
-                grantedTalentName: "Peer",
-                grantedTalentSpecialisation: primaryChoice,
-              },
-            };
-    } else if (entry.talentId === "touched-by-the-fates") {
-      completedEntry = {
-        ...entry,
-        acquisition: { touchedByFatesPoints: Math.ceil(willpowerBonus / 2) },
-      };
-    } else if (entry.talentId === "purity-of-flesh") {
-      const fatePointsGained = purityFatePoints;
-      const removedCyberneticIds = new Set(cybernetics.map((item) => item.id));
-      const removedIntegratedRangedWeapons = rangedWeapons.filter(isIntegratedRangedWeapon);
-      const removedIntegratedMeleeWeapons = meleeWeapons.filter(isIntegratedMeleeWeapon);
-      const removedArcheotech = archeotech.filter(isPurityArcheotech);
-      const removedConcealedWeaponLinks = [
-        ...rangedWeapons.flatMap((weapon) =>
-          weapon.concealedBionic && removedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-            ? [
-                {
-                  weaponId: weapon.id,
-                  weaponType: "ranged" as const,
-                  ...weapon.concealedBionic,
-                },
-              ]
-            : []
-        ),
-        ...meleeWeapons.flatMap((weapon) =>
-          weapon.concealedBionic && removedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-            ? [
-                {
-                  weaponId: weapon.id,
-                  weaponType: "melee" as const,
-                  ...weapon.concealedBionic,
-                },
-              ]
-            : []
-        ),
-      ];
-      completedEntry = {
-        ...entry,
-        acquisition: {
-          purity: {
-            removedCyberneticIds: cybernetics.map((item) => item.id),
-            removedCybernetics: cybernetics,
-            ...(removedIntegratedRangedWeapons.length > 0
-              ? { removedIntegratedRangedWeapons }
-              : {}),
-            ...(removedIntegratedMeleeWeapons.length > 0 ? { removedIntegratedMeleeWeapons } : {}),
-            ...(removedArcheotech.length > 0 ? { removedArcheotech } : {}),
-            ...(removedConcealedWeaponLinks.length > 0 ? { removedConcealedWeaponLinks } : {}),
-            qualifyingBionicsRemoved: qualifyingBionics,
-            fatePointsGained,
-            ...(hasFatalRemovals ? { toughnessLoss, woundsLoss: 1 } : {}),
-          },
+    onComplete(
+      buildTalentAcquisitionResult({
+        entry,
+        talents,
+        cybernetics,
+        rangedWeapons,
+        meleeWeapons,
+        archeotech,
+        insanity,
+        willpowerBonus,
+        choices: {
+          primaryChoice,
+          secondaryChoice,
+          toughnessLoss,
+          replacement,
+          concealedWeaponChoice,
+          removedDisorderIds,
+          replacementDisorders,
+          fatalRemovalKeys,
+          fatalReplacements,
+          homeworldTraitChoices,
         },
-      };
-      nextCybernetics = [];
-      nextRangedWeapons = rangedWeapons
-        .filter((weapon) => !isIntegratedRangedWeapon(weapon))
-        .map((weapon) =>
-          weapon.concealedBionic && removedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-            ? { ...weapon, concealedBionic: undefined }
-            : weapon
-        );
-      nextMeleeWeapons = meleeWeapons
-        .filter((weapon) => !isIntegratedMeleeWeapon(weapon))
-        .map((weapon) =>
-          weapon.concealedBionic && removedCyberneticIds.has(weapon.concealedBionic.cyberneticId)
-            ? { ...weapon, concealedBionic: undefined }
-            : weapon
-        );
-      nextArcheotech = archeotech.filter((item) => !isPurityArcheotech(item));
-      if (hasFatalRemovals) {
-        for (const fatalItem of fatalRemovalItems) {
-          const fatalReplacement = fatalReplacements[fatalItem.key].trim();
-          additionalTalentEntries.push({
-            uid: crypto.randomUUID(),
-            talentId: "reformed-skin",
-            name: `Reformed Skin (${fatalReplacement})`,
-            specialisation: fatalReplacement,
-            notes: `Immediate replacement required after removing ${fatalItem.name} through Purity of Flesh.`,
-            acquisition: {
-              reformedSkinPurityReplacement: true,
-              purityTalentEntryUid: entry.uid,
-            },
-          });
-        }
-      }
-    } else if (entry.talentId === "reformed-skin") {
-      completedEntry =
-        primaryChoice === "purity"
-          ? {
-              ...entry,
-              acquisition: {
-                ...entry.acquisition,
-                reformedSkinPurityReplacement: true,
-                purityTalentEntryUid: purityEntry?.uid,
-              },
-            }
-          : {
-              ...entry,
-              acquisition: {
-                ...entry.acquisition,
-                reformedSkinPurityReplacement: false,
-              },
-            };
-    } else if (entry.talentId === "rite-of-pure-thought") {
-      const retained = disorders.filter((disorder) => !removedDisorderIds.includes(disorder.id));
-      const replacements = disorders
-        .filter((disorder) => removedDisorderIds.includes(disorder.id))
-        .map((disorder) => ({
-          ...disorder,
-          id: crypto.randomUUID(),
-          referenceId: undefined,
-          name: replacementDisorders[disorder.id].trim(),
-          notes: `Replacement for ${disorder.name} through Rite of Pure Thought.`,
-          custom: true,
-        }));
-      nextInsanity = { ...insanity, disorders: [...retained, ...replacements] };
-      completedEntry = {
-        ...entry,
-        acquisition: {
-          riteOfPureThoughtReviewed: true,
-          riteOriginalDisorders: disorders.filter((disorder) =>
-            removedDisorderIds.includes(disorder.id)
-          ),
-          riteReplacementDisorderIds: replacements.map((disorder) => disorder.id),
-        },
-      };
-    } else if (/^psy-rating-[3-6]$/.test(entry.talentId)) {
-      completedEntry = {
-        ...entry,
-        acquisition: {
-          ...entry.acquisition,
-          psyRatingWillpowerBonus: willpowerBonus,
-          psyRatingMinorPowerGrants: psyRatingMinorGrants,
-          psyRatingMajorPowerGrants: psyRatingMajorGrants,
-          psyRatingDiscipline: primaryChoice,
-          psyRatingNewDiscipline: psyRatingUsesNewDiscipline,
-        },
-      };
-    }
-
-    onComplete({
-      entry: completedEntry,
-      ...(nextCybernetics ? { cybernetics: nextCybernetics } : {}),
-      ...(nextRangedWeapons ? { rangedWeapons: nextRangedWeapons } : {}),
-      ...(nextMeleeWeapons ? { meleeWeapons: nextMeleeWeapons } : {}),
-      ...(nextArcheotech ? { archeotech: nextArcheotech } : {}),
-      ...(nextInsanity ? { insanity: nextInsanity } : {}),
-      ...(additionalTalentEntries.length > 0 ? { additionalTalentEntries } : {}),
-    });
+        createId: () => crypto.randomUUID(),
+      })
+    );
   };
 
   const handleApply = () => {
