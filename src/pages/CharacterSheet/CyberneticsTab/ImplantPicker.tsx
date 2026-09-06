@@ -40,7 +40,7 @@ import {
   hasQualityText,
 } from "./cyberneticsHelpers";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { isVariableMeta } from "../../../utils/customItemMeta";
+import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
 import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isVariableMeta } from "../../src/utils/customItemMeta";
+import { isVariableMeta } from "../../src/data/reference/referenceMeta";
 
 describe("isVariableMeta", () => {
   it.each([undefined, null, "", "   ", "\u2014", "variable", "VARIES"])(

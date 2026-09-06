@@ -3,6 +3,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
+import { dbAs } from "../helpers";
 
 describe("Firestore Rules: DM Privileges", () => {
   const campaignId = "camp1";
@@ -32,10 +33,10 @@ describe("Firestore Rules: DM Privileges", () => {
     const env = await getTestEnv();
     await setupAll(env);
 
-    const dm = env.authenticatedContext("dm-1");
+    const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dm.firestore().collection(`campaigns/${campaignId}/characters`).doc(characterId).delete()
+      dmDb.collection(`campaigns/${campaignId}/characters`).doc(characterId).delete()
     ).resolves.toBeUndefined();
   });
 
@@ -43,10 +44,10 @@ describe("Firestore Rules: DM Privileges", () => {
     const env = await getTestEnv();
     await setupAll(env);
 
-    const p = env.authenticatedContext("player-1");
+    const playerDb = dbAs(env, "player-1");
 
     await expect(
-      p.firestore().collection(`campaigns/${campaignId}/characters`).doc(characterId).delete()
+      playerDb.collection(`campaigns/${campaignId}/characters`).doc(characterId).delete()
     ).rejects.toThrow();
   });
 });

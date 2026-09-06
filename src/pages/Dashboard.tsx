@@ -36,7 +36,7 @@ import { ConfirmInline } from "../ui/forms/ConfirmInline";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "../hooks/useRecoveryLookup";
-import { useClaimActions } from "../hooks/useClaimActions";
+import { claimCharacter } from "../services/characterService";
 
 interface Props {
   user: User;
@@ -504,7 +504,6 @@ function ClaimCharacterSection() {
   const toast = useToast();
 
   const { loading, error, data, lookup } = useRecoveryLookup();
-  const { claimCharacter } = useClaimActions();
 
   useEffect(() => {
     const codeParam = new URLSearchParams(window.location.search).get("code");
@@ -539,7 +538,7 @@ function ClaimCharacterSection() {
     } finally {
       setClaiming(false);
     }
-  }, [data, claiming, claimCharacter, navigate, toast, code]);
+  }, [data, claiming, navigate, toast, code]);
 
   return (
     <div>

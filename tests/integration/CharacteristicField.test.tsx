@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import CharacteristicField from "../../src/components/CharacteristicField";
+import { CharacteristicField } from "../../src/components/CharacteristicField";
 
 describe("CharacteristicField", () => {
   it("renders with correct initial value", () => {

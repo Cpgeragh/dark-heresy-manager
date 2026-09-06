@@ -4,16 +4,13 @@ import { characterDocRef } from "../firebase/converters";
 import type { CharacterDocument } from "../types/Firestore";
 import { useDocumentSubscription } from "./useFirestoreSubscription";
 
-// Type aliases for clarity
-type Character = CharacterDocument;
-
 interface UseCharacterDataArgs {
   campaignId?: string;
   characterId?: string;
 }
 
 interface UseCharacterDataResult {
-  character: Character | null;
+  character: CharacterDocument | null;
   loading: boolean;
   error: Error | null;
 }
@@ -27,7 +24,7 @@ export function useCharacterData({
     data: character,
     loading: characterLoading,
     error: characterError,
-  } = useDocumentSubscription<Character, Character>(
+  } = useDocumentSubscription<CharacterDocument, CharacterDocument>(
     activePath ? characterDocRef(campaignId, characterId) : null,
     (snapshot) => (snapshot.exists() ? snapshot.data() : null)
   );

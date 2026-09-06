@@ -18,7 +18,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { isVariableMeta } from "../../../utils/customItemMeta";
+import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
 import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
 

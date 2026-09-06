@@ -12,7 +12,7 @@ import {
   getCharacteristicModifierSources,
   type CharacteristicModifierSource,
 } from "../../mechanics/corruption/characteristicModifierTotals";
-import CharacteristicField from "../../components/CharacteristicField";
+import { CharacteristicField } from "../../components/CharacteristicField";
 import { InfoModal } from "../../components/InfoModal";
 import {
   CHARACTERISTIC_BONUS_DIVISOR,

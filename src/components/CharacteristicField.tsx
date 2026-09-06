@@ -22,7 +22,7 @@ interface Props {
   tierCosts?: (number | null | undefined)[];
 }
 
-export default function CharacteristicField({
+export function CharacteristicField({
   label,
   value,
   editable,

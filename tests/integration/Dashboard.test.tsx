@@ -2,7 +2,7 @@
 //
 // PortraitUpload, RecoveryBackupBanner, QrModal, ClaimForm, and ClaimPreview are
 // all mocked — each already has its own dedicated test file. useRecoveryLookup
-// and useClaimActions are also mocked directly, same reasoning. This file is
+// and the claim service are also mocked directly, same reasoning. This file is
 // scoped to Dashboard's own orchestration: DM campaign
 // CRUD (create/edit/archive/delete-with-preflight-progress/restore), the QR panel
 // gating, the player campaign list, and the claim-a-character flow including the
@@ -36,8 +36,8 @@ vi.mock("../../src/hooks/useRecoveryLookup", () => ({
 }));
 
 const claimCharacterMock = vi.fn();
-vi.mock("../../src/hooks/useClaimActions", () => ({
-  useClaimActions: () => ({ claimCharacter: claimCharacterMock }),
+vi.mock("../../src/services/characterService", () => ({
+  claimCharacter: (...args: unknown[]) => claimCharacterMock(...args),
 }));
 
 const mockToastError = vi.fn();

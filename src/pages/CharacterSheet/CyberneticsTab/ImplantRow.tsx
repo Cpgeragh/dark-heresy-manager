@@ -15,7 +15,7 @@ import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
-import { isVariableMeta } from "../../../utils/customItemMeta";
+import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import {
   availableCraftsmanship,
   concealedWeaponBionicDescription,
