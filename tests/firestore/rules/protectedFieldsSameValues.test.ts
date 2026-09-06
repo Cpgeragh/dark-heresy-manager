@@ -88,8 +88,6 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
     const dmCampaignId = `camp-dm-${Date.now()}`;
     await createCampaign(env, dmCampaignId, "dm-1");
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
     await createCharacter(env, dmCampaignId, "char-dm", {
       userId: "player-1",
       isEditableByPlayer: true,
