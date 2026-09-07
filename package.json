@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "performance:local": "node scripts/startPerformanceEnvironment.mjs",
+    "performance:seed": "node scripts/seedPerformanceFixtures.mjs",
     "test": "vitest --config vitest.config.fast.ts",
     "test:ui": "vitest --ui --config vitest.config.fast.ts",
     "test:fast": "vitest run --config vitest.config.fast.ts",

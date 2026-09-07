@@ -5,6 +5,7 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import { SplashScreen } from "./components/SplashScreen";
 import { markUpdateStalled, markPostUpgrade } from "./pwaUpdateState";
+import { recordApplicationCommit } from "./performance/performanceMetrics";
 import "./index.css";
 import "@fontsource/im-fell-english/400.css";
 import "@fontsource/roboto/400.css";
@@ -16,10 +17,17 @@ let settled = false;
 function renderApp() {
   if (settled) return;
   settled = true;
+  const application = <App />;
   root.render(
     <React.StrictMode>
       <BrowserRouter>
-        <App />
+        {import.meta.env.MODE === "performance" ? (
+          <React.Profiler id="Application" onRender={recordApplicationCommit}>
+            {application}
+          </React.Profiler>
+        ) : (
+          application
+        )}
       </BrowserRouter>
     </React.StrictMode>
   );

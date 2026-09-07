@@ -13,14 +13,17 @@ vi.mock("firebase/app", () => ({
   initializeApp: vi.fn(() => ({})),
 }));
 vi.mock("firebase/firestore", () => ({
+  connectFirestoreEmulator: vi.fn(),
   initializeFirestore: vi.fn(() => ({})),
   persistentLocalCache: vi.fn(() => ({})),
   persistentMultipleTabManager: vi.fn(() => ({})),
 }));
 vi.mock("firebase/auth", () => ({
+  connectAuthEmulator: vi.fn(),
   getAuth: vi.fn(() => ({})),
 }));
 vi.mock("firebase/functions", () => ({
+  connectFunctionsEmulator: vi.fn(),
   getFunctions: vi.fn(() => ({})),
 }));
 
@@ -95,5 +98,59 @@ describe("src/firebase.ts App Check", () => {
 
     await expect(import("../../src/firebase")).rejects.toThrow("VITE_RECAPTCHA_SITE_KEY");
     expect(mockInitializeAppCheck).not.toHaveBeenCalled();
+  });
+});
+
+describe("src/firebase.ts performance emulator mode", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("connects every browser Firebase client only for dh-test performance mode", async () => {
+    const { connectAuthEmulator } = await import("firebase/auth");
+    const { connectFirestoreEmulator } = await import("firebase/firestore");
+    const { connectFunctionsEmulator } = await import("firebase/functions");
+    stubAllEnvVars();
+    vi.stubEnv("MODE", "performance");
+    vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "dh-test");
+    vi.stubEnv("VITE_RECAPTCHA_SITE_KEY", "unused-local-key");
+
+    await import("../../src/firebase");
+
+    expect(connectFirestoreEmulator).toHaveBeenCalledWith({}, "127.0.0.1", 8080);
+    expect(connectAuthEmulator).toHaveBeenCalledWith({}, "http://127.0.0.1:9099", {
+      disableWarnings: true,
+    });
+    expect(connectFunctionsEmulator).toHaveBeenCalledWith({}, "127.0.0.1", 5001);
+    expect(mockInitializeAppCheck).not.toHaveBeenCalled();
+  });
+
+  it("rejects performance mode for every project except dh-test", async () => {
+    stubAllEnvVars();
+    vi.stubEnv("MODE", "performance");
+    vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "not-the-test-project");
+
+    await expect(import("../../src/firebase")).rejects.toThrow(
+      'Performance mode may only use the local Firebase project "dh-test".'
+    );
+  });
+
+  it("does not connect emulators in the ordinary test mode", async () => {
+    const { connectAuthEmulator } = await import("firebase/auth");
+    const { connectFirestoreEmulator } = await import("firebase/firestore");
+    const { connectFunctionsEmulator } = await import("firebase/functions");
+    stubAllEnvVars();
+
+    await import("../../src/firebase");
+
+    expect(connectAuthEmulator).not.toHaveBeenCalled();
+    expect(connectFirestoreEmulator).not.toHaveBeenCalled();
+    expect(connectFunctionsEmulator).not.toHaveBeenCalled();
   });
 });

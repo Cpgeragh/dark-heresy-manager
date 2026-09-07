@@ -1,12 +1,16 @@
 import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import {
+  connectFirestoreEmulator,
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { getFunctions } from "firebase/functions";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+
+const PERFORMANCE_PROJECT_ID = "dh-test";
+const isPerformanceMode = import.meta.env.MODE === "performance";
 
 const requiredEnvVars = {
   VITE_FIREBASE_API_KEY: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -34,6 +38,12 @@ const firebaseConfig = {
   appId: requiredEnvVars.VITE_FIREBASE_APP_ID,
 };
 
+if (isPerformanceMode && firebaseConfig.projectId !== PERFORMANCE_PROJECT_ID) {
+  throw new Error(
+    `Performance mode may only use the local Firebase project "${PERFORMANCE_PROJECT_ID}".`
+  );
+}
+
 const app = initializeApp(firebaseConfig);
 
 const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -43,7 +53,7 @@ if (
 ) {
   throw new Error('Missing Firebase config value "VITE_RECAPTCHA_SITE_KEY" for staging App Check.');
 }
-if (recaptchaSiteKey) {
+if (recaptchaSiteKey && !isPerformanceMode) {
   initializeAppCheck(app, {
     provider: new ReCaptchaEnterpriseProvider(recaptchaSiteKey),
     isTokenAutoRefreshEnabled: true,
@@ -57,3 +67,9 @@ export const db = initializeFirestore(app, {
 });
 export const auth = getAuth(app);
 export const functions = getFunctions(app, "europe-west2");
+
+if (isPerformanceMode) {
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+}

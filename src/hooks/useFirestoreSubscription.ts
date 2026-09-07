@@ -8,6 +8,7 @@ import {
   type QuerySnapshot,
   type Unsubscribe,
 } from "firebase/firestore";
+import { beginPerformanceSubscription } from "../performance/performanceMetrics";
 
 export interface FirestoreSubscriptionState<T> {
   data: T;
@@ -60,16 +61,22 @@ function useFirestoreSubscription<T>({
     if (subscriptionKey === null) return;
 
     let active = true;
+    const performanceSubscription =
+      import.meta.env.MODE === "performance" ? beginPerformanceSubscription(subscriptionKey) : null;
 
     let unsubscribe: Unsubscribe;
     try {
       unsubscribe = startSubscription(
         (data) => {
           if (!active) return;
+          performanceSubscription?.snapshot(
+            Array.isArray(data) ? data.length : data === null ? 0 : 1
+          );
           setState({ source: subscriptionKey, data, loading: false, error: null });
         },
         (error) => {
           if (!active) return;
+          performanceSubscription?.error();
           setState({
             source: subscriptionKey,
             data: getEmptyData(),
@@ -90,12 +97,14 @@ function useFirestoreSubscription<T>({
       });
       return () => {
         active = false;
+        performanceSubscription?.stop();
       };
     }
 
     return () => {
       active = false;
       unsubscribe();
+      performanceSubscription?.stop();
     };
   }, [subscriptionKey]);
 
