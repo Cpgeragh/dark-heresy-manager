@@ -11,13 +11,16 @@ const deferredDashboard = vi.hoisted(() => {
   return { ready, resolve };
 });
 
+const authState = vi.hoisted(() => ({
+  currentUser: { uid: "user-1" } as { uid: string } | null,
+  loading: false,
+  error: null as Error | null,
+  onboarded: true,
+  setOnboarded: vi.fn(),
+}));
+
 vi.mock("../../src/hooks/useAuth", () => ({
-  useAuth: () => ({
-    currentUser: { uid: "user-1" },
-    loading: false,
-    onboarded: true,
-    setOnboarded: vi.fn(),
-  }),
+  useAuth: () => authState,
 }));
 vi.mock("../../src/hooks/useDeviceLink", () => ({
   useDeviceLink: () => ({
@@ -64,6 +67,10 @@ import App from "../../src/App";
 describe("App loading boundaries", () => {
   beforeEach(() => {
     sessionStorage.clear();
+    authState.currentUser = { uid: "user-1" };
+    authState.loading = false;
+    authState.error = null;
+    authState.onboarded = true;
   });
 
   it("keeps the application shell visible while a direct route loads", async () => {
@@ -79,5 +86,18 @@ describe("App loading boundaries", () => {
     deferredDashboard.resolve();
 
     expect(await screen.findByText("Deferred dashboard")).toBeInTheDocument();
+  });
+
+  it("shows an explicit account error instead of an indefinite loading state", () => {
+    authState.currentUser = null;
+    authState.error = new Error("sign-in failed");
+
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Unable to load your account. Please refresh.")).toBeInTheDocument();
   });
 });

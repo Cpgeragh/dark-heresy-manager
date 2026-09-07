@@ -21,6 +21,29 @@ interface PerformanceSnapshot {
   events: ApplicationPerformanceEvent[];
   activeListeners: number;
   heapBytes: number | null;
+  navigation: NavigationPerformanceEntry | null;
+  resources: ResourcePerformanceEntry[];
+}
+
+interface NavigationPerformanceEntry {
+  startTime: number;
+  responseStart: number;
+  responseEnd: number;
+  domInteractive: number;
+  domContentLoaded: number;
+  load: number;
+  transferBytes: number;
+  encodedBytes: number;
+}
+
+interface ResourcePerformanceEntry {
+  name: string;
+  initiatorType: string;
+  startTime: number;
+  duration: number;
+  transferBytes: number;
+  encodedBytes: number;
+  decodedBytes: number;
 }
 
 interface ApplicationPerformanceRecorder {
@@ -44,6 +67,52 @@ function heapBytes(): number | null {
   return typeof memory?.usedJSHeapSize === "number" ? memory.usedJSHeapSize : null;
 }
 
+function round(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function navigationEntry(): NavigationPerformanceEntry | null {
+  if (typeof performance.getEntriesByType !== "function") return null;
+  const entry = performance.getEntriesByType("navigation")[0] as
+    | PerformanceNavigationTiming
+    | undefined;
+  if (!entry) return null;
+  return {
+    startTime: round(entry.startTime),
+    responseStart: round(entry.responseStart),
+    responseEnd: round(entry.responseEnd),
+    domInteractive: round(entry.domInteractive),
+    domContentLoaded: round(entry.domContentLoadedEventEnd),
+    load: round(entry.loadEventEnd),
+    transferBytes: entry.transferSize,
+    encodedBytes: entry.encodedBodySize,
+  };
+}
+
+function safeResourceName(name: string): string {
+  try {
+    const url = new URL(name, window.location.href);
+    return url.origin === window.location.origin ? url.pathname : `${url.origin}${url.pathname}`;
+  } catch {
+    return name.split("?", 1)[0];
+  }
+}
+
+function resourceEntries(): ResourcePerformanceEntry[] {
+  if (typeof performance.getEntriesByType !== "function") return [];
+  return (performance.getEntriesByType("resource") as PerformanceResourceTiming[])
+    .slice(-500)
+    .map((entry) => ({
+      name: safeResourceName(entry.name),
+      initiatorType: entry.initiatorType,
+      startTime: round(entry.startTime),
+      duration: round(entry.duration),
+      transferBytes: entry.transferSize,
+      encodedBytes: entry.encodedBodySize,
+      decodedBytes: entry.decodedBodySize,
+    }));
+}
+
 function recorder(): ApplicationPerformanceRecorder | null {
   if (import.meta.env.MODE !== "performance" || typeof window === "undefined") return null;
   if (window.__DHM_PERFORMANCE__) return window.__DHM_PERFORMANCE__;
@@ -63,6 +132,8 @@ function recorder(): ApplicationPerformanceRecorder | null {
         events: [...events],
         activeListeners: this.activeListeners,
         heapBytes: heapBytes(),
+        navigation: navigationEntry(),
+        resources: resourceEntries(),
       };
     },
   };
@@ -146,3 +217,7 @@ export const recordApplicationCommit: ProfilerOnRenderCallback = (id, phase, act
     phase,
   });
 };
+
+export function markApplicationPerformance(name: string): void {
+  recorder()?.mark(name);
+}

@@ -11,6 +11,10 @@ import {
   configureEmulatorOnlyEnvironment,
   PERFORMANCE_EMULATOR,
 } from "../../scripts/seedPerformanceFixtures.mjs";
+import {
+  createPerformanceEnvironment,
+  PERFORMANCE_PROJECT_ID,
+} from "../../scripts/performanceEnvironmentConfig.mjs";
 
 const ENVIRONMENT_NAMES = [
   "GCLOUD_PROJECT",
@@ -122,5 +126,26 @@ describe("performance seeder safety", () => {
     vi.stubEnv(name, value);
 
     expect(() => configureEmulatorOnlyEnvironment()).toThrow(name);
+  });
+});
+
+describe("performance application environment safety", () => {
+  it("builds every browser and Admin destination for dh-test only", () => {
+    const environment = createPerformanceEnvironment({}, "revision-a");
+
+    expect(environment.VITE_FIREBASE_PROJECT_ID).toBe(PERFORMANCE_PROJECT_ID);
+    expect(environment.GCLOUD_PROJECT).toBe(PERFORMANCE_PROJECT_ID);
+    expect(environment.FIRESTORE_EMULATOR_HOST).toBe("127.0.0.1:8080");
+    expect(environment.FIREBASE_AUTH_EMULATOR_HOST).toBe("127.0.0.1:9099");
+    expect(environment.VITE_FIREBASE_APP_ID).toContain("revision-a");
+  });
+
+  it.each([
+    ["VITE_FIREBASE_PROJECT_ID", "dark-heresy-manager"],
+    ["GCLOUD_PROJECT", "dark-heresy-manager"],
+    ["FIRESTORE_EMULATOR_HOST", "firestore.googleapis.com"],
+    ["FIREBASE_AUTH_EMULATOR_HOST", "identitytoolkit.googleapis.com"],
+  ])("rejects a conflicting %s destination", (name, value) => {
+    expect(() => createPerformanceEnvironment({ [name]: value })).toThrow(name);
   });
 });

@@ -48,7 +48,7 @@ export default function App() {
   // -------------------------------------------------
   // AUTH & USER STATE
   // -------------------------------------------------
-  const { currentUser, loading, onboarded, setOnboarded } = useAuth();
+  const { currentUser, loading, error: authError, onboarded, setOnboarded } = useAuth();
 
   // -------------------------------------------------
   // DEVICE LINK — must be called unconditionally before any early returns
@@ -76,7 +76,7 @@ export default function App() {
     return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
   }
 
-  if (linkError || profileError) {
+  if (authError || linkError || profileError) {
     return <SplashScreen label="Unable to load your account. Please refresh." />;
   }
 

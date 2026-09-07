@@ -6,11 +6,13 @@
 //
 // Both exclude archived campaigns (archivedAt == null).
 
+import { useEffect } from "react";
 import { limit, query, where } from "firebase/firestore";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { campaignsCollectionRef } from "../firebase/converters";
 import { useQuerySubscription } from "../hooks/useFirestoreSubscription";
 import { CampaignsContext } from "./useCampaignsContext";
+import { markApplicationPerformance } from "../performance/performanceMetrics";
 
 export function CampaignsProvider({ uid, children }: { uid: string; children: React.ReactNode }) {
   const {
@@ -46,6 +48,12 @@ export function CampaignsProvider({ uid, children }: { uid: string; children: Re
     uid ? `player-campaigns:${uid}` : null,
     (snapshot) => snapshot.docs.map((campaignDocument) => campaignDocument.data())
   );
+
+  useEffect(() => {
+    if (!dmLoading && !playerLoading) {
+      markApplicationPerformance("startup:campaign-subscriptions-ready");
+    }
+  }, [dmLoading, playerLoading]);
 
   return (
     <CampaignsContext.Provider

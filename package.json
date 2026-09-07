@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "performance:local": "node scripts/startPerformanceEnvironment.mjs",
+    "performance:pwa": "node scripts/startPwaPerformanceEnvironment.mjs",
     "performance:seed": "node scripts/seedPerformanceFixtures.mjs",
     "test": "vitest --config vitest.config.fast.ts",
     "test:ui": "vitest --ui --config vitest.config.fast.ts",
@@ -30,8 +31,6 @@
   },
   "dependencies": {
     "@fontsource/im-fell-english": "^5.2.6",
-    "@fontsource/roboto": "^5.2.10",
-    "@fontsource/roboto-mono": "^5.2.9",
     "firebase": "^12.6.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
