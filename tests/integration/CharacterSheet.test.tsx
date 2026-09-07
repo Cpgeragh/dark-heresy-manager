@@ -314,6 +314,14 @@ describe("CharacterSheet tabs", () => {
     expect(screen.queryByText("Mock CharacteristicsTab")).not.toBeInTheDocument();
   });
 
+  it("loads a deferred tab directly from its ?tab= URL", async () => {
+    renderSheet("/campaign/campaign-1/character/char-1?tab=weapons");
+
+    expect(screen.getByText("Loading section…")).toBeInTheDocument();
+    expect(await screen.findByText("Mock WeaponsTab")).toBeInTheDocument();
+    expect(screen.queryByText("Mock CharacteristicsTab")).not.toBeInTheDocument();
+  });
+
   it("switches tabs when the drawer requests a change", async () => {
     const user = userEvent.setup();
     renderSheet("/campaign/campaign-1/character/char-1?tab=stats");

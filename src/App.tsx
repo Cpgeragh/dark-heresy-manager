@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation, useMatch } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
@@ -16,13 +16,14 @@ import { ToastProvider, ToastContainer, useToast } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 import { consumeUpdateStalled, consumePostUpgrade } from "./pwaUpdateState";
+import { LoadingState } from "./ui/LoadingState";
 
-import Dashboard from "./pages/Dashboard";
-import CharacterSheet from "./pages/CharacterSheet";
-import CampaignOverview from "./pages/CampaignOverview";
-import Onboarding from "./pages/Onboarding";
-import Settings from "./pages/Settings";
-import MissingProfileRecovery from "./pages/MissingProfileRecovery";
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const CharacterSheet = lazy(() => import("./pages/CharacterSheet"));
+const CampaignOverview = lazy(() => import("./pages/CampaignOverview"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Settings = lazy(() => import("./pages/Settings"));
+const MissingProfileRecovery = lazy(() => import("./pages/MissingProfileRecovery"));
 
 // Shows a one-off toast if a service-worker update started downloading but
 // stalled (flag set in main.tsx). Must live inside ToastProvider.
@@ -86,12 +87,14 @@ export default function App() {
   // First-launch: user hasn't completed onboarding yet.
   if (!onboarded) {
     return (
-      <Onboarding
-        user={currentUser}
-        onComplete={() => setOnboarded(true)}
-        effectiveUserId={effectiveUserId}
-        firstName={firstName}
-      />
+      <Suspense fallback={<SplashScreen label="Loading…" />}>
+        <Onboarding
+          user={currentUser}
+          onComplete={() => setOnboarded(true)}
+          effectiveUserId={effectiveUserId}
+          firstName={firstName}
+        />
+      </Suspense>
     );
   }
 
@@ -101,7 +104,11 @@ export default function App() {
   // a reclaim elsewhere, offer the non-destructive device-link route instead
   // of asking the user to recreate their name or trapping them on an error.
   if (!firstName) {
-    return <MissingProfileRecovery />;
+    return (
+      <Suspense fallback={<SplashScreen label="Loading…" />}>
+        <MissingProfileRecovery />
+      </Suspense>
+    );
   }
 
   // -------------------------------------------------
@@ -119,49 +126,55 @@ export default function App() {
           <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>
             <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
               <ErrorBoundary>
-                <Routes>
-                  <Route
-                    path={ROUTES.DASHBOARD}
-                    element={
-                      <Dashboard
-                        user={currentUser}
-                        effectiveUserId={effectiveUserId}
-                        isLinked={isLinked}
-                        firstName={firstName}
-                      />
-                    }
-                  />
+                <Suspense
+                  fallback={
+                    <LoadingState className="py-10 text-center">Loading page…</LoadingState>
+                  }
+                >
+                  <Routes>
+                    <Route
+                      path={ROUTES.DASHBOARD}
+                      element={
+                        <Dashboard
+                          user={currentUser}
+                          effectiveUserId={effectiveUserId}
+                          isLinked={isLinked}
+                          firstName={firstName}
+                        />
+                      }
+                    />
 
-                  <Route
-                    path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                    element={
-                      <CharacterSheet
-                        effectiveUserId={effectiveUserId}
-                        onOpenMessages={() => setMessagesOpen(true)}
-                      />
-                    }
-                  />
+                    <Route
+                      path={ROUTE_PATTERNS.CHARACTER_SHEET}
+                      element={
+                        <CharacterSheet
+                          effectiveUserId={effectiveUserId}
+                          onOpenMessages={() => setMessagesOpen(true)}
+                        />
+                      }
+                    />
 
-                  <Route
-                    path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
-                    element={<CampaignOverview effectiveUserId={effectiveUserId} />}
-                  />
+                    <Route
+                      path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                      element={<CampaignOverview effectiveUserId={effectiveUserId} />}
+                    />
 
-                  <Route
-                    path={ROUTES.SETTINGS}
-                    element={
-                      <Settings
-                        user={currentUser}
-                        effectiveUserId={effectiveUserId}
-                        firstName={firstName}
-                        isLinked={isLinked}
-                        unlink={unlink}
-                      />
-                    }
-                  />
+                    <Route
+                      path={ROUTES.SETTINGS}
+                      element={
+                        <Settings
+                          user={currentUser}
+                          effectiveUserId={effectiveUserId}
+                          firstName={firstName}
+                          isLinked={isLinked}
+                          unlink={unlink}
+                        />
+                      }
+                    />
 
-                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-                </Routes>
+                    <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+                  </Routes>
+                </Suspense>
               </ErrorBoundary>
             </main>
 

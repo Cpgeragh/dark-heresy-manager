@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet.tsx
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 import { CharacterKebabContent } from "./CharacterSheet/CharacterKebabContent";
@@ -14,18 +14,12 @@ import { InsanityTab } from "./CharacterSheet/InsanityTab";
 import { CorruptionTab } from "./CharacterSheet/CorruptionTab";
 import { CharacteristicsTab } from "./CharacterSheet/CharacteristicsTab";
 import { SkillsTab } from "./CharacterSheet/SkillsTab";
-import { TalentsTab } from "../mechanics/talents/TalentsTab";
 import { TraitsTab } from "../mechanics/traits/TraitsTab";
-import { WeaponsTab } from "./CharacterSheet/WeaponsTab";
 import { ArmourTab } from "./CharacterSheet/ArmourTab";
-import { CyberneticsTab } from "./CharacterSheet/CyberneticsTab";
-import { PsychicTab } from "./CharacterSheet/PsychicTab";
-import { GearTab } from "./CharacterSheet/GearTab";
 import { DrugsTab } from "./CharacterSheet/DrugsTab";
 import { ExperienceTab } from "./CharacterSheet/ExperienceTab";
 import { NotesTab } from "./CharacterSheet/NotesTab";
 import { AdminTab } from "./CharacterSheet/AdminTab";
-import { ArcheotechTab } from "./CharacterSheet/ArcheotechTab";
 import { BackgroundTab } from "./CharacterSheet/BackgroundTab";
 import { CompleteBackgroundSetupModal } from "./CharacterSheet/BackgroundTab/CompleteBackgroundSetupModal";
 import { WeaponTrainingTab } from "./CharacterSheet/WeaponTrainingTab";
@@ -70,6 +64,29 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import { LoadingState } from "../ui/LoadingState";
 import { ROUTES } from "../constants/routes";
 import { RouteLoadError } from "../ui/RouteLoadError";
+
+const TalentsTab = lazy(() =>
+  import("../mechanics/talents/TalentsTab").then(({ TalentsTab }) => ({ default: TalentsTab }))
+);
+const WeaponsTab = lazy(() =>
+  import("./CharacterSheet/WeaponsTab").then(({ WeaponsTab }) => ({ default: WeaponsTab }))
+);
+const CyberneticsTab = lazy(() =>
+  import("./CharacterSheet/CyberneticsTab").then(({ CyberneticsTab }) => ({
+    default: CyberneticsTab,
+  }))
+);
+const PsychicTab = lazy(() =>
+  import("./CharacterSheet/PsychicTab").then(({ PsychicTab }) => ({ default: PsychicTab }))
+);
+const GearTab = lazy(() =>
+  import("./CharacterSheet/GearTab").then(({ GearTab }) => ({ default: GearTab }))
+);
+const ArcheotechTab = lazy(() =>
+  import("./CharacterSheet/ArcheotechTab").then(({ ArcheotechTab }) => ({
+    default: ArcheotechTab,
+  }))
+);
 
 function isPermissionDenied(error: Error | null): boolean {
   if (!error) return false;
@@ -563,289 +580,293 @@ export default function CharacterSheet({
             </div>
           }
         >
-          {activeTab === "vitals" && (
-            <VitalsTab
-              character={character}
-              editable={allowedToEdit}
-              toughnessBonus={getCharBonus("t")}
-              talents={character.talentsAndTraits}
-              onUpdateWounds={handleUpdateWounds}
-              onUpdateFate={handleUpdateFate}
-            />
-          )}
+          <Suspense
+            fallback={<LoadingState className="py-10 text-center">Loading section…</LoadingState>}
+          >
+            {activeTab === "vitals" && (
+              <VitalsTab
+                character={character}
+                editable={allowedToEdit}
+                toughnessBonus={getCharBonus("t")}
+                talents={character.talentsAndTraits}
+                onUpdateWounds={handleUpdateWounds}
+                onUpdateFate={handleUpdateFate}
+              />
+            )}
 
-          {activeTab === "insanity" && (
-            <InsanityTab
-              insanity={character.insanity}
-              talents={character.talentsAndTraits}
-              career={character.header.career}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateInsanity}
-            />
-          )}
+            {activeTab === "insanity" && (
+              <InsanityTab
+                insanity={character.insanity}
+                talents={character.talentsAndTraits}
+                career={character.header.career}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateInsanity}
+              />
+            )}
 
-          {activeTab === "corruption" && (
-            <CorruptionTab
-              corruption={character.corruption}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateCorruption}
-            />
-          )}
+            {activeTab === "corruption" && (
+              <CorruptionTab
+                corruption={character.corruption}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateCorruption}
+              />
+            )}
 
-          {activeTab === "stats" && (
-            <CharacteristicsTab
-              getCharField={getCharField}
-              getEffectiveCharTotal={getEffectiveCharTotal}
-              getCharBonus={getCharBonus}
-              editable={allowedToEdit}
-              corruption={character.corruption}
-              talents={character.talentsAndTraits}
-              career={character.header.career}
-              rank={character.header.rank}
-              updateCharacteristic={updateCharacteristic}
-            />
-          )}
+            {activeTab === "stats" && (
+              <CharacteristicsTab
+                getCharField={getCharField}
+                getEffectiveCharTotal={getEffectiveCharTotal}
+                getCharBonus={getCharBonus}
+                editable={allowedToEdit}
+                corruption={character.corruption}
+                talents={character.talentsAndTraits}
+                career={character.header.career}
+                rank={character.header.rank}
+                updateCharacteristic={updateCharacteristic}
+              />
+            )}
 
-          {activeTab === "skills" && (
-            <SkillsTab
-              skills={character.skills}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateSkills}
-              getCharField={getCharField}
-              corruption={character.corruption}
-              talents={character.talentsAndTraits}
-              career={character.header.career}
-              rank={character.header.rank}
-              isDM={isDM}
-            />
-          )}
+            {activeTab === "skills" && (
+              <SkillsTab
+                skills={character.skills}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateSkills}
+                getCharField={getCharField}
+                corruption={character.corruption}
+                talents={character.talentsAndTraits}
+                career={character.header.career}
+                rank={character.header.rank}
+                isDM={isDM}
+              />
+            )}
 
-          {activeTab === "talents" && (
-            <TalentsTab
-              talents={character.talentsAndTraits}
-              career={character.header.career}
-              rank={character.header.rank}
-              psychic={character.psychic}
-              cybernetics={character.cybernetics ?? []}
-              rangedWeapons={character.rangedWeapons}
-              meleeWeapons={character.meleeWeapons}
-              archeotech={character.archeotech ?? []}
-              insanity={character.insanity}
-              willpowerBonus={getCharBonus("wp")}
-              weaponTraining={character.weaponTraining}
-              isDM={isDM}
-              editable={allowedToEdit}
-              onUpdateTalents={handleUpdateTalents}
-              onUpdateCharacter={patchFields}
-            />
-          )}
+            {activeTab === "talents" && (
+              <TalentsTab
+                talents={character.talentsAndTraits}
+                career={character.header.career}
+                rank={character.header.rank}
+                psychic={character.psychic}
+                cybernetics={character.cybernetics ?? []}
+                rangedWeapons={character.rangedWeapons}
+                meleeWeapons={character.meleeWeapons}
+                archeotech={character.archeotech ?? []}
+                insanity={character.insanity}
+                willpowerBonus={getCharBonus("wp")}
+                weaponTraining={character.weaponTraining}
+                isDM={isDM}
+                editable={allowedToEdit}
+                onUpdateTalents={handleUpdateTalents}
+                onUpdateCharacter={patchFields}
+              />
+            )}
 
-          {activeTab === "training" && (
-            <WeaponTrainingTab
-              weaponTraining={character.weaponTraining}
-              talents={character.talentsAndTraits}
-              career={character.header.career}
-              rank={character.header.rank}
-              editable={allowedToEdit}
-              isDM={isDM}
-              onUpdate={handleUpdateWeaponTraining}
-            />
-          )}
+            {activeTab === "training" && (
+              <WeaponTrainingTab
+                weaponTraining={character.weaponTraining}
+                talents={character.talentsAndTraits}
+                career={character.header.career}
+                rank={character.header.rank}
+                editable={allowedToEdit}
+                isDM={isDM}
+                onUpdate={handleUpdateWeaponTraining}
+              />
+            )}
 
-          {activeTab === "traits" && (
-            <TraitsTab
-              talents={character.talentsAndTraits}
-              career={character.header.career}
-              rank={character.header.rank}
-              cybernetics={character.cybernetics ?? []}
-              gear={character.gear ?? []}
-              editable={allowedToEdit}
-              onUpdateTalents={handleUpdateTalents}
-              onUpdateCybernetics={handleUpdateCybernetics}
-              onUpdateGear={handleUpdateGear}
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-            />
-          )}
+            {activeTab === "traits" && (
+              <TraitsTab
+                talents={character.talentsAndTraits}
+                career={character.header.career}
+                rank={character.header.rank}
+                cybernetics={character.cybernetics ?? []}
+                gear={character.gear ?? []}
+                editable={allowedToEdit}
+                onUpdateTalents={handleUpdateTalents}
+                onUpdateCybernetics={handleUpdateCybernetics}
+                onUpdateGear={handleUpdateGear}
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+              />
+            )}
 
-          {activeTab === "weapons" && (
-            <WeaponsTab
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-              rangedWeapons={character.rangedWeapons}
-              meleeWeapons={character.meleeWeapons}
-              grenades={character.grenades ?? []}
-              editable={allowedToEdit}
-              strengthBonus={getCharBonus("s")}
-              onUpdateRanged={handleUpdateRangedWeapons}
-              onUpdateMelee={handleUpdateMeleeWeapons}
-              onUpdateGrenades={handleUpdateGrenades}
-              shields={character.shields ?? []}
-              onUpdateShields={handleUpdateShields}
-              cybernetics={character.cybernetics ?? []}
-              archeotech={character.archeotech ?? []}
-              onUpdateArcheotech={handleUpdateArcheotech}
-            />
-          )}
+            {activeTab === "weapons" && (
+              <WeaponsTab
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+                rangedWeapons={character.rangedWeapons}
+                meleeWeapons={character.meleeWeapons}
+                grenades={character.grenades ?? []}
+                editable={allowedToEdit}
+                strengthBonus={getCharBonus("s")}
+                onUpdateRanged={handleUpdateRangedWeapons}
+                onUpdateMelee={handleUpdateMeleeWeapons}
+                onUpdateGrenades={handleUpdateGrenades}
+                shields={character.shields ?? []}
+                onUpdateShields={handleUpdateShields}
+                cybernetics={character.cybernetics ?? []}
+                archeotech={character.archeotech ?? []}
+                onUpdateArcheotech={handleUpdateArcheotech}
+              />
+            )}
 
-          {activeTab === "armour" && (
-            <ArmourTab
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-              armour={character.armour}
-              toughnessBonus={getCharBonus("t")}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateArmour}
-              cybernetics={character.cybernetics ?? []}
-              archeotech={character.archeotech ?? []}
-              onUpdateArcheotech={handleUpdateArcheotech}
-              traits={character.talentsAndTraits.traits}
-              talents={character.talentsAndTraits}
-              career={character.header.career}
-            />
-          )}
+            {activeTab === "armour" && (
+              <ArmourTab
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+                armour={character.armour}
+                toughnessBonus={getCharBonus("t")}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateArmour}
+                cybernetics={character.cybernetics ?? []}
+                archeotech={character.archeotech ?? []}
+                onUpdateArcheotech={handleUpdateArcheotech}
+                traits={character.talentsAndTraits.traits}
+                talents={character.talentsAndTraits}
+                career={character.header.career}
+              />
+            )}
 
-          {activeTab === "cybernetics" && (
-            <CyberneticsTab
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-              cybernetics={character.cybernetics ?? []}
-              rangedWeapons={character.rangedWeapons}
-              meleeWeapons={character.meleeWeapons}
-              strengthBonus={getCharBonus("s")}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateCybernetics}
-              onUpdateRanged={handleUpdateRangedWeapons}
-              onUpdateMelee={handleUpdateMeleeWeapons}
-              archeotech={character.archeotech ?? []}
-              onUpdateArcheotech={handleUpdateArcheotech}
-              career={character.header.career}
-            />
-          )}
+            {activeTab === "cybernetics" && (
+              <CyberneticsTab
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+                cybernetics={character.cybernetics ?? []}
+                rangedWeapons={character.rangedWeapons}
+                meleeWeapons={character.meleeWeapons}
+                strengthBonus={getCharBonus("s")}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateCybernetics}
+                onUpdateRanged={handleUpdateRangedWeapons}
+                onUpdateMelee={handleUpdateMeleeWeapons}
+                archeotech={character.archeotech ?? []}
+                onUpdateArcheotech={handleUpdateArcheotech}
+                career={character.header.career}
+              />
+            )}
 
-          {activeTab === "psychic" && (
-            <PsychicTab
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-              psychic={character.psychic}
-              talents={character.talentsAndTraits}
-              psyRating={psyRating}
-              editable={allowedToEdit}
-              onUpdate={handleUpdatePsychic}
-            />
-          )}
+            {activeTab === "psychic" && (
+              <PsychicTab
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+                psychic={character.psychic}
+                talents={character.talentsAndTraits}
+                psyRating={psyRating}
+                editable={allowedToEdit}
+                onUpdate={handleUpdatePsychic}
+              />
+            )}
 
-          {activeTab === "gear" && (
-            <GearTab
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-              gear={character.gear}
-              consumables={character.consumables ?? []}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateGear}
-              onUpdateConsumables={handleUpdateConsumables}
-            />
-          )}
+            {activeTab === "gear" && (
+              <GearTab
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+                gear={character.gear}
+                consumables={character.consumables ?? []}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateGear}
+                onUpdateConsumables={handleUpdateConsumables}
+              />
+            )}
 
-          {activeTab === "companions" && (
-            <CompanionsTab
-              companions={character.companions ?? []}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateCompanions}
-            />
-          )}
+            {activeTab === "companions" && (
+              <CompanionsTab
+                companions={character.companions ?? []}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateCompanions}
+              />
+            )}
 
-          {activeTab === "drugs" && (
-            <DrugsTab
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-              drugs={character.drugs ?? []}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateDrugs}
-            />
-          )}
+            {activeTab === "drugs" && (
+              <DrugsTab
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+                drugs={character.drugs ?? []}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateDrugs}
+              />
+            )}
 
-          {activeTab === "xp" && (
-            <ExperienceTab
-              character={character}
-              isDM={isDM}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateExperience}
-              onUpdateHeader={handleUpdateHeader}
-            />
-          )}
+            {activeTab === "xp" && (
+              <ExperienceTab
+                character={character}
+                isDM={isDM}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateExperience}
+                onUpdateHeader={handleUpdateHeader}
+              />
+            )}
 
-          {activeTab === "notes" && (
-            <NotesTab
-              notes={character.notes ?? []}
-              editable={allowedToEdit}
-              onSave={handleUpdateNotes}
-            />
-          )}
+            {activeTab === "notes" && (
+              <NotesTab
+                notes={character.notes ?? []}
+                editable={allowedToEdit}
+                onSave={handleUpdateNotes}
+              />
+            )}
 
-          {activeTab === "background" && (
-            <BackgroundTab
-              header={character.header}
-              talents={character.talentsAndTraits}
-              cybernetics={character.cybernetics ?? []}
-              editable={allowedToEdit}
-              playerName={ownerName}
-              onUpdateHeader={handleUpdateHeader}
-              onUpdateTalents={handleUpdateTalents}
-              onUpdateCybernetics={handleUpdateCybernetics}
-              gear={character.gear ?? []}
-              onUpdateGear={handleUpdateGear}
-            />
-          )}
+            {activeTab === "background" && (
+              <BackgroundTab
+                header={character.header}
+                talents={character.talentsAndTraits}
+                cybernetics={character.cybernetics ?? []}
+                editable={allowedToEdit}
+                playerName={ownerName}
+                onUpdateHeader={handleUpdateHeader}
+                onUpdateTalents={handleUpdateTalents}
+                onUpdateCybernetics={handleUpdateCybernetics}
+                gear={character.gear ?? []}
+                onUpdateGear={handleUpdateGear}
+              />
+            )}
 
-          {activeTab === "archeotech" && (
-            <ArcheotechTab
-              campaignId={path.campaignId}
-              characterId={character.id}
-              userId={effectiveUserId}
-              characterName={character.header.characterName}
-              isDM={isDM}
-              archeotech={character.archeotech ?? []}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateArcheotech}
-            />
-          )}
+            {activeTab === "archeotech" && (
+              <ArcheotechTab
+                campaignId={path.campaignId}
+                characterId={character.id}
+                userId={effectiveUserId}
+                characterName={character.header.characterName}
+                isDM={isDM}
+                archeotech={character.archeotech ?? []}
+                editable={allowedToEdit}
+                onUpdate={handleUpdateArcheotech}
+              />
+            )}
 
-          {activeTab === "admin" && isDM && (
-            <AdminTab
-              campaignId={path.campaignId}
-              character={character}
-              ownerName={ownerName}
-              onDMForceRelease={dmForceRelease}
-              onDMForceAssign={dmForceAssign}
-              onDMToggleEdit={dmToggleEdit}
-              isDmForceReleasing={isDmForceReleasing}
-              isDmForceAssigning={isDmForceAssigning}
-              isDmTogglingEdit={isDmTogglingEdit}
-              memberIds={memberIds}
-            />
-          )}
+            {activeTab === "admin" && isDM && (
+              <AdminTab
+                campaignId={path.campaignId}
+                character={character}
+                ownerName={ownerName}
+                onDMForceRelease={dmForceRelease}
+                onDMForceAssign={dmForceAssign}
+                onDMToggleEdit={dmToggleEdit}
+                isDmForceReleasing={isDmForceReleasing}
+                isDmForceAssigning={isDmForceAssigning}
+                isDmTogglingEdit={isDmTogglingEdit}
+                memberIds={memberIds}
+              />
+            )}
+          </Suspense>
         </ErrorBoundary>
       </div>
 
