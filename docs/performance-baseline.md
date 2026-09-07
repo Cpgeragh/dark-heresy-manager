@@ -1,4 +1,6 @@
-# Performance baseline — 6 September 2026
+# Performance baseline
+
+Measured: 6 September 2026
 
 This baseline was recorded on the local development machine against the disposable `dh-test`
 Firebase emulators. It is a reference point for subsequent performance investigations, not a set

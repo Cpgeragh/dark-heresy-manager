@@ -1,4 +1,6 @@
-# JavaScript bundle investigation — 7 September 2026
+# JavaScript bundle investigation
+
+Measured: 7 September 2026
 
 Measurements use optimized production builds and compare against the 6 September baseline. A
 disposable source-map build was used for attribution and was removed after the investigation.
