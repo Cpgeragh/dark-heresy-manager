@@ -75,6 +75,17 @@ beforeEach(() => {
 });
 
 describe("DrugsTab", () => {
+  it("enables the custom-item subscription only after the picker opens", async () => {
+    const user = userEvent.setup();
+    renderTab();
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
+
+    await user.click(screen.getByRole("button", { name: "Add drug" }));
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
+  });
+
   it("always shows the Excessive Drug Use rule", () => {
     renderTab();
     expect(screen.getByText("Excessive Drug Use")).toBeInTheDocument();

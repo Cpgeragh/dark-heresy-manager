@@ -244,4 +244,43 @@ describe("bounded Firestore hooks", () => {
       expect.any(Function)
     );
   });
+
+  it("does not construct custom-item queries while the consumer is closed", () => {
+    renderHook(() =>
+      useCampaignCustomItems({
+        campaignId: "campaign-1",
+        category: "weapon",
+        mode: "picker",
+        userId: "user-1",
+        enabled: false,
+      })
+    );
+
+    expect(mockQuery).not.toHaveBeenCalled();
+    expect(mockUseQuerySubscription).toHaveBeenCalledTimes(3);
+    for (const [sourceQuery, subscriptionKey] of mockUseQuerySubscription.mock.calls) {
+      expect(sourceQuery).toBeNull();
+      expect(subscriptionKey).toBeNull();
+    }
+  });
+
+  it("limits a picker creator query to the current user's drafts", () => {
+    renderHook(() =>
+      useCampaignCustomItems({
+        campaignId: "campaign-1",
+        category: "weapon",
+        mode: "picker",
+        userId: "user-1",
+      })
+    );
+
+    expect(mockWhere).toHaveBeenCalledWith("status", "==", "published");
+    expect(mockWhere).toHaveBeenCalledWith("creator.userId", "==", "user-1");
+    expect(mockWhere).toHaveBeenCalledWith("status", "==", "draft");
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(
+      expect.anything(),
+      "custom-items:creator-drafts:campaign-1:user-1:weapon",
+      expect.any(Function)
+    );
+  });
 });

@@ -1,10 +1,18 @@
 // tests/integration/ArmourTab.test.tsx
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
+import type {
+  UseCampaignCustomItemsArgs,
+  UseCampaignCustomItemsResult,
+} from "../../src/hooks/useCampaignCustomItems";
+
+const useCampaignCustomItemsMock = vi.fn<
+  (args: UseCampaignCustomItemsArgs) => UseCampaignCustomItemsResult
+>(() => ({ items: [], loading: false, error: null }));
 vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
-  useCampaignCustomItems: () => ({ items: [], loading: false, error: null }),
+  useCampaignCustomItems: (args: UseCampaignCustomItemsArgs) => useCampaignCustomItemsMock(args),
 }));
 
 import { ArmourTab } from "../../src/pages/CharacterSheet/ArmourTab";
@@ -36,7 +44,22 @@ function renderTab(props: Partial<React.ComponentProps<typeof ArmourTab>> = {}) 
   return { onUpdate };
 }
 
+beforeEach(() => {
+  useCampaignCustomItemsMock.mockClear();
+  useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: false, error: null });
+});
+
 describe("ArmourTab", () => {
+  it("enables the custom-item subscription only after a picker opens", () => {
+    renderTab({ armour: [] });
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "+ Equip" }));
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
+  });
+
   it("renders the location summary and section headers", () => {
     renderTab();
     expect(screen.getByText("Location Summary")).toBeInTheDocument();

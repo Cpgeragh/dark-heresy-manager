@@ -227,6 +227,8 @@ describe("Firestore Rules: Campaign Custom Items", () => {
       playerDb
         .collection(`campaigns/${campaignId}/customItems`)
         .where("creator.userId", "==", "player-1")
+        .where("status", "==", "draft")
+        .where("category", "==", "gear")
         .limit(200)
         .get()
     ).resolves.toBeDefined();

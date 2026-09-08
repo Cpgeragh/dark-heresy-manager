@@ -92,6 +92,18 @@ describe("WeaponsTab", () => {
     }
   });
 
+  it("enables the custom-item subscription only after a picker opens", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockClear();
+    renderTab({ rangedWeapons: [], meleeWeapons: [], grenades: [], shields: [] });
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
+
+    await user.click(screen.getByRole("button", { name: "Add ranged weapon" }));
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
+  });
+
   it("renders the Ranged and Melee sections", () => {
     renderTab();
     expect(screen.getAllByText("Ranged").length).toBeGreaterThanOrEqual(1);

@@ -18,6 +18,7 @@ export interface UseCampaignCustomItemsArgs {
   userId?: string | null;
   characterId?: string | null;
   includeArchived?: boolean;
+  enabled?: boolean;
 }
 
 export interface UseCampaignCustomItemsResult {
@@ -33,6 +34,7 @@ export function useCampaignCustomItems({
   mode,
   userId,
   includeArchived = mode === "admin",
+  enabled = true,
 }: UseCampaignCustomItemsArgs): UseCampaignCustomItemsResult {
   const baseRef = campaignId ? customItemsCollectionRef(campaignId) : null;
   const selectedCategories = useMemo(
@@ -46,8 +48,8 @@ export function useCampaignCustomItems({
       : selectedCategories.length === 1
         ? where("category", "==", selectedCategories[0])
         : where("category", "in", selectedCategories);
-  const adminActive = mode === "admin" && baseRef !== null;
-  const pickerActive = mode === "picker" && baseRef !== null;
+  const adminActive = enabled && mode === "admin" && baseRef !== null;
+  const pickerActive = enabled && mode === "picker" && baseRef !== null;
 
   const adminSubscription = useQuerySubscription(
     adminActive
@@ -79,11 +81,14 @@ export function useCampaignCustomItems({
       ? query(
           baseRef,
           where("creator.userId", "==", userId),
+          where("status", "==", "draft"),
           ...(categoryConstraint ? [categoryConstraint] : []),
           limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
         )
       : null,
-    pickerActive && userId ? `custom-items:creator:${campaignId}:${userId}:${categoryKey}` : null,
+    pickerActive && userId
+      ? `custom-items:creator-drafts:${campaignId}:${userId}:${categoryKey}`
+      : null,
     mapCustomItemSnapshot
   );
 

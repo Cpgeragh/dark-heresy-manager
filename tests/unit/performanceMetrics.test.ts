@@ -71,4 +71,22 @@ describe("performance metrics recorder", () => {
       },
     ]);
   });
+
+  it("records whether a listener snapshot came from cache", async () => {
+    const { beginPerformanceSubscription } =
+      await import("../../src/performance/performanceMetrics");
+    const subscription = beginPerformanceSubscription("campaigns:test");
+
+    subscription?.snapshot(3, { fromCache: true, hasPendingWrites: false });
+
+    expect(window.__DHM_PERFORMANCE__?.snapshot().events).toContainEqual(
+      expect.objectContaining({
+        kind: "listener-snapshot",
+        name: "campaigns:test",
+        count: 3,
+        fromCache: true,
+        hasPendingWrites: false,
+      })
+    );
+  });
 });

@@ -19,6 +19,8 @@ const authState = vi.hoisted(() => ({
   setOnboarded: vi.fn(),
 }));
 
+const campaignProviderRenderMock = vi.hoisted(() => vi.fn());
+
 vi.mock("../../src/hooks/useAuth", () => ({
   useAuth: () => authState,
 }));
@@ -41,7 +43,10 @@ vi.mock("../../src/components/AppHeader", () => ({
 vi.mock("../../src/components/MessageDrawer", () => ({ MessageDrawer: () => null }));
 vi.mock("../../src/components/OfflineIndicator", () => ({ OfflineIndicator: () => null }));
 vi.mock("../../src/context/CampaignsContext", () => ({
-  CampaignsProvider: ({ children }: { children: ReactNode }) => children,
+  CampaignsProvider: ({ children }: { children: ReactNode }) => {
+    campaignProviderRenderMock();
+    return children;
+  },
 }));
 vi.mock("../../src/context/HeaderExtensionContext", () => ({
   HeaderExtensionProvider: ({ children }: { children: ReactNode }) => children,
@@ -71,6 +76,7 @@ describe("App loading boundaries", () => {
     authState.loading = false;
     authState.error = null;
     authState.onboarded = true;
+    campaignProviderRenderMock.mockClear();
   });
 
   it("keeps the application shell visible while a direct route loads", async () => {
@@ -99,5 +105,26 @@ describe("App loading boundaries", () => {
     );
 
     expect(screen.getByText("Unable to load your account. Please refresh.")).toBeInTheDocument();
+  });
+
+  it("mounts campaign-list subscriptions only for the dashboard route", async () => {
+    deferredDashboard.resolve();
+    const settingsView = render(
+      <MemoryRouter initialEntries={["/settings"]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(campaignProviderRenderMock).not.toHaveBeenCalled();
+    settingsView.unmount();
+
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Deferred dashboard")).toBeInTheDocument();
+    expect(campaignProviderRenderMock).toHaveBeenCalled();
   });
 });

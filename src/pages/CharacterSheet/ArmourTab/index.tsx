@@ -145,6 +145,7 @@ export function ArmourTab({
     userId,
     characterId,
     includeArchived: isDM,
+    enabled: showPicker || showFieldPicker || armour.some((piece) => !!piece.customLibraryId),
   });
   const campaignCustomArmour = useMemo(
     () => campaignCustomArmourItems as CampaignCustomItem<"armour">[],

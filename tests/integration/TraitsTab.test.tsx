@@ -4,6 +4,10 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
+import type {
+  UseCampaignCustomItemsArgs,
+  UseCampaignCustomItemsResult,
+} from "../../src/hooks/useCampaignCustomItems";
 
 const { MOCK_TRAIT_LIST } = vi.hoisted(() => {
   const traits = [
@@ -89,6 +93,13 @@ const { MOCK_TRAIT_LIST } = vi.hoisted(() => {
 
 vi.mock("../../src/data/reference/traitData", () => ({ TRAIT_LIST: MOCK_TRAIT_LIST }));
 
+const useCampaignCustomItemsMock = vi.fn<
+  (args: UseCampaignCustomItemsArgs) => UseCampaignCustomItemsResult
+>(() => ({ items: [], loading: false, error: null }));
+vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
+  useCampaignCustomItems: (args: UseCampaignCustomItemsArgs) => useCampaignCustomItemsMock(args),
+}));
+
 import { TraitsTab } from "../../src/mechanics/traits/TraitsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
@@ -122,6 +133,18 @@ function StatefulTraitsTab() {
 }
 
 describe("TraitsTab", () => {
+  it("enables the custom-item subscription only after the picker opens", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockClear();
+    renderTab({ campaignId: "campaign-1", characterId: "char-1", userId: "user-1" });
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
+
+    await user.click(screen.getByRole("button", { name: "Add Trait" }));
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
+  });
+
   it("renders the header and an existing trait entry", () => {
     const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
     renderTab({ talents: makeTalents({ traits: [entry] }) });

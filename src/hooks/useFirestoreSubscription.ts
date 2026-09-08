@@ -6,6 +6,7 @@ import {
   type DocumentSnapshot,
   type Query,
   type QuerySnapshot,
+  type SnapshotMetadata,
   type Unsubscribe,
 } from "firebase/firestore";
 import { beginPerformanceSubscription } from "../performance/performanceMetrics";
@@ -17,7 +18,7 @@ export interface FirestoreSubscriptionState<T> {
 }
 
 type SnapshotSubscriber<T> = (
-  onData: (data: T) => void,
+  onData: (data: T, metadata?: SnapshotMetadata) => void,
   onError: (error: Error) => void
 ) => Unsubscribe;
 
@@ -67,10 +68,11 @@ function useFirestoreSubscription<T>({
     let unsubscribe: Unsubscribe;
     try {
       unsubscribe = startSubscription(
-        (data) => {
+        (data, metadata) => {
           if (!active) return;
           performanceSubscription?.snapshot(
-            Array.isArray(data) ? data.length : data === null ? 0 : 1
+            Array.isArray(data) ? data.length : data === null ? 0 : 1,
+            metadata
           );
           setState({ source: subscriptionKey, data, loading: false, error: null });
         },
@@ -128,7 +130,11 @@ export function useDocumentSubscription<TDocument extends DocumentData, TResult>
     subscriptionKey: reference?.path ?? null,
     createEmptyData: () => null,
     subscribe: (onData, onError) =>
-      onSnapshot(reference!, (snapshot) => onData(mapSnapshot(snapshot)), onError),
+      onSnapshot(
+        reference!,
+        (snapshot) => onData(mapSnapshot(snapshot), snapshot.metadata),
+        onError
+      ),
   });
 }
 
@@ -147,6 +153,10 @@ export function useQuerySubscription<TDocument extends DocumentData, TResult>(
     subscriptionKey: activeKey,
     createEmptyData: () => [],
     subscribe: (onData, onError) =>
-      onSnapshot(sourceQuery!, (snapshot) => onData(mapSnapshot(snapshot)), onError),
+      onSnapshot(
+        sourceQuery!,
+        (snapshot) => onData(mapSnapshot(snapshot), snapshot.metadata),
+        onError
+      ),
   });
 }

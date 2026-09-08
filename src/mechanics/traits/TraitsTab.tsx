@@ -142,6 +142,7 @@ export function TraitsTab({
     category: "trait",
     mode: "picker",
     userId,
+    enabled: showPicker || talents.traits.some((entry) => !!entry.customLibraryId),
   }) as { items: CampaignCustomItem<"trait">[] };
   const campaignCustomTraitsById = useMemo(
     () => new Map(campaignCustomTraits.map((item) => [item.id, item])),

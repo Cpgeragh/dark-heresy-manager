@@ -142,6 +142,13 @@ export function CyberneticsTab({
     userId,
     characterId,
     includeArchived: isDM,
+    enabled:
+      showPicker ||
+      showIntegratedPicker ||
+      installingCustomCybernetic !== null ||
+      cybernetics.some((item) => !!item.customLibraryId) ||
+      rangedWeapons.some((item) => isIntegratedRangedWeapon(item) && !!item.customLibraryId) ||
+      meleeWeapons.some((item) => isIntegratedMeleeWeapon(item) && !!item.customLibraryId),
   });
   const campaignCustomCybernetics = useMemo(
     () =>

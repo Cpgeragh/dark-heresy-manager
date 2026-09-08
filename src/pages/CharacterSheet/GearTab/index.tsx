@@ -137,6 +137,11 @@ export function GearTab({
     userId,
     characterId,
     includeArchived: isDM,
+    enabled:
+      showGearPicker ||
+      showConsumablePicker ||
+      gear.some((item) => !!item.customLibraryId) ||
+      consumables.some((item) => !!item.customLibraryId),
   });
   const campaignCustomGear = useMemo(
     () =>

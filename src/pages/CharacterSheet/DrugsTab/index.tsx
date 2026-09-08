@@ -73,6 +73,7 @@ export function DrugsTab({
     userId,
     characterId,
     includeArchived: isDM,
+    enabled: showPicker || drugs.some((item) => !!item.customLibraryId),
   });
   const campaignCustomDrugs = useMemo(
     () => campaignCustomDrugItems as CampaignCustomItem<"drug">[],

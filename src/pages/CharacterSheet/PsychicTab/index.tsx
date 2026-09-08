@@ -170,6 +170,10 @@ export function PsychicTab({
     userId,
     characterId,
     includeArchived: isDM,
+    enabled:
+      pickerTarget !== null ||
+      psychic.minorPowers.some((power) => !!power.customLibraryId) ||
+      psychic.majorPowers.some((power) => !!power.customLibraryId),
   });
   const campaignCustomPowers = campaignCustomPowerItems as CampaignCustomItem<"power">[];
   const campaignCustomPowersById = new Map(campaignCustomPowers.map((item) => [item.id, item]));

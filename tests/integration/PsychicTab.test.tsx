@@ -4,15 +4,16 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
-import type { UseCampaignCustomItemsResult } from "../../src/hooks/useCampaignCustomItems";
+import type {
+  UseCampaignCustomItemsArgs,
+  UseCampaignCustomItemsResult,
+} from "../../src/hooks/useCampaignCustomItems";
 
-const useCampaignCustomItemsMock = vi.fn<() => UseCampaignCustomItemsResult>(() => ({
-  items: [],
-  loading: false,
-  error: null,
-}));
+const useCampaignCustomItemsMock = vi.fn<
+  (args: UseCampaignCustomItemsArgs) => UseCampaignCustomItemsResult
+>(() => ({ items: [], loading: false, error: null }));
 vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
-  useCampaignCustomItems: () => useCampaignCustomItemsMock(),
+  useCampaignCustomItems: (args: UseCampaignCustomItemsArgs) => useCampaignCustomItemsMock(args),
 }));
 
 const createDraftCustomItemMock = vi.fn(async () => ({
@@ -199,6 +200,7 @@ function libraryPower(
 }
 
 beforeEach(() => {
+  useCampaignCustomItemsMock.mockClear();
   useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: false, error: null });
   createDraftCustomItemMock.mockClear();
   saveDraftCustomItemMock.mockClear();
@@ -207,6 +209,17 @@ beforeEach(() => {
 });
 
 describe("PsychicTab", () => {
+  it("enables the custom-item subscription only after a power picker opens", async () => {
+    const user = userEvent.setup();
+    renderTab();
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
+
+    await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
+  });
+
   it("shows Disciplines as read-only Talent-controlled status chips", () => {
     renderTab({ psychic: { ...emptyPsychic, disciplines: ["Biomancy"] } });
 

@@ -215,6 +215,12 @@ export function WeaponsTab({
     userId,
     characterId,
     includeArchived: isDM,
+    enabled:
+      picker !== null ||
+      rangedWeapons.some((item) => !!item.customLibraryId) ||
+      meleeWeapons.some((item) => !!item.customLibraryId) ||
+      grenades.some((item) => !!item.customLibraryId) ||
+      (shields ?? []).some((item) => !!item.customLibraryId),
   });
   const campaignCustomWeapons = useMemo(
     () =>

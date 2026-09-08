@@ -142,6 +142,36 @@ describe("useDocumentSubscription", () => {
 
     expect(unsubscribe).toHaveBeenCalledOnce();
   });
+
+  it("restarts cleanly when the document path changes and ignores the old listener", () => {
+    const references = {
+      alpha: makeDocumentReference("campaigns/alpha"),
+      beta: makeDocumentReference("campaigns/beta"),
+    };
+    const { result, rerender } = renderHook(
+      ({ documentId }: { documentId: keyof typeof references }) =>
+        useDocumentSubscription<DocumentData, TestItem>(references[documentId], (snapshot) =>
+          snapshot.exists() ? { id: documentId, value: snapshot.data().value as string } : null
+        ),
+      { initialProps: { documentId: "alpha" } as { documentId: keyof typeof references } }
+    );
+
+    act(() => {
+      subscriptions[0].onNext(makeDocumentSnapshot({ value: "Alpha" }));
+    });
+    expect(result.current.data).toEqual({ id: "alpha", value: "Alpha" });
+
+    const firstSubscription = subscriptions[0];
+    rerender({ documentId: "beta" });
+
+    expect(firstSubscription.unsubscribe).toHaveBeenCalledOnce();
+    expect(result.current).toEqual({ data: null, loading: true, error: null });
+
+    act(() => {
+      firstSubscription.onNext(makeDocumentSnapshot({ value: "Stale" }));
+    });
+    expect(result.current).toEqual({ data: null, loading: true, error: null });
+  });
 });
 
 describe("useQuerySubscription", () => {

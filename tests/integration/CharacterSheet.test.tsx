@@ -201,7 +201,13 @@ function renderSheet(initialPath = "/campaign/campaign-1/character/char-1?tab=st
       <Routes>
         <Route
           path="/campaign/:campaignId/character/:characterId"
-          element={<CharacterSheet effectiveUserId="player-1" onOpenMessages={onOpenMessages} />}
+          element={
+            <CharacterSheet
+              effectiveUserId="player-1"
+              effectiveUserFirstName="Iris"
+              onOpenMessages={onOpenMessages}
+            />
+          }
         />
         <Route path="/" element={<div>Mock Shared Dashboard</div>} />
       </Routes>
@@ -281,6 +287,24 @@ describe("CharacterSheet loading/error states", () => {
     useCharacterSheetMock.mockReturnValue(baseSheetResult({ character: undefined }));
     renderSheet();
     expect(screen.getByText("Character not found.")).toBeInTheDocument();
+  });
+});
+
+describe("CharacterSheet owner profile subscription", () => {
+  it("reuses the account profile when the effective user owns the character", () => {
+    renderSheet();
+
+    expect(useUserProfileMock).toHaveBeenCalledWith(null);
+  });
+
+  it("subscribes to another player's profile when viewing their character", () => {
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ character: character({ userId: "player-2" }) })
+    );
+
+    renderSheet();
+
+    expect(useUserProfileMock).toHaveBeenCalledWith("player-2");
   });
 });
 

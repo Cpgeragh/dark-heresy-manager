@@ -230,6 +230,17 @@ beforeEach(() => {
 });
 
 describe("CyberneticsTab", () => {
+  it("enables the custom-item subscription only after a picker opens", async () => {
+    const user = userEvent.setup();
+    renderTab();
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
+
+    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+
+    expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
+  });
+
   it("shows an error state when custom items fail to load", () => {
     useCampaignCustomItemsMock.mockReturnValue({
       items: [],

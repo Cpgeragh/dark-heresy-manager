@@ -100,9 +100,11 @@ function isPermissionDenied(error: Error | null): boolean {
 
 export default function CharacterSheet({
   effectiveUserId,
+  effectiveUserFirstName,
   onOpenMessages,
 }: {
   effectiveUserId: string;
+  effectiveUserFirstName: string;
   onOpenMessages: () => void;
 }) {
   const params = useParams<{ campaignId: string; characterId: string }>();
@@ -160,7 +162,12 @@ export default function CharacterSheet({
   // The owner's player name is derived live from their public profile so it
   // stays in sync with their account first name (falls back to the legacy
   // header.playerName for characters claimed before profiles existed).
-  const { firstName: ownerFirstName, error: ownerProfileError } = useUserProfile(character?.userId);
+  const ownerUserId = character?.userId;
+  const isEffectiveUserOwner = !!ownerUserId && ownerUserId === effectiveUserId;
+  const { firstName: subscribedOwnerFirstName, error: ownerProfileError } = useUserProfile(
+    ownerUserId && !isEffectiveUserOwner ? ownerUserId : null
+  );
+  const ownerFirstName = isEffectiveUserOwner ? effectiveUserFirstName : subscribedOwnerFirstName;
   const ownerName = ownerFirstName ?? character?.header.playerName?.trim() ?? null;
   const psyRating = useMemo(
     () =>

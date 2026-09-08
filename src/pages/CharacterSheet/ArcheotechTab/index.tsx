@@ -81,6 +81,7 @@ export function ArcheotechTab({
     userId,
     characterId,
     includeArchived: isDM,
+    enabled: showPicker || archeotech.some((item) => !!item.customLibraryId),
   });
   const campaignCustomArcheotech = useMemo(
     () => campaignCustomArcheotechItems as CampaignCustomItem<"archeotech">[],

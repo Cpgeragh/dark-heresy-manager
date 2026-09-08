@@ -1,4 +1,5 @@
 import type { ProfilerOnRenderCallback } from "react";
+import type { SnapshotMetadata } from "firebase/firestore";
 
 type PerformanceEventKind =
   | "listener-start"
@@ -15,6 +16,8 @@ export interface ApplicationPerformanceEvent {
   duration?: number;
   count?: number;
   phase?: string;
+  fromCache?: boolean;
+  hasPendingWrites?: boolean;
 }
 
 interface PerformanceSnapshot {
@@ -194,9 +197,21 @@ export function beginPerformanceSubscription(name: string) {
   record({ kind: "listener-start", name, at: startedAt });
 
   return {
-    snapshot(count: number) {
+    snapshot(count: number, metadata?: SnapshotMetadata) {
       const now = performance.now();
-      record({ kind: "listener-snapshot", name, at: now, duration: now - startedAt, count });
+      record({
+        kind: "listener-snapshot",
+        name,
+        at: now,
+        duration: now - startedAt,
+        count,
+        ...(metadata
+          ? {
+              fromCache: metadata.fromCache,
+              hasPendingWrites: metadata.hasPendingWrites,
+            }
+          : {}),
+      });
     },
     error() {
       record({ kind: "listener-error", name, at: performance.now() });

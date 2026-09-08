@@ -123,69 +123,68 @@ export default function App() {
           <AppHeader currentPath={location.pathname} />
 
           {/* ROUTES */}
-          <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>
-            <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
-              <ErrorBoundary>
-                <Suspense
-                  fallback={
-                    <LoadingState className="py-10 text-center">Loading page…</LoadingState>
-                  }
-                >
-                  <Routes>
-                    <Route
-                      path={ROUTES.DASHBOARD}
-                      element={
+          <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+            <ErrorBoundary>
+              <Suspense
+                fallback={<LoadingState className="py-10 text-center">Loading page…</LoadingState>}
+              >
+                <Routes>
+                  <Route
+                    path={ROUTES.DASHBOARD}
+                    element={
+                      <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>
                         <Dashboard
                           user={currentUser}
                           effectiveUserId={effectiveUserId}
                           isLinked={isLinked}
                           firstName={firstName}
                         />
-                      }
-                    />
+                      </CampaignsProvider>
+                    }
+                  />
 
-                    <Route
-                      path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                      element={
-                        <CharacterSheet
-                          effectiveUserId={effectiveUserId}
-                          onOpenMessages={() => setMessagesOpen(true)}
-                        />
-                      }
-                    />
+                  <Route
+                    path={ROUTE_PATTERNS.CHARACTER_SHEET}
+                    element={
+                      <CharacterSheet
+                        effectiveUserId={effectiveUserId}
+                        effectiveUserFirstName={firstName}
+                        onOpenMessages={() => setMessagesOpen(true)}
+                      />
+                    }
+                  />
 
-                    <Route
-                      path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
-                      element={<CampaignOverview effectiveUserId={effectiveUserId} />}
-                    />
+                  <Route
+                    path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                    element={<CampaignOverview effectiveUserId={effectiveUserId} />}
+                  />
 
-                    <Route
-                      path={ROUTES.SETTINGS}
-                      element={
-                        <Settings
-                          user={currentUser}
-                          effectiveUserId={effectiveUserId}
-                          firstName={firstName}
-                          isLinked={isLinked}
-                          unlink={unlink}
-                        />
-                      }
-                    />
+                  <Route
+                    path={ROUTES.SETTINGS}
+                    element={
+                      <Settings
+                        user={currentUser}
+                        effectiveUserId={effectiveUserId}
+                        firstName={firstName}
+                        isLinked={isLinked}
+                        unlink={unlink}
+                      />
+                    }
+                  />
 
-                    <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-                  </Routes>
-                </Suspense>
-              </ErrorBoundary>
-            </main>
+                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </main>
 
-            <MessageDrawer
-              user={currentUser}
-              isOpen={messagesOpen}
-              onClose={() => setMessagesOpen(false)}
-              campaignId={contextCampaignId}
-              characterId={contextCharacterId}
-            />
-          </CampaignsProvider>
+          <MessageDrawer
+            user={currentUser}
+            isOpen={messagesOpen}
+            onClose={() => setMessagesOpen(false)}
+            campaignId={contextCampaignId}
+            characterId={contextCharacterId}
+          />
 
           <ToastContainer />
           <OfflineIndicator />
