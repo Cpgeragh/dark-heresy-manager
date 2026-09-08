@@ -634,7 +634,7 @@ describe("PsychicTab", () => {
       screen.queryByRole("button", { name: "Select Third Fake Minor Power" })
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Available: 1")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Minor Psychic Power")).toHaveLength(4);
+    expect(screen.getAllByText("Minor Psychic Power")).toHaveLength(2);
     expect(screen.queryByText("Talent purchase")).not.toBeInTheDocument();
   });
 
@@ -854,7 +854,7 @@ describe("PsychicTab", () => {
     expect(
       screen.queryByRole("button", { name: "Select Third Fake Minor Power" })
     ).not.toBeInTheDocument();
-    expect(screen.getAllByText("Psy Rating 1")).toHaveLength(4);
+    expect(screen.getAllByText("Psy Rating 1")).toHaveLength(2);
     expect(screen.queryByText("Psy Rating grant")).not.toBeInTheDocument();
   });
 

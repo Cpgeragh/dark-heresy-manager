@@ -12,7 +12,9 @@ import type { CharacteristicTotals } from "../mechanics/corruption/characteristi
 import { SKILL_ADVANCE_VALUES, SKILL_HALF_DIVISOR } from "../constants/gameRules";
 import { calculateCharacteristicTotal } from "../utils/stats";
 import {
+  createTalentSkillEffectContext,
   getTalentSkillEffects,
+  type TalentSkillEffects,
   type TalentModifierSource,
 } from "../mechanics/talents/talentEffects";
 
@@ -35,10 +37,8 @@ function computeTotal(
   skill: SkillEntry,
   getCharField: (key: keyof Characteristics) => CharField,
   modifierTotals: CharacteristicTotals,
-  talents?: TalentsAndTraitsBlock,
-  career?: string
+  talentEffects?: TalentSkillEffects
 ): number | null {
-  const talentEffects = talents ? getTalentSkillEffects(talents, skill, career) : undefined;
   const characteristic = talentEffects?.characteristic ?? skill.characteristic;
   const charField = getCharField(characteristic);
   const rawCharTotal = calculateCharacteristicTotal(charField.base, charField.advances);
@@ -81,31 +81,30 @@ export function useSkillComputation({
   talents,
   career,
 }: UseSkillComputationArgs): SkillWithComputed[] {
-  return useMemo(
-    () =>
-      skills.map((s) => {
-        const effects = talents ? getTalentSkillEffects(talents, s, career) : undefined;
-        const effectiveLevel =
-          effects?.minimumLevel && LEVEL_RANK[effects.minimumLevel] > LEVEL_RANK[s.level]
-            ? effects.minimumLevel
-            : s.level;
-        const total = computeTotal(s, getCharField, modifierTotals, talents, career);
-        return {
-          ...s,
-          ...(effects?.characteristic ? { characteristic: effects.characteristic } : {}),
-          ...(effects?.countsAsBasic ? { advanced: false } : {}),
-          level: effectiveLevel,
-          baseLevel: s.level,
-          total,
-          ...(effects?.minimumLevel ? { talentMinimumLevel: effects.minimumLevel } : {}),
-          ...(effects && effects.sources.length > 0
-            ? {
-                talentAdjustment: effects.modifier,
-                talentSources: effects.sources,
-              }
-            : {}),
-        };
-      }),
-    [skills, getCharField, modifierTotals, talents, career]
-  );
+  return useMemo(() => {
+    const context = talents ? createTalentSkillEffectContext(talents, career) : undefined;
+    return skills.map((s) => {
+      const effects = talents ? getTalentSkillEffects(talents, s, career, context) : undefined;
+      const effectiveLevel =
+        effects?.minimumLevel && LEVEL_RANK[effects.minimumLevel] > LEVEL_RANK[s.level]
+          ? effects.minimumLevel
+          : s.level;
+      const total = computeTotal(s, getCharField, modifierTotals, effects);
+      return {
+        ...s,
+        ...(effects?.characteristic ? { characteristic: effects.characteristic } : {}),
+        ...(effects?.countsAsBasic ? { advanced: false } : {}),
+        level: effectiveLevel,
+        baseLevel: s.level,
+        total,
+        ...(effects?.minimumLevel ? { talentMinimumLevel: effects.minimumLevel } : {}),
+        ...(effects && effects.sources.length > 0
+          ? {
+              talentAdjustment: effects.modifier,
+              talentSources: effects.sources,
+            }
+          : {}),
+      };
+    });
+  }, [skills, getCharField, modifierTotals, talents, career]);
 }

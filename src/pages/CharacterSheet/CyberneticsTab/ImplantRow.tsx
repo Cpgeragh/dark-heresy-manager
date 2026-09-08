@@ -25,6 +25,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   item: CyberneticItem;
@@ -53,6 +54,7 @@ export function ImplantRow({
   onCycleQuality,
   onRemove,
 }: Props) {
+  recordComponentRender("ImplantRow");
   const ref = CYBERNETICS_REFERENCE.find((r) => r.id === item.referenceId);
   const qualityOptions = availableCraftsmanship(ref);
   const canChangeQuality = editable && qualityOptions.length > 1;

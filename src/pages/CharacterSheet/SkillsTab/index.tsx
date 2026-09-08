@@ -8,9 +8,12 @@ import type {
   TalentsAndTraitsBlock,
 } from "../../../types/Character";
 import type { CharField } from "../../../types/Character";
+import {
+  getCharacteristicModifierTotals,
+  type CharacteristicTotals,
+} from "../../../mechanics/corruption/characteristicModifierTotals";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
-import { getCharacteristicModifierTotals } from "../../../mechanics/corruption/characteristicModifierTotals";
 import {
   getNextSkillTierAccess,
   getUnlockedSkillTrainingCosts,
@@ -22,6 +25,8 @@ import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { InfoModal } from "../../../components/InfoModal";
 import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../../hooks/useMediaQuery";
 import {
   segmentedTabId,
   segmentedTabPanelId,
@@ -43,7 +48,8 @@ interface SkillsTabProps {
   editable: boolean;
   onUpdate: (next: SkillEntry[]) => void;
   getCharField: (statKey: keyof Characteristics) => CharField;
-  corruption: CorruptionBlock;
+  modifierTotals?: CharacteristicTotals;
+  corruption?: CorruptionBlock;
   talents?: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
@@ -118,12 +124,14 @@ export function SkillsTab({
   editable,
   onUpdate,
   getCharField,
+  modifierTotals: providedModifierTotals,
   corruption,
   talents,
   career,
   rank,
   isDM = false,
 }: SkillsTabProps) {
+  recordComponentRender("SkillsTab");
   const canUseDmActions = isDM && editable;
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
@@ -140,7 +148,13 @@ export function SkillsTab({
     switchTo: switchView,
   } = useSwipeableTabs(SKILLS_VIEWS, activeView, setActiveView);
 
-  const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
+  const isDesktopLayout = useMediaQuery(DESKTOP_LAYOUT_QUERY);
+  const modifierTotals = useMemo(
+    () =>
+      providedModifierTotals ??
+      (corruption ? getCharacteristicModifierTotals(corruption, talents, career) : {}),
+    [providedModifierTotals, corruption, talents, career]
+  );
   const catalogueSkills = useMemo(() => buildSkillCatalogue(skills), [skills]);
   const computedSkills = useSkillComputation({
     skills: catalogueSkills,
@@ -343,81 +357,87 @@ export function SkillsTab({
 
   return (
     <div className="space-y-4 text-slate-100">
-      {/* MOBILE: tab switcher + swipe */}
-      <div ref={containerRef} className="lg:hidden space-y-4">
-        <SegmentedTabs
-          id={SKILLS_TABS_ID}
-          ariaLabel="Skill type"
-          options={SKILLS_TABS}
-          value={activeView}
-          onChange={switchView}
-        />
+      {!isDesktopLayout ? (
+        <div ref={containerRef} className="space-y-4">
+          <SegmentedTabs
+            id={SKILLS_TABS_ID}
+            ariaLabel="Skill type"
+            options={SKILLS_TABS}
+            value={activeView}
+            onChange={switchView}
+          />
 
-        <section
-          key={activeView}
-          id={segmentedTabPanelId(SKILLS_TABS_ID, activeView)}
-          aria-labelledby={segmentedTabId(SKILLS_TABS_ID, activeView)}
-          role="tabpanel"
-          className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
-        >
-          <div className="flex items-center justify-between">
-            <SkillTypeHeading type={activeView} />
+          <section
+            key={activeView}
+            id={segmentedTabPanelId(SKILLS_TABS_ID, activeView)}
+            aria-labelledby={segmentedTabId(SKILLS_TABS_ID, activeView)}
+            role="tabpanel"
+            className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
+          >
+            <div className="flex items-center justify-between">
+              <SkillTypeHeading type={activeView} />
+              {activeView === "basic" ? (
+                editable ? (
+                  <AddButton
+                    label="Add basic skill"
+                    onClick={() => setIsUntrainedBasicOpen(true)}
+                  />
+                ) : (
+                  <ViewButton
+                    label="View basic skills"
+                    onClick={() => setIsUntrainedBasicOpen(true)}
+                  />
+                )
+              ) : editable ? (
+                <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
+              ) : (
+                <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
+              )}
+            </div>
             {activeView === "basic" ? (
-              editable ? (
+              renderBasicSection()
+            ) : activeItems.length === 0 ? (
+              <p className={`text-sm ${uiTextPlaceholder} text-center py-8`}>
+                No advanced skills trained yet.
+              </p>
+            ) : (
+              <div className="space-y-2">{renderItems(activeItems)}</div>
+            )}
+          </section>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 items-start">
+          <section className={uiSection + " space-y-3"}>
+            <div className="flex items-center justify-between">
+              <SkillTypeHeading type="basic" />
+              {editable ? (
                 <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
               ) : (
                 <ViewButton
                   label="View basic skills"
                   onClick={() => setIsUntrainedBasicOpen(true)}
                 />
-              )
-            ) : editable ? (
-              <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
+              )}
+            </div>
+            {renderBasicSection()}
+          </section>
+          <section className={uiSection + " space-y-3"}>
+            <div className="flex items-center justify-between">
+              <SkillTypeHeading type="advanced" />
+              {editable ? (
+                <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
+              ) : (
+                <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
+              )}
+            </div>
+            {advancedItems.length === 0 ? (
+              <p className={`text-sm ${uiTextPlaceholder}`}>No advanced skills trained yet.</p>
             ) : (
-              <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
+              <div className="space-y-2">{renderItems(advancedItems)}</div>
             )}
-          </div>
-          {activeView === "basic" ? (
-            renderBasicSection()
-          ) : activeItems.length === 0 ? (
-            <p className={`text-sm ${uiTextPlaceholder} text-center py-8`}>
-              No advanced skills trained yet.
-            </p>
-          ) : (
-            <div className="space-y-2">{renderItems(activeItems)}</div>
-          )}
-        </section>
-      </div>
-
-      {/* DESKTOP: both columns side by side */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
-        <section className={uiSection + " space-y-3"}>
-          <div className="flex items-center justify-between">
-            <SkillTypeHeading type="basic" />
-            {editable ? (
-              <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
-            ) : (
-              <ViewButton label="View basic skills" onClick={() => setIsUntrainedBasicOpen(true)} />
-            )}
-          </div>
-          {renderBasicSection()}
-        </section>
-        <section className={uiSection + " space-y-3"}>
-          <div className="flex items-center justify-between">
-            <SkillTypeHeading type="advanced" />
-            {editable ? (
-              <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
-            ) : (
-              <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
-            )}
-          </div>
-          {advancedItems.length === 0 ? (
-            <p className={`text-sm ${uiTextPlaceholder}`}>No advanced skills trained yet.</p>
-          ) : (
-            <div className="space-y-2">{renderItems(advancedItems)}</div>
-          )}
-        </section>
-      </div>
+          </section>
+        </div>
+      )}
 
       <AddSkillModal
         title="Available Untrained Advanced Skills"

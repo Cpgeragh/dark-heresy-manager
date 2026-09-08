@@ -21,6 +21,7 @@ import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;
@@ -105,6 +106,7 @@ export function PowerCard({
   talentSourceName,
   pickerMode = false,
 }: PowerCardProps) {
+  recordComponentRender("PowerCard");
   const [expanded, setExpanded] = useState(false);
   const [deleteArmed, setDeleteArmed] = useState(false);
 

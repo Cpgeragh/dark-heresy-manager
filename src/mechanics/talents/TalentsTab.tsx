@@ -36,6 +36,7 @@ import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import { Button } from "../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { uiTextBody } from "../../ui/styles/editableStyles";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface TalentsTabProps {
   talents: TalentsAndTraitsBlock;
@@ -177,6 +178,7 @@ function TalentCards({
   editable: boolean;
   onRemove: (uid: string) => void;
 }) {
+  recordComponentRender("TalentCards");
   const groups = new Map<string, TalentEntry[]>();
   for (const entry of entries) {
     const current = groups.get(entry.talentId) ?? [];
@@ -362,6 +364,7 @@ export function TalentsTab({
   onUpdateTalents,
   onUpdateCharacter,
 }: TalentsTabProps) {
+  recordComponentRender("TalentsTab");
   const [pendingAcquisition, setPendingAcquisition] = useState<TalentEntry | null>(null);
   const [pendingEffectDeletion, setPendingEffectDeletion] = useState<TalentEntry | null>(null);
   const handleAddTalent = useCallback(

@@ -28,6 +28,7 @@ import {
   colourValue,
 } from "../../../ui/styles/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -65,6 +66,7 @@ export function SkillRow({
   onManualUpgrade,
   isDM = false,
 }: SkillRowProps) {
+  recordComponentRender("SkillRow");
   const [deleteArmed, setDeleteArmed] = useState(false);
   const [upgradeArmed, setUpgradeArmed] = useState(false);
   const [manualUpgradeArmed, setManualUpgradeArmed] = useState(false);

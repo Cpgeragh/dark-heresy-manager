@@ -2,6 +2,7 @@ import type { PsychicPower, TalentsAndTraitsBlock } from "../../../types/Charact
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import type { CustomItemLibraryAction } from "../../../types/CustomItemActions";
 import { PowerCard } from "./PowerCard";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 export function PowerGrid({
   powers,
@@ -38,6 +39,7 @@ export function PowerGrid({
   canLinkPsyRatingGrant: (power: PsychicPower) => boolean;
   onLinkPsyRatingGrant: (power: PsychicPower) => void;
 }) {
+  recordComponentRender("PowerGrid");
   const sortedPowers = [...powers].sort((a, b) => a.name.localeCompare(b.name));
 
   return (

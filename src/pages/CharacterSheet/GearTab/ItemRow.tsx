@@ -9,6 +9,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props extends CustomItemLibraryActionProps<"gear"> {
   item: GearItem;
@@ -29,6 +30,7 @@ export function ItemRow({
   onUpdateAllCopies,
   onRemove,
 }: Props) {
+  recordComponentRender("GearItemRow");
   const hasDesc = !!item.description?.trim();
 
   // Fall back to reference data for items saved before weight/value/availability were stored

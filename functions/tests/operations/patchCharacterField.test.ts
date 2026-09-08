@@ -102,7 +102,7 @@ describe("patchCharacterField", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: false }),
+      data: () => ({ campaignId: "c1", userId: "player-1", isEditableByPlayer: false }),
     });
 
     await patchCharacterField(

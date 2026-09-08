@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet.tsx
 
-import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from "react";
+import { lazy, memo, Suspense, useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 import { CharacterKebabContent } from "./CharacterSheet/CharacterKebabContent";
@@ -64,29 +64,52 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import { LoadingState } from "../ui/LoadingState";
 import { ROUTES } from "../constants/routes";
 import { RouteLoadError } from "../ui/RouteLoadError";
+import { recordComponentRender } from "../performance/performanceMetrics";
 
-const TalentsTab = lazy(() =>
-  import("../mechanics/talents/TalentsTab").then(({ TalentsTab }) => ({ default: TalentsTab }))
+const TalentsTab = memo(
+  lazy(() =>
+    import("../mechanics/talents/TalentsTab").then(({ TalentsTab }) => ({ default: TalentsTab }))
+  )
 );
-const WeaponsTab = lazy(() =>
-  import("./CharacterSheet/WeaponsTab").then(({ WeaponsTab }) => ({ default: WeaponsTab }))
+const WeaponsTab = memo(
+  lazy(() =>
+    import("./CharacterSheet/WeaponsTab").then(({ WeaponsTab }) => ({ default: WeaponsTab }))
+  )
 );
-const CyberneticsTab = lazy(() =>
-  import("./CharacterSheet/CyberneticsTab").then(({ CyberneticsTab }) => ({
-    default: CyberneticsTab,
-  }))
+const CyberneticsTab = memo(
+  lazy(() =>
+    import("./CharacterSheet/CyberneticsTab").then(({ CyberneticsTab }) => ({
+      default: CyberneticsTab,
+    }))
+  )
 );
-const PsychicTab = lazy(() =>
-  import("./CharacterSheet/PsychicTab").then(({ PsychicTab }) => ({ default: PsychicTab }))
+const PsychicTab = memo(
+  lazy(() =>
+    import("./CharacterSheet/PsychicTab").then(({ PsychicTab }) => ({ default: PsychicTab }))
+  )
 );
-const GearTab = lazy(() =>
-  import("./CharacterSheet/GearTab").then(({ GearTab }) => ({ default: GearTab }))
+const GearTab = memo(
+  lazy(() => import("./CharacterSheet/GearTab").then(({ GearTab }) => ({ default: GearTab })))
 );
 const ArcheotechTab = lazy(() =>
   import("./CharacterSheet/ArcheotechTab").then(({ ArcheotechTab }) => ({
     default: ArcheotechTab,
   }))
 );
+
+const MemoizedCharacteristicsTab = memo(CharacteristicsTab);
+const MemoizedSkillsTab = memo(SkillsTab);
+const MemoizedArmourTab = memo(ArmourTab);
+
+const EMPTY_CYBERNETICS: CyberneticItem[] = [];
+const EMPTY_ARCHAEOTECH: ArcheotechItem[] = [];
+const EMPTY_GRENADES: GrenadeItem[] = [];
+const EMPTY_SHIELDS: ShieldItem[] = [];
+const EMPTY_CONSUMABLES: ConsumableItem[] = [];
+const EMPTY_GEAR: GearItem[] = [];
+const EMPTY_COMPANIONS: CompanionItem[] = [];
+const EMPTY_DRUGS: DrugItem[] = [];
+const EMPTY_NOTES: NoteEntry[] = [];
 
 function isPermissionDenied(error: Error | null): boolean {
   if (!error) return false;
@@ -107,6 +130,7 @@ export default function CharacterSheet({
   effectiveUserFirstName: string;
   onOpenMessages: () => void;
 }) {
+  recordComponentRender("CharacterSheet");
   const params = useParams<{ campaignId: string; characterId: string }>();
 
   const {
@@ -127,6 +151,8 @@ export default function CharacterSheet({
     getCharField,
     getEffectiveCharTotal,
     getCharBonus,
+    characteristicModifierTotals,
+    characteristicModifierSources,
     updateCharacteristic,
     updateField,
     patchField,
@@ -469,9 +495,9 @@ export default function CharacterSheet({
         saving={isUpdating}
         onUpdateHeader={handleUpdateHeader}
         onUpdateTalents={handleUpdateTalents}
-        cybernetics={character.cybernetics ?? []}
+        cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
         onUpdateCybernetics={handleUpdateCybernetics}
-        gear={character.gear ?? []}
+        gear={character.gear ?? EMPTY_GEAR}
         onUpdateGear={handleUpdateGear}
         onReturnToDashboard={() => navigate(ROUTES.DASHBOARD)}
         onComplete={() => {
@@ -620,12 +646,13 @@ export default function CharacterSheet({
             )}
 
             {activeTab === "stats" && (
-              <CharacteristicsTab
+              <MemoizedCharacteristicsTab
                 getCharField={getCharField}
                 getEffectiveCharTotal={getEffectiveCharTotal}
                 getCharBonus={getCharBonus}
                 editable={allowedToEdit}
-                corruption={character.corruption}
+                modifierTotals={characteristicModifierTotals}
+                modifierSources={characteristicModifierSources}
                 talents={character.talentsAndTraits}
                 career={character.header.career}
                 rank={character.header.rank}
@@ -634,12 +661,12 @@ export default function CharacterSheet({
             )}
 
             {activeTab === "skills" && (
-              <SkillsTab
+              <MemoizedSkillsTab
                 skills={character.skills}
                 editable={allowedToEdit}
                 onUpdate={handleUpdateSkills}
                 getCharField={getCharField}
-                corruption={character.corruption}
+                modifierTotals={characteristicModifierTotals}
                 talents={character.talentsAndTraits}
                 career={character.header.career}
                 rank={character.header.rank}
@@ -653,10 +680,10 @@ export default function CharacterSheet({
                 career={character.header.career}
                 rank={character.header.rank}
                 psychic={character.psychic}
-                cybernetics={character.cybernetics ?? []}
+                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
                 rangedWeapons={character.rangedWeapons}
                 meleeWeapons={character.meleeWeapons}
-                archeotech={character.archeotech ?? []}
+                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
                 insanity={character.insanity}
                 willpowerBonus={getCharBonus("wp")}
                 weaponTraining={character.weaponTraining}
@@ -684,8 +711,8 @@ export default function CharacterSheet({
                 talents={character.talentsAndTraits}
                 career={character.header.career}
                 rank={character.header.rank}
-                cybernetics={character.cybernetics ?? []}
-                gear={character.gear ?? []}
+                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                gear={character.gear ?? EMPTY_GEAR}
                 editable={allowedToEdit}
                 onUpdateTalents={handleUpdateTalents}
                 onUpdateCybernetics={handleUpdateCybernetics}
@@ -707,22 +734,22 @@ export default function CharacterSheet({
                 isDM={isDM}
                 rangedWeapons={character.rangedWeapons}
                 meleeWeapons={character.meleeWeapons}
-                grenades={character.grenades ?? []}
+                grenades={character.grenades ?? EMPTY_GRENADES}
                 editable={allowedToEdit}
                 strengthBonus={getCharBonus("s")}
                 onUpdateRanged={handleUpdateRangedWeapons}
                 onUpdateMelee={handleUpdateMeleeWeapons}
                 onUpdateGrenades={handleUpdateGrenades}
-                shields={character.shields ?? []}
+                shields={character.shields ?? EMPTY_SHIELDS}
                 onUpdateShields={handleUpdateShields}
-                cybernetics={character.cybernetics ?? []}
-                archeotech={character.archeotech ?? []}
+                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
                 onUpdateArcheotech={handleUpdateArcheotech}
               />
             )}
 
             {activeTab === "armour" && (
-              <ArmourTab
+              <MemoizedArmourTab
                 campaignId={path.campaignId}
                 characterId={character.id}
                 userId={effectiveUserId}
@@ -732,8 +759,8 @@ export default function CharacterSheet({
                 toughnessBonus={getCharBonus("t")}
                 editable={allowedToEdit}
                 onUpdate={handleUpdateArmour}
-                cybernetics={character.cybernetics ?? []}
-                archeotech={character.archeotech ?? []}
+                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
                 onUpdateArcheotech={handleUpdateArcheotech}
                 traits={character.talentsAndTraits.traits}
                 talents={character.talentsAndTraits}
@@ -748,7 +775,7 @@ export default function CharacterSheet({
                 userId={effectiveUserId}
                 characterName={character.header.characterName}
                 isDM={isDM}
-                cybernetics={character.cybernetics ?? []}
+                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
                 rangedWeapons={character.rangedWeapons}
                 meleeWeapons={character.meleeWeapons}
                 strengthBonus={getCharBonus("s")}
@@ -756,7 +783,7 @@ export default function CharacterSheet({
                 onUpdate={handleUpdateCybernetics}
                 onUpdateRanged={handleUpdateRangedWeapons}
                 onUpdateMelee={handleUpdateMeleeWeapons}
-                archeotech={character.archeotech ?? []}
+                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
                 onUpdateArcheotech={handleUpdateArcheotech}
                 career={character.header.career}
               />
@@ -785,7 +812,7 @@ export default function CharacterSheet({
                 characterName={character.header.characterName}
                 isDM={isDM}
                 gear={character.gear}
-                consumables={character.consumables ?? []}
+                consumables={character.consumables ?? EMPTY_CONSUMABLES}
                 editable={allowedToEdit}
                 onUpdate={handleUpdateGear}
                 onUpdateConsumables={handleUpdateConsumables}
@@ -794,7 +821,7 @@ export default function CharacterSheet({
 
             {activeTab === "companions" && (
               <CompanionsTab
-                companions={character.companions ?? []}
+                companions={character.companions ?? EMPTY_COMPANIONS}
                 editable={allowedToEdit}
                 onUpdate={handleUpdateCompanions}
               />
@@ -807,7 +834,7 @@ export default function CharacterSheet({
                 userId={effectiveUserId}
                 characterName={character.header.characterName}
                 isDM={isDM}
-                drugs={character.drugs ?? []}
+                drugs={character.drugs ?? EMPTY_DRUGS}
                 editable={allowedToEdit}
                 onUpdate={handleUpdateDrugs}
               />
@@ -825,7 +852,7 @@ export default function CharacterSheet({
 
             {activeTab === "notes" && (
               <NotesTab
-                notes={character.notes ?? []}
+                notes={character.notes ?? EMPTY_NOTES}
                 editable={allowedToEdit}
                 onSave={handleUpdateNotes}
               />
@@ -835,13 +862,13 @@ export default function CharacterSheet({
               <BackgroundTab
                 header={character.header}
                 talents={character.talentsAndTraits}
-                cybernetics={character.cybernetics ?? []}
+                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
                 editable={allowedToEdit}
                 playerName={ownerName}
                 onUpdateHeader={handleUpdateHeader}
                 onUpdateTalents={handleUpdateTalents}
                 onUpdateCybernetics={handleUpdateCybernetics}
-                gear={character.gear ?? []}
+                gear={character.gear ?? EMPTY_GEAR}
                 onUpdateGear={handleUpdateGear}
               />
             )}
@@ -853,7 +880,7 @@ export default function CharacterSheet({
                 userId={effectiveUserId}
                 characterName={character.header.characterName}
                 isDM={isDM}
-                archeotech={character.archeotech ?? []}
+                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
                 editable={allowedToEdit}
                 onUpdate={handleUpdateArcheotech}
               />

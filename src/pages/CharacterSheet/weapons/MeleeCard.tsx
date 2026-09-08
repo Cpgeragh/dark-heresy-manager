@@ -56,6 +56,7 @@ import {
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
 import { AmmoEntryRow } from "./AmmoEntryRow";
 import { AmmoPicker } from "./AmmoPicker";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 function hasMultipleMeleeProfiles(damage?: string): boolean {
   return !!damage && /\bLow:\s|\bHigh:\s|;/.test(damage);
@@ -110,6 +111,7 @@ export function MeleeCard({
   integrated?: boolean;
   pickerMode?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
+  recordComponentRender("MeleeCard");
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
     setExpanded(isEquipped);

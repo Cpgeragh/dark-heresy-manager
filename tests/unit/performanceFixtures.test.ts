@@ -68,6 +68,20 @@ describe("performance fixture profiles", () => {
     expect((character!.rangedWeapons as unknown[]).length).toBe(180);
     expect((character!.skills as unknown[]).length).toBe(180);
     expect((character!.talentsAndTraits as { talents: unknown[] }).talents.length).toBe(180);
+    expect(character!.header).toMatchObject({ career: "Adept", rank: "Archivist" });
+    expect(character!.rangedWeapons[0]).toMatchObject({
+      custom: true,
+      ammoType: "Bullets",
+      ammoEntries: [
+        expect.objectContaining({
+          id: "ammo-1",
+          referenceId: "cr-bullets",
+          rounds: 12,
+          loaded: true,
+        }),
+      ],
+      loadedAmmoByProfile: expect.objectContaining({ Primary: "ammo-1" }),
+    });
     expect(PRODUCT_LIMITS.characterArrayEntries).toBe(200);
   });
 

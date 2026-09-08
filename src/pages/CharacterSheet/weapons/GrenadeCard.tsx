@@ -37,6 +37,7 @@ import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 export function GrenadeCard({
   item,
@@ -67,6 +68,7 @@ export function GrenadeCard({
   canEquipMoreTypes?: boolean;
   isStowedCard?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
+  recordComponentRender("GrenadeCard");
   const expansionSource = !isStowedCard && isEquipped;
   const [previousExpansionSource, setPreviousExpansionSource] = useState(expansionSource);
   const [expanded, setExpanded] = useState(expansionSource);

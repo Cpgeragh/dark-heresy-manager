@@ -11,6 +11,20 @@ class ResizeObserverStub {
 }
 global.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 
+// Component tests default to the desktop layout. Responsive suites override
+// this per test when they exercise the mobile-only tree.
+window.matchMedia = (query: string) =>
+  ({
+    matches: query === "(min-width: 1024px)",
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => true,
+  }) as MediaQueryList;
+
 // jsdom doesn't implement <dialog>'s showModal()/close(), used directly via
 // ref by InfoModal, WeaponTrainingTab's exotic-weapon modal, etc. Stub them
 // to toggle the `open` attribute/fire the close event like a real browser.

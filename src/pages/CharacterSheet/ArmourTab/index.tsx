@@ -46,6 +46,7 @@ import {
   stripArmourKind,
   toCustomArmourData,
 } from "./armourSnapshotHelpers";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -119,6 +120,7 @@ export function ArmourTab({
   talents,
   career,
 }: ArmourTabProps) {
+  recordComponentRender("ArmourTab");
   const [showPicker, setShowPicker] = useState(false);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);

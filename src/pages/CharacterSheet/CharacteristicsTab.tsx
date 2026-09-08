@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet/CharacteristicsTab.tsx
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CharField } from "../../types/Character";
 import type {
   Characteristics,
@@ -8,8 +8,8 @@ import type {
   TalentsAndTraitsBlock,
 } from "../../types/Character";
 import {
-  getCharacteristicModifierTotals,
-  getCharacteristicModifierSources,
+  getCharacteristicModifierBreakdown,
+  type CharacteristicTotals,
   type CharacteristicModifierSource,
 } from "../../mechanics/corruption/characteristicModifierTotals";
 import { CharacteristicField } from "../../components/CharacteristicField";
@@ -39,6 +39,8 @@ import {
   getTraitMovementEffects,
   getWaryInitiativeBonus,
 } from "../../mechanics/traits/traitEffects";
+import { recordComponentRender } from "../../performance/performanceMetrics";
+import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -64,6 +66,7 @@ function StatBlock({
   getCharField,
   updateCharacteristic,
 }: StatBlockProps) {
+  recordComponentRender("StatBlock");
   const value = getCharField(statKey);
   const statTotal = calculateCharacteristicTotal(value.base, value.advances);
   const effectiveTotal = Math.max(1, statTotal + adjustment);
@@ -161,7 +164,9 @@ interface CharacteristicsTabProps {
   getEffectiveCharTotal: (statKey: keyof Characteristics) => number;
   getCharBonus: (statKey: keyof Characteristics) => number;
   editable: boolean;
-  corruption: CorruptionBlock;
+  modifierTotals?: CharacteristicTotals;
+  modifierSources?: Partial<Record<keyof Characteristics, CharacteristicModifierSource[]>>;
+  corruption?: CorruptionBlock;
   talents?: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
@@ -173,13 +178,25 @@ export function CharacteristicsTab({
   getEffectiveCharTotal,
   getCharBonus,
   editable,
+  modifierTotals: providedModifierTotals,
+  modifierSources: providedModifierSources,
   corruption,
   talents,
   career,
   rank,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
-  const modifierTotals = getCharacteristicModifierTotals(corruption, talents, career);
+  recordComponentRender("CharacteristicsTab");
+  const isDesktopLayout = useMediaQuery(DESKTOP_LAYOUT_QUERY);
+  const fallbackBreakdown = useMemo(
+    () =>
+      corruption
+        ? getCharacteristicModifierBreakdown(corruption, talents, career)
+        : { totals: {}, sources: {} },
+    [corruption, talents, career]
+  );
+  const modifierTotals = providedModifierTotals ?? fallbackBreakdown.totals;
+  const modifierSources = providedModifierSources ?? fallbackBreakdown.sources;
   const [activeStat, setActiveStat] = useState<keyof Characteristics>("ws");
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -502,82 +519,83 @@ export function CharacteristicsTab({
         )}
       </div>
 
-      {/* Main stats — mobile swiper */}
-      <div ref={containerRef} className="lg:hidden overflow-x-hidden py-3">
-        <div
-          ref={trackRef}
-          className="flex"
-          style={{ transform: `translateX(${restingOffset}px)` }}
-        >
+      {/* Main stats — mount only the active responsive layout. */}
+      {!isDesktopLayout ? (
+        <div ref={containerRef} className="overflow-x-hidden py-3">
           <div
-            aria-hidden="true"
-            className="pointer-events-none opacity-50"
-            style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
+            ref={trackRef}
+            className="flex"
+            style={{ transform: `translateX(${restingOffset}px)` }}
           >
-            <StatBlock
-              key={prevStat}
-              label={STAT_LABELS[prevStat]}
-              statKey={prevStat}
-              editable={false}
-              adjustment={modifierTotals[prevStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, prevStat, talents, career)}
-              tierCosts={getCharacteristicTierCosts(career, prevStat)}
-              getCharField={getCharField}
-              updateCharacteristic={updateCharacteristicWithPurchase}
-            />
-          </div>
-          <div
-            className="rounded-lg shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]"
-            style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
-          >
-            <StatBlock
-              key={activeStat}
-              label={STAT_LABELS[activeStat]}
-              statKey={activeStat}
-              editable={editable}
-              adjustment={modifierTotals[activeStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, activeStat, talents, career)}
-              tierCosts={getCharacteristicTierCosts(career, activeStat)}
-              getCharField={getCharField}
-              updateCharacteristic={updateCharacteristicWithPurchase}
-            />
-          </div>
-          <div
-            aria-hidden="true"
-            className="pointer-events-none opacity-50"
-            style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0 }}
-          >
-            <StatBlock
-              key={nextStat}
-              label={STAT_LABELS[nextStat]}
-              statKey={nextStat}
-              editable={false}
-              adjustment={modifierTotals[nextStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, nextStat, talents, career)}
-              tierCosts={getCharacteristicTierCosts(career, nextStat)}
-              getCharField={getCharField}
-              updateCharacteristic={updateCharacteristicWithPurchase}
-            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none opacity-50"
+              style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
+            >
+              <StatBlock
+                key={prevStat}
+                label={STAT_LABELS[prevStat]}
+                statKey={prevStat}
+                editable={false}
+                adjustment={modifierTotals[prevStat] ?? 0}
+                sources={modifierSources[prevStat] ?? []}
+                tierCosts={getCharacteristicTierCosts(career, prevStat)}
+                getCharField={getCharField}
+                updateCharacteristic={updateCharacteristicWithPurchase}
+              />
+            </div>
+            <div
+              className="rounded-lg shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]"
+              style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
+            >
+              <StatBlock
+                key={activeStat}
+                label={STAT_LABELS[activeStat]}
+                statKey={activeStat}
+                editable={editable}
+                adjustment={modifierTotals[activeStat] ?? 0}
+                sources={modifierSources[activeStat] ?? []}
+                tierCosts={getCharacteristicTierCosts(career, activeStat)}
+                getCharField={getCharField}
+                updateCharacteristic={updateCharacteristicWithPurchase}
+              />
+            </div>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none opacity-50"
+              style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0 }}
+            >
+              <StatBlock
+                key={nextStat}
+                label={STAT_LABELS[nextStat]}
+                statKey={nextStat}
+                editable={false}
+                adjustment={modifierTotals[nextStat] ?? 0}
+                sources={modifierSources[nextStat] ?? []}
+                tierCosts={getCharacteristicTierCosts(career, nextStat)}
+                getCharField={getCharField}
+                updateCharacteristic={updateCharacteristicWithPurchase}
+              />
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Main stats — desktop grid */}
-      <div className="hidden lg:grid lg:grid-cols-3 gap-4">
-        {STAT_KEYS.map((key) => (
-          <StatBlock
-            key={key}
-            label={STAT_LABELS[key]}
-            statKey={key}
-            editable={editable}
-            adjustment={modifierTotals[key] ?? 0}
-            sources={getCharacteristicModifierSources(corruption, key, talents, career)}
-            tierCosts={getCharacteristicTierCosts(career, key)}
-            getCharField={getCharField}
-            updateCharacteristic={updateCharacteristicWithPurchase}
-          />
-        ))}
-      </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-4">
+          {STAT_KEYS.map((key) => (
+            <StatBlock
+              key={key}
+              label={STAT_LABELS[key]}
+              statKey={key}
+              editable={editable}
+              adjustment={modifierTotals[key] ?? 0}
+              sources={modifierSources[key] ?? []}
+              tierCosts={getCharacteristicTierCosts(career, key)}
+              getCharField={getCharField}
+              updateCharacteristic={updateCharacteristicWithPurchase}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

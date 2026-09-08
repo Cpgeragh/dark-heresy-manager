@@ -74,9 +74,14 @@ export function useCharacterSheet({
   // ================================================================
   // HELPERS
   // ================================================================
-  const { getCharField, getCharTotal, getEffectiveCharTotal, getCharBonus } = useCharacterHelpers({
-    character,
-  });
+  const {
+    getCharField,
+    getCharTotal,
+    getEffectiveCharTotal,
+    getCharBonus,
+    characteristicModifierTotals,
+    characteristicModifierSources,
+  } = useCharacterHelpers({ character });
 
   // ================================================================
   // PUBLIC API
@@ -103,6 +108,8 @@ export function useCharacterSheet({
     getCharTotal,
     getEffectiveCharTotal,
     getCharBonus,
+    characteristicModifierTotals,
+    characteristicModifierSources,
 
     // Mutations
     updateField: mutations.updateField,

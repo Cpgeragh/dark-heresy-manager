@@ -3,6 +3,7 @@
 // Card components, pickers and helpers live in ./weapons/.
 
 import { useState, useCallback, Fragment, useMemo } from "react";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -175,6 +176,7 @@ export function WeaponsTab({
   archeotech,
   onUpdateArcheotech,
 }: WeaponsTabProps) {
+  recordComponentRender("WeaponsTab");
   const [picker, setPicker] = useState<PickerTarget>(null);
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);

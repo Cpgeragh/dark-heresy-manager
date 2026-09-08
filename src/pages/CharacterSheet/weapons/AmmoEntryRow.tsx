@@ -20,6 +20,7 @@ import {
 import { InfoModal } from "../../../components/InfoModal";
 import type { AmmoTrackingMode } from "./weaponHelpers";
 import { formatAmmoWeight } from "./formatAmmoWeight";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 // ─── Ammo Entry Row ───────────────────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ export function AmmoEntryRow({
   onUpdateRounds: (qty: number) => void;
   onSetLooseRounds: (qty: number) => void;
 }) {
+  recordComponentRender("AmmoEntryRow");
   const ammoRef = entry.referenceId
     ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
     : undefined;

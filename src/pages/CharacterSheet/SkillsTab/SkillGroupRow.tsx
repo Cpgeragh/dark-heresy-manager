@@ -14,6 +14,7 @@ import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/styles/colourTokens";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { uiSectionShell } from "../../../ui/styles/editableStyles";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface SkillGroupRowProps {
   category: string;
@@ -34,6 +35,7 @@ export function SkillGroupRow({
   onManualUpgrade,
   isDM,
 }: SkillGroupRowProps) {
+  recordComponentRender("SkillGroupRow");
   const [expanded, setExpanded] = useState(false);
   const toggle = useCallback(() => setExpanded((p) => !p), []);
   const characteristics = getSkillGroupCharacteristics(skills);

@@ -28,6 +28,7 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { ARMOUR_UPGRADE_REFERENCE } from "../../../data/reference/armourUpgradeReference";
 import { ArmourUpgradeCard, ArmourUpgradePicker } from "./ArmourUpgradePicker";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
@@ -73,6 +74,7 @@ export function PieceRow({
   onAddUpgrade,
   onRemoveUpgrade,
 }: Props) {
+  recordComponentRender("ArmourPieceRow");
   const [showUpgradePicker, setShowUpgradePicker] = useState(false);
   const apDesc = apBreakdown(piece);
   const craftsmanship = piece.craftsmanship ?? "Common";

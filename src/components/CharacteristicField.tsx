@@ -11,6 +11,7 @@ import { Button } from "../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
 import { uiTextBody } from "../ui/styles/editableStyles";
 import { colourAmberPlain } from "../ui/styles/colourTokens";
+import { recordComponentRender } from "../performance/performanceMetrics";
 
 interface Props {
   label: string;
@@ -30,6 +31,7 @@ export function CharacteristicField({
   hideLabel = false,
   tierCosts,
 }: Props) {
+  recordComponentRender("CharacteristicField");
   const { base, advances } = value;
   const [error, setError] = useState<string | undefined>();
   const [draft, setDraft] = useState(String(base));

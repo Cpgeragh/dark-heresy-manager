@@ -59,6 +59,7 @@ import {
   rangedRulesForCraftsmanship,
   meleeDamageForCraftsmanship,
 } from "../weapons/weaponHelpers";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -106,6 +107,7 @@ export function CyberneticsTab({
   onUpdateArcheotech,
   career,
 }: CyberneticsTabProps) {
+  recordComponentRender("CyberneticsTab");
   const [showPicker, setShowPicker] = useState(false);
   const [installingConcealedWeapon, setInstallingConcealedWeapon] = useState<{
     ref: CyberneticRef;

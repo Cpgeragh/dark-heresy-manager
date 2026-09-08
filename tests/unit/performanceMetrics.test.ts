@@ -89,4 +89,20 @@ describe("performance metrics recorder", () => {
       })
     );
   });
+
+  it("counts named component renders and clears them on reset", async () => {
+    const { recordComponentRender } = await import("../../src/performance/performanceMetrics");
+
+    recordComponentRender("SkillRow");
+    recordComponentRender("SkillRow");
+    recordComponentRender("SkillsTab");
+
+    expect(window.__DHM_PERFORMANCE__?.snapshot().componentRenderCounts).toEqual({
+      SkillRow: 2,
+      SkillsTab: 1,
+    });
+
+    window.__DHM_PERFORMANCE__?.reset();
+    expect(window.__DHM_PERFORMANCE__?.snapshot().componentRenderCounts).toEqual({});
+  });
 });

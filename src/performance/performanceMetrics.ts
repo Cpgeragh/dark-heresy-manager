@@ -23,6 +23,7 @@ export interface ApplicationPerformanceEvent {
 interface PerformanceSnapshot {
   events: ApplicationPerformanceEvent[];
   activeListeners: number;
+  componentRenderCounts: Record<string, number>;
   heapBytes: number | null;
   navigation: NavigationPerformanceEntry | null;
   resources: ResourcePerformanceEntry[];
@@ -51,7 +52,9 @@ interface ResourcePerformanceEntry {
 
 interface ApplicationPerformanceRecorder {
   readonly events: ApplicationPerformanceEvent[];
+  readonly componentRenderCounts: Map<string, number>;
   activeListeners: number;
+  countComponentRender: (name: string) => void;
   mark: (name: string) => void;
   reset: () => void;
   snapshot: () => PerformanceSnapshot;
@@ -121,19 +124,26 @@ function recorder(): ApplicationPerformanceRecorder | null {
   if (window.__DHM_PERFORMANCE__) return window.__DHM_PERFORMANCE__;
 
   const events: ApplicationPerformanceEvent[] = [];
+  const componentRenderCounts = new Map<string, number>();
   window.__DHM_PERFORMANCE__ = {
     events,
+    componentRenderCounts,
     activeListeners: 0,
+    countComponentRender(name) {
+      componentRenderCounts.set(name, (componentRenderCounts.get(name) ?? 0) + 1);
+    },
     mark(name) {
       record({ kind: "mark", name, at: performance.now() });
     },
     reset() {
       events.length = 0;
+      componentRenderCounts.clear();
     },
     snapshot() {
       return {
         events: [...events],
         activeListeners: this.activeListeners,
+        componentRenderCounts: Object.fromEntries(componentRenderCounts),
         heapBytes: heapBytes(),
         navigation: navigationEntry(),
         resources: resourceEntries(),
@@ -235,4 +245,10 @@ export const recordApplicationCommit: ProfilerOnRenderCallback = (id, phase, act
 
 export function markApplicationPerformance(name: string): void {
   recorder()?.mark(name);
+}
+
+/** Counts component function executions in performance builds only. */
+export function recordComponentRender(name: string): void {
+  if (import.meta.env.MODE !== "performance") return;
+  recorder()?.countComponentRender(name);
 }

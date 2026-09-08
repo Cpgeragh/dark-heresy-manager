@@ -281,10 +281,10 @@ function matchesAny(skill: SkillEntry, ids: readonly string[]): boolean {
 export function getTraitSkillEffects(
   talents: TalentsAndTraitsBlock,
   skill: SkillEntry,
-  career?: string
+  career?: string,
+  activeEntries: readonly TalentEntry[] = getActiveTraitEntries(talents, career)
 ): TraitSkillEffects {
   const effects: TraitSkillEffects = { modifier: 0, sources: [] };
-  const entries = getActiveTraitEntries(talents, career);
   const applyBasic = (name: string, type: TraitModifierSource["type"]) => {
     effects.countsAsBasic = true;
     effects.sources.push({ name, type, amount: 0, detail: `counts ${skill.name} as Basic` });
@@ -305,7 +305,7 @@ export function getTraitSkillEffects(
     applyBasic("Forge World", "Homeworld");
   }
 
-  for (const entry of entries) {
+  for (const entry of activeEntries) {
     const type = sourceType(entry);
     switch (entry.talentId) {
       case "homeworld-primitive":

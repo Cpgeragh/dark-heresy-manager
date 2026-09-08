@@ -79,6 +79,7 @@ import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
 import { AmmoEntryRow } from "./AmmoEntryRow";
 import { AmmoPicker } from "./AmmoPicker";
 import { formatAmmoWeight } from "./formatAmmoWeight";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 // ─── Ranged Card ──────────────────────────────────────────────────────────────
 
@@ -135,6 +136,7 @@ export function RangedCard({
   integrated?: boolean;
   pickerMode?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
+  recordComponentRender("RangedCard");
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
     setExpanded(isEquipped);

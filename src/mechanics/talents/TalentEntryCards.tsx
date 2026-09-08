@@ -24,6 +24,7 @@ import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons"
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { normaliseSources } from "./talentUtils";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
@@ -60,6 +61,7 @@ export function EntryCard({
   onArchive,
   onUpdateAllCopies,
 }: EntryCardProps) {
+  recordComponentRender("TalentEntryCard");
   const [deleteArmed, setDeleteArmed] = useState(false);
   const shownName = displayName ?? entry.name;
   const isGranted = Boolean(entry.grantedByTalentEntryUid);
@@ -217,6 +219,7 @@ export function TalentGroupCard({
   onRemove: (uid: string) => void;
   statusAfterSource?: boolean;
 }) {
+  recordComponentRender("TalentGroupCard");
   const [expanded, setExpanded] = useState(false);
   return (
     <div className={uiSectionShell + " overflow-hidden"}>

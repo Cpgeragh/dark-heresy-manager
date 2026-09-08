@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  getCharacteristicModifierBreakdown,
   getCharacteristicModifierTotals,
   getCharacteristicModifierSources,
 } from "../../src/mechanics/corruption/characteristicModifierTotals";
@@ -173,5 +174,27 @@ describe("getCharacteristicModifierSources", () => {
       minorMutations: [{ id: "custom-1", name: "Homemade Affliction", custom: true }],
     };
     expect(getCharacteristicModifierSources(corruption, "ag")).toEqual([]);
+  });
+});
+
+describe("getCharacteristicModifierBreakdown", () => {
+  it("produces totals and per-characteristic sources in one pass", () => {
+    const corruption: CorruptionBlock = {
+      points: 0,
+      malignancies: [malignancy("palsy", { rolledModifiers: { ag: 6 } })],
+      minorMutations: [mutation("brute")],
+    };
+
+    expect(getCharacteristicModifierBreakdown(corruption)).toEqual({
+      totals: { ag: -16, s: 10, t: 10 },
+      sources: {
+        ag: [
+          { name: "Palsy", type: "Malignancy", amount: -6 },
+          { name: "Brute", type: "Minor Mutation", amount: -10 },
+        ],
+        s: [{ name: "Brute", type: "Minor Mutation", amount: 10 }],
+        t: [{ name: "Brute", type: "Minor Mutation", amount: 10 }],
+      },
+    });
   });
 });

@@ -34,6 +34,8 @@ export function useCharacterMutations({
   const [isDmTogglingEdit, setIsDmTogglingEdit] = useState(false);
 
   const toast = useToast();
+  const hasCharacter = character !== null;
+  const characteristics = character?.characteristics;
 
   type DirectWriteCharacterField = "isEditableByPlayer" | "backgroundComplete";
 
@@ -42,7 +44,7 @@ export function useCharacterMutations({
   // ================================================================
   const updateField = useCallback(
     async <K extends DirectWriteCharacterField>(field: K, value: Character[K]): Promise<void> => {
-      if (!allowedToEdit || !character) return;
+      if (!allowedToEdit || !hasCharacter) return;
 
       setIsUpdating(true);
       try {
@@ -57,7 +59,7 @@ export function useCharacterMutations({
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, campaignId, characterId, toast]
+    [allowedToEdit, hasCharacter, campaignId, characterId, toast]
   );
 
   type PatchableCharacterField =
@@ -89,7 +91,7 @@ export function useCharacterMutations({
 
   const patchField = useCallback(
     async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {
-      if (!allowedToEdit || !character) return;
+      if (!allowedToEdit || !hasCharacter) return;
 
       setIsUpdating(true);
       try {
@@ -102,12 +104,12 @@ export function useCharacterMutations({
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, campaignId, characterId, toast]
+    [allowedToEdit, hasCharacter, campaignId, characterId, toast]
   );
 
   const patchFields = useCallback(
     async (partial: Record<string, unknown>): Promise<void> => {
-      if (!allowedToEdit || !character) return;
+      if (!allowedToEdit || !hasCharacter) return;
       setIsUpdating(true);
       try {
         await patchCharacterFields(campaignId, characterId, stripUndefined(partial));
@@ -119,7 +121,7 @@ export function useCharacterMutations({
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, campaignId, characterId, toast]
+    [allowedToEdit, hasCharacter, campaignId, characterId, toast]
   );
 
   // ================================================================
@@ -127,12 +129,12 @@ export function useCharacterMutations({
   // ================================================================
   const updateCharacteristic = useCallback(
     async (statKey: keyof Characteristics, value: CharField): Promise<void> => {
-      if (!allowedToEdit || !character) return;
+      if (!allowedToEdit || !characteristics) return;
 
       setIsUpdating(true);
       try {
         const updated = stripUndefined({
-          ...character.characteristics,
+          ...characteristics,
           [statKey]: value,
         });
 
@@ -145,7 +147,7 @@ export function useCharacterMutations({
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, campaignId, characterId, toast]
+    [allowedToEdit, characteristics, campaignId, characterId, toast]
   );
 
   // ================================================================

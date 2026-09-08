@@ -36,7 +36,7 @@ function emptyCharacter(campaignId, characterName, userId = null) {
       characterName,
       playerName: "Performance",
       career: "Adept",
-      rank: "Novice",
+      rank: "Archivist",
       homeWorld: "Hive World",
       divination: "The Emperor knows.",
       description: "Deterministic local performance fixture.",
@@ -332,12 +332,25 @@ function largeCharacter(campaignId, uid) {
     equipped: index < 4,
     ...(index === 0
       ? {
-          loadedAmmoByProfile: Object.fromEntries(
-            Array.from({ length: 90 }, (_, keyIndex) => [
+          custom: true,
+          ammoType: "Bullets",
+          ammoEntries: [
+            {
+              id: "ammo-1",
+              referenceId: "cr-bullets",
+              name: "Bullets",
+              clips: 0,
+              rounds: 12,
+              loaded: true,
+            },
+          ],
+          loadedAmmoByProfile: Object.fromEntries([
+            ...Array.from({ length: 90 }, (_, keyIndex) => [
               `profile-${keyIndex + 1}`,
               `ammo-${keyIndex + 1}`,
-            ])
-          ),
+            ]),
+            ["Primary", "ammo-1"],
+          ]),
         }
       : {}),
   }));

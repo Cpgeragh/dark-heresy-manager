@@ -37,6 +37,7 @@ import {
   toCustomConsumableData,
   toCustomGearData,
 } from "./gearSnapshotHelpers";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -93,6 +94,7 @@ export function GearTab({
   onUpdate,
   onUpdateConsumables,
 }: GearTabProps) {
+  recordComponentRender("GearTab");
   const [showGearPicker, setShowGearPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [showConsumablePicker, setShowConsumablePicker] = useState(false);

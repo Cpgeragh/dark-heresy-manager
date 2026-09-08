@@ -15,6 +15,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props extends CustomItemLibraryActionProps<"consumable"> {
   item: ConsumableItem;
@@ -37,6 +38,7 @@ export function ConsumableRow({
   onUpdateQty,
   onRemove,
 }: Props) {
+  recordComponentRender("ConsumableRow");
   const hasDesc = !!item.description?.trim();
 
   return (

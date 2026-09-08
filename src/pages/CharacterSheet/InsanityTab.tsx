@@ -3,6 +3,7 @@
 import type { InsanityBlock, TalentsAndTraitsBlock } from "../../types/Character";
 import { uiSection } from "../../ui/styles/editableStyles";
 import { InsanityPanel } from "../../mechanics/insanity/InsanityPanel";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface InsanityTabProps {
   insanity: InsanityBlock;
@@ -13,6 +14,7 @@ interface InsanityTabProps {
 }
 
 export function InsanityTab({ insanity, editable, onUpdate, talents, career }: InsanityTabProps) {
+  recordComponentRender("InsanityTab");
   return (
     <InsanityPanel
       insanity={insanity}

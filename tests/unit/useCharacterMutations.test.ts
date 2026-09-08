@@ -18,8 +18,10 @@ vi.mock("../../src/services/characterService", () => ({
 }));
 
 const mockToastError = vi.fn();
+const mockToastSuccess = vi.fn();
+const mockToast = { error: mockToastError, success: mockToastSuccess };
 vi.mock("../../src/components/Toast", () => ({
-  useToast: () => ({ error: mockToastError, success: vi.fn() }),
+  useToast: () => mockToast,
 }));
 
 const mockPatchCharacterField = vi.mocked(patchCharacterFieldService);
@@ -90,6 +92,30 @@ describe("useCharacterMutations: patchField", () => {
     await act(() => result.current.patchField("notes", "Hello"));
 
     expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("permission-denied"));
+  });
+
+  it("keeps generic mutation callbacks stable when a fresh character snapshot remains available", () => {
+    const { result, rerender } = renderHook(
+      ({ character }: { character: Character | null }) =>
+        useCharacterMutations({
+          campaignId: "camp-1",
+          characterId: "char-1",
+          character,
+          allowedToEdit: true,
+        }),
+      { initialProps: { character: baseCharacter as Character | null } }
+    );
+    const initial = {
+      updateField: result.current.updateField,
+      patchField: result.current.patchField,
+      patchFields: result.current.patchFields,
+    };
+
+    rerender({ character: { ...baseCharacter, notes: "new snapshot" } as Character });
+
+    expect(result.current.updateField).toBe(initial.updateField);
+    expect(result.current.patchField).toBe(initial.patchField);
+    expect(result.current.patchFields).toBe(initial.patchFields);
   });
 });
 

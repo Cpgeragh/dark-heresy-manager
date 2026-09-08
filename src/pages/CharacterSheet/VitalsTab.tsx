@@ -16,6 +16,7 @@ import {
 import { uiSection, uiCell, uiCellValue, uiInfoModalWrapper } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 const VITALS_RULE_TEXT = {
   criticalDamage:
@@ -44,6 +45,7 @@ export function VitalsTab({
   onUpdateFate,
   talents,
 }: VitalsTabProps) {
+  recordComponentRender("VitalsTab");
   const { wounds, fate } = character;
   const woundSources = talents ? getTalentWoundModifierSources(talents) : [];
   const woundAdjustment = woundSources.reduce((total, source) => total + source.amount, 0);

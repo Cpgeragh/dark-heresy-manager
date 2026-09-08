@@ -12,6 +12,7 @@ import type {
 import {
   getTraitGrantedTalentSpecs,
   getTraitGrantedWeaponTrainingIds,
+  getActiveTraitEntries,
   getTraitSkillEffects,
 } from "../traits/traitEffects";
 import {
@@ -211,6 +212,29 @@ export interface TalentSkillEffects {
   sources: TalentModifierSource[];
 }
 
+export interface TalentSkillEffectContext {
+  careerSkillIds: ReadonlySet<string>;
+  activeTalentsById: ReadonlyMap<string, readonly TalentEntry[]>;
+  activeTraits: readonly TalentEntry[];
+}
+
+export function createTalentSkillEffectContext(
+  talents: TalentsAndTraitsBlock,
+  career?: string
+): TalentSkillEffectContext {
+  const activeTalentsById = new Map<string, TalentEntry[]>();
+  for (const entry of getActiveTalentEntries(talents)) {
+    const entries = activeTalentsById.get(entry.talentId) ?? [];
+    entries.push(entry);
+    activeTalentsById.set(entry.talentId, entries);
+  }
+  return {
+    careerSkillIds: new Set(getDerivedCareerSkillIds(career, talents.careerStartingChoices)),
+    activeTalentsById,
+    activeTraits: getActiveTraitEntries(talents, career),
+  };
+}
+
 function skillMatchesTalentChoice(skill: SkillEntry, entry: TalentEntry): boolean {
   return Boolean(
     entry.specialisation &&
@@ -221,11 +245,15 @@ function skillMatchesTalentChoice(skill: SkillEntry, entry: TalentEntry): boolea
 export function getTalentSkillEffects(
   talents: TalentsAndTraitsBlock,
   skill: SkillEntry,
-  career?: string
+  career?: string,
+  context: TalentSkillEffectContext = createTalentSkillEffectContext(talents, career)
 ): TalentSkillEffects {
   const effects: TalentSkillEffects = { modifier: 0, sources: [] };
+  const indexedEntries = (talentId: string) => context.activeTalentsById.get(talentId) ?? [];
+  const indexedChoice = (talentId: string, choice: string) =>
+    indexedEntries(talentId).find((entry) => hasChoice(entry, choice));
 
-  if (getDerivedCareerSkillIds(career, talents.careerStartingChoices).includes(skill.id)) {
+  if (context.careerSkillIds.has(skill.id)) {
     effects.minimumLevel = "trained";
     if (skill.level === "untrained") {
       effects.sources.push({
@@ -237,18 +265,18 @@ export function getTalentSkillEffects(
     }
   }
 
-  for (const entry of activeEntriesFor(talents, "talented")) {
+  for (const entry of indexedEntries("talented")) {
     if (!skillMatchesTalentChoice(skill, entry)) continue;
     effects.modifier += 10;
     effects.sources.push({ name: entry.name, type: "Talent", amount: 10 });
   }
 
-  if (skill.id === "silent-move" && activeEntriesFor(talents, "machinator-array").length > 0) {
+  if (skill.id === "silent-move" && indexedEntries("machinator-array").length > 0) {
     effects.modifier -= 10;
     effects.sources.push({ name: "Machinator Array", type: "Talent", amount: -10 });
   }
 
-  if (skill.category === "Common Lore" && cultEntry(talents, "Political")) {
+  if (skill.category === "Common Lore" && indexedChoice("cult-briefing", "Political")) {
     effects.countsAsBasic = true;
     effects.sources.push({
       name: "Cult Briefing (Political)",
@@ -258,7 +286,7 @@ export function getTalentSkillEffects(
     });
   }
 
-  if (skill.id === "tech-use" && cultEntry(talents, "Heretek")) {
+  if (skill.id === "tech-use" && indexedChoice("cult-briefing", "Heretek")) {
     effects.minimumLevel = "trained";
     if (skill.level === "untrained") {
       effects.sources.push({
@@ -270,7 +298,7 @@ export function getTalentSkillEffects(
     }
   }
 
-  if (skill.id === "medicae" && cultEntry(talents, "Infestation")) {
+  if (skill.id === "medicae" && indexedChoice("cult-briefing", "Infestation")) {
     effects.minimumLevel = "trained";
     if (skill.level === "untrained") {
       effects.sources.push({
@@ -282,7 +310,7 @@ export function getTalentSkillEffects(
     }
   }
 
-  if (skill.id === "deceive" && sicariusEntry(talents, "Adept")) {
+  if (skill.id === "deceive" && indexedChoice("sicarius-tutoring", "Adept")) {
     effects.characteristic = "int";
     effects.sources.push({
       name: "Sicarius Tutoring (Adept)",
@@ -291,7 +319,7 @@ export function getTalentSkillEffects(
       detail: "uses Intelligence",
     });
   }
-  if (skill.id === "inquiry" && sicariusEntry(talents, "Tech-Priest")) {
+  if (skill.id === "inquiry" && indexedChoice("sicarius-tutoring", "Tech-Priest")) {
     effects.characteristic = "int";
     effects.sources.push({
       name: "Sicarius Tutoring (Tech-Priest)",
@@ -300,16 +328,16 @@ export function getTalentSkillEffects(
       detail: "uses Intelligence",
     });
   }
-  if (skill.id === "shadowing" && sicariusEntry(talents, "Arbitrator")) {
+  if (skill.id === "shadowing" && indexedChoice("sicarius-tutoring", "Arbitrator")) {
     effects.modifier += 10;
     effects.sources.push({ name: "Sicarius Tutoring (Arbitrator)", type: "Talent", amount: 10 });
   }
-  if (skill.id === "concealment" && sicariusEntry(talents, "Assassin")) {
+  if (skill.id === "concealment" && indexedChoice("sicarius-tutoring", "Assassin")) {
     effects.modifier += 10;
     effects.sources.push({ name: "Sicarius Tutoring (Assassin)", type: "Talent", amount: 10 });
   }
 
-  const traitEffects = getTraitSkillEffects(talents, skill, career);
+  const traitEffects = getTraitSkillEffects(talents, skill, career, context.activeTraits);
   if (traitEffects.countsAsBasic) effects.countsAsBasic = true;
   if (traitEffects.minimumLevel) effects.minimumLevel = traitEffects.minimumLevel;
   effects.modifier += traitEffects.modifier;

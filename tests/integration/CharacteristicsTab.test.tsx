@@ -1,5 +1,5 @@
 // tests/integration/CharacteristicsTab.test.tsx
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -347,6 +347,26 @@ describe("CharacteristicsTab adjustment source breakdown", () => {
 });
 
 describe("CharacteristicsTab mobile peek carousel", () => {
+  const desktopMatchMedia = window.matchMedia;
+
+  beforeEach(() => {
+    window.matchMedia = (query: string) =>
+      ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => true,
+      }) as MediaQueryList;
+  });
+
+  afterEach(() => {
+    window.matchMedia = desktopMatchMedia;
+  });
+
   it("wraps to Fellowship on one side and Ballistic Skill on the other for the default Weapon Skill view", () => {
     renderTab();
 

@@ -45,6 +45,8 @@ import { CustomPowerForm } from "./CustomPowerForm";
 import { PowerGrid } from "./PowerGrid";
 import { PowerPicker } from "./PowerPicker";
 import { normalisePowerName, toCustomPowerData } from "./psychicPowerHelpers";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../../hooks/useMediaQuery";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -141,6 +143,8 @@ export function PsychicTab({
   editable,
   onUpdate,
 }: PsychicTabProps) {
+  recordComponentRender("PsychicTab");
+  const isDesktopLayout = useMediaQuery(DESKTOP_LAYOUT_QUERY);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
   const [purchaseChoiceTarget, setPurchaseChoiceTarget] = useState<PickerTarget>(null);
   const [pendingTalentEntryUid, setPendingTalentEntryUid] = useState<string | undefined>();
@@ -617,161 +621,162 @@ export function PsychicTab({
         </div>
       </div>
 
-      {/* MINOR POWERS ────────────────────────────────────────────────────── */}
-      <div ref={containerRef} className="lg:hidden space-y-4">
-        <SegmentedTabs
-          id={PSYCHIC_POWER_TABS_ID}
-          ariaLabel="Psychic power groups"
-          options={PSYCHIC_POWER_TABS}
-          value={activePowerGroup}
-          onChange={switchPowerGroup}
-        />
+      {!isDesktopLayout ? (
+        <div ref={containerRef} className="space-y-4">
+          <SegmentedTabs
+            id={PSYCHIC_POWER_TABS_ID}
+            ariaLabel="Psychic power groups"
+            options={PSYCHIC_POWER_TABS}
+            value={activePowerGroup}
+            onChange={switchPowerGroup}
+          />
 
-        <section
-          key={activePowerGroup}
-          id={segmentedTabPanelId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
-          aria-labelledby={segmentedTabId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
-          className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
-          role="tabpanel"
-        >
-          <div className="flex items-center justify-between">
-            <PowerSectionHeading
-              title={activeTitle}
-              availableSelections={
-                activePowerGroup === "minor"
-                  ? availableMinorPurchases.length + availableMinorPsyRatingCount
-                  : availableMajorPurchases.length + availableMajorPsyRatingCount
-              }
-            />
-            {editable ? (
-              <AddButton label={`Add ${activeTitle.slice(0, -1)}`} onClick={activeOpenPicker} />
+          <section
+            key={activePowerGroup}
+            id={segmentedTabPanelId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
+            aria-labelledby={segmentedTabId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
+            className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
+            role="tabpanel"
+          >
+            <div className="flex items-center justify-between">
+              <PowerSectionHeading
+                title={activeTitle}
+                availableSelections={
+                  activePowerGroup === "minor"
+                    ? availableMinorPurchases.length + availableMinorPsyRatingCount
+                    : availableMajorPurchases.length + availableMajorPsyRatingCount
+                }
+              />
+              {editable ? (
+                <AddButton label={`Add ${activeTitle.slice(0, -1)}`} onClick={activeOpenPicker} />
+              ) : (
+                <ViewButton label={`View ${activeTitle}`} onClick={activeOpenPicker} />
+              )}
+            </div>
+            {activePowers.length === 0 ? (
+              <p className="text-sm lg:text-base text-slate-400">{activeEmptyText}</p>
             ) : (
-              <ViewButton label={`View ${activeTitle}`} onClick={activeOpenPicker} />
+              <PowerGrid
+                powers={activePowers}
+                talents={talents}
+                editable={editable}
+                isDM={isDM}
+                userId={userId}
+                campaignCustomPowersById={campaignCustomPowersById}
+                getBusyAction={getBusyAction}
+                onRemove={activeRemove}
+                onEdit={activeEditPower}
+                onPublishPower={publishDefinition}
+                onArchivePower={archiveDefinition}
+                onUpdateAllPowerCopies={updateAllCopies}
+                canLinkPurchase={
+                  activePowerGroup === "minor"
+                    ? availableMinorPurchases.length > 0
+                    : availableMajorPurchases.length > 0
+                }
+                onLinkPurchase={(power) => handleLinkExistingPower(activePowerGroup, power)}
+                canLinkPsyRatingGrant={(power) =>
+                  (activePowerGroup === "minor"
+                    ? availableMinorPsyRatingGrants
+                    : availableMajorPsyRatingGrants
+                  ).some(
+                    (grant) =>
+                      activePowerGroup === "minor" ||
+                      !grant.entry.acquisition?.psyRatingDiscipline ||
+                      grant.entry.acquisition.psyRatingDiscipline === power.discipline
+                  )
+                }
+                onLinkPsyRatingGrant={(power) =>
+                  handleLinkExistingPowerToPsyRating(activePowerGroup, power)
+                }
+              />
             )}
-          </div>
-          {activePowers.length === 0 ? (
-            <p className="text-sm lg:text-base text-slate-400">{activeEmptyText}</p>
-          ) : (
-            <PowerGrid
-              powers={activePowers}
-              talents={talents}
-              editable={editable}
-              isDM={isDM}
-              userId={userId}
-              campaignCustomPowersById={campaignCustomPowersById}
-              getBusyAction={getBusyAction}
-              onRemove={activeRemove}
-              onEdit={activeEditPower}
-              onPublishPower={publishDefinition}
-              onArchivePower={archiveDefinition}
-              onUpdateAllPowerCopies={updateAllCopies}
-              canLinkPurchase={
-                activePowerGroup === "minor"
-                  ? availableMinorPurchases.length > 0
-                  : availableMajorPurchases.length > 0
-              }
-              onLinkPurchase={(power) => handleLinkExistingPower(activePowerGroup, power)}
-              canLinkPsyRatingGrant={(power) =>
-                (activePowerGroup === "minor"
-                  ? availableMinorPsyRatingGrants
-                  : availableMajorPsyRatingGrants
-                ).some(
-                  (grant) =>
-                    activePowerGroup === "minor" ||
-                    !grant.entry.acquisition?.psyRatingDiscipline ||
-                    grant.entry.acquisition.psyRatingDiscipline === power.discipline
-                )
-              }
-              onLinkPsyRatingGrant={(power) =>
-                handleLinkExistingPowerToPsyRating(activePowerGroup, power)
-              }
-            />
-          )}
-        </section>
-      </div>
-
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-        <section className={uiSection + " space-y-4"}>
-          <div className="flex items-center justify-between">
-            <PowerSectionHeading
-              title="Minor Powers"
-              availableSelections={availableMinorPurchases.length + availableMinorPsyRatingCount}
-            />
-            {editable ? (
-              <AddButton label="Add Minor Power" onClick={openPickerForMinor} />
+          </section>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-6 items-start">
+          <section className={uiSection + " space-y-4"}>
+            <div className="flex items-center justify-between">
+              <PowerSectionHeading
+                title="Minor Powers"
+                availableSelections={availableMinorPurchases.length + availableMinorPsyRatingCount}
+              />
+              {editable ? (
+                <AddButton label="Add Minor Power" onClick={openPickerForMinor} />
+              ) : (
+                <ViewButton label="View Minor Powers" onClick={openPickerForMinor} />
+              )}
+            </div>
+            {psychic.minorPowers.length === 0 ? (
+              <p className="text-sm lg:text-base text-slate-400">No minor powers recorded.</p>
             ) : (
-              <ViewButton label="View Minor Powers" onClick={openPickerForMinor} />
+              <PowerGrid
+                powers={psychic.minorPowers}
+                talents={talents}
+                editable={editable}
+                isDM={isDM}
+                userId={userId}
+                campaignCustomPowersById={campaignCustomPowersById}
+                getBusyAction={getBusyAction}
+                onRemove={removeMinorPower}
+                onEdit={(power) => setEditingCustomPower({ target: "minor", power })}
+                onPublishPower={publishDefinition}
+                onArchivePower={archiveDefinition}
+                onUpdateAllPowerCopies={updateAllCopies}
+                canLinkPurchase={availableMinorPurchases.length > 0}
+                onLinkPurchase={(power) => handleLinkExistingPower("minor", power)}
+                canLinkPsyRatingGrant={() => availableMinorPsyRatingGrants.length > 0}
+                onLinkPsyRatingGrant={(power) => handleLinkExistingPowerToPsyRating("minor", power)}
+              />
             )}
-          </div>
-          {psychic.minorPowers.length === 0 ? (
-            <p className="text-sm lg:text-base text-slate-400">No minor powers recorded.</p>
-          ) : (
-            <PowerGrid
-              powers={psychic.minorPowers}
-              talents={talents}
-              editable={editable}
-              isDM={isDM}
-              userId={userId}
-              campaignCustomPowersById={campaignCustomPowersById}
-              getBusyAction={getBusyAction}
-              onRemove={removeMinorPower}
-              onEdit={(power) => setEditingCustomPower({ target: "minor", power })}
-              onPublishPower={publishDefinition}
-              onArchivePower={archiveDefinition}
-              onUpdateAllPowerCopies={updateAllCopies}
-              canLinkPurchase={availableMinorPurchases.length > 0}
-              onLinkPurchase={(power) => handleLinkExistingPower("minor", power)}
-              canLinkPsyRatingGrant={() => availableMinorPsyRatingGrants.length > 0}
-              onLinkPsyRatingGrant={(power) => handleLinkExistingPowerToPsyRating("minor", power)}
-            />
-          )}
-        </section>
+          </section>
 
-        {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
-        <section className={uiSection + " space-y-4"}>
-          <div className="flex items-center justify-between">
-            <PowerSectionHeading
-              title="Major Powers"
-              availableSelections={availableMajorPurchases.length + availableMajorPsyRatingCount}
-            />
-            {editable ? (
-              <AddButton label="Add Major Power" onClick={openPickerForMajor} />
+          {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
+          <section className={uiSection + " space-y-4"}>
+            <div className="flex items-center justify-between">
+              <PowerSectionHeading
+                title="Major Powers"
+                availableSelections={availableMajorPurchases.length + availableMajorPsyRatingCount}
+              />
+              {editable ? (
+                <AddButton label="Add Major Power" onClick={openPickerForMajor} />
+              ) : (
+                <ViewButton label="View Major Powers" onClick={openPickerForMajor} />
+              )}
+            </div>
+            {psychic.majorPowers.length === 0 ? (
+              <p className="text-sm lg:text-base text-slate-400">No major powers recorded.</p>
             ) : (
-              <ViewButton label="View Major Powers" onClick={openPickerForMajor} />
+              <PowerGrid
+                powers={psychic.majorPowers}
+                talents={talents}
+                editable={editable}
+                isDM={isDM}
+                userId={userId}
+                campaignCustomPowersById={campaignCustomPowersById}
+                getBusyAction={getBusyAction}
+                onRemove={removeMajorPower}
+                onEdit={(power) => setEditingCustomPower({ target: "major", power })}
+                onPublishPower={publishDefinition}
+                onArchivePower={archiveDefinition}
+                onUpdateAllPowerCopies={updateAllCopies}
+                canLinkPurchase={availableMajorPurchases.length > 0}
+                onLinkPurchase={(power) => handleLinkExistingPower("major", power)}
+                canLinkPsyRatingGrant={(power) =>
+                  availableMajorPsyRatingGrants.some(
+                    (grant) =>
+                      !grant.entry.acquisition?.psyRatingDiscipline ||
+                      grant.entry.acquisition.psyRatingDiscipline === power.discipline
+                  )
+                }
+                onLinkPsyRatingGrant={(power) => handleLinkExistingPowerToPsyRating("major", power)}
+              />
             )}
-          </div>
-          {psychic.majorPowers.length === 0 ? (
-            <p className="text-sm lg:text-base text-slate-400">No major powers recorded.</p>
-          ) : (
-            <PowerGrid
-              powers={psychic.majorPowers}
-              talents={talents}
-              editable={editable}
-              isDM={isDM}
-              userId={userId}
-              campaignCustomPowersById={campaignCustomPowersById}
-              getBusyAction={getBusyAction}
-              onRemove={removeMajorPower}
-              onEdit={(power) => setEditingCustomPower({ target: "major", power })}
-              onPublishPower={publishDefinition}
-              onArchivePower={archiveDefinition}
-              onUpdateAllPowerCopies={updateAllCopies}
-              canLinkPurchase={availableMajorPurchases.length > 0}
-              onLinkPurchase={(power) => handleLinkExistingPower("major", power)}
-              canLinkPsyRatingGrant={(power) =>
-                availableMajorPsyRatingGrants.some(
-                  (grant) =>
-                    !grant.entry.acquisition?.psyRatingDiscipline ||
-                    grant.entry.acquisition.psyRatingDiscipline === power.discipline
-                )
-              }
-              onLinkPsyRatingGrant={(power) => handleLinkExistingPowerToPsyRating("major", power)}
-            />
-          )}
-        </section>
+          </section>
 
-        {/* POWER PICKER MODAL ──────────────────────────────────────────────── */}
-      </div>
+          {/* POWER PICKER MODAL ──────────────────────────────────────────────── */}
+        </div>
+      )}
 
       {purchaseChoiceTarget !== null && (
         <PickerModal

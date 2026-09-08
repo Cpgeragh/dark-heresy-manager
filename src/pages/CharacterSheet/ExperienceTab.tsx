@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 import type {
   Character,
   CharacterHeader,
@@ -651,6 +652,7 @@ export function ExperienceTab({
   onUpdate,
   onUpdateHeader,
 }: ExperienceTabProps) {
+  recordComponentRender("ExperienceTab");
   const { experience } = character;
   const remaining = experience.total - experience.spent;
   const rankCards = buildRankCards(character);

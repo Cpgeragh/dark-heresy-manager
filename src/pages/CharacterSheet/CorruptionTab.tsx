@@ -3,6 +3,7 @@
 import type { CorruptionBlock } from "../../types/Character";
 import { uiSection } from "../../ui/styles/editableStyles";
 import { CorruptionPanel } from "../../mechanics/corruption/CorruptionPanel";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface CorruptionTabProps {
   corruption: CorruptionBlock;
@@ -11,6 +12,7 @@ interface CorruptionTabProps {
 }
 
 export function CorruptionTab({ corruption, editable, onUpdate }: CorruptionTabProps) {
+  recordComponentRender("CorruptionTab");
   return (
     <CorruptionPanel
       corruption={corruption}
