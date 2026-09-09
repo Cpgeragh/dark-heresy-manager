@@ -17,6 +17,7 @@ import { QuantityControl } from "../../../ui/QuantityControl";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 export function DrugRow({
   item,
@@ -37,6 +38,7 @@ export function DrugRow({
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
 } & CustomItemLibraryActionProps<"drug">) {
+  recordComponentRender("DrugRow");
   const ref = DRUGS_REFERENCE.find((r) => r.id === item.referenceId);
   const hasInfo = !!(ref?.effect || ref?.sideEffect || ref?.notes || item.notes);
 

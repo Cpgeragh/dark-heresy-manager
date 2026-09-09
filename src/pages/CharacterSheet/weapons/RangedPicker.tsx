@@ -1,13 +1,20 @@
 // src/pages/CharacterSheet/weapons/RangedPicker.tsx
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
 } from "../../../data/reference/weaponReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { uiTextBody, uiTextMuted, uiItemName } from "../../../ui/styles/editableStyles";
+import {
+  uiCardTitle,
+  uiInfoModalWrapper,
+  uiItemName,
+  uiSectionShell,
+  uiTextBody,
+  uiTextMuted,
+} from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
@@ -23,9 +30,12 @@ import { ArrowRight, ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip } from "./weaponShared";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { RangedCard } from "./RangedCard";
-import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
+import { uiExpandButton, uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 import { weaponClassChip, ammoFamilyChip, rangedCraftsmanshipDescription } from "./weaponHelpers";
+import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
+import { InfoModal } from "../../../components/InfoModal";
 
 function RangedWeaponCardPickerRow({
   weaponReference,
@@ -36,6 +46,89 @@ function RangedWeaponCardPickerRow({
   editable: boolean;
   onSelect: () => void;
 }) {
+  recordComponentRender("RangedWeaponPickerRow");
+  const [expanded, setExpanded] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef(false);
+
+  useEffect(() => {
+    if (!restoreFocusRef.current) return;
+    restoreFocusRef.current = false;
+    const expectedLabel = `${expanded ? "Collapse" : "Expand"} ${weaponReference.name} details`;
+    const nextControl = Array.from(
+      rowRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []
+    ).find((button) => button.getAttribute("aria-label") === expectedLabel);
+    nextControl?.focus();
+  }, [expanded, weaponReference.name]);
+
+  function showDetails() {
+    restoreFocusRef.current = true;
+    setExpanded(true);
+  }
+
+  function setDetailsExpanded(nextExpanded: boolean) {
+    restoreFocusRef.current = true;
+    setExpanded(nextExpanded);
+  }
+
+  if (!expanded) {
+    const classChip = weaponClassChip(weaponReference.class);
+    return (
+      <div ref={rowRef} className={`${uiSectionShell} overflow-hidden`}>
+        <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
+          <button
+            type="button"
+            onClick={editable ? onSelect : showDetails}
+            aria-label={
+              editable ? `Select ${weaponReference.name}` : `Expand ${weaponReference.name} details`
+            }
+            aria-expanded={editable ? undefined : false}
+            className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(editable)}`}
+          />
+          <div className={`${uiExpandButton} relative pointer-events-none`}>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <p className={uiCardTitle}>{weaponReference.name}</p>
+              {weaponReference.description && (
+                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
+                  <InfoModal
+                    title={weaponReference.name}
+                    content={
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {weaponReference.description}
+                      </p>
+                    }
+                  />
+                </span>
+              )}
+            </div>
+            {classChip && (
+              <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                <Chip size="sm" className={classChip.active}>
+                  {classChip.label}
+                </Chip>
+              </div>
+            )}
+          </div>
+          <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+            {editable ? (
+              <button
+                type="button"
+                onClick={showDetails}
+                aria-expanded={false}
+                aria-label={`Expand ${weaponReference.name} details`}
+                className="relative z-10 pointer-events-auto p-1 -m-1"
+              >
+                <ExpandChevron expanded={false} />
+              </button>
+            ) : (
+              <ExpandChevron expanded={false} />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const weapon: RangedWeapon = {
     id: `picker-${weaponReference.id}`,
     referenceId: weaponReference.id,
@@ -59,18 +152,22 @@ function RangedWeaponCardPickerRow({
     ammoEntries: [],
   };
   return (
-    <RangedCard
-      weapon={weapon}
-      editable={false}
-      pickerMode
-      onSelect={editable ? onSelect : undefined}
-      onRemove={() => {}}
-      onAddUpgrade={() => {}}
-      onRemoveUpgrade={() => {}}
-      onUpdateAmmoEntries={() => {}}
-      onUpdateQuantity={() => {}}
-      allowUpgrades={false}
-    />
+    <div ref={rowRef}>
+      <RangedCard
+        weapon={weapon}
+        editable={false}
+        pickerMode
+        expanded
+        onExpandedChange={setDetailsExpanded}
+        onSelect={editable ? onSelect : undefined}
+        onRemove={() => {}}
+        onAddUpgrade={() => {}}
+        onRemoveUpgrade={() => {}}
+        onUpdateAmmoEntries={() => {}}
+        onUpdateQuantity={() => {}}
+        allowUpgrades={false}
+      />
+    </div>
   );
 }
 
@@ -99,6 +196,7 @@ export function RangedPicker({
   placeholder?: string;
   showCustom?: boolean;
 }) {
+  recordComponentRender("RangedPicker");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<RangedWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");

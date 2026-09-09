@@ -34,8 +34,10 @@ import { useCampaignCharacterSummaries } from "../hooks/useCampaignCharacterSumm
 import { MyCharacterCard } from "./CampaignOverview/MyCharacterCard";
 import { PartyRosterTile } from "./CampaignOverview/PartyRosterTile";
 import { RouteLoadError } from "../ui/RouteLoadError";
+import { recordComponentRender } from "../performance/performanceMetrics";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
+  recordComponentRender("CampaignOverview");
   const params = useParams<{ campaignId: string }>();
   const campaignId = params.campaignId;
 

@@ -12,6 +12,7 @@ import {
   CUSTOM_ITEM_CATEGORY_ORDER,
   CUSTOM_ITEM_STATUS_ORDER,
 } from "../../constants/customItems";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 export function CustomItemLibraryAdmin({
   campaignId,
@@ -20,6 +21,7 @@ export function CustomItemLibraryAdmin({
   campaignId: string;
   userId: string;
 }) {
+  recordComponentRender("CustomItemLibraryAdmin");
   const { items, loading, error } = useCampaignCustomItems({
     campaignId,
     mode: "admin",

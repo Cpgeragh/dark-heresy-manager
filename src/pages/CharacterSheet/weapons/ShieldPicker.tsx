@@ -16,6 +16,7 @@ import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 export function ShieldPicker({
   editable = true,
@@ -34,6 +35,7 @@ export function ShieldPicker({
   onClose: () => void;
   suspended?: boolean;
 }) {
+  recordComponentRender("ShieldPicker");
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
   const filtered = SHIELD_REFERENCE.filter((r) =>

@@ -13,6 +13,7 @@ import { ModalHeader } from "../../ui/modals/ModalHeader";
 import { ModalShell } from "../../ui/modals/ModalShell";
 import type { ClaimLogAction } from "../../utils/claimLog";
 import { PortraitUpload } from "../../components/PortraitUpload";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 function formatAction(action: ClaimLogAction): string {
   switch (action) {
@@ -59,6 +60,7 @@ export function CharacterRow({
   portraitUrl?: string;
   isDM: boolean;
 }) {
+  recordComponentRender("CharacterRow");
   const [showHistory, setShowHistory] = useState(false);
   const [deletePreflight, setDeletePreflight] = useState<{
     loading: boolean;

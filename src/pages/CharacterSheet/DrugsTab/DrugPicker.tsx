@@ -14,6 +14,7 @@ import {
 } from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 function drugInfoContent(ref: DrugRef) {
   return (
@@ -65,6 +66,7 @@ export function DrugPicker({
   onClose: () => void;
   suspended?: boolean;
 }) {
+  recordComponentRender("DrugPicker");
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
   const filtered = DRUGS_REFERENCE.filter((r) =>

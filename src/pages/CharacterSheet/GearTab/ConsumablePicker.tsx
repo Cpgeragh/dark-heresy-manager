@@ -11,6 +11,7 @@ import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/
 import { uiTextBody, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props {
   editable?: boolean;
@@ -31,6 +32,7 @@ export function ConsumablePicker({
   onClose,
   suspended = false,
 }: Props) {
+  recordComponentRender("ConsumablePicker");
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
   const filtered = CONSUMABLES_REFERENCE.filter((r) =>

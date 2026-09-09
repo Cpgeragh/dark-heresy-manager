@@ -19,6 +19,7 @@ import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 import { colourAmberFaint, colourRank, colourValue } from "../../ui/styles/colourTokens";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 import {
   getNextTalentCost,
   getNextTalentPurchase,
@@ -86,6 +87,7 @@ export function TalentPickerModal({
   career?: string;
   rank?: string;
 }) {
+  recordComponentRender("TalentPickerModal");
   const [query, setQuery] = useState("");
   const [showOverflow, setShowOverflow] = useState(false);
   const [picked, setPicked] = useState<AnyListItem | null>(null);

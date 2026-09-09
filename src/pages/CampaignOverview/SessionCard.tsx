@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { Timestamp } from "firebase/firestore";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 import type { SessionListDocument } from "../../types/Firestore";
 import {
   getSessionXpAffectedDocumentCount,
@@ -46,6 +47,7 @@ function toInputDate(value: SessionListDocument["date"]): string {
 }
 
 export function SessionCard({ session, characters, isDM, onDelete, onSave, onApplyXp }: Props) {
+  recordComponentRender("SessionCard");
   const toast = useToast();
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [saving, setSaving] = useState(false);

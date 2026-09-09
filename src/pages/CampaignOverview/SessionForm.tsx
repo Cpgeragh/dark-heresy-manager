@@ -12,6 +12,7 @@ import {
   uiFormLabelSecondary,
   uiSection,
 } from "../../ui/styles/editableStyles";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface Character {
   id: string;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function SessionForm({ campaignId, characters, onClose }: Props) {
+  recordComponentRender("SessionForm");
   const toast = useToast();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [summary, setSummary] = useState("");

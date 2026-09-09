@@ -26,6 +26,7 @@ import {
   uiItemName,
   uiTextGMNote,
 } from "../../../ui/styles/editableStyles";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { uiPickerBackButton } from "../../../ui/styles/buttonStyles";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
@@ -69,6 +70,7 @@ export function ImplantPicker({
   onClose,
   suspended = false,
 }: Props) {
+  recordComponentRender("ImplantPicker");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<CyberneticRef | null>(null);
   const [pendingCost, setPendingCost] = useState<CyberneticRef | null>(null);

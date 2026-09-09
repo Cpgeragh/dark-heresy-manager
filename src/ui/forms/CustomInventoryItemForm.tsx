@@ -11,6 +11,7 @@ import { CustomFormSection } from "./CustomFormSection";
 import { CustomFormShell } from "./CustomFormShell";
 import { OriginSelector } from "./OriginSelector";
 import { RequiredFormLabel } from "./RequiredFormLabel";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface InitialValue {
   name?: string;
@@ -59,6 +60,7 @@ export function CustomInventoryItemForm({
   onSubmit,
   onCancel,
 }: Props) {
+  recordComponentRender("CustomInventoryItemForm");
   const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialValue?.name ?? "");
   const [quantity, setQuantity] = useState(

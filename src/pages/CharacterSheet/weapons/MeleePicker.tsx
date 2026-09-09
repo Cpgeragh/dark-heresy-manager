@@ -23,6 +23,7 @@ import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip } from "./weaponShared";
 import { MeleeCard } from "./MeleeCard";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { meleeCraftsmanshipDescription } from "./weaponHelpers";
 
 function MeleeWeaponCardPickerRow({
@@ -94,6 +95,7 @@ export function MeleePicker({
   placeholder?: string;
   showCustom?: boolean;
 }) {
+  recordComponentRender("MeleePicker");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<MeleeWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");

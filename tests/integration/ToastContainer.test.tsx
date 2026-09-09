@@ -3,9 +3,9 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-const useToastMock = vi.fn();
+const useToastsMock = vi.fn();
 vi.mock("../../src/components/Toast/ToastContext", () => ({
-  useToast: () => useToastMock(),
+  useToasts: () => useToastsMock(),
 }));
 
 vi.mock("../../src/components/Toast/ToastItem", () => ({
@@ -18,18 +18,16 @@ import { ToastContainer } from "../../src/components/Toast/ToastContainer";
 
 describe("ToastContainer", () => {
   it("renders nothing when there are no toasts", () => {
-    useToastMock.mockReturnValue({ toasts: [] });
+    useToastsMock.mockReturnValue([]);
     const { container } = render(<ToastContainer />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders one ToastItem per toast", () => {
-    useToastMock.mockReturnValue({
-      toasts: [
-        { id: "t1", message: "First" },
-        { id: "t2", message: "Second" },
-      ],
-    });
+    useToastsMock.mockReturnValue([
+      { id: "t1", message: "First" },
+      { id: "t2", message: "Second" },
+    ]);
     render(<ToastContainer />);
 
     expect(screen.getByText("Mock ToastItem: First")).toBeInTheDocument();

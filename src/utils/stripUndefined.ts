@@ -7,6 +7,8 @@ export function stripUndefined<T>(value: T): T {
     return value.map(stripUndefined) as unknown as T;
   }
   if (value !== null && typeof value === "object") {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) return value;
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>)
         .filter(([, v]) => v !== undefined)

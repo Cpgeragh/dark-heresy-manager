@@ -15,6 +15,7 @@ import {
 import { StatusBadge } from "../../ui/chips/StatusBadge";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { CUSTOM_ITEM_CATEGORY_LABELS } from "../../constants/customItems";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 type ManagementBusyAction = "restore" | "delete";
 type PreflightState = {
@@ -45,6 +46,7 @@ export function CustomItemAdminRow({
   campaignId: string;
   userId: string;
 }) {
+  recordComponentRender("CustomItemAdminRow");
   const [managementBusyAction, setManagementBusyAction] = useState<ManagementBusyAction | null>(
     null
   );

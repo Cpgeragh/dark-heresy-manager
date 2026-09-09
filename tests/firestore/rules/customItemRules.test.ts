@@ -248,6 +248,48 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     await expect(playerDb.collection(versionsPath()).limit(101).get()).rejects.toThrow();
   });
 
+  it("allows the bounded armour query used by a campaign DM", async () => {
+    const env = await getTestEnv();
+    await createCustomItemCampaign(env);
+    await seedCustomItem(
+      env,
+      {
+        category: "armour",
+        data: {
+          armourKind: "worn",
+          name: "Custom Carapace",
+          locations: ["Body"],
+          ap: 5,
+          weight: "7 kg",
+          value: "1,000 Thrones",
+          availability: "Rare",
+          source: "Custom",
+        },
+      },
+      {
+        category: "armour",
+        data: {
+          armourKind: "worn",
+          name: "Custom Carapace",
+          locations: ["Body"],
+          ap: 5,
+          weight: "7 kg",
+          value: "1,000 Thrones",
+          availability: "Rare",
+          source: "Custom",
+        },
+      }
+    );
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/customItems`)
+        .where("category", "==", "armour")
+        .limit(200)
+        .get()
+    ).resolves.toBeDefined();
+  });
+
   it("creator may update draft definition fields but may not publish", async () => {
     const env = await getTestEnv();
     await createCustomItemCampaign(env);

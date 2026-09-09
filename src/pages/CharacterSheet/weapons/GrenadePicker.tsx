@@ -23,6 +23,7 @@ import {
 } from "../../../ui/styles/colourTokens";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { weaponClassChip } from "./weaponHelpers";
 
 export function GrenadePicker({
@@ -44,6 +45,7 @@ export function GrenadePicker({
   onClose: () => void;
   suspended?: boolean;
 }) {
+  recordComponentRender("GrenadePicker");
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
   const filtered = GRENADE_REFERENCE.filter((r) =>

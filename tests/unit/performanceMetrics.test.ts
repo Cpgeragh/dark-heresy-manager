@@ -90,6 +90,22 @@ describe("performance metrics recorder", () => {
     );
   });
 
+  it("records a sanitized Firestore listener error code", async () => {
+    const { beginPerformanceSubscription } =
+      await import("../../src/performance/performanceMetrics");
+    const subscription = beginPerformanceSubscription("campaigns:test:armour");
+
+    subscription?.error("permission-denied");
+
+    expect(window.__DHM_PERFORMANCE__?.snapshot().events).toContainEqual(
+      expect.objectContaining({
+        kind: "listener-error",
+        name: "campaigns:test:armour",
+        errorCode: "permission-denied",
+      })
+    );
+  });
+
   it("counts named component renders and clears them on reset", async () => {
     const { recordComponentRender } = await import("../../src/performance/performanceMetrics");
 

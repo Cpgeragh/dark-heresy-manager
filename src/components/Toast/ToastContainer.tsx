@@ -1,10 +1,10 @@
 // src/components/Toast/ToastContainer.tsx
 
-import { useToast } from "./ToastContext";
+import { useToasts } from "./ToastContext";
 import { ToastItem } from "./ToastItem";
 
 export function ToastContainer() {
-  const { toasts } = useToast();
+  const toasts = useToasts();
 
   if (toasts.length === 0) return null;
 

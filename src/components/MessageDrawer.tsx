@@ -9,6 +9,7 @@ import { MessageInput } from "./MessageInput";
 import { useToast } from "./Toast";
 import { CloseButton } from "../ui/buttons/CloseButton";
 import { ErrorState } from "../ui/ErrorState";
+import { recordComponentRender } from "../performance/performanceMetrics";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────
 
@@ -76,6 +77,7 @@ export function MessageDrawer({
   campaignId: string | null;
   characterId: string | null;
 }) {
+  recordComponentRender("MessageDrawer");
   return (
     <>
       {/* Backdrop */}

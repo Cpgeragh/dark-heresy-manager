@@ -75,6 +75,20 @@ describe("stripUndefined — objects", () => {
       equipped: true,
     });
   });
+
+  it("preserves non-plain Firestore-compatible values", () => {
+    const timestamp = new Date("2026-09-09T00:00:00.000Z");
+    class Sentinel {
+      constructor(readonly _methodName: string) {}
+    }
+    const serverTimestamp = new Sentinel("serverTimestamp");
+
+    const result = stripUndefined({ timestamp, serverTimestamp, omitted: undefined });
+
+    expect(result).toEqual({ timestamp, serverTimestamp });
+    expect(result.timestamp).toBe(timestamp);
+    expect(result.serverTimestamp).toBe(serverTimestamp);
+  });
 });
 
 describe("stripUndefined — arrays", () => {

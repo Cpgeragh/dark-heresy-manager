@@ -28,6 +28,7 @@ import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryAct
 import { createDraftCustomItem, saveDraftCustomItem } from "../../services/customItemService";
 import { useToast } from "../../components/Toast";
 import type { CampaignCustomItem, CustomTraitData } from "../../types/CustomItems";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface TraitsTabProps {
   talents: TalentsAndTraitsBlock;
@@ -132,6 +133,7 @@ export function TraitsTab({
   characterName,
   isDM = false,
 }: TraitsTabProps) {
+  recordComponentRender("TraitsTab");
   const toast = useToast();
   const [showPicker, setShowPicker] = useState(false);
   const [customTraitOpen, setCustomTraitOpen] = useState(false);

@@ -12,6 +12,7 @@ import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
 import { LoadingState } from "../../ui/LoadingState";
 import type { CharacterListItem } from "../../types/Firestore";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -113,6 +114,7 @@ export function DMInbox({
   dmUid: string;
   characters: CharacterListItem[];
 }) {
+  recordComponentRender("DMInbox");
   const { threads, loading, error } = useThreads(campaignId);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 

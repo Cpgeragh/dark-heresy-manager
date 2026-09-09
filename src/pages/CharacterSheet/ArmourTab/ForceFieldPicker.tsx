@@ -19,6 +19,7 @@ import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props {
   editable?: boolean;
@@ -39,6 +40,7 @@ export function ForceFieldPicker({
   onClose,
   suspended = false,
 }: Props) {
+  recordComponentRender("ForceFieldPicker");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ArmourRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>("Common");

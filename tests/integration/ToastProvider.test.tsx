@@ -1,13 +1,15 @@
 // tests/integration/ToastProvider.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { Profiler } from "react";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ToastProvider } from "../../src/components/Toast/ToastProvider";
-import { useToast } from "../../src/components/Toast/ToastContext";
+import { useToast, useToasts } from "../../src/components/Toast/ToastContext";
 
 function Consumer() {
   const toast = useToast();
+  const toasts = useToasts();
   return (
     <div>
       <button onClick={() => toast.success("Saved!")}>Success</button>
@@ -15,7 +17,7 @@ function Consumer() {
       <button onClick={() => toast.info("Heads up", 0)}>InfoNoAutoDismiss</button>
       <button onClick={() => toast.warning("Careful", 1000, "copy-me")}>WarningWithCopy</button>
       <ul>
-        {toast.toasts.map((t) => (
+        {toasts.map((t) => (
           <li key={t.id}>
             {t.type}:{t.message}
             <button onClick={() => toast.removeToast(t.id)}>Remove {t.id}</button>
@@ -24,6 +26,15 @@ function Consumer() {
       </ul>
     </div>
   );
+}
+
+function ActionOnlyConsumer() {
+  const toast = useToast();
+  return <button onClick={() => toast.success("Stable", 1000)}>Stable action</button>;
+}
+
+function ToastStateConsumer() {
+  return <div data-testid="toast-count">{useToasts().length}</div>;
 }
 
 function renderConsumer() {
@@ -108,5 +119,31 @@ describe("ToastProvider", () => {
 
     expect(screen.getByText("success:Saved!")).toBeInTheDocument();
     expect(screen.getByText("error:Failed!")).toBeInTheDocument();
+  });
+
+  it("does not rerender an action-only consumer when toast state changes", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const onRender = vi.fn();
+    render(
+      <ToastProvider>
+        <Profiler id="action-consumer" onRender={onRender}>
+          <ActionOnlyConsumer />
+        </Profiler>
+        <ToastStateConsumer />
+      </ToastProvider>
+    );
+
+    expect(onRender).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("toast-count")).toHaveTextContent("0");
+
+    await user.click(screen.getByRole("button", { name: "Stable action" }));
+    expect(screen.getByTestId("toast-count")).toHaveTextContent("1");
+    expect(onRender).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(screen.getByTestId("toast-count")).toHaveTextContent("0");
+    expect(onRender).toHaveBeenCalledTimes(1);
   });
 });

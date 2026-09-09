@@ -8,6 +8,7 @@ import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
 import { PlusIcon } from "../icons/PlusIcon";
 import { uiPickerPressFeedback } from "../styles/buttonStyles";
+import { recordComponentRender } from "../../performance/performanceMetrics";
 
 export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`p-4 lg:p-5 space-y-4 ${className}`.trim()} {...props} />;
@@ -31,6 +32,7 @@ export function PickerRow({
   type = "button",
   ...props
 }: PickerRowProps) {
+  recordComponentRender("PickerRow");
   const respondsToInput = interactive && !disabled;
 
   return (
@@ -141,6 +143,7 @@ export function PickerModal({
   suspended = false,
   children,
 }: Props) {
+  recordComponentRender("PickerModal");
   const listRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {

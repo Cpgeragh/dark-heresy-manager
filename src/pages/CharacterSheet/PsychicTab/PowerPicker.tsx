@@ -14,6 +14,7 @@ import { PickerCustomAction, PickerModal } from "../../../ui/pickers/PickerModal
 import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 import { PowerCard } from "./PowerCard";
 import { normalisePowerName } from "./psychicPowerHelpers";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 function referencePowerPreview(ref: PsychicPowerRef): PsychicPower {
   return {
@@ -71,6 +72,7 @@ export function PowerPicker({
   selectionLocked?: boolean;
   selectionBusy?: boolean;
 }) {
+  recordComponentRender("PowerPicker");
   const [query, setQuery] = useState("");
   const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<string | null>(null);

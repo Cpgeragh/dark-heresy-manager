@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { ThreadMessage } from "../types/Firestore";
+import { recordComponentRender } from "../performance/performanceMetrics";
 
 export function MessageThread({
   messages,
@@ -20,6 +21,7 @@ export function MessageThread({
   hasOlderMessages: boolean;
   olderError: Error | null;
 }) {
+  recordComponentRender("MessageThread");
   const bottomRef = useRef<HTMLDivElement>(null);
   const newestMessageId = messages.at(-1)?.id;
 

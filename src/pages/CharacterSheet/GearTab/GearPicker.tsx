@@ -17,6 +17,7 @@ import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
 import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props {
   editable?: boolean;
@@ -37,6 +38,7 @@ export function GearPicker({
   onClose,
   suspended = false,
 }: Props) {
+  recordComponentRender("GearPicker");
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<GearRef | null>(null);
   const listScrollPositionRef = useRef(0);

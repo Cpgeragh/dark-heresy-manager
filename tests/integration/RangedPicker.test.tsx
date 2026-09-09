@@ -247,4 +247,20 @@ describe("RangedPicker", () => {
     expect(screen.queryByText("Select weapon craftsmanship:")).not.toBeInTheDocument();
     expect(onSelect).not.toHaveBeenCalled();
   });
+
+  it("mounts weapon details only when expanded and restores focus when collapsed", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+
+    expect(screen.queryByText("Reliable")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand Lasgun details" }));
+
+    expect(screen.getByText("Reliable")).toBeInTheDocument();
+    const collapse = screen.getByRole("button", { name: "Collapse Lasgun details" });
+    expect(collapse).toHaveFocus();
+    await user.click(collapse);
+
+    expect(screen.queryByText("Reliable")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Expand Lasgun details" })).toHaveFocus();
+  });
 });

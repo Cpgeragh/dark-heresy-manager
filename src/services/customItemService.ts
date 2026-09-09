@@ -71,6 +71,63 @@ export interface CustomItemOperationPreflight extends DestructiveOperationPrefli
   scannedCharacters: number;
 }
 
+export interface DraftCustomItemDocuments<TCategory extends CustomItemCategory> {
+  item: CampaignCustomItem<TCategory>;
+  version: CampaignCustomItemVersion<TCategory>;
+}
+
+export function buildDraftCustomItemDocuments<TCategory extends CustomItemCategory>({
+  campaignId,
+  customItemId,
+  versionId,
+  category,
+  creator,
+  data,
+  timestamp,
+}: CreateDraftCustomItemArgs<TCategory> & {
+  customItemId: string;
+  versionId: string;
+  timestamp: CampaignCustomItem<TCategory>["createdAt"];
+}): DraftCustomItemDocuments<TCategory> {
+  const name = data.name.trim();
+  const item = stripUndefined<CampaignCustomItem<TCategory>>({
+    id: customItemId,
+    campaignId,
+    category,
+    status: "draft",
+    name,
+    creator,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy: creator,
+    updatedBy: creator,
+    publishedVersionId: null,
+    draftVersionId: versionId,
+    latestVersionId: versionId,
+    latestVersionNumber: 1,
+    archivedAt: null,
+    archivedByUserId: null,
+    data,
+  });
+  const version = stripUndefined<CampaignCustomItemVersion<TCategory>>({
+    id: versionId,
+    campaignId,
+    customItemId,
+    category,
+    versionNumber: 1,
+    status: "draft",
+    data,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy: creator,
+    updatedBy: creator,
+    publishedAt: null,
+    publishedByUserId: null,
+  });
+
+  return { item, version };
+}
+
 export function customItemsCollectionRef(campaignId: string) {
   return collection(db, "campaigns", campaignId, "customItems");
 }
@@ -107,47 +164,19 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
   const itemRef = doc(customItemsCollectionRef(campaignId));
   const versionRef = doc(customItemVersionsCollectionRef(campaignId, itemRef.id));
   const timestamp = serverTimestamp();
-  const name = cleanData.name.trim();
-
-  const item: CampaignCustomItem<TCategory> = {
-    id: itemRef.id,
-    campaignId,
-    category,
-    status: "draft",
-    name,
-    creator,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    createdBy: creator,
-    updatedBy: creator,
-    publishedVersionId: null,
-    draftVersionId: versionRef.id,
-    latestVersionId: versionRef.id,
-    latestVersionNumber: 1,
-    archivedAt: null,
-    archivedByUserId: null,
-    data: cleanData,
-  };
-
-  const version: CampaignCustomItemVersion<TCategory> = {
-    id: versionRef.id,
+  const { item, version } = buildDraftCustomItemDocuments({
     campaignId,
     customItemId: itemRef.id,
+    versionId: versionRef.id,
     category,
-    versionNumber: 1,
-    status: "draft",
+    creator,
     data: cleanData,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    createdBy: creator,
-    updatedBy: creator,
-    publishedAt: null,
-    publishedByUserId: null,
-  };
+    timestamp,
+  });
 
   const batch = writeBatch(db);
-  batch.set(itemRef, stripUndefined(item));
-  batch.set(versionRef, stripUndefined(version));
+  batch.set(itemRef, item);
+  batch.set(versionRef, version);
   await batch.commit();
 
   return { customItemId: itemRef.id, versionId: versionRef.id };

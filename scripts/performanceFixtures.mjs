@@ -5,6 +5,7 @@ export const PERFORMANCE_PROFILE_NAMES = [
   "empty",
   "small",
   "large-character",
+  "large-picker",
   "large-dm",
   "long-thread",
 ];
@@ -445,6 +446,21 @@ export function buildPerformanceProfile(profileName, uid) {
     const character = largeCharacter(campaignId, uid);
     writes.push({ path: `campaigns/${campaignId}`, data: campaignData(uid, "Large Character") });
     addCharacter(writes, campaignId, characterId, character, character.header.characterName);
+    return {
+      writes,
+      route: `/campaign/${campaignId}/character/${characterId}`,
+      campaignId,
+      characterId,
+    };
+  }
+
+  if (profileName === "large-picker") {
+    const campaignId = "perf-large-picker";
+    const characterId = "large-picker-character-001";
+    const character = largeCharacter(campaignId, uid);
+    writes.push({ path: `campaigns/${campaignId}`, data: campaignData(uid, "Large Pickers") });
+    addCharacter(writes, campaignId, characterId, character, character.header.characterName);
+    addCustomItems(writes, campaignId, uid, 200, characterId, character.header.characterName);
     return {
       writes,
       route: `/campaign/${campaignId}/character/${characterId}`,

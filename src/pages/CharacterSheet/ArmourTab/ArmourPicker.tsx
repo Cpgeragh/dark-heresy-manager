@@ -20,6 +20,7 @@ import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/c
 import { StatChip } from "../../../ui/chips/StatChip";
 import { locationLabel } from "../../../utils/armourLocations";
 import { apBreakdown, armourCraftsmanshipDescription } from "./armourHelpers";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props {
   editable?: boolean;
@@ -40,6 +41,7 @@ export function ArmourPicker({
   onClose,
   suspended = false,
 }: Props) {
+  recordComponentRender("ArmourPicker");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ArmourRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>("Common");

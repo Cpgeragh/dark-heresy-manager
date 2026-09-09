@@ -8,6 +8,7 @@ import type {
 } from "firebase/firestore";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  getSanitizedFirestoreErrorCode,
   useDocumentSubscription,
   useQuerySubscription,
 } from "../../src/hooks/useFirestoreSubscription";
@@ -78,6 +79,20 @@ beforeEach(() => {
       return subscription.unsubscribe;
     }
   );
+});
+
+describe("getSanitizedFirestoreErrorCode", () => {
+  it("keeps valid Firebase codes and classifies known messages without exposing them", () => {
+    expect(getSanitizedFirestoreErrorCode({ code: "permission-denied" })).toBe("permission-denied");
+    expect(getSanitizedFirestoreErrorCode({ code: 9 })).toBe("grpc-9");
+    expect(
+      getSanitizedFirestoreErrorCode(new Error("The query requires an index with private URL"))
+    ).toBe("failed-precondition");
+    expect(getSanitizedFirestoreErrorCode(new TypeError("unrecognised private detail"))).toBe(
+      "exception-type"
+    );
+    expect(getSanitizedFirestoreErrorCode("unrecognised private detail")).toBe("unclassified");
+  });
 });
 
 describe("useDocumentSubscription", () => {
@@ -201,6 +216,7 @@ describe("useQuerySubscription", () => {
 
     rerender({ enabled: true });
     expect(mockOnSnapshot).toHaveBeenCalledOnce();
+    expect(mockOnSnapshot.mock.calls[0][0]).toBe(sourceQuery);
     expect(result.current).toEqual({ data: [], loading: true, error: null });
 
     const { unsubscribe } = subscriptions[0];

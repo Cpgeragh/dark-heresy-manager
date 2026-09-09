@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   onSnapshot,
   type DocumentData,
@@ -30,6 +30,26 @@ function normaliseError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
+export function getSanitizedFirestoreErrorCode(error: unknown): string {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && /^(?:firestore\/)?[a-z-]+$/.test(code)) return code;
+    if (typeof code === "number" && Number.isInteger(code)) return `grpc-${code}`;
+  }
+
+  const message = error instanceof Error ? error.message : "";
+  if (/requires an index/i.test(message)) return "failed-precondition";
+  if (/missing or insufficient permissions|permission.denied/i.test(message)) {
+    return "permission-denied";
+  }
+  if (/expected type.+query|invalid query/i.test(message)) return "invalid-argument";
+  if (/internal assertion failed/i.test(message)) return "internal";
+  if (error instanceof Error && /^[A-Za-z]+Error$/.test(error.name)) {
+    return `exception-${error.name.replace(/Error$/, "").toLowerCase()}`;
+  }
+  return "unclassified";
+}
+
 function useFirestoreSubscription<T>({
   subscriptionKey,
   createEmptyData,
@@ -39,8 +59,10 @@ function useFirestoreSubscription<T>({
   createEmptyData: () => T;
   subscribe: SnapshotSubscriber<T>;
 }): FirestoreSubscriptionState<T> {
-  const getEmptyData = useEffectEvent(createEmptyData);
-  const startSubscription = useEffectEvent(subscribe);
+  const getEmptyDataRef = useRef(createEmptyData);
+  const subscribeRef = useRef(subscribe);
+  getEmptyDataRef.current = createEmptyData;
+  subscribeRef.current = subscribe;
 
   const [state, setState] = useState<SubscriptionState<T, string>>(() => ({
     source: subscriptionKey,
@@ -67,7 +89,7 @@ function useFirestoreSubscription<T>({
 
     let unsubscribe: Unsubscribe;
     try {
-      unsubscribe = startSubscription(
+      unsubscribe = subscribeRef.current(
         (data, metadata) => {
           if (!active) return;
           performanceSubscription?.snapshot(
@@ -78,21 +100,22 @@ function useFirestoreSubscription<T>({
         },
         (error) => {
           if (!active) return;
-          performanceSubscription?.error();
+          performanceSubscription?.error(getSanitizedFirestoreErrorCode(error));
           setState({
             source: subscriptionKey,
-            data: getEmptyData(),
+            data: getEmptyDataRef.current(),
             loading: false,
             error: normaliseError(error),
           });
         }
       );
     } catch (error) {
+      performanceSubscription?.error(getSanitizedFirestoreErrorCode(error));
       queueMicrotask(() => {
         if (!active) return;
         setState({
           source: subscriptionKey,
-          data: getEmptyData(),
+          data: getEmptyDataRef.current(),
           loading: false,
           error: normaliseError(error),
         });

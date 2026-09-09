@@ -23,6 +23,7 @@ import {
 import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
+import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface AddSkillModalProps {
   isOpen: boolean;
@@ -87,6 +88,7 @@ export function AddSkillModal({
   unlockedCosts,
   isDM = false,
 }: AddSkillModalProps) {
+  recordComponentRender("AddSkillModal");
   const [search, setSearch] = useState("");
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [showOverflow, setShowOverflow] = useState(false);

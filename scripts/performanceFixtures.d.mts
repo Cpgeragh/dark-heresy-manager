@@ -3,6 +3,7 @@ export type PerformanceProfileName =
   | "empty"
   | "small"
   | "large-character"
+  | "large-picker"
   | "large-dm"
   | "long-thread";
 

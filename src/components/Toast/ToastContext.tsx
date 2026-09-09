@@ -13,7 +13,6 @@ export interface Toast {
 }
 
 export interface ToastContextValue {
-  toasts: Toast[];
   addToast: (message: string, type?: ToastType, duration?: number, copyText?: string) => void;
   removeToast: (id: string) => void;
   success: (message: string, duration?: number, copyText?: string) => void;
@@ -23,11 +22,20 @@ export interface ToastContextValue {
 }
 
 export const ToastContext = createContext<ToastContextValue | null>(null);
+export const ToastStateContext = createContext<Toast[] | null>(null);
 
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within ToastProvider");
+  }
+  return context;
+}
+
+export function useToasts() {
+  const context = useContext(ToastStateContext);
+  if (!context) {
+    throw new Error("useToasts must be used within ToastProvider");
   }
   return context;
 }

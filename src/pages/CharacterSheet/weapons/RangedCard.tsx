@@ -1,7 +1,7 @@
 // src/pages/CharacterSheet/weapons/RangedCard.tsx
 // RangedCard — see RangedPicker.tsx and CustomRangedForm.tsx for the weapon picker and custom-weapon form.
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type {
   RangedWeapon,
   WeaponAmmoEntry,
@@ -113,6 +113,8 @@ export function RangedCard({
   forceExpanded = false,
   integrated = false,
   pickerMode = false,
+  expanded: controlledExpanded,
+  onExpandedChange,
 }: {
   weapon: RangedWeapon;
   editable: boolean;
@@ -135,12 +137,23 @@ export function RangedCard({
   forceExpanded?: boolean;
   integrated?: boolean;
   pickerMode?: boolean;
+  expanded?: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
 } & CustomItemLibraryActionProps<"weapon">) {
   recordComponentRender("RangedCard");
-  const [expanded, setExpanded] = useState(isEquipped);
-  useEffect(() => {
-    setExpanded(isEquipped);
-  }, [isEquipped]);
+  const [internalExpanded, setInternalExpanded] = useState(isEquipped);
+  const [previousIsEquipped, setPreviousIsEquipped] = useState(isEquipped);
+  if (controlledExpanded === undefined && previousIsEquipped !== isEquipped) {
+    setPreviousIsEquipped(isEquipped);
+    setInternalExpanded(isEquipped);
+  }
+  const expanded = controlledExpanded ?? internalExpanded;
+
+  function toggleExpanded() {
+    const nextExpanded = !expanded;
+    if (controlledExpanded === undefined) setInternalExpanded(nextExpanded);
+    onExpandedChange?.(nextExpanded);
+  }
 
   const [showUpgradePicker, setShowUpgradePicker] = useState(false);
   const [showAmmoPicker, setShowAmmoPicker] = useState(false);
@@ -387,7 +400,7 @@ export function RangedCard({
         {!forceExpanded && (
           <button
             type="button"
-            onClick={onSelect ?? (() => setExpanded((e) => !e))}
+            onClick={onSelect ?? toggleExpanded}
             aria-expanded={onSelect ? undefined : expanded}
             aria-label={
               onSelect
@@ -455,7 +468,7 @@ export function RangedCard({
             (onSelect ? (
               <button
                 type="button"
-                onClick={() => setExpanded((e) => !e)}
+                onClick={toggleExpanded}
                 aria-expanded={expanded}
                 aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
                 className="relative z-10 pointer-events-auto p-1 -m-1"

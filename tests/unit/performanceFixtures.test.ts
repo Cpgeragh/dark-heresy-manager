@@ -41,6 +41,7 @@ describe("performance fixture profiles", () => {
       "empty",
       "small",
       "large-character",
+      "large-picker",
       "large-dm",
       "long-thread",
     ]);
@@ -104,6 +105,24 @@ describe("performance fixture profiles", () => {
     expect(
       longThread.writes.filter((write) => /\/messages\/[^/]+$/u.test(write.path))
     ).toHaveLength(300);
+  });
+
+  it("creates a near-limit picker profile without changing the historical character fixture", () => {
+    const profile = buildPerformanceProfile("large-picker", "performance-user");
+    const character = characterDocumentFromProfile(
+      profile,
+      "perf-large-picker",
+      "large-picker-character-001"
+    );
+
+    expect(character).toBeDefined();
+    expect((character!.gear as unknown[]).length).toBe(180);
+    expect(
+      profile.writes.filter((write) => /\/customItems\/[^/]+$/u.test(write.path))
+    ).toHaveLength(200);
+    expect(
+      profile.writes.filter((write) => /\/customItems\/[^/]+\/versions\/[^/]+$/u.test(write.path))
+    ).toHaveLength(200);
   });
 
   it("uses a real character creator shape for custom-library fixtures", () => {

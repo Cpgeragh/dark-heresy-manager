@@ -18,6 +18,7 @@ export interface ApplicationPerformanceEvent {
   phase?: string;
   fromCache?: boolean;
   hasPendingWrites?: boolean;
+  errorCode?: string;
 }
 
 interface PerformanceSnapshot {
@@ -223,8 +224,13 @@ export function beginPerformanceSubscription(name: string) {
           : {}),
       });
     },
-    error() {
-      record({ kind: "listener-error", name, at: performance.now() });
+    error(errorCode?: string) {
+      record({
+        kind: "listener-error",
+        name,
+        at: performance.now(),
+        ...(errorCode ? { errorCode } : {}),
+      });
     },
     stop() {
       target.activeListeners = Math.max(0, target.activeListeners - 1);
