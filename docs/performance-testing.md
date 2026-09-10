@@ -100,3 +100,35 @@ Both controls add a matching `firestore-network:*` mark after the transition com
 affect direct Firestore operations only. Callable Functions are not queued by Firestore's offline
 cache; a callable mutation that reports a failure still requires an explicit retry. These controls
 exist only in the guarded local performance build.
+
+## Repeated-use lifecycle measurements
+
+Use repeated cycles when investigating performance that may degrade during a long application
+session. Warm the route or interface once before recording cycles when it loads a lazy module,
+reference data, images, or a substantial Firestore result for the first time.
+
+For every measured cycle:
+
+1. Record the settled baseline before the action.
+2. Open the drawer, modal, picker, or route and record its active state where possible.
+3. Close it or navigate away, wait for the deterministic settled signal, and record the new
+   baseline.
+4. Compare total DOM nodes, active Firestore listeners, and heap size when exposed.
+5. Repeat enough later cycles to determine whether post-cleanup values stabilise, fall, or continue
+   to grow.
+
+Event-handler and timer counts are not exposed by the performance recorder. Check their ownership
+through source pairing and focused lifecycle tests unless a guarded measurement-only instrument is
+separately justified. Do not monkey-patch browser globals during an ordinary performance run; the
+instrumentation can change the lifecycle being measured.
+
+Do not diagnose a leak from a single high heap value or from memory that remains allocated after
+the first use. Lazy modules, decoded assets, reference data, Firestore caches, and browser-managed
+rendering structures can remain allocated for reuse. Require repeatable upward growth after warm-up
+and corroborate it with a structural signal or an identified retained owner before proposing a
+cleanup correction.
+
+Exclude emulator startup, fixture seeding, browser-control delays, file-chooser interaction,
+service-worker build or installation time, and test-runner contention from product lifecycle
+conclusions. Record discarded or incomplete cycles rather than combining them with successful
+measurements.
