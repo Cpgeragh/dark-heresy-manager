@@ -1,6 +1,6 @@
 // tests/integration/BackgroundTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within, fireEvent } from "@testing-library/react";
+import { act, render, screen, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -27,6 +27,29 @@ function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = 
 }
 
 describe("BackgroundTab", () => {
+  it("coalesces Character Name typing and flushes the final value on blur without a duplicate", () => {
+    vi.useFakeTimers();
+    try {
+      const { onUpdateHeader } = renderTab();
+      const name = screen.getAllByLabelText("Character Name")[0];
+
+      fireEvent.change(name, { target: { value: "B" } });
+      fireEvent.change(name, { target: { value: "Brother" } });
+      fireEvent.change(name, { target: { value: "Brother Corvin" } });
+      expect(onUpdateHeader).not.toHaveBeenCalled();
+
+      fireEvent.blur(name);
+      expect(onUpdateHeader).toHaveBeenCalledOnce();
+      expect(onUpdateHeader).toHaveBeenCalledWith(
+        expect.objectContaining({ characterName: "Brother Corvin" })
+      );
+      act(() => vi.advanceTimersByTime(600));
+      expect(onUpdateHeader).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("selects a career with no starting choices and assigns its starting rank immediately", async () => {
     const user = userEvent.setup();
     const { onUpdateHeader } = renderTab({

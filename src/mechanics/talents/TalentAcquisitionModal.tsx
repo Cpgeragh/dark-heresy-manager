@@ -59,7 +59,7 @@ interface Props {
   willpowerBonus: number;
   knownDisciplines: readonly string[];
   weaponTraining: WeaponTrainingBlock;
-  onComplete: (result: TalentAcquisitionResult) => void;
+  onComplete: (result: TalentAcquisitionResult) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -169,6 +169,7 @@ export function TalentAcquisitionModal({
     HomeworldTraitChoices | undefined
   >();
   const [showHomeworldTraitAcquisition, setShowHomeworldTraitAcquisition] = useState(false);
+  const [saving, setSaving] = useState(false);
   const acquisitionScrollPositionRef = useRef(0);
 
   const homeworldOptions = HOMEWORLD_LIST.filter(
@@ -281,9 +282,10 @@ export function TalentAcquisitionModal({
     return true;
   })();
 
-  const complete = () => {
+  const complete = async () => {
     if (!canComplete) return;
-    onComplete(
+    setSaving(true);
+    await onComplete(
       buildTalentAcquisitionResult({
         entry,
         talents,
@@ -308,15 +310,16 @@ export function TalentAcquisitionModal({
         createId: () => crypto.randomUUID(),
       })
     );
+    setSaving(false);
   };
 
-  const handleApply = () => {
+  const handleApply = async () => {
     if (!canComplete) return;
     if (entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals) {
       setPurityStage("reformed-skin");
       return;
     }
-    complete();
+    await complete();
   };
 
   let pickerConfig: AcquisitionPickerConfig | null = null;
@@ -567,10 +570,12 @@ export function TalentAcquisitionModal({
       footer={
         <div className="space-y-2">
           <RequiredFieldsNote />
-          <Button fullWidth onClick={handleApply} disabled={!canComplete}>
-            {entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals
-              ? "Continue to Reformed Skin"
-              : "Apply and add Talent"}
+          <Button fullWidth onClick={handleApply} disabled={!canComplete || saving}>
+            {saving
+              ? "Saving…"
+              : entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals
+                ? "Continue to Reformed Skin"
+                : "Apply and add Talent"}
           </Button>
         </div>
       }

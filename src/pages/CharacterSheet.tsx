@@ -103,6 +103,9 @@ const MemoizedArmourTab = memo(ArmourTab);
 
 const EMPTY_CYBERNETICS: CyberneticItem[] = [];
 const EMPTY_ARCHAEOTECH: ArcheotechItem[] = [];
+const EMPTY_RANGED_WEAPONS: RangedWeapon[] = [];
+const EMPTY_MELEE_WEAPONS: MeleeWeapon[] = [];
+const EMPTY_ARMOUR: WornArmourPiece[] = [];
 const EMPTY_GRENADES: GrenadeItem[] = [];
 const EMPTY_SHIELDS: ShieldItem[] = [];
 const EMPTY_CONSUMABLES: ConsumableItem[] = [];
@@ -156,7 +159,9 @@ export default function CharacterSheet({
     updateCharacteristic,
     updateField,
     patchField,
-    patchFields,
+    patchFieldWithResult,
+    patchFieldsWithResult,
+    patchCollectionField,
     releaseCharacter,
     dmForceRelease,
     dmForceAssign,
@@ -382,18 +387,21 @@ export default function CharacterSheet({
   );
 
   const handleUpdateRangedWeapons = useCallback(
-    (next: RangedWeapon[]) => patchField("rangedWeapons", next),
-    [patchField]
+    (next: RangedWeapon[]) =>
+      patchCollectionField("rangedWeapons", character?.rangedWeapons ?? EMPTY_RANGED_WEAPONS, next),
+    [character?.rangedWeapons, patchCollectionField]
   );
 
   const handleUpdateMeleeWeapons = useCallback(
-    (next: MeleeWeapon[]) => patchField("meleeWeapons", next),
-    [patchField]
+    (next: MeleeWeapon[]) =>
+      patchCollectionField("meleeWeapons", character?.meleeWeapons ?? EMPTY_MELEE_WEAPONS, next),
+    [character?.meleeWeapons, patchCollectionField]
   );
 
   const handleUpdateArmour = useCallback(
-    (next: WornArmourPiece[]) => patchField("armour", next),
-    [patchField]
+    (next: WornArmourPiece[]) =>
+      patchCollectionField("armour", character?.armour ?? EMPTY_ARMOUR, next),
+    [character?.armour, patchCollectionField]
   );
 
   const handleUpdatePsychic = useCallback(
@@ -412,18 +420,20 @@ export default function CharacterSheet({
   );
 
   const handleUpdateConsumables = useCallback(
-    (next: ConsumableItem[]) => patchField("consumables", next),
-    [patchField]
+    (next: ConsumableItem[]) =>
+      patchCollectionField("consumables", character?.consumables ?? EMPTY_CONSUMABLES, next),
+    [character?.consumables, patchCollectionField]
   );
 
   const handleUpdateDrugs = useCallback(
-    (next: DrugItem[]) => patchField("drugs", next),
-    [patchField]
+    (next: DrugItem[]) => patchCollectionField("drugs", character?.drugs ?? EMPTY_DRUGS, next),
+    [character?.drugs, patchCollectionField]
   );
 
   const handleUpdateGrenades = useCallback(
-    (next: GrenadeItem[]) => patchField("grenades", next),
-    [patchField]
+    (next: GrenadeItem[]) =>
+      patchCollectionField("grenades", character?.grenades ?? EMPTY_GRENADES, next),
+    [character?.grenades, patchCollectionField]
   );
 
   const handleUpdateShields = useCallback(
@@ -442,8 +452,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateExperience = useCallback(
-    (next: ExperienceBlock) => patchField("experience", next),
-    [patchField]
+    (next: ExperienceBlock) => patchFieldWithResult("experience", next),
+    [patchFieldWithResult]
   );
 
   const handleUpdateArcheotech = useCallback(
@@ -690,7 +700,7 @@ export default function CharacterSheet({
                 isDM={isDM}
                 editable={allowedToEdit}
                 onUpdateTalents={handleUpdateTalents}
-                onUpdateCharacter={patchFields}
+                onUpdateCharacter={patchFieldsWithResult}
               />
             )}
 
@@ -846,7 +856,7 @@ export default function CharacterSheet({
                 isDM={isDM}
                 editable={allowedToEdit}
                 onUpdate={handleUpdateExperience}
-                onUpdateHeader={handleUpdateHeader}
+                onUpdateCharacter={patchFieldsWithResult}
               />
             )}
 

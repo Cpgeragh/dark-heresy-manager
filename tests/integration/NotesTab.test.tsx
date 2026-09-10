@@ -77,6 +77,45 @@ describe("NotesTab legacy plain-text notes", () => {
     vi.useRealTimers();
   });
 
+  it("flushes the final pending legacy note on unmount", () => {
+    vi.useFakeTimers();
+    try {
+      const onSave = vi.fn();
+      const view = render(<NotesTab notes="Old" editable onSave={onSave} />);
+      const textarea = screen.getByPlaceholderText(
+        "Campaign notes, reminders, character details, or anything else…"
+      );
+
+      fireEvent.change(textarea, { target: { value: "Saved while leaving" } });
+      view.unmount();
+
+      expect(onSave).toHaveBeenCalledOnce();
+      expect(onSave).toHaveBeenCalledWith("Saved while leaving");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not save twice when blur is followed by unmount", () => {
+    vi.useFakeTimers();
+    try {
+      const onSave = vi.fn();
+      const view = render(<NotesTab notes="Old" editable onSave={onSave} />);
+      const textarea = screen.getByPlaceholderText(
+        "Campaign notes, reminders, character details, or anything else…"
+      );
+
+      fireEvent.change(textarea, { target: { value: "One final draft" } });
+      fireEvent.blur(textarea);
+      view.unmount();
+
+      expect(onSave).toHaveBeenCalledOnce();
+      expect(onSave).toHaveBeenCalledWith("One final draft");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("shows an empty state with no legacy text and no entries", () => {
     render(<NotesWiring initial="" />);
     expect(screen.getByText("No notes yet.")).toBeInTheDocument();

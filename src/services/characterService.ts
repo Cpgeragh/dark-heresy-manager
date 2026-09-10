@@ -31,6 +31,7 @@ import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../firestore/singleFlight";
 import { driveJobToCompletion } from "../firestore/bulkJobClient";
 import { createLocalId } from "../utils/createLocalId";
+import { measurePerformanceMutation } from "../performance/performanceMetrics";
 import {
   assertCharacterImportData,
   assertCharacterPayload,
@@ -149,13 +150,15 @@ export async function updateCharacter(
   assertFirestoreDocumentId(characterId, "Character ID");
   const cleanPartial = stripUndefined(partial);
   assertCharacterPayload(cleanPartial);
-  await runSingleFlight("character:update", [campaignId, characterId, cleanPartial], () => {
-    if (touchesCharacterSummary(cleanPartial)) {
-      return writeCharacterFieldsWithSummary(campaignId, characterId, cleanPartial);
-    }
-    const ref = characterDocRef(campaignId, characterId);
-    return updateDoc(ref, cleanPartial as UpdateData<Character>);
-  });
+  await measurePerformanceMutation("character:update", () =>
+    runSingleFlight("character:update", [campaignId, characterId, cleanPartial], () => {
+      if (touchesCharacterSummary(cleanPartial)) {
+        return writeCharacterFieldsWithSummary(campaignId, characterId, cleanPartial);
+      }
+      const ref = characterDocRef(campaignId, characterId);
+      return updateDoc(ref, cleanPartial as UpdateData<Character>);
+    })
+  );
 }
 
 const callReconcileCharacterSpentXp = httpsCallable<
@@ -374,19 +377,270 @@ export async function patchCharacterField(
 ): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
-  await callPatchCharacterField({
-    campaignId,
-    characterId,
-    field,
-    value: stripUndefined(value),
-    operationId: createLocalId("patch-character-field"),
-  });
+  await measurePerformanceMutation(`character:${field}`, () =>
+    callPatchCharacterField({
+      campaignId,
+      characterId,
+      field,
+      value: stripUndefined(value),
+      operationId: createLocalId("patch-character-field"),
+    }).then(() => undefined)
+  );
 }
 
 const callPatchCharacterFields = httpsCallable<
   { campaignId: string; characterId: string; fields: Record<string, unknown>; operationId: string },
   void
 >(functions, "patchCharacterField");
+
+interface CharacterNumberLocator {
+  field: "consumables" | "drugs" | "grenades" | "rangedWeapons" | "meleeWeapons" | "armour";
+  itemId: string;
+  property: "quantity" | "spareCells" | "clips" | "rounds";
+  nestedCollection?: "ammoEntries" | "magazineSlots";
+  nestedItemId?: string;
+}
+
+interface CharacterNumberMutation extends CharacterNumberLocator {
+  delta: number;
+  fallbackValue: number;
+}
+
+const callAdjustCharacterNumber = httpsCallable<
+  CharacterNumberMutation & { campaignId: string; characterId: string; operationId: string },
+  void
+>(functions, "adjustCharacterNumber");
+
+export const CHARACTER_NUMBER_COALESCE_MS = 300;
+
+type Difference = { path: (string | number)[]; before: unknown; after: unknown };
+
+function collectDifferences(
+  before: unknown,
+  after: unknown,
+  path: (string | number)[],
+  differences: Difference[]
+): void {
+  if (Object.is(before, after)) return;
+  if (Array.isArray(before) && Array.isArray(after)) {
+    if (before.length !== after.length) {
+      differences.push({ path, before, after });
+      return;
+    }
+    before.forEach((entry, index) =>
+      collectDifferences(entry, after[index], [...path, index], differences)
+    );
+    return;
+  }
+  if (
+    typeof before === "object" &&
+    before !== null &&
+    !Array.isArray(before) &&
+    typeof after === "object" &&
+    after !== null &&
+    !Array.isArray(after)
+  ) {
+    const beforeRecord = before as Record<string, unknown>;
+    const afterRecord = after as Record<string, unknown>;
+    const keys = new Set([...Object.keys(beforeRecord), ...Object.keys(afterRecord)]);
+    for (const key of keys) {
+      collectDifferences(beforeRecord[key], afterRecord[key], [...path, key], differences);
+    }
+    return;
+  }
+  differences.push({ path, before, after });
+}
+
+function recordAt(value: unknown, index: number): Record<string, unknown> | null {
+  if (!Array.isArray(value)) return null;
+  const entry = value[index];
+  return typeof entry === "object" && entry !== null && !Array.isArray(entry)
+    ? (entry as Record<string, unknown>)
+    : null;
+}
+
+function defaultStoredNumber(field: CharacterNumberLocator["field"], property: string): number {
+  if (field === "meleeWeapons" && property === "quantity") return 1;
+  return 0;
+}
+
+export function findCharacterNumberMutation(
+  field: CharacterNumberLocator["field"],
+  before: unknown,
+  after: unknown
+): CharacterNumberMutation | null {
+  const differences: Difference[] = [];
+  collectDifferences(before, after, [], differences);
+  if (differences.length !== 1) return null;
+  const difference = differences[0];
+  const [itemIndex, segment, nestedIndex, nestedProperty] = difference.path;
+  if (typeof itemIndex !== "number" || typeof segment !== "string") return null;
+  const beforeItem = recordAt(before, itemIndex);
+  const afterItem = recordAt(after, itemIndex);
+  if (
+    !beforeItem ||
+    !afterItem ||
+    beforeItem.id !== afterItem.id ||
+    typeof afterItem.id !== "string"
+  ) {
+    return null;
+  }
+
+  let locator: CharacterNumberLocator;
+  if (difference.path.length === 2) {
+    const allowed =
+      segment === "quantity" &&
+      ["consumables", "drugs", "grenades", "rangedWeapons", "meleeWeapons"].includes(field);
+    if (!allowed && !(field === "armour" && segment === "spareCells")) return null;
+    locator = {
+      field,
+      itemId: afterItem.id,
+      property: segment as CharacterNumberLocator["property"],
+    };
+  } else {
+    if (
+      difference.path.length !== 4 ||
+      typeof nestedIndex !== "number" ||
+      typeof nestedProperty !== "string" ||
+      !["rangedWeapons", "meleeWeapons"].includes(field) ||
+      !["ammoEntries", "magazineSlots"].includes(segment) ||
+      !["clips", "rounds"].includes(nestedProperty) ||
+      (segment === "magazineSlots" && (field !== "rangedWeapons" || nestedProperty !== "rounds"))
+    ) {
+      return null;
+    }
+    const afterNested = recordAt(afterItem[segment], nestedIndex);
+    const beforeNested = recordAt(beforeItem[segment], nestedIndex);
+    if (
+      !afterNested ||
+      !beforeNested ||
+      typeof afterNested.id !== "string" ||
+      beforeNested.id !== afterNested.id
+    ) {
+      return null;
+    }
+    locator = {
+      field,
+      itemId: afterItem.id,
+      property: nestedProperty as CharacterNumberLocator["property"],
+      nestedCollection: segment as CharacterNumberLocator["nestedCollection"],
+      nestedItemId: afterNested.id,
+    };
+  }
+
+  const beforeNumber = Number.isSafeInteger(difference.before)
+    ? (difference.before as number)
+    : defaultStoredNumber(field, locator.property);
+  if (
+    !Number.isSafeInteger(difference.after) ||
+    (difference.after as number) < 0 ||
+    beforeNumber < 0
+  ) {
+    return null;
+  }
+  const delta = (difference.after as number) - beforeNumber;
+  return delta === 0 ? null : { ...locator, delta, fallbackValue: beforeNumber };
+}
+
+interface PendingCharacterNumberMutation {
+  campaignId: string;
+  characterId: string;
+  mutation: CharacterNumberMutation;
+  timer: ReturnType<typeof setTimeout>;
+  resolve: (() => void)[];
+  reject: ((error: unknown) => void)[];
+}
+
+const pendingCharacterNumberMutations = new Map<string, PendingCharacterNumberMutation>();
+
+function numberMutationKey(
+  campaignId: string,
+  characterId: string,
+  mutation: CharacterNumberLocator
+): string {
+  return JSON.stringify([
+    campaignId,
+    characterId,
+    mutation.field,
+    mutation.itemId,
+    mutation.nestedCollection ?? "",
+    mutation.nestedItemId ?? "",
+    mutation.property,
+  ]);
+}
+
+function queueCharacterNumberMutation(
+  campaignId: string,
+  characterId: string,
+  mutation: CharacterNumberMutation
+): Promise<void> {
+  const key = numberMutationKey(campaignId, characterId, mutation);
+  const existing = pendingCharacterNumberMutations.get(key);
+  if (existing) {
+    clearTimeout(existing.timer);
+    existing.mutation.delta += mutation.delta;
+    existing.timer = setTimeout(
+      () => void flushCharacterNumberMutation(key),
+      CHARACTER_NUMBER_COALESCE_MS
+    );
+    return new Promise<void>((resolve, reject) => {
+      existing.resolve.push(resolve);
+      existing.reject.push(reject);
+    });
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    const pending: PendingCharacterNumberMutation = {
+      campaignId,
+      characterId,
+      mutation: { ...mutation },
+      timer: setTimeout(() => void flushCharacterNumberMutation(key), CHARACTER_NUMBER_COALESCE_MS),
+      resolve: [resolve],
+      reject: [reject],
+    };
+    pendingCharacterNumberMutations.set(key, pending);
+  });
+}
+
+async function flushCharacterNumberMutation(key: string): Promise<void> {
+  const pending = pendingCharacterNumberMutations.get(key);
+  if (!pending) return;
+  pendingCharacterNumberMutations.delete(key);
+  if (pending.mutation.delta === 0) {
+    pending.resolve.forEach((resolve) => resolve());
+    return;
+  }
+  try {
+    await measurePerformanceMutation(`character:${pending.mutation.field}:number`, () =>
+      callAdjustCharacterNumber({
+        campaignId: pending.campaignId,
+        characterId: pending.characterId,
+        ...pending.mutation,
+        operationId: createLocalId("adjust-character-number"),
+      }).then(() => undefined)
+    );
+    pending.resolve.forEach((resolve) => resolve());
+  } catch (error) {
+    pending.reject.forEach((reject) => reject(error));
+  }
+}
+
+export async function patchCharacterCollectionField(
+  campaignId: string,
+  characterId: string,
+  field: CharacterNumberLocator["field"],
+  before: unknown[],
+  after: unknown[]
+): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  const mutation = findCharacterNumberMutation(field, before, after);
+  if (mutation) {
+    await queueCharacterNumberMutation(campaignId, characterId, mutation);
+    return;
+  }
+  await patchCharacterField(campaignId, characterId, field, after);
+}
 
 /** Patches several character fields atomically via the protected server-side operation. */
 export async function patchCharacterFields(
@@ -396,12 +650,14 @@ export async function patchCharacterFields(
 ): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
-  await callPatchCharacterFields({
-    campaignId,
-    characterId,
-    fields: stripUndefined(fields),
-    operationId: createLocalId("patch-character-field"),
-  });
+  await measurePerformanceMutation("character:fields", () =>
+    callPatchCharacterFields({
+      campaignId,
+      characterId,
+      fields: stripUndefined(fields),
+      operationId: createLocalId("patch-character-field"),
+    }).then(() => undefined)
+  );
 }
 
 const REGISTER_CODE_RETRY_ATTEMPTS = 3;

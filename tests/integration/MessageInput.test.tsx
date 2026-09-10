@@ -1,6 +1,6 @@
 // tests/integration/MessageInput.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { MessageInput } from "../../src/components/MessageInput";
@@ -52,5 +52,19 @@ describe("MessageInput", () => {
   it("uses a custom placeholder", () => {
     render(<MessageInput onSend={vi.fn()} placeholder="Reply to Vex…" />);
     expect(screen.getByPlaceholderText("Reply to Vex…")).toBeInTheDocument();
+  });
+
+  it("retains the draft and re-enables sending when delivery fails", async () => {
+    const user = userEvent.setup();
+    const onSend = vi.fn().mockRejectedValue(new Error("offline"));
+    render(<MessageInput onSend={onSend} />);
+
+    const input = screen.getByPlaceholderText("Message…");
+    await user.type(input, "Try again later");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Send" })).toBeEnabled());
+    expect(input).toHaveValue("Try again later");
+    expect(onSend).toHaveBeenCalledOnce();
   });
 });

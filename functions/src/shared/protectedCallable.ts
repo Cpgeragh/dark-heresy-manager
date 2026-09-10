@@ -50,8 +50,10 @@ async function recordOutcome(
   outcome: "success" | "failure"
 ): Promise<void> {
   try {
-    await recordAuditEntry({ operation, actorUid, outcome });
-    await recordUsageMetric(operation);
+    await Promise.all([
+      recordAuditEntry({ operation, actorUid, outcome }),
+      recordUsageMetric(operation),
+    ]);
   } catch {
     logger.warn(`Failed to record audit/metric for ${operation}`);
   }

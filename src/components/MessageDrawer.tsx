@@ -33,6 +33,7 @@ function PlayerThread({
       } catch (err) {
         console.error("Failed to send message:", err);
         toast.error("Failed to send message. Please try again.");
+        throw err;
       }
     },
     [campaignId, characterId, playerUid, toast]

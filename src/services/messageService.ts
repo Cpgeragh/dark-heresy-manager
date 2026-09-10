@@ -18,6 +18,7 @@ import {
   assertString,
 } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
+import { measurePerformanceMutation } from "../performance/performanceMetrics";
 
 /**
  * Sends a message in a character-DM thread and updates the thread summary.
@@ -43,44 +44,46 @@ export async function sendMessage(
     throw new Error(`Message cannot exceed ${PRODUCT_LIMITS.messageCharacters} characters.`);
   }
 
-  await runSingleFlight(
-    "message:send",
-    [campaignId, characterId, fromUid, trimmedText, isFromPlayer],
-    async () => {
-      const batch = writeBatch(db);
+  await measurePerformanceMutation("message:send", () =>
+    runSingleFlight(
+      "message:send",
+      [campaignId, characterId, fromUid, trimmedText, isFromPlayer],
+      async () => {
+        const batch = writeBatch(db);
 
-      const messagesRef = collection(
-        db,
-        "campaigns",
-        campaignId,
-        "threads",
-        characterId,
-        "messages"
-      );
-      const messageRef = doc(messagesRef);
-
-      batch.set(messageRef, {
-        fromUid,
-        text: trimmedText,
-        timestamp: serverTimestamp(),
-        read: false,
-      });
-
-      const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
-
-      batch.set(
-        threadRef,
-        {
+        const messagesRef = collection(
+          db,
+          "campaigns",
+          campaignId,
+          "threads",
           characterId,
-          lastMessage: trimmedText.slice(0, PRODUCT_LIMITS.threadSummaryPreviewCharacters),
-          lastTimestamp: serverTimestamp(),
-          ...(isFromPlayer ? { unreadForDM: increment(1) } : {}),
-        },
-        { merge: true }
-      );
+          "messages"
+        );
+        const messageRef = doc(messagesRef);
 
-      await batch.commit();
-    }
+        batch.set(messageRef, {
+          fromUid,
+          text: trimmedText,
+          timestamp: serverTimestamp(),
+          read: false,
+        });
+
+        const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
+
+        batch.set(
+          threadRef,
+          {
+            characterId,
+            lastMessage: trimmedText.slice(0, PRODUCT_LIMITS.threadSummaryPreviewCharacters),
+            lastTimestamp: serverTimestamp(),
+            ...(isFromPlayer ? { unreadForDM: increment(1) } : {}),
+          },
+          { merge: true }
+        );
+
+        await batch.commit();
+      }
+    )
   );
 }
 
@@ -99,7 +102,9 @@ export async function markThreadRead(
   }
   if (unreadForDM === 0) return;
   const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
-  await updateDoc(threadRef, { unreadForDM: 0 });
+  await measurePerformanceMutation("message:mark-read", () =>
+    updateDoc(threadRef, { unreadForDM: 0 })
+  );
 }
 
 /**
@@ -111,11 +116,13 @@ export async function clearThread(campaignId: string, characterId: string): Prom
   assertFirestoreDocumentId(characterId, "Character ID");
   const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
   const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
-  await deleteQueryDocsInPages(db, messagesRef);
-  await setDoc(threadRef, {
-    characterId,
-    lastMessage: null,
-    lastTimestamp: null,
-    unreadForDM: 0,
+  await measurePerformanceMutation("message:clear", async () => {
+    await deleteQueryDocsInPages(db, messagesRef);
+    await setDoc(threadRef, {
+      characterId,
+      lastMessage: null,
+      lastTimestamp: null,
+      unreadForDM: 0,
+    });
   });
 }

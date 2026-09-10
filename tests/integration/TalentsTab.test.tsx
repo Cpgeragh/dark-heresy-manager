@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
@@ -491,6 +491,22 @@ describe("TalentsTab", () => {
         }),
       })
     );
+  });
+
+  it("keeps an acquisition dialog open when its character save fails", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(false);
+    renderTab({ willpowerBonus: 5, onUpdateCharacter });
+    await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
+    await user.click(screen.getByText("Touched by the Fates"));
+    await user.click(screen.getByRole("checkbox"));
+    await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Apply and add Talent" })).toBeEnabled()
+    );
+    expect(screen.getByRole("button", { name: "Apply and add Talent" })).toBeInTheDocument();
+    expect(onUpdateCharacter).toHaveBeenCalledOnce();
   });
 
   it("requires and records the Cult Briefing Blood training choice", async () => {

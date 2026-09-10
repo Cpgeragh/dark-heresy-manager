@@ -23,6 +23,8 @@ export function MessageInput({
     try {
       await onSend(trimmed);
       setText("");
+    } catch {
+      // The parent reports the error. Keep the draft so the user can retry.
     } finally {
       setSending(false);
     }

@@ -35,6 +35,7 @@ import {
 } from "../firestore/destructiveOperationPreflight";
 import { deleteRefsAtomically } from "../firestore/firestoreBatchDelete";
 import { driveJobToCompletion } from "../firestore/bulkJobClient";
+import { measurePerformanceMutation } from "../performance/performanceMetrics";
 
 export interface CreateDraftCustomItemArgs<TCategory extends CustomItemCategory> {
   campaignId: string;
@@ -177,7 +178,7 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
   const batch = writeBatch(db);
   batch.set(itemRef, item);
   batch.set(versionRef, version);
-  await batch.commit();
+  await measurePerformanceMutation("custom-item:create-draft", () => batch.commit());
 
   return { customItemId: itemRef.id, versionId: versionRef.id };
 }
@@ -196,59 +197,63 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
   assertCustomItemData(category, cleanData);
   const itemRef = customItemDocRef(campaignId, customItemId);
 
-  return runTransaction(db, async (transaction) => {
-    const itemSnap = await transaction.get(itemRef);
-    if (!itemSnap.exists()) throw new Error("Custom item not found.");
+  return measurePerformanceMutation("custom-item:save-draft", () =>
+    runTransaction(db, async (transaction) => {
+      const itemSnap = await transaction.get(itemRef);
+      if (!itemSnap.exists()) throw new Error("Custom item not found.");
 
-    const item = itemSnap.data() as CampaignCustomItem<TCategory>;
-    if (item.category !== category) throw new Error("Custom-item category does not match.");
-    if (item.status === "archived") throw new Error("Archived custom items cannot be edited.");
+      const item = itemSnap.data() as CampaignCustomItem<TCategory>;
+      if (item.category !== category) throw new Error("Custom-item category does not match.");
+      if (item.status === "archived") throw new Error("Archived custom items cannot be edited.");
 
-    const timestamp = serverTimestamp();
-    const isExistingDraft = !!item.draftVersionId;
-    const draftVersionId =
-      item.draftVersionId ?? doc(customItemVersionsCollectionRef(campaignId, customItemId)).id;
-    const draftVersionRef = customItemVersionDocRef(campaignId, customItemId, draftVersionId);
-    const versionNumber = isExistingDraft ? item.latestVersionNumber : item.latestVersionNumber + 1;
-    const name = cleanData.name.trim();
+      const timestamp = serverTimestamp();
+      const isExistingDraft = !!item.draftVersionId;
+      const draftVersionId =
+        item.draftVersionId ?? doc(customItemVersionsCollectionRef(campaignId, customItemId)).id;
+      const draftVersionRef = customItemVersionDocRef(campaignId, customItemId, draftVersionId);
+      const versionNumber = isExistingDraft
+        ? item.latestVersionNumber
+        : item.latestVersionNumber + 1;
+      const name = cleanData.name.trim();
 
-    if (isExistingDraft) {
-      transaction.update(draftVersionRef, {
-        data: cleanData as CampaignCustomItemVersion<TCategory>["data"],
+      if (isExistingDraft) {
+        transaction.update(draftVersionRef, {
+          data: cleanData as CampaignCustomItemVersion<TCategory>["data"],
+          updatedAt: timestamp,
+          updatedBy: editor,
+        });
+      } else {
+        const version: CampaignCustomItemVersion<TCategory> = {
+          id: draftVersionId,
+          campaignId,
+          customItemId,
+          category: item.category,
+          versionNumber,
+          status: "draft",
+          data: cleanData,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          createdBy: editor,
+          updatedBy: editor,
+          publishedAt: null,
+          publishedByUserId: null,
+        };
+        transaction.set(draftVersionRef, stripUndefined(version));
+      }
+      transaction.update(itemRef, {
+        name,
+        data: cleanData,
+        draftVersionId,
+        latestVersionId: draftVersionId,
+        latestVersionNumber: versionNumber,
+        status: "draft",
         updatedAt: timestamp,
         updatedBy: editor,
       });
-    } else {
-      const version: CampaignCustomItemVersion<TCategory> = {
-        id: draftVersionId,
-        campaignId,
-        customItemId,
-        category: item.category,
-        versionNumber,
-        status: "draft",
-        data: cleanData,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        createdBy: editor,
-        updatedBy: editor,
-        publishedAt: null,
-        publishedByUserId: null,
-      };
-      transaction.set(draftVersionRef, stripUndefined(version));
-    }
-    transaction.update(itemRef, {
-      name,
-      data: cleanData,
-      draftVersionId,
-      latestVersionId: draftVersionId,
-      latestVersionNumber: versionNumber,
-      status: "draft",
-      updatedAt: timestamp,
-      updatedBy: editor,
-    });
 
-    return draftVersionId;
-  });
+      return draftVersionId;
+    })
+  );
 }
 
 export async function publishCustomItem({
@@ -261,49 +266,51 @@ export async function publishCustomItem({
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
   if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
-  return runSingleFlight("custom-item:publish", [campaignId, customItemId], async () => {
-    const itemRef = customItemDocRef(campaignId, customItemId);
+  return measurePerformanceMutation("custom-item:publish", () =>
+    runSingleFlight("custom-item:publish", [campaignId, customItemId], async () => {
+      const itemRef = customItemDocRef(campaignId, customItemId);
 
-    return runTransaction(db, async (transaction) => {
-      const itemSnap = await transaction.get(itemRef);
-      if (!itemSnap.exists()) throw new Error("Custom item not found.");
+      return runTransaction(db, async (transaction) => {
+        const itemSnap = await transaction.get(itemRef);
+        if (!itemSnap.exists()) throw new Error("Custom item not found.");
 
-      const item = itemSnap.data() as CampaignCustomItem;
-      const targetVersionId = versionId ?? item.draftVersionId ?? item.latestVersionId;
-      if (!targetVersionId) throw new Error("Custom item has no version to publish.");
+        const item = itemSnap.data() as CampaignCustomItem;
+        const targetVersionId = versionId ?? item.draftVersionId ?? item.latestVersionId;
+        if (!targetVersionId) throw new Error("Custom item has no version to publish.");
 
-      const versionRef = customItemVersionDocRef(campaignId, customItemId, targetVersionId);
-      const versionSnap = await transaction.get(versionRef);
-      if (!versionSnap.exists()) throw new Error("Custom item version not found.");
+        const versionRef = customItemVersionDocRef(campaignId, customItemId, targetVersionId);
+        const versionSnap = await transaction.get(versionRef);
+        if (!versionSnap.exists()) throw new Error("Custom item version not found.");
 
-      const version = versionSnap.data() as CampaignCustomItemVersion;
-      assertCustomItemData(version.category, stripUndefined(version.data));
-      const timestamp = serverTimestamp();
+        const version = versionSnap.data() as CampaignCustomItemVersion;
+        assertCustomItemData(version.category, stripUndefined(version.data));
+        const timestamp = serverTimestamp();
 
-      transaction.update(versionRef, {
-        status: "published",
-        publishedAt: timestamp,
-        publishedByUserId: actorUserId,
-        updatedAt: timestamp,
-        updatedBy: { userId: actorUserId },
+        transaction.update(versionRef, {
+          status: "published",
+          publishedAt: timestamp,
+          publishedByUserId: actorUserId,
+          updatedAt: timestamp,
+          updatedBy: { userId: actorUserId },
+        });
+        transaction.update(itemRef, {
+          status: "published",
+          name: version.data.name.trim(),
+          data: stripUndefined(version.data),
+          publishedVersionId: targetVersionId,
+          draftVersionId: null,
+          latestVersionId: targetVersionId,
+          latestVersionNumber: version.versionNumber,
+          archivedAt: null,
+          archivedByUserId: null,
+          updatedAt: timestamp,
+          updatedBy: { userId: actorUserId },
+        });
+
+        return targetVersionId;
       });
-      transaction.update(itemRef, {
-        status: "published",
-        name: version.data.name.trim(),
-        data: stripUndefined(version.data),
-        publishedVersionId: targetVersionId,
-        draftVersionId: null,
-        latestVersionId: targetVersionId,
-        latestVersionNumber: version.versionNumber,
-        archivedAt: null,
-        archivedByUserId: null,
-        updatedAt: timestamp,
-        updatedBy: { userId: actorUserId },
-      });
-
-      return targetVersionId;
-    });
-  });
+    })
+  );
 }
 
 export async function archiveCustomItem({
@@ -314,13 +321,15 @@ export async function archiveCustomItem({
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
-  await updateDoc(customItemDocRef(campaignId, customItemId), {
-    status: "archived",
-    archivedAt: serverTimestamp(),
-    archivedByUserId: actorUserId,
-    updatedAt: serverTimestamp(),
-    updatedBy: { userId: actorUserId },
-  });
+  await measurePerformanceMutation("custom-item:archive", () =>
+    updateDoc(customItemDocRef(campaignId, customItemId), {
+      status: "archived",
+      archivedAt: serverTimestamp(),
+      archivedByUserId: actorUserId,
+      updatedAt: serverTimestamp(),
+      updatedBy: { userId: actorUserId },
+    })
+  );
 }
 
 export async function restoreCustomItem({
@@ -335,13 +344,15 @@ export async function restoreCustomItem({
   if (!itemSnap.exists()) throw new Error("Custom item not found.");
   const item = itemSnap.data() as CampaignCustomItem;
   if (item.status !== "archived") throw new Error("Only archived items can be restored.");
-  await updateDoc(customItemDocRef(campaignId, customItemId), {
-    status: item.publishedVersionId ? "published" : "draft",
-    archivedAt: null,
-    archivedByUserId: null,
-    updatedAt: serverTimestamp(),
-    updatedBy: { userId: actorUserId },
-  });
+  await measurePerformanceMutation("custom-item:restore", () =>
+    updateDoc(customItemDocRef(campaignId, customItemId), {
+      status: item.publishedVersionId ? "published" : "draft",
+      archivedAt: null,
+      archivedByUserId: null,
+      updatedAt: serverTimestamp(),
+      updatedBy: { userId: actorUserId },
+    })
+  );
 }
 
 function customItemPreflight(

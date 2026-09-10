@@ -6,6 +6,9 @@ type PerformanceEventKind =
   | "listener-snapshot"
   | "listener-error"
   | "listener-stop"
+  | "mutation-start"
+  | "mutation-complete"
+  | "mutation-error"
   | "react-commit"
   | "mark";
 
@@ -19,6 +22,7 @@ export interface ApplicationPerformanceEvent {
   fromCache?: boolean;
   hasPendingWrites?: boolean;
   errorCode?: string;
+  mutationId?: number;
 }
 
 interface PerformanceSnapshot {
@@ -68,6 +72,7 @@ declare global {
 }
 
 const MAX_RECORDED_EVENTS = 2_000;
+let mutationSequence = 0;
 
 function heapBytes(): number | null {
   const memory = (performance as Performance & { memory?: { usedJSHeapSize?: number } }).memory;
@@ -237,6 +242,66 @@ export function beginPerformanceSubscription(name: string) {
       record({ kind: "listener-stop", name, at: performance.now() });
     },
   };
+}
+
+/**
+ * Brackets one persistence operation in performance builds. The recorder
+ * stores only the operation name and timing metadata, never mutation payloads.
+ */
+export function beginPerformanceMutation(name: string) {
+  const target = recorder();
+  if (!target) return null;
+  const startedAt = performance.now();
+  const mutationId = ++mutationSequence;
+  record({ kind: "mutation-start", name, at: startedAt, mutationId });
+
+  return {
+    complete() {
+      const now = performance.now();
+      record({
+        kind: "mutation-complete",
+        name,
+        at: now,
+        duration: now - startedAt,
+        mutationId,
+      });
+    },
+    error(errorCode?: string) {
+      const now = performance.now();
+      record({
+        kind: "mutation-error",
+        name,
+        at: now,
+        duration: now - startedAt,
+        mutationId,
+        ...(errorCode ? { errorCode } : {}),
+      });
+    },
+  };
+}
+
+function mutationErrorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("code" in error)) return undefined;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" && /^(?:functions\/|firestore\/)?[a-z-]+$/.test(code)
+    ? code
+    : undefined;
+}
+
+/** Records acknowledgement latency while preserving the operation's result and errors. */
+export async function measurePerformanceMutation<T>(
+  name: string,
+  operation: () => Promise<T>
+): Promise<T> {
+  const measurement = beginPerformanceMutation(name);
+  try {
+    const result = await operation();
+    measurement?.complete();
+    return result;
+  } catch (error) {
+    measurement?.error(mutationErrorCode(error));
+    throw error;
+  }
 }
 
 export const recordApplicationCommit: ProfilerOnRenderCallback = (id, phase, actualDuration) => {

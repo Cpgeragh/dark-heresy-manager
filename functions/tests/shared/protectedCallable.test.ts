@@ -175,6 +175,33 @@ describe("protectedCallable", () => {
     expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain("secret");
   });
 
+  it("starts independent audit and usage recording concurrently", async () => {
+    let resolveAudit!: () => void;
+    let resolveMetric!: () => void;
+    vi.mocked(recordAuditEntry).mockImplementation(
+      () => new Promise<void>((resolve) => (resolveAudit = resolve))
+    );
+    vi.mocked(recordUsageMetric).mockImplementation(
+      () => new Promise<void>((resolve) => (resolveMetric = resolve))
+    );
+
+    const pending = protectedCallable({
+      request: makeRequest(),
+      operation: "test-op",
+      allowedFields: [],
+      handler: async () => "ok",
+    });
+
+    await vi.waitFor(() => {
+      expect(recordAuditEntry).toHaveBeenCalledOnce();
+      expect(recordUsageMetric).toHaveBeenCalledOnce();
+    });
+    resolveAudit();
+    resolveMetric();
+
+    await expect(pending).resolves.toBe("ok");
+  });
+
   it("wraps the whole operation in withSafeErrors", async () => {
     await protectedCallable({
       request: makeRequest(),

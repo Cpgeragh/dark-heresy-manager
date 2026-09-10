@@ -20,6 +20,7 @@ import {
   assertString,
 } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
+import { measurePerformanceMutation } from "../performance/performanceMetrics";
 
 interface SessionData {
   date: Date;
@@ -62,28 +63,30 @@ export async function createSession(campaignId: string, session: SessionData): P
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   validateSessionData(session);
 
-  await runSingleFlight("session:create", [campaignId, session], async () => {
-    const batch = writeBatch(db);
-    const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
-    const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionRef.id);
-    const createdAt = serverTimestamp();
-    const summaryData = {
-      date: session.date,
-      summary: session.summary,
-      xpAwarded: session.xpAwarded,
-      attendees: session.attendees,
-      createdAt,
-      ...(session.xpAwarded > 0 ? { xpApplied: false } : {}),
-    };
+  await measurePerformanceMutation("session:create", () =>
+    runSingleFlight("session:create", [campaignId, session], async () => {
+      const batch = writeBatch(db);
+      const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
+      const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionRef.id);
+      const createdAt = serverTimestamp();
+      const summaryData = {
+        date: session.date,
+        summary: session.summary,
+        xpAwarded: session.xpAwarded,
+        attendees: session.attendees,
+        createdAt,
+        ...(session.xpAwarded > 0 ? { xpApplied: false } : {}),
+      };
 
-    batch.set(sessionRef, {
-      ...summaryData,
-      dmNotes: session.dmNotes,
-    });
-    batch.set(summaryRef, summaryData);
+      batch.set(sessionRef, {
+        ...summaryData,
+        dmNotes: session.dmNotes,
+      });
+      batch.set(summaryRef, summaryData);
 
-    await batch.commit();
-  });
+      await batch.commit();
+    })
+  );
 }
 
 /** Updates the editable fields on an existing campaign session. */
@@ -96,22 +99,24 @@ export async function updateSession(
   assertFirestoreDocumentId(sessionId, "Session ID");
   validateSessionUpdate(data);
 
-  await runSingleFlight("session:update", [campaignId, sessionId, data], async () => {
-    const batch = writeBatch(db);
-    batch.update(
-      doc(db, "campaigns", campaignId, "sessions", sessionId),
-      data as Record<string, unknown>
-    );
-
-    const { dmNotes: _dmNotes, ...summaryUpdate } = data;
-    if (Object.keys(summaryUpdate).length > 0) {
+  await measurePerformanceMutation("session:update", () =>
+    runSingleFlight("session:update", [campaignId, sessionId, data], async () => {
+      const batch = writeBatch(db);
       batch.update(
-        doc(db, "campaigns", campaignId, "sessionSummaries", sessionId),
-        summaryUpdate as Record<string, unknown>
+        doc(db, "campaigns", campaignId, "sessions", sessionId),
+        data as Record<string, unknown>
       );
-    }
-    await batch.commit();
-  });
+
+      const { dmNotes: _dmNotes, ...summaryUpdate } = data;
+      if (Object.keys(summaryUpdate).length > 0) {
+        batch.update(
+          doc(db, "campaigns", campaignId, "sessionSummaries", sessionId),
+          summaryUpdate as Record<string, unknown>
+        );
+      }
+      await batch.commit();
+    })
+  );
 }
 
 function validateSessionData(session: SessionData): void {
@@ -217,54 +222,56 @@ export async function deleteSession(
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(sessionId, "Session ID");
   assertBoolean(reverseXp, "Reverse-XP flag");
-  await runSingleFlight("session:delete", [campaignId, sessionId], async () => {
-    const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
-    const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionId);
+  await measurePerformanceMutation("session:delete", () =>
+    runSingleFlight("session:delete", [campaignId, sessionId], async () => {
+      const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
+      const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionId);
 
-    if (!reverseXp) {
-      const batch = writeBatch(db);
-      batch.delete(sessionRef);
-      batch.delete(summaryRef);
-      await batch.commit();
-      return;
-    }
+      if (!reverseXp) {
+        const batch = writeBatch(db);
+        batch.delete(sessionRef);
+        batch.delete(summaryRef);
+        await batch.commit();
+        return;
+      }
 
-    await runTransaction(db, async (transaction) => {
-      const sessionSnap = await transaction.get(sessionRef);
-      if (sessionSnap.exists()) {
-        const session = sessionSnap.data() as SessionDocument;
-        if (session.xpApplied === true) {
-          if (!Array.isArray(session.attendees)) {
-            throw new Error("Stored session attendees are invalid; XP reversal was stopped.");
-          }
-          if (session.attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
-            throw new Error(
-              `XP reversal has more than ${SESSION_XP_FAN_OUT_LIMIT} attendees and was stopped before any write.`
+      await runTransaction(db, async (transaction) => {
+        const sessionSnap = await transaction.get(sessionRef);
+        if (sessionSnap.exists()) {
+          const session = sessionSnap.data() as SessionDocument;
+          if (session.xpApplied === true) {
+            if (!Array.isArray(session.attendees)) {
+              throw new Error("Stored session attendees are invalid; XP reversal was stopped.");
+            }
+            if (session.attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
+              throw new Error(
+                `XP reversal has more than ${SESSION_XP_FAN_OUT_LIMIT} attendees and was stopped before any write.`
+              );
+            }
+            if (new Set(session.attendees).size !== session.attendees.length) {
+              throw new Error(
+                "Stored session attendees contain duplicates; XP reversal was stopped."
+              );
+            }
+            session.attendees.forEach((characterId) =>
+              assertFirestoreDocumentId(characterId, "Stored session attendee ID")
             );
-          }
-          if (new Set(session.attendees).size !== session.attendees.length) {
-            throw new Error(
-              "Stored session attendees contain duplicates; XP reversal was stopped."
+            assertBulkOperationCount(
+              getSessionXpAffectedDocumentCount(session.attendees.length),
+              "Session XP reversal"
             );
-          }
-          session.attendees.forEach((characterId) =>
-            assertFirestoreDocumentId(characterId, "Stored session attendee ID")
-          );
-          assertBulkOperationCount(
-            getSessionXpAffectedDocumentCount(session.attendees.length),
-            "Session XP reversal"
-          );
-          for (const characterId of session.attendees) {
-            transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
-              "experience.total": increment(-session.xpAwarded),
-            });
+            for (const characterId of session.attendees) {
+              transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
+                "experience.total": increment(-session.xpAwarded),
+              });
+            }
           }
         }
-      }
-      transaction.delete(sessionRef);
-      transaction.delete(summaryRef);
-    });
-  });
+        transaction.delete(sessionRef);
+        transaction.delete(summaryRef);
+      });
+    })
+  );
 }
 
 /**
@@ -302,28 +309,30 @@ export async function applySessionXp(
     "Session XP application"
   );
 
-  await runSingleFlight("session:apply-xp", [campaignId, sessionId], async () => {
-    const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
+  await measurePerformanceMutation("session:apply-xp", () =>
+    runSingleFlight("session:apply-xp", [campaignId, sessionId], async () => {
+      const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
 
-    await runTransaction(db, async (transaction) => {
-      const sessionSnap = await transaction.get(sessionRef);
-      if (!sessionSnap.exists()) {
-        throw new Error("Session does not exist.");
-      }
-      if (sessionSnap.data().xpApplied === true) {
-        throw new Error("XP has already been applied for this session.");
-      }
+      await runTransaction(db, async (transaction) => {
+        const sessionSnap = await transaction.get(sessionRef);
+        if (!sessionSnap.exists()) {
+          throw new Error("Session does not exist.");
+        }
+        if (sessionSnap.data().xpApplied === true) {
+          throw new Error("XP has already been applied for this session.");
+        }
 
-      transaction.update(sessionRef, { xpApplied: true });
-      transaction.update(doc(db, "campaigns", campaignId, "sessionSummaries", sessionId), {
-        xpApplied: true,
-      });
-
-      for (const characterId of attendeeIds) {
-        transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
-          "experience.total": increment(xpAmount),
+        transaction.update(sessionRef, { xpApplied: true });
+        transaction.update(doc(db, "campaigns", campaignId, "sessionSummaries", sessionId), {
+          xpApplied: true,
         });
-      }
-    });
-  });
+
+        for (const characterId of attendeeIds) {
+          transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
+            "experience.total": increment(xpAmount),
+          });
+        }
+      });
+    })
+  );
 }

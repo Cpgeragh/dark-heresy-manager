@@ -53,7 +53,7 @@ interface TalentsTabProps {
   isDM?: boolean;
   editable: boolean;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
-  onUpdateCharacter?: (partial: Partial<Character>) => void;
+  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
 }
 
 const FAITH_GROUP_LABELS: Record<string, string> = {
@@ -366,6 +366,7 @@ export function TalentsTab({
 }: TalentsTabProps) {
   recordComponentRender("TalentsTab");
   const [pendingAcquisition, setPendingAcquisition] = useState<TalentEntry | null>(null);
+  const [savingTalentMutation, setSavingTalentMutation] = useState(false);
   const [pendingEffectDeletion, setPendingEffectDeletion] = useState<TalentEntry | null>(null);
   const handleAddTalent = useCallback(
     (entry: TalentEntry) => {
@@ -393,7 +394,7 @@ export function TalentsTab({
   );
 
   const handleAcquisitionComplete = useCallback(
-    (result: TalentAcquisitionResult) => {
+    async (result: TalentAcquisitionResult): Promise<boolean> => {
       const nextTalents = {
         ...talents,
         talents: [...talents.talents, result.entry, ...(result.additionalTalentEntries ?? [])],
@@ -406,7 +407,7 @@ export function TalentsTab({
           ? { ...psychic, disciplines: [...(psychic.disciplines ?? []), grantedDiscipline] }
           : psychic;
       if (onUpdateCharacter) {
-        onUpdateCharacter({
+        const saved = await onUpdateCharacter({
           talentsAndTraits: nextTalents,
           ...(nextPsychic !== psychic ? { psychic: nextPsychic } : {}),
           ...(result.cybernetics ? { cybernetics: result.cybernetics } : {}),
@@ -415,15 +416,17 @@ export function TalentsTab({
           ...(result.archeotech ? { archeotech: result.archeotech } : {}),
           ...(result.insanity ? { insanity: result.insanity } : {}),
         });
+        if (saved === false) return false;
       } else {
         onUpdateTalents(nextTalents);
       }
       setPendingAcquisition(null);
+      return true;
     },
     [talents, psychic, onUpdateCharacter, onUpdateTalents]
   );
   const applyTalentRemoval = useCallback(
-    (entry: TalentEntry, restoreOneTimeEffects: boolean) => {
+    async (entry: TalentEntry, restoreOneTimeEffects: boolean) => {
       const update = buildTalentRemovalUpdate({
         entry,
         restoreOneTimeEffects,
@@ -436,7 +439,10 @@ export function TalentsTab({
         archeotech,
       });
       if (onUpdateCharacter) {
-        onUpdateCharacter(update);
+        setSavingTalentMutation(true);
+        const saved = await onUpdateCharacter(update);
+        setSavingTalentMutation(false);
+        if (saved === false) return;
       } else {
         onUpdateTalents(update.talentsAndTraits);
       }
@@ -613,17 +619,27 @@ export function TalentsTab({
               restore what that acquisition changed.
             </p>
             <div className="space-y-2">
-              <Button fullWidth onClick={() => applyTalentRemoval(pendingEffectDeletion, true)}>
-                Delete and restore recorded changes
+              <Button
+                fullWidth
+                disabled={savingTalentMutation}
+                onClick={() => void applyTalentRemoval(pendingEffectDeletion, true)}
+              >
+                {savingTalentMutation ? "Saving…" : "Delete and restore recorded changes"}
               </Button>
               <Button
                 fullWidth
                 variant="ghost"
-                onClick={() => applyTalentRemoval(pendingEffectDeletion, false)}
+                disabled={savingTalentMutation}
+                onClick={() => void applyTalentRemoval(pendingEffectDeletion, false)}
               >
                 Delete Talent only
               </Button>
-              <Button fullWidth variant="ghost" onClick={() => setPendingEffectDeletion(null)}>
+              <Button
+                fullWidth
+                variant="ghost"
+                disabled={savingTalentMutation}
+                onClick={() => setPendingEffectDeletion(null)}
+              >
                 Cancel
               </Button>
             </div>

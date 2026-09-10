@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { recordComponentRender } from "../../performance/performanceMetrics";
-import type {
-  Character,
-  CharacterHeader,
-  ExperienceBlock,
-  XpTransaction,
-} from "../../types/Character";
+import type { Character, ExperienceBlock, XpTransaction } from "../../types/Character";
 import {
   buildRankCards,
   type RankCard,
@@ -66,8 +61,8 @@ interface ExperienceTabProps {
   character: Character;
   isDM: boolean;
   editable: boolean;
-  onUpdate: (next: ExperienceBlock) => void;
-  onUpdateHeader: (next: CharacterHeader) => void;
+  onUpdate: (next: ExperienceBlock) => Promise<boolean>;
+  onUpdateCharacter: (partial: Record<string, unknown>) => Promise<boolean>;
 }
 
 const ENTRY_KIND_LABELS: Record<RankCardEntryKind, string> = {
@@ -133,9 +128,10 @@ function XpTransactionModal({
   action: XpAction;
   experience: ExperienceBlock;
   rankId: string;
-  onApply: (next: ExperienceBlock) => void;
+  onApply: (next: ExperienceBlock) => void | Promise<boolean>;
   onClose: () => void;
 }) {
+  const [saving, setSaving] = useState(false);
   const existingRankUpCosts = (experience.transactions ?? []).filter(
     (transaction) => transaction.type === "spend" && transaction.rankId === rankId
   );
@@ -185,7 +181,7 @@ function XpTransactionModal({
     title
   );
 
-  const submit = () => {
+  const submit = async () => {
     if (!validAmount) return;
     const transaction = {
       id: crypto.randomUUID(),
@@ -193,12 +189,14 @@ function XpTransactionModal({
       reason,
       rankId,
     };
-    onApply(
+    setSaving(true);
+    const saved = await onApply(
       isSpend
         ? setRankUpXpCost(experience, transaction)
         : applyXpTransaction(experience, { ...transaction, type: action })
     );
-    onClose();
+    setSaving(false);
+    if (saved !== false) onClose();
   };
 
   return (
@@ -270,19 +268,21 @@ function XpTransactionModal({
         <div className="space-y-2 border-t border-slate-700 pt-4">
           <RequiredFieldsNote />
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="neutral" onClick={onClose}>
+            <Button variant="neutral" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
             <Button
               variant={isSpend ? "primary" : isRemove ? "warningOutline" : "successOutline"}
               onClick={submit}
-              disabled={!validAmount}
+              disabled={!validAmount || saving}
             >
-              {isChangingRankUpCost
-                ? "Confirm Change"
-                : isSpend
-                  ? "Confirm Spend"
-                  : `Confirm ${title}`}
+              {saving
+                ? "Saving…"
+                : isChangingRankUpCost
+                  ? "Confirm Change"
+                  : isSpend
+                    ? "Confirm Spend"
+                    : `Confirm ${title}`}
             </Button>
           </div>
         </div>
@@ -300,8 +300,8 @@ function RankUpModal({
 }: {
   character: Character;
   progression: CareerRankProgression;
-  onUpdate: (next: ExperienceBlock) => void;
-  onConfirm: (next: CharacterHeader) => void;
+  onUpdate: (next: ExperienceBlock) => Promise<boolean>;
+  onConfirm: (partial: Record<string, unknown>) => Promise<boolean>;
   onClose: () => void;
 }) {
   const [selectedRankId, setSelectedRankId] = useState(
@@ -309,6 +309,7 @@ function RankUpModal({
   );
   const [xpAction, setXpAction] = useState<XpAction | null>(null);
   const [rankUpExperience, setRankUpExperience] = useState(character.experience);
+  const [saving, setSaving] = useState(false);
   const selectedRank = progression.nextRanks.find((rank) => rank.id === selectedRankId);
   const remaining = rankUpExperience.total - rankUpExperience.spent;
   const appliedRankUpCosts = (rankUpExperience.transactions ?? []).filter(
@@ -324,19 +325,24 @@ function RankUpModal({
     .filter(Boolean)
     .join("; ");
 
-  const confirm = () => {
+  const confirm = async () => {
     if (!selectedRank) return;
-    if (rankUpExperience !== character.experience) {
-      onUpdate(rankUpExperience);
-    }
-    onConfirm(applyCareerRankUp(character.header, rankUpExperience.spent, selectedRank.id));
-    onClose();
+    setSaving(true);
+    const saved = await onConfirm({
+      experience: rankUpExperience,
+      header: applyCareerRankUp(character.header, rankUpExperience.spent, selectedRank.id),
+    });
+    setSaving(false);
+    if (saved !== false) onClose();
   };
 
-  const cancel = () => {
+  const cancel = async () => {
     const clearedExperience = clearRankUpXpCost(character.experience, progression.currentRank.id);
     if (clearedExperience !== character.experience) {
-      onUpdate(clearedExperience);
+      setSaving(true);
+      const saved = await onUpdate(clearedExperience);
+      setSaving(false);
+      if (saved === false) return;
     }
     onClose();
   };
@@ -347,7 +353,7 @@ function RankUpModal({
         ariaLabel="Confirm Rank Up"
         onClose={cancel}
         className="max-w-lg overflow-y-auto"
-        suspended={xpAction !== null}
+        suspended={xpAction !== null || saving}
       >
         <ModalHeader title="Confirm Rank Up" onClose={cancel} />
         <div className="space-y-4 p-4 lg:p-5">
@@ -430,11 +436,11 @@ function RankUpModal({
           )}
 
           <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
-            <Button variant="neutral" onClick={cancel}>
+            <Button variant="neutral" onClick={cancel} disabled={saving}>
               Cancel
             </Button>
-            <Button onClick={confirm} disabled={!selectedRank}>
-              Confirm Rank Up
+            <Button onClick={confirm} disabled={!selectedRank || saving}>
+              {saving ? "Saving…" : "Confirm Rank Up"}
             </Button>
           </div>
         </div>
@@ -650,7 +656,7 @@ export function ExperienceTab({
   isDM,
   editable,
   onUpdate,
-  onUpdateHeader,
+  onUpdateCharacter,
 }: ExperienceTabProps) {
   recordComponentRender("ExperienceTab");
   const { experience } = character;
@@ -882,7 +888,7 @@ export function ExperienceTab({
           character={character}
           progression={progression}
           onUpdate={onUpdate}
-          onConfirm={onUpdateHeader}
+          onConfirm={onUpdateCharacter}
           onClose={() => setRankUpOpen(false)}
         />
       )}

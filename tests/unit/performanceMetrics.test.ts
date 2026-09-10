@@ -106,6 +106,54 @@ describe("performance metrics recorder", () => {
     );
   });
 
+  it("records mutation acknowledgement timing without storing a payload", async () => {
+    const { measurePerformanceMutation } = await import("../../src/performance/performanceMetrics");
+
+    await expect(measurePerformanceMutation("character:notes", async () => "saved")).resolves.toBe(
+      "saved"
+    );
+
+    const events = window.__DHM_PERFORMANCE__?.snapshot().events ?? [];
+    const start = events.find((event) => event.kind === "mutation-start");
+    const complete = events.find((event) => event.kind === "mutation-complete");
+    expect(start).toEqual(
+      expect.objectContaining({ kind: "mutation-start", name: "character:notes" })
+    );
+    expect(complete).toEqual(
+      expect.objectContaining({
+        kind: "mutation-complete",
+        name: "character:notes",
+        mutationId: start?.mutationId,
+      })
+    );
+    expect(complete?.duration).toBeGreaterThanOrEqual(0);
+    expect(JSON.stringify(events)).not.toContain("saved");
+  });
+
+  it("records a sanitized mutation error and preserves the rejection", async () => {
+    const { measurePerformanceMutation } = await import("../../src/performance/performanceMetrics");
+    const failure = Object.assign(new Error("private detail"), {
+      code: "functions/permission-denied",
+    });
+
+    await expect(
+      measurePerformanceMutation("character:notes", async () => {
+        throw failure;
+      })
+    ).rejects.toBe(failure);
+
+    expect(window.__DHM_PERFORMANCE__?.snapshot().events).toContainEqual(
+      expect.objectContaining({
+        kind: "mutation-error",
+        name: "character:notes",
+        errorCode: "functions/permission-denied",
+      })
+    );
+    expect(JSON.stringify(window.__DHM_PERFORMANCE__?.snapshot().events)).not.toContain(
+      "private detail"
+    );
+  });
+
   it("counts named component renders and clears them on reset", async () => {
     const { recordComponentRender } = await import("../../src/performance/performanceMetrics");
 

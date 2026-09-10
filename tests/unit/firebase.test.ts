@@ -14,6 +14,8 @@ vi.mock("firebase/app", () => ({
 }));
 vi.mock("firebase/firestore", () => ({
   connectFirestoreEmulator: vi.fn(),
+  disableNetwork: vi.fn().mockResolvedValue(undefined),
+  enableNetwork: vi.fn().mockResolvedValue(undefined),
   initializeFirestore: vi.fn(() => ({})),
   persistentLocalCache: vi.fn(() => ({})),
   persistentMultipleTabManager: vi.fn(() => ({})),
@@ -110,11 +112,15 @@ describe("src/firebase.ts performance emulator mode", () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    document.getElementById("dhm-performance-firestore-disable")?.remove();
+    document.getElementById("dhm-performance-firestore-enable")?.remove();
+    delete document.documentElement.dataset.dhmPerformanceFirestoreNetwork;
   });
 
   it("connects every browser Firebase client only for dh-test performance mode", async () => {
     const { connectAuthEmulator } = await import("firebase/auth");
-    const { connectFirestoreEmulator } = await import("firebase/firestore");
+    const { connectFirestoreEmulator, disableNetwork, enableNetwork } =
+      await import("firebase/firestore");
     const { connectFunctionsEmulator } = await import("firebase/functions");
     stubAllEnvVars();
     vi.stubEnv("MODE", "performance");
@@ -129,6 +135,19 @@ describe("src/firebase.ts performance emulator mode", () => {
     });
     expect(connectFunctionsEmulator).toHaveBeenCalledWith({}, "127.0.0.1", 5001);
     expect(mockInitializeAppCheck).not.toHaveBeenCalled();
+
+    const disableButton = document.getElementById(
+      "dhm-performance-firestore-disable"
+    ) as HTMLButtonElement;
+    const enableButton = document.getElementById(
+      "dhm-performance-firestore-enable"
+    ) as HTMLButtonElement;
+    disableButton.click();
+    await vi.waitFor(() => expect(disableNetwork).toHaveBeenCalledWith({}));
+    expect(document.documentElement.dataset.dhmPerformanceFirestoreNetwork).toBe("disabled");
+    enableButton.click();
+    await vi.waitFor(() => expect(enableNetwork).toHaveBeenCalledWith({}));
+    expect(document.documentElement.dataset.dhmPerformanceFirestoreNetwork).toBe("enabled");
   });
 
   it("rejects performance mode for every project except dh-test", async () => {

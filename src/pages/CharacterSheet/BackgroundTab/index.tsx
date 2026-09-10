@@ -503,6 +503,7 @@ export function BackgroundTab({
             value={header.characterName ?? ""}
             onChange={handleCharacterName}
             editable={editable}
+            debounceMs={600}
             placeholder="e.g. Brother Corvus"
           />
           <FormField

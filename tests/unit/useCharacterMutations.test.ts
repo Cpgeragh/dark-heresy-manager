@@ -5,6 +5,7 @@ import { useCharacterMutations } from "../../src/hooks/useCharacterMutations";
 import {
   patchCharacterField as patchCharacterFieldService,
   patchCharacterFields as patchCharacterFieldsService,
+  patchCharacterCollectionField as patchCharacterCollectionFieldService,
 } from "../../src/services/characterService";
 import type { Character } from "../../src/types/Character";
 
@@ -13,6 +14,7 @@ vi.mock("../../src/services/characterService", () => ({
   forceReleaseCharacter: vi.fn(),
   patchCharacterField: vi.fn(),
   patchCharacterFields: vi.fn(),
+  patchCharacterCollectionField: vi.fn(),
   releaseCharacter: vi.fn(),
   updateCharacter: vi.fn(),
 }));
@@ -26,6 +28,7 @@ vi.mock("../../src/components/Toast", () => ({
 
 const mockPatchCharacterField = vi.mocked(patchCharacterFieldService);
 const mockPatchCharacterFields = vi.mocked(patchCharacterFieldsService);
+const mockPatchCharacterCollectionField = vi.mocked(patchCharacterCollectionFieldService);
 
 const baseCharacter = {
   id: "char-1",
@@ -92,6 +95,42 @@ describe("useCharacterMutations: patchField", () => {
     await act(() => result.current.patchField("notes", "Hello"));
 
     expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("permission-denied"));
+  });
+
+  it("keeps isUpdating true until every overlapping mutation has completed", async () => {
+    let finishFirst!: () => void;
+    let finishSecond!: () => void;
+    mockPatchCharacterField
+      .mockImplementationOnce(() => new Promise<void>((resolve) => (finishFirst = resolve)))
+      .mockImplementationOnce(() => new Promise<void>((resolve) => (finishSecond = resolve)));
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+      })
+    );
+
+    let first!: Promise<void>;
+    let second!: Promise<void>;
+    act(() => {
+      first = result.current.patchField("notes", "First");
+      second = result.current.patchField("notes", "Second");
+    });
+    expect(result.current.isUpdating).toBe(true);
+
+    await act(async () => {
+      finishFirst();
+      await first;
+    });
+    expect(result.current.isUpdating).toBe(true);
+
+    await act(async () => {
+      finishSecond();
+      await second;
+    });
+    expect(result.current.isUpdating).toBe(false);
   });
 
   it("keeps generic mutation callbacks stable when a fresh character snapshot remains available", () => {
@@ -233,5 +272,35 @@ describe("useCharacterMutations: patchFields", () => {
     await act(() => result.current.patchFields({ psychic: { psyRating: 1 } }));
 
     expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("permission-denied"));
+  });
+});
+
+describe("useCharacterMutations: patchCollectionField", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("routes a collection update through the numeric-aware service", async () => {
+    mockPatchCharacterCollectionField.mockResolvedValue(undefined);
+    const before = [{ id: "drug-1", quantity: 2 }];
+    const after = [{ id: "drug-1", quantity: 3 }];
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+      })
+    );
+
+    await act(() => result.current.patchCollectionField("drugs", before, after));
+
+    expect(mockPatchCharacterCollectionField).toHaveBeenCalledWith(
+      "camp-1",
+      "char-1",
+      "drugs",
+      before,
+      after
+    );
   });
 });

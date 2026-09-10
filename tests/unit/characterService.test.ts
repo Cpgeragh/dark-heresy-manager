@@ -9,6 +9,7 @@ const {
   mockCallRegisterRecoveryCode,
   mockCallReleaseCharacter,
   mockCallPatchCharacterField,
+  mockCallAdjustCharacterNumber,
   mockCallReconcileCharacterSpentXp,
   mockCallRevokeRecoveryCode,
   mockCallStartCharacterDeletionJob,
@@ -43,6 +44,7 @@ const {
     mockCallRegisterRecoveryCode: vi.fn(),
     mockCallReleaseCharacter: vi.fn(),
     mockCallPatchCharacterField: vi.fn(),
+    mockCallAdjustCharacterNumber: vi.fn(),
     mockCallReconcileCharacterSpentXp: vi.fn(),
     mockCallRevokeRecoveryCode: vi.fn(),
     mockCallStartCharacterDeletionJob: vi.fn(),
@@ -96,6 +98,7 @@ vi.mock("firebase/functions", () => ({
     if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
     if (name === "revokeRecoveryCode") return mockCallRevokeRecoveryCode;
     if (name === "patchCharacterField") return mockCallPatchCharacterField;
+    if (name === "adjustCharacterNumber") return mockCallAdjustCharacterNumber;
     if (name === "reconcileCharacterSpentXp") return mockCallReconcileCharacterSpentXp;
     if (name === "startCharacterDeletionJob") return mockCallStartCharacterDeletionJob;
     if (name === "processCharacterDeletionChunk") return mockCallProcessCharacterDeletionChunk;
@@ -126,6 +129,9 @@ import {
   forceReleaseCharacter,
   importCharacter,
   patchCharacterField,
+  patchCharacterCollectionField,
+  findCharacterNumberMutation,
+  CHARACTER_NUMBER_COALESCE_MS,
   preflightCharacterDeletion,
   reconcileCharacterSpentXp,
   registerRecoveryCode,
@@ -637,5 +643,107 @@ describe("patchCharacterField", () => {
       value: [{ id: "n1", title: "T", text: "x", updatedAt: "now" }],
       operationId: expect.any(String),
     });
+  });
+});
+
+describe("patchCharacterCollectionField", () => {
+  it("identifies supported top-level and nested numeric changes", () => {
+    expect(
+      findCharacterNumberMutation(
+        "drugs",
+        [{ id: "drug-1", quantity: 2 }],
+        [{ id: "drug-1", quantity: 3 }]
+      )
+    ).toEqual({
+      field: "drugs",
+      itemId: "drug-1",
+      property: "quantity",
+      delta: 1,
+      fallbackValue: 2,
+    });
+
+    expect(
+      findCharacterNumberMutation(
+        "rangedWeapons",
+        [{ id: "weapon-1", ammoEntries: [{ id: "ammo-1", clips: 1, rounds: 12 }] }],
+        [{ id: "weapon-1", ammoEntries: [{ id: "ammo-1", clips: 1, rounds: 13 }] }]
+      )
+    ).toEqual({
+      field: "rangedWeapons",
+      itemId: "weapon-1",
+      nestedCollection: "ammoEntries",
+      nestedItemId: "ammo-1",
+      property: "rounds",
+      delta: 1,
+      fallbackValue: 12,
+    });
+  });
+
+  it("falls back to a full field patch when more than one value changes", async () => {
+    mockCallPatchCharacterField.mockResolvedValue({ data: undefined });
+    const before = [{ id: "drug-1", name: "Stimm", quantity: 2 }];
+    const after = [{ id: "drug-1", name: "Improved Stimm", quantity: 3 }];
+
+    await patchCharacterCollectionField("camp-1", "char-1", "drugs", before, after);
+
+    expect(mockCallAdjustCharacterNumber).not.toHaveBeenCalled();
+    expect(mockCallPatchCharacterField).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+      field: "drugs",
+      value: after,
+      operationId: expect.any(String),
+    });
+  });
+
+  it("coalesces rapid changes to the same number into one delta operation", async () => {
+    vi.useFakeTimers();
+    try {
+      mockCallAdjustCharacterNumber.mockResolvedValue({ data: undefined });
+      const before = [{ id: "drug-1", quantity: 2 }];
+      const after = [{ id: "drug-1", quantity: 3 }];
+
+      const first = patchCharacterCollectionField("camp-1", "char-1", "drugs", before, after);
+      const second = patchCharacterCollectionField("camp-1", "char-1", "drugs", before, after);
+      expect(mockCallAdjustCharacterNumber).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(CHARACTER_NUMBER_COALESCE_MS);
+      await Promise.all([first, second]);
+
+      expect(mockCallAdjustCharacterNumber).toHaveBeenCalledOnce();
+      expect(mockCallAdjustCharacterNumber).toHaveBeenCalledWith({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        field: "drugs",
+        itemId: "drug-1",
+        property: "quantity",
+        delta: 2,
+        fallbackValue: 2,
+        operationId: expect.any(String),
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels equal opposite queued deltas without issuing a write", async () => {
+    vi.useFakeTimers();
+    try {
+      const before = [{ id: "drug-1", quantity: 2 }];
+      const increment = patchCharacterCollectionField("camp-1", "char-1", "drugs", before, [
+        { id: "drug-1", quantity: 3 },
+      ]);
+      const decrement = patchCharacterCollectionField("camp-1", "char-1", "drugs", before, [
+        { id: "drug-1", quantity: 1 },
+      ]);
+
+      await vi.advanceTimersByTimeAsync(CHARACTER_NUMBER_COALESCE_MS);
+      await Promise.all([increment, decrement]);
+
+      expect(mockCallAdjustCharacterNumber).not.toHaveBeenCalled();
+      expect(mockCallPatchCharacterField).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

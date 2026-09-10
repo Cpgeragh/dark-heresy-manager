@@ -37,6 +37,10 @@ import {
   type PatchCharacterFieldInput,
 } from "./operations/patchCharacterField.js";
 import {
+  adjustCharacterNumber as runAdjustCharacterNumber,
+  type AdjustCharacterNumberInput,
+} from "./operations/adjustCharacterNumber.js";
+import {
   reconcileCharacterSpentXp as runReconcileCharacterSpentXp,
   type ReconcileCharacterSpentXpInput,
 } from "./operations/reconcileCharacterSpentXp.js";
@@ -688,6 +692,61 @@ export const patchCharacterField = onCall<PatchCharacterFieldInput>(
         (request.data as PatchCharacterFieldInput | undefined)?.operationId
       ),
       handler: ({ uid, data, idempotency }) => runPatchCharacterField(data, uid, idempotency),
+    });
+  }
+);
+
+export const adjustCharacterNumber = onCall<AdjustCharacterNumberInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<AdjustCharacterNumberInput, void>({
+      request,
+      operation: "adjust-character-number",
+      allowedFields: [
+        "campaignId",
+        "characterId",
+        "field",
+        "itemId",
+        "property",
+        "nestedCollection",
+        "nestedItemId",
+        "delta",
+        "fallbackValue",
+        "operationId",
+      ],
+      requiredFields: [
+        "campaignId",
+        "characterId",
+        "field",
+        "itemId",
+        "property",
+        "delta",
+        "fallbackValue",
+        "operationId",
+      ],
+      fieldShapes: {
+        campaignId: "string",
+        characterId: "string",
+        field: {
+          enum: ["consumables", "drugs", "grenades", "rangedWeapons", "meleeWeapons", "armour"],
+        },
+        itemId: "string",
+        property: { enum: ["quantity", "spareCells", "clips", "rounds"] },
+        nestedCollection: { enum: ["ammoEntries", "magazineSlots"] },
+        nestedItemId: "string",
+        operationId: "string",
+      },
+      payloadBounds: { maxBytes: 2_000, maxStringCharacters: 200 },
+      rateLimits: [
+        { key: `patch-character-field:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+      ],
+      idempotencyKey: buildOperationIdempotencyKey(
+        "adjust-character-number",
+        callerUid,
+        (request.data as AdjustCharacterNumberInput | undefined)?.operationId
+      ),
+      handler: ({ uid, data, idempotency }) => runAdjustCharacterNumber(data, uid, idempotency),
     });
   }
 );

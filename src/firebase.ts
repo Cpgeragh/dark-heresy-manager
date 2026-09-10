@@ -2,12 +2,15 @@ import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import {
   connectFirestoreEmulator,
+  disableNetwork,
+  enableNetwork,
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
 } from "firebase/firestore";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+import { markApplicationPerformance } from "./performance/performanceMetrics";
 
 const PERFORMANCE_PROJECT_ID = "dh-test";
 const isPerformanceMode = import.meta.env.MODE === "performance";
@@ -72,4 +75,40 @@ if (isPerformanceMode) {
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+
+  const installNetworkControl = (
+    id: string,
+    action: () => Promise<void>,
+    state: string,
+    right: number
+  ) => {
+    if (typeof document === "undefined") return;
+    if (document.getElementById(id)) return;
+    const button = document.createElement("button");
+    button.id = id;
+    button.type = "button";
+    button.tabIndex = -1;
+    button.setAttribute("aria-hidden", "true");
+    button.style.cssText = `position:fixed;right:${right}px;bottom:0;width:2px;height:2px;opacity:.01;z-index:2147483647;padding:0;border:0`;
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      try {
+        await action();
+        document.documentElement.dataset.dhmPerformanceFirestoreNetwork = state;
+        markApplicationPerformance(`firestore-network:${state}`);
+      } catch {
+        document.documentElement.dataset.dhmPerformanceFirestoreNetwork = "error";
+        markApplicationPerformance("firestore-network:error");
+      }
+    });
+    document.documentElement.append(button);
+  };
+
+  installNetworkControl(
+    "dhm-performance-firestore-disable",
+    () => disableNetwork(db),
+    "disabled",
+    6
+  );
+  installNetworkControl("dhm-performance-firestore-enable", () => enableNetwork(db), "enabled", 9);
 }

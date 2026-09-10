@@ -9,6 +9,7 @@ import {
   forceReleaseCharacter,
   patchCharacterField,
   patchCharacterFields,
+  patchCharacterCollectionField,
   releaseCharacter as releaseCharacterInService,
   updateCharacter,
 } from "../services/characterService";
@@ -27,7 +28,7 @@ export function useCharacterMutations({
   character,
   allowedToEdit,
 }: UseCharacterMutationsProps) {
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [pendingUpdateCount, setPendingUpdateCount] = useState(0);
   const [isReleasing, setIsReleasing] = useState(false);
   const [isDmForceReleasing, setIsDmForceReleasing] = useState(false);
   const [isDmForceAssigning, setIsDmForceAssigning] = useState(false);
@@ -46,7 +47,7 @@ export function useCharacterMutations({
     async <K extends DirectWriteCharacterField>(field: K, value: Character[K]): Promise<void> => {
       if (!allowedToEdit || !hasCharacter) return;
 
-      setIsUpdating(true);
+      setPendingUpdateCount((count) => count + 1);
       try {
         await updateCharacter(campaignId, characterId, {
           [field]: stripUndefined(value),
@@ -56,7 +57,7 @@ export function useCharacterMutations({
         toast.error(`Update failed: ${message}`);
         console.error("Failed to update field:", err);
       } finally {
-        setIsUpdating(false);
+        setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
     },
     [allowedToEdit, hasCharacter, campaignId, characterId, toast]
@@ -89,19 +90,47 @@ export function useCharacterMutations({
     | "movement"
     | "experience";
 
-  const patchField = useCallback(
-    async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {
-      if (!allowedToEdit || !hasCharacter) return;
+  const patchFieldWithResult = useCallback(
+    async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<boolean> => {
+      if (!allowedToEdit || !hasCharacter) return false;
 
-      setIsUpdating(true);
+      setPendingUpdateCount((count) => count + 1);
       try {
         await patchCharacterField(campaignId, characterId, field, stripUndefined(value));
+        return true;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to update field";
         toast.error(`Update failed: ${message}`);
         console.error("Failed to update field:", err);
+        return false;
       } finally {
-        setIsUpdating(false);
+        setPendingUpdateCount((count) => Math.max(0, count - 1));
+      }
+    },
+    [allowedToEdit, hasCharacter, campaignId, characterId, toast]
+  );
+
+  const patchField = useCallback(
+    async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {
+      await patchFieldWithResult(field, value);
+    },
+    [patchFieldWithResult]
+  );
+
+  const patchFieldsWithResult = useCallback(
+    async (partial: Record<string, unknown>): Promise<boolean> => {
+      if (!allowedToEdit || !hasCharacter) return false;
+      setPendingUpdateCount((count) => count + 1);
+      try {
+        await patchCharacterFields(campaignId, characterId, stripUndefined(partial));
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to update character";
+        toast.error(`Update failed: ${message}`);
+        console.error("Failed to update character:", err);
+        return false;
+      } finally {
+        setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
     },
     [allowedToEdit, hasCharacter, campaignId, characterId, toast]
@@ -109,16 +138,27 @@ export function useCharacterMutations({
 
   const patchFields = useCallback(
     async (partial: Record<string, unknown>): Promise<void> => {
+      await patchFieldsWithResult(partial);
+    },
+    [patchFieldsWithResult]
+  );
+
+  const patchCollectionField = useCallback(
+    async (
+      field: "consumables" | "drugs" | "grenades" | "rangedWeapons" | "meleeWeapons" | "armour",
+      before: unknown[],
+      after: unknown[]
+    ): Promise<void> => {
       if (!allowedToEdit || !hasCharacter) return;
-      setIsUpdating(true);
+      setPendingUpdateCount((count) => count + 1);
       try {
-        await patchCharacterFields(campaignId, characterId, stripUndefined(partial));
+        await patchCharacterCollectionField(campaignId, characterId, field, before, after);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to update character";
+        const message = err instanceof Error ? err.message : "Failed to update quantity";
         toast.error(`Update failed: ${message}`);
-        console.error("Failed to update character:", err);
+        console.error("Failed to update character quantity:", err);
       } finally {
-        setIsUpdating(false);
+        setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
     },
     [allowedToEdit, hasCharacter, campaignId, characterId, toast]
@@ -131,7 +171,7 @@ export function useCharacterMutations({
     async (statKey: keyof Characteristics, value: CharField): Promise<void> => {
       if (!allowedToEdit || !characteristics) return;
 
-      setIsUpdating(true);
+      setPendingUpdateCount((count) => count + 1);
       try {
         const updated = stripUndefined({
           ...characteristics,
@@ -144,7 +184,7 @@ export function useCharacterMutations({
         toast.error(`Update failed: ${message}`);
         console.error("Failed to update characteristic:", err);
       } finally {
-        setIsUpdating(false);
+        setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
     },
     [allowedToEdit, characteristics, campaignId, characterId, toast]
@@ -242,6 +282,9 @@ export function useCharacterMutations({
     updateField,
     patchField,
     patchFields,
+    patchFieldWithResult,
+    patchFieldsWithResult,
+    patchCollectionField,
     updateCharacteristic,
     releaseCharacter,
     dmForceRelease,
@@ -249,7 +292,7 @@ export function useCharacterMutations({
     dmToggleEdit,
 
     // Loading states
-    isUpdating,
+    isUpdating: pendingUpdateCount > 0,
     isReleasing,
     isDmForceReleasing,
     isDmForceAssigning,

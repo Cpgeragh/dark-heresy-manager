@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -75,19 +75,19 @@ function makeCharacter(overrides: Partial<Character> = {}): Character {
 }
 
 function renderTab(props: Partial<React.ComponentProps<typeof ExperienceTab>> = {}) {
-  const onUpdate = vi.fn();
-  const onUpdateHeader = vi.fn();
+  const onUpdate = vi.fn().mockResolvedValue(true);
+  const onUpdateCharacter = vi.fn().mockResolvedValue(true);
   render(
     <ExperienceTab
       character={makeCharacter()}
       isDM
       editable
       onUpdate={onUpdate}
-      onUpdateHeader={onUpdateHeader}
+      onUpdateCharacter={onUpdateCharacter}
       {...props}
     />
   );
-  return { onUpdate, onUpdateHeader };
+  return { onUpdate, onUpdateCharacter };
 }
 
 describe("ExperienceTab named Career Rank ledger", () => {
@@ -145,8 +145,8 @@ describe("ExperienceTab named Career Rank ledger", () => {
   });
 
   it("resets expansion to the new current rank when the character ranks up", () => {
-    const onUpdate = vi.fn();
-    const onUpdateHeader = vi.fn();
+    const onUpdate = vi.fn().mockResolvedValue(true);
+    const onUpdateCharacter = vi.fn().mockResolvedValue(true);
     const scoutCharacter = makeCharacter();
     const veteranCharacter = makeCharacter({
       header: { ...scoutCharacter.header, rank: "Veteran", careerPath: undefined },
@@ -157,7 +157,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
         isDM
         editable
         onUpdate={onUpdate}
-        onUpdateHeader={onUpdateHeader}
+        onUpdateCharacter={onUpdateCharacter}
       />
     );
 
@@ -167,7 +167,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
         isDM
         editable
         onUpdate={onUpdate}
-        onUpdateHeader={onUpdateHeader}
+        onUpdateCharacter={onUpdateCharacter}
       />
     );
 
@@ -313,7 +313,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
   it("requires a valid branch choice and confirms exactly one Rank Up", async () => {
     const user = userEvent.setup();
     const current = makeCharacter();
-    const { onUpdateHeader } = renderTab({
+    const { onUpdateCharacter } = renderTab({
       character: {
         ...current,
         header: { ...current.header, rank: "Veteran", careerPath: undefined },
@@ -332,15 +332,42 @@ describe("ExperienceTab named Career Rank ledger", () => {
 
     await user.click(dialog.getByRole("button", { name: "Scout" }));
     await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
-    expect(onUpdateHeader).toHaveBeenLastCalledWith(
-      expect.objectContaining({ rank: "Scout", careerPath: "Scout" })
+    expect(onUpdateCharacter).toHaveBeenCalledOnce();
+    expect(onUpdateCharacter).toHaveBeenLastCalledWith({
+      experience: expect.objectContaining({ total: 7_000, spent: 6_000 }),
+      header: expect.objectContaining({ rank: "Scout", careerPath: "Scout" }),
+    });
+  });
+
+  it("keeps the Rank Up dialog open when the atomic save fails", async () => {
+    const user = userEvent.setup();
+    const current = makeCharacter();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(false);
+    renderTab({
+      character: {
+        ...current,
+        header: { ...current.header, rank: "Veteran", careerPath: undefined },
+        experience: { total: 7_000, spent: 6_000, ranks: [] },
+      },
+      onUpdateCharacter,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    await user.click(dialog.getByRole("button", { name: "Scout" }));
+    await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
+
+    await waitFor(() =>
+      expect(dialog.getByRole("button", { name: "Confirm Rank Up" })).toBeEnabled()
     );
+    expect(screen.getByRole("dialog", { name: "Confirm Rank Up" })).toBeInTheDocument();
+    expect(onUpdateCharacter).toHaveBeenCalledOnce();
   });
 
   it("offers only the Rank Up XP Spend action in the final rank-up review", async () => {
     const user = userEvent.setup();
     const current = makeCharacter();
-    const { onUpdate } = renderTab({
+    const { onUpdate, onUpdateCharacter } = renderTab({
       character: {
         ...current,
         header: { ...current.header, rank: "Guard", careerPath: undefined },
@@ -426,8 +453,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(dialog.getByText("Changed cost")).toBeInTheDocument();
     expect(onUpdate).not.toHaveBeenCalled();
     await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
-    expect(onUpdate).toHaveBeenCalledTimes(1);
-    const changedExperience = onUpdate.mock.calls.at(-1)?.[0];
+    expect(onUpdate).not.toHaveBeenCalled();
+    expect(onUpdateCharacter).toHaveBeenCalledOnce();
+    const changedExperience = onUpdateCharacter.mock.calls.at(-1)?.[0].experience;
     expect(changedExperience.transactions).toHaveLength(1);
     expect(changedExperience.transactions[0]).toEqual(
       expect.objectContaining({ type: "spend", amount: 150, reason: "Changed cost" })

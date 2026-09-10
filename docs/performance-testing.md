@@ -74,3 +74,29 @@ Where custom event dispatch is unavailable, click the performance-only transpare
 `#dhm-performance-snapshot` and read the same root attribute. Snapshot serialization still occurs
 only on request. Native modal dialogs occupy the browser top layer and block controls behind them;
 reset before opening such a dialog and request its snapshot after closing it.
+
+Mutation services also emit paired metadata-only events:
+
+- `mutation-start` records the operation name, a monotonically increasing `mutationId`, and the
+  start time.
+- `mutation-complete` records the matching ID and acknowledgement duration.
+- `mutation-error` records the matching ID, acknowledgement duration, and a sanitized Firebase
+  error code when one is available.
+
+The duration ends when the write, batch, transaction, or callable promise settles. It is therefore
+write-acknowledgement latency, not listener turnaround. To measure end-to-end synchronisation,
+reset immediately before the action and correlate the mutation's completion with the relevant
+subsequent listener snapshot. Payloads, field values, message text, and raw error messages are
+never recorded.
+
+Performance mode provides two additional transparent controls for deterministic offline tests:
+
+- `#dhm-performance-firestore-disable` awaits `disableNetwork(db)` and sets
+  `data-dhm-performance-firestore-network="disabled"` on the root element.
+- `#dhm-performance-firestore-enable` awaits `enableNetwork(db)` and sets the same attribute to
+  `"enabled"`.
+
+Both controls add a matching `firestore-network:*` mark after the transition completes. They
+affect direct Firestore operations only. Callable Functions are not queued by Firestore's offline
+cache; a callable mutation that reports a failure still requires an explicit retry. These controls
+exist only in the guarded local performance build.
