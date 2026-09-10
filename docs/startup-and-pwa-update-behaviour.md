@@ -1,10 +1,11 @@
 ---
-title: Startup and PWA update behavior
+title: Startup and PWA update behaviour
 date: 2026-09-07
+last_updated: 2026-09-10
 status: Corrections applied and verified
 ---
 
-# Startup and PWA update behavior
+# Startup and PWA update behaviour
 
 ## Purpose
 
@@ -20,9 +21,12 @@ The bounded startup corrections identified by this investigation have been appli
 - Authentication observer and anonymous-sign-in failures are now exposed to the application and produce the existing explicit account-load error screen. A first anonymous sign-in hands account synchronisation to the signed-in observer callback, eliminating the duplicate call without clearing loading between callbacks.
 - A stalled update clears the post-upgrade session marker before falling back, preventing a later reload from being mislabelled as a successful upgrade.
 - Both splash WebPs are precached. Manifest icons are included once each, and the unreferenced Roboto and Roboto Mono imports, faces, and packages have been removed.
-- The explicit second service-worker update check and campaign-subscription sequence remain unchanged because the investigation did not justify altering them.
+- The service-worker registration helper is now the only normal update check. Successful activation
+  records the post-upgrade marker before reloading, preserving the single updated-page loading path.
+  The campaign-subscription sequence remains unchanged because the investigation did not justify
+  altering it.
 
-One guarded browser run per corrected state was used as an end-to-end regression check. These values confirm branch behavior; they are not a new statistical baseline and do not replace the five-run investigation results below.
+One guarded browser run per corrected state was used as an end-to-end regression check. These values confirm branch behaviour; they are not a new statistical baseline and do not replace the five-run investigation results below.
 
 | Corrected state                   | Observed result                                                                                                                                                                                                                                                          |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -68,11 +72,28 @@ The update-available duration is browser-observed time from starting the control
 
 ### Service-worker registration and update checking
 
+The original investigation recorded the following behaviour before the dedicated single-check
+follow-up:
+
 - First-visit registration completed at 277.7 ms (231.7–645.9 ms) and did not wait for an update check because there was no controlling worker.
 - On a controlled no-update visit, the explicit update check took 19.7 ms (18.7–20.8 ms) and the app was requested at 74.2 ms median.
 - With the server unavailable, the explicit update check rejected at 2108.2 ms (2100.2–2118.7 ms) and immediately released the app. This was below the existing three-second safety fallback.
 - Five no-update navigations produced ten requests for `sw.js` and ten for its Workbox import. The registration helper performs registration/update work and the application then calls `registration.update()` explicitly, so the request evidence is consistent with two checks per controlled visit.
 - The second check costs little in the local online trace. Removing it without first proving identical update detection would change a deliberate correctness path for a small measured gain, so this investigation does not recommend changing it in the first correction.
+
+The dedicated follow-up on 2026-09-10 removed the explicit `registration.update()` call after
+proving that the registration helper already performs the required check. A successful guarded
+update produced two `sw.js` and two Workbox requests across the update page and its automatic
+reload: one pair per real visit, rather than two pairs per visit. Controlled reloads sometimes
+produced no network request because the browser throttled or coalesced its update check; that is
+browser behaviour and is not treated as product latency.
+
+Removing the second call alone was not sufficient. The browser experiment showed that helper-owned
+activation can reload the page without passing through the previous explicit-update branch. The
+registration callback now receives the update-ready signal, records `pwa-just-upgraded`, displays
+the existing updating state, and reloads once. The updated page consumes that marker and renders
+the application directly, avoiding a second update splash. The three-second registration safeguard
+and thirty-second stalled-update safeguard are unchanged.
 
 The service-worker work did not delay initial HTML parsing or cached JavaScript execution. It does deliberately gate application rendering on controlled visits. Offline, its approximately two-second failure overlaps the approximately two-second wait for cached Auth state, so removing the gate would not have improved the measured end-to-end route time.
 
@@ -145,26 +166,33 @@ The corrected normal production build reports 43 entries totalling 2677.18 KiB, 
 3. Early Auth failures now end loading and display an explicit error.
 4. A first anonymous sign-in now performs account synchronisation once.
 5. The stalled-update fallback now clears the false post-upgrade marker.
-6. A controlled no-update visit still requests the service worker and Workbox import twice. The measured cost is small, and changing this update mechanism is not justified by this evidence.
+6. The dedicated follow-up reduced the normal update path from two checks per visit to the
+   registration helper's single check while preserving update activation, post-upgrade loading,
+   and both existing safeguards.
 7. The startup-critical splash WebPs are now available offline.
 8. The unreferenced Roboto assets are removed. Remaining fonts and application chunks were not removed merely because they contribute to cache size.
 
 ## Implemented correction scope
 
 1. The existing three-second watchdog starts before service-worker registration, and unsupported browsers render immediately.
-2. Auth initialization and sign-in errors are exposed to `App`, including an observer error callback and explicit failure UI.
+2. Auth initialisation and sign-in errors are exposed to `App`, including an observer error callback and explicit failure UI.
 3. Initial anonymous sign-in defers synchronisation to the observer's signed-in callback.
 4. The existing thirty-second stalled-update fallback clears its upgrade marker before rendering the cached app.
 5. WebP is included in the Workbox glob. Redundant public/manifest icon inclusion is disabled because the PNG glob already includes the physical files, and each manifest icon combines its `any` and `maskable` purposes.
 6. Unreferenced Roboto and Roboto Mono source imports, declarations, and direct dependencies are removed.
 7. Focused startup, Auth, application-error, performance-recorder, fixture, and PWA-configuration tests cover the corrected branches.
 8. Guarded browser checks cover all startup states, backend-unavailable startup, and fully offline direct routes.
+9. The explicit second update call is removed. Helper-owned activation now records the post-upgrade
+   marker and reloads exactly once through an injected page-reload boundary.
 
 ## Alternatives considered
 
 - **Shorten the three- or thirty-second safeguards:** rejected. The 30-second timeout is what bounded a genuinely stalled download, and the offline update rejection already beats the three-second fallback. The evidence supports broader coverage and state cleanup, not shorter values.
-- **Render the app before every controlled update check:** rejected for the proposed correction. It would change the intentional update-before-use product behavior, and the offline check overlapped Auth's cached-state delay rather than increasing measured end-to-end route readiness.
-- **Remove the explicit second service-worker check immediately:** deferred. The duplicate requests are real, but the local no-update cost was about 20 ms. Update detection and automatic reload should not be risked without a dedicated single-check experiment across every update state.
+- **Render the app before every controlled update check:** rejected for the proposed correction. It would change the intentional update-before-use product behaviour, and the offline check overlapped Auth's cached-state delay rather than increasing measured end-to-end route readiness.
+- **Remove the explicit second service-worker check without an activation callback:** rejected by
+  the dedicated follow-up. The browser showed that helper-owned activation can reload without the
+  post-upgrade marker. The implemented callback preserves that state transition while eliminating
+  the duplicate check.
 - **Remove image preloads instead of caching the splash images:** rejected. These images are deliberately eager loading-screen assets. Precaching the small files preserves that design offline; removing the preloads would not make them available offline.
 - **Trim precache entries based on size or the build's generic chunk warning:** rejected. Only assets with source-level non-use and request evidence are proposed for removal. Large route chunks remain covered by the separate JavaScript investigation.
 - **Change campaign subscription order or count:** rejected. Online startup is sub-second, and backend-unavailable and fully offline readiness are consistent. No subscription defect was demonstrated here.
@@ -180,5 +208,11 @@ The corrected normal production build reports 43 entries totalling 2677.18 KiB, 
 - Normal TypeScript and production Vite/PWA build: passed; 43 unique production precache entries totalling 2677.18 KiB, with no performance revision entry.
 - Guarded PWA harness rebuild: both revisions passed TypeScript and production-shaped builds; each performance build contained 44 entries, including its one local measurement entry.
 - Browser verification: the original five-run investigation matrix plus corrected-state checks for first visit, cached/no-update, successful automatic update and reload, genuine open-response stalled update, backend-unavailable startup, and fully offline direct `/weapons` and `/talents` routes.
+- Single-check follow-up: all 9 focused PWA startup tests passed, including helper-owned activation,
+  one reload, post-upgrade marker consumption, registration failure, unsupported service workers,
+  never-settled registration, and stalled-update fallback.
+- Guarded single-check browser verification: a successful update reloaded once, the updated page
+  recorded `startup:post-upgrade` before rendering the application, and the request log showed one
+  update-check request pair per real visit.
 
 No timeout was increased. No commit or push was made.

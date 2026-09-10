@@ -35,7 +35,7 @@ These signals must not be conflated:
 - A metadata-only server confirmation is not delivered by the application's normal listeners, so
   the absence of a later `fromCache: false` event is not proof that no server check occurred.
 - The emulator does not reproduce production listener billing, minimum query charges, or all
-  reconnect charging behavior. It therefore cannot produce an exact billed-read total.
+  reconnect charging behaviour. It therefore cannot produce an exact billed-read total.
 
 The billing limitation follows Firestore's documented listener charging and reconnect rules:
 <https://firebase.google.com/docs/firestore/pricing>. Snapshot-source interpretation follows the
@@ -78,8 +78,8 @@ global account subscriptions, even when the user-link document does not exist.
 | Own character, default tab | 7 | 4 | Removed two unused campaign-list listeners and one duplicate profile listener |
 | Settings | 4 | 2 | Removed two unused campaign-list listeners |
 | Empty custom-item character tab, picker closed | Character base + 1 DM or + 2 player | Character base only | Queries are no longer eager |
-| Empty custom-item character tab, picker open | Character base + 1 DM or + 2 player | Same | Required picker behavior retained |
-| Message or claim-history interface open | Base + 1 | Base + 1 | Required live behavior retained |
+| Empty custom-item character tab, picker open | Character base + 1 DM or + 2 player | Same | Required picker behaviour retained |
+| Message or claim-history interface open | Base + 1 | Base + 1 | Required live behaviour retained |
 
 A production-shaped own-character route settled at four active listeners: user link, effective
 profile, campaign document, and character document. Dashboard remained at five, campaign overview
@@ -162,7 +162,7 @@ creator/status/category query shape also passed the local Firestore rules suite.
    custom-item subscription only while a picker is open or a linked character item requires live
    definition state.
 5. Performance listener events record cache and pending-write metadata without enabling
-   metadata-only callbacks or changing normal application behavior.
+   metadata-only callbacks or changing normal application behaviour.
 6. Focused orchestration, query-shape, picker-gating, document-switch, metadata, and rules tests cover
    the corrections.
 
@@ -177,12 +177,12 @@ creator/status/category query shape also passed the local Firestore rules suite.
   require live definition state for edit, publish, archive, and update-all controls after a picker
   closes.
 - **Convert campaign, session, character, or message listeners to one-shot reads:** rejected. Their
-  live synchronization is intended product behavior.
+  live synchronisation is intended product behaviour.
 - **Disable the archived-campaign listener while the Dashboard section is collapsed:** rejected for
   this correction. It supplies visible count and empty-state information, so removal would be a
   product change rather than transparent cleanup.
 - **Reduce list limits because some fixtures are large:** rejected. Limits are existing safety
-  ceilings, and size or an isolated timing is not evidence that ordinary product behavior is wrong.
+  ceilings, and size or an isolated timing is not evidence that ordinary product behaviour is wrong.
 - **Add a three-field custom-item index pre-emptively:** rejected. The query uses equality filters,
   existing index merging is documented, and local query/rules verification passed.
 - **Increase test timeouts:** rejected and not needed.

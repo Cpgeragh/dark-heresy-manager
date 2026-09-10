@@ -96,7 +96,7 @@ The emulator integration group completed in 214.7 s externally, of which about 1
 and process overhead. Its longest cases exercise chunked character deletion (18.1 s), account
 deletion (14.9 s), campaign deletion (11.1 s), concurrent numeric adjustment (9.1 s), identity
 reclaim (9.0 s), and custom-item mutation (8.8 s). Character deletion was effectively identical
-alone and in the group. These are genuine callable, transaction, authorization, and cleanup paths;
+alone and in the group. These are genuine callable, transaction, authorisation, and cleanup paths;
 sharing mutable authentication/application setup or replacing them with unit-level assertions is
 not justified.
 

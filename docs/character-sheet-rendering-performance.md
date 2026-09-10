@@ -17,7 +17,7 @@ loading remains dominated by work outside these corrected React render paths.
 ## Method and interpretation
 
 - A performance-mode-only counter records component function executions. The counts are exact for
-  each named trace, including React development-mode behavior; they are not production analytics.
+  each named trace, including React development-mode behaviour; they are not production analytics.
 - React Profiler commit durations identify where React spent time. Browser-control settling time is
   excluded from the commit figures.
 - Initial-load results use repeated runs where noted. Most interaction timings are single diagnostic
@@ -25,7 +25,7 @@ loading remains dominated by work outside these corrected React render paths.
 - The near-limit fixture contains 180 entries in each dense collection. Its corrected rank and
   valid ranged-weapon/ammunition relationship make the measured journeys deterministic.
 - Desktop measurements used the isolated in-app browser at a 1280-pixel viewport. Responsive
-  behavior was also covered by tests that explicitly switch the media-query result.
+  behaviour was also covered by tests that explicitly switch the media-query result.
 - The instrumentation did not force garbage collection and no arbitrary test timeout was raised.
 
 ## Confirmed changes
@@ -121,12 +121,12 @@ the higher dense-tab values do not alone justify virtualisation.
 - Blanket memoisation was rejected. It would add comparison and maintenance cost to inexpensive
   components without evidence of a user-visible benefit.
 - Custom comparison functions on every row were rejected. Many rows receive legitimately changing
-  objects and callbacks; a bespoke comparator risks stale behavior and needs stronger repeated
+  objects and callbacks; a bespoke comparator risks stale behaviour and needs stronger repeated
   evidence than these traces provide.
-- List virtualisation was rejected for now. It changes scrolling, focus and accessibility behavior,
+- List virtualisation was rejected for now. It changes scrolling, focus and accessibility behaviour,
   and the current evidence does not isolate DOM volume as the sole cause.
 - Caching Firestore snapshot objects or changing provider data ownership was rejected because it
-  would cross into subscription and data-consistency behavior already examined separately.
+  would cross into subscription and data-consistency behaviour already examined separately.
 - Memoising inexpensive Experience, Corruption and Insanity calculations was rejected because their
   measured commits were small.
 - Optimising from bundle size, generic warnings or one unusually fast or slow trace was rejected;
@@ -147,7 +147,7 @@ The completed implementation passed:
   and both PWA harness revisions. The harness build contained 44 precache entries totalling
   2,678.94 KiB.
 
-The backend-blocked optimized route cleared its loading screen to the expected account-load error.
+The backend-blocked optimised route cleared its loading screen to the expected account-load error.
 On a warm reload, the local server received the navigation document and service-worker/update
 files but no cached application assets. After the exact test server process was stopped, the same
 deep route still loaded from the installed service-worker cache and again reached the bounded error
@@ -156,7 +156,7 @@ states without Chrome or a live backend.
 
 All 428 Functions unit tests pass. An outdated DM header-patch fixture initially omitted the
 required character `campaignId`; the fixture was corrected without changing Functions production
-behavior.
+behaviour.
 
 ## Remaining observations
 
@@ -164,4 +164,4 @@ The confirmed duplicate responsive trees and repeated derived calculations are c
 Weapons, Gear, Cybernetics and Talents rows remain candidates for a future investigation only if
 repeated warm distributions and interaction-specific profiles demonstrate a practical problem.
 Any such work should first identify which props actually change per row and verify focus, scrolling
-and editing behavior before choosing memoisation or virtualisation.
+and editing behaviour before choosing memoisation or virtualisation.

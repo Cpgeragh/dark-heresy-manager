@@ -15,6 +15,8 @@ import type {
   UseCampaignCustomItemsResult,
 } from "../../src/hooks/useCampaignCustomItems";
 
+const recordComponentRenderMock = vi.hoisted(() => vi.fn());
+
 const useCampaignCustomItemsMock = vi.fn<
   (args: UseCampaignCustomItemsArgs) => UseCampaignCustomItemsResult
 >(() => ({ items: [], loading: false, error: null }));
@@ -90,13 +92,16 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow", () => ({
     item: { id: string; name: string };
     onCycleQuality: (id: string) => void;
     onRemove: (id: string) => void;
-  }) => (
-    <div>
-      <span>{item.name}</span>
-      <button onClick={() => onCycleQuality(item.id)}>Cycle {item.name}</button>
-      <button onClick={() => onRemove(item.id)}>Remove {item.name}</button>
-    </div>
-  ),
+  }) => {
+    recordComponentRenderMock("ImplantRow");
+    return (
+      <div>
+        <span>{item.name}</span>
+        <button onClick={() => onCycleQuality(item.id)}>Cycle {item.name}</button>
+        <button onClick={() => onRemove(item.id)}>Remove {item.name}</button>
+      </div>
+    );
+  },
 }));
 
 vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/CustomImplantForm", () => ({
@@ -230,6 +235,29 @@ beforeEach(() => {
 });
 
 describe("CyberneticsTab", () => {
+  it("does not rebuild installed implants when a picker opens", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockImplementation(({ enabled }) => ({
+      items: [],
+      loading: Boolean(enabled),
+      error: null,
+    }));
+    renderTab({
+      cybernetics: [{ id: "implant-1", name: "Auto-Quill", source: "CR" }],
+    });
+    const initialRenderCount = recordComponentRenderMock.mock.calls.filter(
+      ([name]) => name === "ImplantRow"
+    ).length;
+
+    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+
+    expect(screen.getAllByText("Auto-Quill").length).toBeGreaterThan(0);
+    expect(initialRenderCount).toBeGreaterThan(0);
+    expect(
+      recordComponentRenderMock.mock.calls.filter(([name]) => name === "ImplantRow").length
+    ).toBe(initialRenderCount);
+  });
+
   it("enables the custom-item subscription only after a picker opens", async () => {
     const user = userEvent.setup();
     renderTab();
@@ -247,7 +275,9 @@ describe("CyberneticsTab", () => {
       loading: false,
       error: new Error("boom"),
     });
-    renderTab();
+    renderTab({
+      cybernetics: [{ id: "implant-1", name: "Linked Implant", customLibraryId: "library-1" }],
+    });
     expect(
       screen.getByText("Unable to load custom cybernetic or integrated weapon items.")
     ).toBeInTheDocument();
@@ -255,7 +285,9 @@ describe("CyberneticsTab", () => {
 
   it("shows a loading state", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: true, error: null });
-    renderTab();
+    renderTab({
+      cybernetics: [{ id: "implant-1", name: "Linked Implant", customLibraryId: "library-1" }],
+    });
     expect(screen.getByText("Loading custom cybernetic items…")).toBeInTheDocument();
   });
 

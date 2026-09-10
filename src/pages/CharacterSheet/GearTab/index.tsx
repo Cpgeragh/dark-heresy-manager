@@ -69,6 +69,9 @@ const GEAR_TABS = [
   },
 ] as const satisfies readonly SegmentedTabOption<GearSection>[];
 const GEAR_TABS_ID = "gear-sections";
+const GEAR_CUSTOM_ITEM_CATEGORIES = ["gear", "consumable"] as const;
+const EMPTY_CUSTOM_GEAR_BY_ID = new Map<string, CampaignCustomItem<"gear">>();
+const EMPTY_CUSTOM_CONSUMABLES_BY_ID = new Map<string, CampaignCustomItem<"consumable">>();
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -127,6 +130,12 @@ export function GearTab({
     userId,
     itemLabel: "consumable",
   });
+  const hasLinkedCustomGear = useMemo(() => gear.some((item) => !!item.customLibraryId), [gear]);
+  const hasLinkedCustomConsumables = useMemo(
+    () => consumables.some((item) => !!item.customLibraryId),
+    [consumables]
+  );
+  const customItemsRequiredForOwnedRows = hasLinkedCustomGear || hasLinkedCustomConsumables;
 
   const {
     items: campaignCustomItems,
@@ -134,16 +143,13 @@ export function GearTab({
     error: customItemsError,
   } = useCampaignCustomItems({
     campaignId,
-    categories: ["gear", "consumable"],
+    categories: GEAR_CUSTOM_ITEM_CATEGORIES,
     mode: isDM ? "admin" : "picker",
     userId,
     characterId,
     includeArchived: isDM,
     enabled:
-      showGearPicker ||
-      showConsumablePicker ||
-      gear.some((item) => !!item.customLibraryId) ||
-      consumables.some((item) => !!item.customLibraryId),
+      showGearPicker || showConsumablePicker || hasLinkedCustomGear || hasLinkedCustomConsumables,
   });
   const campaignCustomGear = useMemo(
     () =>
@@ -170,6 +176,12 @@ export function GearTab({
     () => new Map(campaignCustomConsumables.map((item) => [item.id, item])),
     [campaignCustomConsumables]
   );
+  const customGearByIdForOwnedRows = hasLinkedCustomGear
+    ? campaignCustomGearById
+    : EMPTY_CUSTOM_GEAR_BY_ID;
+  const customConsumablesByIdForOwnedRows = hasLinkedCustomConsumables
+    ? campaignCustomConsumablesById
+    : EMPTY_CUSTOM_CONSUMABLES_BY_ID;
   const sortedGear = useMemo(() => [...gear].sort((a, b) => a.name.localeCompare(b.name)), [gear]);
   const sortedConsumables = useMemo(
     () => [...consumables].sort((a, b) => a.name.localeCompare(b.name)),
@@ -442,6 +454,142 @@ export function GearTab({
     [editable, gear, onUpdate]
   );
 
+  const gearRows = useMemo(
+    () =>
+      sortedGear.map((item) => {
+        const linkedLibraryItem = item.customLibraryId
+          ? customGearByIdForOwnedRows.get(item.customLibraryId)
+          : undefined;
+        const libraryItem =
+          linkedLibraryItem ??
+          (item.customLibraryId
+            ? buildFallbackGearLibraryItem({
+                campaignId,
+                item,
+                userId,
+                characterId,
+                characterName,
+              })
+            : undefined);
+        const canEditDefinition =
+          !!libraryItem &&
+          editable &&
+          ((!!userId && libraryItem.creator.userId === userId) ||
+            (isDM &&
+              (characterId === libraryItem.creator.characterId ||
+                userId === libraryItem.creator.userId)));
+        const rowBusyAction = libraryItem ? getGearBusyAction(libraryItem.id) : null;
+
+        return (
+          <ItemRow
+            key={item.id}
+            item={item}
+            editable={editable}
+            libraryItem={libraryItem}
+            isDM={
+              isDM &&
+              editable &&
+              !!libraryItem &&
+              (characterId === libraryItem.creator.characterId ||
+                userId === libraryItem.creator.userId)
+            }
+            canEditDefinition={canEditDefinition}
+            busyAction={rowBusyAction}
+            onEditDefinition={() => libraryItem && setEditingGearDefinition({ item, libraryItem })}
+            onPublish={() => libraryItem && publishGearDefinition(libraryItem)}
+            onArchive={() => libraryItem && archiveGearDefinition(libraryItem)}
+            onUpdateAllCopies={() => libraryItem && updateAllGearCopies(libraryItem)}
+            onRemove={() => removeItem(item.id)}
+          />
+        );
+      }),
+    [
+      archiveGearDefinition,
+      campaignId,
+      characterId,
+      characterName,
+      customGearByIdForOwnedRows,
+      editable,
+      getGearBusyAction,
+      isDM,
+      publishGearDefinition,
+      removeItem,
+      sortedGear,
+      updateAllGearCopies,
+      userId,
+    ]
+  );
+
+  const consumableRows = useMemo(
+    () =>
+      sortedConsumables.map((item) => {
+        const linkedLibraryItem = item.customLibraryId
+          ? customConsumablesByIdForOwnedRows.get(item.customLibraryId)
+          : undefined;
+        const libraryItem =
+          linkedLibraryItem ??
+          (item.customLibraryId
+            ? buildFallbackConsumableLibraryItem({
+                campaignId,
+                item,
+                userId,
+                characterId,
+                characterName,
+              })
+            : undefined);
+        const canEditDefinition =
+          !!libraryItem &&
+          editable &&
+          ((!!userId && libraryItem.creator.userId === userId) ||
+            (isDM &&
+              (characterId === libraryItem.creator.characterId ||
+                userId === libraryItem.creator.userId)));
+        const rowBusyAction = libraryItem ? getConsumableBusyAction(libraryItem.id) : null;
+
+        return (
+          <ConsumableRow
+            key={item.id}
+            item={item}
+            editable={editable}
+            libraryItem={libraryItem}
+            isDM={
+              isDM &&
+              editable &&
+              !!libraryItem &&
+              (characterId === libraryItem.creator.characterId ||
+                userId === libraryItem.creator.userId)
+            }
+            canEditDefinition={canEditDefinition}
+            busyAction={rowBusyAction}
+            onEditDefinition={() =>
+              libraryItem && setEditingConsumableDefinition({ item, libraryItem })
+            }
+            onPublish={() => libraryItem && publishConsumableDefinition(libraryItem)}
+            onArchive={() => libraryItem && archiveConsumableDefinition(libraryItem)}
+            onUpdateAllCopies={() => libraryItem && updateAllConsumableCopies(libraryItem)}
+            onUpdateQty={updateConsumableQty}
+            onRemove={removeConsumable}
+          />
+        );
+      }),
+    [
+      archiveConsumableDefinition,
+      campaignId,
+      characterId,
+      characterName,
+      customConsumablesByIdForOwnedRows,
+      editable,
+      getConsumableBusyAction,
+      isDM,
+      publishConsumableDefinition,
+      removeConsumable,
+      sortedConsumables,
+      updateAllConsumableCopies,
+      updateConsumableQty,
+      userId,
+    ]
+  );
+
   const visibleGearSectionClass = (section: GearSection) =>
     [
       "space-y-3",
@@ -450,11 +598,11 @@ export function GearTab({
         : "hidden lg:block",
     ].join(" ");
 
-  if (customItemsError) {
+  if (customItemsError && customItemsRequiredForOwnedRows) {
     return <ErrorState>Unable to load custom gear.</ErrorState>;
   }
 
-  if (customItemsLoading) {
+  if (customItemsLoading && customItemsRequiredForOwnedRows) {
     return <LoadingState>Loading custom gear…</LoadingState>;
   }
 
@@ -491,59 +639,7 @@ export function GearTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No items recorded.</p>
           )}
 
-          <div className="space-y-3">
-            {sortedGear.map((item) =>
-              (() => {
-                const linkedLibraryItem = item.customLibraryId
-                  ? campaignCustomGearById.get(item.customLibraryId)
-                  : undefined;
-                const libraryItem =
-                  linkedLibraryItem ??
-                  (item.customLibraryId
-                    ? buildFallbackGearLibraryItem({
-                        campaignId,
-                        item,
-                        userId,
-                        characterId,
-                        characterName,
-                      })
-                    : undefined);
-                const canEditDefinition =
-                  !!libraryItem &&
-                  editable &&
-                  ((!!userId && libraryItem.creator.userId === userId) ||
-                    (isDM &&
-                      (characterId === libraryItem.creator.characterId ||
-                        userId === libraryItem.creator.userId)));
-                const rowBusyAction = libraryItem ? getGearBusyAction(libraryItem.id) : null;
-
-                return (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    editable={editable}
-                    libraryItem={libraryItem}
-                    isDM={
-                      isDM &&
-                      editable &&
-                      !!libraryItem &&
-                      (characterId === libraryItem.creator.characterId ||
-                        userId === libraryItem.creator.userId)
-                    }
-                    canEditDefinition={canEditDefinition}
-                    busyAction={rowBusyAction}
-                    onEditDefinition={() =>
-                      libraryItem && setEditingGearDefinition({ item, libraryItem })
-                    }
-                    onPublish={() => libraryItem && publishGearDefinition(libraryItem)}
-                    onArchive={() => libraryItem && archiveGearDefinition(libraryItem)}
-                    onUpdateAllCopies={() => libraryItem && updateAllGearCopies(libraryItem)}
-                    onRemove={() => removeItem(item.id)}
-                  />
-                );
-              })()
-            )}
-          </div>
+          <div className="space-y-3">{gearRows}</div>
         </section>
         {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
         <section
@@ -565,60 +661,7 @@ export function GearTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No consumables recorded.</p>
           )}
 
-          <div className="space-y-3">
-            {sortedConsumables.map((item) =>
-              (() => {
-                const linkedLibraryItem = item.customLibraryId
-                  ? campaignCustomConsumablesById.get(item.customLibraryId)
-                  : undefined;
-                const libraryItem =
-                  linkedLibraryItem ??
-                  (item.customLibraryId
-                    ? buildFallbackConsumableLibraryItem({
-                        campaignId,
-                        item,
-                        userId,
-                        characterId,
-                        characterName,
-                      })
-                    : undefined);
-                const canEditDefinition =
-                  !!libraryItem &&
-                  editable &&
-                  ((!!userId && libraryItem.creator.userId === userId) ||
-                    (isDM &&
-                      (characterId === libraryItem.creator.characterId ||
-                        userId === libraryItem.creator.userId)));
-                const rowBusyAction = libraryItem ? getConsumableBusyAction(libraryItem.id) : null;
-
-                return (
-                  <ConsumableRow
-                    key={item.id}
-                    item={item}
-                    editable={editable}
-                    libraryItem={libraryItem}
-                    isDM={
-                      isDM &&
-                      editable &&
-                      !!libraryItem &&
-                      (characterId === libraryItem.creator.characterId ||
-                        userId === libraryItem.creator.userId)
-                    }
-                    canEditDefinition={canEditDefinition}
-                    busyAction={rowBusyAction}
-                    onEditDefinition={() =>
-                      libraryItem && setEditingConsumableDefinition({ item, libraryItem })
-                    }
-                    onPublish={() => libraryItem && publishConsumableDefinition(libraryItem)}
-                    onArchive={() => libraryItem && archiveConsumableDefinition(libraryItem)}
-                    onUpdateAllCopies={() => libraryItem && updateAllConsumableCopies(libraryItem)}
-                    onUpdateQty={updateConsumableQty}
-                    onRemove={removeConsumable}
-                  />
-                );
-              })()
-            )}
-          </div>
+          <div className="space-y-3">{consumableRows}</div>
         </section>
       </div>
 

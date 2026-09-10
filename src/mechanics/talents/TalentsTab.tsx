@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import type {
   ArcheotechItem,
   Character,
@@ -111,6 +111,35 @@ function FaithTalentSection({
   rank?: string;
 }) {
   const [showPicker, setShowPicker] = useState(false);
+  const faithTalentCards = useMemo(
+    () =>
+      FAITH_GROUP_ORDER.map((group) => {
+        const groupEntries = entries
+          .filter((entry) => getFaithGroup(entry.talentId) === group)
+          .sort((a, b) => a.name.localeCompare(b.name));
+        return (
+          <div key={group}>
+            <p className={`${uiFormLabel} mb-1.5`}>{FAITH_GROUP_LABELS[group]}</p>
+            {groupEntries.length === 0 && (
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
+            )}
+            <div className="grid grid-cols-1 gap-2">
+              {groupEntries.map((entry) => (
+                <EntryCard
+                  key={entry.uid}
+                  entry={entry}
+                  editable={editable}
+                  onRemove={onRemove}
+                  confirmDeletion
+                  statusAfterSource
+                />
+              ))}
+            </div>
+          </div>
+        );
+      }),
+    [editable, entries, onRemove]
+  );
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
@@ -122,31 +151,7 @@ function FaithTalentSection({
         )}
       </div>
       <section className={uiSection + " space-y-4"}>
-        {FAITH_GROUP_ORDER.map((group) => {
-          const groupEntries = entries
-            .filter((entry) => getFaithGroup(entry.talentId) === group)
-            .sort((a, b) => a.name.localeCompare(b.name));
-          return (
-            <div key={group}>
-              <p className={`${uiFormLabel} mb-1.5`}>{FAITH_GROUP_LABELS[group]}</p>
-              {groupEntries.length === 0 && (
-                <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
-              )}
-              <div className="grid grid-cols-1 gap-2">
-                {groupEntries.map((entry) => (
-                  <EntryCard
-                    key={entry.uid}
-                    entry={entry}
-                    editable={editable}
-                    onRemove={onRemove}
-                    confirmDeletion
-                    statusAfterSource
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
+        {faithTalentCards}
         {showPicker && (
           <TalentPickerModal
             title={editable ? "Add Faith Talent" : "View Faith Talents"}
@@ -167,7 +172,7 @@ function FaithTalentSection({
   );
 }
 
-function TalentCards({
+const TalentCards = memo(function TalentCards({
   entries,
   psychic,
   editable,
@@ -279,7 +284,7 @@ function TalentCards({
         />
       ));
     });
-}
+});
 
 function RegularTalentSection({
   entries,

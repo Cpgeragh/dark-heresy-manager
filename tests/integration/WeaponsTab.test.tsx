@@ -1,5 +1,5 @@
 // tests/integration/WeaponsTab.test.tsx
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -7,6 +7,14 @@ import type {
   UseCampaignCustomItemsArgs,
   UseCampaignCustomItemsResult,
 } from "../../src/hooks/useCampaignCustomItems";
+
+const recordComponentRenderMock = vi.hoisted(() => vi.fn());
+vi.mock("../../src/performance/performanceMetrics", async () => {
+  const actual = await vi.importActual<typeof import("../../src/performance/performanceMetrics")>(
+    "../../src/performance/performanceMetrics"
+  );
+  return { ...actual, recordComponentRender: recordComponentRenderMock };
+});
 
 const useCampaignCustomItemsMock = vi.fn<
   (args: UseCampaignCustomItemsArgs) => UseCampaignCustomItemsResult
@@ -80,7 +88,34 @@ function renderTab(props: Partial<React.ComponentProps<typeof WeaponsTab>> = {})
   return { noop };
 }
 
+beforeEach(() => {
+  vi.clearAllMocks();
+  useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: false, error: null });
+});
+
 describe("WeaponsTab", () => {
+  it("does not rebuild owned weapon cards when a picker opens and closes", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockImplementation(({ enabled }) => ({
+      items: [],
+      loading: Boolean(enabled),
+      error: null,
+    }));
+    renderTab();
+    const cardRenderCount = () =>
+      recordComponentRenderMock.mock.calls.filter(
+        ([name]) => name === "RangedCard" || name === "MeleeCard"
+      ).length;
+    const initialCardRenderCount = cardRenderCount();
+
+    await user.click(screen.getByRole("button", { name: "Add ranged weapon" }));
+    expect(screen.getAllByText("Lasgun").length).toBeGreaterThan(0);
+    await user.keyboard("{Escape}");
+
+    expect(initialCardRenderCount).toBe(2);
+    expect(cardRenderCount()).toBe(initialCardRenderCount);
+  });
+
   it("uses one combined subscription for weapon and armour library items", () => {
     useCampaignCustomItemsMock.mockClear();
     renderTab();

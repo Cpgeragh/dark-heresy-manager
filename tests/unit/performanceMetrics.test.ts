@@ -90,7 +90,7 @@ describe("performance metrics recorder", () => {
     );
   });
 
-  it("records a sanitized Firestore listener error code", async () => {
+  it("records a sanitised Firestore listener error code", async () => {
     const { beginPerformanceSubscription } =
       await import("../../src/performance/performanceMetrics");
     const subscription = beginPerformanceSubscription("campaigns:test:armour");
@@ -130,7 +130,7 @@ describe("performance metrics recorder", () => {
     expect(JSON.stringify(events)).not.toContain("saved");
   });
 
-  it("records a sanitized mutation error and preserves the rejection", async () => {
+  it("records a sanitised mutation error and preserves the rejection", async () => {
     const { measurePerformanceMutation } = await import("../../src/performance/performanceMetrics");
     const failure = Object.assign(new Error("private detail"), {
       code: "functions/permission-denied",

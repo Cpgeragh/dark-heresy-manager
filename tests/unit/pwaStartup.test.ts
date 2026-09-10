@@ -14,6 +14,7 @@ interface RegistrationCallbacks {
       : never
     : never;
   onRegisterError: (error: unknown) => void;
+  onNeedReload: () => void;
 }
 
 function createHarness(overrides: Partial<PwaStartupOptions> = {}) {
@@ -54,6 +55,7 @@ function createHarness(overrides: Partial<PwaStartupOptions> = {}) {
     markUpdateStalled: vi.fn(),
     markPostUpgrade: vi.fn(),
     mark: (name) => marks.push(name),
+    reloadPage: vi.fn(),
     ...overrides,
   };
 
@@ -89,25 +91,25 @@ describe("PWA startup coordination", () => {
     expect(harness.marks).toContain("startup:first-visit-or-no-controller");
   });
 
-  it("renders a controlled visit when the current worker has no update", async () => {
+  it("uses the registration helper's single check on a controlled visit with no update", () => {
     const harness = createHarness();
 
     harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
-    await Promise.resolve();
 
-    expect(harness.registration.update).toHaveBeenCalledOnce();
+    expect(harness.registration.update).not.toHaveBeenCalled();
     expect(harness.scheduled.map(({ delayMs }) => delayMs)).toContain(PWA_UPDATE_CHECK_FALLBACK_MS);
     expect(harness.renders).toEqual(["loading", "app"]);
+    expect(harness.marks).toContain("startup:update-check-complete");
     expect(harness.marks).toContain("startup:no-update");
   });
 
-  it("shows Updating while an available update installs, then falls back after 30 seconds", async () => {
+  it("shows Updating when the single registration check finds an installing update", () => {
     const harness = createHarness();
     harness.registration.installing = {};
 
     harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
-    await Promise.resolve();
 
+    expect(harness.registration.update).not.toHaveBeenCalled();
     expect(harness.renders).toEqual(["loading", "updating"]);
     expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBe("1");
     const stalledFallback = harness.scheduled.find(
@@ -122,32 +124,24 @@ describe("PWA startup coordination", () => {
     expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBeUndefined();
   });
 
-  it("uses the three-second fallback when an update check never settles", () => {
+  it("marks an activated update before the helper-requested reload", () => {
     const harness = createHarness();
-    harness.registration.update.mockReturnValue(new Promise(() => undefined));
-
     harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
-    expect(harness.renders).toEqual(["loading"]);
 
-    harness.scheduled.find(({ delayMs }) => delayMs === PWA_UPDATE_CHECK_FALLBACK_MS)?.callback();
+    harness.callbacks()?.onNeedReload();
+    harness.callbacks()?.onNeedReload();
 
-    expect(harness.renders).toEqual(["loading", "app"]);
-    expect(harness.marks).toContain("startup:update-check-safety-fallback");
+    expect(harness.options.reloadPage).toHaveBeenCalledOnce();
+    expect(harness.renders).toEqual(["loading", "app", "updating"]);
+    expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBe("1");
+    expect(harness.marks).toContain("startup:update-activated");
   });
 
-  it("renders after an update-check rejection or registration error", async () => {
-    const updateFailure = createHarness();
-    updateFailure.registration.update.mockRejectedValue(new Error("offline"));
-    updateFailure.callbacks()?.onRegisteredSW("/sw.js", updateFailure.registration);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(updateFailure.renders).toEqual(["loading", "app"]);
-    expect(updateFailure.marks).toContain("startup:update-check-error");
-
+  it("renders after the registration helper reports an update-check error", () => {
     const registrationFailure = createHarness();
     registrationFailure.callbacks()?.onRegisterError(new Error("registration failed"));
     expect(registrationFailure.renders).toEqual(["loading", "app"]);
+    expect(registrationFailure.marks).toContain("startup:update-check-error");
   });
 
   it("consumes the post-upgrade marker and renders the app immediately", () => {

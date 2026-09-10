@@ -71,7 +71,7 @@ use `dhm-performance-reset` and `dhm-performance-mark`; the latter reads its nam
 `data-dhm-performance-mark`.
 
 Where custom event dispatch is unavailable, click the performance-only transparent button
-`#dhm-performance-snapshot` and read the same root attribute. Snapshot serialization still occurs
+`#dhm-performance-snapshot` and read the same root attribute. Snapshot serialisation still occurs
 only on request. Native modal dialogs occupy the browser top layer and block controls behind them;
 reset before opening such a dialog and request its snapshot after closing it.
 
@@ -80,7 +80,7 @@ Mutation services also emit paired metadata-only events:
 - `mutation-start` records the operation name, a monotonically increasing `mutationId`, and the
   start time.
 - `mutation-complete` records the matching ID and acknowledgement duration.
-- `mutation-error` records the matching ID, acknowledgement duration, and a sanitized Firebase
+- `mutation-error` records the matching ID, acknowledgement duration, and a sanitised Firebase
   error code when one is available.
 
 The duration ends when the write, batch, transaction, or callable promise settles. It is therefore

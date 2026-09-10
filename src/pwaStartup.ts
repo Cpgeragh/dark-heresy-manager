@@ -6,11 +6,11 @@ export const PWA_JUST_UPGRADED_KEY = "pwa-just-upgraded";
 interface ServiceWorkerRegistrationLike {
   installing: unknown;
   waiting: unknown;
-  update: () => Promise<unknown>;
 }
 
 interface ServiceWorkerRegistrationOptions {
   immediate: true;
+  onNeedReload: () => void;
   onRegisteredSW: (
     serviceWorkerUrl: string,
     registration: ServiceWorkerRegistrationLike | undefined
@@ -37,16 +37,18 @@ export interface PwaStartupOptions {
   markUpdateStalled: () => void;
   markPostUpgrade: () => void;
   mark: (name: string) => void;
+  reloadPage: () => void;
 }
 
 /**
  * Coordinates the existing production PWA startup flow behind injectable
  * browser dependencies so every update state can be measured and tested.
  * This intentionally preserves the current three- and thirty-second safety
- * behavior; corrections are considered only after the measurements.
+ * behaviour; corrections are considered only after the measurements.
  */
 export function startPwaStartup(options: PwaStartupOptions): void {
   let settled = false;
+  let reloadRequested = false;
 
   const renderApp = () => {
     if (settled) return;
@@ -68,6 +70,15 @@ export function startPwaStartup(options: PwaStartupOptions): void {
       options.markUpdateStalled();
       renderApp();
     }, PWA_STALLED_UPDATE_FALLBACK_MS);
+  };
+
+  const reloadForActivatedUpdate = () => {
+    if (reloadRequested) return;
+    reloadRequested = true;
+    options.mark("startup:update-activated");
+    options.storage.setItem(PWA_JUST_UPGRADED_KEY, "1");
+    options.renderUpdating();
+    options.reloadPage();
   };
 
   options.mark("startup:bootstrap");
@@ -102,10 +113,13 @@ export function startPwaStartup(options: PwaStartupOptions): void {
   }, PWA_UPDATE_CHECK_FALLBACK_MS);
 
   options.mark("startup:service-worker-registration-start");
+  options.mark("startup:update-check-start");
   options.registerServiceWorker({
     immediate: true,
+    onNeedReload: reloadForActivatedUpdate,
     onRegisteredSW(_serviceWorkerUrl, registration) {
       options.mark("startup:service-worker-registered");
+      options.mark("startup:update-check-complete");
       if (!registration || !options.hasController()) {
         options.mark("startup:first-visit-or-no-controller");
         renderApp();
@@ -113,24 +127,15 @@ export function startPwaStartup(options: PwaStartupOptions): void {
       }
 
       options.mark("startup:controlled-visit");
-      options.mark("startup:update-check-start");
-      registration
-        .update()
-        .then(() => {
-          options.mark("startup:update-check-complete");
-          if (registration.installing || registration.waiting) renderUpdating();
-          else {
-            options.mark("startup:no-update");
-            renderApp();
-          }
-        })
-        .catch(() => {
-          options.mark("startup:update-check-error");
-          renderApp();
-        });
+      if (registration.installing || registration.waiting) renderUpdating();
+      else {
+        options.mark("startup:no-update");
+        renderApp();
+      }
     },
     onRegisterError() {
       options.mark("startup:service-worker-registration-error");
+      options.mark("startup:update-check-error");
       renderApp();
     },
   });

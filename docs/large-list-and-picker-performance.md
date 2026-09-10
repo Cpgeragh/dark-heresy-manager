@@ -1,6 +1,7 @@
 ---
 title: Large-list, picker, search, and custom-form performance
 date: 2026-09-09
+last_updated: 2026-09-10
 status: Corrections implemented and verified
 ---
 
@@ -90,7 +91,7 @@ was 478.4 ms. The browser-observed 1.7 seconds includes control overhead and is 
 claim a product regression.
 
 The correction replaces each collapsed ranged-picker result with a lightweight reference row and
-mounts the existing detailed card only when that result is expanded. Selection behavior, the
+mounts the existing detailed card only when that result is expanded. Selection behaviour, the
 information control, the class marker, the expand/collapse control, focus restoration, and the
 picker's public API remain unchanged. The post-correction broad-search React commit was 122.1 ms,
 about 35% below the 188.9 ms baseline. The browser-observed picker open, first broad input, and
@@ -101,7 +102,7 @@ It did not mount full cards for collapsed picker results. The 1,080 `RangedCard`
 same trace came from the 180 ranged weapons already displayed on the dense sheet behind the modal.
 That background tree still produced 445.5-451.8 ms commits during open and close, so this report
 does not claim that total picker opening became cheap. Isolating the owned-weapons tree would be a
-separate optimization requiring its own evidence and approval.
+separate optimisation requiring its own evidence.
 
 ## Custom-gear flow
 
@@ -212,7 +213,7 @@ its missing delegate. The hook's effect callback could observe the previous rend
 closure when a subscription changed from disabled to enabled in one commit.
 
 The hook now reads the latest empty-data and subscribe callbacks from refs when the effect runs.
-The performance recorder also stores a sanitized error classification such as
+The performance recorder also stores a sanitised error classification such as
 `permission-denied`, `failed-precondition`, or `exception-type`, never the raw error message. No
 query, index, security rule, or list limit changed.
 
@@ -247,7 +248,7 @@ over-15-second observation belongs to suite/process cost and user-event/test set
 propagation and Firestore-create failures, so making only the test query faster would conceal
 product evidence.
 
-## Implemented corrections and remaining evidence
+## Implemented corrections and follow-up evidence
 
 Four narrowly scoped corrections were justified and implemented:
 
@@ -258,13 +259,30 @@ Four narrowly scoped corrections were justified and implemented:
 3. Undefined-value stripping preserves Firebase field-value objects, and exact draft payload tests
    cover the browser-to-rules boundary.
 4. Firestore subscription effects use the latest callback refs, and recorded listener errors expose
-   only a sanitized classification.
+   only a sanitised classification.
 
-The corrections remove the confirmed global toast propagation, the ranged picker's eager detail
-construction, and both functional blockers. The dense sheet behind modal pickers still rerenders
-substantial owned-inventory trees during some modal operations. This report deliberately leaves
-that behavior unchanged: a new isolated measurement would be needed to justify a component
-boundary without masking legitimate inventory updates.
+The first corrections remove the confirmed global toast propagation, the ranged picker's eager
+detail construction, and both functional blockers.
+
+A dedicated follow-up on 2026-09-10 then isolated the owned-inventory work behind modal pickers.
+The first real-browser Gear cycle executed 1,080 owned gear rows and 1,080 owned consumable rows.
+Memoising only the mapped row trees did not solve the complete path: opening a picker enabled its
+on-demand custom-item subscription, and the transition through loading replaced the whole dense
+tab even when every owned row used built-in reference data. The browser measurement exposed this
+gap after the focused component tests had initially missed the real subscription transition.
+
+The correction keeps mapped owned rows and cards stable in Gear, Weapons, Cybernetics,
+and Talents. Inventories with no linked custom-library identifiers use a stable empty lookup map,
+and picker-only custom-item loading no longer replaces their owned tree. Inventories that do
+contain linked custom definitions still wait for those definitions and update when the inventory
+or library data legitimately changes.
+
+Three repeated open/close cycles after correction produced zero owned `GearItemRow`,
+`ConsumableRow`, ranged-card, melee-card, grenade-card, implant-row, integrated-weapon-card, and
+`TalentCards` executions. Picker-local work remained visible and honest: Gear executed 2,094
+picker rows, Weapons 1,980 ranged-picker rows plus 132 shared rows, Cybernetics 108 picker rows,
+and Talents 24 picker rows. The correction therefore isolates unchanged background content; it
+does not claim that rendering thousands of actual picker results is free.
 
 ## Alternatives considered and rejected
 
@@ -272,8 +290,12 @@ boundary without masking legitimate inventory updates.
   input latency without addressing broad result construction or context propagation.
 - Blanket row memoisation was rejected. Context updates bypass it, inline callbacks can defeat it,
   and many rows legitimately change after an inventory update.
+- Always-on custom-item listeners were rejected. They would hide the loading transition by
+  increasing subscription lifetime and backend workload for closed pickers.
+- Removing or truncating picker results was rejected. The remaining picker-row work represents
+  visible product behaviour, and the measurements do not justify changing its result set.
 - Full list virtualisation was rejected for the first correction. It changes scrolling, focus, and
-  keyboard behavior across many mature components. The ranged-picker evidence points more directly
+  keyboard behaviour across many mature components. The ranged-picker evidence points more directly
   to eager detailed-card construction, which can be corrected without limiting results.
 - Global pagination was rejected. Messages already page correctly, campaign list filters were
   responsive, and changing every picker API would be disproportionate.
@@ -297,6 +319,13 @@ boundary without masking legitimate inventory updates.
 - Startup, loading, PWA configuration, and offline-indicator group: 4 files and 18 tests passed.
 - Production build completed and generated a 43-entry, 2,682.80 KiB precache.
 - Lint, formatting verification, local safety checks, and diff whitespace checks passed.
+- Owned-tree follow-up set: 5 files and 109 tests passed.
+- Complete follow-up fast suite: 213 files and 2,270 tests passed in 102.06 seconds.
+- Complete follow-up heavy suite: 3 files and 66 tests passed twice in 66.75 and 67.77 seconds.
+- Repeated local-emulator browser cycles confirmed zero unchanged owned-row or owned-card renders
+  while Gear, Weapons, Cybernetics, and Talent pickers opened and closed.
+- Follow-up production build and generated PWA inventory check passed with 43 unique precache
+  entries, 43 cache-eligible files, and 48 emitted files.
 
 No Functions source changed, so Functions tests were not repeated for these client-only
 corrections. No timeout was increased. No commit or push was made.

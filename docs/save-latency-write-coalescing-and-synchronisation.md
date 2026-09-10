@@ -19,7 +19,7 @@ No live Firebase project was contacted. Authenticated measurements used only the
 ## Method and interpretation
 
 Source inspection and unit tests established each mutation boundary, debounce, transaction, and
-write path. Emulator-backed tests established authorization, rules behaviour, transaction
+write path. Emulator-backed tests established authorisation, rules behaviour, transaction
 contention, and snapshot delivery. An isolated in-app browser exercised the same local application
 against those emulators.
 
@@ -103,7 +103,7 @@ armour spare cells; ammunition clips and rounds; and ranged magazine rounds.
 
 Compatible changes to the same character, collection, item, nested item, and property accumulate
 for 300 ms. A zero net delta cancels without a request. The callable validates the narrow locator,
-authorization, safe-integer delta and fallback, and the complete resulting field. Its transaction
+authorisation, safe-integer delta and fallback, and the complete resulting field. Its transaction
 reads current server state, applies the accumulated delta with a zero lower bound, and writes the
 validated collection. Independent tabs therefore compose against fresh state instead of replacing
 one another's arrays. Structural edits, multiple changed paths, and unsupported number changes
@@ -125,7 +125,7 @@ acknowledges success.
 
 Audit and usage writes begin concurrently after the protected handler outcome is known. They are
 independent observability records, and failure remains non-fatal as before. Authentication,
-validation, rate limiting, idempotency, authorization, product transactions, ordered message
+validation, rate limiting, idempotency, authorisation, product transactions, ordered message
 clearing, and all operations with consistency or security dependencies remain serial.
 
 The offline banner now says to keep the page open and retry any change that reports a failure. The
@@ -162,10 +162,10 @@ reconnection behaviour without making a claim about callable mutations.
   addressing a demonstrated duplicate-write path.
 - Client-side read/modify/write transactions over every inventory array were rejected. The client
   cannot safely use its rendered array as current state across tabs; the narrow server transaction
-  preserves authorization, validation, and idempotency at the existing protected boundary.
+  preserves authorisation, validation, and idempotency at the existing protected boundary.
 - Coalescing structural array edits or unrelated number paths was rejected. Their ordering and
   consistency semantics differ and cannot be represented safely as one accumulated scalar delta.
-- Parallelising validation, rate limiting, authorization, idempotency, transactions, message clear
+- Parallelising validation, rate limiting, authorisation, idempotency, transactions, message clear
   phases, or dependent custom-item workflow steps was rejected. Only independent post-outcome
   audit and usage recording was parallelised.
 - Closing dialogs or clearing message drafts optimistically was rejected because a visible success

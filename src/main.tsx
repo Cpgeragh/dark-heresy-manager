@@ -45,4 +45,5 @@ startPwaStartup({
   markUpdateStalled,
   markPostUpgrade,
   mark: markApplicationPerformance,
+  reloadPage: () => window.location.reload(),
 });

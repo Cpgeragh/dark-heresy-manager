@@ -3,10 +3,19 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { useState } from "react";
 import type {
   UseCampaignCustomItemsArgs,
   UseCampaignCustomItemsResult,
 } from "../../src/hooks/useCampaignCustomItems";
+
+const recordComponentRenderMock = vi.hoisted(() => vi.fn());
+vi.mock("../../src/performance/performanceMetrics", async () => {
+  const actual = await vi.importActual<typeof import("../../src/performance/performanceMetrics")>(
+    "../../src/performance/performanceMetrics"
+  );
+  return { ...actual, recordComponentRender: recordComponentRenderMock };
+});
 
 const useCampaignCustomItemsMock = vi.fn<
   (args: UseCampaignCustomItemsArgs) => UseCampaignCustomItemsResult
@@ -91,12 +100,74 @@ function renderTab(props: Partial<React.ComponentProps<typeof GearTab>> = {}) {
   return { onUpdate, onUpdateConsumables };
 }
 
+function StatefulGearRenderBoundary() {
+  const [gear, setGear] = useState<GearItem[]>([{ id: "gear-1", name: "Auspex", source: "CR" }]);
+  return (
+    <ToastProvider>
+      <button onClick={() => setGear([{ ...gear[0], name: "Updated Auspex" }])}>
+        Update owned gear
+      </button>
+      <GearTab
+        campaignId="campaign-1"
+        characterId="char-1"
+        userId="user-1"
+        isDM={false}
+        gear={gear}
+        consumables={[]}
+        editable
+        onUpdate={setGear}
+        onUpdateConsumables={() => undefined}
+      />
+    </ToastProvider>
+  );
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: false, error: null });
 });
 
 describe("GearTab", () => {
+  it("does not rebuild owned rows when the gear picker opens and closes", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockImplementation(({ enabled }) => ({
+      items: [],
+      loading: Boolean(enabled),
+      error: null,
+    }));
+    renderTab({
+      gear: [{ id: "gear-1", name: "Auspex", source: "CR" }],
+      consumables: [{ id: "consumable-1", name: "Stimm", quantity: 1, source: "CR" }],
+    });
+    const rowRenderCount = () =>
+      recordComponentRenderMock.mock.calls.filter(
+        ([name]) => name === "GearItemRow" || name === "ConsumableRow"
+      ).length;
+    const initialRowRenderCount = rowRenderCount();
+
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    expect(screen.getByText("Auspex")).toBeInTheDocument();
+    await user.keyboard("{Escape}");
+
+    expect(initialRowRenderCount).toBe(2);
+    expect(rowRenderCount()).toBe(initialRowRenderCount);
+  });
+
+  it("rebuilds an owned row when its inventory data changes", async () => {
+    const user = userEvent.setup();
+    render(<StatefulGearRenderBoundary />);
+    const initialRowRenderCount = recordComponentRenderMock.mock.calls.filter(
+      ([name]) => name === "GearItemRow"
+    ).length;
+
+    await user.click(screen.getByRole("button", { name: "Update owned gear" }));
+
+    expect(screen.getByText("Updated Auspex")).toBeInTheDocument();
+    expect(
+      recordComponentRenderMock.mock.calls.filter(([name]) => name === "GearItemRow").length
+    ).toBeGreaterThan(initialRowRenderCount);
+  });
+
   it("enables the custom-item subscription only after a picker opens", async () => {
     const user = userEvent.setup();
     renderTab();
@@ -114,13 +185,17 @@ describe("GearTab", () => {
       loading: false,
       error: new Error("boom"),
     });
-    renderTab();
+    renderTab({
+      gear: [{ id: "gear-1", name: "Linked Gear", customLibraryId: "library-1" }],
+    });
     expect(screen.getByText("Unable to load custom gear.")).toBeInTheDocument();
   });
 
   it("shows a loading state", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: true, error: null });
-    renderTab();
+    renderTab({
+      gear: [{ id: "gear-1", name: "Linked Gear", customLibraryId: "library-1" }],
+    });
     expect(screen.getByText("Loading custom gear…")).toBeInTheDocument();
   });
 

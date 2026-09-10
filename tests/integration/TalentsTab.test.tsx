@@ -4,6 +4,14 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
 
+const recordComponentRenderMock = vi.hoisted(() => vi.fn());
+vi.mock("../../src/performance/performanceMetrics", async () => {
+  const actual = await vi.importActual<typeof import("../../src/performance/performanceMetrics")>(
+    "../../src/performance/performanceMetrics"
+  );
+  return { ...actual, recordComponentRender: recordComponentRenderMock };
+});
+
 const { MOCK_TALENT_LIST } = vi.hoisted(() => ({
   MOCK_TALENT_LIST: [
     {
@@ -188,6 +196,25 @@ function StatefulTalentsTab() {
     />
   );
 }
+
+describe("TalentsTab owned render boundary", () => {
+  it("does not rebuild owned talent cards when a picker opens and closes", async () => {
+    recordComponentRenderMock.mockClear();
+    const user = userEvent.setup();
+    renderTab({
+      talents: makeTalents({ talents: [entry("owned-1", "plain-talent", "Plain Talent")] }),
+    });
+    const talentCardsRenderCount = () =>
+      recordComponentRenderMock.mock.calls.filter(([name]) => name === "TalentCards").length;
+    const initialRenderCount = talentCardsRenderCount();
+
+    await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
+    await user.keyboard("{Escape}");
+
+    expect(initialRenderCount).toBeGreaterThan(0);
+    expect(talentCardsRenderCount()).toBe(initialRenderCount);
+  });
+});
 
 describe("TalentsTab", () => {
   it("uses the shared plus and eye controls", () => {

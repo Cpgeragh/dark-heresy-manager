@@ -89,6 +89,9 @@ interface EditingCyberneticDefinition {
   libraryItem: CampaignCustomItem<"cybernetic">;
 }
 
+const CYBERNETIC_CUSTOM_ITEM_CATEGORIES = ["cybernetic", "weapon"] as const;
+const EMPTY_CUSTOM_CYBERNETICS_BY_ID = new Map<string, CampaignCustomItem<"cybernetic">>();
+
 export function CyberneticsTab({
   campaignId,
   characterId,
@@ -132,6 +135,10 @@ export function CyberneticsTab({
     userId,
     itemLabel: "cybernetic",
   });
+  const hasLinkedCustomCybernetics = useMemo(
+    () => cybernetics.some((item) => !!item.customLibraryId),
+    [cybernetics]
+  );
 
   const {
     items: campaignCustomItems,
@@ -139,7 +146,7 @@ export function CyberneticsTab({
     error: customItemsError,
   } = useCampaignCustomItems({
     campaignId,
-    categories: ["cybernetic", "weapon"],
+    categories: CYBERNETIC_CUSTOM_ITEM_CATEGORIES,
     mode: isDM ? "admin" : "picker",
     userId,
     characterId,
@@ -148,7 +155,7 @@ export function CyberneticsTab({
       showPicker ||
       showIntegratedPicker ||
       installingCustomCybernetic !== null ||
-      cybernetics.some((item) => !!item.customLibraryId) ||
+      hasLinkedCustomCybernetics ||
       rangedWeapons.some((item) => isIntegratedRangedWeapon(item) && !!item.customLibraryId) ||
       meleeWeapons.some((item) => isIntegratedMeleeWeapon(item) && !!item.customLibraryId),
   });
@@ -163,6 +170,9 @@ export function CyberneticsTab({
     () => new Map(campaignCustomCybernetics.map((item) => [item.id, item])),
     [campaignCustomCybernetics]
   );
+  const customCyberneticsByIdForOwnedRows = hasLinkedCustomCybernetics
+    ? campaignCustomCyberneticsById
+    : EMPTY_CUSTOM_CYBERNETICS_BY_ID;
   const campaignCustomIntegratedWeapons = useMemo(
     () =>
       (
@@ -687,63 +697,195 @@ export function CyberneticsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
-  const renderImplantRow = (item: CyberneticItem) => {
-    const linkedArm = item.concealedWeapon
-      ? cybernetics.find((candidate) => candidate.id === item.concealedWeapon?.armId)
-      : undefined;
-    const linkedWeapon =
-      item.concealedWeapon?.weaponType === "ranged"
-        ? rangedWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
-        : item.concealedWeapon?.weaponType === "melee"
-          ? meleeWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
-          : undefined;
-    const linkedLibraryItem = item.customLibraryId
-      ? campaignCustomCyberneticsById.get(item.customLibraryId)
-      : undefined;
-    const libraryItem =
-      linkedLibraryItem ??
-      (item.customLibraryId
-        ? buildFallbackCyberneticLibraryItem({
-            campaignId,
-            item,
-            userId,
-            characterId,
-            characterName,
-          })
-        : undefined);
-    const canEditDefinition =
-      !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
-    const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
+  const renderImplantRow = useCallback(
+    (item: CyberneticItem) => {
+      const linkedArm = item.concealedWeapon
+        ? cybernetics.find((candidate) => candidate.id === item.concealedWeapon?.armId)
+        : undefined;
+      const linkedWeapon =
+        item.concealedWeapon?.weaponType === "ranged"
+          ? rangedWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
+          : item.concealedWeapon?.weaponType === "melee"
+            ? meleeWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
+            : undefined;
+      const linkedLibraryItem = item.customLibraryId
+        ? customCyberneticsByIdForOwnedRows.get(item.customLibraryId)
+        : undefined;
+      const libraryItem =
+        linkedLibraryItem ??
+        (item.customLibraryId
+          ? buildFallbackCyberneticLibraryItem({
+              campaignId,
+              item,
+              userId,
+              characterId,
+              characterName,
+            })
+          : undefined);
+      const canEditDefinition =
+        !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
+      const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
-    return (
-      <ImplantRow
-        key={item.id}
-        item={item}
-        linkedArmName={linkedArm?.name}
-        linkedWeaponName={linkedWeapon?.name}
-        linkedWeaponType={item.concealedWeapon?.weaponType}
-        editable={editable}
-        libraryItem={libraryItem}
-        isDM={isDM && editable}
-        canEditDefinition={canEditDefinition}
-        busyAction={rowBusyAction}
-        onEditDefinition={() =>
-          libraryItem && setEditingCyberneticDefinition({ item, libraryItem })
-        }
-        onPublish={() => libraryItem && publishCyberneticDefinition(libraryItem)}
-        onArchive={() => libraryItem && archiveCyberneticDefinition(libraryItem)}
-        onUpdateAllCopies={() => libraryItem && updateAllCyberneticCopies(libraryItem)}
-        onCycleQuality={cycleQuality}
-        onRemove={removeImplant}
-      />
-    );
-  };
+      return (
+        <ImplantRow
+          key={item.id}
+          item={item}
+          linkedArmName={linkedArm?.name}
+          linkedWeaponName={linkedWeapon?.name}
+          linkedWeaponType={item.concealedWeapon?.weaponType}
+          editable={editable}
+          libraryItem={libraryItem}
+          isDM={isDM && editable}
+          canEditDefinition={canEditDefinition}
+          busyAction={rowBusyAction}
+          onEditDefinition={() =>
+            libraryItem && setEditingCyberneticDefinition({ item, libraryItem })
+          }
+          onPublish={() => libraryItem && publishCyberneticDefinition(libraryItem)}
+          onArchive={() => libraryItem && archiveCyberneticDefinition(libraryItem)}
+          onUpdateAllCopies={() => libraryItem && updateAllCyberneticCopies(libraryItem)}
+          onCycleQuality={cycleQuality}
+          onRemove={removeImplant}
+        />
+      );
+    },
+    [
+      archiveCyberneticDefinition,
+      campaignId,
+      characterId,
+      characterName,
+      customCyberneticsByIdForOwnedRows,
+      cybernetics,
+      cycleQuality,
+      editable,
+      getBusyAction,
+      isDM,
+      meleeWeapons,
+      publishCyberneticDefinition,
+      rangedWeapons,
+      removeImplant,
+      updateAllCyberneticCopies,
+      userId,
+    ]
+  );
+  const implantRows = useMemo(
+    () => sortedCybernetics.map(renderImplantRow),
+    [renderImplantRow, sortedCybernetics]
+  );
+  const archeotechCyberneticRows = useMemo(
+    () =>
+      archeotechCyberneticItems.map((item) => (
+        <ArcheotechImplantRow
+          key={item.id}
+          item={item}
+          editable={editable}
+          onRemove={() => removeArcheotech(item.id)}
+        />
+      )),
+    [archeotechCyberneticItems, editable, removeArcheotech]
+  );
+  const integratedWeaponCards = useMemo(
+    () =>
+      [
+        ...integratedRanged.map((weapon) => ({
+          name: weapon.name,
+          card: (
+            <RangedCard
+              key={weapon.id}
+              weapon={weapon}
+              editable={editable}
+              strengthBonus={strengthBonus}
+              integrated
+              allowUpgrades={false}
+              forceExpanded
+              isEquipped={weapon.equipped ?? false}
+              onToggleEquip={() => toggleEquipIntegratedRanged(weapon.id)}
+              onRemove={() => removeIntegratedRanged(weapon.id)}
+              onAddUpgrade={() => {}}
+              onRemoveUpgrade={() => {}}
+              onUpdateAmmoEntries={(entries) =>
+                onUpdateRanged(
+                  rangedWeapons.map((current) =>
+                    current.id === weapon.id ? { ...current, ammoEntries: entries } : current
+                  )
+                )
+              }
+              onUpdateQuantity={(quantity) =>
+                onUpdateRanged(
+                  rangedWeapons.map((current) =>
+                    current.id === weapon.id ? { ...current, quantity } : current
+                  )
+                )
+              }
+            />
+          ),
+        })),
+        ...integratedMelee.map((weapon) => ({
+          name: weapon.name,
+          card: (
+            <MeleeCard
+              key={weapon.id}
+              weapon={weapon}
+              editable={editable}
+              strengthBonus={strengthBonus}
+              integrated
+              allowUpgrades={false}
+              forceExpanded
+              isEquipped={weapon.equipped ?? false}
+              onToggleEquip={() => toggleEquipIntegratedMelee(weapon.id)}
+              onRemove={() => removeIntegratedMelee(weapon.id)}
+              onAddUpgrade={() => {}}
+              onRemoveUpgrade={() => {}}
+              onUpdateQuantity={(quantity) =>
+                onUpdateMelee(
+                  meleeWeapons.map((current) =>
+                    current.id === weapon.id ? { ...current, quantity } : current
+                  )
+                )
+              }
+            />
+          ),
+        })),
+        ...archeotechIntegratedItems.map((item) => ({
+          name: item.name,
+          card: (
+            <ArcheotechWeaponCard
+              key={item.id}
+              item={item}
+              editable={editable}
+              isEquipped={item.equipped ?? false}
+              onToggleEquip={() => toggleEquipArcheotech(item.id)}
+              onRemove={() => removeArcheotech(item.id)}
+            />
+          ),
+        })),
+      ]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((entry) => entry.card),
+    [
+      archeotechIntegratedItems,
+      editable,
+      integratedMelee,
+      integratedRanged,
+      meleeWeapons,
+      onUpdateMelee,
+      onUpdateRanged,
+      rangedWeapons,
+      removeArcheotech,
+      removeIntegratedMelee,
+      removeIntegratedRanged,
+      strengthBonus,
+      toggleEquipArcheotech,
+      toggleEquipIntegratedMelee,
+      toggleEquipIntegratedRanged,
+    ]
+  );
 
-  if (customItemsError) {
+  if (customItemsError && hasLinkedCustomCybernetics) {
     return <ErrorState>Unable to load custom cybernetic or integrated weapon items.</ErrorState>;
   }
 
-  if (customItemsLoading) {
+  if (customItemsLoading && hasLinkedCustomCybernetics) {
     return <LoadingState>Loading custom cybernetic items…</LoadingState>;
   }
 
@@ -766,80 +908,7 @@ export function CyberneticsTab({
             </p>
           )}
 
-        <IndependentCardGrid
-          items={[
-            ...integratedRanged.map((weapon) => ({
-              name: weapon.name,
-              card: (
-                <RangedCard
-                  key={weapon.id}
-                  weapon={weapon}
-                  editable={editable}
-                  strengthBonus={strengthBonus}
-                  integrated
-                  allowUpgrades={false}
-                  forceExpanded
-                  isEquipped={weapon.equipped ?? false}
-                  onToggleEquip={() => toggleEquipIntegratedRanged(weapon.id)}
-                  onRemove={() => removeIntegratedRanged(weapon.id)}
-                  onAddUpgrade={() => {}}
-                  onRemoveUpgrade={() => {}}
-                  onUpdateAmmoEntries={(entries) =>
-                    onUpdateRanged(
-                      rangedWeapons.map((w) =>
-                        w.id === weapon.id ? { ...w, ammoEntries: entries } : w
-                      )
-                    )
-                  }
-                  onUpdateQuantity={(qty) =>
-                    onUpdateRanged(
-                      rangedWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w))
-                    )
-                  }
-                />
-              ),
-            })),
-            ...integratedMelee.map((weapon) => ({
-              name: weapon.name,
-              card: (
-                <MeleeCard
-                  key={weapon.id}
-                  weapon={weapon}
-                  editable={editable}
-                  strengthBonus={strengthBonus}
-                  integrated
-                  allowUpgrades={false}
-                  forceExpanded
-                  isEquipped={weapon.equipped ?? false}
-                  onToggleEquip={() => toggleEquipIntegratedMelee(weapon.id)}
-                  onRemove={() => removeIntegratedMelee(weapon.id)}
-                  onAddUpgrade={() => {}}
-                  onRemoveUpgrade={() => {}}
-                  onUpdateQuantity={(qty) =>
-                    onUpdateMelee(
-                      meleeWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w))
-                    )
-                  }
-                />
-              ),
-            })),
-            ...archeotechIntegratedItems.map((item) => ({
-              name: item.name,
-              card: (
-                <ArcheotechWeaponCard
-                  key={item.id}
-                  item={item}
-                  editable={editable}
-                  isEquipped={item.equipped ?? false}
-                  onToggleEquip={() => toggleEquipArcheotech(item.id)}
-                  onRemove={() => removeArcheotech(item.id)}
-                />
-              ),
-            })),
-          ]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((entry) => entry.card)}
-        />
+        <IndependentCardGrid items={integratedWeaponCards} />
       </section>
 
       {/* ── INSTALLED IMPLANTS ────────────────────────────────────────────── */}
@@ -881,15 +950,8 @@ export function CyberneticsTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No cybernetics installed.</p>
         )}
 
-        <IndependentCardGrid items={sortedCybernetics.map(renderImplantRow)} />
-        {archeotechCyberneticItems.map((item) => (
-          <ArcheotechImplantRow
-            key={item.id}
-            item={item}
-            editable={editable}
-            onRemove={() => removeArcheotech(item.id)}
-          />
-        ))}
+        <IndependentCardGrid items={implantRows} />
+        {archeotechCyberneticRows}
       </section>
 
       {showIntegratedPicker && (

@@ -39,7 +39,7 @@ collection is not by itself evidence of a leak. A correction would require repea
 later-cycle floors, failure to return to stable DOM or subscription counts, or retained resources
 with an unpaired lifecycle.
 
-Browser automation time, file-chooser time, React development behavior, emulator cold start,
+Browser automation time, file-chooser time, React development behaviour, emulator cold start,
 fixture seeding, PWA build time, and service-worker installation time were excluded from product
 memory conclusions. One route-loop automation call exceeded its control deadline and was
 discarded; the same journey was rerun in smaller complete groups.
@@ -105,7 +105,7 @@ Two bounded timers do not provide leak evidence:
   prevents a late callback from rendering the application twice. The no-update runs recorded one
   late safety mark per new page, not an increasing number within a page.
 
-Changing these timers without repeatable retention would alter working behavior without addressing
+Changing these timers without repeatable retention would alter working behaviour without addressing
 an observed degradation.
 
 ## Retained cache versus leak assessment
@@ -143,8 +143,8 @@ No journey produced the repeatable later-cycle upward growth required for a corr
 
 The focused lifecycle run passed 126 tests across 12 files. It covered Firestore subscription
 replacement and unmount, campaign subscription ownership, media-query cleanup, PWA startup states,
-portrait handling, picker and modal behavior, drawers, message threads, toast cleanup, application
-header behavior, character navigation, and campaign administration.
+portrait handling, picker and modal behaviour, drawers, message threads, toast cleanup, application
+header behaviour, character navigation, and campaign administration.
 
 The repeated local browser measurements above then exercised the integrated application with real
 emulator listeners and real guarded service workers. No arbitrary timeout was added or increased.

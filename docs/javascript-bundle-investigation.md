@@ -2,7 +2,7 @@
 
 Measured: 7 September 2026
 
-Measurements use optimized production builds and compare against the 6 September baseline. A
+Measurements use optimised production builds and compare against the 6 September baseline. A
 disposable source-map build was used for attribution and was removed after the investigation.
 
 ## What was in the original bundle
@@ -78,6 +78,6 @@ warning alone.
 - The complete fast suite passed: 207 files and 2,204 tests.
 - The isolated heavy Gear and Talent suites passed: 3 files and 61 tests. No timeout was increased.
 
-The change deliberately optimizes delivery boundaries only. It does not claim that large rendered
+The change deliberately optimises delivery boundaries only. It does not claim that large rendered
 inventories are now cheap; their render and interaction costs remain separate later performance
 investigations.

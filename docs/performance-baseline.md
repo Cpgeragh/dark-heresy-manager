@@ -8,7 +8,7 @@ of pass/fail budgets.
 
 ## Method
 
-- Production bundle and PWA figures came from optimized Vite builds.
+- Production bundle and PWA figures came from optimised Vite builds.
 - Authenticated journeys used Vite's explicit `performance` mode and deterministic emulator data.
 - Warm journey figures are the median of five full reloads on the same route.
 - “Ready” means the last required Firestore listener produced the data needed for the named screen,
@@ -42,7 +42,7 @@ contain those expected local-only markers.
 
 ## Production-shell cold and warm baseline
 
-Five cold and five warm runs of the backend-blocked optimized shell produced:
+Five cold and five warm runs of the backend-blocked optimised shell produced:
 
 | Signal                   |    Cold median (range) |    Warm median (range) |
 | ------------------------ | ---------------------: | ---------------------: |
@@ -85,7 +85,7 @@ Its focused listener times on the first stable load were approximately 410 ms, 3
 
 ## Offline restart
 
-After the optimized performance PWA and small fixture had loaded twice, the app server and all
+After the optimised performance PWA and small fixture had loaded twice, the app server and all
 three Firebase emulators were stopped. The same campaign route still restored its application
 shell, account and complete cached campaign on five out of five reloads.
 
@@ -93,7 +93,7 @@ Median readiness was 4,355 ms (range 4,334–4,437 ms). The reliability result i
 consistent delay is a concrete lead for the later startup/PWA investigation.
 
 These results establish investigation leads for the later bundle, character-sheet, list and write
-batches. They do not by themselves prescribe virtualization, memoization, code splitting or any
+batches. They do not by themselves prescribe virtualisation, memoisation, code splitting or any
 other specific implementation.
 
 ## Test execution baseline

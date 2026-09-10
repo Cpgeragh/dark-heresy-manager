@@ -152,6 +152,9 @@ const MOBILE_WEAPON_SECTIONS = [
   },
 ] as const satisfies readonly SegmentedTabOption<WeaponMobileSection>[];
 const MOBILE_WEAPON_SECTION_IDS = MOBILE_WEAPON_SECTIONS.map((section) => section.value);
+const WEAPON_CUSTOM_ITEM_CATEGORIES = ["weapon", "armour"] as const;
+const EMPTY_CUSTOM_WEAPONS_BY_ID = new Map<string, CampaignCustomItem<"weapon">>();
+const EMPTY_CUSTOM_ARMOUR_BY_ID = new Map<string, CampaignCustomItem<"armour">>();
 const WEAPON_TABS_ID = "weapon-sections";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -205,6 +208,18 @@ export function WeaponsTab({
     updateAllCopies: updateAllShieldCopies,
     getBusyAction: getShieldBusyAction,
   } = useCustomItemLibraryActions<"armour">({ campaignId, userId, itemLabel: "shield" });
+  const hasLinkedCustomWeapons = useMemo(
+    () =>
+      rangedWeapons.some((item) => !!item.customLibraryId) ||
+      meleeWeapons.some((item) => !!item.customLibraryId) ||
+      grenades.some((item) => !!item.customLibraryId),
+    [grenades, meleeWeapons, rangedWeapons]
+  );
+  const hasLinkedCustomShields = useMemo(
+    () => (shields ?? []).some((item) => !!item.customLibraryId),
+    [shields]
+  );
+  const customItemsRequiredForOwnedRows = hasLinkedCustomWeapons || hasLinkedCustomShields;
 
   const {
     items: campaignCustomItems,
@@ -212,17 +227,12 @@ export function WeaponsTab({
     error: customItemsError,
   } = useCampaignCustomItems({
     campaignId,
-    categories: ["weapon", "armour"],
+    categories: WEAPON_CUSTOM_ITEM_CATEGORIES,
     mode: isDM ? "admin" : "picker",
     userId,
     characterId,
     includeArchived: isDM,
-    enabled:
-      picker !== null ||
-      rangedWeapons.some((item) => !!item.customLibraryId) ||
-      meleeWeapons.some((item) => !!item.customLibraryId) ||
-      grenades.some((item) => !!item.customLibraryId) ||
-      (shields ?? []).some((item) => !!item.customLibraryId),
+    enabled: picker !== null || hasLinkedCustomWeapons || hasLinkedCustomShields,
   });
   const campaignCustomWeapons = useMemo(
     () =>
@@ -254,6 +264,12 @@ export function WeaponsTab({
     () => campaignCustomArmour.filter((item) => item.data.armourKind === "shield"),
     [campaignCustomArmour]
   );
+  const customWeaponsByIdForOwnedRows = hasLinkedCustomWeapons
+    ? campaignCustomWeaponsById
+    : EMPTY_CUSTOM_WEAPONS_BY_ID;
+  const customArmourByIdForOwnedRows = hasLinkedCustomShields
+    ? campaignCustomArmourById
+    : EMPTY_CUSTOM_ARMOUR_BY_ID;
 
   const {
     allRangedEntries,
@@ -264,14 +280,18 @@ export function WeaponsTab({
     archeotechGrenadeItems,
     slotsRemaining,
     equippedGrenadeTypes,
-  } = buildWeaponInventoryModel({
-    rangedWeapons,
-    meleeWeapons,
-    grenades,
-    cybernetics,
-    shields,
-    archeotech,
-  });
+  } = useMemo(
+    () =>
+      buildWeaponInventoryModel({
+        rangedWeapons,
+        meleeWeapons,
+        grenades,
+        cybernetics,
+        shields,
+        archeotech,
+      }),
+    [archeotech, cybernetics, grenades, meleeWeapons, rangedWeapons, shields]
+  );
 
   // ── Grenade handlers ───────────────────────────────────────────────────────
 
@@ -995,7 +1015,7 @@ export function WeaponsTab({
   const getLibraryItemForWeapon = useCallback(
     (weapon: RangedWeapon | MeleeWeapon, kind: "ranged" | "melee") => {
       const linkedLibraryItem = weapon.customLibraryId
-        ? campaignCustomWeaponsById.get(weapon.customLibraryId)
+        ? customWeaponsByIdForOwnedRows.get(weapon.customLibraryId)
         : undefined;
       return (
         linkedLibraryItem ??
@@ -1011,7 +1031,7 @@ export function WeaponsTab({
           : undefined)
       );
     },
-    [campaignCustomWeaponsById, campaignId, characterId, characterName, userId]
+    [campaignId, characterId, characterName, customWeaponsByIdForOwnedRows, userId]
   );
 
   const getWeaponLibraryProps = useCallback(
@@ -1053,7 +1073,7 @@ export function WeaponsTab({
   const getLibraryItemForGrenade = useCallback(
     (grenade: GrenadeItem) => {
       const linkedLibraryItem = grenade.customLibraryId
-        ? campaignCustomWeaponsById.get(grenade.customLibraryId)
+        ? customWeaponsByIdForOwnedRows.get(grenade.customLibraryId)
         : undefined;
       return (
         linkedLibraryItem ??
@@ -1068,7 +1088,7 @@ export function WeaponsTab({
           : undefined)
       );
     },
-    [campaignCustomWeaponsById, campaignId, characterId, characterName, userId]
+    [campaignId, characterId, characterName, customWeaponsByIdForOwnedRows, userId]
   );
 
   const getGrenadeLibraryProps = useCallback(
@@ -1106,7 +1126,7 @@ export function WeaponsTab({
   const getLibraryItemForShield = useCallback(
     (shield: ShieldItem) => {
       const linkedLibraryItem = shield.customLibraryId
-        ? campaignCustomArmourById.get(shield.customLibraryId)
+        ? customArmourByIdForOwnedRows.get(shield.customLibraryId)
         : undefined;
       return (
         linkedLibraryItem ??
@@ -1121,7 +1141,7 @@ export function WeaponsTab({
           : undefined)
       );
     },
-    [campaignCustomArmourById, campaignId, characterId, characterName, userId]
+    [campaignId, characterId, characterName, customArmourByIdForOwnedRows, userId]
   );
 
   const getShieldLibraryProps = useCallback(
@@ -1154,11 +1174,302 @@ export function WeaponsTab({
     ]
   );
 
-  if (customItemsError) {
+  const rangedRows = useMemo(
+    () =>
+      allRangedEntries.map((entry) => {
+        if (entry.kind === "cybernetic")
+          return (
+            <CyberneticWeaponCard
+              key={entry.cybernetic.id}
+              cyberneticName={entry.cybernetic.name}
+              weapon={entry.weapon}
+              craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
+              strengthBonus={strengthBonus}
+            />
+          );
+        if (entry.kind === "archeotech")
+          return (
+            <ArcheotechWeaponCard
+              key={entry.item.id}
+              item={entry.item}
+              strengthBonus={strengthBonus}
+              editable={editable}
+              isEquipped={entry.item.equipped ?? false}
+              onToggleEquip={
+                entry.item.type !== "Integrated Weapon"
+                  ? () => toggleEquipArcheotech(entry.item.id)
+                  : undefined
+              }
+              slotsDisabled={
+                entry.item.type !== "Integrated Weapon" &&
+                !entry.item.equipped &&
+                slotsRemaining < 1
+              }
+            />
+          );
+        if (entry.kind === "integrated")
+          return (
+            <RangedCard
+              key={entry.weapon.id}
+              weapon={entry.weapon}
+              editable={editable}
+              strengthBonus={strengthBonus}
+              integrated
+              allowUpgrades={false}
+              forceExpanded
+              isEquipped
+              onRemove={() => {}}
+              onAddUpgrade={() => {}}
+              onRemoveUpgrade={() => {}}
+              onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
+              onUpdateLoadedAmmoByProfile={(profile, entryId) =>
+                updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)
+              }
+              onUpdateMagazineSlots={(slots, activeSlotId) =>
+                updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)
+              }
+              onUpdateQuantity={(quantity) => updateRangedQuantity(entry.weapon.id, quantity)}
+              grenades={grenades}
+              onUpdateGrenades={onUpdateGrenades}
+              archeotechGrenades={archeotechGrenadeItems}
+            />
+          );
+        return (
+          <RangedCard
+            key={entry.weapon.id}
+            weapon={entry.weapon}
+            editable={editable}
+            strengthBonus={strengthBonus}
+            {...getWeaponLibraryProps(entry.weapon, "ranged")}
+            onRemove={() => removeRanged(entry.index)}
+            onAddUpgrade={(upgradeId) => addUpgradeToRanged(entry.weapon.id, upgradeId)}
+            onRemoveUpgrade={(upgradeId) => removeUpgradeFromRanged(entry.weapon.id, upgradeId)}
+            onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
+            onUpdateLoadedAmmoByProfile={(profile, entryId) =>
+              updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)
+            }
+            onUpdateMagazineSlots={(slots, activeSlotId) =>
+              updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)
+            }
+            onUpdateQuantity={(quantity) => updateRangedQuantity(entry.weapon.id, quantity)}
+            grenades={grenades}
+            onUpdateGrenades={onUpdateGrenades}
+            archeotechGrenades={archeotechGrenadeItems}
+            isEquipped={entry.weapon.equipped ?? false}
+            onToggleEquip={() => toggleEquipRanged(entry.weapon.id)}
+            slotsDisabled={!entry.weapon.equipped && slotsRemaining < getRangedSlots(entry.weapon)}
+          />
+        );
+      }),
+    [
+      addUpgradeToRanged,
+      allRangedEntries,
+      archeotechGrenadeItems,
+      editable,
+      getWeaponLibraryProps,
+      grenades,
+      onUpdateGrenades,
+      removeRanged,
+      removeUpgradeFromRanged,
+      slotsRemaining,
+      strengthBonus,
+      toggleEquipArcheotech,
+      toggleEquipRanged,
+      updateRangedAmmoEntries,
+      updateRangedMagazineSlots,
+      updateRangedProfileLoadedAmmo,
+      updateRangedQuantity,
+    ]
+  );
+
+  const meleeRows = useMemo(
+    () =>
+      allMeleeEntries.map((entry) => {
+        if (entry.kind === "cybernetic")
+          return (
+            <CyberneticWeaponCard
+              key={entry.cybernetic.id}
+              cyberneticName={entry.cybernetic.name}
+              weapon={entry.weapon}
+              craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
+              strengthBonus={strengthBonus}
+            />
+          );
+        if (entry.kind === "archeotech")
+          return (
+            <ArcheotechWeaponCard
+              key={entry.item.id}
+              item={entry.item}
+              strengthBonus={strengthBonus}
+              editable={editable}
+              isEquipped={entry.item.equipped ?? false}
+              onToggleEquip={
+                entry.item.type !== "Integrated Weapon"
+                  ? () => toggleEquipArcheotech(entry.item.id)
+                  : undefined
+              }
+              slotsDisabled={
+                entry.item.type !== "Integrated Weapon" &&
+                !entry.item.equipped &&
+                slotsRemaining < 1
+              }
+            />
+          );
+        if (entry.kind === "integrated")
+          return (
+            <MeleeCard
+              key={entry.weapon.id}
+              weapon={entry.weapon}
+              editable={editable}
+              strengthBonus={strengthBonus}
+              integrated
+              allowUpgrades={false}
+              forceExpanded
+              isEquipped
+              onRemove={() => {}}
+              onAddUpgrade={() => {}}
+              onRemoveUpgrade={() => {}}
+              onUpdateQuantity={(quantity) => updateMeleeQuantity(entry.weapon.id, quantity)}
+              onUpdateAlternateRangedAmmoEntries={(entries, loadedAmmoId) =>
+                updateMeleeAlternateRangedAmmoEntries(entry.weapon.id, entries, loadedAmmoId)
+              }
+            />
+          );
+        return (
+          <MeleeCard
+            key={entry.weapon.id}
+            weapon={entry.weapon}
+            editable={editable}
+            strengthBonus={strengthBonus}
+            {...getWeaponLibraryProps(entry.weapon, "melee")}
+            onRemove={() => removeMelee(entry.index)}
+            onAddUpgrade={(upgradeId) => addUpgradeToMelee(entry.weapon.id, upgradeId)}
+            onRemoveUpgrade={(upgradeId) => removeUpgradeFromMelee(entry.weapon.id, upgradeId)}
+            onUpdateQuantity={(quantity) => updateMeleeQuantity(entry.weapon.id, quantity)}
+            onUpdateAlternateRangedAmmoEntries={(entries, loadedAmmoId) =>
+              updateMeleeAlternateRangedAmmoEntries(entry.weapon.id, entries, loadedAmmoId)
+            }
+            isEquipped={entry.weapon.equipped ?? false}
+            onToggleEquip={() => toggleEquipMelee(entry.weapon.id)}
+            slotsDisabled={!entry.weapon.equipped && slotsRemaining < getMeleeSlots(entry.weapon)}
+          />
+        );
+      }),
+    [
+      addUpgradeToMelee,
+      allMeleeEntries,
+      editable,
+      getWeaponLibraryProps,
+      removeMelee,
+      removeUpgradeFromMelee,
+      slotsRemaining,
+      strengthBonus,
+      toggleEquipArcheotech,
+      toggleEquipMelee,
+      updateMeleeAlternateRangedAmmoEntries,
+      updateMeleeQuantity,
+    ]
+  );
+
+  const grenadeRows = useMemo(
+    () =>
+      allGrenadeEntries.map((entry) => {
+        if (entry.kind === "archeotech")
+          return (
+            <ArcheotechWeaponCard
+              key={entry.item.id}
+              item={entry.item}
+              editable={editable}
+              isEquipped={entry.item.equipped ?? false}
+              onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
+              slotsDisabled={!entry.item.equipped && equippedGrenadeTypes >= MAX_GRENADE_TYPES}
+            />
+          );
+        const item = entry.item;
+        const isEquipped = !!item.equipped;
+        const stowedCount = isEquipped ? Math.max(0, item.quantity - 3) : 0;
+        return (
+          <Fragment key={item.id}>
+            <GrenadeCard
+              item={item}
+              editable={editable}
+              strengthBonus={strengthBonus}
+              {...getGrenadeLibraryProps(item)}
+              onRemove={() => removeGrenade(item.id)}
+              onUpdateQty={(quantity) => updateGrenadeQty(item.id, quantity)}
+              isEquipped={isEquipped}
+              onToggleEquip={() => toggleEquipGrenade(item.id)}
+              canEquipMoreTypes={isEquipped || equippedGrenadeTypes < MAX_GRENADE_TYPES}
+            />
+            {isEquipped && stowedCount > 0 && (
+              <GrenadeCard
+                item={{ ...item, quantity: stowedCount }}
+                editable={false}
+                strengthBonus={strengthBonus}
+                onRemove={() => {}}
+                onUpdateQty={() => {}}
+                isStowedCard
+              />
+            )}
+          </Fragment>
+        );
+      }),
+    [
+      allGrenadeEntries,
+      editable,
+      equippedGrenadeTypes,
+      getGrenadeLibraryProps,
+      removeGrenade,
+      strengthBonus,
+      toggleEquipArcheotech,
+      toggleEquipGrenade,
+      updateGrenadeQty,
+    ]
+  );
+  const shieldRows = useMemo(
+    () =>
+      sortedShields.map((item) => (
+        <ShieldCard
+          key={item.id}
+          item={item}
+          editable={editable}
+          {...getShieldLibraryProps(item)}
+          onRemove={() => removeShield(item.id)}
+          isEquipped={item.equipped ?? false}
+          onToggleEquip={() => toggleEquipShield(item.id)}
+          slotsDisabled={!item.equipped && slotsRemaining < 1}
+        />
+      )),
+    [
+      editable,
+      getShieldLibraryProps,
+      removeShield,
+      slotsRemaining,
+      sortedShields,
+      toggleEquipShield,
+    ]
+  );
+  const archeotechShieldRows = useMemo(
+    () =>
+      archeotechShieldItems.map((item) => (
+        <ArcheotechShieldRow
+          key={item.id}
+          item={item}
+          editable={editable}
+          isEquipped={item.equipped ?? false}
+          onToggleEquip={() => toggleEquipArcheotech(item.id)}
+          slotsDisabled={!item.equipped && slotsRemaining < 1}
+          onRemove={() => removeArcheotech(item.id)}
+        />
+      )),
+    [archeotechShieldItems, editable, removeArcheotech, slotsRemaining, toggleEquipArcheotech]
+  );
+
+  if (customItemsError && customItemsRequiredForOwnedRows) {
     return <ErrorState>Unable to load custom weapons.</ErrorState>;
   }
 
-  if (customItemsLoading) {
+  if (customItemsLoading && customItemsRequiredForOwnedRows) {
     return <LoadingState>Loading custom weapons…</LoadingState>;
   }
 
@@ -1196,95 +1507,7 @@ export function WeaponsTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No ranged weapons.</p>
           )}
 
-          {allRangedEntries.map((entry) => {
-            if (entry.kind === "cybernetic")
-              return (
-                <CyberneticWeaponCard
-                  key={entry.cybernetic.id}
-                  cyberneticName={entry.cybernetic.name}
-                  weapon={entry.weapon}
-                  craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
-                  strengthBonus={strengthBonus}
-                />
-              );
-            if (entry.kind === "archeotech")
-              return (
-                <ArcheotechWeaponCard
-                  key={entry.item.id}
-                  item={entry.item}
-                  strengthBonus={strengthBonus}
-                  editable={editable}
-                  isEquipped={entry.item.equipped ?? false}
-                  onToggleEquip={
-                    entry.item.type !== "Integrated Weapon"
-                      ? () => toggleEquipArcheotech(entry.item.id)
-                      : undefined
-                  }
-                  slotsDisabled={
-                    entry.item.type !== "Integrated Weapon" &&
-                    !entry.item.equipped &&
-                    slotsRemaining < 1
-                  }
-                />
-              );
-            if (entry.kind === "integrated")
-              return (
-                <RangedCard
-                  key={entry.weapon.id}
-                  weapon={entry.weapon}
-                  editable={editable}
-                  strengthBonus={strengthBonus}
-                  integrated
-                  allowUpgrades={false}
-                  forceExpanded
-                  isEquipped
-                  onRemove={() => {}}
-                  onAddUpgrade={() => {}}
-                  onRemoveUpgrade={() => {}}
-                  onUpdateAmmoEntries={(entries) =>
-                    updateRangedAmmoEntries(entry.weapon.id, entries)
-                  }
-                  onUpdateLoadedAmmoByProfile={(profile, entryId) =>
-                    updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)
-                  }
-                  onUpdateMagazineSlots={(slots, activeSlotId) =>
-                    updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)
-                  }
-                  onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
-                  grenades={grenades}
-                  onUpdateGrenades={onUpdateGrenades}
-                  archeotechGrenades={archeotechGrenadeItems}
-                />
-              );
-            return (
-              <RangedCard
-                key={entry.weapon.id}
-                weapon={entry.weapon}
-                editable={editable}
-                strengthBonus={strengthBonus}
-                {...getWeaponLibraryProps(entry.weapon, "ranged")}
-                onRemove={() => removeRanged(entry.index)}
-                onAddUpgrade={(upgradeId) => addUpgradeToRanged(entry.weapon.id, upgradeId)}
-                onRemoveUpgrade={(upgradeId) => removeUpgradeFromRanged(entry.weapon.id, upgradeId)}
-                onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
-                onUpdateLoadedAmmoByProfile={(profile, entryId) =>
-                  updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)
-                }
-                onUpdateMagazineSlots={(slots, activeSlotId) =>
-                  updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)
-                }
-                onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
-                grenades={grenades}
-                onUpdateGrenades={onUpdateGrenades}
-                archeotechGrenades={archeotechGrenadeItems}
-                isEquipped={entry.weapon.equipped ?? false}
-                onToggleEquip={() => toggleEquipRanged(entry.weapon.id)}
-                slotsDisabled={
-                  !entry.weapon.equipped && slotsRemaining < getRangedSlots(entry.weapon)
-                }
-              />
-            );
-          })}
+          {rangedRows}
 
           {showCustomRanged && (
             <CustomRangedForm
@@ -1318,79 +1541,7 @@ export function WeaponsTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No melee weapons.</p>
           )}
 
-          {allMeleeEntries.map((entry) => {
-            if (entry.kind === "cybernetic")
-              return (
-                <CyberneticWeaponCard
-                  key={entry.cybernetic.id}
-                  cyberneticName={entry.cybernetic.name}
-                  weapon={entry.weapon}
-                  craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
-                  strengthBonus={strengthBonus}
-                />
-              );
-            if (entry.kind === "archeotech")
-              return (
-                <ArcheotechWeaponCard
-                  key={entry.item.id}
-                  item={entry.item}
-                  strengthBonus={strengthBonus}
-                  editable={editable}
-                  isEquipped={entry.item.equipped ?? false}
-                  onToggleEquip={
-                    entry.item.type !== "Integrated Weapon"
-                      ? () => toggleEquipArcheotech(entry.item.id)
-                      : undefined
-                  }
-                  slotsDisabled={
-                    entry.item.type !== "Integrated Weapon" &&
-                    !entry.item.equipped &&
-                    slotsRemaining < 1
-                  }
-                />
-              );
-            if (entry.kind === "integrated")
-              return (
-                <MeleeCard
-                  key={entry.weapon.id}
-                  weapon={entry.weapon}
-                  editable={editable}
-                  strengthBonus={strengthBonus}
-                  integrated
-                  allowUpgrades={false}
-                  forceExpanded
-                  isEquipped
-                  onRemove={() => {}}
-                  onAddUpgrade={() => {}}
-                  onRemoveUpgrade={() => {}}
-                  onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
-                  onUpdateAlternateRangedAmmoEntries={(entries, loadedAmmoId) =>
-                    updateMeleeAlternateRangedAmmoEntries(entry.weapon.id, entries, loadedAmmoId)
-                  }
-                />
-              );
-            return (
-              <MeleeCard
-                key={entry.weapon.id}
-                weapon={entry.weapon}
-                editable={editable}
-                strengthBonus={strengthBonus}
-                {...getWeaponLibraryProps(entry.weapon, "melee")}
-                onRemove={() => removeMelee(entry.index)}
-                onAddUpgrade={(upgradeId) => addUpgradeToMelee(entry.weapon.id, upgradeId)}
-                onRemoveUpgrade={(upgradeId) => removeUpgradeFromMelee(entry.weapon.id, upgradeId)}
-                onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
-                onUpdateAlternateRangedAmmoEntries={(entries, loadedAmmoId) =>
-                  updateMeleeAlternateRangedAmmoEntries(entry.weapon.id, entries, loadedAmmoId)
-                }
-                isEquipped={entry.weapon.equipped ?? false}
-                onToggleEquip={() => toggleEquipMelee(entry.weapon.id)}
-                slotsDisabled={
-                  !entry.weapon.equipped && slotsRemaining < getMeleeSlots(entry.weapon)
-                }
-              />
-            );
-          })}
+          {meleeRows}
 
           {showCustomMelee && (
             <CustomMeleeForm
@@ -1426,49 +1577,7 @@ export function WeaponsTab({
           </p>
         )}
 
-        <IndependentCardGrid
-          items={allGrenadeEntries.map((entry) => {
-            if (entry.kind === "archeotech")
-              return (
-                <ArcheotechWeaponCard
-                  key={entry.item.id}
-                  item={entry.item}
-                  editable={editable}
-                  isEquipped={entry.item.equipped ?? false}
-                  onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
-                  slotsDisabled={!entry.item.equipped && equippedGrenadeTypes >= MAX_GRENADE_TYPES}
-                />
-              );
-            const item = entry.item;
-            const isEquipped = !!item.equipped;
-            const stowedCount = isEquipped ? Math.max(0, item.quantity - 3) : 0;
-            return (
-              <Fragment key={item.id}>
-                <GrenadeCard
-                  item={item}
-                  editable={editable}
-                  strengthBonus={strengthBonus}
-                  {...getGrenadeLibraryProps(item)}
-                  onRemove={() => removeGrenade(item.id)}
-                  onUpdateQty={(qty) => updateGrenadeQty(item.id, qty)}
-                  isEquipped={isEquipped}
-                  onToggleEquip={() => toggleEquipGrenade(item.id)}
-                  canEquipMoreTypes={isEquipped || equippedGrenadeTypes < MAX_GRENADE_TYPES}
-                />
-                {isEquipped && stowedCount > 0 && (
-                  <GrenadeCard
-                    item={{ ...item, quantity: stowedCount }}
-                    editable={false}
-                    strengthBonus={strengthBonus}
-                    onRemove={() => {}}
-                    onUpdateQty={() => {}}
-                    isStowedCard
-                  />
-                )}
-              </Fragment>
-            );
-          })}
-        />
+        <IndependentCardGrid items={grenadeRows} />
       </section>
 
       {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
@@ -1491,33 +1600,8 @@ export function WeaponsTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No shields carried.</p>
         )}
 
-        <IndependentCardGrid
-          items={sortedShields.map((item) => (
-            <ShieldCard
-              key={item.id}
-              item={item}
-              editable={editable}
-              {...getShieldLibraryProps(item)}
-              onRemove={() => removeShield(item.id)}
-              isEquipped={item.equipped ?? false}
-              onToggleEquip={() => toggleEquipShield(item.id)}
-              slotsDisabled={!item.equipped && slotsRemaining < 1}
-            />
-          ))}
-        />
-        <IndependentCardGrid
-          items={archeotechShieldItems.map((item) => (
-            <ArcheotechShieldRow
-              key={item.id}
-              item={item}
-              editable={editable}
-              isEquipped={item.equipped ?? false}
-              onToggleEquip={() => toggleEquipArcheotech(item.id)}
-              slotsDisabled={!item.equipped && slotsRemaining < 1}
-              onRemove={() => removeArcheotech(item.id)}
-            />
-          ))}
-        />
+        <IndependentCardGrid items={shieldRows} />
+        <IndependentCardGrid items={archeotechShieldRows} />
       </section>
 
       {/* ── Pickers ───────────────────────────────────────────────────────── */}

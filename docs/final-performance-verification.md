@@ -1,6 +1,7 @@
 ---
 title: Final performance verification
 date: 2026-09-10
+last_updated: 2026-09-10
 status: Verification complete
 ---
 
@@ -9,7 +10,7 @@ status: Verification complete
 ## Purpose
 
 This report consolidates the completed performance investigations and repeats the original
-baseline scenarios against the final approved source. It covers delivery, startup and PWA
+baseline scenarios against the final source. It covers delivery, startup and PWA
 behaviour, authenticated routes, dense character rendering, large lists and pickers, Firestore
 activity, persistence, repeated-use lifecycle behaviour, and test execution.
 
@@ -20,7 +21,7 @@ browser against local services; Google Chrome and live Firebase projects were no
 ## Method and interpretation
 
 The original baseline was recorded on 2026-09-06. Final measurements were recorded on 2026-09-10
-after the approved performance changes. Production delivery figures came from three optimized
+after the performance changes. Production delivery figures came from three optimised
 builds. Authenticated scenarios used deterministic performance fixtures and five warm reloads.
 Readiness was taken from the last required first listener snapshot or the explicit startup mark,
 not a fixed delay. React timings came from the application-level Profiler.
@@ -41,11 +42,12 @@ samples are diagnostic observations, not CI budgets.
 | -------------------------------- | ----------------------------------------------------------------: | -------------------------------------------------------------------------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Startup JavaScript               |                     2,391.44 kB / 666.26 kB gzip in one main file | 731.51 kB / 228.50 kB gzip startup file; largest lazy chunk 945.11 kB / 249.65 kB gzip | Route and feature splitting removed most application code from initial startup without hiding the remaining large character chunk.                                                                                                                         |
 | CSS                              |                                          70.82 kB / 18.59 kB gzip |                                                               58.67 kB / 11.23 kB gzip | Stable across all three final builds.                                                                                                                                                                                                                      |
-| PWA precache                     |                                         21 entries / 2,759.38 KiB |                             43 unique entries / 2,688.20 KiB from the PWA build report | More split assets are cached while total cached bytes are lower. The independent inventory sum is 2,688.62 KiB because it includes the 423-byte manifest.                                                                                                  |
-| Built output                     |                                        3,185,189 bytes / 34 files |                                                             2,969,224 bytes / 48 files | The higher file count is the intended result of code splitting, not additional startup work.                                                                                                                                                               |
+| PWA precache                     |                                         21 entries / 2,759.38 KiB |                             43 unique entries / 2,689.22 KiB from the PWA build report | More split assets are cached while total cached bytes are lower. The independent inventory sum is 2,689.63 KiB because it includes the 423-byte manifest.                                                                                                  |
+| Built output                     |                                        3,185,189 bytes / 34 files |                                                             2,970,264 bytes / 48 files | The higher file count is the intended result of code splitting, not additional startup work.                                                                                                                                                               |
 | Production build phase           |                                     6.82–7.07 s across three runs |                                                          5.91–6.19 s across three runs | Stable local build result; not a runtime budget.                                                                                                                                                                                                           |
-| Fresh optimized PWA shell        |                       Splash ready 343.8 ms median; load 407.3 ms |                             First-visit app-render mark 533.5 ms median; load 490.5 ms | The fresh-origin run used the `localhost.` loopback alias to obtain uncached origins. Its response start was 306.2–313.5 ms, so the absolute total is not directly comparable to the original host path. All five reached the application render boundary. |
-| Cached optimized PWA shell       |                       Splash ready 166.8 ms median; load 211.4 ms |                                           App-render mark 86.3 ms median; load 62.0 ms | All five launches settled. The first service-worker takeover was a 321.1 ms outlier; the next four app-render marks were 73.7–98.5 ms with no progressive slowdown.                                                                                        |
+| Fresh optimised PWA shell        |                       Splash ready 343.8 ms median; load 407.3 ms |                             First-visit app-render mark 533.5 ms median; load 490.5 ms | The fresh-origin run used the `localhost.` loopback alias to obtain uncached origins. Its response start was 306.2–313.5 ms, so the absolute total is not directly comparable to the original host path. All five reached the application render boundary. |
+| Cached optimised PWA shell       |                       Splash ready 166.8 ms median; load 211.4 ms |                                           App-render mark 86.3 ms median; load 62.0 ms | All five launches settled. The first service-worker takeover was a 321.1 ms outlier; the next four app-render marks were 73.7–98.5 ms with no progressive slowdown.                                                                                        |
+| Service-worker update checks     |                           Two checks per controlled cached visit |                                           One helper-owned check per controlled visit | A guarded update and its reload produced one `sw.js`/Workbox request pair on each real visit. Browser-throttled reloads can produce no network request and are not counted as product latency.                                                              |
 | Empty signed-in dashboard        |                Ready 613.8 ms; largest commit 6.9 ms; 5 listeners |                                     Ready 688.7 ms; largest commit 4.9 ms; 5 listeners | Readiness varied while rendering and subscription ownership remained stable. No correction is justified by this local difference.                                                                                                                          |
 | Small campaign                   |               Ready 720.6 ms; largest commit 20.2 ms; 9 listeners |                                    Ready 670.6 ms; largest commit 22.2 ms; 7 listeners | Listener ownership reduced while readiness remained in the same range.                                                                                                                                                                                     |
 | 45-campaign dashboard            |               Ready 808.2 ms; largest commit 50.1 ms; 5 listeners |                                    Ready 767.8 ms; largest commit 34.0 ms; 5 listeners | The final five runs consistently rendered 308 DOM nodes.                                                                                                                                                                                                   |
@@ -53,8 +55,9 @@ samples are diagnostic observations, not CI budgets.
 | Large campaign                   |            Ready 1,573.0 ms; largest commit 244.1 ms; 9 listeners |                                 Ready 1,578.8 ms; largest commit 211.9 ms; 7 listeners | Five corrected measurements waited for both Session 180 and custom item 180; all settled at 5,738 DOM nodes.                                                                                                                                               |
 | 100-message drawer               |              345 ms observed; largest commit 31.9 ms; 8 listeners |                405 ms observed; largest initial commit 31.5 ms; 5 listeners while open | The browser-control time varied while React work and bounded subscription ownership remained stable.                                                                                                                                                       |
 | Dense Gear navigation            |                        About 3.80 s; large commits 203 and 266 ms |                                                       3.257 s; largest commit 247.7 ms | The dense owned tree remains substantial but did not regress.                                                                                                                                                                                              |
-| Dense Weapons navigation         |                        About 3.83 s; large commits 317 and 354 ms |                                                       3.260 s; largest commit 332.1 ms | The known dense owned-weapon tree remains a documented lead, not proof that virtualization is safe.                                                                                                                                                        |
-| Gear picker search               |                            123 ms observed for a selective result |                                         87 ms observed for one `Auspex/Scanner` result | The corresponding selective search commit was 1.0 ms; larger commits in the trace came from opening and closing the dense parent tree.                                                                                                                     |
+| Dense Weapons navigation         |                        About 3.83 s; large commits 317 and 354 ms |                                                       3.260 s; largest commit 332.1 ms | The known dense owned-weapon tree remains a documented lead, not proof that virtualisation is safe.                                                                                                                                                        |
+| Gear picker search               |                            123 ms observed for a selective result |                                         87 ms observed for one `Auspex/Scanner` result | The corresponding selective search commit was 1.0 ms. Historical open/close commits included rebuilding the dense parent tree; the follow-up below isolates that unchanged content.                                                                       |
+| Owned tree behind open pickers   |            1,080 Gear and 1,080 Consumable rows in one Gear cycle |                                        Zero unchanged owned rows/cards over 3 cycles | Gear, Weapons, Cybernetics, and Talents retain their owned background trees while picker-local state and subscriptions change. Actual visible picker rows still render.                                                                                    |
 | Fixed-cost gear mutation         |               701 ms to rendered item; Function body about 161 ms |                           Warm acknowledgement 376.7 ms; server snapshot 54.6 ms later | The first local call took 3.43 s because it included Functions cold start and is excluded from steady-state latency. Both operations produced one mutation pair and one server-current snapshot.                                                           |
 | Older message pages              |             48.5 ms second-page commit; 75.6 ms third-page commit |                                  55.0 ms second-page commit; 73.9 ms third-page commit | The 100-message page boundary remains stable. Browser control observed 535 and 425 ms respectively.                                                                                                                                                        |
 | Fully offline cached campaign    |                              5/5; 4,355 ms median, 4,334–4,437 ms |                                             5/5; 4,738.9 ms median, 4,727.2–4,763.8 ms | Every required snapshot came from cache and every run returned to 376 DOM nodes and 7 listeners. The result is close to the later startup investigation's roughly 4.58 s local route result and does not show progressive degradation or data loss.        |
@@ -76,7 +79,7 @@ Repeated-use checks did not find an accumulating interface owner. Route cycles r
 subscription and DOM baselines. Twenty-one large-picker closes returned to 10,697 DOM nodes and 4
 listeners. Sixteen character-message closes returned to the same state. Campaign messages,
 sessions, portrait cancellation, and service-worker updates also returned to stable structural
-counts. Later-cycle heap floors stabilized or fell after warm-up; that behaviour is retained cache,
+counts. Later-cycle heap floors stabilised or fell after warm-up; that behaviour is retained cache,
 not repeatable leak evidence.
 
 ## Firestore and persistence evidence
@@ -119,31 +122,33 @@ file counts, totals, or wall-clock budgets. It runs in local deployment verifica
 after the hosting predeploy build. Its three focused tests cover a valid generated build, a missing
 eligible asset, and duplicate/forbidden production metadata.
 
-The final build passed with 43 unique precache entries, 43 eligible files, 48 emitted files, and an
-independently summed 2,688.62 KiB precache inventory.
+The follow-up build passed with 43 unique precache entries, 43 eligible files, 48 emitted files,
+and an independently summed 2,689.63 KiB precache inventory.
 
 ## Findings that did not justify more runtime changes
 
 - The existing large-chunk advisory is an inventory lead, not evidence of a user-observable defect.
   The largest character chunk is loaded on demand and its dense paths have separate render evidence.
-- Dense Gear, Weapons, Talents, and picker open/close paths still rebuild large owned trees. Their
-  focused results are stable, while virtualization would change scrolling, focus, and accessibility
-  behaviour and lacks evidence strong enough to justify that risk.
+- Initial navigation to dense Gear and Weapons tabs and the visible rows inside large pickers still
+  perform substantial work. Picker open/close state no longer rebuilds unchanged owned Gear,
+  Weapons, Cybernetics, or Talent trees. Virtualisation would still change scrolling, focus, and
+  accessibility behaviour and is not justified by the remaining evidence.
 - The first local Functions call was much slower than the warm call. The difference was emulator
   cold start, not a persistent save-state delay.
 - Fresh-origin PWA totals included about 309 ms before the loopback response began. That host-alias
   and browser-tab setup cost prevents treating the absolute cold total as a product regression.
-- Two fresh PWA origins delayed account synchronization when several simultaneous tabs exhausted
+- Two fresh PWA origins delayed account synchronisation when several simultaneous tabs exhausted
   the browser's shared connection capacity. Their shell marks remained valid; their authenticated
   settling was discarded. Sequential cached launches and authenticated scenarios completed.
 - The offline route was a few hundred milliseconds slower than the original baseline but remained
   tightly clustered, cache-only, complete, and close to the later startup-specific result.
 - Heap samples rose before garbage collection in some dense journeys, but later floors and exact
-  DOM/listener counts stabilized. No repeatable leak signature was found.
+  DOM/listener counts stabilised. No repeatable leak signature was found.
 - Firestore rules can run much faster without per-file isolation, but the candidate produced a real
   cross-test state-pollution failure and remains rejected.
 
-No additional runtime change is justified by these findings.
+No additional runtime change beyond the focused owned-tree and update-check follow-ups is justified
+by these findings.
 
 ## Manual regression coverage
 
@@ -155,7 +160,7 @@ The manual checklist now includes two repeatable, user-observable checks:
   search, correct restoration on close, and no retained stale modal, selection, or route state.
 
 Existing manual coverage already addresses update interruption, full offline recovery, two-tab
-synchronization, debounce/blur behaviour, messages, and bounded product limits; those checks were
+synchronisation, debounce/blur behaviour, messages, and bounded product limits; those checks were
 not duplicated.
 
 ## Final verification
@@ -170,6 +175,14 @@ The following completed successfully against the final source:
 - the complete Functions emulator integration suite: 24 files and 92 tests on `dh-test`; and
 - the isolated local browser scenarios recorded above.
 
+The focused follow-up then completed:
+
+- 5 focused files and 109 tests for the affected character tabs and PWA startup;
+- the complete fast suite: 213 files and 2,270 tests in 102.06 seconds;
+- the complete heavy suite twice: 3 files and 66 tests in 66.75 and 67.77 seconds;
+- the production build and generated PWA inventory check; and
+- isolated local-emulator picker cycles plus guarded service-worker update verification.
+
 Formatting, lint, safety, secret-name, lockfile, and whitespace checks also passed. No arbitrary
 test timeout was increased, and no commit, push, live-project access, or deployment was performed.
 
@@ -178,6 +191,8 @@ test timeout was increased, and no commit, push, live-project access, or deploym
 The final source preserves the demonstrated reductions in startup code, Firestore listener
 ownership, character render propagation, picker result construction, duplicate persistence work,
 and fast-suite setup. Repeated routes, optional interfaces, cached launches, and offline restarts
-return to stable structural states. Remaining large dense-tree costs, emulator cold starts, and
-environment-dependent wall-clock variation are documented leads rather than evidence for another
-correction.
+return to stable structural states. Picker-local state no longer rebuilds unchanged owned
+inventory, and normal service-worker startup now performs one helper-owned update check per visit.
+Initial dense route construction, visible picker rows, emulator cold starts, and
+environment-dependent wall-clock variation remain documented leads rather than evidence for
+another correction.
