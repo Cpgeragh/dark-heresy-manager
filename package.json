@@ -25,7 +25,8 @@
     "check:secrets": "node scripts/checkLocalSafety.mjs --secrets",
     "check:lockfile": "node scripts/checkLocalSafety.mjs --lockfile",
     "check:safety": "node scripts/checkLocalSafety.mjs",
-    "check:deployment:local": "npm run check:safety && npm run build && npm run test:all",
+    "check:build-inventory": "node scripts/checkBuiltPwaInventory.mjs",
+    "check:deployment:local": "npm run check:safety && npm run build && npm run check:build-inventory && npm run test:all",
     "format": "prettier --write src tests functions/src functions/tests billing-guard/src billing-guard/tests scripts",
     "format:check": "prettier --check src tests functions/src functions/tests billing-guard/src billing-guard/tests scripts"
   },

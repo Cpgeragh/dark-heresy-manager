@@ -882,6 +882,7 @@ Use three environments: a clean browser profile, an already-installed PWA on the
 - [ ] Immediately after that auto-update, the app should skip straight past the splash on that specific load — no double-splash flash
 - [ ] Simulate a stalled update (start the update, then kill connectivity before it finishes) — after roughly 30 seconds it should give up waiting and fall back to the previously-cached version rather than hanging on "Updating…" forever, and a "Couldn't download the latest update" toast should appear once it lands
 - [ ] In a plain dev/browser tab (no service worker registered) the app should simply load directly with no splash-related hang at all
+- [ ] With the current version already cached, launch the installed app five times in succession — every launch leaves the splash, restores the intended route, and later launches show no progressive slowdown or stuck "Updating…" state
 - [ ] After an approved deployment, inspect the main document and a hashed asset: the document has the configured CSP, clickjacking, MIME, referrer, permissions and same-origin headers; HTML/service-worker files are not long-cached, while the hashed asset is immutable
 
 ## 24. Onboarding & First Launch
@@ -1044,6 +1045,7 @@ Use one editable character and one read-only character. Open the sheet on phone 
 - [ ] Browser Back/Forward and refresh from Dashboard → Campaign → Character → section produce a coherent route and a working way back; pending/invalid form text is either deliberately preserved or deliberately discarded with warning
 - [ ] Directly open valid Dashboard, Campaign, Character, onboarding-step, and invite URLs in a new tab and after PWA relaunch — each lands on the intended screen after authentication/onboarding gates complete
 - [ ] Header actions appear only on their intended routes and roles; Settings, Messages, export, release, edit-enable, and navigation controls all target the currently visible campaign/character after rapid route changes
+- [ ] Repeat Dashboard → Campaign → a dense Character → a large picker five times — picker search remains responsive, closing it restores the sheet, and later cycles do not visibly slow down or retain stale modal, selection, or route state
 
 ## 31. Hard Product Limits
 

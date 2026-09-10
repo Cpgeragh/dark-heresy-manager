@@ -12,3 +12,4 @@ const isStaging = process.env.GCLOUD_PROJECT === STAGING_PROJECT_ID;
 const command = isStaging ? "npm run build -- --mode staging" : "npm run build";
 
 execSync(command, { stdio: "inherit" });
+execSync("npm run check:build-inventory", { stdio: "inherit" });
