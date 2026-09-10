@@ -3,7 +3,7 @@
 /**
  * UI/UX Constants
  *
- * These values control timing, animations, and user interface behavior.
+ * These values control timing, animations, and user interface behaviour.
  */
 
 // ============================================

@@ -7,7 +7,7 @@ Status: production has Firestore's native Scheduled Backups running daily with 3
 - **Firestore data** — the actual target. Every active collection, including `campaigns`, characters and their subcollections, threads and messages, custom items and versions, private sessions and member-safe session summaries, `recoveryIndex`, `identityRecoveryIndex`, `identitySecret`, `users`, `userProfiles`, `userLinks`, and operational records.
 - **Cloud Functions source and Firestore security rules** — already covered by git, no separate backup mechanism needed.
 - **Firebase Authentication** — deliberately out of scope. The app uses only anonymous auth; no data of independent value lives on the Auth record itself, everything meaningful lives in Firestore documents keyed by UID, already covered above.
-- **The Recovery Code HMAC secret** (`recoveryCodeHmacSecret`, Secret Manager) — losing it would make every existing Recovery Code's index entry unverifiable, though affected codes could be rotated. It currently has no backup outside Secret Manager.
+- **The Recovery Code HMAC secret** (`recoveryCodeHmacSecret`, Secret Manager) — losing it would make every existing Recovery Code's index entry unverifiable, though affected codes could be rotated. It has no backup outside Secret Manager.
 
 ## Mechanism
 

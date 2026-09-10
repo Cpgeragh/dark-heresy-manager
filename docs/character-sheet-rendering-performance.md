@@ -160,8 +160,10 @@ behaviour.
 
 ## Remaining observations
 
-The confirmed duplicate responsive trees and repeated derived calculations are corrected. Dense
-Weapons, Gear, Cybernetics and Talents rows remain candidates for a future investigation only if
-repeated warm distributions and interaction-specific profiles demonstrate a practical problem.
-Any such work should first identify which props actually change per row and verify focus, scrolling
-and editing behaviour before choosing memoisation or virtualisation.
+The confirmed duplicate responsive trees and repeated derived calculations are corrected. A related
+cause, dense Gear, Weapons, Cybernetics and Talents rows remounting whenever a picker opened on top
+of them, was investigated separately and corrected (see the large-list and picker report). The
+remaining, distinct cost is each dense tab's own initial render volume when first opened or updated:
+rendering hundreds of real owned rows is substantial regardless of picker interaction. Any further
+work here should first identify which props actually change per row and verify focus, scrolling and
+editing behaviour before choosing memoisation or virtualisation.

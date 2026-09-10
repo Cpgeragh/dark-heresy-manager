@@ -1,5 +1,5 @@
 // src/ui/PageShell.tsx
-// Standard page wrapper: vertical rhythm + centered page title. Pair with
+// Standard page wrapper: vertical rhythm + centred page title. Pair with
 // <Panel> for the bordered content card(s) below the title.
 
 import type { ReactNode } from "react";
