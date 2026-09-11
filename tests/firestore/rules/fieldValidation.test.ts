@@ -8,23 +8,20 @@ describe("Firestore Rules: bounded field validation", () => {
     await env.clearFirestore();
   });
 
-  it("accepts the exact campaign create shape", async () => {
+  it("blocks even the exact campaign shape from direct creation", async () => {
     const env = await getTestEnv();
     await expect(
       dbAs(env, "dm-1")
         .collection("campaigns")
         .doc("valid")
         .set(validCampaignDocument("dm-1", "Valid Campaign"))
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 
   it("accepts campaign and character collection fields at their exact maxima", async () => {
     const env = await getTestEnv();
     const dmDb = dbAs(env, "dm-1");
-    await dmDb
-      .collection("campaigns")
-      .doc("maximum")
-      .set(validCampaignDocument("dm-1", "c".repeat(100)));
+    await createCampaign(env, "maximum", "dm-1", { name: "c".repeat(100) });
     await expect(
       dmDb
         .collection("campaigns")
@@ -47,35 +44,15 @@ describe("Firestore Rules: bounded field validation", () => {
   it("rejects campaign names, member arrays, types, and unexpected fields outside bounds", async () => {
     const env = await getTestEnv();
     const dmDb = dbAs(env, "dm-1");
+    await createCampaign(env, "bounds", "dm-1");
+    const campaign = dmDb.collection("campaigns").doc("bounds");
 
+    await expect(campaign.update({ name: "x".repeat(101) })).rejects.toThrow();
     await expect(
-      dmDb
-        .collection("campaigns")
-        .doc("long")
-        .set(validCampaignDocument("dm-1", "x".repeat(101)))
+      campaign.update({ memberIds: Array.from({ length: 101 }, (_, index) => `p-${index}`) })
     ).rejects.toThrow();
-    await expect(
-      dmDb
-        .collection("campaigns")
-        .doc("members")
-        .set(
-          validCampaignDocument("dm-1", "Members", {
-            memberIds: Array.from({ length: 101 }, (_, index) => `p-${index}`),
-          })
-        )
-    ).rejects.toThrow();
-    await expect(
-      dmDb
-        .collection("campaigns")
-        .doc("type")
-        .set(validCampaignDocument("dm-1", "Type", { dmId: 42 }))
-    ).rejects.toThrow();
-    await expect(
-      dmDb
-        .collection("campaigns")
-        .doc("extra")
-        .set(validCampaignDocument("dm-1", "Extra", { unexpected: true }))
-    ).rejects.toThrow();
+    await expect(campaign.update({ dmId: 42 })).rejects.toThrow();
+    await expect(campaign.update({ unexpected: true })).rejects.toThrow();
   });
 
   it("accepts a complete character with no client-supplied Recovery Code", async () => {

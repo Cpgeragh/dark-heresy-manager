@@ -14,6 +14,7 @@ const {
   mockBatchUpdate,
   mockBatchCommit,
   mockCampaignsCollectionRef,
+  mockCallCreateCampaign,
   mockCallStartCampaignDeletionJob,
   mockCallProcessCampaignDeletionChunk,
 } = vi.hoisted(() => ({
@@ -30,6 +31,7 @@ const {
   mockBatchCommit: vi.fn().mockResolvedValue(undefined),
   mockWriteBatch: vi.fn(),
   mockCampaignsCollectionRef: vi.fn(() => "campaigns-ref"),
+  mockCallCreateCampaign: vi.fn(),
   mockCallStartCampaignDeletionJob: vi.fn(),
   mockCallProcessCampaignDeletionChunk: vi.fn(),
 }));
@@ -51,6 +53,7 @@ vi.mock("firebase/firestore", () => ({
 
 vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "createCampaign") return mockCallCreateCampaign;
     if (name === "startCampaignDeletionJob") return mockCallStartCampaignDeletionJob;
     if (name === "processCampaignDeletionChunk") return mockCallProcessCampaignDeletionChunk;
     throw new Error(`Unexpected callable: ${name}`);
@@ -80,33 +83,33 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockUpdateDoc.mockResolvedValue(undefined);
   mockSetDoc.mockResolvedValue(undefined);
+  mockCallCreateCampaign.mockResolvedValue({ data: { campaignId: "campaign-new" } });
   mockBatchCommit.mockResolvedValue(undefined);
   mockWriteBatch.mockReturnValue({ update: mockBatchUpdate, commit: mockBatchCommit });
 });
 
 describe("campaign input validation", () => {
   it("reuses one Firebase write for a duplicate in-flight campaign creation", async () => {
-    let finish!: () => void;
-    const pending = new Promise<void>((resolve) => {
+    let finish!: (value: { data: { campaignId: string } }) => void;
+    const pending = new Promise<{ data: { campaignId: string } }>((resolve) => {
       finish = resolve;
     });
-    mockSetDoc.mockReturnValueOnce(pending);
+    mockCallCreateCampaign.mockReturnValueOnce(pending);
 
-    const first = createCampaign("The same campaign", "dm-1");
-    const duplicate = createCampaign("The same campaign", "dm-1");
+    const first = createCampaign("The same campaign");
+    const duplicate = createCampaign("The same campaign");
     await Promise.resolve();
 
-    expect(mockSetDoc).toHaveBeenCalledOnce();
-    finish();
+    expect(mockCallCreateCampaign).toHaveBeenCalledOnce();
+    finish({ data: { campaignId: "campaign-new" } });
     await Promise.all([first, duplicate]);
   });
 
   it("rejects a non-text campaign name before creating a Firestore reference", async () => {
-    await expect(createCampaign(42 as unknown as string, "dm-1")).rejects.toThrow(
+    await expect(createCampaign(42 as unknown as string)).rejects.toThrow(
       "Campaign name must be text"
     );
-    expect(mockDoc).not.toHaveBeenCalled();
-    expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(mockCallCreateCampaign).not.toHaveBeenCalled();
   });
 
   it("rejects a non-text renamed campaign value before writing", async () => {
@@ -219,29 +222,31 @@ describe("deleteCampaign", () => {
   });
 });
 
-describe("createCampaign — GM and Inquisitor name", () => {
-  it("stores gmName and inquisitorName when both are provided", async () => {
-    await createCampaign("The Lathe Run", "dm-1", "Cain", "Inquisitor Vail");
+describe("createCampaign", () => {
+  it("sends the validated campaign fields to the protected Function", async () => {
+    await createCampaign("The Lathe Run", "Inquisitor Vail");
 
-    expect(mockSetDoc).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ gmName: "Cain", inquisitorName: "Inquisitor Vail" })
-    );
+    expect(mockCallCreateCampaign).toHaveBeenCalledWith({
+      name: "The Lathe Run",
+      inquisitorName: "Inquisitor Vail",
+      operationId: expect.stringMatching(/^[0-9a-f-]{36}$/),
+    });
   });
 
-  it("omits gmName and inquisitorName from the write when neither is provided", async () => {
-    await createCampaign("The Lathe Run", "dm-1");
+  it("omits inquisitorName when it is not provided", async () => {
+    await createCampaign("The Lathe Run");
 
-    const written = mockSetDoc.mock.calls[0][1];
-    expect(written).not.toHaveProperty("gmName");
-    expect(written).not.toHaveProperty("inquisitorName");
+    expect(mockCallCreateCampaign).toHaveBeenCalledWith({
+      name: "The Lathe Run",
+      operationId: expect.stringMatching(/^[0-9a-f-]{36}$/),
+    });
   });
 
   it("rejects an Inquisitor name over 100 characters before writing", async () => {
-    await expect(createCampaign("The Lathe Run", "dm-1", "Cain", "x".repeat(101))).rejects.toThrow(
+    await expect(createCampaign("The Lathe Run", "x".repeat(101))).rejects.toThrow(
       "Inquisitor name cannot be more than 100 characters"
     );
-    expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(mockCallCreateCampaign).not.toHaveBeenCalled();
   });
 });
 

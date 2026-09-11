@@ -502,7 +502,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     await expect(dmDb.doc(customItemPath()).delete()).rejects.toThrow();
   });
 
-  it("DM can delete a non-archived item as part of deleting the campaign in the same batch", async () => {
+  it("a client cannot bypass the server deletion job with a campaign-delete batch", async () => {
     const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env); // draft status — normally undeletable on its own
@@ -512,6 +512,6 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     batch.delete(dmDb.doc(customItemPath()));
     batch.delete(dmDb.doc(`campaigns/${campaignId}`));
 
-    await expect(batch.commit()).resolves.toBeUndefined();
+    await expect(batch.commit()).rejects.toThrow();
   });
 });

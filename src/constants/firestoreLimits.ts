@@ -9,8 +9,8 @@ import { PRODUCT_LIMITS } from "./productLimits";
  * separately at write boundaries.
  */
 export const FIRESTORE_QUERY_LIMITS = {
-  activeCampaignsPerRole: 50,
-  archivedCampaigns: 100,
+  activeCampaignsPerRole: PRODUCT_LIMITS.campaignsPerAccount,
+  archivedCampaigns: PRODUCT_LIMITS.campaignsPerAccount,
   dmCampaignsForNameSync: 100,
   charactersPerCampaign: PRODUCT_LIMITS.charactersPerCampaign,
   playerCharactersPerUser: 1_000,

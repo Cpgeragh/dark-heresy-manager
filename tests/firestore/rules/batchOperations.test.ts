@@ -14,14 +14,14 @@ describe("Firestore Rules: Batch Operations", () => {
     await env.clearFirestore();
   });
 
-  it("allows a DM to create multiple valid campaigns in one batch", async () => {
+  it("blocks direct campaign creation in a batch", async () => {
     const env = await getTestEnv();
     const dmDb = dbAs(env, "dm-1");
     const batch = dmDb.batch();
     for (const id of ["c1", "c2", "c3"]) {
       batch.set(dmDb.collection("campaigns").doc(id), validCampaignDocument("dm-1", id));
     }
-    await expect(batch.commit()).resolves.toBeUndefined();
+    await expect(batch.commit()).rejects.toThrow();
   });
 
   it("rejects the whole batch when one campaign has an invalid shape", async () => {

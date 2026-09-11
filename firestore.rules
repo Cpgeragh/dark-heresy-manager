@@ -266,12 +266,9 @@ service cloud.firestore {
                        )) &&
                      boundedQuery(100);
 
-      allow create:
-        if request.auth != null &&
-           request.resource.data.dmId == request.auth.uid &&
-           validCampaignData(request.resource.data) &&
-           request.resource.data.keys().hasAll(['memberIds', 'createdAt', 'archivedAt']) &&
-           request.resource.data.memberIds.size() == 0;
+      // Creation is server-only so account resolution, rate limiting, and the
+      // overall campaign ceiling cannot be bypassed by a modified client.
+      allow create: if false;
 
       // DM (or a linked device) can update any campaign field (except transferring ownership).
       allow update:
@@ -289,9 +286,9 @@ service cloud.firestore {
              request.resource.data.dmId == resource.data.dmId
            );
 
-      // DM (or a linked device) can delete their campaign (cascading delete handled client-side).
-      allow delete:
-        if dmOwnsOrLinked(resource.data.dmId);
+      // Deletion is server-only because Firestore document deletion does not
+      // cascade into characters, messages, or Recovery Index records.
+      allow delete: if false;
 
       // ============================
       // CAMPAIGN CUSTOM ITEM LIBRARY

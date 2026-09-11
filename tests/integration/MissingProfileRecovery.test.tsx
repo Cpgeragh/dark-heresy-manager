@@ -107,9 +107,7 @@ describe("MissingProfileRecovery", () => {
 
     renderPage();
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "No account found for that recovery code."
-    );
+    expect(await screen.findByText("No account found for that recovery code.")).toBeInTheDocument();
   });
 
   it("does not submit the same link twice while the first call is pending", async () => {

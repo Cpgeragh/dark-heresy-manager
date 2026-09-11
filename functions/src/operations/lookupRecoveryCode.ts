@@ -7,6 +7,7 @@
 
 import { getFirestore } from "firebase-admin/firestore";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
+import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 
@@ -41,6 +42,7 @@ export async function lookupRecoveryCode(
   }
 
   const db = getFirestore();
+  const ownerUid = await resolvePrimaryUid(db, callerUid);
   const hash = hashRecoveryCode(code, hmacSecret);
   const indexSnapshot = await db.collection(RECOVERY_INDEX_COLLECTION).doc(hash).get();
   if (!indexSnapshot.exists) {
@@ -73,7 +75,7 @@ export async function lookupRecoveryCode(
   let ownership: OwnershipState;
   if (!character.userId) {
     ownership = "unclaimed";
-  } else if (character.userId === callerUid) {
+  } else if (character.userId === ownerUid) {
     ownership = "claimed-by-you";
   } else if (character.isEditableByPlayer === false) {
     ownership = "locked";

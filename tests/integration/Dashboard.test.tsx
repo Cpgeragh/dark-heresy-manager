@@ -7,10 +7,10 @@
 // CRUD (create/edit/archive/delete-with-preflight-progress/restore), the QR panel
 // gating, the player campaign list, and the claim-a-character flow including the
 // ?code= URL auto-lookup.
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { afterEach, describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import type { User } from "firebase/auth";
 import "@testing-library/jest-dom";
 
@@ -93,14 +93,23 @@ import Dashboard from "../../src/pages/Dashboard";
 import type { CampaignWithId } from "../../src/types/Firestore";
 
 const user1 = { uid: "user-1" } as User;
+const desktopMatchMedia = window.matchMedia;
 
 function dmCampaign(over: Partial<CampaignWithId> = {}): CampaignWithId {
   return { id: "campaign-1", name: "The Lathe Run", dmId: "user-1", ...over } as CampaignWithId;
 }
 
-function renderDashboard(props: Partial<React.ComponentProps<typeof Dashboard>> = {}) {
+function LocationProbe() {
+  const location = useLocation();
+  return <span data-testid="location-search">{location.search}</span>;
+}
+
+function renderDashboard(
+  props: Partial<React.ComponentProps<typeof Dashboard>> = {},
+  initialEntry = "/"
+) {
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <Dashboard
         user={user1}
         effectiveUserId="user-1"
@@ -108,6 +117,7 @@ function renderDashboard(props: Partial<React.ComponentProps<typeof Dashboard>> 
         firstName="Alice"
         {...props}
       />
+      <LocationProbe />
     </MemoryRouter>
   );
 }
@@ -132,18 +142,23 @@ beforeEach(() => {
   });
 });
 
+afterEach(() => {
+  window.matchMedia = desktopMatchMedia;
+});
+
 describe("Dashboard DM campaign list", () => {
   it("creates a campaign and shows a success toast", async () => {
     const user = userEvent.setup();
     renderDashboard();
 
     expect(screen.queryByLabelText("Campaign Name *")).not.toBeInTheDocument();
+    expect(screen.queryByText("Create Campaign")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Create campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
     await user.click(within(form).getByRole("button", { name: "Create campaign" }));
 
-    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", "user-1", "Alice", undefined);
+    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined);
     await waitFor(() =>
       expect(mockToastSuccess).toHaveBeenCalledWith("Campaign created successfully")
     );
@@ -159,12 +174,7 @@ describe("Dashboard DM campaign list", () => {
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
     await user.click(within(form).getByRole("button", { name: "Create campaign" }));
 
-    expect(createCampaignMock).toHaveBeenCalledWith(
-      "New Crusade",
-      "user-1",
-      "Alice",
-      "Inquisitor Vail"
-    );
+    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", "Inquisitor Vail");
   });
 
   it("keeps campaign creation disabled until the required name is valid", async () => {
@@ -177,6 +187,16 @@ describe("Dashboard DM campaign list", () => {
     expect(within(form).getByRole("button", { name: "Create campaign" })).toBeDisabled();
     expect(createCampaignMock).not.toHaveBeenCalled();
     expect(mockToastWarning).not.toHaveBeenCalled();
+  });
+
+  it("submits campaign creation with Enter", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.type(screen.getByLabelText("Campaign Name *"), "New Crusade{Enter}");
+
+    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined);
   });
 
   it("edits a campaign name inline", async () => {
@@ -198,6 +218,45 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(updateCampaignDetailsMock).toHaveBeenCalledWith("campaign-1", "Renamed Crusade", "");
+  });
+
+  it("saves an edited campaign with Enter", async () => {
+    const user = userEvent.setup();
+    useCampaignsContextMock.mockReturnValue({
+      dmCampaigns: [dmCampaign()],
+      playerCampaigns: [],
+      dmLoading: false,
+      playerLoading: false,
+      dmError: null,
+      playerError: null,
+    });
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByLabelText("Edit campaign name");
+    await user.clear(input);
+    await user.type(input, "Renamed Crusade{Enter}");
+
+    expect(updateCampaignDetailsMock).toHaveBeenCalledWith("campaign-1", "Renamed Crusade", "");
+  });
+
+  it("keeps an active create request visible when Escape is pressed", async () => {
+    const user = userEvent.setup();
+    let finish!: () => void;
+    createCampaignMock.mockReturnValueOnce(new Promise<void>((resolve) => (finish = resolve)));
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    const form = screen.getByRole("dialog", { name: "Create Campaign" });
+    await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
+    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+    await user.keyboard("{Escape}");
+
+    expect(screen.getByRole("dialog", { name: "Create Campaign" })).toBeVisible();
+    finish();
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Create Campaign" })).not.toBeInTheDocument()
+    );
   });
 
   it("seeds and edits the Inquisitor Name alongside the campaign name", async () => {
@@ -312,7 +371,17 @@ describe("Dashboard QR panel", () => {
 describe("Dashboard player section", () => {
   it("shows a message when the player has no campaigns", () => {
     renderDashboard();
-    expect(screen.getByText(/You are not part of any campaigns yet/)).toBeInTheDocument();
+    const dmEmptyState = screen.getByText("You have not created any campaigns yet.");
+    const playerEmptyState = screen.getByText(/You are not part of any campaigns yet/);
+    expect(dmEmptyState).toHaveClass("text-slate-500", "italic");
+    expect(playerEmptyState).toHaveClass("text-slate-500", "italic");
+    expect(dmEmptyState.parentElement).toHaveClass("space-y-3");
+    expect(playerEmptyState.parentElement).toHaveClass("space-y-3");
+    expect(dmEmptyState.closest(".rounded-lg")).toHaveClass("border-slate-500", "bg-slate-900/60");
+    expect(playerEmptyState.closest(".rounded-lg")).toHaveClass(
+      "border-slate-500",
+      "bg-slate-900/60"
+    );
     expect(screen.getByRole("button", { name: "Claim a character" })).toBeVisible();
     expect(screen.queryByText("No archived campaigns.")).not.toBeInTheDocument();
   });
@@ -332,6 +401,52 @@ describe("Dashboard player section", () => {
       "href",
       "/campaign/campaign-2"
     );
+  });
+
+  it("keeps campaign actions outside the campaign navigation link", () => {
+    useCampaignsContextMock.mockReturnValue({
+      dmCampaigns: [dmCampaign()],
+      playerCampaigns: [],
+      dmLoading: false,
+      playerLoading: false,
+      dmError: null,
+      playerError: null,
+    });
+    renderDashboard();
+
+    const campaignLink = screen.getByRole("link", { name: "The Lathe Run" });
+    expect(within(campaignLink).queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("uses the standard segmented swipe layout on mobile", async () => {
+    const user = userEvent.setup();
+    window.matchMedia = (query: string) =>
+      ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => true,
+      }) as MediaQueryList;
+
+    renderDashboard();
+
+    expect(screen.getByRole("tab", { name: "Your Campaigns" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    expect(screen.getByRole("heading", { name: "Your Campaigns" })).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Campaigns You Play In" })
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "Playing In" }));
+
+    expect(screen.getByRole("heading", { name: "Campaigns You Play In" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Your Campaigns" })).not.toBeInTheDocument();
   });
 });
 
@@ -365,6 +480,24 @@ describe("Dashboard claim-a-character flow", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(resetRecoveryLookupMock).toHaveBeenCalledOnce();
+  });
+
+  it("submits a recovery-code lookup with Enter", async () => {
+    const user = userEvent.setup();
+    const lookup = vi.fn();
+    useRecoveryLookupMock.mockReturnValue({
+      loading: false,
+      error: null,
+      data: null,
+      lookup,
+      reset: resetRecoveryLookupMock,
+    });
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Claim a character" }));
+    await user.type(screen.getByLabelText("Recovery Code *"), "AAAABBBB{Enter}");
+
+    expect(lookup).toHaveBeenCalledWith("DH-AAAA-BBBB");
   });
 
   it("shows the claim preview once a lookup resolves, and claims on confirm", async () => {
@@ -406,7 +539,7 @@ describe("Dashboard claim-a-character flow", () => {
     await user.click(within(form).getByText("Mock Claim"));
 
     await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Already claimed"));
-    expect(screen.getByText("Already claimed")).toBeInTheDocument();
+    expect(screen.queryByText("Already claimed")).not.toBeInTheDocument();
   });
 
   it("auto-looks-up a code passed in the URL on mount", () => {
@@ -418,12 +551,34 @@ describe("Dashboard claim-a-character flow", () => {
       lookup,
       reset: resetRecoveryLookupMock,
     });
-    window.history.pushState({}, "", "/?code=DH-AAAA-BBBB");
-
-    renderDashboard();
+    renderDashboard({}, "/?code=DH-AAAA-BBBB");
 
     expect(lookup).toHaveBeenCalledWith("DH-AAAA-BBBB");
     expect(screen.getByRole("dialog", { name: "Claim a Character" })).toBeVisible();
-    window.history.pushState({}, "", "/");
+  });
+
+  it("removes a recovery code from the URL when the form closes", async () => {
+    const user = userEvent.setup();
+    renderDashboard({}, "/?code=DH-AAAA-BBBB&source=qr");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.getByTestId("location-search")).toHaveTextContent("?source=qr");
+  });
+
+  it("does not look up a malformed recovery code from the URL", () => {
+    const lookup = vi.fn();
+    useRecoveryLookupMock.mockReturnValue({
+      loading: false,
+      error: null,
+      data: null,
+      lookup,
+      reset: resetRecoveryLookupMock,
+    });
+
+    renderDashboard({}, "/?code=bad-code");
+
+    expect(lookup).not.toHaveBeenCalled();
+    expect(mockToastWarning).toHaveBeenCalledWith("This recovery-code link is invalid.");
   });
 });

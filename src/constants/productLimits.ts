@@ -8,6 +8,7 @@
 export const PRODUCT_LIMITS = {
   campaignCreationsPerWindow: 10,
   campaignCreationWindowMs: 24 * 60 * 60 * 1_000,
+  campaignsPerAccount: 100,
   campaignMembers: 100,
   charactersPerCampaign: 100,
 

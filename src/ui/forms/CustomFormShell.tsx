@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { CustomFormFooter } from "./CustomFormFooter";
 import { PickerBody, PickerModal } from "../pickers/PickerModal";
 
@@ -40,6 +40,7 @@ export function CustomFormShell({
   maxWidth,
   bodyClassName = "",
 }: CustomFormShellProps) {
+  const formId = useId();
   return (
     <PickerModal
       title={title}
@@ -62,10 +63,34 @@ export function CustomFormShell({
           onCancel={onCancel}
           saving={saving}
           savingLabel={savingLabel}
+          formId={formId}
         />
       }
     >
-      <PickerBody className={bodyClassName}>{children}</PickerBody>
+      <PickerBody className={bodyClassName}>
+        <form
+          id={formId}
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (canSubmit && !saving) void onSubmit();
+          }}
+          onKeyDown={(event) => {
+            if (
+              event.key !== "Enter" ||
+              event.shiftKey ||
+              event.nativeEvent.isComposing ||
+              event.target instanceof HTMLTextAreaElement
+            ) {
+              return;
+            }
+            event.preventDefault();
+            if (canSubmit && !saving) void onSubmit();
+          }}
+        >
+          {children}
+        </form>
+      </PickerBody>
     </PickerModal>
   );
 }

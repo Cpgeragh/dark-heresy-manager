@@ -18,6 +18,7 @@ interface CustomFormFooterProps {
   saving?: boolean;
   savingLabel?: string;
   className?: string;
+  formId?: string;
 }
 
 /** Shared validation note and actions for custom-item forms. */
@@ -29,15 +30,22 @@ export function CustomFormFooter({
   saving = false,
   savingLabel = "Saving...",
   className = "",
+  formId,
 }: CustomFormFooterProps) {
   return (
     <div className={`space-y-2 ${className}`.trim()}>
       <RequiredFieldsNote />
       <div className="flex gap-2">
-        <Button className="flex-1" onClick={onSubmit} disabled={!canSubmit || saving}>
+        <Button
+          type={formId ? "submit" : "button"}
+          form={formId}
+          className="flex-1"
+          onClick={formId ? undefined : onSubmit}
+          disabled={!canSubmit || saving}
+        >
           {saving ? savingLabel : submitLabel}
         </Button>
-        <Button variant="secondary" onClick={onCancel}>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={saving}>
           Cancel
         </Button>
       </div>

@@ -26,6 +26,14 @@ export function ToastContainer() {
       } catch {
         // Retain the normal fixed-position fallback in browsers without usable popovers.
       }
+
+      // Some environments expose the methods without implementing the top
+      // layer. Leaving the attribute in place there makes the toast hidden.
+      try {
+        if (!container.matches(":popover-open")) container.removeAttribute("popover");
+      } catch {
+        container.removeAttribute("popover");
+      }
     };
 
     raiseAboveModals();

@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-three pages and cross-cutting sections, containing 625 checks. Every item
+Thirty-three pages and cross-cutting sections, containing 645 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -894,11 +894,16 @@ in the URL (`?step=`), not just component state.
 
 Use a new disposable browser profile for each path: new user, reclaim, and refresh-on-code. Copy the generated recovery code to a secure scratch record and prove it on a second profile. At every step test refresh, Back, and Forward before completing onboarding.
 
-- [ ] Welcome step — "Get Started" stays disabled until a first name is entered; spaces are stripped as you type, not just trimmed on submit
-- [ ] Get Started generates and displays a recovery code once — the "Copy code" button must actually be pressed (button label flips to "Copied") before the "I've saved my recovery code" checkbox becomes checkable, and "I've saved my code" stays disabled until both the copy and the checkbox are done
-- [ ] Browser Back/Forward moves correctly between Welcome → Show Code and Welcome → Reclaim, matching whichever path you took
+- [ ] Welcome step — "Create new account" stays disabled until a first name is entered; spaces are stripped as you type, not just trimmed on submit, and the first character is automatically capitalised
+- [ ] Creating a new account generates and displays one recovery code — copying changes the button label to "Copied", the confirmation checkbox can be selected independently, and "Continue to dashboard" stays disabled until the checkbox is selected
+- [ ] In every recovery-code field, focusing an empty input may display the fixed `DH-` prefix without storing it; typing, deleting across either automatic dash, and backspacing the displayed prefix never produces `DH-DH`, while pasting a complete `DH-XXXX-XXXX` code replaces the field cleanly without duplicating or corrupting the prefix
+- [ ] Press Enter to submit first-name creation, account lookup, and the saved-code confirmation — each behaves exactly like its visible primary button and never starts a duplicate request
+- [ ] Browser Back/Forward moves correctly between Create Your Account → Save Your Recovery Code and Create Your Account → Connect Existing Account, matching whichever path you took
+- [ ] Press Back from Save Your Recovery Code — the standard confirmation opens; "Keep setting up" preserves the same code and checkbox state, while "Cancel account setup" invalidates that code, clears the unfinished name/code state, and returns to Create Your Account
+- [ ] Force navigation back to Create Your Account after a code has already been generated, then select either account path — setup resumes at the existing Save Your Recovery Code screen rather than creating a second code or silently switching into account linking
+- [ ] Hold code generation, lookup, linking, reclaim, completion, or setup cancellation pending and try Back/Escape/repeated submission — the active screen remains visible and locked, no abandoned request later advances onboarding, and failure leaves a usable screen with one action-error toast
 - [ ] Refresh the page while sitting on the show-code step — the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Welcome step instead of showing a blank code
-- [ ] "Returning user? Reclaim your identity" path — entering a previously-issued recovery code from another device migrates every DM-owned campaign and every player-owned character over to this device's account in one go
+- [ ] Connect Existing Account — entering another account's recovery code links this device when that account still has a linked device, or offers identity reclaim when none remain; completing a reclaim moves every DM-owned campaign and player-owned character in one go
 - [ ] With a deliberately seeded account above the identity-reclaim ceiling, recovery stops with the protected-recovery message before any campaign or character changes owner; retrying a normal-sized recovery afterwards still works, proving the temporary proof record was cleaned up
 - [ ] After onboarding completes once, closing and reopening the app never shows onboarding again; if an onboarded account is missing its required profile, the app fails closed with an account-profile loading error and never asks the user to recreate the name
 - [ ] Reclaim an identity that already has a saved first name on a fresh anonymous-auth device — the reclaim control stays on "Finishing recovery…" until the existing name is live, then the dashboard opens directly and the obsolete profile under the old UID no longer exists
@@ -913,13 +918,18 @@ Use a DM with active and archived campaigns, an owning player with multiple clai
 
 **DM section** (hidden entirely on a device installed via the player-only QR invite — see the QR bullet below):
 
-- [ ] Create a campaign; blank/whitespace-only names are rejected
+- [ ] On desktop, Your Campaigns and Campaigns You Play In use the same side-by-side layout as the two Psychic Powers groups; on phone, only one group is visible at a time and the standard swipe/tab control switches between them
+- [ ] Create Campaign is inside Your Campaigns and opens the standard custom-form modal with permanent labels in Campaign Name (required) then Inquisitor Name (optional) order, a required note, and a contained action button; blank/whitespace-only campaign names are rejected
 - [ ] Campaign names stop at 100 characters, and rapidly pressing Create still produces only one campaign
+- [ ] Create a campaign from a linked secondary device — it succeeds under the primary account, appears on both devices after refresh, and does not create a campaign owned by the secondary device ID
+- [ ] Press Enter in Create Campaign and inline Edit Campaign — each submits once; while creation is pending, Escape/close/Cancel cannot hide its modal, while an edit keeps its Cancel action disabled; repeated Enter never starts another write
 - [ ] Rename a campaign inline; Edit/Save/Cancel all behave
 - [ ] Archive a campaign — it moves out of the active list into a collapsed "Archived (N)" disclosure, collapsed by default
 - [ ] Restore an archived campaign — it reappears in the active list
 - [ ] Delete a campaign (active or archived) — requires literally typing DELETE, and actually removes it rather than just archiving it again
 - [ ] Delete a disposable campaign containing enough messages, sessions and custom-item versions to require multiple 100-document pages; if the operation is deliberately interrupted, retrying finishes cleanup and removes the campaign without an oversized-batch error
+- [ ] Use mouse and keyboard to open a campaign and to activate Edit, Archive, and Delete — each action button performs only its own action and never follows the campaign link underneath it
+- [ ] Active campaigns are alphabetised intentionally, archived campaigns are newest-first, and reaching a 100-result query boundary shows the list-limit notice rather than silently hiding additional results
 - [ ] The QR "Share App" panel only appears once you have at least one DM campaign, and never appears at all on a device that is itself a linked secondary device
 - [ ] "Share full app" and "Share player invite" produce genuinely different URLs (different `?invite=` value) — scanning the player one on a separate fresh device/profile should permanently hide that device's DM section (until the full-app QR is scanned there instead)
 
@@ -930,11 +940,16 @@ Use a DM with active and archived campaigns, an owning player with multiple clai
 - [ ] Claim characters in several different campaigns with the same account — every owned character appears under its correct campaign, including a DM-owned character in the DM's own campaign, without duplicating a campaign or character card
 - [ ] Tapping a character card opens that character's sheet directly
 
-**Claim a Character (inline, bottom of the page):**
+**Claim a Character (button and modal inside Campaigns You Play In):**
 
-- [ ] The code field validates the DH-XXXX-XXXX shape before "Look Up Character" enables at all
+- [ ] "Claim a character" opens the standard custom-form modal; the code field validates the DH-XXXX-XXXX shape before "Find character" enables at all, and Cancel/close clears the previous code, preview, and errors
+- [ ] Press Enter with a complete code to run Find Character once; closing while lookup is pending invalidates its late result/error so nothing reopens or toasts afterwards, while Escape/close/Cancel during the actual claim keeps the visible modal mounted until the claim settles
 - [ ] Looking up a valid code shows character name, campaign name, and one of four distinct ownership states: unclaimed (green, claimable) / already yours / claimed by another player / claimed and locked by the DM — confirm the last two show different explanatory text even though both are equally un-claimable right now
 - [ ] Claiming an unclaimed character navigates straight to its character sheet afterwards
+- [ ] From a linked secondary device, a character owned by the primary account reports "already yours"; claiming an unclaimed character assigns it to the primary identity and makes it appear on both devices after refresh
+- [ ] A failed lookup or claim shows exactly one crisp global toast above the modal backdrop and no duplicate red message inside the form; dismissing or retrying leaves the modal usable
+- [ ] Open the Dashboard with a valid `?code=DH-XXXX-XXXX` link — the claim modal opens and performs exactly one lookup; closing it removes only `code` from the address while preserving other query parameters, and refresh does not consume another attempt
+- [ ] Open the Dashboard with a malformed `?code=` value — no lookup request is sent, a specific invalid-link warning appears instead of a generic unexpected error, and closing the modal cleans the address
 - [ ] Recovery backup banner appears only under its intended account/device conditions; copying the code works, and rotating the code replaces any stale code shown by the banner
 - [ ] Entering an exact valid character recovery code still resolves normally; automated rule tests separately confirm that listing or querying the recovery index is denied
 
@@ -1056,6 +1071,7 @@ These are the authoritative product ceilings from `constants/productLimits.ts`. 
 For each boundary, try the largest valid value and then one unit over it. For rolling-window limits, use controlled timestamps or fake timers rather than waiting in real time. For encoded and nested limits, use generated local fixtures whose byte count, entry count and depth are known before upload.
 
 - [ ] A user can create 10 campaigns in a rolling 24-hour window; attempt 11 is rejected before creation, and capacity returns only as the oldest qualifying creation leaves the window
+- [ ] A primary account and all linked devices share the same campaign-creation allowance and the same 100-campaign total ceiling (active plus archived); attempt 101 is rejected without creating a document
 - [ ] A campaign accepts at most 100 distinct members and 100 characters; the next addition is rejected without changing the existing roster
 - [ ] A session accepts at most 100 distinct attendees and 100,000 whole XP; 101 attendees, duplicate attendees, fractional XP and 100,001 XP are rejected
 - [ ] Campaign/character names stop at 100 characters, first names at 50, messages at 2,000, thread previews at 500, and session summaries/DM notes at 4,000 each
@@ -1122,7 +1138,7 @@ Do not deploy between these checks.
 
 - [ ] Run the focused bounded-query, subscription and message-drawer tests — disabled queries create no listener, enabling creates one listener, changing/disabling/unmounting cleans it up, a closed drawer has no thread consumer, and older messages or claim history are fetched only after their explicit activation
 - [ ] Run the focused input-boundary tests — imports, portraits, messages, sessions, character arrays, custom-item values and bulk counts accept their exact maximum valid values, while the first oversized value is rejected before a Firebase write
-- [ ] Run the focused Firestore rules tests — unexpected campaign, character, session, message, thread, custom-item and version fields are rejected; campaign members may create drafts, outsiders cannot, and only the authorised creator/DM transitions remain available
+- [ ] Run the focused Firestore rules tests — unexpected campaign, character, session, message, thread, custom-item and version fields are rejected; direct client campaign creation/deletion is denied so the protected creation and cleanup operations cannot be bypassed; campaign members may create drafts, outsiders cannot, and only the authorised creator/DM transitions remain available
 - [ ] Run the duplicate-submission, batch/preflight and XP-reconciliation tests — identical in-flight mutations share one operation, 440-document atomic work succeeds while 441 is stopped before a batch, and stale `experience.spent` converges after one committed correction
 - [ ] Run the Firebase configuration test — the CSP still permits the app's required Firebase/Auth, image, frame and worker destinations without unsafe script execution; the build hook, SPA rewrite, service-worker revalidation and immutable hashed-asset caching remain intact
 - [ ] Run `npm run build`, `npm run test:run` and `npm run test:rules` once after a batch of test edits — all complete successfully using only the local project and Firestore emulator, and no production deployment occurs

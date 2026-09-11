@@ -151,9 +151,11 @@ export function ModalShell({
         if (closeOnBackdrop && event.target === event.currentTarget) onClose();
       }}
       onCancel={(event) => {
-        if (!closeOnEscape) {
-          event.preventDefault();
-        }
+        // Keep the native dialog controlled by React. Allowing the browser to
+        // close it first can leave a still-mounted, invisible modal behind when
+        // a caller deliberately refuses to close during an active operation.
+        event.preventDefault();
+        if (closeOnEscape) onClose();
       }}
       onClose={() => {
         if (!unmountingRef.current) onClose();

@@ -7,6 +7,14 @@ import { campaignsCollectionRef } from "../firebase/converters";
 import type { CampaignWithId } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
 
+function archivedTime(campaign: CampaignWithId): number {
+  const value = campaign.archivedAt;
+  if (value instanceof Date) return value.getTime();
+  return value && "toMillis" in value && typeof value.toMillis === "function"
+    ? value.toMillis()
+    : 0;
+}
+
 export function useArchivedCampaigns(uid: string) {
   const {
     data: campaigns,
@@ -22,7 +30,13 @@ export function useArchivedCampaigns(uid: string) {
         )
       : null,
     uid ? `archived-campaigns:${uid}` : null,
-    (snapshot) => snapshot.docs.map((campaignDocument) => campaignDocument.data())
+    (snapshot) =>
+      snapshot.docs
+        .map((campaignDocument) => campaignDocument.data())
+        .sort(
+          (left, right) =>
+            archivedTime(right) - archivedTime(left) || left.name.localeCompare(right.name)
+        )
   );
 
   return { campaigns: campaigns as CampaignWithId[], loading, error };

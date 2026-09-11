@@ -5,7 +5,7 @@
 //   • Player section (campaigns you play in, claim character)
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import type { User } from "firebase/auth";
 import { useCampaignsContext } from "../context/useCampaignsContext";
 import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
@@ -18,6 +18,7 @@ import {
 } from "../utils/validation";
 import { buildRoute } from "../constants/routes";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import {
   archiveCampaign,
   createCampaign,
@@ -31,7 +32,6 @@ import {
   uiSection,
   editableInputClass,
   uiFormLabel,
-  uiTextError,
   uiTextPlaceholder,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
@@ -51,7 +51,15 @@ import { CustomFormSection } from "../ui/forms/CustomFormSection";
 import { RequiredFormLabel } from "../ui/forms/RequiredFormLabel";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
 import { formatRecoveryCodeInput } from "../utils/recoveryCode";
-import { colourRequiredText } from "../ui/styles/colourTokens";
+import { colourActiveRose, colourActiveSky, colourRequiredText } from "../ui/styles/colourTokens";
+import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../hooks/useMediaQuery";
+import { useSwipeableTabs } from "../hooks/useSwipeableTabs";
+import { SegmentedTabs, type SegmentedTabOption } from "../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../ui/styles/segmentedTabStyles";
 
 interface Props {
   user: User;
@@ -60,10 +68,34 @@ interface Props {
   firstName: string | null;
 }
 
+type CampaignGroup = "yours" | "playing";
+const CAMPAIGN_GROUPS = ["yours", "playing"] as const satisfies readonly CampaignGroup[];
+const CAMPAIGN_GROUP_TABS = [
+  {
+    value: "yours",
+    label: "Your Campaigns",
+    activeClassName: colourActiveSky,
+  },
+  {
+    value: "playing",
+    label: "Playing In",
+    activeClassName: colourActiveRose,
+  },
+] as const satisfies readonly SegmentedTabOption<CampaignGroup>[];
+const CAMPAIGN_GROUP_TABS_ID = "dashboard-campaign-groups";
+
 interface DeletePreflightState {
   loading: boolean;
   result?: { jobId: string; totalCount: number };
   error?: string;
+}
+
+function CampaignListLimitNotice() {
+  return (
+    <p className="text-xs text-amber-300 lg:text-sm">
+      Showing the first {FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole} campaigns.
+    </p>
+  );
 }
 
 function deleteImpactDetails(state?: DeletePreflightState) {
@@ -104,13 +136,11 @@ function DmCampaignList({
   campaigns,
   loading,
   error,
-  firstName,
 }: {
   userUid: string;
   campaigns: CampaignWithId[];
   loading: boolean;
   error: Error | null;
-  firstName: string | null;
 }) {
   const {
     campaigns: archivedCampaigns,
@@ -160,7 +190,7 @@ function DmCampaignList({
     creatingRef.current = true;
     setCreating(true);
     try {
-      await createCampaign(name, userUid, firstName ?? undefined, inquisitorName || undefined);
+      await createCampaign(name, inquisitorName || undefined);
       setNewCampaignName("");
       setNewInquisitorName("");
       setShowCreateForm(false);
@@ -172,7 +202,7 @@ function DmCampaignList({
       creatingRef.current = false;
       setCreating(false);
     }
-  }, [newCampaignName, newInquisitorName, userUid, firstName, toast]);
+  }, [newCampaignName, newInquisitorName, toast]);
 
   const closeCreateForm = useCallback(() => {
     if (creatingRef.current) return;
@@ -294,141 +324,209 @@ function DmCampaignList({
   }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Create */}
-      <div>
-        <SectionHeader className="mb-3">Create Campaign</SectionHeader>
-        <Button onClick={() => setShowCreateForm(true)}>Create campaign</Button>
-
-        {showCreateForm && (
-          <CustomFormShell
-            title="Create Campaign"
-            scrollPositionRef={createFormScrollPositionRef}
-            canSubmit={campaignNameValid && inquisitorNameValid}
-            submitLabel="Create campaign"
-            savingLabel="Creating…"
-            saving={creating}
-            onSubmit={handleCreate}
-            onClose={closeCreateForm}
-            onCancel={closeCreateForm}
-            maxWidth="max-w-lg"
-          >
-            <CustomFormSection title="Campaign Details">
-              <div>
-                <RequiredFormLabel htmlFor="new-campaign-name">Campaign Name</RequiredFormLabel>
-                <input
-                  id="new-campaign-name"
-                  required
-                  autoFocus
-                  className={`${editableInputClass(true)} mt-0.5`}
-                  placeholder="Campaign name…"
-                  value={newCampaignName}
-                  maxLength={PRODUCT_LIMITS.campaignNameCharacters}
-                  onChange={(event) => setNewCampaignName(event.target.value)}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="new-inquisitor-name" className={uiFormLabel}>
-                  Inquisitor Name{" "}
-                  <span className="normal-case tracking-normal text-slate-500">(optional)</span>
-                </label>
-                <input
-                  id="new-inquisitor-name"
-                  className={`${editableInputClass(true)} mt-0.5`}
-                  placeholder="Inquisitor name…"
-                  value={newInquisitorName}
-                  maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
-                  onChange={(event) => setNewInquisitorName(event.target.value)}
-                />
-              </div>
-            </CustomFormSection>
-          </CustomFormShell>
-        )}
-      </div>
-
+    <section className="space-y-3">
       {/* Active campaigns */}
-      <div>
-        <SectionHeader className="mb-3">Your Campaigns</SectionHeader>
+      <SectionHeader>Your Campaigns</SectionHeader>
 
-        {error ? (
-          <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
-        ) : loading ? (
-          <LoadingState>Loading campaigns…</LoadingState>
-        ) : campaigns.length === 0 ? (
-          <p className="text-slate-400 text-sm lg:text-base">No campaigns created yet.</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {campaigns.map((campaign) =>
-              editingId === campaign.id ? (
-                <div key={campaign.id} className={uiSection + " space-y-2"}>
-                  <input
-                    className={editableInputClass(true)}
-                    value={editInquisitorName}
-                    maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
-                    onChange={(e) => setEditInquisitorName(e.target.value)}
-                    placeholder="Inquisitor Name (optional)"
-                    aria-label="Edit Inquisitor name"
-                  />
-                  <input
-                    className={editableInputClass(true)}
-                    value={editName}
-                    maxLength={PRODUCT_LIMITS.campaignNameCharacters}
-                    onChange={(e) => setEditName(e.target.value)}
-                    autoFocus
-                    aria-label="Edit campaign name"
-                  />
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" onClick={handleEditSave} disabled={editing}>
-                      {editing ? "Saving…" : "Save"}
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={editing}
-                      onClick={() => {
-                        setEditingId(null);
-                        setEditName("");
-                        setEditInquisitorName("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
+      {error ? (
+        <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
+      ) : loading ? (
+        <LoadingState>Loading campaigns…</LoadingState>
+      ) : campaigns.length === 0 ? (
+        <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+          You have not created any campaigns yet.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {campaigns.map((campaign) =>
+            editingId === campaign.id ? (
+              <form
+                key={campaign.id}
+                className={uiSection + " space-y-2"}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void handleEditSave();
+                }}
+              >
+                <input
+                  className={editableInputClass(true)}
+                  value={editInquisitorName}
+                  maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
+                  onChange={(e) => setEditInquisitorName(e.target.value)}
+                  placeholder="Inquisitor Name (optional)"
+                  aria-label="Edit Inquisitor name"
+                />
+                <input
+                  className={editableInputClass(true)}
+                  value={editName}
+                  maxLength={PRODUCT_LIMITS.campaignNameCharacters}
+                  onChange={(e) => setEditName(e.target.value)}
+                  autoFocus
+                  aria-label="Edit campaign name"
+                />
+                <div className="flex items-center gap-2">
+                  <Button type="submit" size="sm" disabled={editing}>
+                    {editing ? "Saving…" : "Save"}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={editing}
+                    onClick={() => {
+                      setEditingId(null);
+                      setEditName("");
+                      setEditInquisitorName("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </div>
-              ) : (
+              </form>
+            ) : (
+              <div
+                key={campaign.id}
+                className={
+                  uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"
+                }
+              >
                 <Link
-                  key={campaign.id}
                   to={buildRoute.campaignOverview(campaign.id)}
-                  className={
-                    uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"
-                  }
+                  className="min-w-0 flex-1 font-medium text-slate-200 lg:text-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
                 >
-                  <span className="flex-1 font-medium text-slate-200 lg:text-lg">
-                    {campaign.name}
-                  </span>
+                  {campaign.name}
+                </Link>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setEditingId(campaign.id);
+                    setEditName(campaign.name);
+                    setEditInquisitorName(campaign.inquisitorName ?? "");
+                  }}
+                >
+                  Edit
+                </Button>
+
+                <ConfirmInline
+                  triggerLabel="Archive"
+                  question="Archive?"
+                  variant="warning"
+                  size="sm"
+                  busy={archiving}
+                  onConfirm={() => handleArchive(campaign.id)}
+                />
+
+                <ConfirmInline
+                  triggerLabel="Delete"
+                  requireText="DELETE"
+                  requirePrompt="Type DELETE to confirm"
+                  size="sm"
+                  busy={deleting}
+                  onArm={() => loadDeletePreflight(campaign.id)}
+                  details={deleteImpactDetails(deletePreflights[campaign.id])}
+                  confirmDisabled={
+                    deletePreflights[campaign.id]?.loading || !deletePreflights[campaign.id]?.result
+                  }
+                  onConfirm={() => handleDeleteConfirm(campaign.id)}
+                  busyLabel={
+                    deleteProgress && deleteProgress.totalCount > 0
+                      ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
+                      : "Deleting…"
+                  }
+                />
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      {!error && !loading && campaigns.length === FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole && (
+        <CampaignListLimitNotice />
+      )}
+
+      <Button onClick={() => setShowCreateForm(true)}>Create campaign</Button>
+
+      {showCreateForm && (
+        <CustomFormShell
+          title="Create Campaign"
+          scrollPositionRef={createFormScrollPositionRef}
+          canSubmit={campaignNameValid && inquisitorNameValid}
+          submitLabel="Create campaign"
+          savingLabel="Creating…"
+          saving={creating}
+          onSubmit={handleCreate}
+          onClose={closeCreateForm}
+          onCancel={closeCreateForm}
+          maxWidth="max-w-lg"
+        >
+          <CustomFormSection title="Campaign Details">
+            <div>
+              <RequiredFormLabel htmlFor="new-campaign-name">Campaign Name</RequiredFormLabel>
+              <input
+                id="new-campaign-name"
+                required
+                autoFocus
+                className={`${editableInputClass(true)} mt-0.5`}
+                placeholder="Campaign name…"
+                value={newCampaignName}
+                maxLength={PRODUCT_LIMITS.campaignNameCharacters}
+                onChange={(event) => setNewCampaignName(event.target.value)}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="new-inquisitor-name" className={uiFormLabel}>
+                Inquisitor Name{" "}
+                <span className="normal-case tracking-normal text-slate-500">(optional)</span>
+              </label>
+              <input
+                id="new-inquisitor-name"
+                className={`${editableInputClass(true)} mt-0.5`}
+                placeholder="Inquisitor name…"
+                value={newInquisitorName}
+                maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
+                onChange={(event) => setNewInquisitorName(event.target.value)}
+              />
+            </div>
+          </CustomFormSection>
+        </CustomFormShell>
+      )}
+
+      {/* Archived */}
+      {archivedError ? (
+        <ErrorState>Unable to load archived campaigns.</ErrorState>
+      ) : archivedLoading ? (
+        <LoadingState>Loading archived campaigns…</LoadingState>
+      ) : archivedCampaigns.length > 0 ? (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowArchived((v) => !v)}
+            aria-expanded={showArchived}
+            className="inline-flex items-center gap-1 text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"
+          >
+            <ExpandChevron expanded={showArchived} />
+            <span>Archived ({archivedCampaigns.length})</span>
+          </button>
+
+          {showArchived && (
+            <div className="flex flex-col gap-2 mt-2">
+              {archivedCampaigns.map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className={uiSection + " flex items-center gap-2 opacity-60"}
+                >
+                  <span className="flex-1 text-slate-400 italic lg:text-lg">{campaign.name}</span>
 
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setEditingId(campaign.id);
-                      setEditName(campaign.name);
-                      setEditInquisitorName(campaign.inquisitorName ?? "");
-                    }}
+                    onClick={() => handleRestore(campaign.id)}
+                    disabled={restoring}
                   >
-                    Edit
+                    Restore
                   </Button>
-
-                  <ConfirmInline
-                    triggerLabel="Archive"
-                    question="Archive?"
-                    variant="warning"
-                    size="sm"
-                    busy={archiving}
-                    onConfirm={() => handleArchive(campaign.id)}
-                  />
 
                   <ConfirmInline
                     triggerLabel="Delete"
@@ -449,74 +547,16 @@ function DmCampaignList({
                         : "Deleting…"
                     }
                   />
-                </Link>
-              )
-            )}
-          </div>
-        )}
-
-        {/* Archived */}
-        {archivedError ? (
-          <ErrorState className="mt-4">Unable to load archived campaigns.</ErrorState>
-        ) : archivedLoading ? (
-          <LoadingState className="mt-4">Loading archived campaigns…</LoadingState>
-        ) : archivedCampaigns.length > 0 ? (
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => setShowArchived((v) => !v)}
-              aria-expanded={showArchived}
-              className="inline-flex items-center gap-1 text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              <ExpandChevron expanded={showArchived} />
-              <span>Archived ({archivedCampaigns.length})</span>
-            </button>
-
-            {showArchived && (
-              <div className="flex flex-col gap-2 mt-2">
-                {archivedCampaigns.map((campaign) => (
-                  <div
-                    key={campaign.id}
-                    className={uiSection + " flex items-center gap-2 opacity-60"}
-                  >
-                    <span className="flex-1 text-slate-400 italic lg:text-lg">{campaign.name}</span>
-
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleRestore(campaign.id)}
-                      disabled={restoring}
-                    >
-                      Restore
-                    </Button>
-
-                    <ConfirmInline
-                      triggerLabel="Delete"
-                      requireText="DELETE"
-                      requirePrompt="Type DELETE to confirm"
-                      size="sm"
-                      busy={deleting}
-                      onArm={() => loadDeletePreflight(campaign.id)}
-                      details={deleteImpactDetails(deletePreflights[campaign.id])}
-                      confirmDisabled={
-                        deletePreflights[campaign.id]?.loading ||
-                        !deletePreflights[campaign.id]?.result
-                      }
-                      onConfirm={() => handleDeleteConfirm(campaign.id)}
-                      busyLabel={
-                        deleteProgress && deleteProgress.totalCount > 0
-                          ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
-                          : "Deleting…"
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : null}
-      </div>
-    </div>
+                </div>
+              ))}
+              {archivedCampaigns.length === FIRESTORE_QUERY_LIMITS.archivedCampaigns && (
+                <CampaignListLimitNotice />
+              )}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -546,12 +586,14 @@ function ClaimCharacterSection() {
   const [code, setCode] = useState("");
   const [open, setOpen] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const [claimError, setClaimError] = useState<string | null>(null);
   const formScrollPositionRef = useRef(0);
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const toast = useToast();
   const showErrorToast = toast.error;
+  const showWarningToast = toast.warning;
+  const handledUrlCodeRef = useRef<string | null>(null);
 
   const { loading, error, data, lookup, reset: resetLookup } = useRecoveryLookup();
 
@@ -562,16 +604,25 @@ function ClaimCharacterSection() {
   }, [error, open, showErrorToast]);
 
   useEffect(() => {
-    const codeParam = new URLSearchParams(window.location.search).get("code");
-    if (codeParam) {
-      setCode(codeParam);
-      setOpen(true);
-      lookup(codeParam);
+    const codeParam = searchParams.get("code");
+    if (!codeParam) {
+      handledUrlCodeRef.current = null;
+      return;
     }
-  }, [lookup]);
+    if (handledUrlCodeRef.current === codeParam) return;
+    handledUrlCodeRef.current = codeParam;
+    const normalizedCode = formatRecoveryCodeInput(codeParam);
+    setCode(normalizedCode);
+    setOpen(true);
+    if (validateRecoveryCode(normalizedCode).isValid) {
+      lookup(normalizedCode);
+    } else {
+      showWarningToast("This recovery-code link is invalid.");
+    }
+  }, [lookup, searchParams, showWarningToast]);
 
   const handleLookup = useCallback(() => {
-    lookup(code);
+    lookup(formatRecoveryCodeInput(code));
   }, [lookup, code]);
 
   const closeForm = useCallback(() => {
@@ -579,8 +630,13 @@ function ClaimCharacterSection() {
     resetLookup();
     setOpen(false);
     setCode("");
-    setClaimError(null);
-  }, [claiming, resetLookup]);
+    const nextSearchParams = new URLSearchParams(searchParams);
+    if (nextSearchParams.has("code")) {
+      nextSearchParams.delete("code");
+      setSearchParams(nextSearchParams, { replace: true });
+    }
+    handledUrlCodeRef.current = null;
+  }, [claiming, resetLookup, searchParams, setSearchParams]);
 
   const normalizedCode = formatRecoveryCodeInput(code);
   const codeValid = validateRecoveryCode(normalizedCode).isValid;
@@ -588,13 +644,12 @@ function ClaimCharacterSection() {
   const handleClaim = useCallback(async () => {
     if (!data || claiming) return;
     if (data.ownership !== "unclaimed") {
-      setClaimError("This character cannot be claimed.");
+      toast.warning("This character cannot be claimed.");
       return;
     }
     try {
       setClaiming(true);
-      setClaimError(null);
-      const result = await claimCharacter(code);
+      const result = await claimCharacter(normalizedCode);
       navigate(buildRoute.characterSheet(result.campaignId, result.characterId));
     } catch (err: unknown) {
       const message =
@@ -602,11 +657,10 @@ function ClaimCharacterSection() {
           ? err.message
           : "Failed to claim character. It may have been claimed already.";
       toast.error(message);
-      setClaimError(message);
     } finally {
       setClaiming(false);
     }
-  }, [data, claiming, navigate, toast, code]);
+  }, [data, claiming, navigate, toast, normalizedCode]);
 
   return (
     <>
@@ -643,12 +697,6 @@ function ClaimCharacterSection() {
             />
           </CustomFormSection>
 
-          {claimError && (
-            <p className={`${uiTextError} rounded border border-red-600 bg-red-900/20 p-2 lg:p-3`}>
-              {claimError}
-            </p>
-          )}
-
           {data && (
             <ClaimPreview
               characterName={data.characterName}
@@ -667,59 +715,115 @@ function ClaimCharacterSection() {
   );
 }
 
+function PlayerCampaignSection({
+  campaigns,
+  loading,
+  error,
+}: {
+  campaigns: CampaignWithId[];
+  loading: boolean;
+  error: Error | null;
+}) {
+  return (
+    <section className="space-y-3">
+      <SectionHeader>Campaigns You Play In</SectionHeader>
+
+      {error ? (
+        <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
+      ) : loading ? (
+        <LoadingState>Loading campaigns…</LoadingState>
+      ) : null}
+
+      {!error && !loading && campaigns.length === 0 && (
+        <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+          You are not part of any campaigns yet.
+        </p>
+      )}
+
+      {!error && !loading && campaigns.length > 0 && (
+        <div className="space-y-4">
+          {campaigns.map((campaign) => (
+            <PlayerCampaignRow
+              key={campaign.id}
+              campaignId={campaign.id}
+              campaignName={campaign.name}
+            />
+          ))}
+        </div>
+      )}
+      {!error && !loading && campaigns.length === FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole && (
+        <CampaignListLimitNotice />
+      )}
+      <ClaimCharacterSection />
+    </section>
+  );
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function Dashboard({ user, effectiveUserId, isLinked, firstName }: Props) {
   const { dmCampaigns, playerCampaigns, dmLoading, playerLoading, dmError, playerError } =
     useCampaignsContext();
+  const isDesktopLayout = useMediaQuery(DESKTOP_LAYOUT_QUERY);
+  const [activeCampaignGroup, setActiveCampaignGroup] = useState<CampaignGroup>("yours");
+  const {
+    containerRef,
+    transitionClass,
+    switchTo: switchCampaignGroup,
+  } = useSwipeableTabs(CAMPAIGN_GROUPS, activeCampaignGroup, setActiveCampaignGroup);
+
+  const yourCampaignsSection = (
+    <div className="min-w-0 space-y-6">
+      <DmCampaignList
+        userUid={effectiveUserId}
+        campaigns={dmCampaigns}
+        loading={dmLoading}
+        error={dmError}
+      />
+
+      {dmCampaigns.length > 0 && !isLinked && <QrPanel />}
+    </div>
+  );
+  const playingCampaignsSection = (
+    <PlayerCampaignSection
+      campaigns={playerCampaigns}
+      loading={playerLoading}
+      error={playerError}
+    />
+  );
 
   return (
     <PageShell title={firstName ? `${firstName}'s Dashboard` : "Dashboard"}>
       <RecoveryBackupBanner ownUid={user.uid} effectiveUserId={effectiveUserId} />
 
-      <Panel>
-        {/* ── DM section ───────────────────────────────────────────────── */}
-        <DmCampaignList
-          userUid={effectiveUserId}
-          campaigns={dmCampaigns}
-          loading={dmLoading}
-          error={dmError}
-          firstName={firstName}
-        />
+      {isDesktopLayout ? (
+        <div className="grid grid-cols-2 items-start gap-6">
+          <div className={`${uiSection} min-w-0`}>{yourCampaignsSection}</div>
+          <div className={`${uiSection} min-w-0`}>{playingCampaignsSection}</div>
+        </div>
+      ) : (
+        <Panel>
+          <div ref={containerRef} className="space-y-4">
+            <SegmentedTabs
+              id={CAMPAIGN_GROUP_TABS_ID}
+              ariaLabel="Campaign groups"
+              options={CAMPAIGN_GROUP_TABS}
+              value={activeCampaignGroup}
+              onChange={switchCampaignGroup}
+            />
 
-        {/* QR codes — only show once the user has at least one campaign */}
-        {dmCampaigns.length > 0 && !isLinked && <QrPanel />}
-
-        <hr className="border-slate-700" />
-
-        {/* ── Player section ───────────────────────────────────────────── */}
-        <SectionHeader>Campaigns You Play In</SectionHeader>
-
-        {playerError ? (
-          <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
-        ) : playerLoading ? (
-          <LoadingState>Loading campaigns…</LoadingState>
-        ) : null}
-
-        {!playerError && !playerLoading && playerCampaigns.length === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
-            You are not part of any campaigns yet.
-          </p>
-        )}
-
-        {!playerError && !playerLoading && playerCampaigns.length > 0 && (
-          <div className="space-y-4">
-            {playerCampaigns.map((campaign) => (
-              <PlayerCampaignRow
-                key={campaign.id}
-                campaignId={campaign.id}
-                campaignName={campaign.name}
-              />
-            ))}
+            <div
+              key={activeCampaignGroup}
+              id={segmentedTabPanelId(CAMPAIGN_GROUP_TABS_ID, activeCampaignGroup)}
+              aria-labelledby={segmentedTabId(CAMPAIGN_GROUP_TABS_ID, activeCampaignGroup)}
+              className={[uiSwipeableTabPanel, transitionClass].join(" ")}
+              role="tabpanel"
+            >
+              {activeCampaignGroup === "yours" ? yourCampaignsSection : playingCampaignsSection}
+            </div>
           </div>
-        )}
-        <ClaimCharacterSection />
-      </Panel>
+        </Panel>
+      )}
     </PageShell>
   );
 }

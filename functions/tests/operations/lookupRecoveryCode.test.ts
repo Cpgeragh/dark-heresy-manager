@@ -3,6 +3,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { lookupRecoveryCode } from "../../src/operations/lookupRecoveryCode";
 import { hashRecoveryCode } from "../../src/shared/recoveryCode";
 
+const mockResolvePrimaryUid = vi.hoisted(() =>
+  vi.fn(async (_db: unknown, callerUid: string) => callerUid)
+);
+
+vi.mock("../../src/shared/linkedIdentity", () => ({
+  resolvePrimaryUid: mockResolvePrimaryUid,
+}));
+
 const mockIndexGet = vi.fn();
 const mockCampaignGet = vi.fn();
 const mockCharacterGet = vi.fn();
@@ -30,6 +38,7 @@ const CODE = "DH-ABCD-1234";
 describe("lookupRecoveryCode", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockResolvePrimaryUid.mockImplementation(async (_db: unknown, callerUid: string) => callerUid);
   });
 
   it("returns not-found without touching Firestore for a malformed code", async () => {
@@ -110,6 +119,23 @@ describe("lookupRecoveryCode", () => {
     });
 
     const result = await lookupRecoveryCode(CODE, "user-1", SECRET);
+
+    expect(result).toMatchObject({ status: "found", preview: { ownership: "claimed-by-you" } });
+  });
+
+  it("returns claimed-by-you when a linked device's primary account owns the character", async () => {
+    mockResolvePrimaryUid.mockResolvedValue("primary-user");
+    mockIndexGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ campaignId: "c1", characterId: "char-1" }),
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ name: "Test Campaign" }) });
+    mockCharacterGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ userId: "primary-user", header: {} }),
+    });
+
+    const result = await lookupRecoveryCode(CODE, "linked-device", SECRET);
 
     expect(result).toMatchObject({ status: "found", preview: { ownership: "claimed-by-you" } });
   });

@@ -29,7 +29,10 @@ export function CampaignsProvider({ uid, children }: { uid: string; children: Re
         )
       : null,
     uid ? `dm-campaigns:${uid}` : null,
-    (snapshot) => snapshot.docs.map((campaignDocument) => campaignDocument.data())
+    (snapshot) =>
+      snapshot.docs
+        .map((campaignDocument) => campaignDocument.data())
+        .sort((left, right) => left.name.localeCompare(right.name))
   );
 
   const {
@@ -46,7 +49,10 @@ export function CampaignsProvider({ uid, children }: { uid: string; children: Re
         )
       : null,
     uid ? `player-campaigns:${uid}` : null,
-    (snapshot) => snapshot.docs.map((campaignDocument) => campaignDocument.data())
+    (snapshot) =>
+      snapshot.docs
+        .map((campaignDocument) => campaignDocument.data())
+        .sort((left, right) => left.name.localeCompare(right.name))
   );
 
   useEffect(() => {

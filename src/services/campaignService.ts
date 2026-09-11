@@ -2,67 +2,58 @@
 // Firestore operations for campaign documents.
 
 import {
-  collection,
   deleteField,
   doc,
   getDocs,
   limit,
   query,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where,
   writeBatch,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
-import type { CampaignDocument } from "../types/Firestore";
 import { validateCampaignName, validateInquisitorName } from "../utils/validation";
 import { assertFirestoreDocumentId, assertString } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
 import { driveJobToCompletion } from "../firestore/bulkJobClient";
 import { campaignsCollectionRef } from "../firebase/converters";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
+import { createLocalId } from "../utils/createLocalId";
+
+const callCreateCampaign = httpsCallable<
+  { name: string; inquisitorName?: string; operationId: string },
+  { campaignId: string }
+>(functions, "createCampaign");
 
 /**
  * Creates a new campaign owned by the given DM.
  * Returns the new campaign's Firestore document ID.
  */
-export async function createCampaign(
-  name: string,
-  dmId: string,
-  gmName?: string,
-  inquisitorName?: string
-): Promise<string> {
+export async function createCampaign(name: string, inquisitorName?: string): Promise<string> {
   assertString(name, "Campaign name");
   const trimmedName = name.trim();
   const validation = validateCampaignName(trimmedName);
   if (!validation.isValid) throw new Error(validation.error);
-  assertFirestoreDocumentId(dmId, "Campaign owner ID");
-
-  const trimmedGmName = gmName?.trim();
   const trimmedInquisitorName = inquisitorName?.trim();
   if (trimmedInquisitorName) {
     const inquisitorValidation = validateInquisitorName(trimmedInquisitorName);
     if (!inquisitorValidation.isValid) throw new Error(inquisitorValidation.error);
   }
 
-  return runSingleFlight("campaign:create", [dmId, trimmedName], async () => {
-    const newRef = doc(collection(db, "campaigns"));
-
-    const campaignData: CampaignDocument = {
-      name: trimmedName,
-      dmId,
-      memberIds: [],
-      createdAt: new Date(),
-      archivedAt: null,
-      ...(trimmedGmName ? { gmName: trimmedGmName } : {}),
-      ...(trimmedInquisitorName ? { inquisitorName: trimmedInquisitorName } : {}),
-    };
-
-    await setDoc(newRef, campaignData);
-    return newRef.id;
-  });
+  return runSingleFlight(
+    "campaign:create",
+    [trimmedName, trimmedInquisitorName ?? ""],
+    async () => {
+      const { data } = await callCreateCampaign({
+        name: trimmedName,
+        ...(trimmedInquisitorName ? { inquisitorName: trimmedInquisitorName } : {}),
+        operationId: createLocalId("create-campaign"),
+      });
+      return data.campaignId;
+    }
+  );
 }
 
 /**

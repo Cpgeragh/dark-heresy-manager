@@ -2,6 +2,15 @@ import type { Firestore } from "firebase-admin/firestore";
 
 const USER_LINKS_COLLECTION = "userLinks";
 
+/** Resolves a signed-in device to the account identity it belongs to. */
+export async function resolvePrimaryUid(db: Firestore, callerUid: string): Promise<string> {
+  const linkSnapshot = await db.collection(USER_LINKS_COLLECTION).doc(callerUid).get();
+  const primaryUid = linkSnapshot.data()?.primaryUid;
+  return linkSnapshot.exists && typeof primaryUid === "string" && primaryUid.length > 0
+    ? primaryUid
+    : callerUid;
+}
+
 /**
  * Returns true when the caller is the stored primary identity or a device
  * explicitly linked to it. Server operations must use this wherever the

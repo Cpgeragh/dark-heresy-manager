@@ -7,6 +7,7 @@ describe("hard product limits", () => {
     expect(PRODUCT_LIMITS).toEqual({
       campaignCreationsPerWindow: 10,
       campaignCreationWindowMs: 86_400_000,
+      campaignsPerAccount: 100,
       campaignMembers: 100,
       charactersPerCampaign: 100,
       campaignNameCharacters: 100,
@@ -51,6 +52,8 @@ describe("hard product limits", () => {
 
   it("uses the product ceilings for matching live-query windows", () => {
     expect(FIRESTORE_QUERY_LIMITS.charactersPerCampaign).toBe(PRODUCT_LIMITS.charactersPerCampaign);
+    expect(FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole).toBe(PRODUCT_LIMITS.campaignsPerAccount);
+    expect(FIRESTORE_QUERY_LIMITS.archivedCampaigns).toBe(PRODUCT_LIMITS.campaignsPerAccount);
     expect(FIRESTORE_QUERY_LIMITS.messagesPerThread).toBe(PRODUCT_LIMITS.messagesPerPage);
     expect(FIRESTORE_QUERY_LIMITS.claimLogEntries).toBe(PRODUCT_LIMITS.claimHistoryEntriesPerPage);
     expect(FIRESTORE_QUERY_LIMITS.customItemsPerQuery).toBe(PRODUCT_LIMITS.customItemsPerCampaign);

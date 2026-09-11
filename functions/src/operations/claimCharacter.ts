@@ -15,6 +15,7 @@ import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import { buildClaimLogPayload } from "../shared/claimLog.js";
 import { rotateRecoveryCodeInTransaction } from "../shared/recoveryCodeRotation.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
+import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
@@ -39,6 +40,7 @@ export async function claimCharacter(
   }
 
   const db = getFirestore();
+  const ownerUid = await resolvePrimaryUid(db, callerUid);
   const hash = hashRecoveryCode(input.code, hmacSecret);
   const indexRef = db.collection(RECOVERY_INDEX_COLLECTION).doc(hash);
 
@@ -82,12 +84,12 @@ export async function claimCharacter(
         characterId,
         input.code,
         hmacSecret,
-        { userId: callerUid }
+        { userId: ownerUid }
       );
-      transaction.update(campaignRef, { memberIds: FieldValue.arrayUnion(callerUid) });
+      transaction.update(campaignRef, { memberIds: FieldValue.arrayUnion(ownerUid) });
       transaction.set(
         characterRef.collection("claimLog").doc(),
-        buildClaimLogPayload("claim", callerUid, null, callerUid)
+        buildClaimLogPayload("claim", callerUid, null, ownerUid)
       );
 
       return { campaignId, characterId };

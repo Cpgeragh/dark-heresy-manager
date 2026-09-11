@@ -122,8 +122,8 @@ describe("CampaignsProvider — Firestore queries", () => {
   it("caps both active campaign listeners", () => {
     renderHook(() => useCampaignsContext(), { wrapper: makeWrapper("uid-1") });
     expect(mockLimit).toHaveBeenCalledTimes(2);
-    expect(mockLimit).toHaveBeenNthCalledWith(1, 50);
-    expect(mockLimit).toHaveBeenNthCalledWith(2, 50);
+    expect(mockLimit).toHaveBeenNthCalledWith(1, 100);
+    expect(mockLimit).toHaveBeenNthCalledWith(2, 100);
   });
 });
 
@@ -142,6 +142,20 @@ describe("CampaignsProvider — snapshot handling", () => {
     expect(result.current.dmCampaigns).toHaveLength(2);
     expect((result.current.dmCampaigns[0] as CampaignWithId).id).toBe("c1");
     expect(result.current.playerCampaigns).toEqual([]);
+  });
+
+  it("orders campaign lists alphabetically instead of by generated document id", () => {
+    const { result } = renderHook(() => useCampaignsContext(), {
+      wrapper: makeWrapper("uid-1"),
+    });
+
+    act(() => {
+      capturedDmOnNext!({
+        docs: [makeDoc("a-random-id", { name: "Zeta" }), makeDoc("z-random-id", { name: "Alpha" })],
+      });
+    });
+
+    expect(result.current.dmCampaigns.map((campaign) => campaign.name)).toEqual(["Alpha", "Zeta"]);
   });
 
   it("populates playerCampaigns when the player snapshot fires", () => {

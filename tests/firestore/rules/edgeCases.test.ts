@@ -2,7 +2,7 @@
 
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
-import { dbAs, validCampaignDocument } from "../helpers";
+import { createCampaign, dbAs } from "../helpers";
 
 describe("Firestore Rules: Edge Cases", () => {
   afterEach(async () => {
@@ -22,60 +22,50 @@ describe("Firestore Rules: Edge Cases", () => {
     ).rejects.toThrow();
   });
 
-  it("DM can create campaign with special characters in name", async () => {
+  it("DM can update a campaign to a name with special characters", async () => {
     const env = await getTestEnv();
-
+    await createCampaign(env, "c-special-chars", "dm-1");
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb
-        .collection("campaigns")
-        .doc("c-special-chars")
-        .set(validCampaignDocument("dm-1", 'Test\'s "Campaign" & More! 你好 мир 🎮'))
+      dmDb.collection("campaigns").doc("c-special-chars").update({
+        name: 'Test\'s "Campaign" & More! 你好 мир 🎮',
+      })
     ).resolves.toBeUndefined();
   });
 
-  it("DM can create campaign with timestamp fields", async () => {
+  it("DM can archive a campaign with a timestamp", async () => {
     const env = await getTestEnv();
-
+    await createCampaign(env, "c-timestamps", "dm-1");
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
       dmDb
         .collection("campaigns")
         .doc("c-timestamps")
-        .set(
-          validCampaignDocument("dm-1", "Campaign with Timestamps", {
-            createdAt: new Date("2024-01-15"),
-            archivedAt: new Date("2024-02-01"),
-          })
-        )
+        .update({
+          archivedAt: new Date("2024-02-01"),
+        })
     ).resolves.toBeUndefined();
   });
 
   it("campaign can have document ID different from campaign name", async () => {
     const env = await getTestEnv();
-
+    await createCampaign(env, "random-id-12345", "dm-1", { name: "Actual Campaign Name" });
     const dmDb = dbAs(env, "dm-1");
 
-    await expect(
-      dmDb
-        .collection("campaigns")
-        .doc("random-id-12345")
-        .set(validCampaignDocument("dm-1", "Actual Campaign Name"))
-    ).resolves.toBeUndefined();
+    await expect(dmDb.collection("campaigns").doc("random-id-12345").get()).resolves.toMatchObject({
+      exists: true,
+    });
   });
 
-  it("DM can create campaign with null values in optional fields", async () => {
+  it("campaigns may omit optional fields", async () => {
     const env = await getTestEnv();
-
+    await createCampaign(env, "c-no-optionals", "dm-1", { name: "Campaign without optionals" });
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb
-        .collection("campaigns")
-        .doc("c-nulls")
-        .set(validCampaignDocument("dm-1", "Campaign with Nulls"))
+      dmDb.collection("campaigns").doc("c-no-optionals").update({ name: "Still valid" })
     ).resolves.toBeUndefined();
   });
 

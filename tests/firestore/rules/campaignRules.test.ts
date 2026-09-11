@@ -120,7 +120,7 @@ describe("Firestore Rules: Campaigns", () => {
     expect(snapshot.docs.map((document) => document.id)).toEqual(["active-member"]);
   });
 
-  it("DM may create a campaign when dmId matches their uid", async () => {
+  it("campaign creation is blocked for direct clients, including the intended DM", async () => {
     const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
@@ -133,10 +133,10 @@ describe("Firestore Rules: Campaigns", () => {
         createdAt: new Date(),
         archivedAt: null,
       })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 
-  it("an authenticated player may create a campaign and thereby become its DM", async () => {
+  it("an authenticated user cannot bypass the protected campaign-creation Function", async () => {
     const env = await getTestEnv();
     const userDb = dbAs(env, "player-creator");
 
@@ -150,7 +150,7 @@ describe("Firestore Rules: Campaigns", () => {
         createdAt: new Date(),
         archivedAt: null,
       })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 
   it("DM cannot create a campaign with unrecognised fields", async () => {
@@ -236,14 +236,14 @@ describe("Firestore Rules: Campaigns", () => {
     ).rejects.toThrow();
   });
 
-  it("DM can delete their own campaign", async () => {
+  it("the DM cannot bypass the protected cascading-deletion Function", async () => {
     const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
     const dmDb = dbAs(env, "dm-1");
 
-    await expect(dmDb.collection("campaigns").doc("c1").delete()).resolves.toBeUndefined();
+    await expect(dmDb.collection("campaigns").doc("c1").delete()).rejects.toThrow();
   });
 
   it("DM can archive their own campaign", async () => {

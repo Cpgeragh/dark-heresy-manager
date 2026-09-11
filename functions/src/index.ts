@@ -103,6 +103,11 @@ import {
 import { revokeIdentityCode as runRevokeIdentityCode } from "./operations/revokeIdentityCode.js";
 import { discardOnboardingSetup as runDiscardOnboardingSetup } from "./operations/discardOnboardingSetup.js";
 import {
+  createCampaign as runCreateCampaign,
+  type CreateCampaignInput,
+  type CreateCampaignResult,
+} from "./operations/createCampaign.js";
+import {
   deleteAccount as runDeleteAccount,
   type DeleteAccountResult,
 } from "./operations/deleteAccount.js";
@@ -126,6 +131,20 @@ export const protectedPing = onCall({ timeoutSeconds: 30 }, (request) =>
     handler: async () => ({ ok: true }),
   })
 );
+
+export const createCampaign = onCall<CreateCampaignInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  const operationId = request.data?.operationId;
+  return protectedCallable<CreateCampaignInput, CreateCampaignResult>({
+    request,
+    operation: "create-campaign",
+    allowedFields: ["name", "inquisitorName", "operationId"],
+    requiredFields: ["name", "operationId"],
+    fieldShapes: { name: "string", inquisitorName: "string", operationId: "string" },
+    idempotencyKey: buildOperationIdempotencyKey("create-campaign", callerUid, operationId),
+    handler: ({ uid, data, idempotency }) => runCreateCampaign(data, uid, idempotency),
+  });
+});
 
 export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
   { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },

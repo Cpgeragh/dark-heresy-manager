@@ -3,6 +3,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { claimCharacter } from "../../src/operations/claimCharacter";
 import { hashRecoveryCode } from "../../src/shared/recoveryCode";
 
+const mockResolvePrimaryUid = vi.hoisted(() =>
+  vi.fn(async (_db: unknown, callerUid: string) => callerUid)
+);
+
+vi.mock("../../src/shared/linkedIdentity", () => ({
+  resolvePrimaryUid: mockResolvePrimaryUid,
+}));
+
 const mockTransactionGet = vi.fn();
 const mockTransactionUpdate = vi.fn();
 const mockTransactionSet = vi.fn();
@@ -53,6 +61,7 @@ const CODE = "DH-ABCD-1234";
 describe("claimCharacter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockResolvePrimaryUid.mockImplementation(async (_db: unknown, callerUid: string) => callerUid);
   });
 
   it("rejects a malformed code without touching Firestore", async () => {
@@ -184,6 +193,33 @@ describe("claimCharacter", () => {
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCampaignRef, {
       memberIds: { __arrayUnion: "dm-1" },
     });
+  });
+
+  it("assigns a claim made on a linked device to the primary account", async () => {
+    mockResolvePrimaryUid.mockResolvedValue("primary-user");
+    mockTransactionGet.mockResolvedValueOnce({
+      exists: true,
+      data: () => ({ campaignId: "c1", characterId: "char-1" }),
+    });
+    mockTransactionGet.mockResolvedValueOnce({ exists: true, data: () => ({}) });
+    mockTransactionGet.mockResolvedValueOnce({
+      exists: true,
+      data: () => ({ userId: null, recoveryCode: CODE }),
+    });
+
+    await claimCharacter({ code: CODE }, "linked-device", SECRET);
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      mockCharacterRef,
+      expect.objectContaining({ userId: "primary-user" })
+    );
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCampaignRef, {
+      memberIds: { __arrayUnion: "primary-user" },
+    });
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ actorUid: "linked-device", newOwnerUid: "primary-user" })
+    );
   });
 
   it("resolves the target by the code's HMAC hash, not the raw code", async () => {
