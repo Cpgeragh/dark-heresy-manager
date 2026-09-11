@@ -77,7 +77,7 @@ describe("reclaimIdentity", () => {
   });
 
   it("rejects a malformed recovery code before calling the Function", async () => {
-    await expect(reclaimIdentity("not-a-code")).rejects.toThrow("DH-XXXX-YYYY");
+    await expect(reclaimIdentity("not-a-code")).rejects.toThrow("Invalid recovery code");
     expect(mockCallStartIdentityReclaimJob).not.toHaveBeenCalled();
   });
 
@@ -152,7 +152,7 @@ describe("reclaimIdentity", () => {
     }
 
     await expect(reclaimIdentity("DH-RCLM-0005")).rejects.toThrow(
-      "Too many recovery-code attempts. Try again in 15 minutes."
+      "5-attempt recovery-code limit reached. Try again in 15 minutes."
     );
     expect(mockCallStartIdentityReclaimJob).toHaveBeenCalledTimes(5);
   });

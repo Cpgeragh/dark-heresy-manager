@@ -37,7 +37,7 @@ function UpdateStallNotice() {
   return null;
 }
 
-export default function App() {
+function AppContent() {
   const [isPostUpgrade] = useState(() => consumePostUpgrade());
   const location = useLocation();
   const [messagesOpen, setMessagesOpen] = useState(false);
@@ -116,80 +116,88 @@ export default function App() {
   // -------------------------------------------------
   return (
     <HeaderExtensionProvider>
-      <ToastProvider>
-        <UpdateStallNotice />
-        <div className="min-h-screen bg-slate-950 text-slate-100">
-          {/* HEADER */}
-          <AppHeader currentPath={location.pathname} />
+      <UpdateStallNotice />
+      <div className="min-h-screen bg-slate-950 text-slate-100">
+        {/* HEADER */}
+        <AppHeader currentPath={location.pathname} />
 
-          {/* ROUTES */}
-          <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
-            <ErrorBoundary>
-              <Suspense
-                fallback={<LoadingState className="py-10 text-center">Loading page…</LoadingState>}
-              >
-                <Routes>
-                  <Route
-                    path={ROUTES.DASHBOARD}
-                    element={
-                      <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>
-                        <Dashboard
-                          user={currentUser}
-                          effectiveUserId={effectiveUserId}
-                          isLinked={isLinked}
-                          firstName={firstName}
-                        />
-                      </CampaignsProvider>
-                    }
-                  />
-
-                  <Route
-                    path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                    element={
-                      <CharacterSheet
-                        effectiveUserId={effectiveUserId}
-                        effectiveUserFirstName={firstName}
-                        onOpenMessages={() => setMessagesOpen(true)}
-                      />
-                    }
-                  />
-
-                  <Route
-                    path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
-                    element={<CampaignOverview effectiveUserId={effectiveUserId} />}
-                  />
-
-                  <Route
-                    path={ROUTES.SETTINGS}
-                    element={
-                      <Settings
+        {/* ROUTES */}
+        <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+          <ErrorBoundary>
+            <Suspense
+              fallback={<LoadingState className="py-10 text-center">Loading page…</LoadingState>}
+            >
+              <Routes>
+                <Route
+                  path={ROUTES.DASHBOARD}
+                  element={
+                    <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>
+                      <Dashboard
                         user={currentUser}
                         effectiveUserId={effectiveUserId}
-                        firstName={firstName}
                         isLinked={isLinked}
-                        unlink={unlink}
+                        firstName={firstName}
                       />
-                    }
-                  />
+                    </CampaignsProvider>
+                  }
+                />
 
-                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-                </Routes>
-              </Suspense>
-            </ErrorBoundary>
-          </main>
+                <Route
+                  path={ROUTE_PATTERNS.CHARACTER_SHEET}
+                  element={
+                    <CharacterSheet
+                      effectiveUserId={effectiveUserId}
+                      effectiveUserFirstName={firstName}
+                      onOpenMessages={() => setMessagesOpen(true)}
+                    />
+                  }
+                />
 
-          <MessageDrawer
-            user={currentUser}
-            isOpen={messagesOpen}
-            onClose={() => setMessagesOpen(false)}
-            campaignId={contextCampaignId}
-            characterId={contextCharacterId}
-          />
+                <Route
+                  path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                  element={<CampaignOverview effectiveUserId={effectiveUserId} />}
+                />
 
-          <ToastContainer />
-          <OfflineIndicator />
-        </div>
-      </ToastProvider>
+                <Route
+                  path={ROUTES.SETTINGS}
+                  element={
+                    <Settings
+                      user={currentUser}
+                      effectiveUserId={effectiveUserId}
+                      firstName={firstName}
+                      isLinked={isLinked}
+                      unlink={unlink}
+                    />
+                  }
+                />
+
+                <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
+        </main>
+
+        <MessageDrawer
+          user={currentUser}
+          isOpen={messagesOpen}
+          onClose={() => setMessagesOpen(false)}
+          campaignId={contextCampaignId}
+          characterId={contextCharacterId}
+        />
+
+        <OfflineIndicator />
+      </div>
     </HeaderExtensionProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
+      <ToastContainer />
+    </ToastProvider>
   );
 }

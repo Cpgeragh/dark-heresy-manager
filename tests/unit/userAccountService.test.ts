@@ -6,6 +6,7 @@ const {
   mockServerTimestamp,
   mockSetDoc,
   mockUpdateDoc,
+  mockCallDiscardOnboardingSetup,
   mockCallDeleteAccount,
   mockSignOut,
 } = vi.hoisted(() => ({
@@ -14,6 +15,7 @@ const {
   mockServerTimestamp: vi.fn(() => "server-time"),
   mockSetDoc: vi.fn().mockResolvedValue(undefined),
   mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
+  mockCallDiscardOnboardingSetup: vi.fn(),
   mockCallDeleteAccount: vi.fn(),
   mockSignOut: vi.fn(),
 }));
@@ -32,6 +34,7 @@ vi.mock("firebase/firestore", () => ({
 
 vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "discardOnboardingSetup") return mockCallDiscardOnboardingSetup;
     if (name === "deleteAccount") return mockCallDeleteAccount;
     throw new Error(`Unexpected callable: ${name}`);
   }),
@@ -48,6 +51,7 @@ import {
   markRecoveryCodeBackedUp,
   needsRecoveryCodeBackup,
   synchroniseUserAccount,
+  discardOnboardingSetup,
   deleteCurrentAccount,
 } from "../../src/services/userAccountService";
 
@@ -133,6 +137,23 @@ describe("user account recovery state", () => {
     mockUpdateDoc.mockRejectedValueOnce(error);
 
     await expect(markRecoveryCodeBackedUp("user-5")).rejects.toBe(error);
+  });
+});
+
+describe("discardOnboardingSetup", () => {
+  it("asks the server to remove unfinished onboarding data", async () => {
+    mockCallDiscardOnboardingSetup.mockResolvedValue({ data: undefined });
+
+    await discardOnboardingSetup();
+
+    expect(mockCallDiscardOnboardingSetup).toHaveBeenCalledWith({});
+  });
+
+  it("preserves cleanup failures for the page to handle", async () => {
+    const error = new Error("cleanup failed");
+    mockCallDiscardOnboardingSetup.mockRejectedValue(error);
+
+    await expect(discardOnboardingSetup()).rejects.toBe(error);
   });
 });
 

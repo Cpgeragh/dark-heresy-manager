@@ -25,7 +25,7 @@ describe("client code-attempt limiting", () => {
     expect(() => recordClientCodeAttempt("recovery")).toThrow(
       expect.objectContaining({
         name: "ClientCodeAttemptLimitError",
-        message: "Too many recovery-code attempts. Try again in 15 minutes.",
+        message: "5-attempt recovery-code limit reached. Try again in 15 minutes.",
       })
     );
   });
@@ -37,6 +37,27 @@ describe("client code-attempt limiting", () => {
     vi.advanceTimersByTime(15 * 60 * 1_000);
 
     expect(() => recordClientCodeAttempt("recovery")).not.toThrow();
+  });
+
+  it("counts down to a full reset without jumping back up", () => {
+    const minute = 60 * 1_000;
+    const start = Date.now();
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      recordClientCodeAttempt("recovery", start + attempt * minute);
+    }
+
+    expect(() => recordClientCodeAttempt("recovery", start + 14 * minute)).toThrow(
+      expect.objectContaining({
+        message: "5-attempt recovery-code limit reached. Try again in 5 minutes.",
+      })
+    );
+    expect(() => recordClientCodeAttempt("recovery", start + 18 * minute)).toThrow(
+      expect.objectContaining({
+        message: "5-attempt recovery-code limit reached. Try again in 1 minute.",
+      })
+    );
+    expect(() => recordClientCodeAttempt("recovery", start + 19 * minute)).not.toThrow();
   });
 
   it("tracks recovery and device-link attempts independently", () => {

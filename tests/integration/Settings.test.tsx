@@ -96,6 +96,17 @@ describe("Settings display name", () => {
     expect(input).toHaveValue("CainMarko");
   });
 
+  it("capitalizes the first letter as it is typed", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    const input = screen.getByPlaceholderText("e.g. David");
+    await user.clear(input);
+    await user.type(input, "cormac");
+
+    expect(input).toHaveValue("Cormac");
+  });
+
   it("shows an error when saving fails", async () => {
     const user = userEvent.setup();
     saveFirstNameMock.mockRejectedValue(new Error("network"));

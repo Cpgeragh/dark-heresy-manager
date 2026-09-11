@@ -25,7 +25,7 @@ describe("recovery lookup service", () => {
   });
 
   it("validates malformed codes before recording or calling Firebase", async () => {
-    await expect(lookupRecoveryCharacter("not-a-code")).rejects.toThrow("DH-XXXX-YYYY");
+    await expect(lookupRecoveryCharacter("not-a-code")).rejects.toThrow("Invalid recovery code");
     expect(mockCallLookupRecoveryCode).not.toHaveBeenCalled();
   });
 

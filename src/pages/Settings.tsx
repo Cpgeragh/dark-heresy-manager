@@ -20,6 +20,8 @@ import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
+import { validateRecoveryCode } from "../utils/validation";
+import { formatFirstNameInput } from "../utils/firstName";
 
 interface Props {
   user: User;
@@ -191,8 +193,10 @@ export default function Settings({
             <div className="flex gap-2">
               <input
                 type="text"
+                autoComplete="given-name"
+                autoCapitalize="words"
                 value={nameDraft}
-                onChange={(e) => setNameDraft(e.target.value.replace(/\s/g, ""))}
+                onChange={(e) => setNameDraft(formatFirstNameInput(e.target.value))}
                 maxLength={PRODUCT_LIMITS.firstNameCharacters}
                 placeholder="e.g. David"
                 className="flex-1 px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm lg:text-base placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
@@ -313,7 +317,10 @@ export default function Settings({
                   placeholder="Paste recovery code here"
                 />
                 {linkError && <p className={uiTextError}>{linkError}</p>}
-                <Button onClick={handleLinkDevice} disabled={linking || !linkCode.trim()}>
+                <Button
+                  onClick={handleLinkDevice}
+                  disabled={linking || !validateRecoveryCode(linkCode).isValid}
+                >
                   {linking ? "Linking…" : "Link This Device"}
                 </Button>
               </>

@@ -71,6 +71,54 @@ describe("useRecoveryLookup", () => {
     const { result } = renderHook(() => useRecoveryLookup());
     await act(() => result.current.lookup("DH-TEST-0005"));
 
-    expect(result.current.error).toBe("Too many recovery-code attempts. Try again in 15 minutes.");
+    expect(result.current.error).toBe(
+      "5-attempt recovery-code limit reached. Try again in 15 minutes."
+    );
+  });
+
+  it("clears a previous result and error when reset", async () => {
+    mockLookup.mockResolvedValue({ status: "not-found" });
+
+    const { result } = renderHook(() => useRecoveryLookup());
+    await act(() => result.current.lookup("DH-TEST-0006"));
+    expect(result.current.error).not.toBeNull();
+
+    act(() => result.current.reset());
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
+    expect(result.current.data).toBeNull();
+  });
+
+  it("ignores a lookup result that completes after reset", async () => {
+    const found = {
+      campaignId: "c1",
+      characterId: "ch1",
+      characterName: "Brother Corvus",
+      campaignName: "The Calixis Conspiracy",
+      ownership: "unclaimed" as const,
+    };
+    let resolveLookup!: (value: { status: "found"; result: typeof found }) => void;
+    mockLookup.mockReturnValue(
+      new Promise((resolve) => {
+        resolveLookup = resolve;
+      })
+    );
+
+    const { result } = renderHook(() => useRecoveryLookup());
+    let lookupPromise!: Promise<void>;
+    act(() => {
+      lookupPromise = result.current.lookup("DH-TEST-0007");
+    });
+    act(() => result.current.reset());
+
+    await act(async () => {
+      resolveLookup({ status: "found", result: found });
+      await lookupPromise;
+    });
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
+    expect(result.current.data).toBeNull();
   });
 });

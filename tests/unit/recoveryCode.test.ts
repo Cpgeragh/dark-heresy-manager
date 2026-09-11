@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { generateRecoveryCode, formatRecoveryCodeInput } from "../../src/utils/recoveryCode";
+import {
+  generateRecoveryCode,
+  formatRecoveryCodeInput,
+  formatRecoveryCodeInputChange,
+} from "../../src/utils/recoveryCode";
 import { validateRecoveryCode } from "../../src/utils/validation";
 
 // RECOVERY_CODE_SEGMENT_LENGTH = 4, RECOVERY_CODE_SEGMENTS = 2
@@ -44,16 +48,14 @@ describe("generateRecoveryCode", () => {
 
 describe("formatRecoveryCodeInput", () => {
   it("uppercases input", () => {
-    expect(formatRecoveryCodeInput("dh3a9k2b")).toBe("DH-3A9K-2B");
+    expect(formatRecoveryCodeInput("3a9k2b7c")).toBe("DH-3A9K-2B7C");
   });
 
-  it("inserts dashes progressively as the user types", () => {
-    expect(formatRecoveryCodeInput("d")).toBe("D");
-    expect(formatRecoveryCodeInput("dh")).toBe("DH");
-    expect(formatRecoveryCodeInput("dh3")).toBe("DH-3");
-    expect(formatRecoveryCodeInput("dh3a9k")).toBe("DH-3A9K");
-    expect(formatRecoveryCodeInput("dh3a9k2")).toBe("DH-3A9K-2");
-    expect(formatRecoveryCodeInput("dh3a9k2b")).toBe("DH-3A9K-2B");
+  it("supplies the prefix and separators while the user types only variable characters", () => {
+    expect(formatRecoveryCodeInput("3")).toBe("DH-3");
+    expect(formatRecoveryCodeInput("3a9k")).toBe("DH-3A9K-");
+    expect(formatRecoveryCodeInput("3a9k2")).toBe("DH-3A9K-2");
+    expect(formatRecoveryCodeInput("3a9k2b")).toBe("DH-3A9K-2B");
   });
 
   it("is idempotent on already-formatted codes", () => {
@@ -61,7 +63,15 @@ describe("formatRecoveryCodeInput", () => {
   });
 
   it("strips spaces and other non-alphanumeric characters", () => {
-    expect(formatRecoveryCodeInput("dh 3a9k!2b")).toBe("DH-3A9K-2B");
+    expect(formatRecoveryCodeInput("3a9k ! 2b7c")).toBe("DH-3A9K-2B7C");
+  });
+
+  it("does not mistake variable characters beginning with DH for the fixed prefix", () => {
+    expect(formatRecoveryCodeInput("dh3a9k2b")).toBe("DH-DH3A-9K2B");
+  });
+
+  it("accepts a complete unformatted code", () => {
+    expect(formatRecoveryCodeInput("dh3a9k2b7c")).toBe("DH-3A9K-2B7C");
   });
 
   it("truncates input beyond the full code length", () => {
@@ -71,5 +81,31 @@ describe("formatRecoveryCodeInput", () => {
 
   it("returns an empty string for empty input", () => {
     expect(formatRecoveryCodeInput("")).toBe("");
+  });
+});
+
+describe("formatRecoveryCodeInputChange", () => {
+  it("keeps the automatic prefix empty when its dash is backspaced", () => {
+    expect(formatRecoveryCodeInputChange("DH-", "DH")).toBe("");
+  });
+
+  it("removes a fixed prefix manually typed after the automatic prefix", () => {
+    expect(formatRecoveryCodeInputChange("DH-DH", "DH-DH-")).toBe("");
+  });
+
+  it("removes the second separator when the last character after it is deleted", () => {
+    expect(formatRecoveryCodeInputChange("DH-3A9K-2", "DH-3A9K-")).toBe("DH-3A9K");
+  });
+
+  it("removes the second separator when the whole second segment is deleted", () => {
+    expect(formatRecoveryCodeInputChange("DH-3A9K-2B7C", "DH-3A9K-")).toBe("DH-3A9K");
+  });
+
+  it("continues through an empty automatic separator when backspacing", () => {
+    expect(formatRecoveryCodeInputChange("DH-3A9K-", "DH-3A9K")).toBe("DH-3A9");
+  });
+
+  it("restores the separator when typing resumes after a complete first segment", () => {
+    expect(formatRecoveryCodeInputChange("DH-3A9K", "DH-3A9K2")).toBe("DH-3A9K-2");
   });
 });

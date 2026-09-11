@@ -101,6 +101,7 @@ import {
   type CancelBulkJobInput,
 } from "./operations/cancelBulkJob.js";
 import { revokeIdentityCode as runRevokeIdentityCode } from "./operations/revokeIdentityCode.js";
+import { discardOnboardingSetup as runDiscardOnboardingSetup } from "./operations/discardOnboardingSetup.js";
 import {
   deleteAccount as runDeleteAccount,
   type DeleteAccountResult,
@@ -575,6 +576,22 @@ export const revokeIdentityCode = onCall(
         { key: `revoke-identity-code:${callerUid}`, limit: 10, windowMs: 60 * 60 * 1000 },
       ],
       handler: ({ uid }) => runRevokeIdentityCode(uid, identityCodeHmacSecret.value()),
+    });
+  }
+);
+
+export const discardOnboardingSetup = onCall(
+  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<Record<string, never>, void>({
+      request,
+      operation: "discard-onboarding-setup",
+      allowedFields: [],
+      rateLimits: [
+        { key: `discard-onboarding-setup:${callerUid}`, limit: 10, windowMs: 60 * 60 * 1000 },
+      ],
+      handler: ({ uid }) => runDiscardOnboardingSetup(uid, identityCodeHmacSecret.value()),
     });
   }
 );

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { ToastContainer, ToastProvider } from "../../src/components/Toast";
 
 const linkDeviceMock = vi.fn();
 const useLinkDeviceMock = vi.fn();
@@ -19,12 +20,22 @@ vi.mock("../../src/services/identityService", () => ({
 
 import MissingProfileRecovery from "../../src/pages/MissingProfileRecovery";
 
+function renderPage() {
+  return render(
+    <ToastProvider>
+      <MissingProfileRecovery />
+      <ToastContainer />
+    </ToastProvider>
+  );
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   useLinkDeviceMock.mockReturnValue({
     linkDevice: linkDeviceMock,
     loading: false,
     error: null,
+    reset: vi.fn(),
   });
   getIdentityRecoveryModeMock.mockResolvedValue("link");
   reclaimIdentityMock.mockResolvedValue({ role: "player", profileTransferred: true });
@@ -32,7 +43,7 @@ beforeEach(() => {
 
 describe("MissingProfileRecovery", () => {
   it("checks the code before offering either recovery action", () => {
-    const { container } = render(<MissingProfileRecovery />);
+    const { container } = renderPage();
 
     expect(screen.getByRole("heading", { name: "Reconnect This Browser" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
@@ -44,10 +55,10 @@ describe("MissingProfileRecovery", () => {
   it("formats the recovery code and links the browser", async () => {
     const user = userEvent.setup();
     linkDeviceMock.mockResolvedValue(undefined);
-    render(<MissingProfileRecovery />);
+    renderPage();
 
     const input = screen.getByPlaceholderText("DH-XXXX-YYYY");
-    await user.type(input, "dhaaaabbbb");
+    await user.type(input, "aaaabbbb");
     expect(input).toHaveValue("DH-AAAA-BBBB");
 
     await user.click(screen.getByRole("button", { name: "Continue" }));
@@ -60,12 +71,23 @@ describe("MissingProfileRecovery", () => {
     expect(reclaimIdentityMock).not.toHaveBeenCalled();
   });
 
+  it("submits a complete recovery code with Enter", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.type(screen.getByPlaceholderText("DH-XXXX-YYYY"), "AAAABBBB");
+    await user.keyboard("{Enter}");
+
+    expect(getIdentityRecoveryModeMock).toHaveBeenCalledWith("DH-AAAA-BBBB");
+    expect(await screen.findByRole("button", { name: "Link This Browser" })).toBeVisible();
+  });
+
   it("offers only reclaim when no linked devices remain", async () => {
     const user = userEvent.setup();
     getIdentityRecoveryModeMock.mockResolvedValue("reclaim");
-    render(<MissingProfileRecovery />);
+    renderPage();
 
-    await user.type(screen.getByPlaceholderText("DH-XXXX-YYYY"), "DH-AAAA-BBBB");
+    await user.type(screen.getByPlaceholderText("DH-XXXX-YYYY"), "AAAABBBB");
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(await screen.findByText(/No linked devices remain/i)).toBeInTheDocument();
@@ -76,16 +98,18 @@ describe("MissingProfileRecovery", () => {
     expect(linkDeviceMock).not.toHaveBeenCalled();
   });
 
-  it("shows the safe linking error", () => {
+  it("shows a failed lookup through the global error toast", async () => {
     useLinkDeviceMock.mockReturnValue({
       linkDevice: linkDeviceMock,
       loading: false,
       error: "Recovery code not found.",
     });
 
-    render(<MissingProfileRecovery />);
+    renderPage();
 
-    expect(screen.getByText("Recovery code not found.")).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No account found for that recovery code."
+    );
   });
 
   it("does not submit the same link twice while the first call is pending", async () => {
@@ -96,7 +120,7 @@ describe("MissingProfileRecovery", () => {
         finish = resolve;
       })
     );
-    render(<MissingProfileRecovery />);
+    renderPage();
 
     await user.type(screen.getByPlaceholderText("DH-XXXX-YYYY"), "DH-AAAA-BBBB");
     await user.click(screen.getByRole("button", { name: "Continue" }));

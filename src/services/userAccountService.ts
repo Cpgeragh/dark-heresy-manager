@@ -11,6 +11,11 @@ const callDeleteAccount = httpsCallable<
   { releasedCharacters: number; removedLinkedDevices: number }
 >(functions, "deleteAccount");
 
+const callDiscardOnboardingSetup = httpsCallable<Record<string, never>, void>(
+  functions,
+  "discardOnboardingSetup"
+);
+
 /**
  * Ensures the anonymous-auth user has an account document and returns whether
  * onboarding has been completed. Existing accounts are read-only on startup;
@@ -61,6 +66,13 @@ export async function completeOnboarding(uid: string): Promise<void> {
   await updateDoc(doc(db, "users", uid), {
     onboarded: true,
     recoveryBackedUp: true,
+  });
+}
+
+/** Removes provisional profile and recovery data before leaving unfinished onboarding. */
+export async function discardOnboardingSetup(): Promise<void> {
+  await runSingleFlight("account:discard-onboarding", [], async () => {
+    await callDiscardOnboardingSetup({});
   });
 }
 

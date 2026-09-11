@@ -217,7 +217,7 @@ export function validateRecoveryCode(code: string): ValidationResult {
   if (!/^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(trimmed)) {
     return {
       isValid: false,
-      error: "Recovery code format: DH-XXXX-YYYY",
+      error: "Invalid recovery code",
     };
   }
 

@@ -32,24 +32,74 @@ export function generateRecoveryCode(): string {
 }
 
 /**
- * Format raw user input into the DH-XXXX-YYYY shape as they type:
- * uppercases, strips non-alphanumerics, caps length, and re-inserts dashes.
+ * Format the user-entered characters into the DH-XXXX-YYYY shape as they type.
+ * The fixed DH prefix and separators are supplied automatically, so users only
+ * enter the eight variable characters. Full formatted codes can still be pasted.
  */
 export function formatRecoveryCodeInput(raw: string): string {
-  const maxChars =
-    RECOVERY_CODE_PREFIX.length + RECOVERY_CODE_SEGMENTS * RECOVERY_CODE_SEGMENT_LENGTH;
+  const upper = raw.trim().toUpperCase();
+  if (!upper) return "";
 
-  const clean = raw
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "")
-    .slice(0, maxChars);
+  const totalVariableCharacters = RECOVERY_CODE_SEGMENTS * RECOVERY_CODE_SEGMENT_LENGTH;
+  const clean = upper.replace(/[^A-Z0-9]/g, "");
+  const includesPrefix =
+    upper.startsWith(`${RECOVERY_CODE_PREFIX}-`) ||
+    (clean.startsWith(RECOVERY_CODE_PREFIX) && clean.length > totalVariableCharacters);
+  const variableCharacters = (
+    includesPrefix ? clean.slice(RECOVERY_CODE_PREFIX.length) : clean
+  ).slice(0, totalVariableCharacters);
 
-  const parts: string[] = [clean.slice(0, RECOVERY_CODE_PREFIX.length)];
-  for (let i = 0; i < RECOVERY_CODE_SEGMENTS; i++) {
-    const start = RECOVERY_CODE_PREFIX.length + i * RECOVERY_CODE_SEGMENT_LENGTH;
-    if (clean.length > start) {
-      parts.push(clean.slice(start, start + RECOVERY_CODE_SEGMENT_LENGTH));
+  if (!variableCharacters) return "";
+
+  const firstSegment = variableCharacters.slice(0, RECOVERY_CODE_SEGMENT_LENGTH);
+  const secondSegment = variableCharacters.slice(RECOVERY_CODE_SEGMENT_LENGTH);
+  const secondSeparator = firstSegment.length === RECOVERY_CODE_SEGMENT_LENGTH ? "-" : "";
+
+  return `${RECOVERY_CODE_PREFIX}-${firstSegment}${secondSeparator}${secondSegment}`;
+}
+
+/**
+ * Format an input edit while allowing Backspace to move naturally across the
+ * automatically inserted separator.
+ */
+export function formatRecoveryCodeInputChange(previousValue: string, rawValue: string): string {
+  const fixedPrefix = `${RECOVERY_CODE_PREFIX}-`;
+  const secondSeparatorIndex = fixedPrefix.length + RECOVERY_CODE_SEGMENT_LENGTH;
+  const isDeleting = rawValue.length < previousValue.length;
+
+  // The focused empty field displays DH- without storing it as user input.
+  // Backspacing that visual prefix must keep the underlying value empty rather
+  // than interpreting the remaining DH as variable code characters.
+  if (isDeleting && previousValue === fixedPrefix) return "";
+
+  // The field already displays DH- on focus. If someone nevertheless types
+  // DH- themselves, discard that duplicate fixed prefix and continue normally.
+  if (rawValue.toUpperCase().startsWith(`${fixedPrefix}${fixedPrefix}`)) {
+    return formatRecoveryCodeInput(rawValue.slice(fixedPrefix.length));
+  }
+
+  if (isDeleting && previousValue.startsWith(fixedPrefix)) {
+    const previousHasSecondSeparator = previousValue[secondSeparatorIndex] === "-";
+    const previousSecondSegment = previousHasSecondSeparator
+      ? previousValue.slice(secondSeparatorIndex + 1)
+      : "";
+    const rawWithoutTrailingSeparator = rawValue.endsWith("-") ? rawValue.slice(0, -1) : rawValue;
+    const leavesCompleteFirstSegment =
+      rawWithoutTrailingSeparator.length === secondSeparatorIndex &&
+      rawWithoutTrailingSeparator.startsWith(fixedPrefix);
+
+    if (previousSecondSegment && leavesCompleteFirstSegment) {
+      return rawWithoutTrailingSeparator;
+    }
+
+    if (
+      previousHasSecondSeparator &&
+      !previousSecondSegment &&
+      rawValue === previousValue.slice(0, -1)
+    ) {
+      return rawValue.slice(0, -1);
     }
   }
-  return parts.join("-");
+
+  return formatRecoveryCodeInput(rawValue);
 }

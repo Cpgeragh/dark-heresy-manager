@@ -11,7 +11,11 @@ import { useCampaignsContext } from "../context/useCampaignsContext";
 import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
 import { useToast } from "../components/Toast";
 import { RecoveryBackupBanner } from "../components/RecoveryBackupBanner";
-import { validateCampaignName, validateInquisitorName } from "../utils/validation";
+import {
+  validateCampaignName,
+  validateInquisitorName,
+  validateRecoveryCode,
+} from "../utils/validation";
 import { buildRoute } from "../constants/routes";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
@@ -23,7 +27,13 @@ import {
   updateCampaignDetails,
 } from "../services/campaignService";
 import type { CampaignWithId } from "../types/Firestore";
-import { uiSection, editableInputClass, uiTextError } from "../ui/styles/editableStyles";
+import {
+  uiSection,
+  editableInputClass,
+  uiFormLabel,
+  uiTextError,
+  uiTextPlaceholder,
+} from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { ExpandChevron } from "../ui/icons/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
@@ -33,10 +43,15 @@ import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
 import { LoadingState } from "../ui/LoadingState";
 import { ConfirmInline } from "../ui/forms/ConfirmInline";
-import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "../hooks/useRecoveryLookup";
 import { claimCharacter } from "../services/characterService";
+import { CustomFormShell } from "../ui/forms/CustomFormShell";
+import { CustomFormSection } from "../ui/forms/CustomFormSection";
+import { RequiredFormLabel } from "../ui/forms/RequiredFormLabel";
+import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
+import { formatRecoveryCodeInput } from "../utils/recoveryCode";
+import { colourRequiredText } from "../ui/styles/colourTokens";
 
 interface Props {
   user: User;
@@ -104,6 +119,8 @@ function DmCampaignList({
   } = useArchivedCampaigns(userUid);
   const [newCampaignName, setNewCampaignName] = useState("");
   const [newInquisitorName, setNewInquisitorName] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const createFormScrollPositionRef = useRef(0);
   const [creating, setCreating] = useState(false);
   const creatingRef = useRef(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -146,6 +163,7 @@ function DmCampaignList({
       await createCampaign(name, userUid, firstName ?? undefined, inquisitorName || undefined);
       setNewCampaignName("");
       setNewInquisitorName("");
+      setShowCreateForm(false);
       toast.success("Campaign created successfully");
     } catch (error) {
       console.error("Failed to create campaign:", error);
@@ -155,6 +173,17 @@ function DmCampaignList({
       setCreating(false);
     }
   }, [newCampaignName, newInquisitorName, userUid, firstName, toast]);
+
+  const closeCreateForm = useCallback(() => {
+    if (creatingRef.current) return;
+    setShowCreateForm(false);
+    setNewCampaignName("");
+    setNewInquisitorName("");
+  }, []);
+
+  const campaignNameValid = validateCampaignName(newCampaignName.trim()).isValid;
+  const inquisitorNameValid =
+    !newInquisitorName.trim() || validateInquisitorName(newInquisitorName.trim()).isValid;
 
   const handleEditSave = useCallback(async () => {
     if (!editingId || editingRef.current) return;
@@ -269,33 +298,53 @@ function DmCampaignList({
       {/* Create */}
       <div>
         <SectionHeader className="mb-3">Create Campaign</SectionHeader>
-        <div className="space-y-2">
-          <input
-            className={editableInputClass(true)}
-            placeholder="Inquisitor Name (optional)"
-            value={newInquisitorName}
-            maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
-            onChange={(e) => setNewInquisitorName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void handleCreate();
-            }}
-            aria-label="Inquisitor name"
-          />
-          <input
-            className={editableInputClass(true)}
-            placeholder="Campaign Name"
-            value={newCampaignName}
-            maxLength={PRODUCT_LIMITS.campaignNameCharacters}
-            onChange={(e) => setNewCampaignName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void handleCreate();
-            }}
-            aria-label="New campaign name"
-          />
-          <Button onClick={handleCreate} disabled={creating}>
-            {creating ? "Creating…" : "Create"}
-          </Button>
-        </div>
+        <Button onClick={() => setShowCreateForm(true)}>Create campaign</Button>
+
+        {showCreateForm && (
+          <CustomFormShell
+            title="Create Campaign"
+            scrollPositionRef={createFormScrollPositionRef}
+            canSubmit={campaignNameValid && inquisitorNameValid}
+            submitLabel="Create campaign"
+            savingLabel="Creating…"
+            saving={creating}
+            onSubmit={handleCreate}
+            onClose={closeCreateForm}
+            onCancel={closeCreateForm}
+            maxWidth="max-w-lg"
+          >
+            <CustomFormSection title="Campaign Details">
+              <div>
+                <RequiredFormLabel htmlFor="new-campaign-name">Campaign Name</RequiredFormLabel>
+                <input
+                  id="new-campaign-name"
+                  required
+                  autoFocus
+                  className={`${editableInputClass(true)} mt-0.5`}
+                  placeholder="Campaign name…"
+                  value={newCampaignName}
+                  maxLength={PRODUCT_LIMITS.campaignNameCharacters}
+                  onChange={(event) => setNewCampaignName(event.target.value)}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="new-inquisitor-name" className={uiFormLabel}>
+                  Inquisitor Name{" "}
+                  <span className="normal-case tracking-normal text-slate-500">(optional)</span>
+                </label>
+                <input
+                  id="new-inquisitor-name"
+                  className={`${editableInputClass(true)} mt-0.5`}
+                  placeholder="Inquisitor name…"
+                  value={newInquisitorName}
+                  maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
+                  onChange={(event) => setNewInquisitorName(event.target.value)}
+                />
+              </div>
+            </CustomFormSection>
+          </CustomFormShell>
+        )}
       </div>
 
       {/* Active campaigns */}
@@ -411,9 +460,7 @@ function DmCampaignList({
           <ErrorState className="mt-4">Unable to load archived campaigns.</ErrorState>
         ) : archivedLoading ? (
           <LoadingState className="mt-4">Loading archived campaigns…</LoadingState>
-        ) : archivedCampaigns.length === 0 ? (
-          <p className="mt-4 text-slate-500 text-sm lg:text-base">No archived campaigns.</p>
-        ) : (
+        ) : archivedCampaigns.length > 0 ? (
           <div className="mt-4">
             <button
               type="button"
@@ -467,7 +514,7 @@ function DmCampaignList({
               </div>
             )}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -497,18 +544,28 @@ function QrPanel() {
 
 function ClaimCharacterSection() {
   const [code, setCode] = useState("");
+  const [open, setOpen] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const formScrollPositionRef = useRef(0);
 
   const navigate = useNavigate();
   const toast = useToast();
+  const showErrorToast = toast.error;
 
-  const { loading, error, data, lookup } = useRecoveryLookup();
+  const { loading, error, data, lookup, reset: resetLookup } = useRecoveryLookup();
+
+  useEffect(() => {
+    if (open && error) {
+      showErrorToast(error);
+    }
+  }, [error, open, showErrorToast]);
 
   useEffect(() => {
     const codeParam = new URLSearchParams(window.location.search).get("code");
     if (codeParam) {
       setCode(codeParam);
+      setOpen(true);
       lookup(codeParam);
     }
   }, [lookup]);
@@ -516,6 +573,17 @@ function ClaimCharacterSection() {
   const handleLookup = useCallback(() => {
     lookup(code);
   }, [lookup, code]);
+
+  const closeForm = useCallback(() => {
+    if (claiming) return;
+    resetLookup();
+    setOpen(false);
+    setCode("");
+    setClaimError(null);
+  }, [claiming, resetLookup]);
+
+  const normalizedCode = formatRecoveryCodeInput(code);
+  const codeValid = validateRecoveryCode(normalizedCode).isValid;
 
   const handleClaim = useCallback(async () => {
     if (!data || claiming) return;
@@ -541,38 +609,61 @@ function ClaimCharacterSection() {
   }, [data, claiming, navigate, toast, code]);
 
   return (
-    <div>
-      <SectionHeader className="mb-3">Claim a Character</SectionHeader>
+    <>
+      <Button onClick={() => setOpen(true)}>Claim a character</Button>
 
-      <div className="space-y-4">
-        <ClaimForm code={code} onCodeChange={setCode} onSubmit={handleLookup} loading={loading} />
+      {open && (
+        <CustomFormShell
+          title="Claim a Character"
+          scrollPositionRef={formScrollPositionRef}
+          canSubmit={codeValid && !loading}
+          submitLabel="Find character"
+          savingLabel="Checking…"
+          saving={loading}
+          onSubmit={handleLookup}
+          onClose={closeForm}
+          onCancel={closeForm}
+          maxWidth="max-w-lg"
+        >
+          <CustomFormSection title="Character Code">
+            <RecoveryCodeInput
+              value={code}
+              onValueChange={setCode}
+              disabled={loading || claiming}
+              appearance="form"
+              label={
+                <>
+                  Recovery Code{" "}
+                  <span className={colourRequiredText} aria-hidden="true">
+                    *
+                  </span>
+                </>
+              }
+              labelClassName={uiFormLabel}
+            />
+          </CustomFormSection>
 
-        {error && (
-          <p className={`${uiTextError} border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded`}>
-            {error}
-          </p>
-        )}
+          {claimError && (
+            <p className={`${uiTextError} rounded border border-red-600 bg-red-900/20 p-2 lg:p-3`}>
+              {claimError}
+            </p>
+          )}
 
-        {claimError && (
-          <p className={`${uiTextError} border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded`}>
-            {claimError}
-          </p>
-        )}
+          {data && (
+            <ClaimPreview
+              characterName={data.characterName}
+              campaignName={data.campaignName}
+              ownership={data.ownership}
+              onClaim={handleClaim}
+            />
+          )}
 
-        {data && (
-          <ClaimPreview
-            characterName={data.characterName}
-            campaignName={data.campaignName}
-            ownership={data.ownership}
-            onClaim={handleClaim}
-          />
-        )}
-
-        {claiming && (
-          <p className="text-xs lg:text-sm text-slate-400 text-center">Claiming character…</p>
-        )}
-      </div>
-    </div>
+          {claiming && (
+            <p className="text-center text-xs text-slate-400 lg:text-sm">Claiming character…</p>
+          )}
+        </CustomFormShell>
+      )}
+    </>
   );
 }
 
@@ -611,9 +702,8 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         ) : null}
 
         {!playerError && !playerLoading && playerCampaigns.length === 0 && (
-          <p className="text-slate-400 text-sm lg:text-base">
-            You are not part of any campaigns yet. Ask your DM for a recovery code to claim your
-            character.
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+            You are not part of any campaigns yet.
           </p>
         )}
 
@@ -628,10 +718,6 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
             ))}
           </div>
         )}
-
-        <hr className="border-slate-700" />
-
-        {/* ── Claim a character ────────────────────────────────────────── */}
         <ClaimCharacterSection />
       </Panel>
     </PageShell>

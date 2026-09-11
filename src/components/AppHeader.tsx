@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useMatch } from "react-router-dom";
 import { useHeaderExtension } from "../context/useHeaderExtension";
 import { ROUTES } from "../constants/routes";
+import { AppHeaderShell, appHeaderIconButtonClass } from "./AppHeaderShell";
 
 interface AppHeaderProps {
   currentPath: string;
@@ -39,14 +40,14 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
   }, [kebabOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-2 grid grid-cols-[1fr_auto_1fr] items-center">
-        {/* Left icon — home/back */}
-        <div className="flex items-center gap-2">
+    <AppHeaderShell
+      left={
+        <>
+          {/* Left icon — home/back */}
           {(backHref || currentPath !== ROUTES.DASHBOARD) && (
             <Link
               to={backHref ?? ROUTES.DASHBOARD}
-              className="h-8 w-8 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center hover:bg-slate-700 transition"
+              className={appHeaderIconButtonClass}
               aria-label={backHref ? "Back" : "Dashboard"}
             >
               <svg
@@ -65,24 +66,14 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
               </svg>
             </Link>
           )}
-        </div>
-
-        {/* App name — centred */}
-        <div className="flex items-center justify-center pointer-events-none">
-          <span className="font-cinzel font-bold text-slate-200 text-base tracking-wide">
-            Dark Heresy Manager
-          </span>
-        </div>
-
-        {/* Settings + kebab */}
-        <div className="flex items-center justify-end gap-2">
+        </>
+      }
+      right={
+        <>
+          {/* Settings + kebab */}
           {/* Settings — dashboard only */}
           {isOnDashboard && (
-            <Link
-              to={ROUTES.SETTINGS}
-              aria-label="Settings"
-              className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
-            >
+            <Link to={ROUTES.SETTINGS} aria-label="Settings" className={appHeaderIconButtonClass}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -124,8 +115,8 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
               )}
             </div>
           )}
-        </div>
-      </div>
-    </header>
+        </>
+      }
+    />
   );
 }

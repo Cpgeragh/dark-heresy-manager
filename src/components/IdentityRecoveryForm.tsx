@@ -1,13 +1,17 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { IdentityRecoveryFlow } from "../hooks/useIdentityRecoveryFlow";
+import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
-import { uiTextError } from "../ui/styles/editableStyles";
+import { validateRecoveryCode } from "../utils/validation";
 
 interface IdentityRecoveryFormProps {
   flow: IdentityRecoveryFlow;
   deviceNoun: "device" | "browser";
-  description: ReactNode;
+  description?: ReactNode;
+  inputAppearance?: "recovery" | "form";
+  inputLabelAside?: ReactNode;
+  checkLabel?: string;
   onLinked?: () => void | Promise<void>;
   onReclaimed?: () => void | Promise<void>;
   showFinishingStatus?: boolean;
@@ -17,20 +21,49 @@ function titleCase(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+function recoveryErrorMessage(message: string): string {
+  return message === "Recovery code not found."
+    ? "No account found for that recovery code."
+    : message;
+}
+
 export function IdentityRecoveryForm({
   flow,
   deviceNoun,
   description,
+  inputAppearance = "recovery",
+  inputLabelAside,
+  checkLabel = "Continue",
   onLinked,
   onReclaimed,
   showFinishingStatus = false,
 }: IdentityRecoveryFormProps) {
+  const toast = useToast();
+  const lastErrorRef = useRef<string | null>(null);
   const busy = flow.phase !== "idle";
   const deviceLabel = titleCase(deviceNoun);
+  const hasValidCode = validateRecoveryCode(flow.code).isValid;
+
+  useEffect(() => {
+    if (!flow.error) {
+      lastErrorRef.current = null;
+      return;
+    }
+    if (flow.error === lastErrorRef.current) return;
+
+    lastErrorRef.current = flow.error;
+    toast.error(recoveryErrorMessage(flow.error));
+  }, [flow.error, toast]);
 
   return (
-    <>
-      <p className="text-slate-300 text-sm lg:text-base">{description}</p>
+    <form
+      className="space-y-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!flow.mode) void flow.check();
+      }}
+    >
+      {description && <p className="text-slate-300 text-sm lg:text-base">{description}</p>}
 
       {flow.mode === "link" && (
         <p className="text-amber-300 text-xs lg:text-sm">
@@ -50,11 +83,13 @@ export function IdentityRecoveryForm({
         disabled={busy || flow.linkRequestPending}
         placeholder="DH-XXXX-YYYY"
         size="large"
+        appearance={inputAppearance}
+        labelAside={inputLabelAside}
       />
 
       {!flow.mode && (
-        <Button fullWidth size="lg" onClick={() => void flow.check()} disabled={busy || !flow.code}>
-          {flow.phase === "checking" ? "Checking…" : "Continue"}
+        <Button type="submit" fullWidth size="lg" disabled={busy || !hasValidCode}>
+          {flow.phase === "checking" ? "Checking…" : checkLabel}
         </Button>
       )}
 
@@ -91,12 +126,11 @@ export function IdentityRecoveryForm({
         </Button>
       )}
 
-      {flow.error && <p className={`${uiTextError} text-center`}>{flow.error}</p>}
       {showFinishingStatus && flow.phase === "finishing" && (
         <p className="text-emerald-300 text-sm lg:text-base text-center" role="status">
           Loading your account…
         </p>
       )}
-    </>
+    </form>
   );
 }

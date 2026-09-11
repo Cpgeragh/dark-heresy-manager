@@ -11,6 +11,7 @@ export const colourEmerald = "border-emerald-500/50 bg-emerald-500/10 text-emera
 export const colourEmeraldPlain = "text-emerald-300";
 export const colourAmberPlain = "text-amber-300";
 export const colourSkyPlain = "text-sky-300";
+export const colourMetadataLabelText = "text-sky-300/85";
 export const colourTextPrimary = "text-slate-100";
 export const colourRequiredText = "text-red-500";
 export const colourLime = "border-lime-500/50 bg-lime-500/10 text-lime-300";

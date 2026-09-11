@@ -1,7 +1,7 @@
 // src/ui/styles/editableStyles.ts
 
 import { chipClassName } from "./chipStyles";
-import { colourInactive } from "./colourTokens";
+import { colourInactive, colourMetadataLabelText } from "./colourTokens";
 import { fieldControlClass, type FieldResize } from "./fieldStyles";
 
 /**
@@ -66,7 +66,7 @@ export const uiTextSubtle = "text-slate-500";
 export const uiTextPlaceholder = "text-slate-500 italic";
 
 /** Tiny uppercase label text used beside values. */
-export const uiTextLabel = "text-[10px] lg:text-xs text-sky-300/85 uppercase tracking-wide";
+export const uiTextLabel = `text-[10px] lg:text-xs ${colourMetadataLabelText} uppercase tracking-wide`;
 
 export const uiTextError = "text-red-400 text-sm lg:text-base";
 export const uiTextGMNote = "text-amber-400/70 italic";
@@ -74,8 +74,7 @@ export const uiTextGMNote = "text-amber-400/70 italic";
 // ─── Form tokens ──────────────────────────────────────────────────────────────
 
 export const uiFormLabel = "text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100";
-export const uiFormLabelBlue =
-  "text-xs lg:text-sm font-medium uppercase tracking-wide text-sky-300/85";
+export const uiFormLabelBlue = `text-xs lg:text-sm font-medium uppercase tracking-wide ${colourMetadataLabelText}`;
 export const uiFormLabelSecondary = "block text-xs lg:text-sm text-slate-400 mb-1";
 export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]";
 export const uiSubheading =

@@ -49,9 +49,17 @@ describe("ToastItem", () => {
     expect(removeToastMock).toHaveBeenCalledWith("abc");
   });
 
-  it("copies the message text to the clipboard", async () => {
+  it("does not show a copy control for an ordinary toast", () => {
+    render(<ToastItem toast={toast({ type: "error" })} />);
+
+    expect(
+      screen.queryByRole("button", { name: "Copy message to clipboard" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("copies explicitly supplied text to the clipboard", async () => {
     const { user, writeTextMock } = setupUserWithClipboardSpy();
-    render(<ToastItem toast={toast({ message: "DH-AAAA-BBBB" })} />);
+    render(<ToastItem toast={toast({ message: "DH-AAAA-BBBB", copyText: "DH-AAAA-BBBB" })} />);
 
     await user.click(screen.getByRole("button", { name: "Copy message to clipboard" }));
 
@@ -65,7 +73,7 @@ describe("ToastItem", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     try {
       const { user } = setupUserWithClipboardSpy({ advanceTimers: vi.advanceTimersByTime });
-      render(<ToastItem toast={toast({ message: "DH-AAAA-BBBB" })} />);
+      render(<ToastItem toast={toast({ message: "DH-AAAA-BBBB", copyText: "DH-AAAA-BBBB" })} />);
 
       await user.click(screen.getByRole("button", { name: "Copy message to clipboard" }));
       await waitFor(() =>

@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
+export const MODAL_OPENED_EVENT = "dhm:modal-opened";
+
 interface ViewportState {
   top: number;
   left: number;
@@ -112,6 +114,7 @@ export function ModalShell({
     if (!dialog) return;
 
     dialog.showModal();
+    window.dispatchEvent(new Event(MODAL_OPENED_EVENT));
     return () => {
       unmountingRef.current = true;
       if (dialog.open) dialog.close();

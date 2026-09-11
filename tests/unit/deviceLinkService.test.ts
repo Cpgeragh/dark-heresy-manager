@@ -52,7 +52,9 @@ describe("device link operations", () => {
   });
 
   it("rejects a malformed recovery code before calling the Function", async () => {
-    await expect(linkDeviceToAccount("device-uid", "not-a-code")).rejects.toThrow("DH-XXXX-YYYY");
+    await expect(linkDeviceToAccount("device-uid", "not-a-code")).rejects.toThrow(
+      "Invalid recovery code"
+    );
     expect(mockCallLinkDevice).not.toHaveBeenCalled();
   });
 
@@ -75,7 +77,7 @@ describe("device link operations", () => {
     }
 
     await expect(linkDeviceToAccount("device-uid", "DH-LINK-0005")).rejects.toThrow(
-      "Too many device-link code attempts. Try again in 15 minutes."
+      "5-attempt device-link limit reached. Try again in 15 minutes."
     );
     expect(mockCallLinkDevice).toHaveBeenCalledTimes(5);
   });
