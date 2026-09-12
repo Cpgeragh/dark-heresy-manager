@@ -4,6 +4,8 @@ import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
 import { validateRecoveryCode } from "../utils/validation";
+import { editableInputClass, uiSectionHeader } from "../ui/styles/editableStyles";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 interface IdentityRecoveryFormProps {
   flow: IdentityRecoveryFlow;
@@ -36,6 +38,7 @@ export function IdentityRecoveryForm({
   const lastErrorRef = useRef<string | null>(null);
   const busy = flow.phase !== "idle";
   const hasValidCode = validateRecoveryCode(flow.code).isValid;
+  const hasDeviceName = flow.deviceName.trim().length > 0;
 
   useEffect(() => {
     if (!flow.error) {
@@ -68,7 +71,24 @@ export function IdentityRecoveryForm({
         labelAside={inputLabelAside}
       />
 
-      <Button type="submit" fullWidth size="lg" disabled={busy || !hasValidCode}>
+      <div>
+        <label htmlFor="identity-device-name" className={uiSectionHeader}>
+          Device Name <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="identity-device-name"
+          type="text"
+          value={flow.deviceName}
+          onChange={(event) => flow.setDeviceName(event.target.value)}
+          disabled={busy || flow.linkRequestPending}
+          maxLength={PRODUCT_LIMITS.deviceNameCharacters}
+          placeholder="e.g. My phone"
+          autoComplete="off"
+          className={`${editableInputClass(true)} mt-1`}
+        />
+      </div>
+
+      <Button type="submit" fullWidth size="lg" disabled={busy || !hasValidCode || !hasDeviceName}>
         {flow.phase === "finishing"
           ? "Opening account…"
           : flow.phase === "linking" || flow.linkRequestPending

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 export const MODAL_OPENED_EVENT = "dhm:modal-opened";
+export const MODAL_LAYER_CHANGED_EVENT = "dhm:modal-layer-changed";
 
 interface ViewportState {
   top: number;
@@ -115,11 +116,17 @@ export function ModalShell({
 
     dialog.showModal();
     window.dispatchEvent(new Event(MODAL_OPENED_EVENT));
+    window.dispatchEvent(new Event(MODAL_LAYER_CHANGED_EVENT));
     return () => {
       unmountingRef.current = true;
       if (dialog.open) dialog.close();
+      queueMicrotask(() => window.dispatchEvent(new Event(MODAL_LAYER_CHANGED_EVENT)));
     };
   }, []);
+
+  useEffect(() => {
+    window.dispatchEvent(new Event(MODAL_LAYER_CHANGED_EVENT));
+  }, [suspended]);
 
   const useVisibleViewport =
     viewportAware &&
@@ -147,6 +154,8 @@ export function ModalShell({
       ref={dialogRef}
       aria-label={ariaLabel}
       aria-modal="true"
+      data-modal-shell="true"
+      data-modal-suspended={suspended ? "true" : "false"}
       onClick={(event) => {
         if (closeOnBackdrop && event.target === event.currentTarget) onClose();
       }}

@@ -17,13 +17,12 @@ import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 import { consumeUpdateStalled, consumePostUpgrade } from "./pwaUpdateState";
 import { LoadingState } from "./ui/LoadingState";
+import Settings from "./pages/Settings";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CharacterSheet = lazy(() => import("./pages/CharacterSheet"));
 const CampaignOverview = lazy(() => import("./pages/CampaignOverview"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
-const Settings = lazy(() => import("./pages/Settings"));
-const MissingProfileRecovery = lazy(() => import("./pages/MissingProfileRecovery"));
 
 // Shows a one-off toast if a service-worker update started downloading but
 // stalled (flag set in main.tsx). Must live inside ToastProvider.
@@ -106,13 +105,19 @@ function AppContent() {
     return <SplashScreen label="Unable to load your account. Please refresh." />;
   }
 
-  // A completed account must always have a profile. New onboarding writes the
-  // name before issuing a recovery code, and device connections preserve that
-  // profile. The fallback below remains for pre-migration legacy browsers.
+  // A completed account must always have a profile. If this device somehow
+  // has none (a remote disconnect, or a session from before an account had
+  // its own permanent id), send it back through the same onboarding flow any
+  // other unconnected device uses, rather than a separate recovery screen.
   if (!firstName) {
     return (
       <Suspense fallback={<SplashScreen label="Loading…" />}>
-        <MissingProfileRecovery />
+        <Onboarding
+          user={currentUser}
+          onComplete={() => setOnboarded(true)}
+          effectiveUserId={effectiveUserId}
+          firstName={firstName}
+        />
       </Suspense>
     );
   }
@@ -186,14 +191,12 @@ function AppContent() {
         />
 
         {settingsOpen && (
-          <Suspense fallback={null}>
-            <Settings
-              effectiveUserId={effectiveUserId}
-              firstName={firstName}
-              disconnect={handleDeviceDisconnect}
-              onClose={() => setSettingsOpen(false)}
-            />
-          </Suspense>
+          <Settings
+            effectiveUserId={effectiveUserId}
+            firstName={firstName}
+            disconnect={handleDeviceDisconnect}
+            onClose={() => setSettingsOpen(false)}
+          />
         )}
 
         <OfflineIndicator />

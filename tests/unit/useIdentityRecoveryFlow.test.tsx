@@ -18,8 +18,9 @@ describe("useIdentityRecoveryFlow", () => {
     const onSuccess = vi.fn();
     const { result } = renderHook(() => useIdentityRecoveryFlow());
     act(() => result.current.setCode("AAAABBBB"));
+    act(() => result.current.setDeviceName("My phone"));
     await act(() => result.current.link(onSuccess));
-    expect(linkDevice).toHaveBeenCalledWith("DH-AAAA-BBBB");
+    expect(linkDevice).toHaveBeenCalledWith("DH-AAAA-BBBB", "My phone");
     expect(onSuccess).toHaveBeenCalledOnce();
     expect(result.current.phase).toBe("finishing");
   });
@@ -34,6 +35,7 @@ describe("useIdentityRecoveryFlow", () => {
     const onSuccess = vi.fn();
     const { result } = renderHook(() => useIdentityRecoveryFlow());
     act(() => result.current.setCode("AAAABBBB"));
+    act(() => result.current.setDeviceName("My phone"));
     let request!: Promise<void>;
     act(() => {
       request = result.current.link(onSuccess);
@@ -44,6 +46,7 @@ describe("useIdentityRecoveryFlow", () => {
       await request;
     });
     expect(result.current.code).toBe("");
+    expect(result.current.deviceName).toBe("");
     expect(result.current.phase).toBe("idle");
     expect(onSuccess).not.toHaveBeenCalled();
   });

@@ -1,6 +1,4 @@
-// src/ui/icons/PencilIcon.tsx
-
-export function PencilIcon({ className = "w-4 h-4" }: { className?: string }) {
+export function DevicesIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -14,8 +12,10 @@ export function PencilIcon({ className = "w-4 h-4" }: { className?: string }) {
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-      <path d="m15 5 4 4" />
+      <path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8" />
+      <path d="M10 19v-3.96 3.15" />
+      <path d="M7 19h5" />
+      <rect width="6" height="10" x="16" y="12" rx="2" />
     </svg>
   );
 }

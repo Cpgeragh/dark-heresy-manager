@@ -33,8 +33,11 @@ beforeEach(() => {
 });
 
 it("creates an account through the server", async () => {
-  await expect(createAccount()).resolves.toEqual({ accountId: "account-1", code: "DH-AAAA-BBBB" });
-  expect(callCreate).toHaveBeenCalledWith({});
+  await expect(createAccount("My phone")).resolves.toEqual({
+    accountId: "account-1",
+    code: "DH-AAAA-BBBB",
+  });
+  expect(callCreate).toHaveBeenCalledWith({ deviceName: "My phone" });
 });
 
 it("reads an existing account recovery code", async () => {

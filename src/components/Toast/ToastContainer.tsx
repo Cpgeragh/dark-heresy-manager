@@ -1,7 +1,8 @@
 // src/components/Toast/ToastContainer.tsx
 
-import { useLayoutEffect, useRef } from "react";
-import { MODAL_OPENED_EVENT } from "../../ui/modals/ModalShell";
+import { createPortal } from "react-dom";
+import { useLayoutEffect, useRef, useState } from "react";
+import { MODAL_LAYER_CHANGED_EVENT, MODAL_OPENED_EVENT } from "../../ui/modals/ModalShell";
 import { useToasts } from "./ToastContext";
 import { ToastItem } from "./ToastItem";
 
@@ -9,6 +10,29 @@ export function ToastContainer() {
   const toasts = useToasts();
   const hasToasts = toasts.length > 0;
   const containerRef = useRef<HTMLDivElement>(null);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement>(() => document.body);
+
+  useLayoutEffect(() => {
+    let active = true;
+    const updatePortalTarget = () => {
+      queueMicrotask(() => {
+        if (!active) return;
+        const openModals = Array.from(
+          document.querySelectorAll<HTMLDialogElement>(
+            'dialog[data-modal-shell="true"][open]:not([data-modal-suspended="true"])'
+          )
+        );
+        setPortalTarget(openModals.at(-1) ?? document.body);
+      });
+    };
+
+    updatePortalTarget();
+    window.addEventListener(MODAL_LAYER_CHANGED_EVENT, updatePortalTarget);
+    return () => {
+      active = false;
+      window.removeEventListener(MODAL_LAYER_CHANGED_EVENT, updatePortalTarget);
+    };
+  }, [hasToasts]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -46,11 +70,11 @@ export function ToastContainer() {
         // The browser may already have closed it.
       }
     };
-  }, [hasToasts]);
+  }, [hasToasts, portalTarget]);
 
   if (!hasToasts) return null;
 
-  return (
+  return createPortal(
     <div
       ref={containerRef}
       popover="manual"
@@ -59,6 +83,7 @@ export function ToastContainer() {
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} />
       ))}
-    </div>
+    </div>,
+    portalTarget
   );
 }

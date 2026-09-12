@@ -13,15 +13,19 @@ const callRegisterIdentityCode = httpsCallable<Record<string, never>, { code: st
   "registerIdentityCode"
 );
 
-const callCreateAccount = httpsCallable<Record<string, never>, { accountId: string; code: string }>(
-  functions,
-  "createAccount"
-);
+const callCreateAccount = httpsCallable<
+  { deviceName: string },
+  { accountId: string; code: string }
+>(functions, "createAccount");
 
 /** Gives this device a brand new account: a fresh id, a link record, and a recovery code. */
-export async function createAccount(): Promise<{ accountId: string; code: string }> {
-  return runSingleFlight("identity:create-account", [], async () => {
-    const { data } = await callCreateAccount({});
+export async function createAccount(
+  deviceName: string
+): Promise<{ accountId: string; code: string }> {
+  const name = deviceName.trim();
+  if (!name) throw new Error("Device name is required.");
+  return runSingleFlight("identity:create-account", [name], async () => {
+    const { data } = await callCreateAccount({ deviceName: name });
     return data;
   });
 }

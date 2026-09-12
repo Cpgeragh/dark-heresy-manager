@@ -13,6 +13,7 @@ export function useIdentityRecoveryFlow() {
     reset: resetLinkDevice,
   } = useLinkDevice();
   const [code, setStoredCode] = useState("");
+  const [deviceName, setDeviceName] = useState("");
   const [phase, setPhase] = useState<IdentityRecoveryPhase>("idle");
   const [localError, setLocalError] = useState<string | null>(null);
   const operationRef = useRef(false);
@@ -27,6 +28,7 @@ export function useIdentityRecoveryFlow() {
     operationVersionRef.current += 1;
     operationRef.current = false;
     setStoredCode("");
+    setDeviceName("");
     setPhase("idle");
     setLocalError(null);
     resetLinkDevice();
@@ -46,7 +48,7 @@ export function useIdentityRecoveryFlow() {
       setPhase("linking");
       setLocalError(null);
       try {
-        await linkDevice(code);
+        await linkDevice(code, deviceName.trim());
         if (operationVersionRef.current !== operationVersion) return;
         await onSuccess?.();
         if (operationVersionRef.current === operationVersion) setPhase("finishing");
@@ -57,15 +59,17 @@ export function useIdentityRecoveryFlow() {
         }
       }
     },
-    [code, linkDevice, phase]
+    [code, deviceName, linkDevice, phase]
   );
 
   return {
     code,
+    deviceName,
     phase,
     error: linkError || localError,
     linkRequestPending,
     setCode,
+    setDeviceName,
     link,
     reset,
     failCompletion,

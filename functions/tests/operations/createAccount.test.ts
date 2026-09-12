@@ -3,6 +3,7 @@ import { createAccount } from "../../src/operations/createAccount";
 
 const state = vi.hoisted(() => ({ linked: false, provisional: false, code: "DH-OLD0-CODE" }));
 const transactionCreate = vi.hoisted(() => vi.fn());
+const transactionUpdate = vi.hoisted(() => vi.fn());
 const refs = vi.hoisted(() => new Map<string, { path: string; id: string }>());
 const ref = (path: string, id: string) => {
   const value = { path, id };
@@ -32,6 +33,7 @@ const runTransaction = vi.hoisted(() =>
         return { exists: false, data: () => ({}) };
       },
       create: transactionCreate,
+      update: transactionUpdate,
     })
   )
 );
@@ -49,7 +51,7 @@ beforeEach(() => {
 
 describe("createAccount", () => {
   it("atomically creates a provisional account, first device link, and recovery code", async () => {
-    const result = await createAccount("device-1", "secret");
+    const result = await createAccount({ deviceName: "Cormac's laptop" }, "device-1", "secret");
     expect(result.accountId).toBe("new-account-id");
     expect(result.code).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
     expect(transactionCreate).toHaveBeenCalledWith(
@@ -58,14 +60,16 @@ describe("createAccount", () => {
     );
     expect(transactionCreate).toHaveBeenCalledWith(
       expect.objectContaining({ path: "userLinks/device-1" }),
-      expect.objectContaining({ primaryUid: "new-account-id" })
+      expect.objectContaining({ primaryUid: "new-account-id", name: "Cormac's laptop" })
     );
   });
 
   it("returns the same provisional account when account creation is retried", async () => {
     state.linked = true;
     state.provisional = true;
-    await expect(createAccount("device-1", "secret")).resolves.toEqual({
+    await expect(
+      createAccount({ deviceName: "Cormac's laptop" }, "device-1", "secret")
+    ).resolves.toEqual({
       accountId: "existing",
       code: "DH-OLD0-CODE",
     });
@@ -74,8 +78,16 @@ describe("createAccount", () => {
 
   it("does not overwrite an established account link", async () => {
     state.linked = true;
-    await expect(createAccount("device-1", "secret")).rejects.toMatchObject({
+    await expect(
+      createAccount({ deviceName: "Cormac's laptop" }, "device-1", "secret")
+    ).rejects.toMatchObject({
       code: "failed-precondition",
+    });
+  });
+
+  it("requires a device name", async () => {
+    await expect(createAccount({ deviceName: "  " }, "device-1", "secret")).rejects.toMatchObject({
+      code: "invalid-argument",
     });
   });
 });

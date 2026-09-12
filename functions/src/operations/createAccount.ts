@@ -8,6 +8,11 @@
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { generateRecoveryCode, hashRecoveryCode } from "../shared/recoveryCode.js";
+import { validateDeviceName } from "../shared/deviceLinks.js";
+
+export interface CreateAccountInput {
+  deviceName: string;
+}
 
 export interface CreateAccountResult {
   accountId: string;
@@ -15,10 +20,12 @@ export interface CreateAccountResult {
 }
 
 export async function createAccount(
+  input: CreateAccountInput,
   callerUid: string,
   hmacSecret: string
 ): Promise<CreateAccountResult> {
   const db = getFirestore();
+  const deviceName = validateDeviceName(input.deviceName);
 
   const linkRef = db.collection("userLinks").doc(callerUid);
   const userRef = db.collection("users").doc(callerUid);
@@ -54,6 +61,9 @@ export async function createAccount(
         typeof code === "string" &&
         code.length > 0
       ) {
+        if (existingLink.data()?.name !== deviceName) {
+          transaction.update(linkRef, { name: deviceName });
+        }
         return { accountId, code };
       }
       throw new HttpsError(
@@ -77,6 +87,7 @@ export async function createAccount(
     });
     transaction.create(linkRef, {
       primaryUid: newAccountId,
+      name: deviceName,
       linkedAt: FieldValue.serverTimestamp(),
     });
     transaction.create(secretRef, { code: newCode });

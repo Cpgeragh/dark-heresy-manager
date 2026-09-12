@@ -60,6 +60,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const [name, setName] = useState(firstName ?? "");
+  const [deviceName, setDeviceName] = useState("");
   const [savedConfirmed, setSavedConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cancelSetupOpen, setCancelSetupOpen] = useState(false);
@@ -201,15 +202,20 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   async function handleGetStarted() {
     if (busyRef.current) return;
     const trimmedName = name.trim();
+    const trimmedDeviceName = deviceName.trim();
     if (!trimmedName) {
       toast.warning("Please enter your first name.");
+      return;
+    }
+    if (!trimmedDeviceName) {
+      toast.warning("Please enter a name for this device.");
       return;
     }
     busyRef.current = true;
     setBusy(true);
     skipCodeRehydrationRef.current = false;
     try {
-      const created = await createAccount();
+      const created = await createAccount(trimmedDeviceName);
       await saveFirstName(created.accountId, trimmedName);
       const nextCode = created.code;
       setCode(nextCode);
@@ -328,7 +334,39 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   />
                 </div>
 
-                <Button type="submit" fullWidth size="lg" disabled={busy || !name.trim()}>
+                <div>
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <label htmlFor="onboarding-device-name">
+                      <span className={uiSectionHeader}>
+                        Device Name <span className={colourRequiredText}>*</span>
+                      </span>
+                    </label>
+                    <span className={uiInfoModalWrapper}>
+                      <InfoModal
+                        title="Device Name"
+                        content={<p>Used to identify this device in Manage Devices.</p>}
+                      />
+                    </span>
+                  </div>
+                  <input
+                    id="onboarding-device-name"
+                    type="text"
+                    autoComplete="off"
+                    value={deviceName}
+                    onChange={(event) => setDeviceName(event.target.value)}
+                    placeholder="e.g. My phone"
+                    disabled={busy}
+                    maxLength={PRODUCT_LIMITS.deviceNameCharacters}
+                    className={editableInputClass(true)}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  size="lg"
+                  disabled={busy || !name.trim() || !deviceName.trim()}
+                >
                   {busy ? "Setting up…" : "Create new account"}
                 </Button>
 

@@ -27,8 +27,11 @@ describe("Functions: linkDevice", () => {
 
     const deviceUid = await signInTestUser();
     await adminDb.collection("users").doc(deviceUid).set({ onboarded: false });
-    const linkDevice = httpsCallable<{ code: string }, void>(getTestFunctions(), "linkDevice");
-    await linkDevice({ code: registered.code });
+    const linkDevice = httpsCallable<{ code: string; deviceName: string }, void>(
+      getTestFunctions(),
+      "linkDevice"
+    );
+    await linkDevice({ code: registered.code, deviceName: "My laptop" });
 
     const linkSnapshot = await adminDb.collection("userLinks").doc(deviceUid).get();
     expect(linkSnapshot.data()?.primaryUid).toBe(primaryUid);
@@ -39,7 +42,9 @@ describe("Functions: linkDevice", () => {
     await adminDb.collection("users").doc(deviceUid).set({ onboarded: false });
     const linkDevice = httpsCallable(getTestFunctions(), "linkDevice");
 
-    await expect(linkDevice({ code: "DH-0000-0000" })).rejects.toMatchObject({
+    await expect(
+      linkDevice({ code: "DH-0000-0000", deviceName: "My laptop" })
+    ).rejects.toMatchObject({
       code: "functions/not-found",
     });
   }, 15000);
@@ -58,7 +63,7 @@ describe("Functions: linkDevice", () => {
     await adminDb.collection("users").doc(deviceUid).set({ onboarded: false });
     const linkDevice = httpsCallable(getTestFunctions(), "linkDevice");
 
-    await expect(linkDevice({ code: first.code })).rejects.toMatchObject({
+    await expect(linkDevice({ code: first.code, deviceName: "My laptop" })).rejects.toMatchObject({
       code: "functions/not-found",
     });
   }, 15000);

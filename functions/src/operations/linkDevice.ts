@@ -8,9 +8,11 @@
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
+import { validateDeviceName } from "../shared/deviceLinks.js";
 
 export interface LinkDeviceInput {
   code: string;
+  deviceName: string;
 }
 
 export async function linkDevice(
@@ -20,6 +22,7 @@ export async function linkDevice(
 ): Promise<void> {
   const db = getFirestore();
   const code = input.code.trim();
+  const deviceName = validateDeviceName(input.deviceName);
   const hash = hashRecoveryCode(code, hmacSecret);
 
   const indexRef = db.collection("identityRecoveryIndex").doc(hash);
@@ -75,6 +78,7 @@ export async function linkDevice(
 
     transaction.create(linkRef, {
       primaryUid: accountId,
+      name: deviceName,
       linkedAt: FieldValue.serverTimestamp(),
     });
   });

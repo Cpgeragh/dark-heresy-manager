@@ -18,10 +18,10 @@ describe("Functions: permanent account lifecycle", () => {
     try {
       await adminDb.collection("users").doc(first.uid).set({ onboarded: false });
       const createAccount = httpsCallable<
-        Record<string, never>,
+        { deviceName: string },
         { accountId: string; code: string }
       >(first.functions, "createAccount");
-      const created = (await createAccount({})).data;
+      const created = (await createAccount({ deviceName: "First phone" })).data;
       expect(created.accountId).not.toBe(first.uid);
       expect(
         (await adminDb.collection("accounts").doc(created.accountId).get()).data()?.status
@@ -34,16 +34,59 @@ describe("Functions: permanent account lifecycle", () => {
       ).toBe("active");
 
       await adminDb.collection("users").doc(second.uid).set({ onboarded: false });
-      await httpsCallable<{ code: string }, void>(
+      await httpsCallable<{ code: string; deviceName: string }, void>(
         second.functions,
         "linkDevice"
-      )({ code: created.code });
+      )({ code: created.code, deviceName: "Second laptop" });
       await httpsCallable(second.functions, "completeOnboarding")({});
       expect((await adminDb.collection("userLinks").doc(second.uid).get()).data()?.primaryUid).toBe(
         created.accountId
       );
 
-      await httpsCallable(second.functions, "disconnectDevice")({ confirmLastDevice: false });
+      const listed = (
+        await httpsCallable<
+          Record<string, never>,
+          {
+            devices: Array<{
+              uid: string;
+              name: string | null;
+              linkedAt: number | null;
+              isCurrentDevice: boolean;
+            }>;
+          }
+        >(first.functions, "listLinkedDevices")({})
+      ).data.devices;
+      expect(listed).toHaveLength(2);
+      expect(listed).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ uid: first.uid, name: "First phone", isCurrentDevice: true }),
+          expect.objectContaining({
+            uid: second.uid,
+            name: "Second laptop",
+            isCurrentDevice: false,
+          }),
+        ])
+      );
+
+      await httpsCallable(first.functions, "renameLinkedDevice")({
+        targetDeviceUid: second.uid,
+        name: "Old laptop",
+      });
+      expect((await adminDb.collection("userLinks").doc(second.uid).get()).data()?.name).toBe(
+        "Old laptop"
+      );
+
+      const remotelyDisconnected = (
+        await httpsCallable<
+          { targetDeviceUid: string },
+          { recoveryCode: string; remainingDeviceCount: number }
+        >(first.functions, "disconnectOtherDevice")({ targetDeviceUid: second.uid })
+      ).data;
+      expect(remotelyDisconnected.remainingDeviceCount).toBe(1);
+      expect(remotelyDisconnected.recoveryCode).not.toBe(created.code);
+      expect((await adminDb.collection("userLinks").doc(second.uid).get()).exists).toBe(false);
+      expect((await adminDb.collection("users").doc(second.uid).get()).data()?.onboarded).toBe(false);
+
       const disconnectFirst = httpsCallable(first.functions, "disconnectDevice");
       await expect(disconnectFirst({ confirmLastDevice: false })).rejects.toMatchObject({
         code: "functions/failed-precondition",

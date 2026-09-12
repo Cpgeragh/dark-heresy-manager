@@ -50,29 +50,29 @@ beforeEach(() => {
 });
 
 it("connects an unfinished device to an active account", async () => {
-  await linkDevice({ code: "DH-AAAA-BBBB" }, "device-1", "secret");
+  await linkDevice({ code: "DH-AAAA-BBBB", deviceName: "Cormac's phone" }, "device-1", "secret");
   expect(transactionCreate).toHaveBeenCalledWith(
     expect.objectContaining({ path: "userLinks/device-1" }),
-    { primaryUid: "account-1", linkedAt: "server-time" }
+    { primaryUid: "account-1", name: "Cormac's phone", linkedAt: "server-time" }
   );
 });
 
 it("rejects unknown codes and existing device links", async () => {
   state.index = false;
-  await expect(linkDevice({ code: "DH-AAAA-BBBB" }, "device-1", "secret")).rejects.toMatchObject({
-    code: "not-found",
-  });
+  await expect(
+    linkDevice({ code: "DH-AAAA-BBBB", deviceName: "Phone" }, "device-1", "secret")
+  ).rejects.toMatchObject({ code: "not-found" });
   state.index = true;
   state.linked = true;
-  await expect(linkDevice({ code: "DH-AAAA-BBBB" }, "device-1", "secret")).rejects.toMatchObject({
-    code: "failed-precondition",
-  });
+  await expect(
+    linkDevice({ code: "DH-AAAA-BBBB", deviceName: "Phone" }, "device-1", "secret")
+  ).rejects.toMatchObject({ code: "failed-precondition" });
 });
 
 it("does not expose an unfinished account to another device", async () => {
   state.accountStatus = "provisional";
-  await expect(linkDevice({ code: "DH-AAAA-BBBB" }, "device-1", "secret")).rejects.toMatchObject({
-    code: "failed-precondition",
-  });
+  await expect(
+    linkDevice({ code: "DH-AAAA-BBBB", deviceName: "Phone" }, "device-1", "secret")
+  ).rejects.toMatchObject({ code: "failed-precondition" });
   expect(transactionCreate).not.toHaveBeenCalled();
 });

@@ -1,6 +1,6 @@
 // tests/integration/ToastContainer.test.tsx
 import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 const useToastsMock = vi.fn();
@@ -88,5 +88,21 @@ describe("ToastContainer", () => {
 
     expect(hidePopover).toHaveBeenCalledOnce();
     expect(showPopover).toHaveBeenCalledOnce();
+  });
+
+  it("moves toasts inside the active modal so their controls remain interactive", async () => {
+    const dialog = document.createElement("dialog");
+    dialog.open = true;
+    dialog.dataset.modalShell = "true";
+    dialog.dataset.modalSuspended = "false";
+    document.body.append(dialog);
+    useToastsMock.mockReturnValue([{ id: "t1", message: "Modal error" }]);
+
+    render(<ToastContainer />);
+
+    await waitFor(() =>
+      expect(screen.getByText("Mock ToastItem: Modal error").closest("dialog")).toBe(dialog)
+    );
+    dialog.remove();
   });
 });

@@ -65,6 +65,19 @@ import {
   type DisconnectDeviceResult,
 } from "./operations/disconnectDevice.js";
 import {
+  listLinkedDevices as runListLinkedDevices,
+  type ListLinkedDevicesResult,
+} from "./operations/listLinkedDevices.js";
+import {
+  renameLinkedDevice as runRenameLinkedDevice,
+  type RenameLinkedDeviceInput,
+} from "./operations/renameLinkedDevice.js";
+import {
+  disconnectOtherDevice as runDisconnectOtherDevice,
+  type DisconnectOtherDeviceInput,
+  type DisconnectOtherDeviceResult,
+} from "./operations/disconnectOtherDevice.js";
+import {
   startCharacterDeletionJob as runStartCharacterDeletionJob,
   processCharacterDeletionChunk as runProcessCharacterDeletionChunk,
   type StartCharacterDeletionJobInput,
@@ -92,6 +105,7 @@ import {
 import { revokeIdentityCode as runRevokeIdentityCode } from "./operations/revokeIdentityCode.js";
 import {
   createAccount as runCreateAccount,
+  type CreateAccountInput,
   type CreateAccountResult,
 } from "./operations/createAccount.js";
 import { discardOnboardingSetup as runDiscardOnboardingSetup } from "./operations/discardOnboardingSetup.js";
@@ -336,9 +350,9 @@ export const linkDevice = onCall<LinkDeviceInput>(
     return protectedCallable<LinkDeviceInput, void>({
       request,
       operation: "link-device",
-      allowedFields: ["code"],
-      requiredFields: ["code"],
-      fieldShapes: { code: "string" },
+      allowedFields: ["code", "deviceName"],
+      requiredFields: ["code", "deviceName"],
+      fieldShapes: { code: "string", deviceName: "string" },
       rateLimits: [
         { key: `link-device:user:${callerUid}`, limit: 5, windowMs: 15 * 60 * 1000 },
         { key: `link-device:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
@@ -358,6 +372,54 @@ export const disconnectDevice = onCall<DisconnectDeviceInput>({ timeoutSeconds: 
     handler: ({ uid, data }) => runDisconnectDevice(data, uid),
   });
 });
+
+export const listLinkedDevices = onCall({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<Record<string, never>, ListLinkedDevicesResult>({
+    request,
+    operation: "list-linked-devices",
+    allowedFields: [],
+    rateLimits: [{ key: `list-linked-devices:${callerUid}`, limit: 60, windowMs: 60 * 60 * 1000 }],
+    handler: ({ uid }) => runListLinkedDevices(uid),
+  });
+});
+
+export const renameLinkedDevice = onCall<RenameLinkedDeviceInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<RenameLinkedDeviceInput, void>({
+      request,
+      operation: "rename-linked-device",
+      allowedFields: ["targetDeviceUid", "name"],
+      requiredFields: ["targetDeviceUid", "name"],
+      fieldShapes: { targetDeviceUid: "string", name: "string" },
+      rateLimits: [
+        { key: `rename-linked-device:${callerUid}`, limit: 60, windowMs: 60 * 60 * 1000 },
+      ],
+      handler: ({ uid, data }) => runRenameLinkedDevice(data, uid),
+    });
+  }
+);
+
+export const disconnectOtherDevice = onCall<DisconnectOtherDeviceInput>(
+  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<DisconnectOtherDeviceInput, DisconnectOtherDeviceResult>({
+      request,
+      operation: "disconnect-other-device",
+      allowedFields: ["targetDeviceUid"],
+      requiredFields: ["targetDeviceUid"],
+      fieldShapes: { targetDeviceUid: "string" },
+      rateLimits: [
+        { key: `disconnect-other-device:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+      ],
+      handler: ({ uid, data }) =>
+        runDisconnectOtherDevice(data, uid, identityCodeHmacSecret.value()),
+    });
+  }
+);
 
 export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
   { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
@@ -533,16 +595,18 @@ export const cancelBulkJob = onCall<CancelBulkJobInput>({ timeoutSeconds: 30 }, 
   });
 });
 
-export const createAccount = onCall(
+export const createAccount = onCall<CreateAccountInput>(
   { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
-    return protectedCallable<Record<string, never>, CreateAccountResult>({
+    return protectedCallable<CreateAccountInput, CreateAccountResult>({
       request,
       operation: "create-account",
-      allowedFields: [],
+      allowedFields: ["deviceName"],
+      requiredFields: ["deviceName"],
+      fieldShapes: { deviceName: "string" },
       rateLimits: [{ key: `create-account:${callerUid}`, limit: 5, windowMs: 60 * 60 * 1000 }],
-      handler: ({ uid }) => runCreateAccount(uid, identityCodeHmacSecret.value()),
+      handler: ({ uid, data }) => runCreateAccount(data, uid, identityCodeHmacSecret.value()),
     });
   }
 );

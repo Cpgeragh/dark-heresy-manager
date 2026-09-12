@@ -64,7 +64,6 @@ vi.mock("../../src/pages/CharacterSheet", () => ({ default: () => null }));
 vi.mock("../../src/pages/CampaignOverview", () => ({ default: () => null }));
 vi.mock("../../src/pages/Onboarding", () => ({ default: () => null }));
 vi.mock("../../src/pages/Settings", () => ({ default: () => null }));
-vi.mock("../../src/pages/MissingProfileRecovery", () => ({ default: () => null }));
 
 import App from "../../src/App";
 

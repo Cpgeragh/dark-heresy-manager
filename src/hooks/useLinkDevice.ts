@@ -12,7 +12,7 @@ export function useLinkDevice() {
   const linkingRef = useRef<Promise<void> | null>(null);
   const requestVersionRef = useRef(0);
 
-  const linkDevice = useCallback(async (recoveryCode: string) => {
+  const linkDevice = useCallback(async (recoveryCode: string, deviceName: string) => {
     if (linkingRef.current) return linkingRef.current;
     const user = auth.currentUser;
     if (!user) throw new Error("Not signed in.");
@@ -23,7 +23,7 @@ export function useLinkDevice() {
 
     const operation = (async () => {
       try {
-        await linkDeviceToAccount(user.uid, recoveryCode);
+        await linkDeviceToAccount(user.uid, recoveryCode, deviceName);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to link device.";
         console.error("Failed to link device:", err);

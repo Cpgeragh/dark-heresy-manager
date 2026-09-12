@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-three pages and cross-cutting sections, containing 645 checks. Every item
+Thirty-three pages and cross-cutting sections, containing comprehensive checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -894,7 +894,7 @@ in the URL (`?step=`), not just component state.
 
 Use a new disposable browser profile for each path: new account, connect existing account, and refresh-on-code. Copy the generated recovery code to a secure scratch record and prove it on a second profile. At every step test refresh, Back, and Forward before completing onboarding.
 
-- [ ] Welcome step — "Create new account" stays disabled until a first name is entered; spaces are stripped as you type, not just trimmed on submit, and the first character is automatically capitalised
+- [ ] Create Your Account step — "Create new account" stays disabled until both a first name and a user-chosen device name are entered; first-name spaces are stripped as you type and its first character is automatically capitalised
 - [ ] Creating a new account generates and displays one recovery code — copying changes the button label to "Copied", the confirmation checkbox can be selected independently, and "Continue to dashboard" stays disabled until the checkbox is selected
 - [ ] In every recovery-code field, focusing an empty input may display the fixed `DH-` prefix without storing it; typing, deleting across either automatic dash, and backspacing the displayed prefix never produces `DH-DH`, while pasting a complete `DH-XXXX-XXXX` code replaces the field cleanly without duplicating or corrupting the prefix
 - [ ] Press Enter to submit first-name creation, account lookup, and the saved-code confirmation — each behaves exactly like its visible primary button and never starts a duplicate request
@@ -902,8 +902,8 @@ Use a new disposable browser profile for each path: new account, connect existin
 - [ ] Press Back from Save Your Recovery Code — the standard confirmation opens; "Keep setting up" preserves the same code and checkbox state, while "Cancel account setup" invalidates that code, clears the unfinished name/code state, and returns to Create Your Account
 - [ ] Retry Create New Account after deliberately interrupting the first response — the server returns the same unfinished account and recovery code rather than creating a second account
 - [ ] Hold account creation, connection, completion, or setup cancellation pending and try Back/Escape/repeated submission — the active screen remains visible and locked, no abandoned request later advances onboarding, and failure leaves a usable screen with one action-error toast
-- [ ] Refresh the page while sitting on the show-code step — the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Welcome step instead of showing a blank code
-- [ ] Connect Existing Account — entering an active account's recovery code performs one direct connection action; there is no reclaim/link choice and no existing device or account data is moved
+- [ ] Refresh the page while sitting on the show-code step — the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Create Your Account step instead of showing a blank code
+- [ ] Connect Existing Account — entering an active account's recovery code and a user-chosen device name performs one direct connection action; there is no reclaim/link choice and no existing device or account data is moved
 - [ ] Try the recovery code from an unfinished new-account setup on another device — connection is rejected until the creating device completes onboarding
 - [ ] After onboarding completes once, closing and reopening the app never shows onboarding again; if an onboarded account is missing its required profile, the app fails closed with an account-profile loading error and never asks the user to recreate the name
 - [ ] Connect a fresh device to an account that already has a saved first name — the control stays on "Opening account…" until the shared profile is live, then the dashboard opens directly
@@ -1015,13 +1015,18 @@ Reachable only from the header while on the Dashboard route.
 
 Use one disposable account and several fresh browser profiles. Every browser is just a connected device; there is no primary/secondary distinction and a device never retains a hidden account underneath the connected one.
 
-- [ ] Reveal Recovery Code — on a device that's never generated one, revealing it creates one on the spot rather than erroring
+- [ ] Simply opening Settings does not load the device list and cannot show a device-list error toast; the list request starts only after pressing Manage Devices, and one failure produces one toast
+- [ ] View Account Recovery Code — on an account that's never generated one, revealing it creates one on the spot rather than erroring
 - [ ] Rotate Code — displays a new code once; the old code should stop working immediately afterwards (try it on a fresh device to confirm)
 - [ ] Connecting an account is available only during onboarding; Settings has no paste-a-code account-switching form
 - [ ] There is deliberately no limit on how many devices can connect to one account — connecting a 4th, 5th, etc. device should succeed the same as any other
-- [ ] Disconnect This Device — removes only this device's connection and returns it to Welcome; no hidden earlier account or data reappears
-- [ ] Disconnect a device while another remains connected — it proceeds after the normal confirmation and the other device remains usable
-- [ ] Disconnect the final connected device — a second warning explains that the recovery code is required to regain access; cancelling leaves the connection intact and confirming returns this device to Welcome without deleting the account
+- [ ] Manage Devices shows the exact number of connected devices, every user-chosen name and link date, and marks the browser being used as "This device"
+- [ ] A device created before naming was introduced appears as unnamed; opening Manage Devices prompts for a name on the current unnamed device, and any other unnamed device can be named from its row
+- [ ] Rename the current device and another device, close and reopen Manage Devices, and confirm both saved names remain
+- [ ] Unlink This Device removes only this device's connection and returns it to Create Your Account; no hidden earlier account or data reappears
+- [ ] Unlink another device while it is open elsewhere — it returns to Create Your Account, loses access to the shared account, and every other connected device remains usable
+- [ ] Remote unlink automatically rotates the account recovery code in the same operation, displays the replacement code for saving or copying, and makes the previous code fail immediately
+- [ ] Unlink the final connected device — a second warning explains that the recovery code is required to regain access; cancelling leaves the connection intact and confirming returns this device to Create Your Account without deleting the account
 - [ ] Delete Account is available from every connected device, releases claimed characters, disconnects all devices, revokes recovery, and remains blocked until every owned campaign is deleted or transferred
 - [ ] Recovery backup banner and Settings always show the same current recovery code after reveal or rotation; an old code disappears from all visible surfaces and fails on a fresh device
 

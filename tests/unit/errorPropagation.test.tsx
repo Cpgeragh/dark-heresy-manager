@@ -136,10 +136,12 @@ describe("onboarding error propagation", () => {
       </MemoryRouter>
     );
 
-    await browserUser.type(screen.getByLabelText("First Name"), "david{Enter}");
+    await browserUser.type(screen.getByLabelText("First Name"), "david");
+    await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop{Enter}");
 
     await waitFor(() => expect(mockSaveFirstName).toHaveBeenCalledWith("account-new", "David"));
     expect(mockCreateAccount).toHaveBeenCalledOnce();
+    expect(mockCreateAccount).toHaveBeenCalledWith("My laptop");
   });
 
   it("lets the server resume the same unfinished account instead of creating another", async () => {
@@ -154,7 +156,8 @@ describe("onboarding error propagation", () => {
       </MemoryRouter>
     );
 
-    await browserUser.type(screen.getByLabelText("First Name"), "david{Enter}");
+    await browserUser.type(screen.getByLabelText("First Name"), "david");
+    await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop{Enter}");
 
     expect(await screen.findByText("RECOVERY-CODE")).toBeVisible();
     expect(mockCreateAccount).toHaveBeenCalledOnce();
@@ -263,6 +266,7 @@ describe("onboarding error propagation", () => {
     await screen.findByRole("heading", { name: "Create Your Account" });
 
     await browserUser.type(screen.getByLabelText("First Name"), "david");
+    await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop");
     await browserUser.click(screen.getByRole("button", { name: "Create new account" }));
 
     expect(await screen.findByText("NEW-CODE")).toBeVisible();
@@ -378,9 +382,12 @@ describe("new-device linking", () => {
     fireEvent.change(screen.getByLabelText("Recovery code"), {
       target: { value: "DH-C0DE-0001" },
     });
+    fireEvent.change(screen.getByPlaceholderText("e.g. My phone"), {
+      target: { value: "My laptop" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Find account" }));
 
-    expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001");
+    expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001", "My laptop");
     expect(await screen.findByRole("button", { name: "Opening account…" })).toBeDisabled();
     expect(onComplete).not.toHaveBeenCalled();
 
@@ -430,9 +437,12 @@ describe("new-device linking", () => {
     fireEvent.change(screen.getByLabelText("Recovery code"), {
       target: { value: "DH-C0DE-0001" },
     });
+    fireEvent.change(screen.getByPlaceholderText("e.g. My phone"), {
+      target: { value: "My laptop" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Find account" }));
 
-    expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001");
+    expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001", "My laptop");
     expect(screen.queryByRole("button", { name: "Reclaim Identity" })).not.toBeInTheDocument();
   });
 });
