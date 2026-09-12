@@ -2,7 +2,7 @@ import type { Firestore } from "firebase-admin/firestore";
 
 const USER_LINKS_COLLECTION = "userLinks";
 
-/** Resolves a signed-in device to the account identity it belongs to. */
+/** Resolves a signed-in device to the permanent account id it belongs to. */
 export async function resolvePrimaryUid(db: Firestore, callerUid: string): Promise<string> {
   const linkSnapshot = await db.collection(USER_LINKS_COLLECTION).doc(callerUid).get();
   const primaryUid = linkSnapshot.data()?.primaryUid;
@@ -12,8 +12,8 @@ export async function resolvePrimaryUid(db: Firestore, callerUid: string): Promi
 }
 
 /**
- * Returns true when the caller is the stored primary identity or a device
- * explicitly linked to it. Server operations must use this wherever the
+ * Returns true when the caller is the legacy stored identity or a device
+ * explicitly connected to the account. Server operations must use this wherever the
  * Firestore rules use dmOwnsOrLinked/playerOwnsOrLinked, otherwise a linked
  * browser can pass the UI/rules checks but be rejected by the callable.
  */

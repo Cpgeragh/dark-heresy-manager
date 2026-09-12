@@ -8,6 +8,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
+import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
 export interface ReleaseCharacterInput {
   campaignId: string;
@@ -21,6 +22,7 @@ export async function releaseCharacter(
   idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
+  const accountId = await resolvePrimaryUid(db, callerUid);
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
   const characterRef = campaignRef.collection("characters").doc(input.characterId);
 
@@ -33,7 +35,7 @@ export async function releaseCharacter(
         throw new HttpsError("not-found", "Character not found.");
       }
       const currentOwner = characterSnapshot.data()?.userId as string | null | undefined;
-      if (currentOwner !== callerUid) {
+      if (currentOwner !== accountId) {
         throw new HttpsError("permission-denied", "You do not own this character.");
       }
 

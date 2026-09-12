@@ -37,6 +37,9 @@ service-account*.json
 *.p12
 *.pfx
 
+# One-off migration backups (contain real recovery codes/identity data)
+account-migration-backup-*.json
+
 # Reference screenshots (local only)
 reference-images/
 

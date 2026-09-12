@@ -6,7 +6,7 @@ This document describes the current `firestore.rules` contract. The rules file i
 
 Every request must be authenticated unless a rule explicitly says otherwise. No current application path permits unauthenticated Firestore access.
 
-`playerOwnsOrLinked(ownerId)` and `dmOwnsOrLinked(dmId)` treat a signed-in primary identity and a secondary device with a matching `userLinks` document as the same effective account. This is used consistently for character ownership, DM authority, profiles, messaging and recovery-code management.
+`playerOwnsOrLinked(ownerId)` and `dmOwnsOrLinked(dmId)` treat the signed-in account itself and any device with a matching `userLinks` document pointing at it as the same effective account. This is used consistently for character ownership, DM authority, profiles, messaging and recovery-code management.
 
 ## Users and profiles
 
@@ -18,13 +18,13 @@ Every request must be authenticated unless a rule explicitly says otherwise. No 
 
 Any authenticated user may read campaign metadata. Any user may create a campaign when its `dmId` is their own UID and the document has the approved shape. Campaign names are limited to 100 characters, member lists to 100 entries, and optional GM/Inquisitor names to 100 characters.
 
-The DM or a linked DM device may edit campaign metadata without transferring `dmId`, and may delete the campaign. A claimant may only add their effective identity to `memberIds`; they cannot remove existing members or change another field. Identity-reclaim updates may replace the old DM/member UID only while a valid temporary reclaim proof exists.
+The DM or a device linked to the DM's account may edit campaign metadata without transferring `dmId`, and may delete the campaign. A claimant may only add their effective identity to `memberIds`; they cannot remove existing members or change another field.
 
 ## Characters and audit history
 
 Any authenticated user may read campaign character documents. Only the DM may create a character, and a new character must be unclaimed, player editing must be disabled, and a recovery code must exist.
 
-The DM may update or delete a character. An owning player or linked device may edit only while `isEditableByPlayer` is true and cannot change `userId`, `isEditableByPlayer` or `recoveryCode`. A claim may only move `userId` from null to the claimant's effective identity. Identity reclaim may replace only the proven old owner UID.
+The DM may update or delete a character. An owning player or a device linked to their account may edit only while `isEditableByPlayer` is true and cannot change `userId`, `isEditableByPlayer` or `recoveryCode`. A claim may only move `userId` from null to the claimant's effective identity.
 
 Claim-log entries are DM-readable only and immutable after creation. Players may add their own valid claim/release events; DMs may add their own force-assign/force-release events. A log may be deleted only by the DM in the same atomic operation that deletes its parent character.
 
@@ -40,7 +40,7 @@ Creators may edit only the approved draft/version fields and cannot change immut
 
 ## Character recovery and account/device recovery
 
-`/recoveryIndex/{code}` and `/identityRecoveryIndex/{hash}` are managed exclusively by trusted Cloud Functions through the Admin SDK; clients have no read or write access to either. Character claiming, Recovery Code lookup/registration/revocation, and identity-code registration/reclaim all go through the corresponding protected callables (see `functions/src/operations/`) rather than direct Firestore access.
+`/recoveryIndex/{code}` and `/identityRecoveryIndex/{hash}` are managed exclusively by trusted Cloud Functions through the Admin SDK; clients have no read or write access to either. Character claiming, Recovery Code lookup/registration/revocation, and identity-code registration all go through the corresponding protected callables (see `functions/src/operations/`) rather than direct Firestore access.
 
 `/identitySecret/{uid}` contains only a bounded recovery code and is readable/writable by that effective account (owner or a linked device) so Settings can reveal or rotate it; a write must contain exactly one `code` field passing `validRecoveryCode`.
 

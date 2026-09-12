@@ -1,14 +1,24 @@
-import { deleteDoc, doc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-import { db, functions } from "../firebase";
+import { functions } from "../firebase";
 import { assertFirestoreDocumentId, assertRecoveryCode } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
 import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
 const callLinkDevice = httpsCallable<{ code: string }, void>(functions, "linkDevice");
+const callDisconnectDevice = httpsCallable<
+  { confirmLastDevice: boolean },
+  { wasLastDevice: boolean }
+>(functions, "disconnectDevice");
+
+export class LastDeviceDisconnectError extends Error {
+  constructor() {
+    super("This is the last connected device.");
+    this.name = "LastDeviceDisconnectError";
+  }
+}
 
 /**
- * Links a secondary device to the account identified by a recovery code,
+ * Connects this device to the account identified by a recovery code,
  * via the linkDevice Function.
  */
 export async function linkDeviceToAccount(currentUid: string, recoveryCode: string): Promise<void> {
@@ -21,8 +31,20 @@ export async function linkDeviceToAccount(currentUid: string, recoveryCode: stri
   });
 }
 
-/** Removes the current device's link to its primary account. */
-export async function unlinkDevice(uid: string): Promise<void> {
+/** Disconnects only the current device. The account and its data remain. */
+export async function disconnectDevice(
+  uid: string,
+  confirmLastDevice = false
+): Promise<{ wasLastDevice: boolean }> {
   assertFirestoreDocumentId(uid, "User ID");
-  await runSingleFlight("device:unlink", [uid], () => deleteDoc(doc(db, "userLinks", uid)));
+  return runSingleFlight("device:disconnect", [uid, confirmLastDevice], async () => {
+    try {
+      const { data } = await callDisconnectDevice({ confirmLastDevice });
+      return data;
+    } catch (error) {
+      const details = (error as { details?: { reason?: unknown } } | null)?.details;
+      if (details?.reason === "last-device") throw new LastDeviceDisconnectError();
+      throw error;
+    }
+  });
 }

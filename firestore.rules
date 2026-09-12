@@ -7,8 +7,8 @@ service cloud.firestore {
     // HELPER FUNCTIONS
     // ============================
 
-    // Returns true if the authenticated user is the owner of the given userId,
-    // or if their device is linked to that owner via userLinks.
+    // Returns true for a legacy owner id or when this signed-in device is
+    // connected to the permanent account id through userLinks.
     function playerOwnsOrLinked(ownerId) {
       return request.auth != null && (
         request.auth.uid == ownerId ||
@@ -686,28 +686,32 @@ service cloud.firestore {
     // ============================
     // IDENTITY SECRET — proof store (uid → code), rule-side only
     // ============================
-    // Never readable by clients — only accessed via get() in security rule
-    // evaluation when verifying a reclaim attempt.
+    // Readable by every device connected to the account for reveal; writes
+    // remain server-only so rotation cannot leave the index out of sync.
     match /identitySecret/{uid} {
-      // Owner or a linked device can read/write — linked devices need this to
-      // reveal and rotate the primary account's recovery code from Settings.
+      // Connected devices need this read to reveal the account recovery code.
       allow read:  if playerOwnsOrLinked(uid);
-      allow create, update: if playerOwnsOrLinked(uid) &&
-                                request.resource.data.keys().hasOnly(['code']) &&
-                                request.resource.data.keys().hasAll(['code']) &&
-                                validRecoveryCode(request.resource.data.code);
-      allow delete: if playerOwnsOrLinked(uid);
+      // Rotation and revocation are server-only so the recovery index and
+      // plaintext secret can never get out of sync.
+      allow create, update, delete: if false;
+    }
+
+    // Permanent account records are server-owned lifecycle metadata.
+    match /accounts/{accountId} {
+      allow read, write: if false;
     }
 
     // ============================
     // USER LINKS — multi-device access
     // ============================
-    // A secondary device writes its own UID as the document key, with
-    // primaryUid pointing to the account it is linked to.
+    // Every device has its own UID as the document key. primaryUid is retained
+    // as the stored field name but now points to a permanent account id.
     match /userLinks/{uid} {
       // A device can read its own link doc.
       allow get: if request.auth != null && uid == request.auth.uid;
-      allow delete: if request.auth != null && uid == request.auth.uid;
+      // Connecting and disconnecting are server-only so a device cannot skip
+      // lifecycle and last-device safeguards.
+      allow create, update, delete: if false;
     }
 
     // ============================

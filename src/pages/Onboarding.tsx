@@ -6,7 +6,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { User } from "firebase/auth";
-import { rotateRecoveryCode, getRecoveryCode } from "../services/identityService";
+import { createAccount, getRecoveryCode } from "../services/identityService";
 import { completeOnboarding, discardOnboardingSetup } from "../services/userAccountService";
 import { saveFirstName } from "../services/profileService";
 import {
@@ -73,8 +73,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   const resetRecoveryFlow = recoveryFlow.reset;
   const [awaitingLinkedProfile, setAwaitingLinkedProfile] = useState(false);
   const linkCompletionRef = useRef(false);
-  const [awaitingReclaimedProfile, setAwaitingReclaimedProfile] = useState(false);
-  const reclaimCompletionRef = useRef(false);
   const toast = useToast();
   const recoveryBusy = recoveryFlow.phase !== "idle" || recoveryFlow.linkRequestPending;
 
@@ -98,13 +96,11 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     if (step === "link") return;
     resetRecoveryFlow();
     setAwaitingLinkedProfile(false);
-    setAwaitingReclaimedProfile(false);
     linkCompletionRef.current = false;
-    reclaimCompletionRef.current = false;
   }, [step, resetRecoveryFlow]);
 
   // Linking is non-destructive. Wait until the live device-link and profile
-  // subscriptions have resolved the primary identity, then mark this local
+  // subscriptions have resolved the permanent account, then mark this local
   // browser's user document as onboarded and open the shared account.
   useEffect(() => {
     if (
@@ -118,7 +114,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
 
     linkCompletionRef.current = true;
     let ignore = false;
-    completeOnboarding(user.uid)
+    completeOnboarding()
       .then(() => {
         if (ignore) return;
         setSearchParams({}, { replace: true });
@@ -158,31 +154,13 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     return () => window.clearTimeout(timeout);
   }, [awaitingLinkedProfile, failRecoveryCompletion]);
 
-  useEffect(() => {
-    if (!awaitingReclaimedProfile || !firstName || reclaimCompletionRef.current) return;
-    reclaimCompletionRef.current = true;
-    setSearchParams({}, { replace: true });
-    onComplete();
-  }, [awaitingReclaimedProfile, firstName, onComplete, setSearchParams]);
-
-  useEffect(() => {
-    if (!awaitingReclaimedProfile) return;
-    const timeout = window.setTimeout(() => {
-      setAwaitingReclaimedProfile(false);
-      failRecoveryCompletion(
-        "Your identity was reclaimed, but the account is still loading. Please try again."
-      );
-    }, 15_000);
-    return () => window.clearTimeout(timeout);
-  }, [awaitingReclaimedProfile, failRecoveryCompletion]);
-
   // On a reload that lands back on the code step, the code value is gone from
   // memory — rehydrate it from the server. If none exists, fall back to welcome.
   useEffect(() => {
     if (step !== "show-code" || code || skipCodeRehydrationRef.current) return;
     let ignore = false;
     setCodeLoading(true);
-    getRecoveryCode(user.uid)
+    getRecoveryCode(effectiveUserId)
       .then((existing) => {
         if (ignore) return;
         setCodeLoading(false);
@@ -201,14 +179,14 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     return () => {
       ignore = true;
     };
-  }, [step, code, user.uid, setSearchParams, toast]);
+  }, [step, code, effectiveUserId, setSearchParams, toast]);
 
   async function handleFinish() {
     if (busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
     try {
-      await completeOnboarding(user.uid);
+      await completeOnboarding();
       setSearchParams({}, { replace: true });
       onComplete();
     } catch (err) {
@@ -231,9 +209,9 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     setBusy(true);
     skipCodeRehydrationRef.current = false;
     try {
-      await saveFirstName(effectiveUserId, trimmedName);
-      const existingCode = code ?? (await getRecoveryCode(user.uid));
-      const nextCode = existingCode ?? (await rotateRecoveryCode(user.uid));
+      const created = await createAccount();
+      await saveFirstName(created.accountId, trimmedName);
+      const nextCode = created.code;
       setCode(nextCode);
       setCopied(false);
       setSavedConfirmed(false);
@@ -254,17 +232,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     busyRef.current = true;
     setBusy(true);
     try {
-      const existingCode = code ?? (await getRecoveryCode(user.uid));
-      if (existingCode) {
-        setCode(existingCode);
-        setCopied(false);
-        setSavedConfirmed(false);
-        busyRef.current = false;
-        setBusy(false);
-        goToStep("show-code");
-        return;
-      }
-
       await discardOnboardingSetup();
       resetRecoveryFlow();
       goToStep("link");
@@ -421,7 +388,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                     </span>
                   }
                   onLinked={() => setAwaitingLinkedProfile(true)}
-                  onReclaimed={() => setAwaitingReclaimedProfile(true)}
                 />
               </div>
             </Panel>

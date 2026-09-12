@@ -2,7 +2,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { User } from "firebase/auth";
 import "@testing-library/jest-dom";
 
 const getRecoveryCodeMock = vi.fn();
@@ -18,16 +17,13 @@ const deleteCurrentAccountMock = vi.fn();
 vi.mock("../../src/services/userAccountService", () => ({
   deleteCurrentAccount: (...args: unknown[]) => deleteCurrentAccountMock(...args),
 }));
+vi.mock("../../src/services/deviceLinkService", () => ({
+  LastDeviceDisconnectError: class LastDeviceDisconnectError extends Error {},
+}));
 
 const saveFirstNameMock = vi.fn();
 vi.mock("../../src/services/profileService", () => ({
   saveFirstName: (...args: unknown[]) => saveFirstNameMock(...args),
-}));
-
-const linkDeviceMock = vi.fn();
-const useLinkDeviceMock = vi.fn();
-vi.mock("../../src/hooks/useLinkDevice", () => ({
-  useLinkDevice: () => useLinkDeviceMock(),
 }));
 
 const mockToastError = vi.fn();
@@ -38,26 +34,16 @@ vi.mock("../../src/components/Toast", () => ({
 
 import Settings from "../../src/pages/Settings";
 
-const user1 = { uid: "user-1" } as User;
-
 beforeEach(() => {
   vi.clearAllMocks();
-  useLinkDeviceMock.mockReturnValue({ linkDevice: linkDeviceMock, loading: false, error: null });
 });
 
 function renderSettings(props: Partial<React.ComponentProps<typeof Settings>> = {}) {
-  const unlink = vi.fn().mockResolvedValue(undefined);
+  const disconnect = vi.fn().mockResolvedValue(undefined);
   render(
-    <Settings
-      user={user1}
-      effectiveUserId="user-1"
-      firstName="Alice"
-      isLinked={false}
-      unlink={unlink}
-      {...props}
-    />
+    <Settings effectiveUserId="user-1" firstName="Alice" disconnect={disconnect} {...props} />
   );
-  return { unlink };
+  return { disconnect };
 }
 
 describe("Settings display name", () => {
@@ -238,59 +224,44 @@ describe("Settings recovery code", () => {
 });
 
 describe("Settings linked device", () => {
-  it("links a device with the typed code and clears the input", async () => {
+  it("disconnects this device through the shared account flow", async () => {
     const user = userEvent.setup();
-    linkDeviceMock.mockResolvedValue(undefined);
-    renderSettings();
+    const { disconnect } = renderSettings();
 
-    const input = screen.getByPlaceholderText("Paste recovery code here");
-    await user.type(input, "DH-AAAA-BBBB");
-    await user.click(screen.getByRole("button", { name: "Link This Device" }));
+    await user.click(screen.getByRole("button", { name: "Disconnect This Device" }));
+    await user.click(screen.getByRole("button", { name: "Yes, disconnect" }));
 
-    expect(linkDeviceMock).toHaveBeenCalledWith("DH-AAAA-BBBB");
+    expect(disconnect).toHaveBeenCalledWith(false);
+  });
+
+  it("shows an error toast when disconnecting this device fails", async () => {
+    const user = userEvent.setup();
+    renderSettings({ disconnect: vi.fn().mockRejectedValue(new Error("network")) });
+
+    await user.click(screen.getByRole("button", { name: "Disconnect This Device" }));
+    await user.click(screen.getByRole("button", { name: "Yes, disconnect" }));
+
     await waitFor(() =>
-      expect(mockToastSuccess).toHaveBeenCalledWith("Device linked successfully.")
+      expect(mockToastError).toHaveBeenCalledWith("Failed to disconnect device. Please try again.")
     );
   });
 
-  it("disables Link This Device until a code is typed", () => {
-    renderSettings();
-    expect(screen.getByRole("button", { name: "Link This Device" })).toBeDisabled();
-  });
-
-  it("shows the link error surfaced by useLinkDevice", () => {
-    useLinkDeviceMock.mockReturnValue({
-      linkDevice: linkDeviceMock,
-      loading: false,
-      error: "Invalid or already-used code.",
-    });
-    renderSettings();
-
-    expect(screen.getByText("Invalid or already-used code.")).toBeInTheDocument();
-  });
-
-  it("shows the Unlink flow when this device is linked, and confirms", async () => {
+  it("warns before disconnecting the account's last device", async () => {
     const user = userEvent.setup();
-    const { unlink } = renderSettings({ isLinked: true });
+    const { LastDeviceDisconnectError } = await import("../../src/services/deviceLinkService");
+    const disconnect = vi
+      .fn()
+      .mockRejectedValueOnce(new LastDeviceDisconnectError())
+      .mockResolvedValueOnce(undefined);
+    renderSettings({ disconnect });
 
-    expect(screen.queryByRole("button", { name: "Link This Device" })).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Unlink This Device" }));
-    await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
+    await user.click(screen.getByRole("button", { name: "Disconnect This Device" }));
+    await user.click(screen.getByRole("button", { name: "Yes, disconnect" }));
 
-    expect(unlink).toHaveBeenCalled();
-    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Device unlinked."));
-  });
-
-  it("shows an error toast when unlinking fails", async () => {
-    const user = userEvent.setup();
-    renderSettings({ isLinked: true, unlink: vi.fn().mockRejectedValue(new Error("x")) });
-
-    await user.click(screen.getByRole("button", { name: "Unlink This Device" }));
-    await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
-
-    await waitFor(() =>
-      expect(mockToastError).toHaveBeenCalledWith("Failed to unlink device. Please try again.")
-    );
+    expect(await screen.findByRole("heading", { name: "Disconnect Last Device" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Disconnect anyway" }));
+    expect(disconnect).toHaveBeenNthCalledWith(1, false);
+    expect(disconnect).toHaveBeenNthCalledWith(2, true);
   });
 });
 
@@ -309,10 +280,10 @@ describe("Settings account deletion", () => {
     expect(deleteCurrentAccountMock).toHaveBeenCalledOnce();
   });
 
-  it("does not offer primary-account deletion from a linked secondary device", () => {
-    renderSettings({ isLinked: true });
+  it("offers account deletion on every connected device", () => {
+    renderSettings();
 
-    expect(screen.queryByRole("button", { name: "Delete Account" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete Account" })).toBeInTheDocument();
   });
 
   it("shows the server rejection when account deletion is blocked", async () => {

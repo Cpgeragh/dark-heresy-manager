@@ -2,15 +2,14 @@
 // User settings: recovery code management and device linking.
 
 import { useRef, useState } from "react";
-import type { User } from "firebase/auth";
 import {
   getRecoveryCode,
   revokeIdentityRecoveryCode,
   rotateRecoveryCode,
 } from "../services/identityService";
 import { deleteCurrentAccount } from "../services/userAccountService";
+import { LastDeviceDisconnectError } from "../services/deviceLinkService";
 import { saveFirstName } from "../services/profileService";
-import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { uiSection, uiTextError } from "../ui/styles/editableStyles";
@@ -19,25 +18,17 @@ import { ConfirmInline } from "../ui/forms/ConfirmInline";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
-import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
-import { validateRecoveryCode } from "../utils/validation";
 import { formatFirstNameInput } from "../utils/firstName";
+import { ModalShell } from "../ui/modals/ModalShell";
+import { ModalHeader } from "../ui/modals/ModalHeader";
 
 interface Props {
-  user: User;
   effectiveUserId: string;
   firstName: string;
-  isLinked: boolean;
-  unlink: () => Promise<void>;
+  disconnect: (confirmLastDevice?: boolean) => Promise<void>;
 }
 
-export default function Settings({
-  user: _user,
-  effectiveUserId,
-  firstName,
-  isLinked,
-  unlink,
-}: Props) {
+export default function Settings({ effectiveUserId, firstName, disconnect }: Props) {
   const toast = useToast();
 
   // ── Display name state ───────────────────────────────────────────────────
@@ -56,10 +47,9 @@ export default function Settings({
   const revokingRef = useRef(false);
 
   // ── Device link state ────────────────────────────────────────────────────
-  const { linkDevice, loading: linking, error: linkError } = useLinkDevice();
-  const [linkCode, setLinkCode] = useState("");
-  const [unlinking, setUnlinking] = useState(false);
-  const unlinkingRef = useRef(false);
+  const [disconnectingDevice, setDisconnectingDevice] = useState(false);
+  const disconnectingDeviceRef = useRef(false);
+  const [lastDeviceWarningOpen, setLastDeviceWarningOpen] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const deletingAccountRef = useRef(false);
 
@@ -136,29 +126,22 @@ export default function Settings({
     }
   }
 
-  async function handleLinkDevice() {
+  async function handleDisconnectDevice(confirmLastDevice = false) {
+    if (disconnectingDeviceRef.current) return;
+    disconnectingDeviceRef.current = true;
+    setDisconnectingDevice(true);
     try {
-      await linkDevice(linkCode);
-      setLinkCode("");
-      toast.success("Device linked successfully.");
-    } catch {
-      // linkError is set by useLinkDevice; nothing extra needed here
-    }
-  }
-
-  async function handleUnlink() {
-    if (unlinkingRef.current) return;
-    unlinkingRef.current = true;
-    setUnlinking(true);
-    try {
-      await unlink();
-      toast.success("Device unlinked.");
+      await disconnect(confirmLastDevice);
     } catch (err) {
-      console.error("Failed to unlink device:", err);
-      toast.error("Failed to unlink device. Please try again.");
+      if (err instanceof LastDeviceDisconnectError) {
+        setLastDeviceWarningOpen(true);
+        return;
+      }
+      console.error("Failed to disconnect device:", err);
+      toast.error("Failed to disconnect device. Please try again.");
     } finally {
-      unlinkingRef.current = false;
-      setUnlinking(false);
+      disconnectingDeviceRef.current = false;
+      setDisconnectingDevice(false);
     }
   }
 
@@ -217,8 +200,8 @@ export default function Settings({
           <SectionHeader className="mb-3">Recovery Code</SectionHeader>
           <section className={uiSection + " space-y-3"}>
             <p className="text-slate-400 text-sm lg:text-base">
-              Use this code to reclaim your campaigns and characters if you lose access to this
-              device. Keep it somewhere safe and private.
+              Use this code to reconnect to your campaigns and characters if no device is still
+              connected. Keep it somewhere safe and private.
             </p>
 
             {revealedCode ? (
@@ -283,74 +266,81 @@ export default function Settings({
 
         {/* ── Linked Device ───────────────────────────────────────────────── */}
         <div>
-          <SectionHeader className="mb-3">Linked Device</SectionHeader>
+          <SectionHeader className="mb-3">This Device</SectionHeader>
           <section className={uiSection + " space-y-3"}>
-            {isLinked ? (
-              <>
-                <p className="text-slate-400 text-sm lg:text-base">
-                  This device is linked to another account. All campaigns and characters from that
-                  account are accessible here.
-                </p>
-                <ConfirmInline
-                  triggerLabel="Unlink This Device"
-                  question="Unlink this device?"
-                  onConfirm={handleUnlink}
-                  variant="warning"
-                  busy={unlinking}
-                  confirmLabel="Yes, unlink"
-                  cancelLabel="Cancel"
-                  busyLabel="Unlinking…"
-                />
-              </>
-            ) : (
-              <>
-                <p className="text-slate-400 text-sm lg:text-base">
-                  Enter the recovery code from your other device to access all its campaigns and
-                  characters here.
-                </p>
-                <RecoveryCodeInput
-                  value={linkCode}
-                  onValueChange={setLinkCode}
-                  disabled={linking}
-                  label={null}
-                  ariaLabel="Recovery code for linked device"
-                  placeholder="Paste recovery code here"
-                />
-                {linkError && <p className={uiTextError}>{linkError}</p>}
-                <Button
-                  onClick={handleLinkDevice}
-                  disabled={linking || !validateRecoveryCode(linkCode).isValid}
-                >
-                  {linking ? "Linking…" : "Link This Device"}
-                </Button>
-              </>
-            )}
+            <p className="text-slate-400 text-sm lg:text-base">
+              Disconnect this device from your account. Your campaigns and characters remain in the
+              account and stay available on every other connected device.
+            </p>
+            <ConfirmInline
+              triggerLabel="Disconnect This Device"
+              question="Disconnect this device?"
+              onConfirm={() => handleDisconnectDevice(false)}
+              variant="warning"
+              busy={disconnectingDevice}
+              confirmLabel="Yes, disconnect"
+              cancelLabel="Cancel"
+              busyLabel="Disconnecting…"
+            />
           </section>
         </div>
 
-        {!isLinked && (
-          <div>
-            <SectionHeader className="mb-3">Delete Account</SectionHeader>
-            <section className={uiSection + " space-y-3 border-red-900/70"}>
-              <p className="text-slate-400 text-sm lg:text-base">
-                This releases your claimed characters, removes your profile and linked devices,
-                revokes account recovery, and permanently deletes this anonymous account. You must
-                delete or transfer every campaign you own first.
-              </p>
-              <ConfirmInline
-                triggerLabel="Delete Account"
-                onConfirm={handleDeleteAccount}
-                requireText="DELETE"
-                requirePrompt="Type DELETE to permanently delete this account"
-                busy={deletingAccount}
-                confirmLabel="Delete permanently"
-                cancelLabel="Cancel"
-                busyLabel="Deleting…"
-              />
-            </section>
-          </div>
-        )}
+        <div>
+          <SectionHeader className="mb-3">Delete Account</SectionHeader>
+          <section className={uiSection + " space-y-3 border-red-900/70"}>
+            <p className="text-slate-400 text-sm lg:text-base">
+              This releases your claimed characters, removes your profile and linked devices,
+              revokes account recovery, and permanently deletes this anonymous account. You must
+              delete or transfer every campaign you own first.
+            </p>
+            <ConfirmInline
+              triggerLabel="Delete Account"
+              onConfirm={handleDeleteAccount}
+              requireText="DELETE"
+              requirePrompt="Type DELETE to permanently delete this account"
+              busy={deletingAccount}
+              confirmLabel="Delete permanently"
+              cancelLabel="Cancel"
+              busyLabel="Deleting…"
+            />
+          </section>
+        </div>
       </Panel>
+
+      {lastDeviceWarningOpen && (
+        <ModalShell
+          ariaLabel="Disconnect Last Device"
+          onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
+          className="max-w-lg"
+        >
+          <ModalHeader
+            title="Disconnect Last Device"
+            onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
+          />
+          <div className="space-y-4 p-4 lg:p-5">
+            <p className="text-sm text-slate-300 lg:text-base">
+              This is the last connected device. Make sure you have saved your recovery code or you
+              will lose access to this account.
+            </p>
+            <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
+              <Button
+                variant="neutral"
+                onClick={() => setLastDeviceWarningOpen(false)}
+                disabled={disconnectingDevice}
+              >
+                Keep connected
+              </Button>
+              <Button
+                variant="warning"
+                onClick={() => void handleDisconnectDevice(true)}
+                disabled={disconnectingDevice}
+              >
+                {disconnectingDevice ? "Disconnecting…" : "Disconnect anyway"}
+              </Button>
+            </div>
+          </div>
+        </ModalShell>
+      )}
     </PageShell>
   );
 }

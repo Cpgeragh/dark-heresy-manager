@@ -16,6 +16,11 @@ const callDiscardOnboardingSetup = httpsCallable<Record<string, never>, void>(
   "discardOnboardingSetup"
 );
 
+const callCompleteOnboarding = httpsCallable<Record<string, never>, void>(
+  functions,
+  "completeOnboarding"
+);
+
 /**
  * Ensures the anonymous-auth user has an account document and returns whether
  * onboarding has been completed. Existing accounts are read-only on startup;
@@ -61,11 +66,9 @@ export async function markRecoveryCodeBackedUp(uid: string): Promise<void> {
 }
 
 /** Completes first-run onboarding after the recovery code is saved. */
-export async function completeOnboarding(uid: string): Promise<void> {
-  assertFirestoreDocumentId(uid, "User ID");
-  await updateDoc(doc(db, "users", uid), {
-    onboarded: true,
-    recoveryBackedUp: true,
+export async function completeOnboarding(): Promise<void> {
+  await runSingleFlight("account:complete-onboarding", [], async () => {
+    await callCompleteOnboarding({});
   });
 }
 
@@ -76,10 +79,11 @@ export async function discardOnboardingSetup(): Promise<void> {
   });
 }
 
-/** Deletes the current primary account, then clears the deleted local session. */
+/** Deletes the connected account, then clears the deleted local session. */
 export async function deleteCurrentAccount(): Promise<void> {
   await runSingleFlight("account:delete", [], async () => {
     await callDeleteAccount({});
     await signOut(auth);
+    window.location.reload();
   });
 }

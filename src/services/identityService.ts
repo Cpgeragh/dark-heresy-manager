@@ -7,98 +7,29 @@ import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import { assertFirestoreDocumentId, assertRecoveryCode } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
-import { driveJobToCompletion } from "../firestore/bulkJobClient";
-import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
-const callRegisterIdentityCode = httpsCallable<
-  { role: "dm" | "player"; targetUid?: string },
-  { code: string }
->(functions, "registerIdentityCode");
+const callRegisterIdentityCode = httpsCallable<Record<string, never>, { code: string }>(
+  functions,
+  "registerIdentityCode"
+);
 
-const callStartIdentityReclaimJob = httpsCallable<
-  { code: string },
-  {
-    jobId: string;
-    totalCount: number;
-    role: "dm" | "player";
-    profileTransferred: boolean;
-  }
->(functions, "startIdentityReclaimJob");
+const callCreateAccount = httpsCallable<Record<string, never>, { accountId: string; code: string }>(
+  functions,
+  "createAccount"
+);
 
-const callProcessIdentityReclaimChunk = httpsCallable<
-  { jobId: string },
-  { done: boolean; processedCount: number; totalCount: number }
->(functions, "processIdentityReclaimChunk");
+/** Gives this device a brand new account: a fresh id, a link record, and a recovery code. */
+export async function createAccount(): Promise<{ accountId: string; code: string }> {
+  return runSingleFlight("identity:create-account", [], async () => {
+    const { data } = await callCreateAccount({});
+    return data;
+  });
+}
 
 const callRevokeIdentityCode = httpsCallable<Record<string, never>, void>(
   functions,
   "revokeIdentityCode"
 );
-
-const callGetIdentityRecoveryMode = httpsCallable<
-  { code: string },
-  | { status: "found"; mode: "link" | "reclaim" }
-  | { status: "not-found" }
-  | { status: "own-code" }
-  | { status: "missing-data" }
->(functions, "getIdentityRecoveryMode");
-
-export async function getIdentityRecoveryMode(code: string): Promise<"link" | "reclaim"> {
-  assertRecoveryCode(code);
-  const normalisedCode = code.trim();
-  return runSingleFlight("identity:recovery-mode", [normalisedCode], async () => {
-    recordClientCodeAttempt("recovery");
-    const { data } = await callGetIdentityRecoveryMode({ code: normalisedCode });
-    if (data.status === "not-found") {
-      throw new Error("Recovery code not found.");
-    }
-    if (data.status === "own-code") {
-      throw new Error("This code belongs to this device.");
-    }
-    if (data.status === "missing-data") {
-      throw new Error("Recovery identity is invalid.");
-    }
-    return data.mode;
-  });
-}
-
-/**
- * Reclaims an identity on a new device using a previously issued recovery
- * code, via the resumable startIdentityReclaimJob/processIdentityReclaimChunk
- * Functions. The identity documents transfer immediately when the job
- * starts; every campaign/character the old identity owned then migrates in
- * chunks, resumable if a call drops mid-way. onProgress, if given, is
- * called after the job starts and after each chunk with the running
- * processed/total counts.
- * Returns the reclaimed role so the caller can update local app state.
- */
-export interface ReclaimIdentityResult {
-  role: "dm" | "player";
-  profileTransferred: boolean;
-}
-
-export async function reclaimIdentity(
-  code: string,
-  onProgress?: (progress: { processedCount: number; totalCount: number }) => void
-): Promise<ReclaimIdentityResult> {
-  assertRecoveryCode(code);
-  const normalisedCode = code.trim();
-  return runSingleFlight("identity:reclaim", [normalisedCode], async () => {
-    recordClientCodeAttempt("recovery");
-    const { data: started } = await callStartIdentityReclaimJob({ code: normalisedCode });
-    onProgress?.({ processedCount: 0, totalCount: started.totalCount });
-    await driveJobToCompletion(
-      started.jobId,
-      async (jobId) => (await callProcessIdentityReclaimChunk({ jobId })).data,
-      (chunk) =>
-        onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
-    );
-    return {
-      role: started.role,
-      profileTransferred: started.profileTransferred,
-    };
-  });
-}
 
 /**
  * Reads the user's current recovery code from identitySecret.
@@ -114,21 +45,19 @@ export async function getRecoveryCode(uid: string): Promise<string | null> {
 }
 
 /**
- * Rotates (or first-generates) the identity recovery code for uid, via the
- * registerIdentityCode Function. uid may be the caller's own account, or —
- * from a linked secondary device — the primary account it's linked to; the
- * Function verifies that server-side, mirroring firestore.rules'
+ * Rotates (or first-generates) the identity recovery code for the permanent
+ * account id. The Function verifies the device connection server-side, mirroring firestore.rules'
  * playerOwnsOrLinked.
  * Returns the new code so the UI can display it.
  */
 export async function rotateRecoveryCode(
   uid: string,
-  role: "dm" | "player" = "player"
+  _role: "dm" | "player" = "player"
 ): Promise<string> {
   assertFirestoreDocumentId(uid, "User ID");
-  if (role !== "dm" && role !== "player") throw new Error("Recovery role is invalid.");
-  return runSingleFlight("identity:rotate-recovery", [uid, role], async () => {
-    const { data } = await callRegisterIdentityCode({ role, targetUid: uid });
+  if (_role !== "dm" && _role !== "player") throw new Error("Recovery role is invalid.");
+  return runSingleFlight("identity:rotate-recovery", [uid], async () => {
+    const { data } = await callRegisterIdentityCode({});
     return data.code;
   });
 }

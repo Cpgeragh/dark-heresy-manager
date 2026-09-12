@@ -54,13 +54,13 @@ describe("Firestore Rules: userLinks", () => {
     ).rejects.toThrow();
   });
 
-  it("can delete your own link", async () => {
+  it("cannot bypass disconnect safeguards by deleting a link directly", async () => {
     const env = await getTestEnv();
     await createUserLink(env, "device-1", "primary-1");
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1").delete()
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 });
 

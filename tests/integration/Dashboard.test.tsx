@@ -110,13 +110,7 @@ function renderDashboard(
 ) {
   render(
     <MemoryRouter initialEntries={[initialEntry]}>
-      <Dashboard
-        user={user1}
-        effectiveUserId="user-1"
-        isLinked={false}
-        firstName="Alice"
-        {...props}
-      />
+      <Dashboard user={user1} effectiveUserId="user-1" firstName="Alice" {...props} />
       <LocationProbe />
     </MemoryRouter>
   );
@@ -348,8 +342,8 @@ describe("Dashboard DM campaign list", () => {
 });
 
 describe("Dashboard QR panel", () => {
-  it("only shows Share App when the DM has campaigns and isn't a linked device", () => {
-    renderDashboard({ isLinked: false });
+  it("shows Share App from every connected device when the account has a campaign", () => {
+    renderDashboard();
     expect(screen.queryByRole("button", { name: "Share App" })).not.toBeInTheDocument();
 
     useCampaignsContextMock.mockReturnValue({
@@ -360,11 +354,11 @@ describe("Dashboard QR panel", () => {
       dmError: null,
       playerError: null,
     });
-    renderDashboard({ isLinked: false });
+    renderDashboard();
     expect(screen.getByRole("button", { name: "Share App" })).toBeInTheDocument();
 
-    renderDashboard({ isLinked: true });
-    expect(screen.getAllByRole("button", { name: "Share App" })).toHaveLength(1);
+    renderDashboard();
+    expect(screen.getAllByRole("button", { name: "Share App" })).toHaveLength(2);
   });
 });
 

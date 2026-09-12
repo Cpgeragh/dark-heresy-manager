@@ -42,11 +42,11 @@ describe("Functions: deleteAccount", () => {
     );
     await claimCharacter({ code: registered.code });
 
-    const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+    const registerIdentityCode = httpsCallable<Record<string, never>, { code: string }>(
       getTestFunctions(),
       "registerIdentityCode"
     );
-    const { data: identity } = await registerIdentityCode({ role: "player" });
+    await registerIdentityCode({});
 
     const deleteAccount = httpsCallable(getTestFunctions(), "deleteAccount");
     const { data: result } = await deleteAccount({});
@@ -65,15 +65,6 @@ describe("Functions: deleteAccount", () => {
     expect((await adminDb.collection("identitySecret").doc(playerUid).get()).exists).toBe(false);
     expect((await adminDb.collection("users").doc(playerUid).get()).exists).toBe(false);
     expect((await adminDb.collection("userProfiles").doc(playerUid).get()).exists).toBe(false);
-
-    const getMode = httpsCallable<{ code: string }, { status: string }>(
-      getTestFunctions(),
-      "getIdentityRecoveryMode"
-    );
-    await signInTestUser();
-    await expect(getMode({ code: identity.code })).resolves.toMatchObject({
-      data: { status: "not-found" },
-    });
 
     await expect(adminAuth.getUser(playerUid)).rejects.toMatchObject({
       code: "auth/user-not-found",

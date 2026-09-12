@@ -892,7 +892,7 @@ in the URL (`?step=`), not just component state.
 
 ### How to test this page
 
-Use a new disposable browser profile for each path: new user, reclaim, and refresh-on-code. Copy the generated recovery code to a secure scratch record and prove it on a second profile. At every step test refresh, Back, and Forward before completing onboarding.
+Use a new disposable browser profile for each path: new account, connect existing account, and refresh-on-code. Copy the generated recovery code to a secure scratch record and prove it on a second profile. At every step test refresh, Back, and Forward before completing onboarding.
 
 - [ ] Welcome step — "Create new account" stays disabled until a first name is entered; spaces are stripped as you type, not just trimmed on submit, and the first character is automatically capitalised
 - [ ] Creating a new account generates and displays one recovery code — copying changes the button label to "Copied", the confirmation checkbox can be selected independently, and "Continue to dashboard" stays disabled until the checkbox is selected
@@ -900,13 +900,13 @@ Use a new disposable browser profile for each path: new user, reclaim, and refre
 - [ ] Press Enter to submit first-name creation, account lookup, and the saved-code confirmation — each behaves exactly like its visible primary button and never starts a duplicate request
 - [ ] Browser Back/Forward moves correctly between Create Your Account → Save Your Recovery Code and Create Your Account → Connect Existing Account, matching whichever path you took
 - [ ] Press Back from Save Your Recovery Code — the standard confirmation opens; "Keep setting up" preserves the same code and checkbox state, while "Cancel account setup" invalidates that code, clears the unfinished name/code state, and returns to Create Your Account
-- [ ] Force navigation back to Create Your Account after a code has already been generated, then select either account path — setup resumes at the existing Save Your Recovery Code screen rather than creating a second code or silently switching into account linking
-- [ ] Hold code generation, lookup, linking, reclaim, completion, or setup cancellation pending and try Back/Escape/repeated submission — the active screen remains visible and locked, no abandoned request later advances onboarding, and failure leaves a usable screen with one action-error toast
+- [ ] Retry Create New Account after deliberately interrupting the first response — the server returns the same unfinished account and recovery code rather than creating a second account
+- [ ] Hold account creation, connection, completion, or setup cancellation pending and try Back/Escape/repeated submission — the active screen remains visible and locked, no abandoned request later advances onboarding, and failure leaves a usable screen with one action-error toast
 - [ ] Refresh the page while sitting on the show-code step — the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Welcome step instead of showing a blank code
-- [ ] Connect Existing Account — entering another account's recovery code links this device when that account still has a linked device, or offers identity reclaim when none remain; completing a reclaim moves every DM-owned campaign and player-owned character in one go
-- [ ] With a deliberately seeded account above the identity-reclaim ceiling, recovery stops with the protected-recovery message before any campaign or character changes owner; retrying a normal-sized recovery afterwards still works, proving the temporary proof record was cleaned up
+- [ ] Connect Existing Account — entering an active account's recovery code performs one direct connection action; there is no reclaim/link choice and no existing device or account data is moved
+- [ ] Try the recovery code from an unfinished new-account setup on another device — connection is rejected until the creating device completes onboarding
 - [ ] After onboarding completes once, closing and reopening the app never shows onboarding again; if an onboarded account is missing its required profile, the app fails closed with an account-profile loading error and never asks the user to recreate the name
-- [ ] Reclaim an identity that already has a saved first name on a fresh anonymous-auth device — the reclaim control stays on "Finishing recovery…" until the existing name is live, then the dashboard opens directly and the obsolete profile under the old UID no longer exists
+- [ ] Connect a fresh device to an account that already has a saved first name — the control stays on "Opening account…" until the shared profile is live, then the dashboard opens directly
 
 ## 25. Dashboard
 
@@ -914,14 +914,14 @@ The landing page after onboarding — separate DM and Player sections on one scr
 
 ### How to test this page
 
-Use a DM with active and archived campaigns, an owning player with multiple claimed characters, a linked secondary device, and a player-invite-only device. Work through DM actions first, then player cards and claim states. Refresh after every mutation.
+Use a DM with active and archived campaigns, an owning player with multiple claimed characters, another connected device, and a player-invite-only device. Work through DM actions first, then player cards and claim states. Refresh after every mutation.
 
 **DM section** (hidden entirely on a device installed via the player-only QR invite — see the QR bullet below):
 
 - [ ] On desktop, Your Campaigns and Campaigns You Play In use the same side-by-side layout as the two Psychic Powers groups; on phone, only one group is visible at a time and the standard swipe/tab control switches between them
 - [ ] Create Campaign is inside Your Campaigns and opens the standard custom-form modal with permanent labels in Campaign Name (required) then Inquisitor Name (optional) order, a required note, and a contained action button; blank/whitespace-only campaign names are rejected
 - [ ] Campaign names stop at 100 characters, and rapidly pressing Create still produces only one campaign
-- [ ] Create a campaign from a linked secondary device — it succeeds under the primary account, appears on both devices after refresh, and does not create a campaign owned by the secondary device ID
+- [ ] Create a campaign from another connected device — it belongs to the same permanent account and appears on both devices after refresh
 - [ ] Press Enter in Create Campaign and inline Edit Campaign — each submits once; while creation is pending, Escape/close/Cancel cannot hide its modal, while an edit keeps its Cancel action disabled; repeated Enter never starts another write
 - [ ] Rename a campaign inline; Edit/Save/Cancel all behave
 - [ ] Archive a campaign — it moves out of the active list into a collapsed "Archived (N)" disclosure, collapsed by default
@@ -930,7 +930,7 @@ Use a DM with active and archived campaigns, an owning player with multiple clai
 - [ ] Delete a disposable campaign containing enough messages, sessions and custom-item versions to require multiple 100-document pages; if the operation is deliberately interrupted, retrying finishes cleanup and removes the campaign without an oversized-batch error
 - [ ] Use mouse and keyboard to open a campaign and to activate Edit, Archive, and Delete — each action button performs only its own action and never follows the campaign link underneath it
 - [ ] Active campaigns are alphabetised intentionally, archived campaigns are newest-first, and reaching a 100-result query boundary shows the list-limit notice rather than silently hiding additional results
-- [ ] The QR "Share App" panel only appears once you have at least one DM campaign, and never appears at all on a device that is itself a linked secondary device
+- [ ] The QR "Share App" panel appears once the account has at least one DM campaign and is available from every connected device
 - [ ] "Share full app" and "Share player invite" produce genuinely different URLs (different `?invite=` value) — scanning the player one on a separate fresh device/profile should permanently hide that device's DM section (until the full-app QR is scanned there instead)
 
 **Player section:**
@@ -946,7 +946,7 @@ Use a DM with active and archived campaigns, an owning player with multiple clai
 - [ ] Press Enter with a complete code to run Find Character once; closing while lookup is pending invalidates its late result/error so nothing reopens or toasts afterwards, while Escape/close/Cancel during the actual claim keeps the visible modal mounted until the claim settles
 - [ ] Looking up a valid code shows character name, campaign name, and one of four distinct ownership states: unclaimed (green, claimable) / already yours / claimed by another player / claimed and locked by the DM — confirm the last two show different explanatory text even though both are equally un-claimable right now
 - [ ] Claiming an unclaimed character navigates straight to its character sheet afterwards
-- [ ] From a linked secondary device, a character owned by the primary account reports "already yours"; claiming an unclaimed character assigns it to the primary identity and makes it appear on both devices after refresh
+- [ ] From another connected device, an account-owned character reports "already yours"; claiming an unclaimed character assigns it to the permanent account and makes it appear on both devices after refresh
 - [ ] A failed lookup or claim shows exactly one crisp global toast above the modal backdrop and no duplicate red message inside the form; dismissing or retrying leaves the modal usable
 - [ ] Open the Dashboard with a valid `?code=DH-XXXX-XXXX` link — the claim modal opens and performs exactly one lookup; closing it removes only `code` from the address while preserving other query parameters, and refresh does not consume another attempt
 - [ ] Open the Dashboard with a malformed `?code=` value — no lookup request is sent, a specific invalid-link warning appears instead of a generic unexpected error, and closing the modal cleans the address
@@ -968,7 +968,7 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] DM: Import JSON (header kebab menu) — rejects any file missing `recoveryCode` or `isEditableByPlayer` with an error toast rather than importing a malformed character; a valid import is issued a **fresh** recovery code, it does not reuse whatever was in the file
 - [ ] Export JSON from a character sheet's kebab menu (available to the DM or the owning player), then re-import that same file — confirm the re-imported copy gets its own new recovery code rather than colliding with the original's
 - [ ] There is no Clone Character action; export and import remain available for deliberate copying, and an imported character receives a fresh recovery code
-- [ ] DM: Delete a character — confirm the old recovery code genuinely stops resolving anywhere afterwards (claim lookup, reclaim, etc.), not just that the character vanishes from this list
+- [ ] DM: Delete a character — confirm the old recovery code genuinely stops resolving anywhere afterwards, not just that the character vanishes from this list
 - [ ] With a deliberately seeded character with far more claim-log/XP-proposal/message documents than a single batch could hold, deletion still succeeds — it runs as a resumable job with live chunk progress shown on the confirm button, rather than refusing above a fixed document ceiling
 - [ ] Per-character "History" modal lists claim/release/force-assign/force-release events newest-first, with a readable date on each
 - [ ] Only the DM sees the per-character History action; opening and closing it repeatedly loads normally each time without leaving a stale loading or error state
@@ -997,7 +997,7 @@ Open the same character thread as player and DM in separate profiles. Start empt
 - [ ] As DM, the inbox (inside Campaign Overview, §26) lists every character's thread at once, each with a live unread count and a last-message preview, ordered most-recent-first
 - [ ] Sending a message as the player increments the DM's unread badge for that specific character's thread; opening that thread as DM clears its badge back to zero
 - [ ] Double-clicking Send, or a rapid duplicate submit, writes only one message and increments the DM's unread badge only once, not two identical messages
-- [ ] Send from a linked player or DM device — the message succeeds as the linked primary identity; an unrelated identity cannot spoof the sender or alter the unread count
+- [ ] Send from any connected player or DM device — the message uses the permanent account identity; an unrelated account cannot spoof the sender or alter the unread count
 - [ ] DM "Clear chat" requires literally typing DELETE, permanently deletes every message in that thread, and resets the thread's last-message preview back to empty — confirm there is no way to recover a cleared thread
 - [ ] Clear a disposable thread containing more than 200 messages; all pages are removed and the thread summary resets without hitting Firestore's batch-write ceiling
 - [ ] Neither side can edit or delete an individual message once sent — confirm there's genuinely no such control, only the DM's all-or-nothing "Clear chat"
@@ -1013,13 +1013,16 @@ Reachable only from the header while on the Dashboard route.
 
 ### How to test this page
 
-Use a disposable primary account and several linkable secondary profiles. Record every device's original identity and visible data before linking. Exercise reveal, rotate, repeated linking, and unlink, proving old and new codes from fresh profiles after each transition.
+Use one disposable account and several fresh browser profiles. Every browser is just a connected device; there is no primary/secondary distinction and a device never retains a hidden account underneath the connected one.
 
 - [ ] Reveal Recovery Code — on a device that's never generated one, revealing it creates one on the spot rather than erroring
-- [ ] Rotate Code — displays a new code once; the old code should stop working immediately afterwards (try it in a fresh Link/Reclaim attempt to confirm)
-- [ ] Link This Device — entering another account's recovery code switches this device onto that account's data; this is a _switch_, not a merge, so confirm you understand which account's campaigns/characters you're looking at afterwards, especially if this device already had its own separate data before linking
-- [ ] There is deliberately no limit on how many devices can be linked to one account — linking a 4th, 5th, etc. device should succeed the same as any other
-- [ ] Unlink This Device — reverts this device back to its own separate identity; campaigns/characters that only existed on the (now former) primary account disappear from view here afterwards, and this device's own pre-linking data (if any) reappears
+- [ ] Rotate Code — displays a new code once; the old code should stop working immediately afterwards (try it on a fresh device to confirm)
+- [ ] Connecting an account is available only during onboarding; Settings has no paste-a-code account-switching form
+- [ ] There is deliberately no limit on how many devices can connect to one account — connecting a 4th, 5th, etc. device should succeed the same as any other
+- [ ] Disconnect This Device — removes only this device's connection and returns it to Welcome; no hidden earlier account or data reappears
+- [ ] Disconnect a device while another remains connected — it proceeds after the normal confirmation and the other device remains usable
+- [ ] Disconnect the final connected device — a second warning explains that the recovery code is required to regain access; cancelling leaves the connection intact and confirming returns this device to Welcome without deleting the account
+- [ ] Delete Account is available from every connected device, releases claimed characters, disconnects all devices, revokes recovery, and remains blocked until every owned campaign is deleted or transferred
 - [ ] Recovery backup banner and Settings always show the same current recovery code after reveal or rotation; an old code disappears from all visible surfaces and fails on a fresh device
 
 ## 29. Cross-cutting permission boundaries
@@ -1071,7 +1074,7 @@ These are the authoritative product ceilings from `constants/productLimits.ts`. 
 For each boundary, try the largest valid value and then one unit over it. For rolling-window limits, use controlled timestamps or fake timers rather than waiting in real time. For encoded and nested limits, use generated local fixtures whose byte count, entry count and depth are known before upload.
 
 - [ ] A user can create 10 campaigns in a rolling 24-hour window; attempt 11 is rejected before creation, and capacity returns only as the oldest qualifying creation leaves the window
-- [ ] A primary account and all linked devices share the same campaign-creation allowance and the same 100-campaign total ceiling (active plus archived); attempt 101 is rejected without creating a document
+- [ ] Every device connected to an account shares the same campaign-creation allowance and the same 100-campaign total ceiling (active plus archived); attempt 101 is rejected without creating a document
 - [ ] A campaign accepts at most 100 distinct members and 100 characters; the next addition is rejected without changing the existing roster
 - [ ] A session accepts at most 100 distinct attendees and 100,000 whole XP; 101 attendees, duplicate attendees, fractional XP and 100,001 XP are rejected
 - [ ] Campaign/character names stop at 100 characters, first names at 50, messages at 2,000, thread previews at 500, and session summaries/DM notes at 4,000 each
@@ -1089,7 +1092,7 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Repeat the pending-request test for character creation, import, deletion, claim, release, force assignment and edit-permission changes — only one ownership/audit mutation is produced for the repeated action
 - [ ] Submit the same character or portrait update twice while its first write is pending, then submit a genuinely different character update — the duplicate is collapsed, the distinct update is not discarded, and both final values refresh correctly
 - [ ] Repeat rapid confirmation for session creation, editing, XP application and deletion, plus custom-item publication and propagation — each action produces one Firebase request sequence and unlocks after either success or failure
-- [ ] Rapidly repeat Recovery Code rotation, identity reclaim and device linking while their first request is pending — one code, reclaim or link sequence runs; all callers receive the same result, and a failed operation can be retried
+- [ ] Rapidly repeat Recovery Code rotation, account creation and device connection while the first request is pending — one rotation, account or connection operation runs; all callers receive the same result, and a failed operation can be retried
 - [ ] Launch with a brand-new anonymous identity — exactly one user document is created with onboarding incomplete; launch again as the same identity and confirm startup performs no user write and never adds or refreshes `lastSeen`
 - [ ] Open a DM thread whose unread badge is already zero — no reset write occurs; then receive one player message, open the thread and confirm one reset is written and no second reset follows the zero snapshot
 - [ ] Type continuously for several seconds in Description, Background Notes and a legacy plain-text Notes field — the text remains responsive locally, Firebase receives coalesced writes after pauses rather than one write per keystroke, and blur/navigation preserves the final text

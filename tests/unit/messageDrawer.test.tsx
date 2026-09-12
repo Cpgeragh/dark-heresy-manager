@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { User } from "firebase/auth";
 
 const { mockUseThreadMessages } = vi.hoisted(() => ({
   mockUseThreadMessages: vi.fn(() => ({ messages: [], loading: false, error: null })),
@@ -28,8 +27,6 @@ vi.mock("../../src/components/MessageInput", () => ({
 
 import { MessageDrawer } from "../../src/components/MessageDrawer";
 
-const user = { uid: "user-1" } as User;
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -38,7 +35,7 @@ describe("MessageDrawer listener lifecycle", () => {
   it("does not mount a message listener while closed", () => {
     render(
       <MessageDrawer
-        user={user}
+        accountId="account-1"
         isOpen={false}
         onClose={vi.fn()}
         campaignId="campaign-1"
@@ -52,7 +49,7 @@ describe("MessageDrawer listener lifecycle", () => {
   it("mounts the selected thread listener while open", () => {
     render(
       <MessageDrawer
-        user={user}
+        accountId="account-1"
         isOpen
         onClose={vi.fn()}
         campaignId="campaign-1"
@@ -66,7 +63,7 @@ describe("MessageDrawer listener lifecycle", () => {
   it("removes the thread consumer immediately when an open drawer closes", () => {
     const { rerender } = render(
       <MessageDrawer
-        user={user}
+        accountId="account-1"
         isOpen
         onClose={vi.fn()}
         campaignId="campaign-1"
@@ -79,7 +76,7 @@ describe("MessageDrawer listener lifecycle", () => {
 
     rerender(
       <MessageDrawer
-        user={user}
+        accountId="account-1"
         isOpen={false}
         onClose={vi.fn()}
         campaignId="campaign-1"

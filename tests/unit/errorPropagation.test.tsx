@@ -6,13 +6,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockCompleteOnboarding,
+  mockCreateAccount,
   mockDiscardOnboardingSetup,
   mockGetRecoveryCode,
-  mockGetIdentityRecoveryMode,
   mockLinkDevice,
   mockMarkRecoveryCodeBackedUp,
   mockNeedsRecoveryCodeBackup,
-  mockReclaimIdentity,
   mockRotateRecoveryCode,
   mockSaveFirstName,
   mockToastError,
@@ -23,13 +22,12 @@ const {
   const mockToastWarning = vi.fn();
   return {
     mockCompleteOnboarding: vi.fn(),
+    mockCreateAccount: vi.fn(),
     mockDiscardOnboardingSetup: vi.fn(),
     mockGetRecoveryCode: vi.fn(),
-    mockGetIdentityRecoveryMode: vi.fn(),
     mockLinkDevice: vi.fn(),
     mockMarkRecoveryCodeBackedUp: vi.fn(),
     mockNeedsRecoveryCodeBackup: vi.fn(),
-    mockReclaimIdentity: vi.fn(),
     mockRotateRecoveryCode: vi.fn(),
     mockSaveFirstName: vi.fn(),
     mockToastError,
@@ -44,9 +42,8 @@ const {
 });
 
 vi.mock("../../src/services/identityService", () => ({
+  createAccount: mockCreateAccount,
   getRecoveryCode: mockGetRecoveryCode,
-  getIdentityRecoveryMode: mockGetIdentityRecoveryMode,
-  reclaimIdentity: mockReclaimIdentity,
   rotateRecoveryCode: mockRotateRecoveryCode,
 }));
 
@@ -82,13 +79,12 @@ const user = { uid: "user-1" } as User;
 beforeEach(() => {
   vi.clearAllMocks();
   mockCompleteOnboarding.mockResolvedValue(undefined);
+  mockCreateAccount.mockResolvedValue({ accountId: "account-new", code: "NEW-CODE" });
   mockDiscardOnboardingSetup.mockResolvedValue(undefined);
   mockGetRecoveryCode.mockResolvedValue("RECOVERY-CODE");
-  mockGetIdentityRecoveryMode.mockResolvedValue("link");
   mockLinkDevice.mockResolvedValue(undefined);
   mockMarkRecoveryCodeBackedUp.mockResolvedValue(undefined);
   mockNeedsRecoveryCodeBackup.mockResolvedValue(false);
-  mockReclaimIdentity.mockResolvedValue({ role: "player", profileTransferred: true });
   mockRotateRecoveryCode.mockResolvedValue("NEW-CODE");
   mockSaveFirstName.mockResolvedValue(undefined);
 });
@@ -133,7 +129,6 @@ function BrowserBackControl() {
 
 describe("onboarding error propagation", () => {
   it("creates an account when the first-name form is submitted with Enter", async () => {
-    mockGetRecoveryCode.mockResolvedValueOnce(null);
     const browserUser = userEvent.setup();
     render(
       <MemoryRouter>
@@ -143,11 +138,15 @@ describe("onboarding error propagation", () => {
 
     await browserUser.type(screen.getByLabelText("First Name"), "david{Enter}");
 
-    await waitFor(() => expect(mockSaveFirstName).toHaveBeenCalledWith("user-1", "David"));
-    expect(mockRotateRecoveryCode).toHaveBeenCalledWith("user-1");
+    await waitFor(() => expect(mockSaveFirstName).toHaveBeenCalledWith("account-new", "David"));
+    expect(mockCreateAccount).toHaveBeenCalledOnce();
   });
 
-  it("resumes an existing unfinished setup instead of rotating its recovery code", async () => {
+  it("lets the server resume the same unfinished account instead of creating another", async () => {
+    mockCreateAccount.mockResolvedValueOnce({
+      accountId: "account-existing",
+      code: "RECOVERY-CODE",
+    });
     const browserUser = userEvent.setup();
     render(
       <MemoryRouter>
@@ -158,6 +157,8 @@ describe("onboarding error propagation", () => {
     await browserUser.type(screen.getByLabelText("First Name"), "david{Enter}");
 
     expect(await screen.findByText("RECOVERY-CODE")).toBeVisible();
+    expect(mockCreateAccount).toHaveBeenCalledOnce();
+    expect(mockSaveFirstName).toHaveBeenCalledWith("account-existing", "David");
     expect(mockRotateRecoveryCode).not.toHaveBeenCalled();
   });
 
@@ -169,7 +170,7 @@ describe("onboarding error propagation", () => {
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: "Continue to dashboard" }));
 
-    await waitFor(() => expect(mockCompleteOnboarding).toHaveBeenCalledWith("user-1"));
+    await waitFor(() => expect(mockCompleteOnboarding).toHaveBeenCalledWith());
   });
 
   it("marks the recovery code as copied only after the clipboard write succeeds", async () => {
@@ -261,7 +262,6 @@ describe("onboarding error propagation", () => {
     await browserUser.click(screen.getByRole("button", { name: "Cancel account setup" }));
     await screen.findByRole("heading", { name: "Create Your Account" });
 
-    mockGetRecoveryCode.mockResolvedValueOnce(null);
     await browserUser.type(screen.getByLabelText("First Name"), "david");
     await browserUser.click(screen.getByRole("button", { name: "Create new account" }));
 
@@ -379,8 +379,6 @@ describe("new-device linking", () => {
       target: { value: "DH-C0DE-0001" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Find account" }));
-    await screen.findByRole("button", { name: "Link This Device" });
-    fireEvent.click(screen.getByRole("button", { name: "Link This Device" }));
 
     expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001");
     expect(await screen.findByRole("button", { name: "Opening account…" })).toBeDisabled();
@@ -397,7 +395,7 @@ describe("new-device linking", () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(mockCompleteOnboarding).toHaveBeenCalledWith("user-1"));
+    await waitFor(() => expect(mockCompleteOnboarding).toHaveBeenCalledWith());
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
   });
 
@@ -413,7 +411,6 @@ describe("new-device linking", () => {
   });
 
   it("clears any partial new-account data before opening account connection", async () => {
-    mockGetRecoveryCode.mockResolvedValueOnce(null);
     const browserUser = userEvent.setup();
     render(
       <MemoryRouter>
@@ -427,8 +424,7 @@ describe("new-device linking", () => {
     expect(await screen.findByRole("heading", { name: "Connect Existing Account" })).toBeVisible();
   });
 
-  it("shows only reclaim when the server reports no linked devices", async () => {
-    mockGetIdentityRecoveryMode.mockResolvedValue("reclaim");
+  it("uses one direct connection action without a reclaim branch", async () => {
     renderLinkStep();
 
     fireEvent.change(screen.getByLabelText("Recovery code"), {
@@ -436,8 +432,8 @@ describe("new-device linking", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Find account" }));
 
-    expect(await screen.findByRole("button", { name: "Reclaim Identity" })).toBeVisible();
-    expect(screen.queryByRole("button", { name: "Link This Device" })).not.toBeInTheDocument();
+    expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001");
+    expect(screen.queryByRole("button", { name: "Reclaim Identity" })).not.toBeInTheDocument();
   });
 });
 

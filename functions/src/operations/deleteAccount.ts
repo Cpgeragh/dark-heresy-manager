@@ -3,6 +3,7 @@ import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { buildClaimLogPayload } from "../shared/claimLog.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
+import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
 // Leaves room below Firestore's 500-write transaction limit for SDK or
 // schema changes without turning an account deletion into a partial write.
@@ -18,29 +19,20 @@ export async function deleteAccount(
   hmacSecret: string
 ): Promise<DeleteAccountResult> {
   const db = getFirestore();
-  const ownedCampaignsQuery = db.collection("campaigns").where("dmId", "==", callerUid).limit(1);
-  const claimedCharactersQuery = db.collectionGroup("characters").where("userId", "==", callerUid);
-  const inboundLinksQuery = db.collection("userLinks").where("primaryUid", "==", callerUid);
-  const ownLinkRef = db.collection("userLinks").doc(callerUid);
-  const secretRef = db.collection("identitySecret").doc(callerUid);
+  const accountId = await resolvePrimaryUid(db, callerUid);
+  const ownedCampaignsQuery = db.collection("campaigns").where("dmId", "==", accountId).limit(1);
+  const claimedCharactersQuery = db.collectionGroup("characters").where("userId", "==", accountId);
+  const inboundLinksQuery = db.collection("userLinks").where("primaryUid", "==", accountId);
+  const secretRef = db.collection("identitySecret").doc(accountId);
 
   const result = await db.runTransaction(
     async (transaction) => {
-      const [ownedCampaigns, claimedCharacters, inboundLinks, ownLinkSnapshot, secretSnapshot] =
-        await Promise.all([
-          transaction.get(ownedCampaignsQuery),
-          transaction.get(claimedCharactersQuery),
-          transaction.get(inboundLinksQuery),
-          transaction.get(ownLinkRef),
-          transaction.get(secretRef),
-        ]);
-
-      if (ownLinkSnapshot.exists) {
-        throw new HttpsError(
-          "failed-precondition",
-          "Unlink this secondary device before deleting an account."
-        );
-      }
+      const [ownedCampaigns, claimedCharacters, inboundLinks, secretSnapshot] = await Promise.all([
+        transaction.get(ownedCampaignsQuery),
+        transaction.get(claimedCharactersQuery),
+        transaction.get(inboundLinksQuery),
+        transaction.get(secretRef),
+      ]);
 
       if (!ownedCampaigns.empty) {
         throw new HttpsError(
@@ -65,7 +57,7 @@ export async function deleteAccount(
       const identityIndexWrite =
         typeof identityCode === "string" && identityCode.length > 0 ? 1 : 0;
       const writeCount =
-        claimedCharacters.size * 2 + campaignRefs.size + linkRefs.size + 3 + identityIndexWrite;
+        claimedCharacters.size * 2 + campaignRefs.size + linkRefs.size * 2 + 3 + identityIndexWrite;
 
       if (writeCount > MAX_ACCOUNT_DELETION_WRITES) {
         throw new HttpsError(
@@ -78,11 +70,11 @@ export async function deleteAccount(
         transaction.update(character.ref, { userId: null, isEditableByPlayer: false });
         transaction.set(
           character.ref.collection("claimLog").doc(),
-          buildClaimLogPayload("release", callerUid, callerUid, null)
+          buildClaimLogPayload("release", callerUid, accountId, null)
         );
       }
       for (const campaignRef of campaignRefs.values()) {
-        transaction.update(campaignRef, { memberIds: FieldValue.arrayRemove(callerUid) });
+        transaction.update(campaignRef, { memberIds: FieldValue.arrayRemove(accountId) });
       }
 
       if (typeof identityCode === "string" && identityCode.length > 0) {
@@ -91,23 +83,41 @@ export async function deleteAccount(
         );
       }
       transaction.delete(secretRef);
-      transaction.delete(db.collection("users").doc(callerUid));
-      transaction.delete(db.collection("userProfiles").doc(callerUid));
-      for (const linkRef of linkRefs.values()) transaction.delete(linkRef);
+      transaction.delete(db.collection("userProfiles").doc(accountId));
+      transaction.delete(db.collection("accounts").doc(accountId));
+      for (const linkRef of linkRefs.values()) {
+        transaction.delete(linkRef);
+        transaction.set(
+          db.collection("users").doc(linkRef.id),
+          { onboarded: false, recoveryBackedUp: false },
+          { merge: true }
+        );
+      }
 
       return {
         releasedCharacters: claimedCharacters.size,
         removedLinkedDevices: linkRefs.size,
+        deviceUids: [...linkRefs.values()].map((reference) => reference.id),
       };
     },
     { maxAttempts: 5 }
   );
 
   try {
-    await getAuth().deleteUser(callerUid);
+    const deviceUids = result.deviceUids.length > 0 ? result.deviceUids : [callerUid];
+    const deletion = await getAuth().deleteUsers(deviceUids);
+    if (deletion.failureCount > 0) {
+      throw new HttpsError(
+        "internal",
+        "The account was deleted, but a device session could not be cleared."
+      );
+    }
   } catch (error) {
     if ((error as { code?: string } | null)?.code !== "auth/user-not-found") throw error;
   }
 
-  return result;
+  return {
+    releasedCharacters: result.releasedCharacters,
+    removedLinkedDevices: result.removedLinkedDevices,
+  };
 }

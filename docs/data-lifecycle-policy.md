@@ -2,7 +2,7 @@
 
 ## Account deletion
 
-Account deletion is available only from a primary device. A linked secondary device must be unlinked instead. A user who owns campaigns must transfer or delete every owned campaign before deleting the account.
+Account deletion is available from every device connected to the account. A user who owns campaigns must transfer or delete every owned campaign before deleting the account. Disconnecting a device removes only that device's access; disconnecting the final device requires an additional warning because the recovery code is then the only way back into the account.
 
 An approved deletion releases every character claimed by the account, removes the account from affected campaign memberships, revokes its identity-recovery code, removes direct and inbound device links, deletes the user and public-profile documents, and then deletes the anonymous Firebase Authentication user. Firestore cleanup is bounded and atomic; an operation that would exceed the safe transaction ceiling is refused before any account data changes.
 
@@ -38,4 +38,4 @@ A character Recovery Code can be revoked independently. Claiming consumes the su
 
 ## Backups and exports
 
-Manual staging exports remain in their selected Cloud Storage destination until deliberately deleted or covered by a separately configured bucket lifecycle rule. Primary deletion does not retroactively alter an existing export. There is no scheduled export or automatic retention policy.
+Manual staging exports remain in their selected Cloud Storage destination until deliberately deleted or covered by a separately configured bucket lifecycle rule. Account deletion does not retroactively alter an existing export. There is no scheduled export or automatic retention policy.

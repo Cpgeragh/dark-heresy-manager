@@ -19,10 +19,7 @@ import {
   registerRecoveryCode as runRegisterRecoveryCode,
   type RegisterRecoveryCodeInput,
 } from "./operations/registerRecoveryCode.js";
-import {
-  registerIdentityCode as runRegisterIdentityCode,
-  type RegisterIdentityCodeInput,
-} from "./operations/registerIdentityCode.js";
+import { registerIdentityCode as runRegisterIdentityCode } from "./operations/registerIdentityCode.js";
 import {
   lookupRecoveryCode as runLookupRecoveryCode,
   type LookupRecoveryCodeInput,
@@ -61,20 +58,12 @@ import {
   forceAssignCharacter as runForceAssignCharacter,
   type ForceAssignCharacterInput,
 } from "./operations/forceAssignCharacter.js";
-import {
-  startIdentityReclaimJob as runStartIdentityReclaimJob,
-  processIdentityReclaimChunk as runProcessIdentityReclaimChunk,
-  type StartIdentityReclaimJobInput,
-  type StartIdentityReclaimJobResult,
-  type ProcessIdentityReclaimChunkInput,
-  type ProcessIdentityReclaimChunkResult,
-} from "./operations/identityReclaimJob.js";
 import { linkDevice as runLinkDevice, type LinkDeviceInput } from "./operations/linkDevice.js";
 import {
-  getIdentityRecoveryMode as runGetIdentityRecoveryMode,
-  type GetIdentityRecoveryModeInput,
-  type GetIdentityRecoveryModeResult,
-} from "./operations/getIdentityRecoveryMode.js";
+  disconnectDevice as runDisconnectDevice,
+  type DisconnectDeviceInput,
+  type DisconnectDeviceResult,
+} from "./operations/disconnectDevice.js";
 import {
   startCharacterDeletionJob as runStartCharacterDeletionJob,
   processCharacterDeletionChunk as runProcessCharacterDeletionChunk,
@@ -101,7 +90,12 @@ import {
   type CancelBulkJobInput,
 } from "./operations/cancelBulkJob.js";
 import { revokeIdentityCode as runRevokeIdentityCode } from "./operations/revokeIdentityCode.js";
+import {
+  createAccount as runCreateAccount,
+  type CreateAccountResult,
+} from "./operations/createAccount.js";
 import { discardOnboardingSetup as runDiscardOnboardingSetup } from "./operations/discardOnboardingSetup.js";
+import { completeOnboarding as runCompleteOnboarding } from "./operations/completeOnboarding.js";
 import {
   createCampaign as runCreateCampaign,
   type CreateCampaignInput,
@@ -167,21 +161,18 @@ export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
     })
 );
 
-export const registerIdentityCode = onCall<RegisterIdentityCodeInput>(
+export const registerIdentityCode = onCall(
   { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
-    return protectedCallable<RegisterIdentityCodeInput, { code: string }>({
+    return protectedCallable<Record<string, never>, { code: string }>({
       request,
       operation: "register-identity-code",
-      allowedFields: ["role", "targetUid"],
-      requiredFields: ["role"],
-      fieldShapes: { role: { enum: ["dm", "player"] }, targetUid: "string" },
+      allowedFields: [],
       rateLimits: [
         { key: `register-identity-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      handler: ({ uid, data }) =>
-        runRegisterIdentityCode(data, uid, identityCodeHmacSecret.value()),
+      handler: ({ uid }) => runRegisterIdentityCode(uid, identityCodeHmacSecret.value()),
     });
   }
 );
@@ -336,58 +327,6 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
   }
 );
 
-export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
-  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
-  (request) => {
-    const callerUid = request.auth?.uid ?? "anonymous";
-    const codeHash = hashForKey(request.data?.code ?? "");
-    const idempotencyKey = `start-identity-reclaim-job:${callerUid}:${codeHash}`;
-
-    return protectedCallable<StartIdentityReclaimJobInput, StartIdentityReclaimJobResult>({
-      request,
-      operation: "start-identity-reclaim-job",
-      allowedFields: ["code"],
-      requiredFields: ["code"],
-      fieldShapes: { code: "string" },
-      rateLimits: [
-        { key: `start-identity-reclaim-job:user:${callerUid}`, limit: 5, windowMs: 15 * 60 * 1000 },
-        { key: `start-identity-reclaim-job:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
-      ],
-      idempotencyKey,
-      handler: ({ uid, data, idempotency }) =>
-        runStartIdentityReclaimJob(
-          data,
-          uid,
-          idempotencyKey,
-          identityCodeHmacSecret.value(),
-          idempotency
-        ),
-    });
-  }
-);
-
-export const processIdentityReclaimChunk = onCall<ProcessIdentityReclaimChunkInput>(
-  { timeoutSeconds: 30 },
-  (request) => {
-    const callerUid = request.auth?.uid ?? "anonymous";
-    return protectedCallable<ProcessIdentityReclaimChunkInput, ProcessIdentityReclaimChunkResult>({
-      request,
-      operation: "process-identity-reclaim-chunk",
-      allowedFields: ["jobId"],
-      requiredFields: ["jobId"],
-      fieldShapes: { jobId: "string" },
-      rateLimits: [
-        {
-          key: `process-identity-reclaim-chunk:${callerUid}`,
-          limit: 300,
-          windowMs: 60 * 60 * 1000,
-        },
-      ],
-      handler: ({ uid, data }) => runProcessIdentityReclaimChunk(data, uid),
-    });
-  }
-);
-
 export const linkDevice = onCall<LinkDeviceInput>(
   { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
@@ -408,6 +347,17 @@ export const linkDevice = onCall<LinkDeviceInput>(
     });
   }
 );
+
+export const disconnectDevice = onCall<DisconnectDeviceInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<DisconnectDeviceInput, DisconnectDeviceResult>({
+    request,
+    operation: "disconnect-device",
+    allowedFields: ["confirmLastDevice"],
+    rateLimits: [{ key: `disconnect-device:${callerUid}`, limit: 10, windowMs: 60 * 60 * 1000 }],
+    handler: ({ uid, data }) => runDisconnectDevice(data, uid),
+  });
+});
 
 export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
   { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
@@ -583,6 +533,20 @@ export const cancelBulkJob = onCall<CancelBulkJobInput>({ timeoutSeconds: 30 }, 
   });
 });
 
+export const createAccount = onCall(
+  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<Record<string, never>, CreateAccountResult>({
+      request,
+      operation: "create-account",
+      allowedFields: [],
+      rateLimits: [{ key: `create-account:${callerUid}`, limit: 5, windowMs: 60 * 60 * 1000 }],
+      handler: ({ uid }) => runCreateAccount(uid, identityCodeHmacSecret.value()),
+    });
+  }
+);
+
 export const revokeIdentityCode = onCall(
   { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
@@ -615,29 +579,16 @@ export const discardOnboardingSetup = onCall(
   }
 );
 
-export const getIdentityRecoveryMode = onCall<GetIdentityRecoveryModeInput>(
-  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
-  (request) => {
-    const callerUid = request.auth?.uid ?? "anonymous";
-    const codeHash = hashForKey(request.data?.code ?? "");
-
-    return protectedCallable<GetIdentityRecoveryModeInput, GetIdentityRecoveryModeResult>({
-      request,
-      operation: "get-identity-recovery-mode",
-      allowedFields: ["code"],
-      requiredFields: ["code"],
-      fieldShapes: { code: "string" },
-      rateLimits: [
-        { key: `get-identity-recovery-mode:user:${callerUid}`, limit: 5, windowMs: 15 * 60 * 1000 },
-        { key: `get-identity-recovery-mode:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
-      ],
-      handler: ({ uid, data }) =>
-        withMinimumDuration(250, () =>
-          runGetIdentityRecoveryMode(data, uid, identityCodeHmacSecret.value())
-        ),
-    });
-  }
-);
+export const completeOnboarding = onCall({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<Record<string, never>, void>({
+    request,
+    operation: "complete-onboarding",
+    allowedFields: [],
+    rateLimits: [{ key: `complete-onboarding:${callerUid}`, limit: 10, windowMs: 60 * 60 * 1000 }],
+    handler: ({ uid }) => runCompleteOnboarding(uid),
+  });
+});
 
 export const deleteAccount = onCall(
   { secrets: [identityCodeHmacSecret], timeoutSeconds: 60 },

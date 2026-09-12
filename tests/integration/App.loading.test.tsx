@@ -26,9 +26,8 @@ vi.mock("../../src/hooks/useAuth", () => ({
 }));
 vi.mock("../../src/hooks/useDeviceLink", () => ({
   useDeviceLink: () => ({
-    isLinked: false,
     effectiveUserId: "user-1",
-    unlink: vi.fn(),
+    disconnect: vi.fn(),
     loading: false,
     error: null,
   }),

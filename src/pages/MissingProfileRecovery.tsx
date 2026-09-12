@@ -3,9 +3,8 @@ import { useIdentityRecoveryFlow } from "../hooks/useIdentityRecoveryFlow";
 import { Panel } from "../ui/Panel";
 
 /**
- * Recovery route for a browser whose old local identity no longer has a
- * profile. Linking is deliberately non-destructive: the existing working
- * device remains signed in and this browser becomes a secondary device.
+ * Compatibility route for a legacy browser whose old identity no longer has
+ * a profile. Current devices return to onboarding when disconnected.
  */
 export default function MissingProfileRecovery() {
   const recoveryFlow = useIdentityRecoveryFlow();
@@ -21,8 +20,8 @@ export default function MissingProfileRecovery() {
             deviceNoun="browser"
             description={
               <>
-                This browser no longer has an active account profile. Enter the recovery code to
-                check the account's connected-device records.
+                This browser no longer has an active account profile. Enter your recovery code to
+                connect it to the account again.
               </>
             }
             showFinishingStatus

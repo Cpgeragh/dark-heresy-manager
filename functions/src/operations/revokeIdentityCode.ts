@@ -1,9 +1,11 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
+import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
 export async function revokeIdentityCode(callerUid: string, hmacSecret: string): Promise<void> {
   const db = getFirestore();
-  const secretRef = db.collection("identitySecret").doc(callerUid);
+  const accountId = await resolvePrimaryUid(db, callerUid);
+  const secretRef = db.collection("identitySecret").doc(accountId);
 
   await db.runTransaction(
     async (transaction) => {

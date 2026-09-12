@@ -64,7 +64,6 @@ import {
 interface Props {
   user: User;
   effectiveUserId: string;
-  isLinked: boolean;
   firstName: string | null;
 }
 
@@ -761,7 +760,7 @@ function PlayerCampaignSection({
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
-export default function Dashboard({ user, effectiveUserId, isLinked, firstName }: Props) {
+export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
   const { dmCampaigns, playerCampaigns, dmLoading, playerLoading, dmError, playerError } =
     useCampaignsContext();
   const isDesktopLayout = useMediaQuery(DESKTOP_LAYOUT_QUERY);
@@ -781,7 +780,7 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         error={dmError}
       />
 
-      {dmCampaigns.length > 0 && !isLinked && <QrPanel />}
+      {dmCampaigns.length > 0 && <QrPanel />}
     </div>
   );
   const playingCampaignsSection = (

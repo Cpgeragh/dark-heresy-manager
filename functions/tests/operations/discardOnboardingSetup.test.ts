@@ -1,91 +1,68 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 import { discardOnboardingSetup } from "../../src/operations/discardOnboardingSetup";
 
-const {
-  mockRunTransaction,
-  mockTransactionGet,
-  mockTransactionDelete,
-  mockCollection,
-  mockIndexDoc,
-  userRef,
-  secretRef,
-  profileRef,
-  indexRef,
-} = vi.hoisted(() => {
-  const userRef = { path: "users/user-1" };
-  const secretRef = { path: "identitySecret/user-1" };
-  const profileRef = { path: "userProfiles/user-1" };
-  const indexRef = { path: "identityRecoveryIndex/hash" };
-  const mockIndexDoc = vi.fn(() => indexRef);
-  const mockTransactionGet = vi.fn();
-  const mockTransactionDelete = vi.fn();
-  const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<void>) =>
-    callback({ get: mockTransactionGet, delete: mockTransactionDelete })
-  );
-  const mockCollection = vi.fn((name: string) => {
-    if (name === "users") return { doc: vi.fn(() => userRef) };
-    if (name === "identitySecret") return { doc: vi.fn(() => secretRef) };
-    if (name === "userProfiles") return { doc: vi.fn(() => profileRef) };
-    if (name === "identityRecoveryIndex") return { doc: mockIndexDoc };
-    throw new Error(`Unexpected collection: ${name}`);
-  });
-  return {
-    mockRunTransaction,
-    mockTransactionGet,
-    mockTransactionDelete,
-    mockCollection,
-    mockIndexDoc,
-    userRef,
-    secretRef,
-    profileRef,
-    indexRef,
-  };
-});
-
+const state = vi.hoisted(() => ({ onboarded: false, status: "provisional", creator: "device-1" }));
+const transactionDelete = vi.hoisted(() => vi.fn());
+const makeRef = (path: string) => ({ path, id: path.split("/").at(-1) });
+const collection = vi.hoisted(() =>
+  vi.fn((name: string) => ({ doc: (id: string) => makeRef(`${name}/${id}`) }))
+);
+const runTransaction = vi.hoisted(() =>
+  vi.fn(async (callback: (tx: unknown) => unknown) =>
+    callback({
+      get: async (reference: { path: string }) => {
+        if (reference.path === "users/device-1")
+          return { exists: true, data: () => ({ onboarded: state.onboarded }) };
+        if (reference.path === "userLinks/device-1")
+          return { exists: true, data: () => ({ primaryUid: "account-1" }) };
+        if (reference.path === "accounts/account-1")
+          return {
+            exists: true,
+            data: () => ({ status: state.status, createdByDeviceUid: state.creator }),
+          };
+        if (reference.path === "identitySecret/account-1")
+          return { exists: true, data: () => ({ code: "DH-AAAA-BBBB" }) };
+        return { exists: false, data: () => ({}) };
+      },
+      delete: transactionDelete,
+    })
+  )
+);
 vi.mock("firebase-admin/firestore", () => ({
-  getFirestore: () => ({ collection: mockCollection, runTransaction: mockRunTransaction }),
+  getFirestore: () => ({ collection, runTransaction }),
 }));
 
-describe("discardOnboardingSetup", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+beforeEach(() => {
+  vi.clearAllMocks();
+  state.onboarded = false;
+  state.status = "provisional";
+  state.creator = "device-1";
+});
+
+it("deletes only the provisional account created by this device", async () => {
+  await discardOnboardingSetup("device-1", "secret");
+  expect(transactionDelete).toHaveBeenCalledWith(
+    expect.objectContaining({ path: "accounts/account-1" })
+  );
+  expect(transactionDelete).toHaveBeenCalledWith(
+    expect.objectContaining({ path: "userLinks/device-1" })
+  );
+  expect(transactionDelete).toHaveBeenCalledWith(
+    expect.objectContaining({ path: "identitySecret/account-1" })
+  );
+});
+
+it("refuses to discard an established account linked during onboarding", async () => {
+  state.status = "active";
+  await expect(discardOnboardingSetup("device-1", "secret")).rejects.toMatchObject({
+    code: "failed-precondition",
   });
+  expect(transactionDelete).not.toHaveBeenCalled();
+});
 
-  it("atomically removes the provisional profile, secret, and recovery lookup", async () => {
-    mockTransactionGet
-      .mockResolvedValueOnce({ exists: true, data: () => ({ onboarded: false }) })
-      .mockResolvedValueOnce({ exists: true, data: () => ({ code: "DH-AAAA-BBBB" }) });
-
-    await discardOnboardingSetup("user-1", "test-secret");
-
-    expect(mockTransactionGet).toHaveBeenNthCalledWith(1, userRef);
-    expect(mockTransactionGet).toHaveBeenNthCalledWith(2, secretRef);
-    expect(mockIndexDoc).toHaveBeenCalledWith(expect.any(String));
-    expect(mockTransactionDelete).toHaveBeenCalledWith(indexRef);
-    expect(mockTransactionDelete).toHaveBeenCalledWith(secretRef);
-    expect(mockTransactionDelete).toHaveBeenCalledWith(profileRef);
-  });
-
-  it("removes a partial profile even when code creation never completed", async () => {
-    mockTransactionGet
-      .mockResolvedValueOnce({ exists: true, data: () => ({ onboarded: false }) })
-      .mockResolvedValueOnce({ exists: false });
-
-    await discardOnboardingSetup("user-1", "test-secret");
-
-    expect(mockIndexDoc).not.toHaveBeenCalled();
-    expect(mockTransactionDelete).toHaveBeenCalledWith(secretRef);
-    expect(mockTransactionDelete).toHaveBeenCalledWith(profileRef);
-  });
-
-  it("refuses to remove data after onboarding has completed", async () => {
-    mockTransactionGet
-      .mockResolvedValueOnce({ exists: true, data: () => ({ onboarded: true }) })
-      .mockResolvedValueOnce({ exists: true, data: () => ({ code: "DH-AAAA-BBBB" }) });
-
-    await expect(discardOnboardingSetup("user-1", "test-secret")).rejects.toMatchObject({
-      code: "failed-precondition",
-    });
-    expect(mockTransactionDelete).not.toHaveBeenCalled();
+it("refuses to discard after onboarding is complete", async () => {
+  state.onboarded = true;
+  await expect(discardOnboardingSetup("device-1", "secret")).rejects.toMatchObject({
+    code: "failed-precondition",
   });
 });

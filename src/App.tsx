@@ -51,12 +51,11 @@ function AppContent() {
   const { currentUser, loading, error: authError, onboarded, setOnboarded } = useAuth();
 
   // -------------------------------------------------
-  // DEVICE LINK — must be called unconditionally before any early returns
+  // DEVICE CONNECTION — must be called unconditionally before any early returns
   // -------------------------------------------------
   const {
-    isLinked,
     effectiveUserId,
-    unlink,
+    disconnect,
     loading: linkLoading,
     error: linkError,
   } = useDeviceLink(currentUser?.uid ?? "");
@@ -72,11 +71,11 @@ function AppContent() {
   // -------------------------------------------------
   // LOADING STATES
   // -------------------------------------------------
-  if (loading || linkLoading || profileLoading) {
+  if (loading || linkLoading) {
     return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
   }
 
-  if (authError || linkError || profileError) {
+  if (authError || linkError) {
     return <SplashScreen label="Unable to load your account. Please refresh." />;
   }
 
@@ -98,17 +97,28 @@ function AppContent() {
     );
   }
 
+  if (profileLoading) {
+    return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
+  }
+
+  if (profileError) {
+    return <SplashScreen label="Unable to load your account. Please refresh." />;
+  }
+
   // A completed account must always have a profile. New onboarding writes the
-  // name before issuing a recovery code, and reclaim/link operations preserve
-  // that profile. If this browser contains an identity that was superseded by
-  // a reclaim elsewhere, offer the non-destructive device-link route instead
-  // of asking the user to recreate their name or trapping them on an error.
+  // name before issuing a recovery code, and device connections preserve that
+  // profile. The fallback below remains for pre-migration legacy browsers.
   if (!firstName) {
     return (
       <Suspense fallback={<SplashScreen label="Loading…" />}>
         <MissingProfileRecovery />
       </Suspense>
     );
+  }
+
+  async function handleDeviceDisconnect(confirmLastDevice = false) {
+    await disconnect(confirmLastDevice);
+    setOnboarded(false);
   }
 
   // -------------------------------------------------
@@ -135,7 +145,6 @@ function AppContent() {
                       <Dashboard
                         user={currentUser}
                         effectiveUserId={effectiveUserId}
-                        isLinked={isLinked}
                         firstName={firstName}
                       />
                     </CampaignsProvider>
@@ -162,11 +171,9 @@ function AppContent() {
                   path={ROUTES.SETTINGS}
                   element={
                     <Settings
-                      user={currentUser}
                       effectiveUserId={effectiveUserId}
                       firstName={firstName}
-                      isLinked={isLinked}
-                      unlink={unlink}
+                      disconnect={handleDeviceDisconnect}
                     />
                   }
                 />
@@ -178,7 +185,7 @@ function AppContent() {
         </main>
 
         <MessageDrawer
-          user={currentUser}
+          accountId={effectiveUserId}
           isOpen={messagesOpen}
           onClose={() => setMessagesOpen(false)}
           campaignId={contextCampaignId}

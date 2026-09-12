@@ -19,13 +19,14 @@ describe("Functions: linkDevice", () => {
   it("links a second device to the primary account identified by the code", async () => {
     const primaryUid = await signInTestUser();
     await adminDb.collection("userProfiles").doc(primaryUid).set({ firstName: "Primary" });
-    const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+    const registerIdentityCode = httpsCallable<Record<string, never>, { code: string }>(
       getTestFunctions(),
       "registerIdentityCode"
     );
-    const { data: registered } = await registerIdentityCode({ role: "player" });
+    const { data: registered } = await registerIdentityCode({});
 
     const deviceUid = await signInTestUser();
+    await adminDb.collection("users").doc(deviceUid).set({ onboarded: false });
     const linkDevice = httpsCallable<{ code: string }, void>(getTestFunctions(), "linkDevice");
     await linkDevice({ code: registered.code });
 
@@ -34,7 +35,8 @@ describe("Functions: linkDevice", () => {
   }, 15000);
 
   it("rejects a code that does not resolve", async () => {
-    await signInTestUser();
+    const deviceUid = await signInTestUser();
+    await adminDb.collection("users").doc(deviceUid).set({ onboarded: false });
     const linkDevice = httpsCallable(getTestFunctions(), "linkDevice");
 
     await expect(linkDevice({ code: "DH-0000-0000" })).rejects.toMatchObject({
@@ -45,14 +47,15 @@ describe("Functions: linkDevice", () => {
   it("rejects a code that has already been rotated away", async () => {
     const primaryUid = await signInTestUser();
     await adminDb.collection("userProfiles").doc(primaryUid).set({ firstName: "Primary" });
-    const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+    const registerIdentityCode = httpsCallable<Record<string, never>, { code: string }>(
       getTestFunctions(),
       "registerIdentityCode"
     );
-    const { data: first } = await registerIdentityCode({ role: "player" });
-    await registerIdentityCode({ role: "player" });
+    const { data: first } = await registerIdentityCode({});
+    await registerIdentityCode({});
 
-    await signInTestUser();
+    const deviceUid = await signInTestUser();
+    await adminDb.collection("users").doc(deviceUid).set({ onboarded: false });
     const linkDevice = httpsCallable(getTestFunctions(), "linkDevice");
 
     await expect(linkDevice({ code: first.code })).rejects.toMatchObject({

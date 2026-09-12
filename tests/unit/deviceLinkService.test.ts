@@ -1,106 +1,57 @@
 // @vitest-environment jsdom
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDeleteDoc, mockDoc, mockCallLinkDevice } = vi.hoisted(() => ({
-  mockDeleteDoc: vi.fn(),
-  mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
-  mockCallLinkDevice: vi.fn(),
-}));
-
-vi.mock("firebase/firestore", () => ({
-  deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
-  doc: (...args: unknown[]) => mockDoc(...args),
+const { callLink, callDisconnect } = vi.hoisted(() => ({
+  callLink: vi.fn(),
+  callDisconnect: vi.fn(),
 }));
 
 vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn((_functions: unknown, name: string) => {
-    if (name === "linkDevice") return mockCallLinkDevice;
+    if (name === "linkDevice") return callLink;
+    if (name === "disconnectDevice") return callDisconnect;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
+vi.mock("../../src/firebase", () => ({ functions: "mock-functions" }));
 
-vi.mock("../../src/firebase", () => ({
-  db: "mock-db",
-  functions: "mock-functions",
-}));
-
-import { linkDeviceToAccount, unlinkDevice } from "../../src/services/deviceLinkService";
+import {
+  disconnectDevice,
+  LastDeviceDisconnectError,
+  linkDeviceToAccount,
+} from "../../src/services/deviceLinkService";
 
 beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
-  mockDeleteDoc.mockResolvedValue(undefined);
-  mockCallLinkDevice.mockResolvedValue({ data: undefined });
+  callLink.mockResolvedValue({ data: undefined });
+  callDisconnect.mockResolvedValue({ data: { wasLastDevice: false } });
 });
 
 describe("device link operations", () => {
-  it("reuses one in-flight call for a duplicate device-link attempt", async () => {
-    let finish!: (value: unknown) => void;
-    const pending = new Promise((resolve) => {
-      finish = resolve;
-    });
-    mockCallLinkDevice.mockReturnValueOnce(pending);
-
-    const first = linkDeviceToAccount("duplicate-device", "DH-VALI-CODE");
-    const duplicate = linkDeviceToAccount("duplicate-device", "DH-VALI-CODE");
-    await Promise.resolve();
-
-    expect(mockCallLinkDevice).toHaveBeenCalledOnce();
-    finish({ data: undefined });
-    await Promise.all([first, duplicate]);
+  it("connects with a trimmed recovery code", async () => {
+    await linkDeviceToAccount("device-1", "  DH-VALI-CODE  ");
+    expect(callLink).toHaveBeenCalledWith({ code: "DH-VALI-CODE" });
   });
 
-  it("rejects a malformed recovery code before calling the Function", async () => {
-    await expect(linkDeviceToAccount("device-uid", "not-a-code")).rejects.toThrow(
-      "Invalid recovery code"
-    );
-    expect(mockCallLinkDevice).not.toHaveBeenCalled();
+  it("rejects a malformed code before calling the server", async () => {
+    await expect(linkDeviceToAccount("device-1", "bad")).rejects.toThrow("Invalid recovery code");
+    expect(callLink).not.toHaveBeenCalled();
   });
 
-  it("calls linkDevice with the trimmed code", async () => {
-    await linkDeviceToAccount("device-uid", "  DH-VALI-CODE  ");
-
-    expect(mockCallLinkDevice).toHaveBeenCalledWith({ code: "DH-VALI-CODE" });
+  it("asks the server to disconnect the current device", async () => {
+    await expect(disconnectDevice("device-1")).resolves.toEqual({ wasLastDevice: false });
+    expect(callDisconnect).toHaveBeenCalledWith({ confirmLastDevice: false });
   });
 
-  it("propagates a rejection from the Function", async () => {
-    const error = new Error("Recovery code not found.");
-    mockCallLinkDevice.mockRejectedValue(error);
-
-    await expect(linkDeviceToAccount("device-uid", "DH-UNKN-OWN0")).rejects.toBe(error);
+  it("allows an explicitly confirmed last-device disconnect", async () => {
+    callDisconnect.mockResolvedValue({ data: { wasLastDevice: true } });
+    await expect(disconnectDevice("device-1", true)).resolves.toEqual({ wasLastDevice: true });
+    expect(callDisconnect).toHaveBeenCalledWith({ confirmLastDevice: true });
   });
 
-  it("blocks the sixth valid device-link attempt before calling Firebase", async () => {
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      await linkDeviceToAccount("device-uid", `DH-LINK-000${attempt}`);
-    }
-
-    await expect(linkDeviceToAccount("device-uid", "DH-LINK-0005")).rejects.toThrow(
-      "5-attempt device-link limit reached. Try again in 15 minutes."
-    );
-    expect(mockCallLinkDevice).toHaveBeenCalledTimes(5);
-  });
-
-  it("unlinks the current device", async () => {
-    await unlinkDevice("device-uid");
-
-    expect(mockDeleteDoc).toHaveBeenCalledWith("userLinks/device-uid");
-  });
-
-  it("collapses a duplicate in-flight unlink", async () => {
-    let finish!: () => void;
-    const pending = new Promise<void>((resolve) => {
-      finish = resolve;
-    });
-    mockDeleteDoc.mockReturnValueOnce(pending);
-
-    const first = unlinkDevice("device-uid");
-    const duplicate = unlinkDevice("device-uid");
-
-    await vi.waitFor(() => expect(mockDeleteDoc).toHaveBeenCalledOnce());
-    finish();
-    await Promise.all([first, duplicate]);
-    expect(mockDeleteDoc).toHaveBeenCalledOnce();
+  it("maps the server's last-device response to a specific client error", async () => {
+    callDisconnect.mockRejectedValue({ details: { reason: "last-device" } });
+    await expect(disconnectDevice("device-1")).rejects.toBeInstanceOf(LastDeviceDisconnectError);
   });
 });

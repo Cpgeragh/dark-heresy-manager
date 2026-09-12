@@ -8,43 +8,24 @@
 // not the security boundary — the hash-derived identityRecoveryIndex/{hash}
 // entry is.
 //
-// targetUid lets a linked secondary device act for the
-// primary account it's linked to, mirroring firestore.rules'
-// playerOwnsOrLinked exactly — this Function grants no more access than the
-// rules already allow for revealing/rotating the primary's identity code.
+// The caller's device link is resolved server-side, so clients cannot choose
+// which account receives the new code.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { generateRecoveryCode, hashRecoveryCode } from "../shared/recoveryCode.js";
+import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
 const IDENTITY_INDEX_COLLECTION = "identityRecoveryIndex";
 const IDENTITY_SECRET_COLLECTION = "identitySecret";
-const USER_LINKS_COLLECTION = "userLinks";
 const USER_PROFILES_COLLECTION = "userProfiles";
 
-export interface RegisterIdentityCodeInput {
-  role: "dm" | "player";
-  targetUid?: string;
-}
-
 export async function registerIdentityCode(
-  input: RegisterIdentityCodeInput,
   callerUid: string,
   hmacSecret: string
 ): Promise<{ code: string }> {
   const db = getFirestore();
-
-  let identityUid = callerUid;
-  if (input.targetUid && input.targetUid !== callerUid) {
-    const linkSnapshot = await db.collection(USER_LINKS_COLLECTION).doc(callerUid).get();
-    if (!linkSnapshot.exists || linkSnapshot.data()?.primaryUid !== input.targetUid) {
-      throw new HttpsError(
-        "permission-denied",
-        "This device is not linked to the requested account."
-      );
-    }
-    identityUid = input.targetUid;
-  }
+  const identityUid = await resolvePrimaryUid(db, callerUid);
 
   const secretRef = db.collection(IDENTITY_SECRET_COLLECTION).doc(identityUid);
   const profileRef = db.collection(USER_PROFILES_COLLECTION).doc(identityUid);
@@ -80,7 +61,6 @@ export async function registerIdentityCode(
       }
       transaction.set(db.collection(IDENTITY_INDEX_COLLECTION).doc(newHash), {
         uid: identityUid,
-        role: input.role,
       });
       transaction.set(secretRef, { code: newCode });
     },

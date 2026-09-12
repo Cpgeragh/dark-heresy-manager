@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { revokeIdentityCode } from "../../src/operations/revokeIdentityCode";
 
+vi.mock("../../src/shared/linkedIdentity", () => ({
+  resolvePrimaryUid: vi.fn(async (_db: unknown, uid: string) => uid),
+}));
+
 const {
   mockRunTransaction,
   mockTransactionGet,

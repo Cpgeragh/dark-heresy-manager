@@ -1,7 +1,6 @@
 // src/components/MessageDrawer.tsx
 
 import { useCallback } from "react";
-import type { User } from "firebase/auth";
 import { useThreadMessages } from "../hooks/useThreadMessages";
 import { sendMessage } from "../services/messageService";
 import { MessageThread } from "./MessageThread";
@@ -66,13 +65,13 @@ function PlayerThread({
 // ── MessageDrawer ─────────────────────────────────────────────────────────────
 
 export function MessageDrawer({
-  user,
+  accountId,
   isOpen,
   onClose,
   campaignId,
   characterId,
 }: {
-  user: User;
+  accountId: string;
   isOpen: boolean;
   onClose: () => void;
   campaignId: string | null;
@@ -110,7 +109,7 @@ export function MessageDrawer({
 
         {/* Panel content */}
         {isOpen && campaignId && characterId ? (
-          <PlayerThread campaignId={campaignId} characterId={characterId} playerUid={user.uid} />
+          <PlayerThread campaignId={campaignId} characterId={characterId} playerUid={accountId} />
         ) : (
           <p className="text-sm text-slate-500 text-center py-10 px-6">
             Open a character sheet to message your DM.

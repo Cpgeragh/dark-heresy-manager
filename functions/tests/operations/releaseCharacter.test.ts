@@ -2,6 +2,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { releaseCharacter } from "../../src/operations/releaseCharacter";
 
+vi.mock("../../src/shared/linkedIdentity", () => ({
+  resolvePrimaryUid: vi.fn(async (_db: unknown, uid: string) => uid),
+}));
+
 const mockTransactionGet = vi.fn();
 const mockTransactionUpdate = vi.fn();
 const mockTransactionSet = vi.fn();

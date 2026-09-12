@@ -64,12 +64,12 @@ describe("Firestore Rules: identitySecret", () => {
     ).rejects.toThrow();
   });
 
-  it("owner can write their own identity secret entry", async () => {
+  it("clients cannot write identity secrets, including their own", async () => {
     const env = await getTestEnv();
 
     await expect(
       dbAs(env, "uid-1").collection("identitySecret").doc("uid-1").set({ code: "DH-SECR-0001" })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 
   it("identity secrets accept only the exact recovery-code shape and field set", async () => {

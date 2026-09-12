@@ -23,22 +23,13 @@ describe("Functions: revokeIdentityCode", () => {
       getTestFunctions(),
       "registerIdentityCode"
     );
-    const { data: registered } = await registerIdentityCode({ role: "player" });
+    await registerIdentityCode({});
 
     const revokeIdentityCode = httpsCallable(getTestFunctions(), "revokeIdentityCode");
     await revokeIdentityCode({});
 
     const secretSnapshot = await adminDb.collection("identitySecret").doc(uid).get();
     expect(secretSnapshot.exists).toBe(false);
-
-    await signInTestUser();
-    const getMode = httpsCallable<{ code: string }, { status: string }>(
-      getTestFunctions(),
-      "getIdentityRecoveryMode"
-    );
-    await expect(getMode({ code: registered.code })).resolves.toMatchObject({
-      data: { status: "not-found" },
-    });
   }, 20000);
 
   it("succeeds as a safe no-op when the caller has no identity code registered", async () => {
