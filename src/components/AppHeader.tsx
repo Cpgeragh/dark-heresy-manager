@@ -8,9 +8,10 @@ import { AppHeaderShell, appHeaderIconButtonClass } from "./AppHeaderShell";
 
 interface AppHeaderProps {
   currentPath: string;
+  onOpenSettings: () => void;
 }
 
-export function AppHeader({ currentPath }: AppHeaderProps) {
+export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
   const { backHref, kebabContent } = useHeaderExtension();
   const [kebabOpen, setKebabOpen] = useState(false);
   const kebabRef = useRef<HTMLDivElement>(null);
@@ -73,7 +74,12 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
           {/* Settings + kebab */}
           {/* Settings — dashboard only */}
           {isOnDashboard && (
-            <Link to={ROUTES.SETTINGS} aria-label="Settings" className={appHeaderIconButtonClass}>
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              aria-label="Settings"
+              className={appHeaderIconButtonClass}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -93,7 +99,7 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
                   d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                 />
               </svg>
-            </Link>
+            </button>
           )}
 
           {/* Kebab menu */}

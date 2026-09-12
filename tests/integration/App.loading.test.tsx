@@ -108,14 +108,14 @@ describe("App loading boundaries", () => {
 
   it("mounts campaign-list subscriptions only for the dashboard route", async () => {
     deferredDashboard.resolve();
-    const settingsView = render(
-      <MemoryRouter initialEntries={["/settings"]}>
+    const campaignView = render(
+      <MemoryRouter initialEntries={["/campaign/campaign-1"]}>
         <App />
       </MemoryRouter>
     );
 
     expect(campaignProviderRenderMock).not.toHaveBeenCalled();
-    settingsView.unmount();
+    campaignView.unmount();
 
     render(
       <MemoryRouter initialEntries={["/"]}>

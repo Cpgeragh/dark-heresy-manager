@@ -17,12 +17,13 @@ beforeEach(() => {
   useHeaderExtensionMock.mockReturnValue({ backHref: null, kebabContent: null });
 });
 
-function renderHeader(currentPath: string, initialEntry = currentPath) {
+function renderHeader(currentPath: string, initialEntry = currentPath, onOpenSettings = vi.fn()) {
   render(
     <MemoryRouter initialEntries={[initialEntry]}>
-      <AppHeader currentPath={currentPath} />
+      <AppHeader currentPath={currentPath} onOpenSettings={onOpenSettings} />
     </MemoryRouter>
   );
+  return { onOpenSettings };
 }
 
 describe("AppHeader", () => {
@@ -43,14 +44,18 @@ describe("AppHeader", () => {
     expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/campaign/c1");
   });
 
-  it("shows the Settings link only on the dashboard route", () => {
-    renderHeader("/", "/");
-    expect(screen.getByRole("link", { name: "Settings" })).toBeInTheDocument();
+  it("opens Settings from the dashboard gear button", async () => {
+    const user = userEvent.setup();
+    const { onOpenSettings } = renderHeader("/", "/");
+
+    await user.click(screen.getByRole("button", { name: "Settings" }));
+
+    expect(onOpenSettings).toHaveBeenCalledOnce();
   });
 
-  it("hides the Settings link off the dashboard route", () => {
+  it("hides the Settings button off the dashboard route", () => {
     renderHeader("/settings", "/settings");
-    expect(screen.queryByRole("link", { name: "Settings" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Settings" })).not.toBeInTheDocument();
   });
 
   it("hides the kebab button entirely when there is no kebab content", () => {

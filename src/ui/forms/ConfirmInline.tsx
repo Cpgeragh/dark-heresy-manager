@@ -40,7 +40,7 @@ export function ConfirmInline({
   confirmDisabled: externallyDisabled = false,
   variant = "danger",
   busy = false,
-  size = "sm",
+  size = "md",
   requireText,
   requirePrompt,
   confirmLabel = "Yes",
@@ -52,8 +52,8 @@ export function ConfirmInline({
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
 
-  const triggerVariant = variant === "warning" ? "warningGhost" : "dangerGhost";
-  const confirmVariant = variant === "warning" ? "primary" : "danger";
+  const triggerVariant = variant === "warning" ? "warningOutline" : "primary";
+  const confirmVariant = variant === "warning" ? "warningOutline" : "primary";
   const accent = variant === "warning" ? "text-amber-400" : "text-red-400";
 
   const handle = (fn: () => void) => (e: React.MouseEvent) => {
@@ -124,7 +124,7 @@ export function ConfirmInline({
           >
             {effectiveBusy ? busyLabel : confirmLabel}
           </Button>
-          <Button variant="secondary" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
+          <Button variant="ghost" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
             {cancelLabel}
           </Button>
         </div>
@@ -144,7 +144,7 @@ export function ConfirmInline({
         >
           {effectiveBusy ? busyLabel : confirmLabel}
         </Button>
-        <Button variant="secondary" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
+        <Button variant="ghost" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
           {cancelLabel}
         </Button>
       </div>

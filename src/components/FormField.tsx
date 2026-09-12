@@ -18,6 +18,8 @@ interface FormFieldProps {
   error?: string;
   onBlur?: () => void;
   debounceMs?: number;
+  maxLength?: number;
+  liveTransform?: (value: string) => string;
 }
 
 export function FormField({
@@ -33,6 +35,8 @@ export function FormField({
   error,
   onBlur,
   debounceMs = 0,
+  maxLength,
+  liveTransform,
 }: FormFieldProps) {
   const hasError = !!error && editable;
   const controlClass = fieldControlClass({
@@ -47,10 +51,11 @@ export function FormField({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      if (debounceMs > 0) updateDraft(e.target.value);
-      else onChange(e.target.value);
+      const nextValue = liveTransform ? liveTransform(e.target.value) : e.target.value;
+      if (debounceMs > 0) updateDraft(nextValue);
+      else onChange(nextValue);
     },
-    [debounceMs, onChange, updateDraft]
+    [debounceMs, liveTransform, onChange, updateDraft]
   );
 
   const handleBlur = useCallback(() => {
@@ -73,6 +78,7 @@ export function FormField({
           onBlur={handleBlur}
           placeholder={placeholder}
           rows={rows}
+          maxLength={maxLength}
           aria-label={label}
           aria-describedby={
             error ? `${inputId}-error` : description ? `${inputId}-desc` : undefined
@@ -89,6 +95,7 @@ export function FormField({
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder={placeholder}
+          maxLength={maxLength}
           aria-label={label}
           aria-describedby={
             error ? `${inputId}-error` : description ? `${inputId}-desc` : undefined

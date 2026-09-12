@@ -1,16 +1,14 @@
 // tests/integration/Settings.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 const getRecoveryCodeMock = vi.fn();
 const rotateRecoveryCodeMock = vi.fn();
-const revokeIdentityRecoveryCodeMock = vi.fn();
 vi.mock("../../src/services/identityService", () => ({
   getRecoveryCode: (...args: unknown[]) => getRecoveryCodeMock(...args),
   rotateRecoveryCode: (...args: unknown[]) => rotateRecoveryCodeMock(...args),
-  revokeIdentityRecoveryCode: (...args: unknown[]) => revokeIdentityRecoveryCodeMock(...args),
 }));
 
 const deleteCurrentAccountMock = vi.fn();
@@ -40,11 +38,30 @@ beforeEach(() => {
 
 function renderSettings(props: Partial<React.ComponentProps<typeof Settings>> = {}) {
   const disconnect = vi.fn().mockResolvedValue(undefined);
+  const onClose = vi.fn();
   render(
-    <Settings effectiveUserId="user-1" firstName="Alice" disconnect={disconnect} {...props} />
+    <Settings
+      effectiveUserId="user-1"
+      firstName="Alice"
+      disconnect={disconnect}
+      onClose={onClose}
+      {...props}
+    />
   );
-  return { disconnect };
+  return { disconnect, onClose };
 }
+
+describe("Settings modal", () => {
+  it("uses the standard modal shell and closes from its header", async () => {
+    const user = userEvent.setup();
+    const { onClose } = renderSettings();
+
+    const dialog = screen.getByRole("dialog", { name: "Settings" });
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+});
 
 describe("Settings display name", () => {
   it("pre-fills the input with the current first name", () => {
@@ -104,7 +121,7 @@ describe("Settings display name", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() =>
-      expect(screen.getByText("Failed to save display name. Please try again.")).toBeInTheDocument()
+      expect(mockToastError).toHaveBeenCalledWith("Failed to save display name. Please try again.")
     );
   });
 });
@@ -115,7 +132,7 @@ describe("Settings recovery code", () => {
     getRecoveryCodeMock.mockResolvedValue("DH-AAAA-BBBB");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Code" }));
 
     expect(await screen.findByText("DH-AAAA-BBBB")).toBeInTheDocument();
     expect(rotateRecoveryCodeMock).not.toHaveBeenCalled();
@@ -128,7 +145,7 @@ describe("Settings recovery code", () => {
     rotateRecoveryCodeMock.mockResolvedValue("DH-CCCC-DDDD");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Code" }));
 
     expect(await screen.findByText("DH-CCCC-DDDD")).toBeInTheDocument();
     expect(mockToastSuccess).toHaveBeenCalledWith("Recovery code generated.");
@@ -139,24 +156,25 @@ describe("Settings recovery code", () => {
     getRecoveryCodeMock.mockRejectedValue(new Error("network"));
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Code" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("Failed to load recovery code.")
     );
   });
 
-  it("hides the code again from Hide", async () => {
+  it("hides the code again when the modal is closed", async () => {
     const user = userEvent.setup();
     getRecoveryCodeMock.mockResolvedValue("DH-AAAA-BBBB");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Code" }));
     await screen.findByText("DH-AAAA-BBBB");
-    await user.click(screen.getByRole("button", { name: "Hide" }));
+    const revealDialog = screen.getByRole("dialog", { name: "Reveal Code" });
+    await user.click(within(revealDialog).getByRole("button", { name: "Close" }));
 
     expect(screen.queryByText("DH-AAAA-BBBB")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reveal Recovery Code" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reveal Code" })).toBeInTheDocument();
   });
 
   it("rotates the code on confirm, replacing the revealed value", async () => {
@@ -165,7 +183,7 @@ describe("Settings recovery code", () => {
     rotateRecoveryCodeMock.mockResolvedValue("DH-EEEE-FFFF");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Code" }));
     await screen.findByText("DH-AAAA-BBBB");
     await user.click(screen.getByRole("button", { name: "Rotate Code" }));
     await user.click(screen.getByRole("button", { name: "Yes, rotate" }));
@@ -183,7 +201,7 @@ describe("Settings recovery code", () => {
     rotateRecoveryCodeMock.mockRejectedValue(new Error("network"));
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Code" }));
     await screen.findByText("DH-AAAA-BBBB");
     await user.click(screen.getByRole("button", { name: "Rotate Code" }));
     await user.click(screen.getByRole("button", { name: "Yes, rotate" }));
@@ -191,33 +209,6 @@ describe("Settings recovery code", () => {
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith(
         "Failed to rotate recovery code. Please try again."
-      )
-    );
-  });
-
-  it("revokes the identity recovery code after confirmation", async () => {
-    const user = userEvent.setup();
-    revokeIdentityRecoveryCodeMock.mockResolvedValue(undefined);
-    renderSettings();
-
-    await user.click(screen.getByRole("button", { name: "Revoke Code" }));
-    await user.click(screen.getByRole("button", { name: "Yes, revoke" }));
-
-    expect(revokeIdentityRecoveryCodeMock).toHaveBeenCalledOnce();
-    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Recovery code revoked."));
-  });
-
-  it("reports a failed identity-code revocation", async () => {
-    const user = userEvent.setup();
-    revokeIdentityRecoveryCodeMock.mockRejectedValue(new Error("failed"));
-    renderSettings();
-
-    await user.click(screen.getByRole("button", { name: "Revoke Code" }));
-    await user.click(screen.getByRole("button", { name: "Yes, revoke" }));
-
-    await waitFor(() =>
-      expect(mockToastError).toHaveBeenCalledWith(
-        "Failed to revoke recovery code. Please try again."
       )
     );
   });
@@ -266,7 +257,7 @@ describe("Settings linked device", () => {
 });
 
 describe("Settings account deletion", () => {
-  it("requires typing DELETE before deleting the primary account", async () => {
+  it("requires typing DELETE before deleting the account", async () => {
     const user = userEvent.setup();
     deleteCurrentAccountMock.mockResolvedValue(undefined);
     renderSettings();

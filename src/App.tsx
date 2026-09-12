@@ -41,6 +41,7 @@ function AppContent() {
   const [isPostUpgrade] = useState(() => consumePostUpgrade());
   const location = useLocation();
   const [messagesOpen, setMessagesOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const characterSheetMatch = useMatch(ROUTE_PATTERNS.CHARACTER_SHEET);
   const contextCampaignId = characterSheetMatch?.params?.campaignId ?? null;
   const contextCharacterId = characterSheetMatch?.params?.characterId ?? null;
@@ -129,7 +130,10 @@ function AppContent() {
       <UpdateStallNotice />
       <div className="min-h-screen bg-slate-950 text-slate-100">
         {/* HEADER */}
-        <AppHeader currentPath={location.pathname} />
+        <AppHeader
+          currentPath={location.pathname}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
 
         {/* ROUTES */}
         <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
@@ -167,17 +171,6 @@ function AppContent() {
                   element={<CampaignOverview effectiveUserId={effectiveUserId} />}
                 />
 
-                <Route
-                  path={ROUTES.SETTINGS}
-                  element={
-                    <Settings
-                      effectiveUserId={effectiveUserId}
-                      firstName={firstName}
-                      disconnect={handleDeviceDisconnect}
-                    />
-                  }
-                />
-
                 <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
               </Routes>
             </Suspense>
@@ -191,6 +184,17 @@ function AppContent() {
           campaignId={contextCampaignId}
           characterId={contextCharacterId}
         />
+
+        {settingsOpen && (
+          <Suspense fallback={null}>
+            <Settings
+              effectiveUserId={effectiveUserId}
+              firstName={firstName}
+              disconnect={handleDeviceDisconnect}
+              onClose={() => setSettingsOpen(false)}
+            />
+          </Suspense>
+        )}
 
         <OfflineIndicator />
       </div>

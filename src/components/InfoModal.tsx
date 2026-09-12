@@ -17,7 +17,7 @@ export function InfoModal({ title, content, hideTitle = false, as = "button" }: 
   const [open, setOpen] = useState(false);
 
   const triggerClassName =
-    "inline-flex h-[13.5px] w-[18px] shrink-0 items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 text-sm leading-none hover:bg-slate-600";
+    "inline-flex h-3.5 w-[18px] shrink-0 items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 text-sm leading-none hover:bg-slate-600 transform-gpu";
   const triggerIcon = (
     <svg
       xmlns="http://www.w3.org/2000/svg"

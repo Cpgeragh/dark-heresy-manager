@@ -1,15 +1,15 @@
 import type { ButtonHTMLAttributes } from "react";
 import { uiIconAddButton } from "../styles/buttonStyles";
-import { TrashIcon } from "../icons/TrashIcon";
+import { PencilIcon } from "../icons/PencilIcon";
 
-type RemoveButtonProps = Omit<
+type EditButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   "aria-label" | "children" | "type"
 > & {
   label: string;
 };
 
-export function RemoveButton({ label, className = "", ...buttonProps }: RemoveButtonProps) {
+export function EditButton({ label, className = "", ...buttonProps }: EditButtonProps) {
   return (
     <button
       type="button"
@@ -17,7 +17,7 @@ export function RemoveButton({ label, className = "", ...buttonProps }: RemoveBu
       className={`${uiIconAddButton} ${className}`.trim()}
       {...buttonProps}
     >
-      <TrashIcon className="w-[18px] h-[18px]" />
+      <PencilIcon className="w-[18px] h-[18px]" />
     </button>
   );
 }

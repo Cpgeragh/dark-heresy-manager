@@ -2,22 +2,21 @@
 // User settings: recovery code management and device linking.
 
 import { useRef, useState } from "react";
-import {
-  getRecoveryCode,
-  revokeIdentityRecoveryCode,
-  rotateRecoveryCode,
-} from "../services/identityService";
+import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
 import { deleteCurrentAccount } from "../services/userAccountService";
 import { LastDeviceDisconnectError } from "../services/deviceLinkService";
 import { saveFirstName } from "../services/profileService";
 import { useToast } from "../components/Toast";
+import { InfoModal } from "../components/InfoModal";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { uiSection, uiTextError } from "../ui/styles/editableStyles";
+import { colourAmberPlain } from "../ui/styles/colourTokens";
+import { editableInputClass, uiInfoModalWrapper } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
-import { ConfirmInline } from "../ui/forms/ConfirmInline";
-import { PageShell } from "../ui/PageShell";
-import { Panel } from "../ui/Panel";
-import { SectionHeader } from "../ui/SectionHeader";
+import { ViewButton } from "../ui/buttons/ViewButton";
+import { RemoveButton } from "../ui/buttons/RemoveButton";
+import { EditButton } from "../ui/buttons/EditButton";
+import { UnlinkButton } from "../ui/buttons/UnlinkButton";
+import { PickerModal, PickerBody } from "../ui/pickers/PickerModal";
 import { formatFirstNameInput } from "../utils/firstName";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
@@ -26,16 +25,22 @@ interface Props {
   effectiveUserId: string;
   firstName: string;
   disconnect: (confirmLastDevice?: boolean) => Promise<void>;
+  onClose: () => void;
 }
 
-export default function Settings({ effectiveUserId, firstName, disconnect }: Props) {
+const settingsRowClass =
+  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4 lg:py-5";
+const settingsLabelClass =
+  "font-cinzel text-sm font-semibold uppercase tracking-wider text-slate-200 lg:text-base";
+
+export default function Settings({ effectiveUserId, firstName, disconnect, onClose }: Props) {
   const toast = useToast();
 
   // ── Display name state ───────────────────────────────────────────────────
   const [nameDraft, setNameDraft] = useState(firstName);
   const [savingName, setSavingName] = useState(false);
   const savingNameRef = useRef(false);
-  const [nameError, setNameError] = useState<string | null>(null);
+  const [editNameOpen, setEditNameOpen] = useState(false);
 
   // ── Recovery code state ──────────────────────────────────────────────────
   const [revealedCode, setRevealedCode] = useState<string | null>(null);
@@ -43,15 +48,17 @@ export default function Settings({ effectiveUserId, firstName, disconnect }: Pro
   const revealingRef = useRef(false);
   const [rotating, setRotating] = useState(false);
   const rotatingRef = useRef(false);
-  const [revoking, setRevoking] = useState(false);
-  const revokingRef = useRef(false);
+  const [rotateConfirmOpen, setRotateConfirmOpen] = useState(false);
 
   // ── Device link state ────────────────────────────────────────────────────
   const [disconnectingDevice, setDisconnectingDevice] = useState(false);
   const disconnectingDeviceRef = useRef(false);
+  const [disconnectConfirmOpen, setDisconnectConfirmOpen] = useState(false);
   const [lastDeviceWarningOpen, setLastDeviceWarningOpen] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const deletingAccountRef = useRef(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   async function handleSaveName() {
     if (savingNameRef.current) return;
@@ -59,13 +66,12 @@ export default function Settings({ effectiveUserId, firstName, disconnect }: Pro
     if (!trimmed || trimmed === firstName) return;
     savingNameRef.current = true;
     setSavingName(true);
-    setNameError(null);
     try {
       await saveFirstName(effectiveUserId, trimmed);
       toast.success("Display name updated.");
     } catch (err) {
       console.error("Failed to save display name:", err);
-      setNameError("Failed to save display name. Please try again.");
+      toast.error("Failed to save display name. Please try again.");
     } finally {
       savingNameRef.current = false;
       setSavingName(false);
@@ -109,23 +115,6 @@ export default function Settings({ effectiveUserId, firstName, disconnect }: Pro
     }
   }
 
-  async function handleRevoke() {
-    if (revokingRef.current) return;
-    revokingRef.current = true;
-    setRevoking(true);
-    try {
-      await revokeIdentityRecoveryCode();
-      setRevealedCode(null);
-      toast.success("Recovery code revoked.");
-    } catch (err) {
-      console.error("Failed to revoke recovery code:", err);
-      toast.error("Failed to revoke recovery code. Please try again.");
-    } finally {
-      revokingRef.current = false;
-      setRevoking(false);
-    }
-  }
-
   async function handleDisconnectDevice(confirmLastDevice = false) {
     if (disconnectingDeviceRef.current) return;
     disconnectingDeviceRef.current = true;
@@ -162,159 +151,327 @@ export default function Settings({ effectiveUserId, firstName, disconnect }: Pro
     }
   }
 
+  const settingsBusy = savingName || revealing || rotating || disconnectingDevice || deletingAccount;
+  const childModalOpen =
+    revealedCode !== null ||
+    disconnectConfirmOpen ||
+    lastDeviceWarningOpen ||
+    deleteConfirmOpen;
+
   return (
-    <PageShell title="Settings">
-      <Panel>
+    <ModalShell
+      ariaLabel="Settings"
+      onClose={() => !settingsBusy && onClose()}
+      suspended={childModalOpen}
+      className="min-h-0 max-h-[85vh] max-w-md flex flex-col overflow-hidden"
+      viewportAware
+    >
+      <ModalHeader title="Settings" onClose={() => !settingsBusy && onClose()} />
+      <div className="min-h-0 flex-1 divide-y divide-slate-700 overflow-y-auto px-4 lg:px-6">
         {/* ── Display Name ───────────────────────────────────────────────── */}
-        <div>
-          <SectionHeader className="mb-3">Display Name</SectionHeader>
-          <section className={uiSection + " space-y-3"}>
-            <p className="text-slate-400 text-sm lg:text-base">
-              Your first name, shown on your dashboard and character sheets. If you DM a campaign,
-              it's also shown to your players as the GM's name.
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                autoComplete="given-name"
-                autoCapitalize="words"
-                value={nameDraft}
-                onChange={(e) => setNameDraft(formatFirstNameInput(e.target.value))}
-                maxLength={PRODUCT_LIMITS.firstNameCharacters}
-                placeholder="e.g. David"
-                className="flex-1 px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm lg:text-base placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
-              />
-              <Button
-                onClick={handleSaveName}
-                disabled={savingName || !nameDraft.trim() || nameDraft.trim() === firstName}
+        <section className={settingsRowClass}>
+          <div>
+            <span className="flex items-center gap-1.5">
+              <span className={settingsLabelClass}>Edit Display Name</span>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal
+                  title="Display Name"
+                  content="Shown on your dashboard and character sheets. If you DM a campaign, it's also shown to your players as the GM's name."
+                />
+              </span>
+            </span>
+          </div>
+          <EditButton
+            label="Edit display name"
+            className="justify-self-end"
+            onClick={() => setEditNameOpen(true)}
+          />
+        </section>
+
+        {editNameOpen && (
+          <PickerModal
+            title="Edit Display Name"
+            query=""
+            onQueryChange={() => undefined}
+            onClose={() => !savingName && setEditNameOpen(false)}
+            isEmpty={false}
+            hideSearch
+            maxWidth="max-w-sm"
+          >
+            <PickerBody>
+              <form
+                className="flex gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void (async () => {
+                    await handleSaveName();
+                    setEditNameOpen(false);
+                  })();
+                }}
               >
-                {savingName ? "Saving…" : "Save"}
-              </Button>
-            </div>
-            {nameError && <p className={uiTextError}>{nameError}</p>}
-          </section>
-        </div>
+                <input
+                  id="settings-first-name"
+                  type="text"
+                  aria-label="First Name"
+                  autoComplete="given-name"
+                  autoCapitalize="words"
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(formatFirstNameInput(e.target.value))}
+                  placeholder="e.g. David"
+                  disabled={savingName}
+                  maxLength={PRODUCT_LIMITS.firstNameCharacters}
+                  className={`${editableInputClass(true)} min-w-0 flex-1`}
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={savingName || !nameDraft.trim() || nameDraft.trim() === firstName}
+                >
+                  {savingName ? "Saving…" : "Save"}
+                </Button>
+              </form>
+            </PickerBody>
+          </PickerModal>
+        )}
 
         {/* ── Recovery Code ───────────────────────────────────────────────── */}
-        <div>
-          <SectionHeader className="mb-3">Recovery Code</SectionHeader>
-          <section className={uiSection + " space-y-3"}>
-            <p className="text-slate-400 text-sm lg:text-base">
-              Use this code to reconnect to your campaigns and characters if no device is still
-              connected. Keep it somewhere safe and private.
-            </p>
-
-            {revealedCode ? (
-              <>
-                <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 text-center">
-                  <p className="text-xs lg:text-sm text-slate-500 uppercase tracking-widest mb-2">
-                    Recovery Code
-                  </p>
-                  <span className="font-code [font-feature-settings:'zero'] text-lg lg:text-xl text-amber-400 tracking-widest break-all select-all">
-                    {revealedCode}
-                  </span>
-                </div>
-
-                <div className="border border-amber-500/60 bg-amber-500/10 rounded-lg p-3 space-y-2">
-                  <p className="text-xs lg:text-sm text-amber-200">
-                    If anyone else may have seen this code, rotate it now to invalidate it.
-                  </p>
-                  <div className="flex gap-3">
-                    <Button variant="ghost" onClick={() => setRevealedCode(null)}>
-                      Hide
-                    </Button>
-                    <ConfirmInline
-                      triggerLabel="Rotate Code"
-                      question="Rotate code?"
-                      onConfirm={handleRotate}
-                      variant="warning"
-                      busy={rotating}
-                      confirmLabel="Yes, rotate"
-                      cancelLabel="Cancel"
-                      busyLabel="Rotating…"
-                    />
-                    <ConfirmInline
-                      triggerLabel="Revoke Code"
-                      question="Revoke code?"
-                      onConfirm={handleRevoke}
-                      busy={revoking}
-                      confirmLabel="Yes, revoke"
-                      cancelLabel="Cancel"
-                      busyLabel="Revoking…"
-                    />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex gap-3">
-                <Button onClick={handleReveal} disabled={revealing}>
-                  {revealing ? "Loading…" : "Reveal Recovery Code"}
-                </Button>
-                <ConfirmInline
-                  triggerLabel="Revoke Code"
-                  question="Revoke code?"
-                  onConfirm={handleRevoke}
-                  busy={revoking}
-                  confirmLabel="Yes, revoke"
-                  cancelLabel="Cancel"
-                  busyLabel="Revoking…"
+        <section className={settingsRowClass}>
+          <div>
+            <span className="flex items-center gap-1.5">
+              <span className={settingsLabelClass}>View Account Recovery Code</span>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal
+                  title="Account Recovery Code"
+                  content="Use this code to reconnect to your campaigns and characters if no device is still connected. Keep it somewhere safe and private."
                 />
+              </span>
+            </span>
+          </div>
+          <ViewButton
+            label="Reveal recovery code"
+            className="justify-self-end"
+            onClick={handleReveal}
+            disabled={revealing}
+          />
+        </section>
+
+        {revealedCode && (
+          <PickerModal
+            title="Reveal Code"
+            query=""
+            onQueryChange={() => undefined}
+            onClose={() => setRevealedCode(null)}
+            isEmpty={false}
+            hideSearch
+            maxWidth="max-w-sm"
+            suspended={rotateConfirmOpen}
+            footer={
+              <Button variant="primary" fullWidth onClick={() => setRotateConfirmOpen(true)}>
+                Rotate Code
+              </Button>
+            }
+          >
+            <PickerBody>
+              <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 text-center">
+                <span className="font-code [font-feature-settings:'zero'] text-lg lg:text-xl text-white tracking-widest break-all select-all">
+                  {revealedCode}
+                </span>
               </div>
-            )}
-          </section>
-        </div>
+              <p className={`text-xs lg:text-sm ${colourAmberPlain} text-center`}>
+                If anyone else may have seen this code, rotate it now to invalidate it.
+              </p>
+            </PickerBody>
+          </PickerModal>
+        )}
+
+        {rotateConfirmOpen && (
+          <PickerModal
+            title="Rotate Code"
+            query=""
+            onQueryChange={() => undefined}
+            onClose={() => !rotating && setRotateConfirmOpen(false)}
+            isEmpty={false}
+            hideSearch
+            maxWidth="max-w-sm"
+            footer={
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="primary"
+                  disabled={rotating}
+                  onClick={async () => {
+                    await handleRotate();
+                    setRotateConfirmOpen(false);
+                  }}
+                >
+                  {rotating ? "Rotating…" : "Yes, rotate"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={rotating}
+                  onClick={() => setRotateConfirmOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            }
+          >
+            <PickerBody>
+              <p className="text-sm lg:text-base text-slate-300">
+                Rotate code? A new one is generated and the old one stops working immediately.
+              </p>
+            </PickerBody>
+          </PickerModal>
+        )}
 
         {/* ── Linked Device ───────────────────────────────────────────────── */}
-        <div>
-          <SectionHeader className="mb-3">This Device</SectionHeader>
-          <section className={uiSection + " space-y-3"}>
-            <p className="text-slate-400 text-sm lg:text-base">
-              Disconnect this device from your account. Your campaigns and characters remain in the
-              account and stay available on every other connected device.
-            </p>
-            <ConfirmInline
-              triggerLabel="Disconnect This Device"
-              question="Disconnect this device?"
-              onConfirm={() => handleDisconnectDevice(false)}
-              variant="warning"
-              busy={disconnectingDevice}
-              confirmLabel="Yes, disconnect"
-              cancelLabel="Cancel"
-              busyLabel="Disconnecting…"
-            />
-          </section>
-        </div>
+        <section className={settingsRowClass}>
+          <div>
+            <span className="flex items-center gap-1.5">
+              <span className={settingsLabelClass}>Unlink Device</span>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal
+                  title="Linked Device"
+                  content="Unlink this device from your account. Your campaigns and characters remain in the account and stay available on every other connected device."
+                />
+              </span>
+            </span>
+          </div>
+          <UnlinkButton
+            label="Unlink this device"
+            className="justify-self-end"
+            onClick={() => setDisconnectConfirmOpen(true)}
+          />
+        </section>
 
-        <div>
-          <SectionHeader className="mb-3">Delete Account</SectionHeader>
-          <section className={uiSection + " space-y-3 border-red-900/70"}>
-            <p className="text-slate-400 text-sm lg:text-base">
-              This releases your claimed characters, removes your profile and linked devices,
-              revokes account recovery, and permanently deletes this anonymous account. You must
-              delete or transfer every campaign you own first.
-            </p>
-            <ConfirmInline
-              triggerLabel="Delete Account"
-              onConfirm={handleDeleteAccount}
-              requireText="DELETE"
-              requirePrompt="Type DELETE to permanently delete this account"
-              busy={deletingAccount}
-              confirmLabel="Delete permanently"
-              cancelLabel="Cancel"
-              busyLabel="Deleting…"
-            />
-          </section>
-        </div>
-      </Panel>
+        {disconnectConfirmOpen && (
+          <PickerModal
+            title="Unlink This Device?"
+            query=""
+            onQueryChange={() => undefined}
+            onClose={() => !disconnectingDevice && setDisconnectConfirmOpen(false)}
+            isEmpty={false}
+            hideSearch
+            maxWidth="max-w-sm"
+            footer={
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="primary"
+                  disabled={disconnectingDevice}
+                  onClick={async () => {
+                    await handleDisconnectDevice(false);
+                    setDisconnectConfirmOpen(false);
+                  }}
+                >
+                  {disconnectingDevice ? "Unlinking…" : "Yes, unlink"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={disconnectingDevice}
+                  onClick={() => setDisconnectConfirmOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            }
+          >
+            <PickerBody>
+              <p className="text-sm lg:text-base text-slate-300">
+                Your campaigns and characters remain in the account and stay available on every
+                other connected device. You can reconnect this device later using your account
+                recovery code.
+              </p>
+            </PickerBody>
+          </PickerModal>
+        )}
+
+        <section className={settingsRowClass}>
+          <div>
+            <span className="flex items-center gap-1.5">
+              <span className={settingsLabelClass}>Delete Account</span>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal
+                  title="Delete Account"
+                  content="This releases your claimed characters, removes your profile and linked devices, revokes account recovery, and permanently deletes this anonymous account. You must delete or transfer every campaign you own first."
+                />
+              </span>
+            </span>
+          </div>
+          <RemoveButton
+            label="Delete account"
+            className="justify-self-end"
+            onClick={() => setDeleteConfirmOpen(true)}
+          />
+        </section>
+
+        {deleteConfirmOpen && (
+          <PickerModal
+            title="Delete Account"
+            query=""
+            onQueryChange={() => undefined}
+            onClose={() => {
+              if (deletingAccount) return;
+              setDeleteConfirmOpen(false);
+              setDeleteConfirmText("");
+            }}
+            isEmpty={false}
+            hideSearch
+            maxWidth="max-w-sm"
+            footer={
+              <div className="space-y-2">
+                <p className={`text-xs lg:text-sm ${colourAmberPlain} text-center`}>
+                  Type DELETE to permanently delete this account
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  disabled={deletingAccount}
+                  placeholder="DELETE"
+                  className={editableInputClass(true)}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="primary"
+                    disabled={deletingAccount || deleteConfirmText !== "DELETE"}
+                    onClick={async () => {
+                      await handleDeleteAccount();
+                      setDeleteConfirmOpen(false);
+                      setDeleteConfirmText("");
+                    }}
+                  >
+                    {deletingAccount ? "Deleting…" : "Delete permanently"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={deletingAccount}
+                    onClick={() => {
+                      setDeleteConfirmOpen(false);
+                      setDeleteConfirmText("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            }
+          >
+            <PickerBody>
+              <p className="text-sm lg:text-base text-slate-300">
+                This permanently deletes your account. This cannot be undone.
+              </p>
+            </PickerBody>
+          </PickerModal>
+        )}
+      </div>
 
       {lastDeviceWarningOpen && (
         <ModalShell
-          ariaLabel="Disconnect Last Device"
+          ariaLabel="Unlink Last Device"
           onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
           className="max-w-lg"
         >
           <ModalHeader
-            title="Disconnect Last Device"
+            title="Unlink Last Device"
             onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
           />
           <div className="space-y-4 p-4 lg:p-5">
@@ -335,12 +492,12 @@ export default function Settings({ effectiveUserId, firstName, disconnect }: Pro
                 onClick={() => void handleDisconnectDevice(true)}
                 disabled={disconnectingDevice}
               >
-                {disconnectingDevice ? "Disconnecting…" : "Disconnect anyway"}
+                {disconnectingDevice ? "Unlinking…" : "Unlink anyway"}
               </Button>
             </div>
           </div>
         </ModalShell>
       )}
-    </PageShell>
+    </ModalShell>
   );
 }

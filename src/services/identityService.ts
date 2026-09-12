@@ -26,11 +26,6 @@ export async function createAccount(): Promise<{ accountId: string; code: string
   });
 }
 
-const callRevokeIdentityCode = httpsCallable<Record<string, never>, void>(
-  functions,
-  "revokeIdentityCode"
-);
-
 /**
  * Reads the user's current recovery code from identitySecret.
  * Returns null if no code exists (e.g. user hasn't completed onboarding).
@@ -59,12 +54,5 @@ export async function rotateRecoveryCode(
   return runSingleFlight("identity:rotate-recovery", [uid], async () => {
     const { data } = await callRegisterIdentityCode({});
     return data.code;
-  });
-}
-
-/** Revokes the current account-level recovery code without replacing it. */
-export async function revokeIdentityRecoveryCode(): Promise<void> {
-  await runSingleFlight("identity:revoke-recovery", [], async () => {
-    await callRevokeIdentityCode({});
   });
 }
