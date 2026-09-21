@@ -330,7 +330,7 @@ export function SkillRow({
               >
                 Upgrade
               </Button>
-              <Button variant="ghost" onClick={() => setUpgradeArmed(false)}>
+              <Button variant="neutral" onClick={() => setUpgradeArmed(false)}>
                 Cancel
               </Button>
             </div>
@@ -366,7 +366,7 @@ export function SkillRow({
               >
                 Upgrade
               </Button>
-              <Button variant="ghost" onClick={() => setManualUpgradeArmed(false)}>
+              <Button variant="neutral" onClick={() => setManualUpgradeArmed(false)}>
                 Cancel
               </Button>
             </div>
@@ -422,7 +422,7 @@ export function SkillRow({
                 </Button>
                 <Button
                   className="col-span-2"
-                  variant="ghost"
+                  variant="neutral"
                   onClick={() => setDeleteArmed(false)}
                 >
                   Cancel
@@ -439,7 +439,7 @@ export function SkillRow({
                 >
                   Delete
                 </Button>
-                <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
                   Cancel
                 </Button>
               </div>

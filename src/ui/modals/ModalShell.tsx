@@ -2,7 +2,7 @@
 // Drawers, popovers, and other non-modal overlays intentionally remain separate.
 
 import { createPortal } from "react-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 export const MODAL_OPENED_EVENT = "dhm:modal-opened";
@@ -110,10 +110,13 @@ export function ModalShell({
 
   useBodyScrollLock();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
+    // Open the native dialog before the browser paints. When a parent modal is
+    // suspended for a child modal, waiting for a normal effect leaves one frame
+    // where the parent's backdrop is transparent but the child's is not open.
     dialog.showModal();
     window.dispatchEvent(new Event(MODAL_OPENED_EVENT));
     window.dispatchEvent(new Event(MODAL_LAYER_CHANGED_EVENT));

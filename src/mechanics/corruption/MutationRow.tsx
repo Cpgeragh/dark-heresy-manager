@@ -119,7 +119,7 @@ export function MutationRow({
               <Button variant="primary" onClick={onRemove}>
                 Delete
               </Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+              <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
                 Cancel
               </Button>
             </div>

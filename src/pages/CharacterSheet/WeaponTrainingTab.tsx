@@ -376,7 +376,7 @@ export function WeaponTrainingTab({
               <Button variant="primary" onClick={confirmTrain}>
                 Train
               </Button>
-              <Button variant="ghost" onClick={() => setPendingTrain(null)}>
+              <Button variant="neutral" onClick={() => setPendingTrain(null)}>
                 Cancel
               </Button>
             </div>
@@ -409,7 +409,7 @@ export function WeaponTrainingTab({
               >
                 Train
               </Button>
-              <Button variant="ghost" onClick={() => setPendingManualTrain(null)}>
+              <Button variant="neutral" onClick={() => setPendingManualTrain(null)}>
                 Cancel
               </Button>
             </div>
@@ -447,7 +447,7 @@ export function WeaponTrainingTab({
               <Button variant="primary" onClick={confirmRemoveTraining}>
                 Remove
               </Button>
-              <Button variant="ghost" onClick={() => setPendingRemoveTraining(null)}>
+              <Button variant="neutral" onClick={() => setPendingRemoveTraining(null)}>
                 Cancel
               </Button>
             </div>
@@ -475,7 +475,7 @@ export function WeaponTrainingTab({
               <Button variant="primary" onClick={confirmRemoveExotic}>
                 Remove
               </Button>
-              <Button variant="ghost" onClick={() => setPendingRemoveExotic(null)}>
+              <Button variant="neutral" onClick={() => setPendingRemoveExotic(null)}>
                 Cancel
               </Button>
             </div>

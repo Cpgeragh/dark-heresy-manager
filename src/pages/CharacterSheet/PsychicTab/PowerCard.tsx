@@ -224,7 +224,7 @@ export function PowerCard({
               <Button variant="primary" onClick={() => onRemove(power.id)}>
                 Delete
               </Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+              <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
                 Cancel
               </Button>
             </div>

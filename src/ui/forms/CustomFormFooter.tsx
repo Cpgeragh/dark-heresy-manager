@@ -35,17 +35,17 @@ export function CustomFormFooter({
   return (
     <div className={`space-y-2 ${className}`.trim()}>
       <RequiredFieldsNote />
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <Button
           type={formId ? "submit" : "button"}
           form={formId}
-          className="flex-1"
+          fullWidth
           onClick={formId ? undefined : onSubmit}
           disabled={!canSubmit || saving}
         >
           {saving ? savingLabel : submitLabel}
         </Button>
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={saving}>
+        <Button type="button" variant="neutral" fullWidth onClick={onCancel} disabled={saving}>
           Cancel
         </Button>
       </div>

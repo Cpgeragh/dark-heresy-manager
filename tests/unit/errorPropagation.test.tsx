@@ -139,7 +139,7 @@ describe("onboarding error propagation", () => {
     await browserUser.type(screen.getByLabelText("First Name"), "david");
     await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop{Enter}");
 
-    await waitFor(() => expect(mockSaveFirstName).toHaveBeenCalledWith("account-new", "David"));
+    await waitFor(() => expect(mockSaveFirstName).toHaveBeenCalledWith("David"));
     expect(mockCreateAccount).toHaveBeenCalledOnce();
     expect(mockCreateAccount).toHaveBeenCalledWith("My laptop");
   });
@@ -161,7 +161,7 @@ describe("onboarding error propagation", () => {
 
     expect(await screen.findByText("RECOVERY-CODE")).toBeVisible();
     expect(mockCreateAccount).toHaveBeenCalledOnce();
-    expect(mockSaveFirstName).toHaveBeenCalledWith("account-existing", "David");
+    expect(mockSaveFirstName).toHaveBeenCalledWith("David");
     expect(mockRotateRecoveryCode).not.toHaveBeenCalled();
   });
 

@@ -3,7 +3,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 import { SERVER_PRODUCT_LIMITS } from "../shared/productLimits.js";
-import { enforceRateLimit } from "../shared/rateLimit.js";
+import { prepareRateLimit } from "../shared/rateLimit.js";
 
 export interface CreateCampaignInput {
   name: string;
@@ -46,12 +46,6 @@ export async function createCampaign(
     false
   );
 
-  await enforceRateLimit({
-    key: `create-campaign:account:${ownerUid}`,
-    limit: SERVER_PRODUCT_LIMITS.campaignCreationsPerWindow,
-    windowMs: SERVER_PRODUCT_LIMITS.campaignCreationWindowMs,
-  });
-
   const campaignRef = db.collection("campaigns").doc();
   const profileRef = db.collection("userProfiles").doc(ownerUid);
   const accountCampaigns = db
@@ -60,14 +54,25 @@ export async function createCampaign(
     .limit(SERVER_PRODUCT_LIMITS.campaignsPerAccount + 1);
 
   return runOperationTransaction(db, idempotency, async (transaction) => {
-    const [profileSnapshot, campaignsSnapshot] = await Promise.all([
+    const [profileSnapshot, campaignsSnapshot, applyCreationLimit] = await Promise.all([
       transaction.get(profileRef),
       transaction.get(accountCampaigns),
+      prepareRateLimit(db, transaction, {
+        key: `create-campaign:account:${ownerUid}`,
+        limit: SERVER_PRODUCT_LIMITS.campaignCreationsPerWindow,
+        windowMs: SERVER_PRODUCT_LIMITS.campaignCreationWindowMs,
+        rejectionMessage: `You can create up to ${SERVER_PRODUCT_LIMITS.campaignCreationsPerWindow} campaigns in 24 hours. Try again later.`,
+        rejectionDetails: { reason: "campaign-daily-limit" },
+      }),
     ]);
     if (campaignsSnapshot.size >= SERVER_PRODUCT_LIMITS.campaignsPerAccount) {
       throw new HttpsError(
         "resource-exhausted",
-        `An account can have at most ${SERVER_PRODUCT_LIMITS.campaignsPerAccount} campaigns.`
+        `An account can have at most ${SERVER_PRODUCT_LIMITS.campaignsPerAccount} campaigns.`,
+        {
+          reason: "campaign-account-limit",
+          limit: SERVER_PRODUCT_LIMITS.campaignsPerAccount,
+        }
       );
     }
 
@@ -77,6 +82,7 @@ export async function createCampaign(
         ? firstName.trim().slice(0, SERVER_PRODUCT_LIMITS.firstNameCharacters)
         : "";
 
+    applyCreationLimit();
     transaction.set(campaignRef, {
       name,
       dmId: ownerUid,

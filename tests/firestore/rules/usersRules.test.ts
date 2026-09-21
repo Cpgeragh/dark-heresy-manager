@@ -101,9 +101,10 @@ describe("Firestore Rules: Users", () => {
     await expect(profiles.limit(1).get()).rejects.toThrow();
   });
 
-  it("rejects unexpected or oversized public-profile fields", async () => {
+  it("rejects all direct public-profile writes", async () => {
     const env = await getTestEnv();
     const profile = dbAs(env, "u1").collection("userProfiles").doc("u1");
+    await expect(profile.set({ firstName: "Iona" })).rejects.toThrow();
     await expect(profile.set({ firstName: "x".repeat(51) })).rejects.toThrow();
     await expect(
       profile.set({ firstName: "Iona", email: "private@example.test" })

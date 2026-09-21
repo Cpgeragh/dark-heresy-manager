@@ -50,7 +50,6 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
 
   // ── Recovery code state ──────────────────────────────────────────────────
   const [revealedCode, setRevealedCode] = useState<string | null>(null);
-  const [revealTitle, setRevealTitle] = useState("Reveal Code");
   const [revealing, setRevealing] = useState(false);
   const revealingRef = useRef(false);
   const [rotating, setRotating] = useState(false);
@@ -64,6 +63,8 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
   const [lastDeviceWarningOpen, setLastDeviceWarningOpen] = useState(false);
   const [devices, setDevices] = useState<LinkedDevice[] | null>(null);
   const [loadingDevices, setLoadingDevices] = useState(false);
+  const loadingDevicesRef = useRef(false);
+  const mountedRef = useRef(true);
   const [manageDevicesOpen, setManageDevicesOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<LinkedDevice | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
@@ -78,20 +79,35 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  const loadDevices = useCallback(async () => {
-    setLoadingDevices(true);
-    try {
-      const linkedDevices = await listLinkedDevices();
-      setDevices(linkedDevices);
-      return linkedDevices;
-    } catch (err) {
-      console.error("Failed to load linked devices:", err);
-      toast.error("Failed to load connected devices. Please try again.");
-      return null;
-    } finally {
-      setLoadingDevices(false);
-    }
-  }, [toast]);
+  const loadDevices = useCallback(
+    async (showError = true) => {
+      if (loadingDevicesRef.current) return null;
+      loadingDevicesRef.current = true;
+      if (mountedRef.current) setLoadingDevices(true);
+      try {
+        const linkedDevices = await listLinkedDevices();
+        if (mountedRef.current) setDevices(linkedDevices);
+        return linkedDevices;
+      } catch (err) {
+        console.error("Failed to load linked devices:", err);
+        if (mountedRef.current && showError) {
+          toast.error("Failed to load connected devices. Please try again.");
+        }
+        return null;
+      } finally {
+        loadingDevicesRef.current = false;
+        if (mountedRef.current) setLoadingDevices(false);
+      }
+    },
+    [toast]
+  );
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!devices || legacyRenamePromptedRef.current) return;
@@ -102,18 +118,20 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     setRenameDraft("");
   }, [devices]);
 
-  async function handleSaveName() {
-    if (savingNameRef.current) return;
+  async function handleSaveName(): Promise<boolean> {
+    if (savingNameRef.current) return false;
     const trimmed = nameDraft.trim();
-    if (!trimmed || trimmed === firstName) return;
+    if (!trimmed || trimmed === firstName) return false;
     savingNameRef.current = true;
     setSavingName(true);
     try {
-      await saveFirstName(effectiveUserId, trimmed);
+      await saveFirstName(trimmed);
       toast.success("Display name updated.");
+      return true;
     } catch (err) {
       console.error("Failed to save display name:", err);
       toast.error("Failed to save display name. Please try again.");
+      return false;
     } finally {
       savingNameRef.current = false;
       setSavingName(false);
@@ -131,7 +149,6 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
         toast.success("Recovery code generated.");
       }
       setRevealedCode(code);
-      setRevealTitle("Reveal Code");
     } catch (err) {
       console.error("Failed to reveal recovery code:", err);
       toast.error("Failed to load recovery code.");
@@ -141,17 +158,19 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     }
   }
 
-  async function handleRotate() {
-    if (rotatingRef.current) return;
+  async function handleRotate(): Promise<boolean> {
+    if (rotatingRef.current) return false;
     rotatingRef.current = true;
     setRotating(true);
     try {
       const newCode = await rotateRecoveryCode(effectiveUserId);
       setRevealedCode(newCode);
       toast.success("Recovery code rotated. Write down your new code.");
+      return true;
     } catch (err) {
       console.error("Failed to rotate recovery code:", err);
       toast.error("Failed to rotate recovery code. Please try again.");
+      return false;
     } finally {
       rotatingRef.current = false;
       setRotating(false);
@@ -170,19 +189,23 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     }
   }
 
-  async function handleDisconnectDevice(confirmLastDevice = false) {
-    if (disconnectingDeviceRef.current) return;
+  async function handleDisconnectDevice(
+    confirmLastDevice = false
+  ): Promise<"success" | "last-device" | "failed"> {
+    if (disconnectingDeviceRef.current) return "failed";
     disconnectingDeviceRef.current = true;
     setDisconnectingDevice(true);
     try {
       await disconnect(confirmLastDevice);
+      return "success";
     } catch (err) {
       if (err instanceof LastDeviceDisconnectError) {
         setLastDeviceWarningOpen(true);
-        return;
+        return "last-device";
       }
       console.error("Failed to disconnect device:", err);
       toast.error("Failed to disconnect device. Please try again.");
+      return "failed";
     } finally {
       disconnectingDeviceRef.current = false;
       setDisconnectingDevice(false);
@@ -190,7 +213,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
   }
 
   async function handleOpenManageDevices() {
-    const linkedDevices = devices ?? (await loadDevices());
+    const linkedDevices = await loadDevices();
     if (linkedDevices) setManageDevicesOpen(true);
   }
 
@@ -215,6 +238,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
       setRenameTarget(null);
       setRenameDraft("");
       toast.success("Device name updated.");
+      void loadDevices(false);
     } catch (err) {
       console.error("Failed to rename device:", err);
       toast.error("Failed to rename device. Please try again.");
@@ -236,6 +260,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
       );
       setRemoteDisconnectTarget(null);
       toast.success("Device unlinked and recovery code rotated.");
+      void loadDevices(false);
     } catch (err) {
       console.error("Failed to unlink device:", err);
       toast.error("Failed to unlink device. Please try again.");
@@ -245,17 +270,19 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     }
   }
 
-  async function handleDeleteAccount() {
-    if (deletingAccountRef.current) return;
+  async function handleDeleteAccount(): Promise<boolean> {
+    if (deletingAccountRef.current) return false;
     deletingAccountRef.current = true;
     setDeletingAccount(true);
     try {
       await deleteCurrentAccount();
+      return true;
     } catch (err) {
       console.error("Failed to delete account:", err);
       toast.error(
         err instanceof Error ? err.message : "Failed to delete account. Please try again."
       );
+      return false;
     } finally {
       deletingAccountRef.current = false;
       setDeletingAccount(false);
@@ -269,7 +296,8 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     renamingDevice ||
     disconnectingDevice ||
     disconnectingOtherDevice ||
-    deletingAccount;
+    deletingAccount ||
+    loadingDevices;
   const childModalOpen =
     editNameOpen ||
     revealedCode !== null ||
@@ -279,6 +307,8 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     disconnectConfirmOpen ||
     lastDeviceWarningOpen ||
     deleteConfirmOpen;
+  const currentDeviceName =
+    devices?.find((device) => device.isCurrentDevice)?.name ?? "Current device";
 
   return (
     <ModalShell
@@ -326,8 +356,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
                 onSubmit={(event) => {
                   event.preventDefault();
                   void (async () => {
-                    await handleSaveName();
-                    setEditNameOpen(false);
+                    if (await handleSaveName()) setEditNameOpen(false);
                   })();
                 }}
               >
@@ -379,7 +408,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
 
         {revealedCode && (
           <PickerModal
-            title={revealTitle}
+            title="Reveal Code"
             query=""
             onQueryChange={() => undefined}
             onClose={() => setRevealedCode(null)}
@@ -388,20 +417,14 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
             maxWidth="max-w-sm"
             suspended={rotateConfirmOpen}
             footer={
-              revealTitle === "Save New Recovery Code" ? (
-                <Button variant="primary" fullWidth onClick={() => void handleCopyRecoveryCode()}>
-                  Copy recovery code
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="primary" onClick={() => void handleCopyRecoveryCode()}>
+                  Copy code
                 </Button>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="primary" onClick={() => void handleCopyRecoveryCode()}>
-                    Copy code
-                  </Button>
-                  <Button variant="ghost" onClick={() => setRotateConfirmOpen(true)}>
-                    Rotate Code
-                  </Button>
-                </div>
-              )
+                <Button variant="ghost" onClick={() => setRotateConfirmOpen(true)}>
+                  Rotate Code
+                </Button>
+              </div>
             }
           >
             <PickerBody>
@@ -411,9 +434,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
                 </span>
               </div>
               <p className={`text-xs lg:text-sm ${colourAmberPlain} text-center`}>
-                {revealTitle === "Save New Recovery Code"
-                  ? "The previous code no longer works. Save this new code somewhere safe before closing."
-                  : "If anyone else may have seen this code, rotate it now to invalidate it."}
+                If anyone else may have seen this code, rotate it now to invalidate it.
               </p>
             </PickerBody>
           </PickerModal>
@@ -434,14 +455,13 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
                   variant="primary"
                   disabled={rotating}
                   onClick={async () => {
-                    await handleRotate();
-                    setRotateConfirmOpen(false);
+                    if (await handleRotate()) setRotateConfirmOpen(false);
                   }}
                 >
                   {rotating ? "Rotating…" : "Yes, rotate"}
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="neutral"
                   disabled={rotating}
                   onClick={() => setRotateConfirmOpen(false)}
                 >
@@ -596,7 +616,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
                   </Button>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="neutral"
                     disabled={renamingDevice}
                     onClick={() => {
                       setRenameTarget(null);
@@ -630,7 +650,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
                   {disconnectingOtherDevice ? "Unlinking…" : "Yes, unlink"}
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="neutral"
                   disabled={disconnectingOtherDevice}
                   onClick={() => setRemoteDisconnectTarget(null)}
                 >
@@ -640,11 +660,33 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
             }
           >
             <PickerBody>
-              <p className="text-sm text-slate-300 lg:text-base">
-                Unlink {remoteDisconnectTarget.name ?? "this device"}? It will return to Create Your
-                Account and lose access to this account. Your recovery code will be replaced, and
-                the new code will be shown next.
-              </p>
+              <dl className="space-y-3 text-sm lg:text-base">
+                <div>
+                  <dt className="font-semibold text-slate-100">Device</dt>
+                  <dd className="text-slate-300">
+                    {remoteDisconnectTarget.name ?? "Unnamed device"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-slate-100">What happens</dt>
+                  <dd className="text-slate-300">
+                    This device will lose access to the account and return to Create Your Account.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-slate-100">Account data</dt>
+                  <dd className="text-slate-300">
+                    Campaigns and characters remain available on the other connected devices.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-slate-100">Recovery code</dt>
+                  <dd className="text-slate-300">
+                    The code will be replaced. The replacement remains available under View Account
+                    Recovery Code in Settings.
+                  </dd>
+                </div>
+              </dl>
             </PickerBody>
           </PickerModal>
         )}
@@ -664,14 +706,14 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
                   variant="primary"
                   disabled={disconnectingDevice}
                   onClick={async () => {
-                    await handleDisconnectDevice(false);
-                    setDisconnectConfirmOpen(false);
+                    const result = await handleDisconnectDevice(false);
+                    if (result !== "failed") setDisconnectConfirmOpen(false);
                   }}
                 >
                   {disconnectingDevice ? "Unlinking…" : "Yes, unlink"}
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="neutral"
                   disabled={disconnectingDevice}
                   onClick={() => setDisconnectConfirmOpen(false)}
                 >
@@ -681,11 +723,30 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
             }
           >
             <PickerBody>
-              <p className="text-sm lg:text-base text-slate-300">
-                Your campaigns and characters remain in the account and stay available on every
-                other connected device. You can reconnect this device later using your account
-                recovery code.
-              </p>
+              <dl className="space-y-3 text-sm lg:text-base">
+                <div>
+                  <dt className="font-semibold text-slate-100">Device</dt>
+                  <dd className="text-slate-300">{currentDeviceName}</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-slate-100">What happens</dt>
+                  <dd className="text-slate-300">
+                    This device will lose access to the account and return to Create Your Account.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-slate-100">Account data</dt>
+                  <dd className="text-slate-300">
+                    Campaigns and characters remain available on the other connected devices.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-slate-100">Reconnect</dt>
+                  <dd className="text-slate-300">
+                    Use the account recovery code to connect this device again.
+                  </dd>
+                </div>
+              </dl>
             </PickerBody>
           </PickerModal>
         )}
@@ -740,15 +801,16 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
                     variant="primary"
                     disabled={deletingAccount || deleteConfirmText !== "DELETE"}
                     onClick={async () => {
-                      await handleDeleteAccount();
-                      setDeleteConfirmOpen(false);
-                      setDeleteConfirmText("");
+                      if (await handleDeleteAccount()) {
+                        setDeleteConfirmOpen(false);
+                        setDeleteConfirmText("");
+                      }
                     }}
                   >
                     {deletingAccount ? "Deleting…" : "Delete permanently"}
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="neutral"
                     disabled={deletingAccount}
                     onClick={() => {
                       setDeleteConfirmOpen(false);
@@ -781,10 +843,25 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
             onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
           />
           <div className="space-y-4 p-4 lg:p-5">
-            <p className="text-sm text-slate-300 lg:text-base">
-              This is the last connected device. Make sure you have saved your recovery code or you
-              will lose access to this account.
-            </p>
+            <dl className="space-y-3 text-sm lg:text-base">
+              <div>
+                <dt className="font-semibold text-slate-100">Device</dt>
+                <dd className="text-slate-300">{currentDeviceName}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-100">What happens</dt>
+                <dd className="text-slate-300">
+                  This device will lose access to the account and return to Create Your Account. No
+                  devices will remain connected.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-100">Access</dt>
+                <dd className="text-slate-300">
+                  You will need the account recovery code to connect a device again.
+                </dd>
+              </div>
+            </dl>
             <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
               <Button
                 variant="neutral"

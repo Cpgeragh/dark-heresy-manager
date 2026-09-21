@@ -216,7 +216,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     skipCodeRehydrationRef.current = false;
     try {
       const created = await createAccount(trimmedDeviceName);
-      await saveFirstName(created.accountId, trimmedName);
+      await saveFirstName(trimmedName);
       const nextCode = created.code;
       setCode(nextCode);
       setCopied(false);

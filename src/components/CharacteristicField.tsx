@@ -242,7 +242,7 @@ export function CharacteristicField({
               <Button variant="primary" onClick={confirmAdvanceChange}>
                 {isUpgrade ? "Upgrade" : "Downgrade"}
               </Button>
-              <Button variant="ghost" onClick={() => setPendingAdvances(null)}>
+              <Button variant="neutral" onClick={() => setPendingAdvances(null)}>
                 Cancel
               </Button>
             </div>

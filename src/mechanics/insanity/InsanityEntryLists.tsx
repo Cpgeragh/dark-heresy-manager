@@ -135,7 +135,7 @@ function DisorderRow({
               >
                 Escalate
               </Button>
-              <Button variant="ghost" onClick={() => setEscalateArmed(false)}>
+              <Button variant="neutral" onClick={() => setEscalateArmed(false)}>
                 Cancel
               </Button>
             </div>
@@ -162,7 +162,7 @@ function DisorderRow({
               <Button variant="primary" onClick={onRemove}>
                 Delete
               </Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+              <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
                 Cancel
               </Button>
             </div>
@@ -244,7 +244,7 @@ function TraumaRow({
               <Button variant="primary" onClick={onRemove}>
                 Delete
               </Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+              <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
                 Cancel
               </Button>
             </div>

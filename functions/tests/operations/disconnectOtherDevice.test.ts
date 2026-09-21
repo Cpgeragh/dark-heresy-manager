@@ -46,7 +46,7 @@ beforeEach(() => {
 it("removes the target, resets it to Welcome, and rotates recovery atomically", async () => {
   await expect(
     disconnectOtherDevice({ targetDeviceUid: "device-2" }, "device-1", "secret")
-  ).resolves.toEqual({ recoveryCode: "DH-NEW0-CODE", remainingDeviceCount: 1 });
+  ).resolves.toEqual({ remainingDeviceCount: 1 });
 
   expect(remove).toHaveBeenCalledWith(expect.objectContaining({ path: "userLinks/device-2" }));
   expect(set).toHaveBeenCalledWith(

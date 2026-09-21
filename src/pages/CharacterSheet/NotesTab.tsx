@@ -272,7 +272,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
               <Button variant="primary" onClick={confirmDelete}>
                 Delete
               </Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(null)}>
+              <Button variant="neutral" onClick={() => setDeleteArmed(null)}>
                 Cancel
               </Button>
             </div>

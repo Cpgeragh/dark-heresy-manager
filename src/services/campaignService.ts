@@ -1,25 +1,13 @@
 // src/services/campaignService.ts
 // Firestore operations for campaign documents.
 
-import {
-  deleteField,
-  doc,
-  getDocs,
-  limit,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-  writeBatch,
-} from "firebase/firestore";
+import { deleteField, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import { validateCampaignName, validateInquisitorName } from "../utils/validation";
 import { assertFirestoreDocumentId, assertString } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
 import { driveJobToCompletion } from "../firestore/bulkJobClient";
-import { campaignsCollectionRef } from "../firebase/converters";
-import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { createLocalId } from "../utils/createLocalId";
 
 const callCreateCampaign = httpsCallable<
@@ -31,7 +19,11 @@ const callCreateCampaign = httpsCallable<
  * Creates a new campaign owned by the given DM.
  * Returns the new campaign's Firestore document ID.
  */
-export async function createCampaign(name: string, inquisitorName?: string): Promise<string> {
+export async function createCampaign(
+  name: string,
+  inquisitorName?: string,
+  operationId?: string
+): Promise<string> {
   assertString(name, "Campaign name");
   const trimmedName = name.trim();
   const validation = validateCampaignName(trimmedName);
@@ -44,12 +36,13 @@ export async function createCampaign(name: string, inquisitorName?: string): Pro
 
   return runSingleFlight(
     "campaign:create",
-    [trimmedName, trimmedInquisitorName ?? ""],
+    [trimmedName, trimmedInquisitorName ?? "", ...(operationId ? [operationId] : [])],
     async () => {
+      const requestOperationId = operationId ?? createLocalId("create-campaign");
       const { data } = await callCreateCampaign({
         name: trimmedName,
         ...(trimmedInquisitorName ? { inquisitorName: trimmedInquisitorName } : {}),
-        operationId: createLocalId("create-campaign"),
+        operationId: requestOperationId,
       });
       return data.campaignId;
     }
@@ -111,30 +104,6 @@ export async function restoreCampaign(campaignId: string): Promise<void> {
       archivedAt: null,
     })
   );
-}
-
-/**
- * Updates the GM name shown to players across every campaign a user DMs.
- * Called whenever the DM's own first name changes.
- */
-export async function syncGmNameAcrossCampaigns(dmId: string, gmName: string): Promise<void> {
-  assertFirestoreDocumentId(dmId, "Campaign owner ID");
-  assertString(gmName, "GM name");
-  const trimmedName = gmName.trim();
-  if (!trimmedName) return;
-
-  const snapshot = await getDocs(
-    query(
-      campaignsCollectionRef(),
-      where("dmId", "==", dmId),
-      limit(FIRESTORE_QUERY_LIMITS.dmCampaignsForNameSync)
-    )
-  );
-  if (snapshot.empty) return;
-
-  const batch = writeBatch(db);
-  snapshot.docs.forEach((campaignDoc) => batch.update(campaignDoc.ref, { gmName: trimmedName }));
-  await batch.commit();
 }
 
 const callStartCampaignDeletionJob = httpsCallable<

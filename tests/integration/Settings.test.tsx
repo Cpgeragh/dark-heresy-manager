@@ -45,16 +45,13 @@ beforeEach(() => {
     { uid: "device-2", name: "Old laptop", linkedAt: 1_600_000_000_000, isCurrentDevice: false },
   ]);
   renameLinkedDeviceMock.mockResolvedValue(undefined);
-  disconnectOtherDeviceMock.mockResolvedValue({
-    recoveryCode: "DH-NEWW-CODE",
-    remainingDeviceCount: 1,
-  });
+  disconnectOtherDeviceMock.mockResolvedValue({ remainingDeviceCount: 1 });
 });
 
 function renderSettings(props: Partial<React.ComponentProps<typeof Settings>> = {}) {
   const disconnect = vi.fn().mockResolvedValue(undefined);
   const onClose = vi.fn();
-  render(
+  const view = render(
     <Settings
       effectiveUserId="user-1"
       firstName="Alice"
@@ -63,7 +60,7 @@ function renderSettings(props: Partial<React.ComponentProps<typeof Settings>> = 
       {...props}
     />
   );
-  return { disconnect, onClose };
+  return { disconnect, onClose, ...view };
 }
 
 describe("Settings modal", () => {
@@ -104,7 +101,7 @@ describe("Settings display name", () => {
     await user.type(input, "Cain");
     await user.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(saveFirstNameMock).toHaveBeenCalledWith("user-1", "Cain");
+    expect(saveFirstNameMock).toHaveBeenCalledWith("Cain");
     await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Display name updated."));
   });
 
@@ -146,6 +143,8 @@ describe("Settings display name", () => {
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("Failed to save display name. Please try again.")
     );
+    expect(screen.getByRole("dialog", { name: "Edit Display Name" })).toBeVisible();
+    expect(screen.getByPlaceholderText("e.g. David")).toHaveValue("Cain");
   });
 });
 
@@ -234,6 +233,7 @@ describe("Settings recovery code", () => {
         "Failed to rotate recovery code. Please try again."
       )
     );
+    expect(screen.getByRole("dialog", { name: "Rotate Code" })).toBeVisible();
   });
 });
 
@@ -274,6 +274,48 @@ describe("Settings linked device", () => {
     );
   });
 
+  it("prevents Settings from closing while connected devices are loading", async () => {
+    const user = userEvent.setup();
+    let finishLoading!: (value: unknown) => void;
+    listLinkedDevicesMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishLoading = resolve;
+      })
+    );
+    const { onClose } = renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Settings" })).getByRole("button", {
+        name: "Close",
+      })
+    );
+
+    expect(onClose).not.toHaveBeenCalled();
+    finishLoading([{ uid: "device-1", name: "Phone", linkedAt: null, isCurrentDevice: true }]);
+    expect(await screen.findByRole("dialog", { name: "Manage Devices" })).toBeVisible();
+    expect(listLinkedDevicesMock).toHaveBeenCalledOnce();
+  });
+
+  it("refreshes the connected devices every time Manage Devices is opened", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    const firstList = await screen.findByRole("dialog", { name: "Manage Devices" });
+    await user.click(within(firstList).getByRole("button", { name: "Close" }));
+
+    listLinkedDevicesMock.mockResolvedValue([
+      { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
+      { uid: "device-3", name: "New laptop", linkedAt: 1_800_000_000_000, isCurrentDevice: false },
+    ]);
+    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+
+    expect(await screen.findByText("New laptop")).toBeVisible();
+    expect(screen.queryByText("Old laptop")).not.toBeInTheDocument();
+    expect(listLinkedDevicesMock).toHaveBeenCalledTimes(2);
+  });
+
   it("renames any device on the account", async () => {
     const user = userEvent.setup();
     renderSettings();
@@ -283,30 +325,49 @@ describe("Settings linked device", () => {
     const input = screen.getByPlaceholderText("e.g. Cormac's phone");
     await user.clear(input);
     await user.type(input, "Home laptop");
+    renameLinkedDeviceMock.mockImplementationOnce(async () => {
+      listLinkedDevicesMock.mockResolvedValue([
+        { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
+        {
+          uid: "device-2",
+          name: "Home laptop",
+          linkedAt: 1_600_000_000_000,
+          isCurrentDevice: false,
+        },
+      ]);
+    });
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(renameLinkedDeviceMock).toHaveBeenCalledWith("device-2", "Home laptop");
     expect(await screen.findByText("Home laptop")).toBeVisible();
   });
 
-  it("unlinks another device and leaves the rotated code available from Settings", async () => {
+  it("unlinks another device, keeps Manage Devices open, and leaves the code in Settings", async () => {
     const user = userEvent.setup();
     renderSettings();
 
     await user.click(screen.getByRole("button", { name: "Manage devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Old laptop" }));
+    disconnectOtherDeviceMock.mockImplementationOnce(async () => {
+      listLinkedDevicesMock.mockResolvedValue([
+        { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
+      ]);
+      return { remainingDeviceCount: 1 };
+    });
     await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
 
     expect(disconnectOtherDeviceMock).toHaveBeenCalledWith("device-2");
     await waitFor(() =>
-      expect(screen.queryByRole("dialog", { name: "Manage Devices" })).not.toBeInTheDocument()
+      expect(screen.queryByRole("button", { name: "Unlink Old laptop" })).not.toBeInTheDocument()
     );
-    expect(
-      screen.queryByRole("dialog", { name: "Save New Recovery Code" })
-    ).not.toBeInTheDocument();
+    const manageDevices = screen.getByRole("dialog", { name: "Manage Devices" });
+    expect(manageDevices).toBeVisible();
+    expect(within(manageDevices).getByText("Phone")).toBeVisible();
+    expect(screen.queryByRole("dialog", { name: "Unlink Device?" })).not.toBeInTheDocument();
     expect(mockToastSuccess).toHaveBeenCalledWith("Device unlinked and recovery code rotated.");
 
     getRecoveryCodeMock.mockResolvedValue("DH-NEWW-CODE");
+    await user.click(within(manageDevices).getByRole("button", { name: "Close" }));
     await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
     expect(await screen.findByText("DH-NEWW-CODE")).toBeVisible();
   });
@@ -320,6 +381,21 @@ describe("Settings linked device", () => {
     await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
 
     expect(disconnect).toHaveBeenCalledWith(false);
+  });
+
+  it("keeps the current-device confirmation open when disconnecting fails", async () => {
+    const user = userEvent.setup();
+    const disconnect = vi.fn().mockRejectedValue(new Error("network"));
+    renderSettings({ disconnect });
+
+    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(await screen.findByRole("button", { name: "Unlink Phone" }));
+    await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Failed to disconnect device. Please try again.")
+    );
+    expect(screen.getByRole("dialog", { name: "Unlink This Device?" })).toBeVisible();
   });
 
   it("warns before unlinking the account's last device", async () => {
@@ -378,5 +454,7 @@ describe("Settings account deletion", () => {
         "Delete or transfer every campaign you own before deleting your account."
       )
     );
+    expect(screen.getByRole("dialog", { name: "Delete Account" })).toBeVisible();
+    expect(screen.getByPlaceholderText("DELETE")).toHaveValue("DELETE");
   });
 });

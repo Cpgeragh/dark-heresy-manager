@@ -2,10 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCampaign } from "../../src/operations/createCampaign";
 
 const mockResolvePrimaryUid = vi.hoisted(() => vi.fn());
-const mockEnforceRateLimit = vi.hoisted(() => vi.fn());
+const mockPrepareRateLimit = vi.hoisted(() => vi.fn());
+const mockApplyRateLimit = vi.hoisted(() => vi.fn());
 
 vi.mock("../../src/shared/linkedIdentity", () => ({ resolvePrimaryUid: mockResolvePrimaryUid }));
-vi.mock("../../src/shared/rateLimit", () => ({ enforceRateLimit: mockEnforceRateLimit }));
+vi.mock("../../src/shared/rateLimit", () => ({ prepareRateLimit: mockPrepareRateLimit }));
 
 const mockTransactionGet = vi.fn();
 const mockTransactionSet = vi.fn();
@@ -36,7 +37,7 @@ describe("createCampaign", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolvePrimaryUid.mockResolvedValue("primary-user");
-    mockEnforceRateLimit.mockResolvedValue(undefined);
+    mockPrepareRateLimit.mockResolvedValue(mockApplyRateLimit);
     mockTransactionGet
       .mockResolvedValueOnce({ data: () => ({ firstName: "Alice" }) })
       .mockResolvedValueOnce({ size: 0 });
@@ -49,11 +50,18 @@ describe("createCampaign", () => {
     );
 
     expect(mockResolvePrimaryUid).toHaveBeenCalledWith(mockDb, "linked-device");
-    expect(mockEnforceRateLimit).toHaveBeenCalledWith({
-      key: "create-campaign:account:primary-user",
-      limit: 10,
-      windowMs: 86_400_000,
-    });
+    expect(mockPrepareRateLimit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ get: mockTransactionGet, set: mockTransactionSet }),
+      {
+        key: "create-campaign:account:primary-user",
+        limit: 10,
+        windowMs: 86_400_000,
+        rejectionMessage: "You can create up to 10 campaigns in 24 hours. Try again later.",
+        rejectionDetails: { reason: "campaign-daily-limit" },
+      }
+    );
+    expect(mockApplyRateLimit).toHaveBeenCalledOnce();
     expect(mockTransactionSet).toHaveBeenCalledWith(campaignRef, {
       name: "The Lathe Run",
       dmId: "primary-user",
@@ -75,6 +83,7 @@ describe("createCampaign", () => {
     await expect(
       createCampaign({ name: "One Too Many", operationId: "op-2" }, "primary-user")
     ).rejects.toThrow("An account can have at most 100 campaigns.");
+    expect(mockApplyRateLimit).not.toHaveBeenCalled();
     expect(mockTransactionSet).not.toHaveBeenCalled();
   });
 
@@ -82,6 +91,6 @@ describe("createCampaign", () => {
     await expect(
       createCampaign({ name: "   ", operationId: "op-3" }, "primary-user")
     ).rejects.toThrow("Campaign name is required.");
-    expect(mockEnforceRateLimit).not.toHaveBeenCalled();
+    expect(mockPrepareRateLimit).not.toHaveBeenCalled();
   });
 });

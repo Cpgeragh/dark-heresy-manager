@@ -78,6 +78,10 @@ import {
   type DisconnectOtherDeviceResult,
 } from "./operations/disconnectOtherDevice.js";
 import {
+  updateDisplayName as runUpdateDisplayName,
+  type UpdateDisplayNameInput,
+} from "./operations/updateDisplayName.js";
+import {
   startCharacterDeletionJob as runStartCharacterDeletionJob,
   processCharacterDeletionChunk as runProcessCharacterDeletionChunk,
   type StartCharacterDeletionJobInput,
@@ -417,6 +421,24 @@ export const disconnectOtherDevice = onCall<DisconnectOtherDeviceInput>(
       ],
       handler: ({ uid, data }) =>
         runDisconnectOtherDevice(data, uid, identityCodeHmacSecret.value()),
+    });
+  }
+);
+
+export const updateDisplayName = onCall<UpdateDisplayNameInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<UpdateDisplayNameInput, void>({
+      request,
+      operation: "update-display-name",
+      allowedFields: ["firstName"],
+      requiredFields: ["firstName"],
+      fieldShapes: { firstName: "string" },
+      rateLimits: [
+        { key: `update-display-name:${callerUid}`, limit: 30, windowMs: 60 * 60 * 1000 },
+      ],
+      handler: ({ uid, data }) => runUpdateDisplayName(data, uid),
     });
   }
 );

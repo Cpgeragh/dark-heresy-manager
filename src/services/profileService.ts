@@ -3,12 +3,18 @@
 // Reads/writes the public first-name directory at /userProfiles/{uid}.
 // First name only — see Firestore rules and UserProfileDocument.
 
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../firebase";
 import type { UserProfileDocument } from "../types/Firestore";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { assertFirestoreDocumentId, assertString } from "../firestore/firebaseValidation";
-import { syncGmNameAcrossCampaigns } from "./campaignService";
+import { runSingleFlight } from "../firestore/singleFlight";
+
+const callUpdateDisplayName = httpsCallable<{ firstName: string }, void>(
+  functions,
+  "updateDisplayName"
+);
 
 export async function getFirstName(uid: string): Promise<string | null> {
   assertFirestoreDocumentId(uid, "User ID");
@@ -18,8 +24,7 @@ export async function getFirstName(uid: string): Promise<string | null> {
   return data.firstName?.trim() || null;
 }
 
-export async function saveFirstName(uid: string, firstName: string): Promise<void> {
-  assertFirestoreDocumentId(uid, "User ID");
+export async function saveFirstName(firstName: string): Promise<void> {
   assertString(firstName, "First name");
   const trimmedName = firstName.trim();
   if (!trimmedName) throw new Error("First name is required.");
@@ -27,6 +32,7 @@ export async function saveFirstName(uid: string, firstName: string): Promise<voi
     throw new Error(`First name cannot exceed ${PRODUCT_LIMITS.firstNameCharacters} characters.`);
   }
 
-  await setDoc(doc(db, "userProfiles", uid), { firstName: trimmedName });
-  await syncGmNameAcrossCampaigns(uid, trimmedName);
+  await runSingleFlight("profile:update-display-name", [trimmedName], async () => {
+    await callUpdateDisplayName({ firstName: trimmedName });
+  });
 }

@@ -8,7 +8,6 @@ export interface DisconnectOtherDeviceInput {
 }
 
 export interface DisconnectOtherDeviceResult {
-  recoveryCode: string;
   remainingDeviceCount: number;
 }
 
@@ -74,6 +73,6 @@ export async function disconnectOtherDevice(
     transaction.delete(targetRef);
     transaction.set(targetUserRef, { onboarded: false, recoveryBackedUp: false }, { merge: true });
 
-    return { recoveryCode: newCode, remainingDeviceCount: links.size - 1 };
+    return { remainingDeviceCount: links.size - 1 };
   });
 }

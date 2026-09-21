@@ -641,7 +641,7 @@ export function TalentsTab({
               </Button>
               <Button
                 fullWidth
-                variant="ghost"
+                variant="neutral"
                 disabled={savingTalentMutation}
                 onClick={() => setPendingEffectDeletion(null)}
               >

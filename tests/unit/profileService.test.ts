@@ -1,54 +1,46 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDoc, mockSetDoc, mockSyncGmNameAcrossCampaigns } = vi.hoisted(() => ({
-  mockDoc: vi.fn(() => "profile-ref"),
-  mockSetDoc: vi.fn().mockResolvedValue(undefined),
-  mockSyncGmNameAcrossCampaigns: vi.fn().mockResolvedValue(undefined),
+const { mockUpdateDisplayName } = vi.hoisted(() => ({
+  mockUpdateDisplayName: vi.fn(),
 }));
 
 vi.mock("firebase/firestore", () => ({
-  doc: (...args: unknown[]) => mockDoc(...args),
+  doc: vi.fn(),
   getDoc: vi.fn(),
-  setDoc: (...args: unknown[]) => mockSetDoc(...args),
 }));
 
-vi.mock("../../src/firebase", () => ({ db: "mock-db" }));
-
-vi.mock("../../src/services/campaignService", () => ({
-  syncGmNameAcrossCampaigns: (...args: unknown[]) => mockSyncGmNameAcrossCampaigns(...args),
+vi.mock("firebase/functions", () => ({
+  httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "updateDisplayName") return mockUpdateDisplayName;
+    throw new Error(`Unexpected callable: ${name}`);
+  }),
 }));
+
+vi.mock("../../src/firebase", () => ({ db: "mock-db", functions: "mock-functions" }));
 
 import { saveFirstName } from "../../src/services/profileService";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockUpdateDisplayName.mockResolvedValue({ data: undefined });
 });
 
 describe("saveFirstName", () => {
-  it("trims a valid first name before storing it", async () => {
-    await saveFirstName("user-1", "  Ibram  ");
+  it("sends the trimmed name to the protected Function", async () => {
+    await saveFirstName("  Ibram  ");
 
-    expect(mockDoc).toHaveBeenCalledWith("mock-db", "userProfiles", "user-1");
-    expect(mockSetDoc).toHaveBeenCalledWith("profile-ref", { firstName: "Ibram" });
+    expect(mockUpdateDisplayName).toHaveBeenCalledWith({ firstName: "Ibram" });
   });
 
-  it("syncs the trimmed name to every campaign the user DMs", async () => {
-    await saveFirstName("user-1", "  Ibram  ");
-
-    expect(mockSyncGmNameAcrossCampaigns).toHaveBeenCalledWith("user-1", "Ibram");
+  it("rejects an empty first name before calling the Function", async () => {
+    await expect(saveFirstName("   ")).rejects.toThrow("First name is required.");
+    expect(mockUpdateDisplayName).not.toHaveBeenCalled();
   });
 
-  it("rejects an empty first name before writing or syncing", async () => {
-    await expect(saveFirstName("user-1", "   ")).rejects.toThrow("First name is required.");
-    expect(mockSetDoc).not.toHaveBeenCalled();
-    expect(mockSyncGmNameAcrossCampaigns).not.toHaveBeenCalled();
-  });
-
-  it("rejects a first name over 50 characters before writing or syncing", async () => {
-    await expect(saveFirstName("user-1", "x".repeat(51))).rejects.toThrow(
+  it("rejects a first name over 50 characters before calling the Function", async () => {
+    await expect(saveFirstName("x".repeat(51))).rejects.toThrow(
       "First name cannot exceed 50 characters."
     );
-    expect(mockSetDoc).not.toHaveBeenCalled();
-    expect(mockSyncGmNameAcrossCampaigns).not.toHaveBeenCalled();
+    expect(mockUpdateDisplayName).not.toHaveBeenCalled();
   });
 });

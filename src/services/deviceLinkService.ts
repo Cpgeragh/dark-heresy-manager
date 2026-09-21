@@ -30,7 +30,7 @@ const callRenameLinkedDevice = httpsCallable<{ targetDeviceUid: string; name: st
 );
 const callDisconnectOtherDevice = httpsCallable<
   { targetDeviceUid: string },
-  { recoveryCode: string; remainingDeviceCount: number }
+  { remainingDeviceCount: number }
 >(functions, "disconnectOtherDevice");
 
 export class LastDeviceDisconnectError extends Error {
@@ -87,14 +87,13 @@ export async function renameLinkedDevice(
   });
 }
 
-/** Disconnects another device and returns the automatically rotated recovery code. */
+/** Disconnects another device and rotates the account recovery code. */
 export async function disconnectOtherDevice(
   targetDeviceUid: string
-): Promise<{ recoveryCode: string; remainingDeviceCount: number }> {
+): Promise<{ remainingDeviceCount: number }> {
   assertFirestoreDocumentId(targetDeviceUid, "Device ID");
   return runSingleFlight("device:disconnect-other", [targetDeviceUid], async () => {
     const { data } = await callDisconnectOtherDevice({ targetDeviceUid });
-    assertRecoveryCode(data.recoveryCode);
     return data;
   });
 }

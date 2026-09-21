@@ -152,7 +152,7 @@ describe("Dashboard DM campaign list", () => {
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
     await user.click(within(form).getByRole("button", { name: "Create campaign" }));
 
-    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined);
+    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined, expect.any(String));
     await waitFor(() =>
       expect(mockToastSuccess).toHaveBeenCalledWith("Campaign created successfully")
     );
@@ -168,7 +168,11 @@ describe("Dashboard DM campaign list", () => {
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
     await user.click(within(form).getByRole("button", { name: "Create campaign" }));
 
-    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", "Inquisitor Vail");
+    expect(createCampaignMock).toHaveBeenCalledWith(
+      "New Crusade",
+      "Inquisitor Vail",
+      expect.any(String)
+    );
   });
 
   it("keeps campaign creation disabled until the required name is valid", async () => {
@@ -190,7 +194,69 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Create campaign" }));
     await user.type(screen.getByLabelText("Campaign Name *"), "New Crusade{Enter}");
 
-    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined);
+    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined, expect.any(String));
+  });
+
+  it("keeps the form open and explains the daily creation limit", async () => {
+    const user = userEvent.setup();
+    createCampaignMock.mockRejectedValueOnce({
+      code: "functions/resource-exhausted",
+      details: { reason: "campaign-daily-limit" },
+    });
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    const form = screen.getByRole("dialog", { name: "Create Campaign" });
+    await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
+    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith(
+        "You can create up to 10 campaigns in 24 hours. Try again later."
+      )
+    );
+    expect(screen.getByRole("dialog", { name: "Create Campaign" })).toBeVisible();
+  });
+
+  it("explains the account-wide campaign limit", async () => {
+    const user = userEvent.setup();
+    createCampaignMock.mockRejectedValueOnce({
+      code: "functions/resource-exhausted",
+      details: { reason: "campaign-account-limit" },
+    });
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    const form = screen.getByRole("dialog", { name: "Create Campaign" });
+    await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
+    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith(
+        "This account already has 100 campaigns. Permanently delete one before creating another."
+      )
+    );
+  });
+
+  it("reuses the same operation ID when campaign creation is retried", async () => {
+    const user = userEvent.setup();
+    createCampaignMock
+      .mockRejectedValueOnce(new Error("response lost"))
+      .mockResolvedValueOnce(undefined);
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    const form = screen.getByRole("dialog", { name: "Create Campaign" });
+    await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
+    const createButton = within(form).getByRole("button", { name: "Create campaign" });
+    await user.click(createButton);
+    await waitFor(() => expect(mockToastError).toHaveBeenCalled());
+
+    const firstOperationId = createCampaignMock.mock.calls[0][2];
+    await user.click(createButton);
+    await waitFor(() => expect(createCampaignMock).toHaveBeenCalledTimes(2));
+
+    expect(createCampaignMock.mock.calls[1][2]).toBe(firstOperationId);
   });
 
   it("edits a campaign name inline", async () => {

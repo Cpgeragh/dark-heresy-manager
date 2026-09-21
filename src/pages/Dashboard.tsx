@@ -60,6 +60,7 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../ui/styles/segmentedTabStyles";
+import { createLocalId } from "../utils/createLocalId";
 
 interface Props {
   user: User;
@@ -87,6 +88,25 @@ interface DeletePreflightState {
   loading: boolean;
   result?: { jobId: string; totalCount: number };
   error?: string;
+}
+
+function campaignCreationErrorMessage(error: unknown): string {
+  const details =
+    typeof error === "object" && error !== null && "details" in error
+      ? (error as { details?: unknown }).details
+      : undefined;
+  const reason =
+    typeof details === "object" && details !== null && "reason" in details
+      ? (details as { reason?: unknown }).reason
+      : undefined;
+
+  if (reason === "campaign-daily-limit") {
+    return `You can create up to ${PRODUCT_LIMITS.campaignCreationsPerWindow} campaigns in 24 hours. Try again later.`;
+  }
+  if (reason === "campaign-account-limit") {
+    return `This account already has ${PRODUCT_LIMITS.campaignsPerAccount} campaigns. Permanently delete one before creating another.`;
+  }
+  return "Failed to create campaign. Please try again.";
 }
 
 function CampaignListLimitNotice() {
@@ -150,6 +170,7 @@ function DmCampaignList({
   const [newInquisitorName, setNewInquisitorName] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const createFormScrollPositionRef = useRef(0);
+  const createOperationIdRef = useRef<string | null>(null);
   const [creating, setCreating] = useState(false);
   const creatingRef = useRef(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -189,14 +210,17 @@ function DmCampaignList({
     creatingRef.current = true;
     setCreating(true);
     try {
-      await createCampaign(name, inquisitorName || undefined);
+      const operationId = createOperationIdRef.current ?? createLocalId("create-campaign");
+      createOperationIdRef.current = operationId;
+      await createCampaign(name, inquisitorName || undefined, operationId);
+      createOperationIdRef.current = null;
       setNewCampaignName("");
       setNewInquisitorName("");
       setShowCreateForm(false);
       toast.success("Campaign created successfully");
     } catch (error) {
       console.error("Failed to create campaign:", error);
-      toast.error("Failed to create campaign");
+      toast.error(campaignCreationErrorMessage(error));
     } finally {
       creatingRef.current = false;
       setCreating(false);
@@ -206,6 +230,7 @@ function DmCampaignList({
   const closeCreateForm = useCallback(() => {
     if (creatingRef.current) return;
     setShowCreateForm(false);
+    createOperationIdRef.current = null;
     setNewCampaignName("");
     setNewInquisitorName("");
   }, []);
@@ -352,7 +377,7 @@ function DmCampaignList({
                   value={editInquisitorName}
                   maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
                   onChange={(e) => setEditInquisitorName(e.target.value)}
-                  placeholder="Inquisitor Name (optional)"
+                  placeholder="Inquisitor Name"
                   aria-label="Edit Inquisitor name"
                 />
                 <input
@@ -363,13 +388,14 @@ function DmCampaignList({
                   autoFocus
                   aria-label="Edit campaign name"
                 />
-                <div className="flex items-center gap-2">
-                  <Button type="submit" size="sm" disabled={editing}>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button type="submit" size="sm" fullWidth disabled={editing}>
                     {editing ? "Saving…" : "Save"}
                   </Button>
                   <Button
-                    variant="secondary"
+                    variant="neutral"
                     size="sm"
+                    fullWidth
                     disabled={editing}
                     onClick={() => {
                       setEditingId(null);
@@ -470,14 +496,16 @@ function DmCampaignList({
                 placeholder="Campaign name…"
                 value={newCampaignName}
                 maxLength={PRODUCT_LIMITS.campaignNameCharacters}
-                onChange={(event) => setNewCampaignName(event.target.value)}
+                onChange={(event) => {
+                  createOperationIdRef.current = null;
+                  setNewCampaignName(event.target.value);
+                }}
               />
             </div>
 
             <div>
               <label htmlFor="new-inquisitor-name" className={uiFormLabel}>
-                Inquisitor Name{" "}
-                <span className="normal-case tracking-normal text-slate-500">(optional)</span>
+                Inquisitor Name
               </label>
               <input
                 id="new-inquisitor-name"
@@ -485,7 +513,10 @@ function DmCampaignList({
                 placeholder="Inquisitor name…"
                 value={newInquisitorName}
                 maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
-                onChange={(event) => setNewInquisitorName(event.target.value)}
+                onChange={(event) => {
+                  createOperationIdRef.current = null;
+                  setNewInquisitorName(event.target.value);
+                }}
               />
             </div>
           </CustomFormSection>

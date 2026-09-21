@@ -218,11 +218,11 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
           Note: XP changes do not retroactively adjust character totals.
         </p>
 
-        <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={saving}>
+        <div className="grid grid-cols-2 gap-2">
+          <Button fullWidth onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
           </Button>
-          <Button variant="secondary" onClick={handleCancelEdit} disabled={saving}>
+          <Button variant="neutral" fullWidth onClick={handleCancelEdit} disabled={saving}>
             Cancel
           </Button>
         </div>

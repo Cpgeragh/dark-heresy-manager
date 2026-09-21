@@ -336,7 +336,7 @@ export function CustomPowerForm({
           <Button className="flex-1" onClick={handleAdd} disabled={!canAdd || saving}>
             {saving ? "Saving..." : initialPower ? "Save Power" : "Add Power"}
           </Button>
-          <Button variant="secondary" onClick={onCancel}>
+          <Button variant="neutral" className="flex-1" onClick={onCancel}>
             Cancel
           </Button>
         </div>

@@ -125,7 +125,7 @@ export function ConcealedWeaponBionicInstaller({
             Back
           </Button>
         )}
-        <Button size="sm" onClick={onClose}>
+        <Button variant="neutral" size="sm" onClick={onClose}>
           Cancel
         </Button>
       </div>

@@ -38,7 +38,7 @@ beforeEach(() => {
   callList.mockResolvedValue({ data: { devices: [] } });
   callRename.mockResolvedValue({ data: undefined });
   callDisconnectOther.mockResolvedValue({
-    data: { recoveryCode: "DH-NEWW-CODE", remainingDeviceCount: 1 },
+    data: { remainingDeviceCount: 1 },
   });
 });
 
@@ -83,9 +83,8 @@ describe("device link operations", () => {
     expect(callRename).toHaveBeenCalledWith({ targetDeviceUid: "device-2", name: "Old laptop" });
   });
 
-  it("disconnects another device and returns the replacement recovery code", async () => {
+  it("disconnects another device without returning the replacement recovery code", async () => {
     await expect(disconnectOtherDevice("device-2")).resolves.toEqual({
-      recoveryCode: "DH-NEWW-CODE",
       remainingDeviceCount: 1,
     });
     expect(callDisconnectOther).toHaveBeenCalledWith({ targetDeviceUid: "device-2" });

@@ -6,14 +6,6 @@ const {
   mockSetDoc,
   mockUpdateDoc,
   mockDeleteField,
-  mockGetDocs,
-  mockQuery,
-  mockWhere,
-  mockLimit,
-  mockWriteBatch,
-  mockBatchUpdate,
-  mockBatchCommit,
-  mockCampaignsCollectionRef,
   mockCallCreateCampaign,
   mockCallStartCampaignDeletionJob,
   mockCallProcessCampaignDeletionChunk,
@@ -23,14 +15,6 @@ const {
   mockSetDoc: vi.fn().mockResolvedValue(undefined),
   mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
   mockDeleteField: vi.fn(() => "delete-field-sentinel"),
-  mockGetDocs: vi.fn(),
-  mockQuery: vi.fn((...args: unknown[]) => args),
-  mockWhere: vi.fn((...args: unknown[]) => ["where", ...args]),
-  mockLimit: vi.fn((value: number) => ["limit", value]),
-  mockBatchUpdate: vi.fn(),
-  mockBatchCommit: vi.fn().mockResolvedValue(undefined),
-  mockWriteBatch: vi.fn(),
-  mockCampaignsCollectionRef: vi.fn(() => "campaigns-ref"),
   mockCallCreateCampaign: vi.fn(),
   mockCallStartCampaignDeletionJob: vi.fn(),
   mockCallProcessCampaignDeletionChunk: vi.fn(),
@@ -41,14 +25,9 @@ vi.mock("firebase/firestore", () => ({
     args.length === 2 ? args.join("/") : args.slice(1).join("/"),
   doc: (...args: unknown[]) => mockDoc(...args),
   deleteField: () => mockDeleteField(),
-  getDocs: (...args: unknown[]) => mockGetDocs(...args),
-  limit: (value: number) => mockLimit(value),
-  query: (...args: unknown[]) => mockQuery(...args),
   serverTimestamp: () => mockServerTimestamp(),
   setDoc: (...args: unknown[]) => mockSetDoc(...args),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
-  where: (...args: unknown[]) => mockWhere(...args),
-  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
 }));
 
 vi.mock("firebase/functions", () => ({
@@ -65,17 +44,12 @@ vi.mock("../../src/firebase", () => ({
   functions: "mock-functions",
 }));
 
-vi.mock("../../src/firebase/converters", () => ({
-  campaignsCollectionRef: (...args: unknown[]) => mockCampaignsCollectionRef(...args),
-}));
-
 import {
   archiveCampaign,
   createCampaign,
   deleteCampaign,
   preflightCampaignDeletion,
   restoreCampaign,
-  syncGmNameAcrossCampaigns,
   updateCampaignDetails,
 } from "../../src/services/campaignService";
 
@@ -84,8 +58,6 @@ beforeEach(() => {
   mockUpdateDoc.mockResolvedValue(undefined);
   mockSetDoc.mockResolvedValue(undefined);
   mockCallCreateCampaign.mockResolvedValue({ data: { campaignId: "campaign-new" } });
-  mockBatchCommit.mockResolvedValue(undefined);
-  mockWriteBatch.mockReturnValue({ update: mockBatchUpdate, commit: mockBatchCommit });
 });
 
 describe("campaign input validation", () => {
@@ -242,6 +214,15 @@ describe("createCampaign", () => {
     });
   });
 
+  it("uses a supplied operation ID when retrying the same creation", async () => {
+    await createCampaign("The Lathe Run", undefined, "create-operation-1");
+
+    expect(mockCallCreateCampaign).toHaveBeenCalledWith({
+      name: "The Lathe Run",
+      operationId: "create-operation-1",
+    });
+  });
+
   it("rejects an Inquisitor name over 100 characters before writing", async () => {
     await expect(createCampaign("The Lathe Run", "x".repeat(101))).rejects.toThrow(
       "Inquisitor name cannot be more than 100 characters"
@@ -274,36 +255,5 @@ describe("updateCampaignDetails", () => {
       "Inquisitor name cannot be more than 100 characters"
     );
     expect(mockUpdateDoc).not.toHaveBeenCalled();
-  });
-});
-
-describe("syncGmNameAcrossCampaigns", () => {
-  it("updates gmName across every campaign the caller DMs", async () => {
-    mockGetDocs.mockResolvedValue({
-      empty: false,
-      docs: [{ ref: "campaign-1-ref" }, { ref: "campaign-2-ref" }],
-    });
-
-    await syncGmNameAcrossCampaigns("dm-1", "  Cain  ");
-
-    expect(mockWhere).toHaveBeenCalledWith("dmId", "==", "dm-1");
-    expect(mockLimit).toHaveBeenCalledWith(100);
-    expect(mockBatchUpdate).toHaveBeenNthCalledWith(1, "campaign-1-ref", { gmName: "Cain" });
-    expect(mockBatchUpdate).toHaveBeenNthCalledWith(2, "campaign-2-ref", { gmName: "Cain" });
-    expect(mockBatchCommit).toHaveBeenCalledOnce();
-  });
-
-  it("does nothing when the caller DMs no campaigns", async () => {
-    mockGetDocs.mockResolvedValue({ empty: true, docs: [] });
-
-    await syncGmNameAcrossCampaigns("dm-1", "Cain");
-
-    expect(mockBatchCommit).not.toHaveBeenCalled();
-  });
-
-  it("skips the query entirely for a blank name", async () => {
-    await syncGmNameAcrossCampaigns("dm-1", "   ");
-
-    expect(mockGetDocs).not.toHaveBeenCalled();
   });
 });

@@ -232,7 +232,7 @@ export function PortraitUpload({
                 {uploading ? "Uploading…" : "Save"}
               </Button>
               <Button
-                variant="secondary"
+                variant="neutral"
                 className="flex-1"
                 onClick={handleCancel}
                 disabled={uploading}

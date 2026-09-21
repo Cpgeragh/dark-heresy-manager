@@ -27,7 +27,12 @@ describe("Functions: permanent account lifecycle", () => {
         (await adminDb.collection("accounts").doc(created.accountId).get()).data()?.status
       ).toBe("provisional");
 
-      await adminDb.collection("userProfiles").doc(created.accountId).set({ firstName: "Iris" });
+      await httpsCallable<{ firstName: string }, void>(first.functions, "updateDisplayName")({
+        firstName: "Iris",
+      });
+      expect(
+        (await adminDb.collection("userProfiles").doc(created.accountId).get()).data()?.firstName
+      ).toBe("Iris");
       await httpsCallable(first.functions, "completeOnboarding")({});
       expect(
         (await adminDb.collection("accounts").doc(created.accountId).get()).data()?.status
@@ -54,7 +59,10 @@ describe("Functions: permanent account lifecycle", () => {
               isCurrentDevice: boolean;
             }>;
           }
-        >(first.functions, "listLinkedDevices")({})
+        >(
+          first.functions,
+          "listLinkedDevices"
+        )({})
       ).data.devices;
       expect(listed).toHaveLength(2);
       expect(listed).toEqual(
@@ -68,7 +76,10 @@ describe("Functions: permanent account lifecycle", () => {
         ])
       );
 
-      await httpsCallable(first.functions, "renameLinkedDevice")({
+      await httpsCallable(
+        first.functions,
+        "renameLinkedDevice"
+      )({
         targetDeviceUid: second.uid,
         name: "Old laptop",
       });
@@ -77,15 +88,19 @@ describe("Functions: permanent account lifecycle", () => {
       );
 
       const remotelyDisconnected = (
-        await httpsCallable<
-          { targetDeviceUid: string },
-          { recoveryCode: string; remainingDeviceCount: number }
-        >(first.functions, "disconnectOtherDevice")({ targetDeviceUid: second.uid })
+        await httpsCallable<{ targetDeviceUid: string }, { remainingDeviceCount: number }>(
+          first.functions,
+          "disconnectOtherDevice"
+        )({ targetDeviceUid: second.uid })
       ).data;
       expect(remotelyDisconnected.remainingDeviceCount).toBe(1);
-      expect(remotelyDisconnected.recoveryCode).not.toBe(created.code);
+      expect(
+        (await adminDb.collection("identitySecret").doc(created.accountId).get()).data()?.code
+      ).not.toBe(created.code);
       expect((await adminDb.collection("userLinks").doc(second.uid).get()).exists).toBe(false);
-      expect((await adminDb.collection("users").doc(second.uid).get()).data()?.onboarded).toBe(false);
+      expect((await adminDb.collection("users").doc(second.uid).get()).data()?.onboarded).toBe(
+        false
+      );
 
       const disconnectFirst = httpsCallable(first.functions, "disconnectDevice");
       await expect(disconnectFirst({ confirmLastDevice: false })).rejects.toMatchObject({

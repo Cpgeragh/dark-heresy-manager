@@ -188,7 +188,7 @@ export function EntryCard({
                 <Button variant="primary" onClick={() => onRemove(entry.uid)}>
                   Delete
                 </Button>
-                <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
                   Cancel
                 </Button>
               </div>
