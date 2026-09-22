@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
-import { uiIconAddButton } from "../styles/buttonStyles";
+import { uiIconButton } from "../styles/buttonStyles";
 import { PencilIcon } from "../icons/PencilIcon";
 
 type EditButtonProps = Omit<
@@ -14,7 +14,7 @@ export function EditButton({ label, className = "", ...buttonProps }: EditButton
     <button
       type="button"
       aria-label={label}
-      className={`${uiIconAddButton} ${className}`.trim()}
+      className={`${uiIconButton} ${className}`.trim()}
       {...buttonProps}
     >
       <PencilIcon className="w-[18px] h-[18px]" />

@@ -1,6 +1,6 @@
 // src/ui/buttons/AddButton.tsx
 import type { ButtonHTMLAttributes } from "react";
-import { uiIconAddButton, uiIconRemoveButton } from "../styles/buttonStyles";
+import { uiIconButton, uiIconButtonCompact } from "../styles/buttonStyles";
 import { PlusIcon } from "../icons/PlusIcon";
 
 type AddButtonProps = Omit<
@@ -8,7 +8,7 @@ type AddButtonProps = Omit<
   "aria-label" | "children" | "type"
 > & {
   label: string;
-  /** "sm" matches RemoveButton's size — use inside cards, beside a plain (non-red-header) label. */
+  /** Compact size for controls inside cards. */
   size?: "md" | "sm";
 };
 
@@ -17,7 +17,7 @@ export function AddButton({ label, size = "md", className = "", ...buttonProps }
     <button
       type="button"
       aria-label={label}
-      className={`${size === "sm" ? uiIconRemoveButton : uiIconAddButton} ${className}`.trim()}
+      className={`${size === "sm" ? uiIconButtonCompact : uiIconButton} ${className}`.trim()}
       {...buttonProps}
     >
       <PlusIcon className={size === "sm" ? "w-4 h-4" : "w-[18px] h-[18px]"} />

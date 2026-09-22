@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 import { DevicesIcon } from "../icons/DevicesIcon";
-import { uiIconAddButton } from "../styles/buttonStyles";
+import { uiIconButton } from "../styles/buttonStyles";
 
 type ManageDevicesButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -18,7 +18,7 @@ export function ManageDevicesButton({
     <button
       type="button"
       aria-label={label}
-      className={`${uiIconAddButton} ${className}`.trim()}
+      className={`${uiIconButton} ${className}`.trim()}
       {...buttonProps}
     >
       <DevicesIcon className="h-[18px] w-[18px]" />

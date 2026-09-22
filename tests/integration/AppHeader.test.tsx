@@ -33,6 +33,15 @@ describe("AppHeader", () => {
     expect(screen.queryByRole("link", { name: "Back" })).not.toBeInTheDocument();
   });
 
+  it("opens Share App from the left side of the dashboard header", async () => {
+    const user = userEvent.setup();
+    renderHeader("/");
+
+    await user.click(screen.getByRole("button", { name: "Share App" }));
+
+    expect(screen.getByRole("dialog", { name: "Share App" })).toBeInTheDocument();
+  });
+
   it("shows a Dashboard link when off the dashboard with no backHref", () => {
     renderHeader("/settings");
     expect(screen.getByRole("link", { name: "Dashboard" })).toHaveAttribute("href", "/");
@@ -56,6 +65,7 @@ describe("AppHeader", () => {
   it("hides the Settings button off the dashboard route", () => {
     renderHeader("/settings", "/settings");
     expect(screen.queryByRole("button", { name: "Settings" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Share App" })).not.toBeInTheDocument();
   });
 
   it("hides the kebab button entirely when there is no kebab content", () => {

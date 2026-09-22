@@ -68,7 +68,7 @@ describe("Settings modal", () => {
     const user = userEvent.setup();
     const { onClose } = renderSettings();
 
-    const dialog = screen.getByRole("dialog", { name: "Settings" });
+    const dialog = screen.getByRole("dialog", { name: "Manage Account" });
     await user.click(within(dialog).getByRole("button", { name: "Close" }));
 
     expect(onClose).toHaveBeenCalledOnce();
@@ -286,7 +286,7 @@ describe("Settings linked device", () => {
 
     await user.click(screen.getByRole("button", { name: "Manage devices" }));
     await user.click(
-      within(screen.getByRole("dialog", { name: "Settings" })).getByRole("button", {
+      within(screen.getByRole("dialog", { name: "Manage Account" })).getByRole("button", {
         name: "Close",
       })
     );

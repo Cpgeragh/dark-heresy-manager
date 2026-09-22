@@ -15,14 +15,13 @@ export function QrModal({ title, url, onClose }: Props) {
     <ModalShell
       ariaLabel={title}
       onClose={onClose}
-      className="max-w-xs lg:max-w-sm overflow-y-auto"
+      className="max-w-[21rem] overflow-y-auto"
     >
       <ModalHeader title={title} onClose={onClose} />
-      <div className="p-5 lg:p-6 space-y-4">
-        <div className="p-3 bg-white rounded-lg flex justify-center">
-          <QRCodeSVG value={url} size={220} />
+      <div className="p-5 lg:p-6">
+        <div className="mx-auto w-fit rounded-lg bg-white p-3">
+          <QRCodeSVG value={url} size={200} />
         </div>
-        <p className="text-xs lg:text-sm text-slate-500 break-all text-center">{url}</p>
       </div>
     </ModalShell>
   );

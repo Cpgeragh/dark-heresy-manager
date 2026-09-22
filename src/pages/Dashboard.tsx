@@ -35,14 +35,21 @@ import {
   uiTextPlaceholder,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
+import { EditButton } from "../ui/buttons/EditButton";
+import { ArchiveButton } from "../ui/buttons/ArchiveButton";
+import { RemoveButton } from "../ui/buttons/RemoveButton";
+import { GearIcon } from "../ui/icons/GearIcon";
+import { uiIconButton } from "../ui/styles/buttonStyles";
 import { ExpandChevron } from "../ui/icons/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
-import { QrModal } from "../ui/modals/QrModal";
+import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
+import { ModalShell } from "../ui/modals/ModalShell";
+import { ModalHeader } from "../ui/modals/ModalHeader";
+import { InfoModal } from "../components/InfoModal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
 import { LoadingState } from "../ui/LoadingState";
-import { ConfirmInline } from "../ui/forms/ConfirmInline";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "../hooks/useRecoveryLookup";
 import { claimCharacter } from "../services/characterService";
@@ -51,7 +58,12 @@ import { CustomFormSection } from "../ui/forms/CustomFormSection";
 import { RequiredFormLabel } from "../ui/forms/RequiredFormLabel";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
 import { formatRecoveryCodeInput } from "../utils/recoveryCode";
-import { colourActiveRose, colourActiveSky, colourRequiredText } from "../ui/styles/colourTokens";
+import {
+  colourActiveRose,
+  colourActiveSky,
+  colourAmberPlain,
+  colourRequiredText,
+} from "../ui/styles/colourTokens";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../hooks/useMediaQuery";
 import { useSwipeableTabs } from "../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../ui/SegmentedTabs";
@@ -83,6 +95,10 @@ const CAMPAIGN_GROUP_TABS = [
   },
 ] as const satisfies readonly SegmentedTabOption<CampaignGroup>[];
 const CAMPAIGN_GROUP_TABS_ID = "dashboard-campaign-groups";
+const campaignActionRowClass =
+  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4 lg:py-5";
+const campaignActionLabelClass =
+  "font-cinzel text-sm font-semibold uppercase tracking-wider text-slate-200 lg:text-base";
 
 interface DeletePreflightState {
   loading: boolean;
@@ -114,18 +130,6 @@ function CampaignListLimitNotice() {
     <p className="text-xs text-amber-300 lg:text-sm">
       Showing the first {FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole} campaigns.
     </p>
-  );
-}
-
-function deleteImpactDetails(state?: DeletePreflightState) {
-  if (!state || state.loading)
-    return <span className="text-xs text-slate-500">Checking affected documents…</span>;
-  if (state.error) return <span className="text-xs text-red-400">{state.error}</span>;
-  if (!state.result) return null;
-  return (
-    <span className="text-xs text-slate-500">
-      {`This permanently deletes ${state.result.totalCount} document${state.result.totalCount === 1 ? "" : "s"}.`}
-    </span>
   );
 }
 
@@ -186,9 +190,20 @@ function DmCampaignList({
   const [deletePreflights, setDeletePreflights] = useState<Record<string, DeletePreflightState>>(
     {}
   );
+  const deletePreflightCacheRef = useRef(
+    new Map<string, { result: NonNullable<DeletePreflightState["result"]>; cachedAt: number }>()
+  );
+  const pendingDeletePreflightsRef = useRef(new Set<string>());
   const [archiving, setArchiving] = useState(false);
+  const [pendingCampaignAction, setPendingCampaignAction] = useState<{
+    campaignId: string;
+    campaignName: string;
+    kind: "archive" | "delete";
+  } | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [restoring, setRestoring] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [openActionsId, setOpenActionsId] = useState<string | null>(null);
   const toast = useToast();
 
   const handleCreate = useCallback(async () => {
@@ -260,6 +275,7 @@ function DmCampaignList({
     try {
       await updateCampaignDetails(editingId, name, inquisitorName);
       setEditingId(null);
+      setOpenActionsId(null);
       setEditName("");
       setEditInquisitorName("");
     } catch (err) {
@@ -271,15 +287,24 @@ function DmCampaignList({
     }
   }, [editingId, editName, editInquisitorName, toast]);
 
+  const closeEditForm = () => {
+    if (editing) return;
+    setEditingId(null);
+    setEditName("");
+    setEditInquisitorName("");
+  };
+
   const handleArchive = useCallback(
     async (campaignId: string) => {
       setArchiving(true);
       try {
         await archiveCampaign(campaignId);
         toast.success("Campaign archived.");
+        return true;
       } catch (err) {
         console.error("Failed to archive campaign:", err);
         toast.error("Failed to archive campaign. Please try again.");
+        return false;
       } finally {
         setArchiving(false);
       }
@@ -312,11 +337,13 @@ function DmCampaignList({
       try {
         await deleteCampaign(jobId, setDeleteProgress);
         toast.success("Campaign deleted.");
+        return true;
       } catch (err) {
         console.error("Failed to delete campaign:", err);
         toast.error(
           err instanceof Error ? err.message : "Failed to delete campaign. Please try again."
         );
+        return false;
       } finally {
         setDeleting(false);
         setDeleteProgress(null);
@@ -326,12 +353,23 @@ function DmCampaignList({
   );
 
   const loadDeletePreflight = useCallback(async (campaignId: string) => {
+    const cached = deletePreflightCacheRef.current.get(campaignId);
+    if (cached && Date.now() - cached.cachedAt < 60 * 60 * 1000) {
+      setDeletePreflights((current) => ({
+        ...current,
+        [campaignId]: { loading: false, result: cached.result },
+      }));
+      return;
+    }
+    if (pendingDeletePreflightsRef.current.has(campaignId)) return;
+    pendingDeletePreflightsRef.current.add(campaignId);
     setDeletePreflights((current) => ({
       ...current,
       [campaignId]: { loading: true },
     }));
     try {
       const result = await preflightCampaignDeletion(campaignId);
+      deletePreflightCacheRef.current.set(campaignId, { result, cachedAt: Date.now() });
       setDeletePreflights((current) => ({
         ...current,
         [campaignId]: { loading: false, result },
@@ -344,8 +382,15 @@ function DmCampaignList({
           error: error instanceof Error ? error.message : "Unable to check this deletion.",
         },
       }));
+    } finally {
+      pendingDeletePreflightsRef.current.delete(campaignId);
     }
   }, []);
+
+  const actionsCampaign = campaigns.find((campaign) => campaign.id === openActionsId);
+  const editNameValid = validateCampaignName(editName.trim()).isValid;
+  const editInquisitorNameValid =
+    !editInquisitorName.trim() || validateInquisitorName(editInquisitorName.trim()).isValid;
 
   return (
     <section className="space-y-3">
@@ -362,107 +407,36 @@ function DmCampaignList({
         </p>
       ) : (
         <div className="flex flex-col gap-3">
-          {campaigns.map((campaign) =>
-            editingId === campaign.id ? (
-              <form
-                key={campaign.id}
-                className={uiSection + " space-y-2"}
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void handleEditSave();
-                }}
-              >
-                <input
-                  className={editableInputClass(true)}
-                  value={editInquisitorName}
-                  maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
-                  onChange={(e) => setEditInquisitorName(e.target.value)}
-                  placeholder="Inquisitor Name"
-                  aria-label="Edit Inquisitor name"
-                />
-                <input
-                  className={editableInputClass(true)}
-                  value={editName}
-                  maxLength={PRODUCT_LIMITS.campaignNameCharacters}
-                  onChange={(e) => setEditName(e.target.value)}
-                  autoFocus
-                  aria-label="Edit campaign name"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <Button type="submit" size="sm" fullWidth disabled={editing}>
-                    {editing ? "Saving…" : "Save"}
-                  </Button>
-                  <Button
-                    variant="neutral"
-                    size="sm"
-                    fullWidth
-                    disabled={editing}
-                    onClick={() => {
-                      setEditingId(null);
-                      setEditName("");
-                      setEditInquisitorName("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <div
-                key={campaign.id}
-                className={
-                  uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"
-                }
-              >
+          {campaigns.map((campaign) => (
+            <div
+              key={campaign.id}
+              className={
+                uiSection + " relative flex items-center gap-3 has-[a:hover]:bg-slate-800 transition-colors"
+              }
+            >
                 <Link
                   to={buildRoute.campaignOverview(campaign.id)}
-                  className="min-w-0 flex-1 font-medium text-slate-200 lg:text-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
-                >
+                  aria-label={campaign.name}
+                  className="absolute inset-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
+                />
+                <span className="pointer-events-none min-w-0 flex-1 font-medium text-slate-200 lg:text-lg">
                   {campaign.name}
-                </Link>
+                </span>
 
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setEditingId(campaign.id);
-                    setEditName(campaign.name);
-                    setEditInquisitorName(campaign.inquisitorName ?? "");
-                  }}
-                >
-                  Edit
-                </Button>
-
-                <ConfirmInline
-                  triggerLabel="Archive"
-                  question="Archive?"
-                  variant="warning"
-                  size="sm"
-                  busy={archiving}
-                  onConfirm={() => handleArchive(campaign.id)}
-                />
-
-                <ConfirmInline
-                  triggerLabel="Delete"
-                  requireText="DELETE"
-                  requirePrompt="Type DELETE to confirm"
-                  size="sm"
-                  busy={deleting}
-                  onArm={() => loadDeletePreflight(campaign.id)}
-                  details={deleteImpactDetails(deletePreflights[campaign.id])}
-                  confirmDisabled={
-                    deletePreflights[campaign.id]?.loading || !deletePreflights[campaign.id]?.result
-                  }
-                  onConfirm={() => handleDeleteConfirm(campaign.id)}
-                  busyLabel={
-                    deleteProgress && deleteProgress.totalCount > 0
-                      ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
-                      : "Deleting…"
-                  }
-                />
-              </div>
-            )
-          )}
+                <div className="relative z-10 shrink-0">
+                  <button
+                    type="button"
+                    aria-label={`Manage ${campaign.name}`}
+                    aria-haspopup="dialog"
+                    aria-expanded={openActionsId === campaign.id}
+                    className={uiIconButton}
+                    onClick={() => setOpenActionsId(campaign.id)}
+                  >
+                    <GearIcon />
+                  </button>
+                </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -558,25 +532,21 @@ function DmCampaignList({
                     Restore
                   </Button>
 
-                  <ConfirmInline
-                    triggerLabel="Delete"
-                    requireText="DELETE"
-                    requirePrompt="Type DELETE to confirm"
+                  <Button
+                    variant="primary"
                     size="sm"
-                    busy={deleting}
-                    onArm={() => loadDeletePreflight(campaign.id)}
-                    details={deleteImpactDetails(deletePreflights[campaign.id])}
-                    confirmDisabled={
-                      deletePreflights[campaign.id]?.loading ||
-                      !deletePreflights[campaign.id]?.result
-                    }
-                    onConfirm={() => handleDeleteConfirm(campaign.id)}
-                    busyLabel={
-                      deleteProgress && deleteProgress.totalCount > 0
-                        ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
-                        : "Deleting…"
-                    }
-                  />
+                    onClick={() => {
+                      setDeleteConfirmText("");
+                      setPendingCampaignAction({
+                        campaignId: campaign.id,
+                        campaignName: campaign.name,
+                        kind: "delete",
+                      });
+                      void loadDeletePreflight(campaign.id);
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </div>
               ))}
               {archivedCampaigns.length === FIRESTORE_QUERY_LIMITS.archivedCampaigns && (
@@ -586,27 +556,250 @@ function DmCampaignList({
           )}
         </div>
       ) : null}
+
+      {actionsCampaign && (
+        <ModalShell
+          ariaLabel={`Manage ${actionsCampaign.name}`}
+          onClose={() => !pendingCampaignAction && !editingId && setOpenActionsId(null)}
+          suspended={Boolean(pendingCampaignAction || editingId === actionsCampaign.id)}
+          className="min-h-0 max-h-[85vh] max-w-md flex flex-col overflow-hidden"
+          viewportAware
+        >
+          <ModalHeader
+            title="Manage Campaign"
+            onClose={() => !pendingCampaignAction && !editingId && setOpenActionsId(null)}
+          />
+          <div className="min-h-0 flex-1 divide-y divide-slate-700 overflow-y-auto px-4 lg:px-6">
+            <section className={campaignActionRowClass}>
+              <span className="flex items-center gap-1.5">
+                <span className={campaignActionLabelClass}>Edit Campaign</span>
+                <InfoModal
+                  title="Edit Campaign"
+                  content="Change this campaign's name and Inquisitor name."
+                />
+              </span>
+              <EditButton
+                label="Edit campaign"
+                className="justify-self-end"
+                onClick={() => {
+                  setEditingId(actionsCampaign.id);
+                  setEditName(actionsCampaign.name);
+                  setEditInquisitorName(actionsCampaign.inquisitorName ?? "");
+                }}
+              />
+            </section>
+            <section className={campaignActionRowClass}>
+              <span className="flex items-center gap-1.5">
+                <span className={campaignActionLabelClass}>Archive Campaign</span>
+                <InfoModal
+                  title="Archive Campaign"
+                  content="Remove this campaign from the active list. You can restore it later."
+                />
+              </span>
+              <ArchiveButton
+                label="Archive campaign"
+                className="justify-self-end"
+                onClick={() =>
+                  setPendingCampaignAction({
+                    campaignId: actionsCampaign.id,
+                    campaignName: actionsCampaign.name,
+                    kind: "archive",
+                  })
+                }
+              />
+            </section>
+            <section className={campaignActionRowClass}>
+              <span className="flex items-center gap-1.5">
+                <span className={campaignActionLabelClass}>Delete Campaign</span>
+                <InfoModal
+                  title="Delete Campaign"
+                  content="Permanently delete this campaign and its data. This cannot be undone."
+                />
+              </span>
+              <RemoveButton
+                label="Delete campaign"
+                className="justify-self-end"
+                onClick={() => {
+                  setDeleteConfirmText("");
+                  setPendingCampaignAction({
+                    campaignId: actionsCampaign.id,
+                    campaignName: actionsCampaign.name,
+                    kind: "delete",
+                  });
+                  void loadDeletePreflight(actionsCampaign.id);
+                }}
+              />
+            </section>
+          </div>
+        </ModalShell>
+      )}
+
+      {editingId && (
+        <PickerModal
+          title="Edit Campaign"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={closeEditForm}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="submit"
+                form="edit-campaign-form"
+                variant="primary"
+                disabled={editing || !editNameValid || !editInquisitorNameValid}
+              >
+                {editing ? "Saving…" : "Save"}
+              </Button>
+              <Button variant="neutral" disabled={editing} onClick={closeEditForm}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <form
+              id="edit-campaign-form"
+              className="space-y-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void handleEditSave();
+              }}
+            >
+              <div>
+                <label htmlFor="edit-inquisitor-name" className={uiFormLabel}>
+                  Inquisitor Name
+                </label>
+                <input
+                  id="edit-inquisitor-name"
+                  className={`${editableInputClass(true)} mt-0.5`}
+                  value={editInquisitorName}
+                  maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
+                  onChange={(event) => setEditInquisitorName(event.target.value)}
+                  disabled={editing}
+                  placeholder="Inquisitor Name"
+                  aria-label="Edit Inquisitor name"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-campaign-name" className={uiFormLabel}>
+                  Campaign Name
+                </label>
+                <input
+                  id="edit-campaign-name"
+                  className={`${editableInputClass(true)} mt-0.5`}
+                  value={editName}
+                  maxLength={PRODUCT_LIMITS.campaignNameCharacters}
+                  onChange={(event) => setEditName(event.target.value)}
+                  disabled={editing}
+                  autoFocus
+                  aria-label="Edit campaign name"
+                />
+              </div>
+            </form>
+          </PickerBody>
+        </PickerModal>
+      )}
+
+      {pendingCampaignAction && (
+        <PickerModal
+          title={pendingCampaignAction.kind === "archive" ? "Archive Campaign" : "Delete Campaign"}
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => {
+            if (archiving || deleting) return;
+            setPendingCampaignAction(null);
+            setDeleteConfirmText("");
+          }}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="space-y-2">
+              {pendingCampaignAction.kind === "delete" && (
+                <>
+                  <label
+                    htmlFor="confirm-campaign-delete"
+                    className={`block text-center text-xs lg:text-sm ${colourAmberPlain}`}
+                  >
+                    Type DELETE to permanently delete this campaign
+                  </label>
+                  <input
+                    id="confirm-campaign-delete"
+                    type="text"
+                    value={deleteConfirmText}
+                    onChange={(event) => setDeleteConfirmText(event.target.value)}
+                    disabled={deleting}
+                    placeholder="DELETE"
+                    className={editableInputClass(true)}
+                  />
+                </>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="primary"
+                  disabled={
+                    pendingCampaignAction.kind === "archive"
+                      ? archiving
+                      : deleting ||
+                        deleteConfirmText !== "DELETE" ||
+                        deletePreflights[pendingCampaignAction.campaignId]?.loading ||
+                        !deletePreflights[pendingCampaignAction.campaignId]?.result
+                  }
+                  onClick={async () => {
+                    const succeeded =
+                      pendingCampaignAction.kind === "archive"
+                        ? await handleArchive(pendingCampaignAction.campaignId)
+                        : await handleDeleteConfirm(pendingCampaignAction.campaignId);
+                    if (succeeded) {
+                      setPendingCampaignAction(null);
+                      setDeleteConfirmText("");
+                      setOpenActionsId(null);
+                    }
+                  }}
+                >
+                  {pendingCampaignAction.kind === "archive"
+                    ? archiving
+                      ? "Archiving…"
+                      : "Yes, archive"
+                    : deleting
+                      ? deleteProgress && deleteProgress.totalCount > 0
+                        ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
+                        : "Deleting…"
+                      : "Delete permanently"}
+                </Button>
+                <Button
+                  variant="neutral"
+                  disabled={archiving || deleting}
+                  onClick={() => {
+                    setPendingCampaignAction(null);
+                    setDeleteConfirmText("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className="text-sm lg:text-base text-slate-300">
+              {pendingCampaignAction.kind === "archive"
+                ? `This archives this campaign: ${pendingCampaignAction.campaignName}. You can restore it later.`
+                : `This permanently deletes this campaign: ${pendingCampaignAction.campaignName}. This cannot be undone.`}
+            </p>
+            {pendingCampaignAction.kind === "delete" &&
+              deletePreflights[pendingCampaignAction.campaignId]?.error && (
+                <span className="text-xs text-red-400">
+                  {deletePreflights[pendingCampaignAction.campaignId]?.error}
+                </span>
+              )}
+          </PickerBody>
+        </PickerModal>
+      )}
     </section>
-  );
-}
-
-// ─── QR code panel ────────────────────────────────────────────────────────────
-
-function QrPanel() {
-  const [open, setOpen] = useState(false);
-  const url = window.location.origin;
-
-  return (
-    <>
-      <div>
-        <SectionHeader className="mb-3">Share App</SectionHeader>
-        <Button variant="secondary" className="w-full" onClick={() => setOpen(true)}>
-          Share App
-        </Button>
-      </div>
-
-      {open && <QrModal title="Share App" url={url} onClose={() => setOpen(false)} />}
-    </>
   );
 }
 
@@ -811,7 +1004,6 @@ export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
         error={dmError}
       />
 
-      {dmCampaigns.length > 0 && <QrPanel />}
     </div>
   );
   const playingCampaignsSection = (

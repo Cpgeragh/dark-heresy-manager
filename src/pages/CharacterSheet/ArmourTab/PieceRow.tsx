@@ -154,7 +154,7 @@ export function PieceRow({
                   onClick={() => setShowUpgradePicker(true)}
                 />
               ) : (
-                <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
+                <ViewButton label="View upgrades" size="sm" onClick={() => setShowUpgradePicker(true)} />
               )}
             </div>
             {upgradeRefs.length === 0 ? (

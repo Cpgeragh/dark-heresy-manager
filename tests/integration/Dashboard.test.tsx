@@ -1,11 +1,11 @@
 // tests/integration/Dashboard.test.tsx
 //
-// PortraitUpload, RecoveryBackupBanner, QrModal, and ClaimPreview are
+// PortraitUpload, RecoveryBackupBanner, and ClaimPreview are
 // all mocked — each already has its own dedicated test file. useRecoveryLookup
 // and the claim service are also mocked directly, same reasoning. This file is
 // scoped to Dashboard's own orchestration: DM campaign
-// CRUD (create/edit/archive/delete-with-preflight-progress/restore), the QR panel
-// gating, the player campaign list, and the claim-a-character flow including the
+// CRUD (create/edit/archive/delete-with-preflight-progress/restore), the player
+// campaign list, and the claim-a-character flow including the
 // ?code= URL auto-lookup.
 import { afterEach, describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
@@ -69,15 +69,6 @@ vi.mock("../../src/components/PortraitUpload", () => ({
 
 vi.mock("../../src/components/RecoveryBackupBanner", () => ({
   RecoveryBackupBanner: () => <div>Mock RecoveryBackupBanner</div>,
-}));
-
-vi.mock("../../src/ui/modals/QrModal", () => ({
-  QrModal: ({ onClose }: { onClose: () => void }) => (
-    <div>
-      Mock QrModal
-      <button onClick={onClose}>Mock Close QrModal</button>
-    </div>
-  ),
 }));
 
 vi.mock("../../src/pages/ClaimCharacter/ClaimPreview", () => ({
@@ -259,7 +250,7 @@ describe("Dashboard DM campaign list", () => {
     expect(createCampaignMock.mock.calls[1][2]).toBe(firstOperationId);
   });
 
-  it("edits a campaign name inline", async () => {
+  it("edits a campaign name in a child modal", async () => {
     const user = userEvent.setup();
     useCampaignsContextMock.mockReturnValue({
       dmCampaigns: [dmCampaign()],
@@ -271,8 +262,14 @@ describe("Dashboard DM campaign list", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
-    const input = screen.getByLabelText("Edit campaign name");
+    await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
+        name: "Edit campaign",
+      })
+    );
+    const editDialog = screen.getByRole("dialog", { name: "Edit Campaign" });
+    const input = within(editDialog).getByLabelText("Edit campaign name");
     await user.clear(input);
     await user.type(input, "Renamed Crusade");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -292,7 +289,12 @@ describe("Dashboard DM campaign list", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
+        name: "Edit campaign",
+      })
+    );
     const input = screen.getByLabelText("Edit campaign name");
     await user.clear(input);
     await user.type(input, "Renamed Crusade{Enter}");
@@ -331,7 +333,12 @@ describe("Dashboard DM campaign list", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
+        name: "Edit campaign",
+      })
+    );
     const inquisitorInput = screen.getByLabelText("Edit Inquisitor name");
     expect(inquisitorInput).toHaveValue("Inquisitor Vail");
     await user.clear(inquisitorInput);
@@ -357,8 +364,14 @@ describe("Dashboard DM campaign list", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Archive" }));
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
+        name: "Archive campaign",
+      })
+    );
+    const archiveDialog = screen.getByRole("dialog", { name: "Archive Campaign" });
+    await user.click(within(archiveDialog).getByRole("button", { name: "Yes, archive" }));
 
     expect(archiveCampaignMock).toHaveBeenCalledWith("campaign-1");
   });
@@ -376,16 +389,79 @@ describe("Dashboard DM campaign list", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
-    await waitFor(() =>
-      expect(screen.getByText("This permanently deletes 5 documents.")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
+        name: "Delete campaign",
+      })
     );
-    expect(screen.getByRole("button", { name: "Yes" })).toBeDisabled();
+    const deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
+    expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeDisabled();
 
-    await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
+    await waitFor(() =>
+      expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled()
+    );
+    await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
 
     expect(deleteCampaignMock).toHaveBeenCalledWith("job-1", expect.any(Function));
+  });
+
+  it("reuses the deletion preflight when the active confirmation is reopened", async () => {
+    const user = userEvent.setup();
+    preflightCampaignDeletionMock.mockResolvedValue({ jobId: "job-1", totalCount: 5 });
+    useCampaignsContextMock.mockReturnValue({
+      dmCampaigns: [dmCampaign()],
+      playerCampaigns: [],
+      dmLoading: false,
+      playerLoading: false,
+      dmError: null,
+      playerError: null,
+    });
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
+    const manageDialog = screen.getByRole("dialog", { name: "Manage The Lathe Run" });
+    await user.click(within(manageDialog).getByRole("button", { name: "Delete campaign" }));
+    let deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
+    await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
+    await waitFor(() =>
+      expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled()
+    );
+    await user.click(within(deleteDialog).getByRole("button", { name: "Cancel" }));
+
+    await user.click(within(manageDialog).getByRole("button", { name: "Delete campaign" }));
+    deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
+    await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
+    expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled();
+    expect(preflightCampaignDeletionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the same named deletion confirmation for an archived campaign", async () => {
+    const user = userEvent.setup();
+    preflightCampaignDeletionMock.mockResolvedValue({ jobId: "archived-job", totalCount: 5 });
+    useArchivedCampaignsMock.mockReturnValue({
+      campaigns: [dmCampaign({ id: "campaign-2", name: "Retired Crusade" })],
+      loading: false,
+      error: null,
+    });
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: /Archived/ }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    const deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
+    expect(within(deleteDialog).getByText(
+      "This permanently deletes this campaign: Retired Crusade. This cannot be undone."
+    )).toBeInTheDocument();
+    expect(within(deleteDialog).queryByText(/documents|Checking affected/)).not.toBeInTheDocument();
+
+    await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
+    await waitFor(() =>
+      expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled()
+    );
+    await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
+    expect(preflightCampaignDeletionMock).toHaveBeenCalledWith("campaign-2");
+    expect(deleteCampaignMock).toHaveBeenCalledWith("archived-job", expect.any(Function));
   });
 
   it("shows archived campaigns behind a toggle, with a working restore action", async () => {
@@ -404,27 +480,6 @@ describe("Dashboard DM campaign list", () => {
 
     await user.click(screen.getByRole("button", { name: "Restore" }));
     expect(restoreCampaignMock).toHaveBeenCalledWith("campaign-2");
-  });
-});
-
-describe("Dashboard QR panel", () => {
-  it("shows Share App from every connected device when the account has a campaign", () => {
-    renderDashboard();
-    expect(screen.queryByRole("button", { name: "Share App" })).not.toBeInTheDocument();
-
-    useCampaignsContextMock.mockReturnValue({
-      dmCampaigns: [dmCampaign()],
-      playerCampaigns: [],
-      dmLoading: false,
-      playerLoading: false,
-      dmError: null,
-      playerError: null,
-    });
-    renderDashboard();
-    expect(screen.getByRole("button", { name: "Share App" })).toBeInTheDocument();
-
-    renderDashboard();
-    expect(screen.getAllByRole("button", { name: "Share App" })).toHaveLength(2);
   });
 });
 

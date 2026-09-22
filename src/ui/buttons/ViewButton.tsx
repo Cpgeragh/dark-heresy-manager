@@ -1,6 +1,6 @@
 // src/ui/buttons/ViewButton.tsx
 import type { ButtonHTMLAttributes } from "react";
-import { uiIconAddButton } from "../styles/buttonStyles";
+import { uiIconButton, uiIconButtonCompact } from "../styles/buttonStyles";
 import { EyeIcon } from "../icons/EyeIcon";
 
 type ViewButtonProps = Omit<
@@ -8,17 +8,18 @@ type ViewButtonProps = Omit<
   "aria-label" | "children" | "type"
 > & {
   label: string;
+  size?: "md" | "sm";
 };
 
-export function ViewButton({ label, className = "", ...buttonProps }: ViewButtonProps) {
+export function ViewButton({ label, size = "md", className = "", ...buttonProps }: ViewButtonProps) {
   return (
     <button
       type="button"
       aria-label={label}
-      className={`${uiIconAddButton} ${className}`.trim()}
+      className={`${size === "sm" ? uiIconButtonCompact : uiIconButton} ${className}`.trim()}
       {...buttonProps}
     >
-      <EyeIcon className="w-[18px] h-[18px]" />
+      <EyeIcon className={size === "sm" ? "w-4 h-4" : "w-[18px] h-[18px]"} />
     </button>
   );
 }

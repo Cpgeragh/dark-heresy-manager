@@ -312,13 +312,13 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
 
   return (
     <ModalShell
-      ariaLabel="Settings"
+      ariaLabel="Manage Account"
       onClose={() => !settingsBusy && onClose()}
       suspended={childModalOpen}
       className="min-h-0 max-h-[85vh] max-w-md flex flex-col overflow-hidden"
       viewportAware
     >
-      <ModalHeader title="Settings" onClose={() => !settingsBusy && onClose()} />
+      <ModalHeader title="Manage Account" onClose={() => !settingsBusy && onClose()} />
       <div className="min-h-0 flex-1 divide-y divide-slate-700 overflow-y-auto px-4 lg:px-6">
         {/* ── Display Name ───────────────────────────────────────────────── */}
         <section className={settingsRowClass}>

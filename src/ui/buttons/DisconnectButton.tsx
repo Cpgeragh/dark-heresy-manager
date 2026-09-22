@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
-import { uiIconAddButton } from "../styles/buttonStyles";
+import { uiIconButton } from "../styles/buttonStyles";
 import { UnlinkIcon } from "../icons/UnlinkIcon";
 
 type DisconnectButtonProps = Omit<
@@ -14,7 +14,7 @@ export function DisconnectButton({ label, className = "", ...buttonProps }: Disc
     <button
       type="button"
       aria-label={label}
-      className={`${uiIconAddButton} ${className}`.trim()}
+      className={`${uiIconButton} ${className}`.trim()}
       {...buttonProps}
     >
       <UnlinkIcon />

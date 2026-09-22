@@ -840,7 +840,7 @@ export function RangedCard({
                 {editable ? (
                   <AddButton label="Add ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
                 ) : (
-                  <ViewButton label="View ammo" onClick={() => setShowAmmoPicker(true)} />
+                  <ViewButton label="View ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
                 )}
               </div>
 
@@ -917,7 +917,11 @@ export function RangedCard({
                       onClick={() => setShowUpgradePicker(true)}
                     />
                   ) : (
-                    <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
+                    <ViewButton
+                      label="View upgrades"
+                      size="sm"
+                      onClick={() => setShowUpgradePicker(true)}
+                    />
                   ))}
               </div>
               {upgradeRefs.length === 0 ? (
