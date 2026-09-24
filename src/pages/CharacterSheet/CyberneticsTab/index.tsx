@@ -24,7 +24,6 @@ import {
 import { Button } from "../../../ui/buttons/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { LoadingState } from "../../../ui/LoadingState";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { uiItemName, uiSection, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 import { Chip } from "../../../ui/chips/Chip";
@@ -885,12 +884,13 @@ export function CyberneticsTab({
     return <ErrorState>Unable to load custom cybernetic or integrated weapon items.</ErrorState>;
   }
 
-  if (customItemsLoading && hasLinkedCustomCybernetics) {
-    return <LoadingState>Loading custom cybernetic items…</LoadingState>;
-  }
-
   return (
     <div className="space-y-6">
+      {customItemsLoading && (
+        <p role="status" className="text-sm text-slate-300">
+          Loading custom cybernetic items…
+        </p>
+      )}
       {/* ── INTEGRATED WEAPONS ────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">

@@ -12,7 +12,6 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { LoadingState } from "../../../ui/LoadingState";
 import { uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -291,12 +290,13 @@ export function ArcheotechTab({
     return <ErrorState>Unable to load custom archeotech items.</ErrorState>;
   }
 
-  if (archeotechLoading) {
-    return <LoadingState>Loading custom archeotech items…</LoadingState>;
-  }
-
   return (
     <div className="space-y-8">
+      {archeotechLoading && (
+        <p role="status" className="text-sm text-slate-300">
+          Loading custom archeotech items…
+        </p>
+      )}
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">

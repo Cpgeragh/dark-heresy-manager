@@ -1,6 +1,6 @@
 // src/hooks/useCampaignCustomItems.ts
 
-import { useMemo } from "react";
+import { createContext, createElement, useContext, useMemo, type ReactNode } from "react";
 import { limit, query, where, type DocumentData, type QuerySnapshot } from "firebase/firestore";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { customItemsCollectionRef } from "../services/customItemService";
@@ -27,7 +27,67 @@ export interface UseCampaignCustomItemsResult {
   error: Error | null;
 }
 
-export function useCampaignCustomItems({
+interface SharedCustomItems {
+  campaignId: string;
+  userId: string;
+  mode: CustomItemsSubscriptionMode;
+  result: UseCampaignCustomItemsResult;
+}
+
+const CustomItemsContext = createContext<SharedCustomItems | null>(null);
+
+export function CampaignCustomItemsScope({
+  campaignId,
+  userId,
+  mode,
+  result,
+  children,
+}: SharedCustomItems & { children: ReactNode }) {
+  return createElement(CustomItemsContext.Provider, {
+    value: { campaignId, userId, mode, result },
+    children,
+  });
+}
+
+export function useCampaignCustomItems(
+  args: UseCampaignCustomItemsArgs
+): UseCampaignCustomItemsResult {
+  const shared = useContext(CustomItemsContext);
+  const useShared =
+    !!shared &&
+    shared.campaignId === args.campaignId &&
+    shared.userId === args.userId &&
+    (shared.mode === "admin" || args.mode === "picker");
+  const direct = useCampaignCustomItemsRaw({
+    ...args,
+    enabled: (args.enabled ?? true) && !useShared,
+  });
+  const selectedCategories = useMemo(
+    () => [
+      ...new Set(args.categories?.length ? args.categories : args.category ? [args.category] : []),
+    ],
+    [args.categories, args.category]
+  );
+  const sharedItems = useMemo(
+    () =>
+      sortCustomItems(
+        (shared?.result.items ?? []).filter(
+          (item) =>
+            (selectedCategories.length === 0 || selectedCategories.includes(item.category)) &&
+            isVisibleCustomItem({
+              item,
+              mode: args.mode,
+              userId: args.userId,
+              includeArchived: args.includeArchived ?? args.mode === "admin",
+            })
+        )
+      ),
+    [shared?.result.items, selectedCategories, args.mode, args.userId, args.includeArchived]
+  );
+  return useShared && shared ? { ...shared.result, items: sharedItems } : direct;
+}
+
+export function useCampaignCustomItemsRaw({
   campaignId,
   category,
   categories,

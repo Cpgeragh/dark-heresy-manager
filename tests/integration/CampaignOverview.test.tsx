@@ -14,6 +14,11 @@ import "@testing-library/jest-dom";
 import { IMPORTANT_TOAST_DURATION } from "../../src/constants/ui";
 import type { CampaignWithId, CharacterListItem } from "../../src/types/Firestore";
 
+vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
+  useCampaignCustomItemsRaw: () => ({ items: [], loading: false, error: null }),
+  CampaignCustomItemsScope: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
   return { ...actual, useParams: () => useParamsMock() };

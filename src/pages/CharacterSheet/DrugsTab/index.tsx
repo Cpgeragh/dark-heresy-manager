@@ -11,7 +11,6 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { LoadingState } from "../../../ui/LoadingState";
 import { uiTextBody, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -256,12 +255,13 @@ export function DrugsTab({
     return <ErrorState>Unable to load custom drug items.</ErrorState>;
   }
 
-  if (drugsLoading) {
-    return <LoadingState>Loading custom drug items…</LoadingState>;
-  }
-
   return (
     <div className="space-y-6">
+      {drugsLoading && (
+        <p role="status" className="text-sm text-slate-300">
+          Loading custom drug items…
+        </p>
+      )}
       {/* Excessive Drug Use rule */}
       <div
         className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}

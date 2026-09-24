@@ -35,11 +35,17 @@ import { MyCharacterCard } from "./CampaignOverview/MyCharacterCard";
 import { PartyRosterTile } from "./CampaignOverview/PartyRosterTile";
 import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
+import {
+  CampaignCustomItemsScope,
+  useCampaignCustomItemsRaw,
+} from "../hooks/useCampaignCustomItems";
+import { useCampaignsContext } from "../context/useCampaignsContext";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
   recordComponentRender("CampaignOverview");
   const params = useParams<{ campaignId: string }>();
   const campaignId = params.campaignId;
+  const { dmCampaigns, playerCampaigns } = useCampaignsContext();
 
   const {
     campaign,
@@ -47,6 +53,25 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     error: campaignError,
   } = useCampaign(campaignId ?? null);
   const isDM = campaign?.dmId === effectiveUserId;
+  const knownRole = campaign
+    ? isDM
+      ? "admin"
+      : "picker"
+    : dmCampaigns.some((item) => item.id === campaignId)
+      ? "admin"
+      : playerCampaigns.some((item) => item.id === campaignId)
+        ? "picker"
+        : null;
+  const {
+    items: customItems,
+    loading: customItemsLoading,
+    error: customItemsError,
+  } = useCampaignCustomItemsRaw({
+    campaignId,
+    mode: knownRole ?? "picker",
+    userId: effectiveUserId,
+    enabled: !!knownRole,
+  });
   const {
     sessions,
     loading: sessionsLoading,
@@ -254,11 +279,11 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
   }
 
-  if (campaignError || charactersError) {
+  if (campaignError || charactersError || (campaign && customItemsError)) {
     return <RouteLoadError resource="campaign" />;
   }
 
-  if (campaignLoading || charactersLoading) {
+  if (campaignLoading || charactersLoading || customItemsLoading) {
     return <LoadingState className="text-center py-10">Loading campaign…</LoadingState>;
   }
 
@@ -273,186 +298,199 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     : characters;
 
   return (
-    <PageShell title={campaign?.name ?? "Campaign Overview"}>
-      <Panel>
-        {/* GM / Inquisitor name — shown to everyone */}
-        {(campaign.gmName || campaign.inquisitorName) && (
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {campaign.gmName && (
-              <span className="text-sm lg:text-base text-slate-300">
-                <span className={uiTextLabel}>GM</span> {campaign.gmName}
-              </span>
-            )}
-            {campaign.inquisitorName && (
-              <span className="text-sm lg:text-base text-slate-300">
-                <span className={uiTextLabel}>Inquisitor</span> {campaign.inquisitorName}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Session form — shown inline when creating */}
-        {isDM && showSessionForm && (
-          <SessionForm
-            campaignId={campaignId}
-            characters={summaries}
-            onClose={() => setShowSessionForm(false)}
-          />
-        )}
-
-        {/* CHARACTERS — DM admin view */}
-        {isDM && (
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-              <SectionHeader>Characters</SectionHeader>
-              <input
-                placeholder="Search…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className={
-                  editableInputClass(true) +
-                  " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"
-                }
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 mb-3">
-              <input
-                className={editableInputClass(true) + " flex-1"}
-                placeholder="Character Name"
-                value={newCharacterName}
-                maxLength={PRODUCT_LIMITS.characterNameCharacters}
-                onChange={(e) => setNewCharacterName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleCreate();
-                }}
-              />
-              <Button onClick={handleCreate} disabled={creatingCharacter}>
-                {creatingCharacter ? "Creating…" : "Create"}
-              </Button>
-            </div>
-
-            <div className="space-y-3">
-              {filteredCharacters.length === 0 ? (
-                <p className="text-slate-400 text-sm lg:text-base">
-                  {search.trim() ? `No characters match "${search}".` : "No characters yet."}
-                </p>
-              ) : (
-                filteredCharacters.map((char) => (
-                  <CharacterRow
-                    key={char.id}
-                    campaignId={campaignId}
-                    characterId={char.id}
-                    characterName={char.header?.characterName ?? "Unnamed Character"}
-                    userId={char.userId ?? null}
-                    recoveryCode={char.recoveryCode}
-                    portraitUrl={char.portraitUrl}
-                    isDM={isDM}
-                  />
-                ))
+    <CampaignCustomItemsScope
+      campaignId={campaignId}
+      userId={effectiveUserId}
+      mode={isDM ? "admin" : "picker"}
+      result={{ items: customItems, loading: customItemsLoading, error: customItemsError }}
+    >
+      <PageShell title={campaign?.name ?? "Campaign Overview"}>
+        <Panel>
+          {/* GM / Inquisitor name — shown to everyone */}
+          {(campaign.gmName || campaign.inquisitorName) && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {campaign.gmName && (
+                <span className="text-sm lg:text-base text-slate-300">
+                  <span className={uiTextLabel}>GM</span> {campaign.gmName}
+                </span>
+              )}
+              {campaign.inquisitorName && (
+                <span className="text-sm lg:text-base text-slate-300">
+                  <span className={uiTextLabel}>Inquisitor</span> {campaign.inquisitorName}
+                </span>
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* MY CHARACTERS — player view */}
-        {!isDM && (
-          <div>
-            <SectionHeader className="mb-3">My Characters</SectionHeader>
-            {characters.length === 0 ? (
-              <p className="text-slate-400 text-sm lg:text-base">
-                You haven't claimed a character in this campaign yet.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {characters.map((c) => (
-                  <MyCharacterCard key={c.id} character={c} campaignId={campaignId} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          {/* Session form — shown inline when creating */}
+          {isDM && showSessionForm && (
+            <SessionForm
+              campaignId={campaignId}
+              characters={summaries}
+              onClose={() => setShowSessionForm(false)}
+            />
+          )}
 
-        {/* PARTY — player view */}
-        {!isDM && (
-          <div>
-            <SectionHeader className="mb-3">Party</SectionHeader>
-            {partySummariesError ? (
-              <ErrorState>Unable to load the party roster. Please refresh the page.</ErrorState>
-            ) : partySummariesLoading ? (
-              <LoadingState>Loading the party roster…</LoadingState>
-            ) : partyMembers.length === 0 ? (
-              <p className="text-slate-400 text-sm lg:text-base">No one else has joined yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {partyMembers.map((s) => (
-                  <PartyRosterTile key={s.id} summary={s} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* MESSAGES — DM only */}
-        {isDM && (
-          <div>
-            <SectionHeader className="mb-3">Messages</SectionHeader>
-            <DMInbox campaignId={campaignId} dmUid={campaign?.dmId ?? ""} characters={characters} />
-          </div>
-        )}
-
-        {/* CUSTOM ITEM LIBRARY — DM only */}
-        {isDM && (
-          <div>
-            <SectionHeader className="mb-3">Custom Item Library</SectionHeader>
-            <CustomItemLibraryAdmin campaignId={campaignId} userId={effectiveUserId} />
-          </div>
-        )}
-
-        {/* SESSION HISTORY */}
-        <div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-            <SectionHeader>Session History</SectionHeader>
-            {isDM && !showSessionForm && (
-              <Button className="w-full sm:w-auto" onClick={() => setShowSessionForm(true)}>
-                New Session
-              </Button>
-            )}
-          </div>
-
-          {sessionsError ? (
-            <ErrorState>Unable to load sessions. Please refresh the page.</ErrorState>
-          ) : sessionsLoading ? (
-            <LoadingState>Loading sessions…</LoadingState>
-          ) : sessions.length === 0 ? (
-            <p className="text-slate-400 text-sm lg:text-base">No sessions recorded yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {sessions.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  session={session}
-                  characters={sessionCharacters}
-                  isDM={isDM}
-                  onDelete={isDM ? (reverseXp) => deleteSession(session.id, reverseXp) : undefined}
-                  onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
-                  onApplyXp={
-                    isDM
-                      ? () =>
-                          applySessionXp(
-                            campaignId,
-                            session.id,
-                            session.attendees,
-                            session.xpAwarded
-                          )
-                      : undefined
+          {/* CHARACTERS — DM admin view */}
+          {isDM && (
+            <div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                <SectionHeader>Characters</SectionHeader>
+                <input
+                  placeholder="Search…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className={
+                    editableInputClass(true) +
+                    " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"
                   }
                 />
-              ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                <input
+                  className={editableInputClass(true) + " flex-1"}
+                  placeholder="Character Name"
+                  value={newCharacterName}
+                  maxLength={PRODUCT_LIMITS.characterNameCharacters}
+                  onChange={(e) => setNewCharacterName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void handleCreate();
+                  }}
+                />
+                <Button onClick={handleCreate} disabled={creatingCharacter}>
+                  {creatingCharacter ? "Creating…" : "Create"}
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {filteredCharacters.length === 0 ? (
+                  <p className="text-slate-400 text-sm lg:text-base">
+                    {search.trim() ? `No characters match "${search}".` : "No characters yet."}
+                  </p>
+                ) : (
+                  filteredCharacters.map((char) => (
+                    <CharacterRow
+                      key={char.id}
+                      campaignId={campaignId}
+                      characterId={char.id}
+                      characterName={char.header?.characterName ?? "Unnamed Character"}
+                      userId={char.userId ?? null}
+                      recoveryCode={char.recoveryCode}
+                      portraitUrl={char.portraitUrl}
+                      isDM={isDM}
+                    />
+                  ))
+                )}
+              </div>
             </div>
           )}
-        </div>
-      </Panel>
-    </PageShell>
+
+          {/* MY CHARACTERS — player view */}
+          {!isDM && (
+            <div>
+              <SectionHeader className="mb-3">My Characters</SectionHeader>
+              {characters.length === 0 ? (
+                <p className="text-slate-400 text-sm lg:text-base">
+                  You haven't claimed a character in this campaign yet.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {characters.map((c) => (
+                    <MyCharacterCard key={c.id} character={c} campaignId={campaignId} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PARTY — player view */}
+          {!isDM && (
+            <div>
+              <SectionHeader className="mb-3">Party</SectionHeader>
+              {partySummariesError ? (
+                <ErrorState>Unable to load the party roster. Please refresh the page.</ErrorState>
+              ) : partySummariesLoading ? (
+                <LoadingState>Loading the party roster…</LoadingState>
+              ) : partyMembers.length === 0 ? (
+                <p className="text-slate-400 text-sm lg:text-base">No one else has joined yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {partyMembers.map((s) => (
+                    <PartyRosterTile key={s.id} summary={s} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MESSAGES — DM only */}
+          {isDM && (
+            <div>
+              <SectionHeader className="mb-3">Messages</SectionHeader>
+              <DMInbox
+                campaignId={campaignId}
+                dmUid={campaign?.dmId ?? ""}
+                characters={characters}
+              />
+            </div>
+          )}
+
+          {/* CUSTOM ITEM LIBRARY — DM only */}
+          {isDM && (
+            <div>
+              <SectionHeader className="mb-3">Custom Item Library</SectionHeader>
+              <CustomItemLibraryAdmin campaignId={campaignId} userId={effectiveUserId} />
+            </div>
+          )}
+
+          {/* SESSION HISTORY */}
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+              <SectionHeader>Session History</SectionHeader>
+              {isDM && !showSessionForm && (
+                <Button className="w-full sm:w-auto" onClick={() => setShowSessionForm(true)}>
+                  New Session
+                </Button>
+              )}
+            </div>
+
+            {sessionsError ? (
+              <ErrorState>Unable to load sessions. Please refresh the page.</ErrorState>
+            ) : sessionsLoading ? (
+              <LoadingState>Loading sessions…</LoadingState>
+            ) : sessions.length === 0 ? (
+              <p className="text-slate-400 text-sm lg:text-base">No sessions recorded yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {sessions.map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    characters={sessionCharacters}
+                    isDM={isDM}
+                    onDelete={
+                      isDM ? (reverseXp) => deleteSession(session.id, reverseXp) : undefined
+                    }
+                    onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
+                    onApplyXp={
+                      isDM
+                        ? () =>
+                            applySessionXp(
+                              campaignId,
+                              session.id,
+                              session.attendees,
+                              session.xpAwarded
+                            )
+                        : undefined
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </Panel>
+      </PageShell>
+    </CampaignCustomItemsScope>
   );
 }

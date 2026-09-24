@@ -66,6 +66,11 @@ import { ROUTES } from "../constants/routes";
 import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import { TitleToolbar } from "../ui/TitleToolbar";
+import {
+  CampaignCustomItemsScope,
+  useCampaignCustomItemsRaw,
+} from "../hooks/useCampaignCustomItems";
+import { useCampaignsContext } from "../context/useCampaignsContext";
 
 const TalentsTab = memo(
   lazy(() =>
@@ -136,6 +141,7 @@ export default function CharacterSheet({
 }) {
   recordComponentRender("CharacterSheet");
   const params = useParams<{ campaignId: string; characterId: string }>();
+  const { dmCampaigns, playerCampaigns } = useCampaignsContext();
 
   const {
     path,
@@ -179,6 +185,38 @@ export default function CharacterSheet({
     characterIdParam: params.characterId,
     effectiveUserId,
   });
+
+  const knownRole = !isDMLoading
+    ? isDM
+      ? "admin"
+      : "picker"
+    : dmCampaigns.some((item) => item.id === params.campaignId)
+      ? "admin"
+      : playerCampaigns.some((item) => item.id === params.campaignId)
+        ? "picker"
+        : null;
+
+  const {
+    items: customItems,
+    loading: customItemsLoading,
+    error: customItemsError,
+  } = useCampaignCustomItemsRaw({
+    campaignId: params.campaignId,
+    mode: knownRole ?? "picker",
+    userId: effectiveUserId,
+    enabled: !!params.campaignId && !!knownRole,
+  });
+
+  useEffect(() => {
+    if (!params.campaignId || !params.characterId) return;
+    // Start the split tab downloads during the existing character load.
+    void Promise.all([
+      import("./CharacterSheet/WeaponsTab"),
+      import("./CharacterSheet/GearTab"),
+      import("./CharacterSheet/ArcheotechTab"),
+      import("./CharacterSheet/CyberneticsTab"),
+    ]);
+  }, [params.campaignId, params.characterId]);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -478,11 +516,11 @@ export default function CharacterSheet({
     return <LoadingState className="text-center py-10">Returning to dashboard…</LoadingState>;
   }
 
-  if (characterLoading || isDMLoading) {
+  if (characterLoading || isDMLoading || customItemsLoading) {
     return <LoadingState className="text-center py-10">Loading character…</LoadingState>;
   }
 
-  if (characterError) {
+  if (characterError || customItemsError) {
     return <RouteLoadError resource="character" />;
   }
 
@@ -550,391 +588,398 @@ export default function CharacterSheet({
   ].join(" ");
 
   return (
-    <div>
-      {ownerProfileError && (
-        <p className="mb-4 text-sm lg:text-base text-amber-300">
-          Unable to refresh the owner&apos;s profile name; showing the stored name.
-        </p>
-      )}
+    <CampaignCustomItemsScope
+      campaignId={params.campaignId ?? ""}
+      userId={effectiveUserId}
+      mode={isDM ? "admin" : "picker"}
+      result={{ items: customItems, loading: customItemsLoading, error: customItemsError }}
+    >
+      <div>
+        {ownerProfileError && (
+          <p className="mb-4 text-sm lg:text-base text-amber-300">
+            Unable to refresh the owner&apos;s profile name; showing the stored name.
+          </p>
+        )}
 
-      {/* DM NAV / OVERRIDE BAR */}
-      {isDM && (
-        <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">
-          <span className="text-xs lg:text-sm text-slate-400">DM View</span>
+        {/* DM NAV / OVERRIDE BAR */}
+        {isDM && (
+          <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">
+            <span className="text-xs lg:text-sm text-slate-400">DM View</span>
 
-          <button
-            type="button"
-            onClick={toggleDmReadOnly}
-            aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
-            aria-pressed={!dmReadOnly}
-            className={`text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border ${
-              dmReadOnly
-                ? "border-slate-600 bg-slate-800 text-slate-300"
-                : "border-amber-400 bg-amber-500 text-slate-900 font-semibold"
-            }`}
+            <button
+              type="button"
+              onClick={toggleDmReadOnly}
+              aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
+              aria-pressed={!dmReadOnly}
+              className={`text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border ${
+                dmReadOnly
+                  ? "border-slate-600 bg-slate-800 text-slate-300"
+                  : "border-amber-400 bg-amber-500 text-slate-900 font-semibold"
+              }`}
+            >
+              {dmReadOnly ? "Read-only" : "Editing enabled"}
+            </button>
+          </div>
+        )}
+
+        {/* Balanced page toolbar: navigation, centred title, matching spacer */}
+        <TitleToolbar
+          className="mb-4"
+          title={TAB_TITLES[activeTab]}
+          left={<SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />}
+          right={
+            <button
+              type="button"
+              onClick={onOpenMessages}
+              aria-label="Messages"
+              className="flex h-10 w-11 items-center justify-center justify-self-end rounded-lg border border-slate-500 bg-slate-800 text-slate-300 transition hover:bg-slate-700 hover:text-white"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-5 w-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+                />
+              </svg>
+            </button>
+          }
+        />
+
+        {/* CONTENT CONTAINER */}
+        <div className={containerClass} role="tabpanel" aria-label={`${activeTab} content`}>
+          <ErrorBoundary
+            fallback={
+              <div className="p-6 text-center space-y-4">
+                <div className="text-slate-300">
+                  <p className="text-lg font-semibold mb-2">Failed to load this tab</p>
+                  <p className="text-sm lg:text-base text-slate-400">
+                    An error occurred while displaying this content.
+                  </p>
+                </div>
+                <Button variant="secondary" onClick={() => handleTabChange("vitals")}>
+                  Back to Overview
+                </Button>
+              </div>
+            }
           >
-            {dmReadOnly ? "Read-only" : "Editing enabled"}
-          </button>
-        </div>
-      )}
+            <Suspense
+              fallback={<LoadingState className="py-10 text-center">Loading section…</LoadingState>}
+            >
+              {activeTab === "vitals" && (
+                <VitalsTab
+                  character={character}
+                  editable={allowedToEdit}
+                  toughnessBonus={getCharBonus("t")}
+                  talents={character.talentsAndTraits}
+                  onUpdateWounds={handleUpdateWounds}
+                  onUpdateFate={handleUpdateFate}
+                />
+              )}
 
-      {/* Balanced page toolbar: navigation, centred title, matching spacer */}
-      <TitleToolbar
-        className="mb-4"
-        title={TAB_TITLES[activeTab]}
-        left={<SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />}
-        right={
+              {activeTab === "insanity" && (
+                <InsanityTab
+                  insanity={character.insanity}
+                  talents={character.talentsAndTraits}
+                  career={character.header.career}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateInsanity}
+                />
+              )}
+
+              {activeTab === "corruption" && (
+                <CorruptionTab
+                  corruption={character.corruption}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateCorruption}
+                />
+              )}
+
+              {activeTab === "stats" && (
+                <MemoizedCharacteristicsTab
+                  getCharField={getCharField}
+                  getEffectiveCharTotal={getEffectiveCharTotal}
+                  getCharBonus={getCharBonus}
+                  editable={allowedToEdit}
+                  modifierTotals={characteristicModifierTotals}
+                  modifierSources={characteristicModifierSources}
+                  talents={character.talentsAndTraits}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  updateCharacteristic={updateCharacteristic}
+                />
+              )}
+
+              {activeTab === "skills" && (
+                <MemoizedSkillsTab
+                  skills={character.skills}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateSkills}
+                  getCharField={getCharField}
+                  modifierTotals={characteristicModifierTotals}
+                  talents={character.talentsAndTraits}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  isDM={isDM}
+                />
+              )}
+
+              {activeTab === "talents" && (
+                <TalentsTab
+                  talents={character.talentsAndTraits}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  psychic={character.psychic}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  rangedWeapons={character.rangedWeapons}
+                  meleeWeapons={character.meleeWeapons}
+                  archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  insanity={character.insanity}
+                  willpowerBonus={getCharBonus("wp")}
+                  weaponTraining={character.weaponTraining}
+                  isDM={isDM}
+                  editable={allowedToEdit}
+                  onUpdateTalents={handleUpdateTalents}
+                  onUpdateCharacter={patchFieldsWithResult}
+                />
+              )}
+
+              {activeTab === "training" && (
+                <WeaponTrainingTab
+                  weaponTraining={character.weaponTraining}
+                  talents={character.talentsAndTraits}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  editable={allowedToEdit}
+                  isDM={isDM}
+                  onUpdate={handleUpdateWeaponTraining}
+                />
+              )}
+
+              {activeTab === "traits" && (
+                <TraitsTab
+                  talents={character.talentsAndTraits}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  gear={character.gear ?? EMPTY_GEAR}
+                  editable={allowedToEdit}
+                  onUpdateTalents={handleUpdateTalents}
+                  onUpdateCybernetics={handleUpdateCybernetics}
+                  onUpdateGear={handleUpdateGear}
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                />
+              )}
+
+              {activeTab === "weapons" && (
+                <WeaponsTab
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                  rangedWeapons={character.rangedWeapons}
+                  meleeWeapons={character.meleeWeapons}
+                  grenades={character.grenades ?? EMPTY_GRENADES}
+                  editable={allowedToEdit}
+                  strengthBonus={getCharBonus("s")}
+                  onUpdateRanged={handleUpdateRangedWeapons}
+                  onUpdateMelee={handleUpdateMeleeWeapons}
+                  onUpdateGrenades={handleUpdateGrenades}
+                  shields={character.shields ?? EMPTY_SHIELDS}
+                  onUpdateShields={handleUpdateShields}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  onUpdateArcheotech={handleUpdateArcheotech}
+                />
+              )}
+
+              {activeTab === "armour" && (
+                <MemoizedArmourTab
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                  armour={character.armour}
+                  toughnessBonus={getCharBonus("t")}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateArmour}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  onUpdateArcheotech={handleUpdateArcheotech}
+                  traits={character.talentsAndTraits.traits}
+                  talents={character.talentsAndTraits}
+                  career={character.header.career}
+                />
+              )}
+
+              {activeTab === "cybernetics" && (
+                <CyberneticsTab
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  rangedWeapons={character.rangedWeapons}
+                  meleeWeapons={character.meleeWeapons}
+                  strengthBonus={getCharBonus("s")}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateCybernetics}
+                  onUpdateRanged={handleUpdateRangedWeapons}
+                  onUpdateMelee={handleUpdateMeleeWeapons}
+                  archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  onUpdateArcheotech={handleUpdateArcheotech}
+                  career={character.header.career}
+                />
+              )}
+
+              {activeTab === "psychic" && (
+                <PsychicTab
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                  psychic={character.psychic}
+                  talents={character.talentsAndTraits}
+                  psyRating={psyRating}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdatePsychic}
+                />
+              )}
+
+              {activeTab === "gear" && (
+                <GearTab
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                  gear={character.gear}
+                  consumables={character.consumables ?? EMPTY_CONSUMABLES}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateGear}
+                  onUpdateConsumables={handleUpdateConsumables}
+                />
+              )}
+
+              {activeTab === "companions" && (
+                <CompanionsTab
+                  companions={character.companions ?? EMPTY_COMPANIONS}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateCompanions}
+                />
+              )}
+
+              {activeTab === "drugs" && (
+                <DrugsTab
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                  drugs={character.drugs ?? EMPTY_DRUGS}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateDrugs}
+                />
+              )}
+
+              {activeTab === "xp" && (
+                <ExperienceTab
+                  character={character}
+                  isDM={isDM}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateExperience}
+                  onUpdateCharacter={patchFieldsWithResult}
+                />
+              )}
+
+              {activeTab === "notes" && (
+                <NotesTab
+                  notes={character.notes ?? EMPTY_NOTES}
+                  editable={allowedToEdit}
+                  onSave={handleUpdateNotes}
+                />
+              )}
+
+              {activeTab === "background" && (
+                <BackgroundTab
+                  header={character.header}
+                  talents={character.talentsAndTraits}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  editable={allowedToEdit}
+                  playerName={ownerName}
+                  onUpdateHeader={handleUpdateHeader}
+                  onUpdateTalents={handleUpdateTalents}
+                  onUpdateCybernetics={handleUpdateCybernetics}
+                  gear={character.gear ?? EMPTY_GEAR}
+                  onUpdateGear={handleUpdateGear}
+                />
+              )}
+
+              {activeTab === "archeotech" && (
+                <ArcheotechTab
+                  campaignId={path.campaignId}
+                  characterId={character.id}
+                  userId={effectiveUserId}
+                  characterName={character.header.characterName}
+                  isDM={isDM}
+                  archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  editable={allowedToEdit}
+                  onUpdate={handleUpdateArcheotech}
+                />
+              )}
+
+              {activeTab === "admin" && isDM && (
+                <AdminTab
+                  campaignId={path.campaignId}
+                  character={character}
+                  ownerName={ownerName}
+                  onDMForceRelease={dmForceRelease}
+                  onDMForceAssign={dmForceAssign}
+                  onDMToggleEdit={dmToggleEdit}
+                  isDmForceReleasing={isDmForceReleasing}
+                  isDmForceAssigning={isDmForceAssigning}
+                  isDmTogglingEdit={isDmTogglingEdit}
+                  memberIds={memberIds}
+                />
+              )}
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+
+        {showScrollTop && (
           <button
             type="button"
-            onClick={onOpenMessages}
-            aria-label="Messages"
-            className="flex h-10 w-11 items-center justify-center justify-self-end rounded-lg border border-slate-500 bg-slate-800 text-slate-300 transition hover:bg-slate-700 hover:text-white"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label="Scroll to top"
+            className="fixed bottom-6 right-4 z-50 w-9 h-9 rounded bg-slate-800/85 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-slate-700/90 transition shadow-lg"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth={1.5}
+              strokeWidth={2.5}
               stroke="currentColor"
-              className="h-5 w-5"
+              className="w-5 h-5"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
             </svg>
           </button>
-        }
-      />
-
-      {/* CONTENT CONTAINER */}
-      <div className={containerClass} role="tabpanel" aria-label={`${activeTab} content`}>
-        <ErrorBoundary
-          fallback={
-            <div className="p-6 text-center space-y-4">
-              <div className="text-slate-300">
-                <p className="text-lg font-semibold mb-2">Failed to load this tab</p>
-                <p className="text-sm lg:text-base text-slate-400">
-                  An error occurred while displaying this content.
-                </p>
-              </div>
-              <Button variant="secondary" onClick={() => handleTabChange("vitals")}>
-                Back to Overview
-              </Button>
-            </div>
-          }
-        >
-          <Suspense
-            fallback={<LoadingState className="py-10 text-center">Loading section…</LoadingState>}
-          >
-            {activeTab === "vitals" && (
-              <VitalsTab
-                character={character}
-                editable={allowedToEdit}
-                toughnessBonus={getCharBonus("t")}
-                talents={character.talentsAndTraits}
-                onUpdateWounds={handleUpdateWounds}
-                onUpdateFate={handleUpdateFate}
-              />
-            )}
-
-            {activeTab === "insanity" && (
-              <InsanityTab
-                insanity={character.insanity}
-                talents={character.talentsAndTraits}
-                career={character.header.career}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateInsanity}
-              />
-            )}
-
-            {activeTab === "corruption" && (
-              <CorruptionTab
-                corruption={character.corruption}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateCorruption}
-              />
-            )}
-
-            {activeTab === "stats" && (
-              <MemoizedCharacteristicsTab
-                getCharField={getCharField}
-                getEffectiveCharTotal={getEffectiveCharTotal}
-                getCharBonus={getCharBonus}
-                editable={allowedToEdit}
-                modifierTotals={characteristicModifierTotals}
-                modifierSources={characteristicModifierSources}
-                talents={character.talentsAndTraits}
-                career={character.header.career}
-                rank={character.header.rank}
-                updateCharacteristic={updateCharacteristic}
-              />
-            )}
-
-            {activeTab === "skills" && (
-              <MemoizedSkillsTab
-                skills={character.skills}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateSkills}
-                getCharField={getCharField}
-                modifierTotals={characteristicModifierTotals}
-                talents={character.talentsAndTraits}
-                career={character.header.career}
-                rank={character.header.rank}
-                isDM={isDM}
-              />
-            )}
-
-            {activeTab === "talents" && (
-              <TalentsTab
-                talents={character.talentsAndTraits}
-                career={character.header.career}
-                rank={character.header.rank}
-                psychic={character.psychic}
-                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
-                rangedWeapons={character.rangedWeapons}
-                meleeWeapons={character.meleeWeapons}
-                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
-                insanity={character.insanity}
-                willpowerBonus={getCharBonus("wp")}
-                weaponTraining={character.weaponTraining}
-                isDM={isDM}
-                editable={allowedToEdit}
-                onUpdateTalents={handleUpdateTalents}
-                onUpdateCharacter={patchFieldsWithResult}
-              />
-            )}
-
-            {activeTab === "training" && (
-              <WeaponTrainingTab
-                weaponTraining={character.weaponTraining}
-                talents={character.talentsAndTraits}
-                career={character.header.career}
-                rank={character.header.rank}
-                editable={allowedToEdit}
-                isDM={isDM}
-                onUpdate={handleUpdateWeaponTraining}
-              />
-            )}
-
-            {activeTab === "traits" && (
-              <TraitsTab
-                talents={character.talentsAndTraits}
-                career={character.header.career}
-                rank={character.header.rank}
-                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
-                gear={character.gear ?? EMPTY_GEAR}
-                editable={allowedToEdit}
-                onUpdateTalents={handleUpdateTalents}
-                onUpdateCybernetics={handleUpdateCybernetics}
-                onUpdateGear={handleUpdateGear}
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-              />
-            )}
-
-            {activeTab === "weapons" && (
-              <WeaponsTab
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-                rangedWeapons={character.rangedWeapons}
-                meleeWeapons={character.meleeWeapons}
-                grenades={character.grenades ?? EMPTY_GRENADES}
-                editable={allowedToEdit}
-                strengthBonus={getCharBonus("s")}
-                onUpdateRanged={handleUpdateRangedWeapons}
-                onUpdateMelee={handleUpdateMeleeWeapons}
-                onUpdateGrenades={handleUpdateGrenades}
-                shields={character.shields ?? EMPTY_SHIELDS}
-                onUpdateShields={handleUpdateShields}
-                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
-                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
-                onUpdateArcheotech={handleUpdateArcheotech}
-              />
-            )}
-
-            {activeTab === "armour" && (
-              <MemoizedArmourTab
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-                armour={character.armour}
-                toughnessBonus={getCharBonus("t")}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateArmour}
-                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
-                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
-                onUpdateArcheotech={handleUpdateArcheotech}
-                traits={character.talentsAndTraits.traits}
-                talents={character.talentsAndTraits}
-                career={character.header.career}
-              />
-            )}
-
-            {activeTab === "cybernetics" && (
-              <CyberneticsTab
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
-                rangedWeapons={character.rangedWeapons}
-                meleeWeapons={character.meleeWeapons}
-                strengthBonus={getCharBonus("s")}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateCybernetics}
-                onUpdateRanged={handleUpdateRangedWeapons}
-                onUpdateMelee={handleUpdateMeleeWeapons}
-                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
-                onUpdateArcheotech={handleUpdateArcheotech}
-                career={character.header.career}
-              />
-            )}
-
-            {activeTab === "psychic" && (
-              <PsychicTab
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-                psychic={character.psychic}
-                talents={character.talentsAndTraits}
-                psyRating={psyRating}
-                editable={allowedToEdit}
-                onUpdate={handleUpdatePsychic}
-              />
-            )}
-
-            {activeTab === "gear" && (
-              <GearTab
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-                gear={character.gear}
-                consumables={character.consumables ?? EMPTY_CONSUMABLES}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateGear}
-                onUpdateConsumables={handleUpdateConsumables}
-              />
-            )}
-
-            {activeTab === "companions" && (
-              <CompanionsTab
-                companions={character.companions ?? EMPTY_COMPANIONS}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateCompanions}
-              />
-            )}
-
-            {activeTab === "drugs" && (
-              <DrugsTab
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-                drugs={character.drugs ?? EMPTY_DRUGS}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateDrugs}
-              />
-            )}
-
-            {activeTab === "xp" && (
-              <ExperienceTab
-                character={character}
-                isDM={isDM}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateExperience}
-                onUpdateCharacter={patchFieldsWithResult}
-              />
-            )}
-
-            {activeTab === "notes" && (
-              <NotesTab
-                notes={character.notes ?? EMPTY_NOTES}
-                editable={allowedToEdit}
-                onSave={handleUpdateNotes}
-              />
-            )}
-
-            {activeTab === "background" && (
-              <BackgroundTab
-                header={character.header}
-                talents={character.talentsAndTraits}
-                cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
-                editable={allowedToEdit}
-                playerName={ownerName}
-                onUpdateHeader={handleUpdateHeader}
-                onUpdateTalents={handleUpdateTalents}
-                onUpdateCybernetics={handleUpdateCybernetics}
-                gear={character.gear ?? EMPTY_GEAR}
-                onUpdateGear={handleUpdateGear}
-              />
-            )}
-
-            {activeTab === "archeotech" && (
-              <ArcheotechTab
-                campaignId={path.campaignId}
-                characterId={character.id}
-                userId={effectiveUserId}
-                characterName={character.header.characterName}
-                isDM={isDM}
-                archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
-                editable={allowedToEdit}
-                onUpdate={handleUpdateArcheotech}
-              />
-            )}
-
-            {activeTab === "admin" && isDM && (
-              <AdminTab
-                campaignId={path.campaignId}
-                character={character}
-                ownerName={ownerName}
-                onDMForceRelease={dmForceRelease}
-                onDMForceAssign={dmForceAssign}
-                onDMToggleEdit={dmToggleEdit}
-                isDmForceReleasing={isDmForceReleasing}
-                isDmForceAssigning={isDmForceAssigning}
-                isDmTogglingEdit={isDmTogglingEdit}
-                memberIds={memberIds}
-              />
-            )}
-          </Suspense>
-        </ErrorBoundary>
+        )}
       </div>
-
-      {showScrollTop && (
-        <button
-          type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          aria-label="Scroll to top"
-          className="fixed bottom-6 right-4 z-50 w-9 h-9 rounded bg-slate-800/85 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-slate-700/90 transition shadow-lg"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2.5}
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-          </svg>
-        </button>
-      )}
-    </div>
+    </CampaignCustomItemsScope>
   );
 }

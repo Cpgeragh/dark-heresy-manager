@@ -56,7 +56,6 @@ import {
 } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { ErrorState } from "../../../ui/ErrorState";
-import { LoadingState } from "../../../ui/LoadingState";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
@@ -1469,12 +1468,13 @@ export function WeaponsTab({
     return <ErrorState>Unable to load custom weapons.</ErrorState>;
   }
 
-  if (customItemsLoading && customItemsRequiredForOwnedRows) {
-    return <LoadingState>Loading custom weapons…</LoadingState>;
-  }
-
   return (
     <div ref={containerRef} className="space-y-8">
+      {customItemsLoading && (
+        <p role="status" className="text-sm text-slate-300">
+          Loading custom weapons…
+        </p>
+      )}
       <div className="lg:hidden">
         <SegmentedTabs
           id={WEAPON_TABS_ID}

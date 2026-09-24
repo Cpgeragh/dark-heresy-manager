@@ -32,7 +32,6 @@ import {
 } from "../../../ui/styles/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { LoadingState } from "../../../ui/LoadingState";
 import { InfoModal } from "../../../components/InfoModal";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -528,10 +527,6 @@ export function ArmourTab({
     return <ErrorState>Unable to load custom armour items.</ErrorState>;
   }
 
-  if (armourLoading) {
-    return <LoadingState>Loading custom armour items…</LoadingState>;
-  }
-
   const effectiveTalents = talents ?? { homeworld: "", talents: [], traits };
   const traitArmourSources = getTraitArmourSources(effectiveTalents, career);
   const traitArmourBonus = traitArmourSources.reduce((total, source) => total + source.amount, 0);
@@ -542,6 +537,11 @@ export function ArmourTab({
 
   return (
     <div className="space-y-6">
+      {armourLoading && (
+        <p role="status" className="text-sm text-slate-300">
+          Loading custom armour items…
+        </p>
+      )}
       <section>
         <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>

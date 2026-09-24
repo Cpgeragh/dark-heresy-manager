@@ -15,7 +15,6 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { LoadingState } from "../../../ui/LoadingState";
 import { uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 import { colourActiveSky, colourActiveRose } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -602,12 +601,13 @@ export function GearTab({
     return <ErrorState>Unable to load custom gear.</ErrorState>;
   }
 
-  if (customItemsLoading && customItemsRequiredForOwnedRows) {
-    return <LoadingState>Loading custom gear…</LoadingState>;
-  }
-
   return (
     <div ref={containerRef} className="space-y-6">
+      {customItemsLoading && (
+        <p role="status" className="text-sm text-slate-300">
+          Loading custom gear…
+        </p>
+      )}
       <div className="lg:hidden">
         <SegmentedTabs
           id={GEAR_TABS_ID}

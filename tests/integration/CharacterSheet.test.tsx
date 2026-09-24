@@ -14,6 +14,11 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import "@testing-library/jest-dom";
 import type { Character } from "../../src/types/Character";
 
+vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
+  useCampaignCustomItemsRaw: () => ({ items: [], loading: false, error: null }),
+  CampaignCustomItemsScope: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const useCharacterSheetMock = vi.fn();
 vi.mock("../../src/pages/CharacterSheet/useCharacterSheet", () => ({
   useCharacterSheet: (...args: unknown[]) => useCharacterSheetMock(...args),
