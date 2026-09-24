@@ -21,7 +21,11 @@ export async function listLinkedDevices(callerUid: string): Promise<ListLinkedDe
     throw new HttpsError("failed-precondition", "This device is not connected to an account.");
   }
 
-  const links = await db.collection("userLinks").where("primaryUid", "==", accountId).get();
+  const links = await db
+    .collection("userLinks")
+    .where("primaryUid", "==", accountId)
+    .limit(200)
+    .get();
   const devices = links.docs.map((link) => {
     const data = link.data();
     const linkedAt = data.linkedAt instanceof Timestamp ? data.linkedAt.toMillis() : null;

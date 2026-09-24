@@ -1,10 +1,11 @@
 // src/App.tsx
 
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Routes, Route, Navigate, useLocation, useMatch } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
 import { useDeviceLink } from "./hooks/useDeviceLink";
+import { useLinkedDevices } from "./hooks/useLinkedDevices";
 import { useUserProfile } from "./hooks/useUserProfile";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
@@ -55,10 +56,16 @@ function AppContent() {
   // -------------------------------------------------
   const {
     effectiveUserId,
+    linkedAccountId,
     disconnect,
     loading: linkLoading,
     error: linkError,
   } = useDeviceLink(currentUser?.uid ?? "");
+  const {
+    devices,
+    loading: devicesLoading,
+    error: devicesError,
+  } = useLinkedDevices(linkedAccountId, currentUser?.uid ?? null);
 
   // First name lives on the shared account profile, read live so it syncs
   // across linked devices.
@@ -68,24 +75,33 @@ function AppContent() {
     error: profileError,
   } = useUserProfile(effectiveUserId);
 
+  // Keep the same provider mounted through the existing splash and route changes.
+  // Once the device link resolves, campaign reads can run beside the remaining
+  // account work rather than waiting for Dashboard to mount.
+  const withCampaigns = (content: ReactNode) => (
+    <CampaignsProvider uid={currentUser && !linkLoading ? effectiveUserId : ""}>
+      {content}
+    </CampaignsProvider>
+  );
+
   // -------------------------------------------------
   // LOADING STATES
   // -------------------------------------------------
-  if (loading || linkLoading) {
-    return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
+  if (loading || linkLoading || (onboarded && devicesLoading)) {
+    return withCampaigns(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
   }
 
-  if (authError || linkError) {
-    return <SplashScreen label="Unable to load your account. Please refresh." />;
+  if (authError || linkError || (onboarded && devicesError)) {
+    return withCampaigns(<SplashScreen label="Unable to load your account. Please refresh." />);
   }
 
   if (!currentUser) {
-    return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
+    return withCampaigns(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
   }
 
   // First-launch: user hasn't completed onboarding yet.
   if (!onboarded) {
-    return (
+    return withCampaigns(
       <Suspense fallback={<SplashScreen label="Loading…" />}>
         <Onboarding
           user={currentUser}
@@ -98,11 +114,11 @@ function AppContent() {
   }
 
   if (profileLoading) {
-    return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
+    return withCampaigns(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
   }
 
   if (profileError) {
-    return <SplashScreen label="Unable to load your account. Please refresh." />;
+    return withCampaigns(<SplashScreen label="Unable to load your account. Please refresh." />);
   }
 
   // A completed account must always have a profile. If this device somehow
@@ -110,7 +126,7 @@ function AppContent() {
   // its own permanent id), send it back through the same onboarding flow any
   // other unconnected device uses, rather than a separate recovery screen.
   if (!firstName) {
-    return (
+    return withCampaigns(
       <Suspense fallback={<SplashScreen label="Loading…" />}>
         <Onboarding
           user={currentUser}
@@ -130,15 +146,12 @@ function AppContent() {
   // -------------------------------------------------
   // MAIN APP UI
   // -------------------------------------------------
-  return (
+  return withCampaigns(
     <HeaderExtensionProvider>
       <UpdateStallNotice />
       <div className="min-h-screen bg-slate-950 text-slate-100">
         {/* HEADER */}
-        <AppHeader
-          currentPath={location.pathname}
-          onOpenSettings={() => setSettingsOpen(true)}
-        />
+        <AppHeader currentPath={location.pathname} onOpenSettings={() => setSettingsOpen(true)} />
 
         {/* ROUTES */}
         <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
@@ -150,13 +163,11 @@ function AppContent() {
                 <Route
                   path={ROUTES.DASHBOARD}
                   element={
-                    <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>
-                      <Dashboard
-                        user={currentUser}
-                        effectiveUserId={effectiveUserId}
-                        firstName={firstName}
-                      />
-                    </CampaignsProvider>
+                    <Dashboard
+                      user={currentUser}
+                      effectiveUserId={effectiveUserId}
+                      firstName={firstName}
+                    />
                   }
                 />
 
@@ -194,6 +205,8 @@ function AppContent() {
           <Settings
             effectiveUserId={effectiveUserId}
             firstName={firstName}
+            devices={devices}
+            deviceListError={devicesError}
             disconnect={handleDeviceDisconnect}
             onClose={() => setSettingsOpen(false)}
           />

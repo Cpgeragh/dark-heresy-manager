@@ -4,7 +4,7 @@ import { listLinkedDevices } from "../../src/operations/listLinkedDevices";
 const getCaller = vi.hoisted(() => vi.fn());
 const getLinks = vi.hoisted(() => vi.fn());
 const doc = vi.hoisted(() => vi.fn(() => ({ get: getCaller })));
-const where = vi.hoisted(() => vi.fn(() => ({ get: getLinks })));
+const where = vi.hoisted(() => vi.fn(() => ({ limit: () => ({ get: getLinks }) })));
 const collection = vi.hoisted(() => vi.fn(() => ({ doc, where })));
 
 vi.mock("firebase-admin/firestore", () => ({

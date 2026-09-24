@@ -27,10 +27,14 @@ vi.mock("../../src/hooks/useAuth", () => ({
 vi.mock("../../src/hooks/useDeviceLink", () => ({
   useDeviceLink: () => ({
     effectiveUserId: "user-1",
+    linkedAccountId: "user-1",
     disconnect: vi.fn(),
     loading: false,
     error: null,
   }),
+}));
+vi.mock("../../src/hooks/useLinkedDevices", () => ({
+  useLinkedDevices: () => ({ devices: [], loading: false, error: null }),
 }));
 vi.mock("../../src/hooks/useUserProfile", () => ({
   useUserProfile: () => ({ firstName: "Iris", loading: false, error: null }),
@@ -105,7 +109,7 @@ describe("App loading boundaries", () => {
     expect(screen.getByText("Unable to load your account. Please refresh.")).toBeInTheDocument();
   });
 
-  it("mounts campaign-list subscriptions only for the dashboard route", async () => {
+  it("starts campaign-list subscriptions before the dashboard route loads", async () => {
     deferredDashboard.resolve();
     const campaignView = render(
       <MemoryRouter initialEntries={["/campaign/campaign-1"]}>
@@ -113,7 +117,7 @@ describe("App loading boundaries", () => {
       </MemoryRouter>
     );
 
-    expect(campaignProviderRenderMock).not.toHaveBeenCalled();
+    expect(campaignProviderRenderMock).toHaveBeenCalled();
     campaignView.unmount();
 
     render(

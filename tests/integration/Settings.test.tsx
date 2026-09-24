@@ -15,12 +15,10 @@ const deleteCurrentAccountMock = vi.fn();
 vi.mock("../../src/services/userAccountService", () => ({
   deleteCurrentAccount: (...args: unknown[]) => deleteCurrentAccountMock(...args),
 }));
-const listLinkedDevicesMock = vi.fn();
 const renameLinkedDeviceMock = vi.fn();
 const disconnectOtherDeviceMock = vi.fn();
 vi.mock("../../src/services/deviceLinkService", () => ({
   LastDeviceDisconnectError: class LastDeviceDisconnectError extends Error {},
-  listLinkedDevices: (...args: unknown[]) => listLinkedDevicesMock(...args),
   renameLinkedDevice: (...args: unknown[]) => renameLinkedDeviceMock(...args),
   disconnectOtherDevice: (...args: unknown[]) => disconnectOtherDeviceMock(...args),
 }));
@@ -40,10 +38,6 @@ import Settings from "../../src/pages/Settings";
 
 beforeEach(() => {
   vi.clearAllMocks();
-  listLinkedDevicesMock.mockResolvedValue([
-    { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
-    { uid: "device-2", name: "Old laptop", linkedAt: 1_600_000_000_000, isCurrentDevice: false },
-  ]);
   renameLinkedDeviceMock.mockResolvedValue(undefined);
   disconnectOtherDeviceMock.mockResolvedValue({ remainingDeviceCount: 1 });
 });
@@ -55,6 +49,16 @@ function renderSettings(props: Partial<React.ComponentProps<typeof Settings>> = 
     <Settings
       effectiveUserId="user-1"
       firstName="Alice"
+      devices={[
+        { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
+        {
+          uid: "device-2",
+          name: "Old laptop",
+          linkedAt: 1_600_000_000_000,
+          isCurrentDevice: false,
+        },
+      ]}
+      deviceListError={null}
       disconnect={disconnect}
       onClose={onClose}
       {...props}
@@ -238,12 +242,7 @@ describe("Settings recovery code", () => {
 });
 
 describe("Settings linked device", () => {
-  it("does not load devices just because Settings opened", () => {
-    renderSettings();
-    expect(listLinkedDevicesMock).not.toHaveBeenCalled();
-  });
-
-  it("loads and shows the exact device list only after Manage Devices is opened", async () => {
+  it("opens with the live device list already available", async () => {
     const user = userEvent.setup();
     renderSettings();
 
@@ -256,64 +255,39 @@ describe("Settings linked device", () => {
     for (const linkedDate of screen.getAllByText(/^Linked /)) {
       expect(linkedDate).toHaveClass("text-slate-400");
     }
-    expect(listLinkedDevicesMock).toHaveBeenCalledOnce();
   });
 
-  it("does not show a device error until the user requests the list", async () => {
-    const user = userEvent.setup();
-    listLinkedDevicesMock.mockRejectedValue(new Error("network"));
-    renderSettings();
-
-    expect(mockToastError).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
-
-    await waitFor(() =>
-      expect(mockToastError).toHaveBeenCalledWith(
-        "Failed to load connected devices. Please try again."
-      )
-    );
+  it("reports a device-list error when Manage Devices is requested", async () => {
+    renderSettings({ devices: null, deviceListError: new Error("network") });
+    expect(screen.getByRole("button", { name: "Manage devices" })).toBeDisabled();
   });
 
-  it("prevents Settings from closing while connected devices are loading", async () => {
+  it("updates the open list when a linked device changes elsewhere", async () => {
     const user = userEvent.setup();
-    let finishLoading!: (value: unknown) => void;
-    listLinkedDevicesMock.mockReturnValueOnce(
-      new Promise((resolve) => {
-        finishLoading = resolve;
-      })
+    const view = renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    view.rerender(
+      <Settings
+        effectiveUserId="user-1"
+        firstName="Alice"
+        disconnect={view.disconnect}
+        onClose={view.onClose}
+        deviceListError={null}
+        devices={[
+          { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
+          {
+            uid: "device-3",
+            name: "New laptop",
+            linkedAt: 1_800_000_000_000,
+            isCurrentDevice: false,
+          },
+        ]}
+      />
     );
-    const { onClose } = renderSettings();
-
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
-    await user.click(
-      within(screen.getByRole("dialog", { name: "Manage Account" })).getByRole("button", {
-        name: "Close",
-      })
-    );
-
-    expect(onClose).not.toHaveBeenCalled();
-    finishLoading([{ uid: "device-1", name: "Phone", linkedAt: null, isCurrentDevice: true }]);
-    expect(await screen.findByRole("dialog", { name: "Manage Devices" })).toBeVisible();
-    expect(listLinkedDevicesMock).toHaveBeenCalledOnce();
-  });
-
-  it("refreshes the connected devices every time Manage Devices is opened", async () => {
-    const user = userEvent.setup();
-    renderSettings();
-
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
-    const firstList = await screen.findByRole("dialog", { name: "Manage Devices" });
-    await user.click(within(firstList).getByRole("button", { name: "Close" }));
-
-    listLinkedDevicesMock.mockResolvedValue([
-      { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
-      { uid: "device-3", name: "New laptop", linkedAt: 1_800_000_000_000, isCurrentDevice: false },
-    ]);
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
 
     expect(await screen.findByText("New laptop")).toBeVisible();
     expect(screen.queryByText("Old laptop")).not.toBeInTheDocument();
-    expect(listLinkedDevicesMock).toHaveBeenCalledTimes(2);
   });
 
   it("renames any device on the account", async () => {
@@ -325,21 +299,10 @@ describe("Settings linked device", () => {
     const input = screen.getByPlaceholderText("e.g. Cormac's phone");
     await user.clear(input);
     await user.type(input, "Home laptop");
-    renameLinkedDeviceMock.mockImplementationOnce(async () => {
-      listLinkedDevicesMock.mockResolvedValue([
-        { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
-        {
-          uid: "device-2",
-          name: "Home laptop",
-          linkedAt: 1_600_000_000_000,
-          isCurrentDevice: false,
-        },
-      ]);
-    });
+    renameLinkedDeviceMock.mockResolvedValueOnce(undefined);
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(renameLinkedDeviceMock).toHaveBeenCalledWith("device-2", "Home laptop");
-    expect(await screen.findByText("Home laptop")).toBeVisible();
   });
 
   it("unlinks another device, keeps Manage Devices open, and leaves the code in Settings", async () => {
@@ -348,18 +311,9 @@ describe("Settings linked device", () => {
 
     await user.click(screen.getByRole("button", { name: "Manage devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Old laptop" }));
-    disconnectOtherDeviceMock.mockImplementationOnce(async () => {
-      listLinkedDevicesMock.mockResolvedValue([
-        { uid: "device-1", name: "Phone", linkedAt: 1_700_000_000_000, isCurrentDevice: true },
-      ]);
-      return { remainingDeviceCount: 1 };
-    });
     await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
 
     expect(disconnectOtherDeviceMock).toHaveBeenCalledWith("device-2");
-    await waitFor(() =>
-      expect(screen.queryByRole("button", { name: "Unlink Old laptop" })).not.toBeInTheDocument()
-    );
     const manageDevices = screen.getByRole("dialog", { name: "Manage Devices" });
     expect(manageDevices).toBeVisible();
     expect(within(manageDevices).getByText("Phone")).toBeVisible();
@@ -400,10 +354,10 @@ describe("Settings linked device", () => {
 
   it("warns before unlinking the account's last device", async () => {
     const user = userEvent.setup();
-    listLinkedDevicesMock.mockResolvedValue([
+    const singleDevice = [
       { uid: "device-1", name: "Phone", linkedAt: null, isCurrentDevice: true },
-    ]);
-    const { disconnect } = renderSettings();
+    ];
+    const { disconnect } = renderSettings({ devices: singleDevice });
 
     await user.click(screen.getByRole("button", { name: "Manage devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Phone" }));

@@ -703,6 +703,13 @@ service cloud.firestore {
     match /userLinks/{uid} {
       // A device can read its own link doc.
       allow get: if request.auth != null && uid == request.auth.uid;
+      // A linked device may list only its own account's bounded device set.
+      // The query must constrain primaryUid to that account for this rule to pass.
+      allow list: if request.auth != null &&
+                     exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+                     resource.data.primaryUid ==
+                       get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid &&
+                     boundedQuery(200);
       // Connecting and disconnecting are server-only so a device cannot skip
       // lifecycle and last-device safeguards.
       allow create, update, delete: if false;

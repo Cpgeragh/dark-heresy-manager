@@ -11,6 +11,8 @@ export const PRODUCT_LIMITS = {
   campaignsPerAccount: 100,
   campaignMembers: 100,
   charactersPerCampaign: 100,
+  devicesPerAccount: 10,
+  linkedDevicesPerQuery: 200,
 
   campaignNameCharacters: 100,
   characterNameCharacters: 100,

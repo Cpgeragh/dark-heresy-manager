@@ -1,12 +1,11 @@
 // src/pages/Settings.tsx
 // User settings: recovery code management and device linking.
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
 import { deleteCurrentAccount } from "../services/userAccountService";
 import {
   disconnectOtherDevice,
-  listLinkedDevices,
   renameLinkedDevice,
   LastDeviceDisconnectError,
   type LinkedDevice,
@@ -31,6 +30,8 @@ import { ModalHeader } from "../ui/modals/ModalHeader";
 interface Props {
   effectiveUserId: string;
   firstName: string;
+  devices: LinkedDevice[] | null;
+  deviceListError: Error | null;
   disconnect: (confirmLastDevice?: boolean) => Promise<void>;
   onClose: () => void;
 }
@@ -39,7 +40,14 @@ const settingsRowClass = "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3
 const settingsLabelClass =
   "font-cinzel text-sm font-semibold uppercase tracking-wider text-slate-200 lg:text-base";
 
-export default function Settings({ effectiveUserId, firstName, disconnect, onClose }: Props) {
+export default function Settings({
+  effectiveUserId,
+  firstName,
+  devices,
+  deviceListError,
+  disconnect,
+  onClose,
+}: Props) {
   const toast = useToast();
 
   // ── Display name state ───────────────────────────────────────────────────
@@ -61,10 +69,6 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
   const disconnectingDeviceRef = useRef(false);
   const [disconnectConfirmOpen, setDisconnectConfirmOpen] = useState(false);
   const [lastDeviceWarningOpen, setLastDeviceWarningOpen] = useState(false);
-  const [devices, setDevices] = useState<LinkedDevice[] | null>(null);
-  const [loadingDevices, setLoadingDevices] = useState(false);
-  const loadingDevicesRef = useRef(false);
-  const mountedRef = useRef(true);
   const [manageDevicesOpen, setManageDevicesOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<LinkedDevice | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
@@ -78,36 +82,6 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
   const deletingAccountRef = useRef(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
-
-  const loadDevices = useCallback(
-    async (showError = true) => {
-      if (loadingDevicesRef.current) return null;
-      loadingDevicesRef.current = true;
-      if (mountedRef.current) setLoadingDevices(true);
-      try {
-        const linkedDevices = await listLinkedDevices();
-        if (mountedRef.current) setDevices(linkedDevices);
-        return linkedDevices;
-      } catch (err) {
-        console.error("Failed to load linked devices:", err);
-        if (mountedRef.current && showError) {
-          toast.error("Failed to load connected devices. Please try again.");
-        }
-        return null;
-      } finally {
-        loadingDevicesRef.current = false;
-        if (mountedRef.current) setLoadingDevices(false);
-      }
-    },
-    [toast]
-  );
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (!devices || legacyRenamePromptedRef.current) return;
@@ -212,9 +186,12 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     }
   }
 
-  async function handleOpenManageDevices() {
-    const linkedDevices = await loadDevices();
-    if (linkedDevices) setManageDevicesOpen(true);
+  function handleOpenManageDevices() {
+    if (deviceListError || !devices) {
+      toast.error("Failed to load connected devices. Please try again.");
+      return;
+    }
+    setManageDevicesOpen(true);
   }
 
   function openRenameDevice(device: LinkedDevice) {
@@ -229,16 +206,9 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     try {
       const name = renameDraft.trim();
       await renameLinkedDevice(renameTarget.uid, name);
-      setDevices(
-        (current) =>
-          current?.map((device) =>
-            device.uid === renameTarget.uid ? { ...device, name } : device
-          ) ?? current
-      );
       setRenameTarget(null);
       setRenameDraft("");
       toast.success("Device name updated.");
-      void loadDevices(false);
     } catch (err) {
       console.error("Failed to rename device:", err);
       toast.error("Failed to rename device. Please try again.");
@@ -254,13 +224,8 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     setDisconnectingOtherDevice(true);
     try {
       await disconnectOtherDevice(remoteDisconnectTarget.uid);
-      setDevices(
-        (current) =>
-          current?.filter((device) => device.uid !== remoteDisconnectTarget.uid) ?? current
-      );
       setRemoteDisconnectTarget(null);
       toast.success("Device unlinked and recovery code rotated.");
-      void loadDevices(false);
     } catch (err) {
       console.error("Failed to unlink device:", err);
       toast.error("Failed to unlink device. Please try again.");
@@ -296,8 +261,7 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
     renamingDevice ||
     disconnectingDevice ||
     disconnectingOtherDevice ||
-    deletingAccount ||
-    loadingDevices;
+    deletingAccount;
   const childModalOpen =
     editNameOpen ||
     revealedCode !== null ||
@@ -494,8 +458,8 @@ export default function Settings({ effectiveUserId, firstName, disconnect, onClo
           <ManageDevicesButton
             label="Manage devices"
             className="justify-self-end"
-            onClick={() => void handleOpenManageDevices()}
-            disabled={loadingDevices}
+            onClick={handleOpenManageDevices}
+            disabled={!devices || !!deviceListError}
           />
         </section>
 

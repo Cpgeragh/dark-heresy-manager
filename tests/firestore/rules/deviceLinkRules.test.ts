@@ -62,6 +62,26 @@ describe("Firestore Rules: userLinks", () => {
       dbAs(env, "device-1").collection("userLinks").doc("device-1").delete()
     ).rejects.toThrow();
   });
+
+  it("allows a bounded live list only for the caller's own linked account", async () => {
+    const env = await getTestEnv();
+    await createUserLink(env, "device-1", "account-1");
+    await createUserLink(env, "device-2", "account-1");
+    await createUserLink(env, "device-3", "account-2");
+
+    const links = dbAs(env, "device-1").collection("userLinks");
+    const own = await links.where("primaryUid", "==", "account-1").limit(200).get();
+    expect(own.docs.map((doc) => doc.id).sort()).toEqual(["device-1", "device-2"]);
+    await expect(links.where("primaryUid", "==", "account-2").limit(200).get()).rejects.toThrow();
+    await expect(links.where("primaryUid", "==", "account-1").get()).rejects.toThrow();
+    await expect(
+      dbAs(env, "outsider")
+        .collection("userLinks")
+        .where("primaryUid", "==", "account-1")
+        .limit(200)
+        .get()
+    ).rejects.toThrow();
+  });
 });
 
 // ============================================================
