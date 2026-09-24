@@ -6,6 +6,7 @@ const remove = vi.hoisted(() => vi.fn());
 const set = vi.hoisted(() => vi.fn());
 const linkRef = { path: "userLinks/device-1" };
 const userRef = { path: "users/device-1" };
+const accountRef = { path: "accounts/account-1" };
 const queryRef = { kind: "links-query" };
 const collection = vi.hoisted(() =>
   vi.fn((name: string) => {
@@ -14,7 +15,7 @@ const collection = vi.hoisted(() =>
         doc: () => linkRef,
         where: () => ({ limit: () => queryRef }),
       };
-    return { doc: () => userRef };
+    return { doc: () => (name === "accounts" ? accountRef : userRef) };
   })
 );
 const runTransaction = vi.hoisted(() =>
@@ -23,7 +24,9 @@ const runTransaction = vi.hoisted(() =>
       get: async (reference: unknown) =>
         reference === linkRef
           ? { exists: true, data: () => ({ primaryUid: "account-1" }) }
-          : { size: state.count },
+          : reference === accountRef
+            ? { exists: true, data: () => ({ deviceCount: state.count }) }
+            : { size: state.count },
       delete: remove,
       set,
     })

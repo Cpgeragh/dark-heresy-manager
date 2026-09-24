@@ -82,6 +82,7 @@ export async function createAccount(
 
     transaction.create(accountRef, {
       status: "provisional",
+      deviceCount: 1,
       createdByDeviceUid: callerUid,
       createdAt: FieldValue.serverTimestamp(),
     });

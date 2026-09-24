@@ -7,11 +7,16 @@ const state = vi.hoisted(() => ({
   onboarded: false,
   accountStatus: "active",
   profile: true,
+  deviceCount: 1,
 }));
 const transactionCreate = vi.hoisted(() => vi.fn());
+const transactionSet = vi.hoisted(() => vi.fn());
 const makeRef = (path: string) => ({ path, id: path.split("/").at(-1) });
 const collection = vi.hoisted(() =>
-  vi.fn((name: string) => ({ doc: (id: string) => makeRef(`${name}/${id}`) }))
+  vi.fn((name: string) => ({
+    doc: (id: string) => makeRef(`${name}/${id}`),
+    where: () => ({ path: `${name}/query` }),
+  }))
 );
 const runTransaction = vi.hoisted(() =>
   vi.fn(async (callback: (tx: unknown) => unknown) =>
@@ -24,12 +29,16 @@ const runTransaction = vi.hoisted(() =>
         if (reference.path === "users/device-1")
           return { exists: true, data: () => ({ onboarded: state.onboarded }) };
         if (reference.path === "accounts/account-1")
-          return { exists: true, data: () => ({ status: state.accountStatus }) };
+          return {
+            exists: true,
+            data: () => ({ status: state.accountStatus, deviceCount: state.deviceCount }),
+          };
         if (reference.path === "userProfiles/account-1")
           return { exists: state.profile, data: () => ({ firstName: "Iris" }) };
         return { exists: false, data: () => ({}) };
       },
       create: transactionCreate,
+      set: transactionSet,
     })
   )
 );
@@ -46,7 +55,16 @@ beforeEach(() => {
     onboarded: false,
     accountStatus: "active",
     profile: true,
+    deviceCount: 1,
   });
+});
+
+it("rejects a new device when the account is at the server limit", async () => {
+  state.deviceCount = 10;
+  await expect(
+    linkDevice({ code: "DH-AAAA-BBBB", deviceName: "Phone" }, "device-1", "secret")
+  ).rejects.toMatchObject({ code: "resource-exhausted" });
+  expect(transactionCreate).not.toHaveBeenCalled();
 });
 
 it("connects an unfinished device to an active account", async () => {

@@ -27,7 +27,10 @@ describe("Functions: permanent account lifecycle", () => {
         (await adminDb.collection("accounts").doc(created.accountId).get()).data()?.status
       ).toBe("provisional");
 
-      await httpsCallable<{ firstName: string }, void>(first.functions, "updateDisplayName")({
+      await httpsCallable<{ firstName: string }, void>(
+        first.functions,
+        "updateDisplayName"
+      )({
         firstName: "Iris",
       });
       expect(
@@ -111,6 +114,51 @@ describe("Functions: permanent account lifecycle", () => {
       expect((await adminDb.collection("userLinks").doc(first.uid).get()).exists).toBe(false);
     } finally {
       await Promise.all([deleteApp(first.app), deleteApp(second.app)]);
+    }
+  }, 30000);
+
+  it("allows only one of two simultaneous links at the ten-device limit", async () => {
+    const owner = await createIndependentClient(`limit-owner-${Date.now()}`);
+    const first = await createIndependentClient(`limit-first-${Date.now()}`);
+    const second = await createIndependentClient(`limit-second-${Date.now()}`);
+    try {
+      await adminDb.collection("users").doc(owner.uid).set({ onboarded: false });
+      await adminDb.collection("users").doc(first.uid).set({ onboarded: false });
+      await adminDb.collection("users").doc(second.uid).set({ onboarded: false });
+      const created = (
+        await httpsCallable<{ deviceName: string }, { accountId: string; code: string }>(
+          owner.functions,
+          "createAccount"
+        )({ deviceName: "Owner" })
+      ).data;
+      await adminDb
+        .collection("accounts")
+        .doc(created.accountId)
+        .update({ status: "active", deviceCount: 9 });
+      await adminDb.collection("userProfiles").doc(created.accountId).set({ firstName: "Iris" });
+      const seed = adminDb.batch();
+      for (let index = 0; index < 8; index++) {
+        seed.set(adminDb.collection("userLinks").doc(`seed-${created.accountId}-${index}`), {
+          primaryUid: created.accountId,
+        });
+      }
+      await seed.commit();
+
+      const attempts = await Promise.allSettled([
+        httpsCallable(first.functions, "linkDevice")({ code: created.code, deviceName: "First" }),
+        httpsCallable(second.functions, "linkDevice")({ code: created.code, deviceName: "Second" }),
+      ]);
+      expect(attempts.filter((attempt) => attempt.status === "fulfilled")).toHaveLength(1);
+      expect(attempts.filter((attempt) => attempt.status === "rejected")).toHaveLength(1);
+      expect(
+        (await adminDb.collection("accounts").doc(created.accountId).get()).data()?.deviceCount
+      ).toBe(10);
+      expect(
+        (await adminDb.collection("userLinks").where("primaryUid", "==", created.accountId).get())
+          .size
+      ).toBe(10);
+    } finally {
+      await Promise.all([deleteApp(owner.app), deleteApp(first.app), deleteApp(second.app)]);
     }
   }, 30000);
 });

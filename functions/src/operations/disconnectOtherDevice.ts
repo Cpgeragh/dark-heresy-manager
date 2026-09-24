@@ -2,6 +2,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { generateRecoveryCode, hashRecoveryCode } from "../shared/recoveryCode.js";
 import { validateDeviceUid } from "../shared/deviceLinks.js";
+import { readDeviceCount, writeDeviceCount } from "../shared/deviceCount.js";
 
 export interface DisconnectOtherDeviceInput {
   targetDeviceUid: string;
@@ -46,13 +47,14 @@ export async function disconnectOtherDevice(
 
     const secretRef = db.collection("identitySecret").doc(accountId);
     const newIndexRef = db.collection("identityRecoveryIndex").doc(newHash);
-    const linksQuery = db.collection("userLinks").where("primaryUid", "==", accountId);
-    const [secret, newIndex, links] = await Promise.all([
+    const accountRef = db.collection("accounts").doc(accountId);
+    const [secret, newIndex, accountSnapshot] = await Promise.all([
       transaction.get(secretRef),
       transaction.get(newIndexRef),
-      transaction.get(linksQuery),
+      transaction.get(accountRef),
     ]);
-    if (links.size < 2) {
+    const deviceCount = await readDeviceCount(db, transaction, accountId, accountSnapshot);
+    if (deviceCount < 2) {
       throw new HttpsError(
         "failed-precondition",
         "The final connected device cannot be removed remotely."
@@ -71,8 +73,9 @@ export async function disconnectOtherDevice(
     transaction.set(secretRef, { code: newCode });
     transaction.create(newIndexRef, { uid: accountId });
     transaction.delete(targetRef);
+    writeDeviceCount(transaction, accountRef, accountSnapshot, deviceCount - 1);
     transaction.set(targetUserRef, { onboarded: false, recoveryBackedUp: false }, { merge: true });
 
-    return { remainingDeviceCount: links.size - 1 };
+    return { remainingDeviceCount: deviceCount - 1 };
   });
 }
