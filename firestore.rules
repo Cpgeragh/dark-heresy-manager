@@ -680,11 +680,10 @@ service cloud.firestore {
     // ============================
     // IDENTITY SECRET — proof store (uid → code), rule-side only
     // ============================
-    // Readable by every device connected to the account for reveal; writes
-    // remain server-only so rotation cannot leave the index out of sync.
+    // The plain-text copy is never returned by a client Firestore read.
+    // Reveal and rotation are server-only.
     match /identitySecret/{uid} {
-      // Connected devices need this read to reveal the account recovery code.
-      allow read:  if playerOwnsOrLinked(uid);
+      allow read: if false;
       // Rotation and revocation are server-only so the recovery index and
       // plaintext secret can never get out of sync.
       allow create, update, delete: if false;
@@ -706,9 +705,10 @@ service cloud.firestore {
       // A linked device may list only its own account's bounded device set.
       // The query must constrain primaryUid to that account for this rule to pass.
       allow list: if request.auth != null &&
-                     exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
-                     resource.data.primaryUid ==
-                       get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid &&
+                     (resource.data.primaryUid == request.auth.uid ||
+                      (exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+                       resource.data.primaryUid ==
+                         get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid)) &&
                      boundedQuery(200);
       // Connecting and disconnecting are server-only so a device cannot skip
       // lifecycle and last-device safeguards.

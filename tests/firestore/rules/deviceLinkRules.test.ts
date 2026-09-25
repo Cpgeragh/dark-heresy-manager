@@ -82,6 +82,18 @@ describe("Firestore Rules: userLinks", () => {
         .get()
     ).rejects.toThrow();
   });
+
+  it("allows the primary account holder to list their own connected devices", async () => {
+    const env = await getTestEnv();
+    await createUserLink(env, "device-1", "account-1");
+    await createUserLink(env, "device-2", "account-1");
+    await createUserLink(env, "device-3", "account-2");
+
+    const links = dbAs(env, "account-1").collection("userLinks");
+    const own = await links.where("primaryUid", "==", "account-1").limit(200).get();
+    expect(own.docs.map((doc) => doc.id).sort()).toEqual(["device-1", "device-2"]);
+    await expect(links.where("primaryUid", "==", "account-2").limit(200).get()).rejects.toThrow();
+  });
 });
 
 // ============================================================

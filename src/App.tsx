@@ -65,7 +65,7 @@ function AppContent() {
     devices,
     loading: devicesLoading,
     error: devicesError,
-  } = useLinkedDevices(linkedAccountId, currentUser?.uid ?? null);
+  } = useLinkedDevices(effectiveUserId, currentUser?.uid ?? null);
 
   // First name lives on the shared account profile, read live so it syncs
   // across linked devices.
