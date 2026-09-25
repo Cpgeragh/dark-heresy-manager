@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { CharacterKebabContent } from "../../src/pages/CharacterSheet/CharacterKebabContent";
 
@@ -40,8 +40,9 @@ describe("CharacterKebabContent Recovery Code section", () => {
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "Share" }));
-    expect(screen.getByText("Share Character")).toBeInTheDocument();
-    expect(screen.getByText(`${window.location.origin}?code=DH-TEST-0001`)).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Share Character" });
+    expect(within(dialog).getByRole("img")).toBeInTheDocument();
+    expect(screen.queryByText(`${window.location.origin}?code=DH-TEST-0001`)).not.toBeInTheDocument();
   });
 
   it("shows no Share button when there's no code", () => {

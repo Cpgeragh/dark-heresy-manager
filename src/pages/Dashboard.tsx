@@ -95,6 +95,7 @@ const CAMPAIGN_GROUP_TABS = [
   },
 ] as const satisfies readonly SegmentedTabOption<CampaignGroup>[];
 const CAMPAIGN_GROUP_TABS_ID = "dashboard-campaign-groups";
+const DELETE_PREFLIGHT_CACHE_MS = 60 * 60 * 1000;
 const campaignActionRowClass =
   "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4 lg:py-5";
 const campaignActionLabelClass =
@@ -354,7 +355,7 @@ function DmCampaignList({
 
   const loadDeletePreflight = useCallback(async (campaignId: string) => {
     const cached = deletePreflightCacheRef.current.get(campaignId);
-    if (cached && Date.now() - cached.cachedAt < 60 * 60 * 1000) {
+    if (cached && Date.now() - cached.cachedAt < DELETE_PREFLIGHT_CACHE_MS) {
       setDeletePreflights((current) => ({
         ...current,
         [campaignId]: { loading: false, result: cached.result },
@@ -678,6 +679,11 @@ function DmCampaignList({
                   value={editInquisitorName}
                   maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
                   onChange={(event) => setEditInquisitorName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter") return;
+                    event.preventDefault();
+                    void handleEditSave();
+                  }}
                   disabled={editing}
                   placeholder="Inquisitor Name"
                   aria-label="Edit Inquisitor name"
@@ -693,6 +699,11 @@ function DmCampaignList({
                   value={editName}
                   maxLength={PRODUCT_LIMITS.campaignNameCharacters}
                   onChange={(event) => setEditName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter") return;
+                    event.preventDefault();
+                    void handleEditSave();
+                  }}
                   disabled={editing}
                   autoFocus
                   aria-label="Edit campaign name"

@@ -14,8 +14,9 @@ import "@testing-library/jest-dom";
 import { IMPORTANT_TOAST_DURATION } from "../../src/constants/ui";
 import type { CampaignWithId, CharacterListItem } from "../../src/types/Firestore";
 
+const useCampaignCustomItemsRawMock = vi.fn();
 vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
-  useCampaignCustomItemsRaw: () => ({ items: [], loading: false, error: null }),
+  useCampaignCustomItemsRaw: (...args: unknown[]) => useCampaignCustomItemsRawMock(...args),
   CampaignCustomItemsScope: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -166,6 +167,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   useParamsMock.mockReturnValue({ campaignId: "campaign-1" });
   useCampaignMock.mockReturnValue({ campaign: campaign(), loading: false, error: null });
+  useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: false, error: null });
   useSessionsMock.mockReturnValue({
     sessions: [],
     loading: false,
@@ -220,6 +222,36 @@ describe("CampaignOverview", () => {
   it("shows a loading state", () => {
     useCampaignMock.mockReturnValue({ campaign: undefined, loading: true, error: null });
     renderPage();
+    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+  });
+
+  it("shows a loading state while characters are still loading", () => {
+    useCampaignCharactersMock.mockReturnValue({ characters: [], loading: true, error: null });
+    renderPage();
+    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+  });
+
+  it("shows a loading state while custom items are still loading", () => {
+    useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: true, error: null });
+    renderPage();
+    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+  });
+
+  it("shows a loading state while sessions are still loading", () => {
+    useSessionsMock.mockReturnValue({
+      sessions: [],
+      loading: true,
+      error: null,
+      deleteSession: vi.fn(),
+      updateSession: vi.fn(),
+    });
+    renderPage();
+    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+  });
+
+  it("shows a loading state while the party roster is still loading, for a player", () => {
+    useCampaignCharacterSummariesMock.mockReturnValue({ summaries: [], loading: true, error: null });
+    renderPage("player-1");
     expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
   });
 
@@ -464,16 +496,6 @@ describe("CampaignOverview — player-facing My Characters and Party", () => {
   it("shows an empty state when no one else has joined", () => {
     renderPage("player-1");
     expect(screen.getByText("No one else has joined yet.")).toBeInTheDocument();
-  });
-
-  it("shows a loading state for the party roster", () => {
-    useCampaignCharacterSummariesMock.mockReturnValue({
-      summaries: [],
-      loading: true,
-      error: null,
-    });
-    renderPage("player-1");
-    expect(screen.getByText("Loading the party roster…")).toBeInTheDocument();
   });
 
   it("shows an error state for the party roster", () => {

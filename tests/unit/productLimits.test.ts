@@ -14,6 +14,8 @@ describe("hard product limits", () => {
       characterNameCharacters: 100,
       firstNameCharacters: 50,
       deviceNameCharacters: 50,
+      devicesPerAccount: 10,
+      linkedDevicesPerQuery: 200,
       inquisitorNameCharacters: 100,
       messageCharacters: 2_000,
       threadSummaryPreviewCharacters: 500,

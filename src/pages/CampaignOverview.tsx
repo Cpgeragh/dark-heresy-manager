@@ -70,7 +70,6 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     campaignId,
     mode: knownRole ?? "picker",
     userId: effectiveUserId,
-    enabled: !!knownRole,
   });
   const {
     sessions,
@@ -283,7 +282,13 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <RouteLoadError resource="campaign" />;
   }
 
-  if (campaignLoading || charactersLoading || customItemsLoading) {
+  if (
+    campaignLoading ||
+    charactersLoading ||
+    customItemsLoading ||
+    sessionsLoading ||
+    partySummariesLoading
+  ) {
     return <LoadingState className="text-center py-10">Loading campaign…</LoadingState>;
   }
 
@@ -410,8 +415,6 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               <SectionHeader className="mb-3">Party</SectionHeader>
               {partySummariesError ? (
                 <ErrorState>Unable to load the party roster. Please refresh the page.</ErrorState>
-              ) : partySummariesLoading ? (
-                <LoadingState>Loading the party roster…</LoadingState>
               ) : partyMembers.length === 0 ? (
                 <p className="text-slate-400 text-sm lg:text-base">No one else has joined yet.</p>
               ) : (
@@ -457,8 +460,6 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
 
             {sessionsError ? (
               <ErrorState>Unable to load sessions. Please refresh the page.</ErrorState>
-            ) : sessionsLoading ? (
-              <LoadingState>Loading sessions…</LoadingState>
             ) : sessions.length === 0 ? (
               <p className="text-slate-400 text-sm lg:text-base">No sessions recorded yet.</p>
             ) : (
