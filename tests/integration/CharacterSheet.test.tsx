@@ -14,8 +14,9 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import "@testing-library/jest-dom";
 import type { Character } from "../../src/types/Character";
 
+const useCampaignCustomItemsRawMock = vi.fn(() => ({ items: [], loading: false, error: null }));
 vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
-  useCampaignCustomItemsRaw: () => ({ items: [], loading: false, error: null }),
+  useCampaignCustomItemsRaw: (...args: unknown[]) => useCampaignCustomItemsRawMock(...args),
   CampaignCustomItemsScope: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -197,6 +198,7 @@ beforeEach(() => {
   getSpentXpMock.mockReturnValue(200);
   reconcileCharacterSpentXpMock.mockResolvedValue(undefined);
   useCharacterSheetMock.mockReturnValue(baseSheetResult());
+  useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: false, error: null });
 });
 
 function renderSheet(initialPath = "/campaign/campaign-1/character/char-1?tab=stats") {
@@ -235,6 +237,18 @@ describe("CharacterSheet loading/error states", () => {
 
   it("shows a loading state", () => {
     useCharacterSheetMock.mockReturnValue(baseSheetResult({ characterLoading: true }));
+    renderSheet();
+    expect(screen.getByText("Loading character…")).toBeInTheDocument();
+  });
+
+  it("shows a loading state while the DM check is still loading", () => {
+    useCharacterSheetMock.mockReturnValue(baseSheetResult({ isDMLoading: true }));
+    renderSheet();
+    expect(screen.getByText("Loading character…")).toBeInTheDocument();
+  });
+
+  it("shows a loading state while custom items are still loading", () => {
+    useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: true, error: null });
     renderSheet();
     expect(screen.getByText("Loading character…")).toBeInTheDocument();
   });
