@@ -9,7 +9,11 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import { validateDeviceName } from "../shared/deviceLinks.js";
-import { readDeviceCount, writeDeviceCount } from "../shared/deviceCount.js";
+import {
+  readDeviceCount,
+  writeDeviceCount,
+  persistRecountOnRejection,
+} from "../shared/deviceCount.js";
 import { SERVER_PRODUCT_LIMITS } from "../shared/productLimits.js";
 
 export interface LinkDeviceInput {
@@ -78,8 +82,14 @@ export async function linkDevice(
       );
     }
 
-    const deviceCount = await readDeviceCount(db, transaction, accountId, accountSnapshot);
+    const { count: deviceCount, wasRecounted } = await readDeviceCount(
+      db,
+      transaction,
+      accountId,
+      accountSnapshot
+    );
     if (deviceCount >= SERVER_PRODUCT_LIMITS.devicesPerAccount) {
+      if (wasRecounted) persistRecountOnRejection(db, accountId, deviceCount);
       throw new HttpsError(
         "resource-exhausted",
         `This account already has the maximum of ${SERVER_PRODUCT_LIMITS.devicesPerAccount} connected devices. Disconnect one before linking another.`
@@ -91,6 +101,6 @@ export async function linkDevice(
       name: deviceName,
       linkedAt: FieldValue.serverTimestamp(),
     });
-    writeDeviceCount(transaction, accountRef, accountSnapshot, deviceCount + 1);
+    writeDeviceCount(transaction, accountRef, deviceCount + 1);
   });
 }

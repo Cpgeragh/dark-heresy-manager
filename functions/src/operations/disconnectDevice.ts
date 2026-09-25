@@ -1,6 +1,10 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
-import { readDeviceCount, writeDeviceCount } from "../shared/deviceCount.js";
+import {
+  readDeviceCount,
+  writeDeviceCount,
+  persistRecountOnRejection,
+} from "../shared/deviceCount.js";
 
 export interface DisconnectDeviceInput {
   confirmLastDevice?: boolean;
@@ -31,16 +35,22 @@ export async function disconnectDevice(
 
     const accountRef = db.collection("accounts").doc(accountId);
     const accountSnapshot = await transaction.get(accountRef);
-    const deviceCount = await readDeviceCount(db, transaction, accountId, accountSnapshot);
+    const { count: deviceCount, wasRecounted } = await readDeviceCount(
+      db,
+      transaction,
+      accountId,
+      accountSnapshot
+    );
     const wasLastDevice = deviceCount === 1;
     if (wasLastDevice && input.confirmLastDevice !== true) {
+      if (wasRecounted) persistRecountOnRejection(db, accountId, deviceCount);
       throw new HttpsError("failed-precondition", "This is the last connected device.", {
         reason: "last-device",
       });
     }
 
     transaction.delete(linkRef);
-    writeDeviceCount(transaction, accountRef, accountSnapshot, Math.max(0, deviceCount - 1));
+    writeDeviceCount(transaction, accountRef, Math.max(0, deviceCount - 1));
     transaction.set(userRef, { onboarded: false, recoveryBackedUp: false }, { merge: true });
     return { wasLastDevice };
   });

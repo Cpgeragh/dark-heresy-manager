@@ -2,7 +2,11 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { generateRecoveryCode, hashRecoveryCode } from "../shared/recoveryCode.js";
 import { validateDeviceUid } from "../shared/deviceLinks.js";
-import { readDeviceCount, writeDeviceCount } from "../shared/deviceCount.js";
+import {
+  readDeviceCount,
+  writeDeviceCount,
+  persistRecountOnRejection,
+} from "../shared/deviceCount.js";
 
 export interface DisconnectOtherDeviceInput {
   targetDeviceUid: string;
@@ -53,8 +57,14 @@ export async function disconnectOtherDevice(
       transaction.get(newIndexRef),
       transaction.get(accountRef),
     ]);
-    const deviceCount = await readDeviceCount(db, transaction, accountId, accountSnapshot);
+    const { count: deviceCount, wasRecounted } = await readDeviceCount(
+      db,
+      transaction,
+      accountId,
+      accountSnapshot
+    );
     if (deviceCount < 2) {
+      if (wasRecounted) persistRecountOnRejection(db, accountId, deviceCount);
       throw new HttpsError(
         "failed-precondition",
         "The final connected device cannot be removed remotely."
@@ -73,7 +83,7 @@ export async function disconnectOtherDevice(
     transaction.set(secretRef, { code: newCode });
     transaction.create(newIndexRef, { uid: accountId });
     transaction.delete(targetRef);
-    writeDeviceCount(transaction, accountRef, accountSnapshot, deviceCount - 1);
+    writeDeviceCount(transaction, accountRef, deviceCount - 1);
     transaction.set(targetUserRef, { onboarded: false, recoveryBackedUp: false }, { merge: true });
 
     return { remainingDeviceCount: deviceCount - 1 };
