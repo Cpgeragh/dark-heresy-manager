@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   parseBudgetNotification,
   hasReachedCap,
+  matchesExpectedBudget,
   disableBillingForProject,
   MONITORED_PROJECT_IDS,
 } from "../src/index.js";
@@ -35,6 +36,22 @@ describe("hasReachedCap", () => {
 
   it("returns true when cost exceeds the budget amount", () => {
     expect(hasReachedCap({ costAmount: 15, budgetAmount: 10 })).toBe(true);
+  });
+});
+
+describe("matchesExpectedBudget", () => {
+  it("accepts only the exact configured budget ID", () => {
+    const notification = {
+      budgetId: "billingAccounts/123/budgets/abc",
+      costAmount: 10,
+      budgetAmount: 10,
+    };
+    expect(matchesExpectedBudget(notification, notification.budgetId)).toBe(true);
+    expect(matchesExpectedBudget(notification, "billingAccounts/123/budgets/other")).toBe(false);
+    expect(matchesExpectedBudget(notification, undefined)).toBe(false);
+    expect(matchesExpectedBudget({ costAmount: 10, budgetAmount: 10 }, notification.budgetId)).toBe(
+      false
+    );
   });
 });
 

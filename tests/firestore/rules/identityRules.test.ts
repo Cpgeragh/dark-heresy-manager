@@ -38,7 +38,7 @@ describe("Firestore Rules: identityRecovery (retired collection)", () => {
 // ============================================================
 // identitySecret/{uid}
 // Proof store: uid → { code }
-// Owner-readable only (for Settings reveal/rotate); others denied.
+// No client reads; Settings reveals through the protected Function.
 // ============================================================
 describe("Firestore Rules: identitySecret", () => {
   afterEach(async () => {
@@ -46,13 +46,13 @@ describe("Firestore Rules: identitySecret", () => {
     await env.clearFirestore();
   });
 
-  it("owner can read their own identity secret entry", async () => {
+  it("even the owner cannot read the plain-text identity secret", async () => {
     const env = await getTestEnv();
     await createIdentitySecretEntry(env, "uid-1", { code: "CODE-XYZ" });
 
     await expect(
       dbAs(env, "uid-1").collection("identitySecret").doc("uid-1").get()
-    ).resolves.toBeDefined();
+    ).rejects.toThrow();
   });
 
   it("another user cannot read someone else's identity secret entry", async () => {

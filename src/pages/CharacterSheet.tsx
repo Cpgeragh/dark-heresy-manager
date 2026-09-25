@@ -204,7 +204,6 @@ export default function CharacterSheet({
     campaignId: params.campaignId,
     mode: knownRole ?? "picker",
     userId: effectiveUserId,
-    enabled: !!params.campaignId && !!knownRole,
   });
 
   useEffect(() => {

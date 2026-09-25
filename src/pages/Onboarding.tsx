@@ -34,7 +34,6 @@ import {
 import { RequiredFieldsNote } from "../ui/forms/CustomFormFooter";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
-import { LoadingState } from "../ui/LoadingState";
 
 type Step = "welcome" | "show-code" | "link";
 
@@ -56,7 +55,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     setSearchParams(next === "welcome" ? {} : { step: next }, { replace });
 
   const [code, setCode] = useState<string | null>(null);
-  const [codeLoading, setCodeLoading] = useState(step === "show-code");
+  const [codeLoading, setCodeLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const [name, setName] = useState(firstName ?? "");
@@ -68,7 +67,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   const discardingSetupRef = useRef(false);
   const previousStepRef = useRef(step);
   const allowShowCodeExitRef = useRef(false);
-  const skipCodeRehydrationRef = useRef(false);
   const recoveryFlow = useIdentityRecoveryFlow();
   const failRecoveryCompletion = recoveryFlow.failCompletion;
   const resetRecoveryFlow = recoveryFlow.reset;
@@ -155,32 +153,20 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     return () => window.clearTimeout(timeout);
   }, [awaitingLinkedProfile, failRecoveryCompletion]);
 
-  // On a reload that lands back on the code step, the code value is gone from
-  // memory — rehydrate it from the server. If none exists, fall back to welcome.
-  useEffect(() => {
-    if (step !== "show-code" || code || skipCodeRehydrationRef.current) return;
-    let ignore = false;
+  // A reload loses the in-memory code. Fetch it only after an explicit View tap.
+  async function handleViewExistingCode() {
+    if (codeLoading) return;
     setCodeLoading(true);
-    getRecoveryCode(effectiveUserId)
-      .then((existing) => {
-        if (ignore) return;
-        setCodeLoading(false);
-        if (existing) {
-          setCode(existing);
-        } else {
-          setSearchParams({}, { replace: true });
-        }
-      })
-      .catch(() => {
-        if (ignore) return;
-        setCodeLoading(false);
-        toast.error("Couldn't load your recovery code. Please try again.");
-        setSearchParams({}, { replace: true });
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [step, code, effectiveUserId, setSearchParams, toast]);
+    try {
+      const existing = await getRecoveryCode(effectiveUserId);
+      if (existing) setCode(existing);
+      else setSearchParams({}, { replace: true });
+    } catch {
+      toast.error("Couldn't load your recovery code. Please try again.");
+    } finally {
+      setCodeLoading(false);
+    }
+  }
 
   async function handleFinish() {
     if (busyRef.current) return;
@@ -213,7 +199,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     }
     busyRef.current = true;
     setBusy(true);
-    skipCodeRehydrationRef.current = false;
     try {
       const created = await createAccount(trimmedDeviceName);
       await saveFirstName(trimmedName);
@@ -268,7 +253,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     setDiscardingSetup(true);
     try {
       await discardOnboardingSetup();
-      skipCodeRehydrationRef.current = true;
       allowShowCodeExitRef.current = true;
       setCancelSetupOpen(false);
       setCode(null);
@@ -515,7 +499,11 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   </div>
                 </form>
               ) : (
-                <LoadingState className="p-6 text-center">Loading recovery code…</LoadingState>
+                <div className="p-6 text-center">
+                  <Button onClick={() => void handleViewExistingCode()} disabled={codeLoading}>
+                    {codeLoading ? "Loading recovery code…" : "View recovery code"}
+                  </Button>
+                </div>
               )}
             </Panel>
           )}

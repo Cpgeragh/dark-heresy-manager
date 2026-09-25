@@ -14,7 +14,6 @@ interface DeviceLinkState {
   loading: boolean;
   error: Error | null;
   effectiveUserId: string;
-  linkedAccountId: string | null;
   disconnect: (confirmLastDevice?: boolean) => Promise<void>;
 }
 
@@ -37,7 +36,6 @@ export function useDeviceLink(myUid: string): DeviceLinkState {
     loading,
     error,
     effectiveUserId: primaryUid ?? myUid,
-    linkedAccountId: primaryUid,
     disconnect,
   };
 }

@@ -15,6 +15,7 @@ export const MONITORED_PROJECT_IDS = [
 ] as const;
 
 export interface BudgetNotification {
+  budgetId?: string;
   budgetDisplayName?: string;
   costAmount: number;
   budgetAmount: number;
@@ -32,6 +33,13 @@ export function parseBudgetNotification(base64Data: string): BudgetNotification 
 
 export function hasReachedCap(notification: BudgetNotification): boolean {
   return notification.costAmount >= notification.budgetAmount;
+}
+
+export function matchesExpectedBudget(
+  notification: BudgetNotification,
+  expectedBudgetId: string | undefined
+): boolean {
+  return Boolean(expectedBudgetId && notification.budgetId === expectedBudgetId);
 }
 
 async function getBillingAccessToken(): Promise<string> {
@@ -73,7 +81,16 @@ export const billingGuard = onMessagePublished(
   },
   async (event) => {
     const notification = parseBudgetNotification(event.data.message.data);
-    logger.info("Received budget notification", { notification });
+    if (!matchesExpectedBudget(notification, process.env.BILLING_GUARD_BUDGET_ID)) {
+      logger.error(
+        "Budget ID is missing or does not match the configured budget; no action taken."
+      );
+      return;
+    }
+
+    logger.info("Received notification for the configured budget.", {
+      budgetId: notification.budgetId,
+    });
 
     if (!hasReachedCap(notification)) {
       logger.info("Spend below budget cap, no action taken.", {

@@ -11,7 +11,7 @@
 // they're observability, not a gate, so a logging failure never masks or
 // blocks a real result.
 
-import type { CallableRequest } from "firebase-functions/v2/https";
+import { HttpsError, type CallableRequest } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import { withSafeErrors } from "./errors.js";
 import { requireAuth } from "./auth.js";
@@ -24,8 +24,7 @@ import {
 import { enforceRateLimit } from "./rateLimit.js";
 import { withIdempotency } from "./idempotency.js";
 import type { IdempotencyExecution } from "./idempotency.js";
-import { recordAuditEntry } from "./audit.js";
-import { recordUsageMetric } from "./metrics.js";
+import { recordCallableOutcome } from "./audit.js";
 
 export interface ProtectedCallableOptions<TData, TResult> {
   request: CallableRequest<TData>;
@@ -50,10 +49,7 @@ async function recordOutcome(
   outcome: "success" | "failure"
 ): Promise<void> {
   try {
-    await Promise.all([
-      recordAuditEntry({ operation, actorUid, outcome }),
-      recordUsageMetric(operation),
-    ]);
+    await recordCallableOutcome({ operation, actorUid, outcome });
   } catch {
     logger.warn(`Failed to record audit/metric for ${operation}`);
   }
@@ -75,7 +71,15 @@ export async function protectedCallable<TData, TResult>(
 
     if (options.rateLimits) {
       for (const rateLimit of options.rateLimits) {
-        await enforceRateLimit(rateLimit);
+        try {
+          await enforceRateLimit(rateLimit);
+        } catch (error) {
+          if (error instanceof HttpsError && error.code === "resource-exhausted") {
+            // No raw key or account identifier is logged.
+            logger.warn("rate-limit-rejected", { operation: options.operation });
+          }
+          throw error;
+        }
       }
     }
 

@@ -2,15 +2,18 @@
 // Generates and stores a user's identity recovery record.
 // One record per user — covers all their campaigns and characters.
 
-import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-import { db, functions } from "../firebase";
+import { functions } from "../firebase";
 import { assertFirestoreDocumentId, assertRecoveryCode } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
 
 const callRegisterIdentityCode = httpsCallable<Record<string, never>, { code: string }>(
   functions,
   "registerIdentityCode"
+);
+const callRevealIdentityCode = httpsCallable<Record<string, never>, { code: string | null }>(
+  functions,
+  "revealIdentityCode"
 );
 
 const callCreateAccount = httpsCallable<
@@ -31,14 +34,14 @@ export async function createAccount(
 }
 
 /**
- * Reads the user's current recovery code from identitySecret.
+ * Reveals the signed-in device's current recovery code through the server.
  * Returns null if no code exists (e.g. user hasn't completed onboarding).
  */
 export async function getRecoveryCode(uid: string): Promise<string | null> {
   assertFirestoreDocumentId(uid, "User ID");
-  const snap = await getDoc(doc(db, "identitySecret", uid));
-  if (!snap.exists()) return null;
-  const code = (snap.data() as { code: unknown }).code;
+  const { data } = await callRevealIdentityCode({});
+  const code = data.code;
+  if (code === null) return null;
   assertRecoveryCode(code);
   return code.trim();
 }

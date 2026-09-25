@@ -1,6 +1,6 @@
 // functions/tests/shared/protectedCallable.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { CallableRequest } from "firebase-functions/v2/https";
+import { HttpsError, type CallableRequest } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import { protectedCallable } from "../../src/shared/protectedCallable";
 import { withSafeErrors } from "../../src/shared/errors";
@@ -8,8 +8,7 @@ import { requireAuth } from "../../src/shared/auth";
 import { assertRequestFields } from "../../src/shared/validation";
 import { enforceRateLimit } from "../../src/shared/rateLimit";
 import { withIdempotency } from "../../src/shared/idempotency";
-import { recordAuditEntry } from "../../src/shared/audit";
-import { recordUsageMetric } from "../../src/shared/metrics";
+import { recordCallableOutcome } from "../../src/shared/audit";
 
 vi.mock("firebase-functions", () => ({
   logger: { warn: vi.fn() },
@@ -33,8 +32,7 @@ vi.mock("../../src/shared/idempotency", () => ({
     ) => handler({ runTransaction: vi.fn() })
   ),
 }));
-vi.mock("../../src/shared/audit", () => ({ recordAuditEntry: vi.fn() }));
-vi.mock("../../src/shared/metrics", () => ({ recordUsageMetric: vi.fn() }));
+vi.mock("../../src/shared/audit", () => ({ recordCallableOutcome: vi.fn() }));
 
 function makeRequest(data: unknown = {}): CallableRequest {
   return { data } as CallableRequest;
@@ -45,8 +43,7 @@ describe("protectedCallable", () => {
     vi.clearAllMocks();
     vi.mocked(requireAuth).mockReturnValue({ uid: "user-1", appCheckVerified: true });
     vi.mocked(enforceRateLimit).mockResolvedValue(undefined);
-    vi.mocked(recordAuditEntry).mockResolvedValue(undefined);
-    vi.mocked(recordUsageMetric).mockResolvedValue(undefined);
+    vi.mocked(recordCallableOutcome).mockResolvedValue(undefined);
   });
 
   it("runs auth, validation, and the handler in order, and records a success outcome", async () => {
@@ -68,10 +65,9 @@ describe("protectedCallable", () => {
       data: { code: "DH-ABCD-1234" },
       idempotency: null,
     });
-    expect(recordAuditEntry).toHaveBeenCalledWith(
+    expect(recordCallableOutcome).toHaveBeenCalledWith(
       expect.objectContaining({ operation: "test-op", actorUid: "user-1", outcome: "success" })
     );
-    expect(recordUsageMetric).toHaveBeenCalledWith("test-op");
   });
 
   it("never forwards a raw Recovery Code to audit or usage metrics", async () => {
@@ -84,14 +80,12 @@ describe("protectedCallable", () => {
       handler: async () => "ok",
     });
 
-    expect(JSON.stringify(vi.mocked(recordAuditEntry).mock.calls)).not.toContain(code);
-    expect(JSON.stringify(vi.mocked(recordUsageMetric).mock.calls)).not.toContain(code);
-    expect(recordAuditEntry).toHaveBeenCalledWith({
+    expect(JSON.stringify(vi.mocked(recordCallableOutcome).mock.calls)).not.toContain(code);
+    expect(recordCallableOutcome).toHaveBeenCalledWith({
       operation: "claim-character",
       actorUid: "user-1",
       outcome: "success",
     });
-    expect(recordUsageMetric).toHaveBeenCalledWith("claim-character");
   });
 
   it("enforces every configured rate limit, in order, before running the handler", async () => {
@@ -129,6 +123,23 @@ describe("protectedCallable", () => {
     expect(enforceRateLimit).not.toHaveBeenCalled();
   });
 
+  it("logs a rate-limit rejection without logging its account key", async () => {
+    vi.mocked(enforceRateLimit).mockRejectedValueOnce(new HttpsError("resource-exhausted", "Wait"));
+    await expect(
+      protectedCallable({
+        request: makeRequest(),
+        operation: "patch-character-field",
+        allowedFields: [],
+        rateLimits: [{ key: "patch-character-field:private-user", limit: 1, windowMs: 1000 }],
+        handler: async () => "ok",
+      })
+    ).rejects.toMatchObject({ code: "resource-exhausted" });
+    expect(logger.warn).toHaveBeenCalledWith("rate-limit-rejected", {
+      operation: "patch-character-field",
+    });
+    expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain("private-user");
+  });
+
   it("routes the handler through idempotency when a key is supplied", async () => {
     await protectedCallable({
       request: makeRequest(),
@@ -155,13 +166,13 @@ describe("protectedCallable", () => {
       })
     ).rejects.toBe(failure);
 
-    expect(recordAuditEntry).toHaveBeenCalledWith(
+    expect(recordCallableOutcome).toHaveBeenCalledWith(
       expect.objectContaining({ operation: "test-op", actorUid: "user-1", outcome: "failure" })
     );
   });
 
   it("does not let an audit/metric recording failure mask a successful result", async () => {
-    vi.mocked(recordAuditEntry).mockRejectedValue(new Error("audit write failed with secret"));
+    vi.mocked(recordCallableOutcome).mockRejectedValue(new Error("audit write failed with secret"));
 
     const result = await protectedCallable({
       request: makeRequest(),
@@ -175,14 +186,10 @@ describe("protectedCallable", () => {
     expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain("secret");
   });
 
-  it("starts independent audit and usage recording concurrently", async () => {
-    let resolveAudit!: () => void;
-    let resolveMetric!: () => void;
-    vi.mocked(recordAuditEntry).mockImplementation(
-      () => new Promise<void>((resolve) => (resolveAudit = resolve))
-    );
-    vi.mocked(recordUsageMetric).mockImplementation(
-      () => new Promise<void>((resolve) => (resolveMetric = resolve))
+  it("waits for the single durable outcome commit", async () => {
+    let resolveCommit!: () => void;
+    vi.mocked(recordCallableOutcome).mockImplementation(
+      () => new Promise<void>((resolve) => (resolveCommit = resolve))
     );
 
     const pending = protectedCallable({
@@ -193,11 +200,9 @@ describe("protectedCallable", () => {
     });
 
     await vi.waitFor(() => {
-      expect(recordAuditEntry).toHaveBeenCalledOnce();
-      expect(recordUsageMetric).toHaveBeenCalledOnce();
+      expect(recordCallableOutcome).toHaveBeenCalledOnce();
     });
-    resolveAudit();
-    resolveMetric();
+    resolveCommit();
 
     await expect(pending).resolves.toBe("ok");
   });

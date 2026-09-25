@@ -8,7 +8,7 @@
 // for their own operation; this only bounds the shape.
 
 import { createHash } from "node:crypto";
-import { getFirestore } from "firebase-admin/firestore";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
 
 const AUDIT_LOG_COLLECTION = "auditLog";
 const MAX_METADATA_KEYS = 20;
@@ -50,4 +50,24 @@ export async function recordAuditEntry(entry: AuditEntryInput): Promise<void> {
     metadata: entry.metadata ?? {},
     timestamp: Date.now(),
   });
+}
+
+/** One durable commit for the audit record and usage count after an action. */
+export async function recordCallableOutcome(entry: AuditEntryInput): Promise<void> {
+  if (entry.metadata) assertBoundedMetadata(entry.metadata);
+  const db = getFirestore();
+  const batch = db.batch();
+  batch.set(db.collection(AUDIT_LOG_COLLECTION).doc(), {
+    operation: entry.operation,
+    actorHash: hashAuditActorUid(entry.actorUid),
+    outcome: entry.outcome,
+    metadata: entry.metadata ?? {},
+    timestamp: Date.now(),
+  });
+  batch.set(
+    db.collection("usageMetrics").doc(entry.operation),
+    { count: FieldValue.increment(1), lastUsedAt: Date.now() },
+    { merge: true }
+  );
+  await batch.commit();
 }

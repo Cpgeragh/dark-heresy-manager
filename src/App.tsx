@@ -56,7 +56,6 @@ function AppContent() {
   // -------------------------------------------------
   const {
     effectiveUserId,
-    linkedAccountId,
     disconnect,
     loading: linkLoading,
     error: linkError,

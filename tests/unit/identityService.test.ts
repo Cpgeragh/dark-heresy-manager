@@ -1,24 +1,20 @@
 // @vitest-environment jsdom
 import { beforeEach, expect, it, vi } from "vitest";
 
-const { mockDoc, mockGetDoc, callRegister, callCreate } = vi.hoisted(() => ({
-  mockDoc: vi.fn((...args: unknown[]) => `${args[1]}/${args[2]}`),
-  mockGetDoc: vi.fn(),
+const { callReveal, callRegister, callCreate } = vi.hoisted(() => ({
+  callReveal: vi.fn(),
   callRegister: vi.fn(),
   callCreate: vi.fn(),
-}));
-vi.mock("firebase/firestore", () => ({
-  doc: (...args: unknown[]) => mockDoc(...args),
-  getDoc: (...args: unknown[]) => mockGetDoc(...args),
 }));
 vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn((_functions: unknown, name: string) => {
     if (name === "registerIdentityCode") return callRegister;
+    if (name === "revealIdentityCode") return callReveal;
     if (name === "createAccount") return callCreate;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
-vi.mock("../../src/firebase", () => ({ db: "db", functions: "functions" }));
+vi.mock("../../src/firebase", () => ({ functions: "functions" }));
 
 import {
   createAccount,
@@ -30,6 +26,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   callCreate.mockResolvedValue({ data: { accountId: "account-1", code: "DH-AAAA-BBBB" } });
   callRegister.mockResolvedValue({ data: { code: "DH-CCCC-DDDD" } });
+  callReveal.mockResolvedValue({ data: { code: "DH-AAAA-BBBB" } });
 });
 
 it("creates an account through the server", async () => {
@@ -41,8 +38,8 @@ it("creates an account through the server", async () => {
 });
 
 it("reads an existing account recovery code", async () => {
-  mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({ code: "DH-AAAA-BBBB" }) });
   await expect(getRecoveryCode("account-1")).resolves.toBe("DH-AAAA-BBBB");
+  expect(callReveal).toHaveBeenCalledWith({});
 });
 
 it("rotates the account recovery code through a server operation", async () => {

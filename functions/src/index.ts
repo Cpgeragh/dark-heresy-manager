@@ -20,6 +20,7 @@ import {
   type RegisterRecoveryCodeInput,
 } from "./operations/registerRecoveryCode.js";
 import { registerIdentityCode as runRegisterIdentityCode } from "./operations/registerIdentityCode.js";
+import { revealIdentityCode as runRevealIdentityCode } from "./operations/revealIdentityCode.js";
 import {
   lookupRecoveryCode as runLookupRecoveryCode,
   type LookupRecoveryCodeInput,
@@ -129,20 +130,23 @@ import {
   type RepairSessionSummariesResult,
 } from "./operations/repairSessionSummaries.js";
 
-setGlobalOptions({ region: "europe-west2" });
+// Production Cloud Monitoring (30 days ending 2026-09-24): at most 17 Function
+// requests in any ten-minute window. Keep wide headroom for normal actions,
+// but prevent unbounded scale; review after traffic grows.
+setGlobalOptions({ region: "europe-west2", maxInstances: 5, concurrency: 40 });
 
-export const ping = onCall({ timeoutSeconds: 30 }, () => {
-  return { ok: true };
-});
+const heavyWorkOptions = { maxInstances: 2, concurrency: 5 } as const;
 
-export const protectedPing = onCall({ timeoutSeconds: 30 }, (request) =>
-  protectedCallable({
+export const revealIdentityCode = onCall({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<Record<string, never>, { code: string | null }>({
     request,
-    operation: "protected-ping",
+    operation: "reveal-identity-code",
     allowedFields: [],
-    handler: async () => ({ ok: true }),
-  })
-);
+    rateLimits: [{ key: `reveal-identity-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
+    handler: ({ uid }) => runRevealIdentityCode(uid),
+  });
+});
 
 export const createCampaign = onCall<CreateCampaignInput>({ timeoutSeconds: 30 }, (request) => {
   const callerUid = request.auth?.uid ?? "anonymous";
@@ -444,7 +448,7 @@ export const updateDisplayName = onCall<UpdateDisplayNameInput>(
 );
 
 export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
-  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const idempotencyKey = `start-character-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`;
@@ -473,7 +477,7 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
 );
 
 export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChunkInput>(
-  { timeoutSeconds: 30 },
+  { timeoutSeconds: 30, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<
@@ -498,7 +502,7 @@ export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChun
 );
 
 export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>(
-  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const idempotencyKey = `start-campaign-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}`;
@@ -525,7 +529,7 @@ export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>(
 );
 
 export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkInput>(
-  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<ProcessCampaignDeletionChunkInput, ProcessCampaignDeletionChunkResult>(
@@ -550,7 +554,7 @@ export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkI
 );
 
 export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput>(
-  { timeoutSeconds: 30 },
+  { timeoutSeconds: 30, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const idempotencyKey = `start-custom-item-mutation-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.customItemId ?? ""}:${request.data?.mode ?? ""}`;
@@ -580,7 +584,7 @@ export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput
 );
 
 export const processCustomItemMutationChunk = onCall<ProcessCustomItemMutationChunkInput>(
-  { timeoutSeconds: 30 },
+  { timeoutSeconds: 30, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<
@@ -677,7 +681,7 @@ export const completeOnboarding = onCall({ timeoutSeconds: 30 }, (request) => {
 });
 
 export const deleteAccount = onCall(
-  { secrets: [identityCodeHmacSecret], timeoutSeconds: 60 },
+  { secrets: [identityCodeHmacSecret], timeoutSeconds: 60, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<Record<string, never>, DeleteAccountResult>({
@@ -691,7 +695,7 @@ export const deleteAccount = onCall(
 );
 
 export const repairSessionSummaries = onCall<RepairSessionSummariesInput>(
-  { timeoutSeconds: 30 },
+  { timeoutSeconds: 30, ...heavyWorkOptions },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<RepairSessionSummariesInput, RepairSessionSummariesResult>({

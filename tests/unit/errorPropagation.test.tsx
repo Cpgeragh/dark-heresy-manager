@@ -95,6 +95,7 @@ function renderCodeStep(onComplete = vi.fn()) {
       <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={onComplete} />
     </MemoryRouter>
   );
+  fireEvent.click(screen.getByRole("button", { name: "View recovery code" }));
   return onComplete;
 }
 
@@ -216,7 +217,7 @@ describe("onboarding error propagation", () => {
     renderCodeStep();
 
     expect(screen.getByRole("heading", { name: "Save Your Recovery Code" })).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent("Loading recovery code…");
+    expect(screen.getByRole("button", { name: "Loading recovery code…" })).toBeDisabled();
 
     resolveCode("RECOVERY-CODE");
     expect(await screen.findByText("RECOVERY-CODE")).toBeVisible();
@@ -281,6 +282,7 @@ describe("onboarding error propagation", () => {
         <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
       </MemoryRouter>
     );
+    fireEvent.click(screen.getByRole("button", { name: "View recovery code" }));
     await screen.findByText("RECOVERY-CODE");
 
     await browserUser.click(screen.getByRole("button", { name: "Browser back" }));
@@ -324,6 +326,7 @@ describe("onboarding error propagation", () => {
         <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
       </MemoryRouter>
     );
+    fireEvent.click(screen.getByRole("button", { name: "View recovery code" }));
     await screen.findByText("RECOVERY-CODE");
     await browserUser.click(screen.getByRole("checkbox"));
     await browserUser.click(screen.getByRole("button", { name: "Continue to dashboard" }));
@@ -371,7 +374,7 @@ describe("onboarding error propagation", () => {
         "Couldn't load your recovery code. Please try again."
       )
     );
-    expect(await screen.findByRole("heading", { name: "Create Your Account" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "View recovery code" })).toBeEnabled();
   });
 });
 

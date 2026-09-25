@@ -1,9 +1,15 @@
 // tests/functions/registerIdentityCode.test.ts
 import { describe, it, expect, afterAll } from "vitest";
 import { httpsCallable } from "firebase/functions";
+import { deleteApp } from "firebase/app";
 import { initializeApp as initializeAdminApp, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { getTestFunctions, signInTestUser, teardownTestFunctions } from "./setup";
+import {
+  createIndependentClient,
+  getTestFunctions,
+  signInTestUser,
+  teardownTestFunctions,
+} from "./setup";
 
 process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
 if (!getApps().length) {
@@ -75,5 +81,27 @@ describe("Functions: registerIdentityCode", () => {
     );
 
     await expect(registerIdentityCode({ targetUid: "some-unlinked-account" })).rejects.toThrow();
+  }, 15000);
+
+  it("reveals the code to a linked device but not another account", async () => {
+    const owner = await createIndependentClient(`code-owner-${Date.now()}`);
+    const linked = await createIndependentClient(`code-linked-${Date.now()}`);
+    const outsider = await createIndependentClient(`code-outsider-${Date.now()}`);
+    try {
+      await adminDb.collection("userLinks").doc(linked.uid).set({ primaryUid: owner.uid });
+      await adminDb.collection("identitySecret").doc(owner.uid).set({ code: "DH-AAAA-BBBB" });
+      const revealLinked = httpsCallable<Record<string, never>, { code: string | null }>(
+        linked.functions,
+        "revealIdentityCode"
+      );
+      const revealOutsider = httpsCallable<Record<string, never>, { code: string | null }>(
+        outsider.functions,
+        "revealIdentityCode"
+      );
+      expect((await revealLinked({})).data.code).toBe("DH-AAAA-BBBB");
+      expect((await revealOutsider({})).data.code).toBeNull();
+    } finally {
+      await Promise.all([deleteApp(owner.app), deleteApp(linked.app), deleteApp(outsider.app)]);
+    }
   }, 15000);
 });

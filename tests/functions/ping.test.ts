@@ -3,14 +3,13 @@ import { describe, it, expect, afterAll } from "vitest";
 import { httpsCallable } from "firebase/functions";
 import { getTestFunctions, teardownTestFunctions } from "./setup";
 
-describe("Functions: ping", () => {
+describe("Functions: protected callable transport", () => {
   afterAll(async () => {
     await teardownTestFunctions();
   });
 
-  it("responds ok over the emulator, proving the client-to-Function plumbing works", async () => {
-    const ping = httpsCallable(getTestFunctions(), "ping");
-    const result = await ping();
-    expect(result.data).toEqual({ ok: true });
+  it("reaches the real recovery-code endpoint and enforces authentication", async () => {
+    const revealCode = httpsCallable(getTestFunctions(), "revealIdentityCode");
+    await expect(revealCode({})).rejects.toMatchObject({ code: "functions/unauthenticated" });
   });
 });
