@@ -48,8 +48,9 @@ interface BackgroundTabProps {
   header: CharacterHeader;
   talents: TalentsAndTraitsBlock;
   editable: boolean;
-  /** Owner's first name, derived from their account profile. Read-only. */
   playerName: string | null;
+  hasLivePlayerName: boolean;
+  playerNameProfileUnresolved: boolean;
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
@@ -82,6 +83,8 @@ export function BackgroundTab({
   talents,
   editable,
   playerName,
+  hasLivePlayerName,
+  playerNameProfileUnresolved,
   onUpdateHeader,
   onUpdateTalents,
   cybernetics = [],
@@ -136,6 +139,10 @@ export function BackgroundTab({
 
   const handleCharacterName = useCallback(
     (v: string) => updateHeaderField("characterName", v),
+    [updateHeaderField]
+  );
+  const handlePlayerName = useCallback(
+    (v: string) => updateHeaderField("playerName", v),
     [updateHeaderField]
   );
   const handleDescription = useCallback(
@@ -509,8 +516,9 @@ export function BackgroundTab({
           <FormField
             label="Player Name"
             value={playerName ?? ""}
-            onChange={() => {}}
-            editable={false}
+            onChange={handlePlayerName}
+            editable={editable && !hasLivePlayerName && !playerNameProfileUnresolved}
+            debounceMs={600}
             placeholder="Set from the player's account"
           />
         </section>

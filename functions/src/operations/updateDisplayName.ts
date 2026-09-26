@@ -24,7 +24,7 @@ function validateFirstName(value: unknown): string {
   return firstName;
 }
 
-/** Updates the account profile and every campaign name copy atomically. */
+/** Name copies change atomically so campaign headers and party rosters cannot disagree. */
 export async function updateDisplayName(
   input: UpdateDisplayNameInput,
   callerUid: string
@@ -37,9 +37,13 @@ export async function updateDisplayName(
     .collection("campaigns")
     .where("dmId", "==", accountId)
     .limit(SERVER_PRODUCT_LIMITS.campaignsPerAccount + 1);
+  const ownedCharactersQuery = db.collectionGroup("characters").where("userId", "==", accountId);
 
   await db.runTransaction(async (transaction) => {
-    const campaigns = await transaction.get(campaignsQuery);
+    const [campaigns, ownedCharacters] = await Promise.all([
+      transaction.get(campaignsQuery),
+      transaction.get(ownedCharactersQuery),
+    ]);
     if (campaigns.size > SERVER_PRODUCT_LIMITS.campaignsPerAccount) {
       throw new HttpsError(
         "failed-precondition",
@@ -50,6 +54,16 @@ export async function updateDisplayName(
     transaction.set(profileRef, { firstName });
     campaigns.docs.forEach((campaign) => {
       transaction.update(campaign.ref, { gmName: firstName });
+    });
+    ownedCharacters.docs.forEach((character) => {
+      const campaignRef = character.ref.parent.parent;
+      if (campaignRef) {
+        transaction.set(
+          campaignRef.collection("characterSummaries").doc(character.id),
+          { playerName: firstName },
+          { merge: true }
+        );
+      }
     });
   });
 }

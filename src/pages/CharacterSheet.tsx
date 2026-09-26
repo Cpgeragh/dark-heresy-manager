@@ -233,11 +233,17 @@ export default function CharacterSheet({
   // header.playerName for characters claimed before profiles existed).
   const ownerUserId = character?.userId;
   const isEffectiveUserOwner = !!ownerUserId && ownerUserId === effectiveUserId;
-  const { firstName: subscribedOwnerFirstName, error: ownerProfileError } = useUserProfile(
-    ownerUserId && !isEffectiveUserOwner ? ownerUserId : null
-  );
+  const {
+    firstName: subscribedOwnerFirstName,
+    loading: subscribedOwnerProfileLoading,
+    error: ownerProfileError,
+  } = useUserProfile(ownerUserId && !isEffectiveUserOwner ? ownerUserId : null);
   const ownerFirstName = isEffectiveUserOwner ? effectiveUserFirstName : subscribedOwnerFirstName;
   const ownerName = ownerFirstName ?? character?.header.playerName?.trim() ?? null;
+  const ownerProfileUnresolved =
+    !!ownerUserId &&
+    !isEffectiveUserOwner &&
+    (subscribedOwnerProfileLoading || ownerProfileError !== null);
   const psyRating = useMemo(
     () =>
       (character?.talentsAndTraits.talents ?? []).reduce((max, entry) => {
@@ -920,6 +926,8 @@ export default function CharacterSheet({
                   cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
                   editable={allowedToEdit}
                   playerName={ownerName}
+                  hasLivePlayerName={ownerFirstName !== null}
+                  playerNameProfileUnresolved={ownerProfileUnresolved}
                   onUpdateHeader={handleUpdateHeader}
                   onUpdateTalents={handleUpdateTalents}
                   onUpdateCybernetics={handleUpdateCybernetics}

@@ -39,6 +39,7 @@ vi.mock("../../src/context/useHeaderExtension", () => ({
 }));
 
 const useUserProfileMock = vi.fn();
+const backgroundTabPropsMock = vi.fn();
 vi.mock("../../src/hooks/useUserProfile", () => ({
   useUserProfile: (...args: unknown[]) => useUserProfileMock(...args),
 }));
@@ -133,7 +134,10 @@ vi.mock("../../src/pages/CharacterSheet/ArcheotechTab", () => ({
   ArcheotechTab: () => <div>Mock ArcheotechTab</div>,
 }));
 vi.mock("../../src/pages/CharacterSheet/BackgroundTab", () => ({
-  BackgroundTab: () => <div>Mock BackgroundTab</div>,
+  BackgroundTab: (props: Record<string, unknown>) => {
+    backgroundTabPropsMock(props);
+    return <div>Mock BackgroundTab</div>;
+  },
 }));
 vi.mock("../../src/pages/CharacterSheet/WeaponTrainingTab", () => ({
   WeaponTrainingTab: () => <div>Mock WeaponTrainingTab</div>,
@@ -194,7 +198,7 @@ function baseSheetResult(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   window.scrollTo = vi.fn();
-  useUserProfileMock.mockReturnValue({ firstName: null, error: null });
+  useUserProfileMock.mockReturnValue({ firstName: null, loading: false, error: null });
   getSpentXpMock.mockReturnValue(200);
   reconcileCharacterSpentXpMock.mockResolvedValue(undefined);
   useCharacterSheetMock.mockReturnValue(baseSheetResult());
@@ -324,6 +328,40 @@ describe("CharacterSheet owner profile subscription", () => {
     renderSheet();
 
     expect(useUserProfileMock).toHaveBeenCalledWith("player-2");
+  });
+
+  it("passes the effective owner's live name separately from the displayed value", () => {
+    renderSheet("/campaign/campaign-1/character/char-1?tab=background");
+
+    expect(backgroundTabPropsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        playerName: "Iris",
+        hasLivePlayerName: true,
+        playerNameProfileUnresolved: false,
+      })
+    );
+  });
+
+  it("keeps a stored fallback distinguishable while another owner's profile is loading", () => {
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({
+        character: character({
+          userId: "player-2",
+          header: { characterName: "Vex", playerName: "Temporary Name" },
+        }),
+      })
+    );
+    useUserProfileMock.mockReturnValue({ firstName: null, loading: true, error: null });
+
+    renderSheet("/campaign/campaign-1/character/char-1?tab=background");
+
+    expect(backgroundTabPropsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        playerName: "Temporary Name",
+        hasLivePlayerName: false,
+        playerNameProfileUnresolved: true,
+      })
+    );
   });
 });
 

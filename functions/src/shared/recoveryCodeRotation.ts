@@ -24,7 +24,8 @@ export function rotateRecoveryCodeInTransaction(
   characterId: string,
   previousCode: string | undefined,
   hmacSecret: string,
-  additionalCharacterUpdates: Record<string, unknown> = {}
+  additionalCharacterUpdates: Record<string, unknown> = {},
+  additionalSummaryUpdates: Record<string, unknown> = {}
 ): string {
   const newCode = generateRecoveryCode();
   const newHash = hashRecoveryCode(newCode, hmacSecret);
@@ -48,7 +49,7 @@ export function rotateRecoveryCodeInTransaction(
   if ("userId" in additionalCharacterUpdates) {
     transaction.set(
       db.collection("campaigns").doc(campaignId).collection("characterSummaries").doc(characterId),
-      { userId: additionalCharacterUpdates.userId },
+      { userId: additionalCharacterUpdates.userId, ...additionalSummaryUpdates },
       { merge: true }
     );
   }

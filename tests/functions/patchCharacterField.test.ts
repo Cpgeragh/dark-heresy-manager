@@ -77,6 +77,7 @@ describe("Functions: patchCharacterField", () => {
       campaignId: campaignRef.id,
       characterName: "Brother Corvus",
       career: "Guardsman",
+      userId: null,
     });
   }, 15000);
 
@@ -141,6 +142,7 @@ describe("Functions: patchCharacterField", () => {
       campaignId: campaignRef.id,
       characterName: "Brother Corvus",
       portraitUrl: portrait,
+      userId: null,
     });
   }, 15000);
 

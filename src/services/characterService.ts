@@ -63,12 +63,17 @@ export async function loadCharacter(
  * Derives the restricted character-summary shape from a full character.
  * Never includes the Recovery Code or any other sheet data.
  */
-export function computeCharacterSummary(character: Character): CharacterSummaryWithId {
+export function computeCharacterSummary(
+  character: Character,
+  livePlayerName?: string | null
+): CharacterSummaryWithId {
+  const profileName = livePlayerName?.trim() ?? "";
+  const storedName = character.header.playerName?.trim() ?? "";
   return stripUndefined({
     id: character.id,
     campaignId: character.campaignId,
     characterName: character.header.characterName,
-    playerName: character.header.playerName,
+    playerName: profileName || storedName || undefined,
     career: character.header.career,
     rank: character.header.rank,
     portraitUrl: character.portraitUrl,
@@ -97,10 +102,14 @@ export async function writeCharacterFieldsWithSummary(
     const snapshot = await transaction.get(ref);
     if (!snapshot.exists()) throw new Error("Character not found.");
     const merged = { ...snapshot.data(), ...partial } as Character;
+    const ownerProfile = merged.userId
+      ? await transaction.get(doc(db, "userProfiles", merged.userId))
+      : null;
+    const livePlayerName = ownerProfile?.data()?.firstName?.trim() || null;
     transaction.update(ref, partial as UpdateData<Character>);
     transaction.set(
       characterSummaryDocRef(campaignId, characterId),
-      computeCharacterSummary(merged)
+      computeCharacterSummary(merged, livePlayerName)
     );
   });
 }
@@ -122,12 +131,25 @@ export async function repairCharacterSummaries(campaignId: string): Promise<numb
     );
     if (snapshot.empty) return 0;
 
+    const characters = snapshot.docs.map((docSnapshot) => docSnapshot.data());
+    const ownerIds = [...new Set(characters.flatMap((character) => character.userId ?? []))];
+    const ownerNames = new Map<string, string>();
+    await Promise.all(
+      ownerIds.map(async (ownerId) => {
+        const profileSnapshot = await getDoc(doc(db, "userProfiles", ownerId));
+        const firstName = profileSnapshot.data()?.firstName?.trim();
+        if (firstName) ownerNames.set(ownerId, firstName);
+      })
+    );
+
     const batch = writeBatch(db);
-    snapshot.docs.forEach((docSnapshot) => {
-      const character = docSnapshot.data();
+    characters.forEach((character) => {
       batch.set(
         characterSummaryDocRef(campaignId, character.id),
-        computeCharacterSummary(character)
+        computeCharacterSummary(
+          character,
+          character.userId ? ownerNames.get(character.userId) : null
+        )
       );
     });
     await batch.commit();

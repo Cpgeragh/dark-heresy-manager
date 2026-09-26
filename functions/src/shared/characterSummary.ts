@@ -13,6 +13,7 @@ export interface CharacterSummaryFields {
   career?: string;
   rank?: string;
   portraitUrl?: string;
+  userId?: string | null;
 }
 
 const SUMMARY_RELEVANT_FIELDS = new Set(["header", "portraitUrl"]);
@@ -22,7 +23,8 @@ export function isSummaryRelevantField(field: string): boolean {
 }
 
 export function computeCharacterSummary(
-  characterData: Record<string, unknown>
+  characterData: Record<string, unknown>,
+  livePlayerName?: string | null
 ): CharacterSummaryFields {
   const header = (characterData.header ?? {}) as Record<string, unknown>;
   if (typeof characterData.campaignId !== "string") {
@@ -35,10 +37,16 @@ export function computeCharacterSummary(
     campaignId: characterData.campaignId,
     characterName: header.characterName,
   };
-  if (typeof header.playerName === "string") summary.playerName = header.playerName;
+  const profileName = typeof livePlayerName === "string" ? livePlayerName.trim() : "";
+  const storedName = typeof header.playerName === "string" ? header.playerName.trim() : "";
+  const playerName = profileName || storedName;
+  if (playerName) summary.playerName = playerName;
   if (typeof header.career === "string") summary.career = header.career;
   if (typeof header.rank === "string") summary.rank = header.rank;
   if (typeof characterData.portraitUrl === "string")
     summary.portraitUrl = characterData.portraitUrl;
+  if (typeof characterData.userId === "string" || characterData.userId === null) {
+    summary.userId = characterData.userId;
+  }
   return summary;
 }

@@ -126,6 +126,7 @@ vi.mock("../../src/firebase/converters", () => ({
 
 import {
   claimCharacter,
+  computeCharacterSummary,
   createNewCharacter,
   deleteCharacter,
   forceAssignCharacter,
@@ -523,6 +524,20 @@ describe("importCharacter", () => {
 });
 
 describe("updateCharacter", () => {
+  it("prefers the live profile name when deriving a claimed character summary", () => {
+    const summary = computeCharacterSummary(
+      {
+        id: "char-1",
+        campaignId: "camp-1",
+        userId: "player-1",
+        header: { characterName: "Corvus", playerName: "Temporary Name" },
+      } as Character,
+      "  Iris  "
+    );
+
+    expect(summary.playerName).toBe("Iris");
+  });
+
   it("writes non-summary fields directly, without touching the summary", async () => {
     await updateCharacter("camp-1", "char-1", { experience: { ranks: [], total: 500, spent: 0 } });
 
@@ -534,15 +549,21 @@ describe("updateCharacter", () => {
   });
 
   it("writes a header change and the derived summary together in one transaction", async () => {
-    mockTransaction.get.mockResolvedValue({
-      exists: () => true,
-      data: () => ({
-        id: "char-1",
-        campaignId: "camp-1",
-        header: { characterName: "Old Name", playerName: "Sam" },
-        portraitUrl: "data:old",
-      }),
-    });
+    mockTransaction.get
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          id: "char-1",
+          campaignId: "camp-1",
+          userId: "player-1",
+          header: { characterName: "Old Name", playerName: "Sam" },
+          portraitUrl: "data:old",
+        }),
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ firstName: "Iris" }),
+      });
 
     await updateCharacter("camp-1", "char-1", {
       header: { characterName: "New Name", playerName: "Sam" },
@@ -558,7 +579,7 @@ describe("updateCharacter", () => {
         id: "char-1",
         campaignId: "camp-1",
         characterName: "New Name",
-        playerName: "Sam",
+        playerName: "Iris",
         portraitUrl: "data:old",
       })
     );
@@ -625,6 +646,33 @@ describe("repairCharacterSummaries", () => {
       expect.objectContaining({ id: "char-2", characterName: "Thane" })
     );
     expect(mockBatch.commit).toHaveBeenCalledOnce();
+  });
+
+  it("uses live profile names when repairing claimed-character summaries", async () => {
+    mockGetDocs.mockResolvedValue({
+      empty: false,
+      docs: [
+        {
+          data: () => ({
+            id: "char-1",
+            campaignId: "camp-1",
+            userId: "player-1",
+            header: { characterName: "Corvus", playerName: "Temporary Name" },
+          }),
+        },
+      ],
+    });
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ firstName: "Iris" }),
+    });
+
+    await repairCharacterSummaries("camp-1");
+
+    expect(mockBatch.set).toHaveBeenCalledWith(
+      "character-summary:camp-1:char-1",
+      expect.objectContaining({ playerName: "Iris", userId: "player-1" })
+    );
   });
 });
 

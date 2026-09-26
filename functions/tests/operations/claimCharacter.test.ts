@@ -37,10 +37,13 @@ const mockCampaignRef = { kind: "campaign", collection: vi.fn(() => mockCharacte
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 const mockIndexDoc = vi.fn((id: string) => ({ kind: "recovery-index", id }));
 const mockIndexCollection = { doc: mockIndexDoc };
+const mockProfileRef = { kind: "user-profile" };
+const mockProfilesCollection = { doc: vi.fn(() => mockProfileRef) };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
   if (name === "recoveryIndex") return mockIndexCollection;
+  if (name === "userProfiles") return mockProfilesCollection;
   throw new Error(`Unexpected collection: ${name}`);
 });
 
@@ -51,6 +54,7 @@ vi.mock("firebase-admin/firestore", () => ({
   }),
   FieldValue: {
     arrayUnion: (v: unknown) => ({ __arrayUnion: v }),
+    delete: () => ({ __delete: true }),
     serverTimestamp: () => "server-timestamp",
   },
 }));
@@ -62,6 +66,10 @@ describe("claimCharacter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolvePrimaryUid.mockImplementation(async (_db: unknown, callerUid: string) => callerUid);
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ firstName: "Iris" }),
+    });
   });
 
   it("rejects a malformed code without touching Firestore", async () => {
@@ -139,8 +147,14 @@ describe("claimCharacter", () => {
     expect(result).toEqual({ campaignId: "c1", characterId: "char-1" });
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
       userId: "user-1",
+      "header.playerName": { __delete: true },
       recoveryCode: expect.stringMatching(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/),
     });
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ userId: "user-1", playerName: "Iris" }),
+      { merge: true }
+    );
     const characterUpdate = mockTransactionUpdate.mock.calls.find(
       ([reference]) => reference === mockCharacterRef
     )?.[1] as { recoveryCode: string };

@@ -40,6 +40,7 @@ vi.mock("firebase-admin/firestore", () => ({
   FieldValue: {
     arrayUnion: (v: unknown) => ({ __arrayUnion: v }),
     arrayRemove: (v: unknown) => ({ __arrayRemove: v }),
+    delete: () => ({ __delete: true }),
     serverTimestamp: () => "server-timestamp",
   },
 }));
@@ -93,6 +94,11 @@ describe("releaseCharacter", () => {
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCampaignRef, {
       memberIds: { __arrayRemove: "user-1" },
     });
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ userId: null, playerName: { __delete: true } }),
+      { merge: true }
+    );
     expect(mockTransactionSet).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

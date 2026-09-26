@@ -34,10 +34,14 @@ export async function releaseCharacter(
       if (!characterSnapshot.exists) {
         throw new HttpsError("not-found", "Character not found.");
       }
-      const currentOwner = characterSnapshot.data()?.userId as string | null | undefined;
+      const characterData = characterSnapshot.data() ?? {};
+      const currentOwner = characterData.userId as string | null | undefined;
       if (currentOwner !== accountId) {
         throw new HttpsError("permission-denied", "You do not own this character.");
       }
+      const header = (characterData.header ?? {}) as Record<string, unknown>;
+      const storedPlayerName =
+        typeof header.playerName === "string" ? header.playerName.trim() || null : null;
 
       await applyOwnershipTransition(
         transaction,
@@ -46,7 +50,8 @@ export async function releaseCharacter(
         "release",
         callerUid,
         currentOwner,
-        null
+        null,
+        { playerName: storedPlayerName }
       );
       // The membership-removal check below queries the characters subcollection,
       // widening this transaction's read set beyond the single document it used

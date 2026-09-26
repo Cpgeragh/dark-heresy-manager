@@ -74,11 +74,20 @@ export async function patchCharacterField(
       }
       const characterData = characterSnapshot.data() ?? {};
       await assertCanEditCharacter(db, callerUid, dmId, characterData);
+      const updatesSummary = Object.keys(patch).some(isSummaryRelevantField);
+      let livePlayerName: string | null = null;
+      if (updatesSummary && typeof characterData.userId === "string") {
+        const ownerProfile = await transaction.get(
+          db.collection("userProfiles").doc(characterData.userId)
+        );
+        const firstName = ownerProfile.data()?.firstName;
+        livePlayerName = typeof firstName === "string" ? firstName.trim() || null : null;
+      }
       transaction.update(characterRef, patch);
-      if (Object.keys(patch).some(isSummaryRelevantField)) {
+      if (updatesSummary) {
         const merged = { ...characterData, ...patch };
         const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
-        transaction.set(summaryRef, computeCharacterSummary(merged));
+        transaction.set(summaryRef, computeCharacterSummary(merged, livePlayerName));
       }
     },
     { maxAttempts: 5 }

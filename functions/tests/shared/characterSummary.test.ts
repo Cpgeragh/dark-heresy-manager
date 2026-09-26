@@ -47,6 +47,39 @@ describe("computeCharacterSummary", () => {
     ).toEqual({ campaignId: "camp-1", characterName: "Brother Corvus" });
   });
 
+  it("uses a live profile name before the stored fallback", () => {
+    expect(
+      computeCharacterSummary(
+        {
+          campaignId: "camp-1",
+          userId: "player-1",
+          header: { characterName: "Brother Corvus", playerName: "Temporary Name" },
+        },
+        "  Live Name  "
+      )
+    ).toEqual({
+      campaignId: "camp-1",
+      characterName: "Brother Corvus",
+      playerName: "Live Name",
+      userId: "player-1",
+    });
+  });
+
+  it("uses the stored name when no live profile name exists", () => {
+    expect(
+      computeCharacterSummary({
+        campaignId: "camp-1",
+        userId: null,
+        header: { characterName: "Brother Corvus", playerName: " Temporary Name " },
+      })
+    ).toEqual({
+      campaignId: "camp-1",
+      characterName: "Brother Corvus",
+      playerName: "Temporary Name",
+      userId: null,
+    });
+  });
+
   it("never includes the Recovery Code or any other sheet data", () => {
     const summary = computeCharacterSummary({
       campaignId: "camp-1",

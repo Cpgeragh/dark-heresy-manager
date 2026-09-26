@@ -24,7 +24,11 @@ export async function applyOwnershipTransition(
   actorUid: string,
   previousOwnerUid: string | null,
   newOwnerUid: string | null,
-  options: { newOwnerAlreadyMember?: boolean } = {}
+  options: {
+    newOwnerAlreadyMember?: boolean;
+    playerName?: string | null;
+    deleteStoredPlayerName?: boolean;
+  } = {}
 ): Promise<void> {
   const losingOwner = previousOwnerUid !== null && previousOwnerUid !== newOwnerUid;
 
@@ -52,16 +56,20 @@ export async function applyOwnershipTransition(
     membershipUpdate = { memberIds: FieldValue.arrayRemove(previousOwnerUid) };
   }
 
-  transaction.update(characterRef, {
+  const characterUpdate: Record<string, unknown> = {
     userId: newOwnerUid,
     isEditableByPlayer: newOwnerUid !== null,
-  });
-  // Keeps the summary's claimed/unclaimed status in sync: the DM's character
-  // list reads userId from here, not the full document, so this would go
-  // silently stale on every claim/release/force-assign without this write.
+  };
+  if (options.deleteStoredPlayerName) {
+    characterUpdate["header.playerName"] = FieldValue.delete();
+  }
+  transaction.update(characterRef, characterUpdate);
   transaction.set(
     campaignRef.collection("characterSummaries").doc(characterRef.id),
-    { userId: newOwnerUid },
+    {
+      userId: newOwnerUid,
+      playerName: options.playerName || FieldValue.delete(),
+    },
     { merge: true }
   );
   if (membershipUpdate) {

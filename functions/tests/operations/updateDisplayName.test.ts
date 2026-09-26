@@ -5,6 +5,12 @@ const set = vi.hoisted(() => vi.fn());
 const update = vi.hoisted(() => vi.fn());
 const get = vi.hoisted(() => vi.fn());
 const queryRef = { path: "campaigns-query" };
+const charactersQueryRef = { path: "characters-query" };
+const summaryRef = { path: "campaigns/playing/characterSummaries/char-1" };
+const playingCampaignRef = {
+  path: "campaigns/playing",
+  collection: () => ({ doc: () => summaryRef }),
+};
 const runTransaction = vi.hoisted(() =>
   vi.fn(async (callback: (transaction: unknown) => unknown) => callback({ get, set, update }))
 );
@@ -17,16 +23,32 @@ const collection = vi.hoisted(() =>
 const resolvePrimaryUid = vi.hoisted(() => vi.fn().mockResolvedValue("account-1"));
 
 vi.mock("firebase-admin/firestore", () => ({
-  getFirestore: () => ({ collection, runTransaction }),
+  getFirestore: () => ({
+    collection,
+    collectionGroup: () => ({ where: () => charactersQueryRef }),
+    runTransaction,
+  }),
 }));
 vi.mock("../../src/shared/linkedIdentity", () => ({ resolvePrimaryUid }));
 
 beforeEach(() => {
   vi.clearAllMocks();
   resolvePrimaryUid.mockResolvedValue("account-1");
-  get.mockResolvedValue({
-    size: 2,
-    docs: [{ ref: { path: "campaigns/one" } }, { ref: { path: "campaigns/two" } }],
+  get.mockImplementation((reference: unknown) => {
+    if (reference === charactersQueryRef) {
+      return Promise.resolve({
+        docs: [
+          {
+            id: "char-1",
+            ref: { parent: { parent: playingCampaignRef } },
+          },
+        ],
+      });
+    }
+    return Promise.resolve({
+      size: 2,
+      docs: [{ ref: { path: "campaigns/one" } }, { ref: { path: "campaigns/two" } }],
+    });
   });
 });
 
@@ -43,6 +65,7 @@ it("updates the profile and every campaign copy in one transaction", async () =>
   expect(update).toHaveBeenNthCalledWith(2, expect.objectContaining({ path: "campaigns/two" }), {
     gmName: "Cain",
   });
+  expect(set).toHaveBeenCalledWith(summaryRef, { playerName: "Cain" }, { merge: true });
 });
 
 it("rejects invalid names before opening a transaction", async () => {

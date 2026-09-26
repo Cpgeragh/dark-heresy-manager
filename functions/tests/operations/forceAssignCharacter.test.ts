@@ -24,10 +24,12 @@ const mockCharactersCollection = {
 const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 const mockUserLinkGet = vi.fn();
+const mockProfileRef = { kind: "user-profile" };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
   if (name === "userLinks") return { doc: vi.fn(() => ({ get: mockUserLinkGet })) };
+  if (name === "userProfiles") return { doc: vi.fn(() => mockProfileRef) };
   throw new Error(`Unexpected collection: ${name}`);
 });
 
@@ -39,6 +41,7 @@ vi.mock("firebase-admin/firestore", () => ({
   FieldValue: {
     arrayUnion: (v: unknown) => ({ __arrayUnion: v }),
     arrayRemove: (v: unknown) => ({ __arrayRemove: v }),
+    delete: () => ({ __delete: true }),
     serverTimestamp: () => "server-timestamp",
   },
 }));
@@ -56,6 +59,9 @@ function setupTransactionGet(options: {
     }
     if (ref === mockCampaignRef) {
       return Promise.resolve({ data: () => ({ memberIds: options.campaignMemberIds ?? [] }) });
+    }
+    if (ref === mockProfileRef) {
+      return Promise.resolve({ exists: true, data: () => ({ firstName: "Iris" }) });
     }
     return Promise.resolve({
       exists: options.character.exists,
@@ -136,7 +142,13 @@ describe("forceAssignCharacter", () => {
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
       userId: "player-1",
       isEditableByPlayer: true,
+      "header.playerName": { __delete: true },
     });
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ userId: "player-1", playerName: "Iris" }),
+      { merge: true }
+    );
     expect(mockTransactionUpdate).not.toHaveBeenCalledWith(mockCampaignRef, expect.anything());
     expect(mockTransactionSet).toHaveBeenCalledWith(
       expect.anything(),

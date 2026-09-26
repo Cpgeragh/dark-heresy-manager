@@ -60,6 +60,15 @@ export async function forceAssignCharacter(
         );
       }
 
+      const targetProfile = await transaction.get(
+        db.collection("userProfiles").doc(input.targetUid)
+      );
+      const firstName = targetProfile.data()?.firstName;
+      const livePlayerName = typeof firstName === "string" ? firstName.trim() || null : null;
+      const header = (characterSnapshot.data()?.header ?? {}) as Record<string, unknown>;
+      const storedPlayerName =
+        typeof header.playerName === "string" ? header.playerName.trim() || null : null;
+
       await applyOwnershipTransition(
         transaction,
         campaignRef,
@@ -68,7 +77,11 @@ export async function forceAssignCharacter(
         callerUid,
         null,
         input.targetUid,
-        { newOwnerAlreadyMember: true }
+        {
+          newOwnerAlreadyMember: true,
+          playerName: livePlayerName ?? storedPlayerName,
+          deleteStoredPlayerName: livePlayerName !== null,
+        }
       );
       // See releaseCharacter.ts: the membership-removal check there widens this
       // transaction's read set, so it gets the same extra retry headroom.

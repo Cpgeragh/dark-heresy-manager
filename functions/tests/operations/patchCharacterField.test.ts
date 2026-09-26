@@ -30,10 +30,12 @@ const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 const mockUserLinkGet = vi.fn();
 const mockUserLinkDoc = vi.fn(() => ({ get: mockUserLinkGet }));
 const mockUserLinksCollection = { doc: mockUserLinkDoc };
+const mockUserProfilesCollection = { doc: vi.fn(() => ({})) };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
   if (name === "userLinks") return mockUserLinksCollection;
+  if (name === "userProfiles") return mockUserProfilesCollection;
   throw new Error(`Unexpected collection: ${name}`);
 });
 
@@ -146,7 +148,41 @@ describe("patchCharacterField", () => {
     expect(mockTransactionSet).toHaveBeenCalledWith(mockSummaryRef, {
       campaignId: "c1",
       characterName: "Brother Corvus",
+      userId: "player-1",
     });
+  });
+
+  it("uses the owner's live profile name when patching the summary", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet
+      .mockResolvedValueOnce({
+        exists: true,
+        data: () => ({
+          campaignId: "c1",
+          userId: "player-1",
+          isEditableByPlayer: false,
+          header: { characterName: "Old Name", playerName: "Temporary Name" },
+        }),
+      })
+      .mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ firstName: "Iris" }),
+      });
+
+    await patchCharacterField(
+      {
+        campaignId: "c1",
+        characterId: "char-1",
+        field: "header",
+        value: { characterName: "Brother Corvus", playerName: "Temporary Name" },
+      },
+      "dm-1"
+    );
+
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      mockSummaryRef,
+      expect.objectContaining({ playerName: "Iris", userId: "player-1" })
+    );
   });
 
   it("allows the DM to patch the portrait and updates the summary", async () => {
@@ -172,6 +208,7 @@ describe("patchCharacterField", () => {
       campaignId: "c1",
       characterName: "Brother Corvus",
       portraitUrl: portrait,
+      userId: "player-1",
     });
   });
 
@@ -282,6 +319,7 @@ describe("patchCharacterField", () => {
     expect(mockTransactionSet).toHaveBeenCalledWith(mockSummaryRef, {
       campaignId: "c1",
       characterName: "Brother Corvus",
+      userId: "player-1",
     });
   });
 

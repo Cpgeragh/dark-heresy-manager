@@ -780,7 +780,7 @@ grants apply across the relevant pages without saving duplicate Trait entries.
 Starting Skills that are merely listed by the Homeworld remain informational;
 Trait rules that explicitly change Skill use are applied automatically.
 
-- [ ] Player Name is always read-only, shows "Set from the player's account" while unclaimed, and fills in automatically once a player claims the character
+- [ ] Player Name can be edited and re-saved while no live owner profile name exists; after a player with a profile name claims the character, it shows that live name and becomes read-only
 - [ ] Age only accepts whole numbers 1 and up — typing 0 or a non-numeric value is rejected outright, no error message, the field just doesn't change
 - [ ] Weight only accepts whole numbers 1 and up, same rejection behaviour as Age
 - [ ] Height accepts up to 2 decimal places (including values under 1, e.g. 0.85) — a 3rd decimal digit is rejected as you type it

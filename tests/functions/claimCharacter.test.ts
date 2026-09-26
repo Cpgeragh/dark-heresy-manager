@@ -27,7 +27,10 @@ describe("Functions: claimCharacter", () => {
     const campaignRef = adminDb.collection("campaigns").doc();
     const characterRef = campaignRef.collection("characters").doc();
     await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-    await characterRef.set({ campaignId: campaignRef.id });
+    await characterRef.set({
+      campaignId: campaignRef.id,
+      header: { characterName: "Corvus", playerName: "Temporary Name" },
+    });
 
     const registerRecoveryCode = httpsCallable<
       { campaignId: string; characterId: string },
@@ -39,6 +42,7 @@ describe("Functions: claimCharacter", () => {
     });
 
     const playerUid = await signInTestUser();
+    await adminDb.collection("userProfiles").doc(playerUid).set({ firstName: "Iris" });
     const claimCharacter = httpsCallable<
       { code: string },
       { campaignId: string; characterId: string }
@@ -49,8 +53,15 @@ describe("Functions: claimCharacter", () => {
 
     const characterSnapshot = await characterRef.get();
     expect(characterSnapshot.data()?.userId).toBe(playerUid);
+    expect(characterSnapshot.data()?.header).not.toHaveProperty("playerName");
     expect(characterSnapshot.data()?.recoveryCode).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
     expect(characterSnapshot.data()?.recoveryCode).not.toBe(registered.code);
+
+    const summarySnapshot = await campaignRef
+      .collection("characterSummaries")
+      .doc(characterRef.id)
+      .get();
+    expect(summarySnapshot.data()).toMatchObject({ userId: playerUid, playerName: "Iris" });
 
     const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
       getTestFunctions(),

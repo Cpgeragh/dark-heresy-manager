@@ -18,6 +18,8 @@ function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = 
       talents={talents}
       editable
       playerName="Cormac"
+      hasLivePlayerName={false}
+      playerNameProfileUnresolved={false}
       onUpdateHeader={onUpdateHeader}
       onUpdateTalents={onUpdateTalents}
       {...props}
@@ -27,6 +29,36 @@ function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = 
 }
 
 describe("BackgroundTab", () => {
+  it("saves a temporary Player Name while no live profile name exists", () => {
+    vi.useFakeTimers();
+    try {
+      const { onUpdateHeader } = renderTab();
+      const playerName = screen.getAllByLabelText("Player Name")[0];
+
+      fireEvent.change(playerName, { target: { value: "Cormac Vale" } });
+      fireEvent.blur(playerName);
+
+      expect(onUpdateHeader).toHaveBeenCalledOnce();
+      expect(onUpdateHeader).toHaveBeenCalledWith(
+        expect.objectContaining({ playerName: "Cormac Vale" })
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("locks Player Name when a live profile name exists", () => {
+    renderTab({ hasLivePlayerName: true });
+
+    expect(screen.getAllByLabelText("Player Name")[0]).toBeDisabled();
+  });
+
+  it("keeps Player Name locked until the owner profile lookup finishes", () => {
+    renderTab({ playerNameProfileUnresolved: true });
+
+    expect(screen.getAllByLabelText("Player Name")[0]).toBeDisabled();
+  });
+
   it("coalesces Character Name typing and flushes the final value on blur without a duplicate", () => {
     vi.useFakeTimers();
     try {

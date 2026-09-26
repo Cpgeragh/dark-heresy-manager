@@ -59,9 +59,11 @@ export async function claimCharacter(
       };
       const campaignRef = db.collection("campaigns").doc(campaignId);
       const characterRef = campaignRef.collection("characters").doc(characterId);
-      const [campaignSnapshot, characterSnapshot] = await Promise.all([
+      const profileRef = db.collection("userProfiles").doc(ownerUid);
+      const [campaignSnapshot, characterSnapshot, profileSnapshot] = await Promise.all([
         transaction.get(campaignRef),
         transaction.get(characterRef),
+        transaction.get(profileRef),
       ]);
 
       if (!campaignSnapshot.exists || !characterSnapshot.exists) {
@@ -75,6 +77,8 @@ export async function claimCharacter(
       if (character.userId) {
         throw new HttpsError("failed-precondition", "This character has already been claimed.");
       }
+      const firstName = profileSnapshot?.data()?.firstName;
+      const livePlayerName = typeof firstName === "string" ? firstName.trim() || null : null;
 
       rotateRecoveryCodeInTransaction(
         transaction,
@@ -84,7 +88,8 @@ export async function claimCharacter(
         characterId,
         input.code,
         hmacSecret,
-        { userId: ownerUid }
+        { userId: ownerUid, "header.playerName": FieldValue.delete() },
+        { playerName: livePlayerName || FieldValue.delete() }
       );
       transaction.update(campaignRef, { memberIds: FieldValue.arrayUnion(ownerUid) });
       transaction.set(

@@ -39,6 +39,7 @@ vi.mock("firebase-admin/firestore", () => ({
   FieldValue: {
     arrayUnion: (v: unknown) => ({ __arrayUnion: v }),
     arrayRemove: (v: unknown) => ({ __arrayRemove: v }),
+    delete: () => ({ __delete: true }),
     serverTimestamp: () => "server-timestamp",
   },
 }));

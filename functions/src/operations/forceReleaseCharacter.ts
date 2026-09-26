@@ -44,7 +44,11 @@ export async function forceReleaseCharacter(
       if (!characterSnapshot.exists) {
         throw new HttpsError("not-found", "Character not found.");
       }
-      const currentOwner = (characterSnapshot.data()?.userId as string | null | undefined) ?? null;
+      const characterData = characterSnapshot.data() ?? {};
+      const currentOwner = (characterData.userId as string | null | undefined) ?? null;
+      const header = (characterData.header ?? {}) as Record<string, unknown>;
+      const storedPlayerName =
+        typeof header.playerName === "string" ? header.playerName.trim() || null : null;
 
       await applyOwnershipTransition(
         transaction,
@@ -53,7 +57,8 @@ export async function forceReleaseCharacter(
         "force-release",
         callerUid,
         currentOwner,
-        null
+        null,
+        { playerName: storedPlayerName }
       );
       // See releaseCharacter.ts: the membership-removal check there widens this
       // transaction's read set, so it gets the same extra retry headroom.
