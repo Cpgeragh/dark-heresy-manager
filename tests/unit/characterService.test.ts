@@ -7,6 +7,7 @@ const {
   mockCallForceAssignCharacter,
   mockCallForceReleaseCharacter,
   mockCallRegisterRecoveryCode,
+  mockCallRevealRecoveryCode,
   mockCallReleaseCharacter,
   mockCallPatchCharacterField,
   mockCallAdjustCharacterNumber,
@@ -42,6 +43,7 @@ const {
     mockCallForceAssignCharacter: vi.fn(),
     mockCallForceReleaseCharacter: vi.fn(),
     mockCallRegisterRecoveryCode: vi.fn(),
+    mockCallRevealRecoveryCode: vi.fn(),
     mockCallReleaseCharacter: vi.fn(),
     mockCallPatchCharacterField: vi.fn(),
     mockCallAdjustCharacterNumber: vi.fn(),
@@ -93,6 +95,7 @@ vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn((_functions: unknown, name: string) => {
     if (name === "claimCharacter") return mockCallClaimCharacter;
     if (name === "registerRecoveryCode") return mockCallRegisterRecoveryCode;
+    if (name === "revealRecoveryCode") return mockCallRevealRecoveryCode;
     if (name === "releaseCharacter") return mockCallReleaseCharacter;
     if (name === "forceReleaseCharacter") return mockCallForceReleaseCharacter;
     if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
@@ -135,6 +138,7 @@ import {
   preflightCharacterDeletion,
   reconcileCharacterSpentXp,
   registerRecoveryCode,
+  revealRecoveryCode,
   releaseCharacter,
   repairCharacterSummaries,
   revokeRecoveryCode,
@@ -261,6 +265,30 @@ describe("character claiming operations", () => {
 
     await expect(claimCharacter("DH-TEST-0004")).rejects.toThrow("Not signed in.");
     expect(mockCallClaimCharacter).not.toHaveBeenCalled();
+  });
+});
+
+describe("revealRecoveryCode", () => {
+  it("calls the Function with campaignId and characterId and returns the code", async () => {
+    mockCallRevealRecoveryCode.mockResolvedValue({ data: { code: "DH-TEST-0005" } });
+
+    const result = await revealRecoveryCode("camp-1", "char-1");
+
+    expect(mockCallRevealRecoveryCode).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+    });
+    expect(result).toBe("DH-TEST-0005");
+  });
+
+  it("propagates the Function's rejection when the caller lacks access", async () => {
+    mockCallRevealRecoveryCode.mockRejectedValue(
+      new Error("You do not have access to this character.")
+    );
+
+    await expect(revealRecoveryCode("camp-1", "char-1")).rejects.toThrow(
+      "You do not have access to this character."
+    );
   });
 });
 

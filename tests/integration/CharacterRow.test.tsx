@@ -7,13 +7,19 @@ import { MemoryRouter } from "react-router-dom";
 import { Timestamp } from "firebase/firestore";
 import "@testing-library/jest-dom";
 
-const { mockUseClaimLogs, mockPreflightCharacterDeletion, mockDeleteCharacter, mockToastError } =
-  vi.hoisted(() => ({
-    mockUseClaimLogs: vi.fn(() => ({ logs: [], loading: false, error: null })),
-    mockPreflightCharacterDeletion: vi.fn(),
-    mockDeleteCharacter: vi.fn(),
-    mockToastError: vi.fn(),
-  }));
+const {
+  mockUseClaimLogs,
+  mockPreflightCharacterDeletion,
+  mockDeleteCharacter,
+  mockRevealRecoveryCode,
+  mockToastError,
+} = vi.hoisted(() => ({
+  mockUseClaimLogs: vi.fn(() => ({ logs: [], loading: false, error: null })),
+  mockPreflightCharacterDeletion: vi.fn(),
+  mockDeleteCharacter: vi.fn(),
+  mockRevealRecoveryCode: vi.fn(),
+  mockToastError: vi.fn(),
+}));
 
 vi.mock("../../src/hooks/useClaimLogs", () => ({
   useClaimLogs: (...args: unknown[]) => mockUseClaimLogs(...args),
@@ -22,6 +28,7 @@ vi.mock("../../src/hooks/useClaimLogs", () => ({
 vi.mock("../../src/services/characterService", () => ({
   preflightCharacterDeletion: mockPreflightCharacterDeletion,
   deleteCharacter: mockDeleteCharacter,
+  revealRecoveryCode: mockRevealRecoveryCode,
 }));
 
 vi.mock("../../src/components/Toast", () => ({
@@ -39,7 +46,6 @@ function renderRow(overrides: Partial<React.ComponentProps<typeof CharacterRow>>
         characterId="char-1"
         characterName="Vex"
         userId="uid-1"
-        recoveryCode="DH-AAAA-BBBB"
         isDM={true}
         {...overrides}
       />
@@ -53,17 +59,18 @@ beforeEach(() => {
 });
 
 describe("CharacterRow display", () => {
-  it("shows the character name, recovery code, and claimed status", () => {
+  it("shows the character name, claimed status, and a Reveal control instead of the code itself", () => {
     renderRow();
     expect(screen.getByText("Vex")).toBeInTheDocument();
-    expect(screen.getByText("Recovery: DH-AAAA-BBBB")).toBeInTheDocument();
     expect(screen.getByText("Claimed")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reveal" })).toBeInTheDocument();
+    expect(screen.queryByText(/DH-/)).not.toBeInTheDocument();
   });
 
-  it("shows Unclaimed and a dash for recovery code when unowned", () => {
-    renderRow({ userId: null, recoveryCode: undefined });
+  it("shows Unclaimed when unowned, still behind a Reveal control", () => {
+    renderRow({ userId: null });
     expect(screen.getByText("Unclaimed")).toBeInTheDocument();
-    expect(screen.getByText("Recovery: —")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reveal" })).toBeInTheDocument();
   });
 
   it("hides History and Delete for non-DM viewers", () => {
@@ -76,6 +83,40 @@ describe("CharacterRow display", () => {
     renderRow({ isDM: true });
     expect(screen.getByRole("button", { name: "History" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+  });
+});
+
+describe("CharacterRow reveal flow", () => {
+  it("fetches and shows the code only after Reveal is clicked", async () => {
+    const user = userEvent.setup();
+    let resolveReveal: (code: string) => void;
+    mockRevealRecoveryCode.mockReturnValue(
+      new Promise((resolve) => {
+        resolveReveal = resolve;
+      })
+    );
+    renderRow();
+
+    expect(mockRevealRecoveryCode).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Reveal" }));
+
+    expect(mockRevealRecoveryCode).toHaveBeenCalledWith("campaign-1", "char-1");
+    expect(screen.getByRole("button", { name: "Revealing…" })).toBeDisabled();
+
+    resolveReveal!("DH-AAAA-BBBB");
+    await waitFor(() => expect(screen.getByText("Recovery: DH-AAAA-BBBB")).toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: "Reveal" })).not.toBeInTheDocument();
+  });
+
+  it("shows an error via toast and leaves the Reveal button available again on failure", async () => {
+    const user = userEvent.setup();
+    mockRevealRecoveryCode.mockRejectedValue(new Error("Network unreachable"));
+    renderRow();
+
+    await user.click(screen.getByRole("button", { name: "Reveal" }));
+
+    await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Network unreachable"));
+    expect(screen.getByRole("button", { name: "Reveal" })).toBeInTheDocument();
   });
 });
 

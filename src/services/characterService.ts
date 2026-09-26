@@ -72,6 +72,7 @@ export function computeCharacterSummary(character: Character): CharacterSummaryW
     career: character.header.career,
     rank: character.header.rank,
     portraitUrl: character.portraitUrl,
+    userId: character.userId,
   }) as CharacterSummaryWithId;
 }
 
@@ -210,6 +211,25 @@ export async function claimCharacter(
   return runSingleFlight("character:claim", [code], async () => {
     const { data } = await callClaimCharacter({ code: code.trim() });
     return data;
+  });
+}
+
+const callRevealRecoveryCode = httpsCallable<
+  { campaignId: string; characterId: string },
+  { code: string }
+>(functions, "revealRecoveryCode");
+
+/** Reveals a character's own Recovery Code through the server, on demand. */
+export async function revealRecoveryCode(
+  campaignId: string,
+  characterId: string
+): Promise<string> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  return runSingleFlight("character:reveal-recovery-code", [campaignId, characterId], async () => {
+    const { data } = await callRevealRecoveryCode({ campaignId, characterId });
+    assertRecoveryCode(data.code);
+    return data.code;
   });
 }
 

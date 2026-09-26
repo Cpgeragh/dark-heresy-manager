@@ -1,8 +1,11 @@
 // src/pages/CampaignOverview/MyCharacterCard.tsx
 
+import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { buildRoute } from "../../constants/routes";
 import { PortraitUpload } from "../../components/PortraitUpload";
+import { revealRecoveryCode } from "../../services/characterService";
+import { useToast } from "../../components/Toast";
 import type { CharacterListItem } from "../../types/Firestore";
 
 export function MyCharacterCard({
@@ -18,6 +21,22 @@ export function MyCharacterCard({
   const xpLeft = character.experience
     ? character.experience.total - character.experience.spent
     : null;
+  const [revealedCode, setRevealedCode] = useState<string | null>(null);
+  const [revealing, setRevealing] = useState(false);
+  const toast = useToast();
+
+  const handleReveal = useCallback(async () => {
+    setRevealing(true);
+    try {
+      const code = await revealRecoveryCode(campaignId, character.id);
+      setRevealedCode(code);
+    } catch (err) {
+      console.error("Failed to reveal recovery code:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to load recovery code.");
+    } finally {
+      setRevealing(false);
+    }
+  }, [campaignId, character.id, toast]);
 
   return (
     <Link
@@ -69,8 +88,24 @@ export function MyCharacterCard({
               )}
             </div>
           )}
-          <div className="text-xs lg:text-sm text-slate-600 font-code">
-            Recovery: {character.recoveryCode}
+          <div
+            className="text-xs lg:text-sm text-slate-600 font-code"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Recovery:{" "}
+            {revealedCode ?? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleReveal();
+                }}
+                disabled={revealing}
+                className="underline hover:text-slate-400 disabled:opacity-50"
+              >
+                {revealing ? "Revealing…" : "Reveal"}
+              </button>
+            )}
           </div>
         </div>
       </div>

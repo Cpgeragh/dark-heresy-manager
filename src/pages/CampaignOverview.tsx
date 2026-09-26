@@ -82,12 +82,12 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     characters,
     loading: charactersLoading,
     error: charactersError,
-  } = useCampaignCharacters(campaignId ?? null, effectiveUserId, campaign ? isDM : null);
+  } = useCampaignCharacters(campaignId ?? null, effectiveUserId);
   const {
     summaries: partySummaries,
     loading: partySummariesLoading,
     error: partySummariesError,
-  } = useCampaignCharacterSummaries(campaign && !isDM && campaignId ? campaignId : null);
+  } = useCampaignCharacterSummaries(campaign && campaignId ? campaignId : null);
   const ownCharacterIds = useMemo(() => new Set(characters.map((c) => c.id)), [characters]);
   const partyMembers = useMemo(
     () => partySummaries.filter((s) => !ownCharacterIds.has(s.id)),
@@ -105,7 +105,11 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   const sessionCharacters = useMemo(
     () =>
       isDM
-        ? summaries
+        ? partySummaries.map((summary) => ({
+            id: summary.id,
+            characterName: summary.characterName,
+            userId: summary.userId,
+          }))
         : [
             ...summaries,
             ...partyMembers.map((summary) => ({
@@ -114,7 +118,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               userId: null,
             })),
           ],
-    [isDM, partyMembers, summaries]
+    [isDM, partySummaries, partyMembers, summaries]
   );
   const toast = useToast();
   const { setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
@@ -297,10 +301,10 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   }
 
   const filteredCharacters = search.trim()
-    ? characters.filter((c) =>
-        (c.header?.characterName ?? "").toLowerCase().includes(search.trim().toLowerCase())
+    ? partySummaries.filter((c) =>
+        c.characterName.toLowerCase().includes(search.trim().toLowerCase())
       )
-    : characters;
+    : partySummaries;
 
   return (
     <CampaignCustomItemsScope
@@ -379,9 +383,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                       key={char.id}
                       campaignId={campaignId}
                       characterId={char.id}
-                      characterName={char.header?.characterName ?? "Unnamed Character"}
-                      userId={char.userId ?? null}
-                      recoveryCode={char.recoveryCode}
+                      characterName={char.characterName}
+                      userId={char.userId}
                       portraitUrl={char.portraitUrl}
                       isDM={isDM}
                     />

@@ -1,10 +1,24 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 
 vi.mock("../../src/components/PortraitUpload", () => ({
   PortraitUpload: () => <div>Mock Portrait</div>,
+}));
+
+const { mockRevealRecoveryCode, mockToastError } = vi.hoisted(() => ({
+  mockRevealRecoveryCode: vi.fn(),
+  mockToastError: vi.fn(),
+}));
+
+vi.mock("../../src/services/characterService", () => ({
+  revealRecoveryCode: mockRevealRecoveryCode,
+}));
+
+vi.mock("../../src/components/Toast", () => ({
+  useToast: () => ({ error: mockToastError, success: vi.fn() }),
 }));
 
 import { MyCharacterCard } from "../../src/pages/CampaignOverview/MyCharacterCard";
@@ -21,6 +35,10 @@ function character(over: Partial<CharacterListItem> = {}): CharacterListItem {
     ...over,
   } as CharacterListItem;
 }
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 function renderCard(over: Partial<CharacterListItem> = {}) {
   render(
@@ -50,9 +68,32 @@ describe("MyCharacterCard", () => {
     expect(screen.getByText(/XP remaining/)).toBeInTheDocument();
   });
 
-  it("shows the character's own recovery code", () => {
-    renderCard({ recoveryCode: "DH-ZZZZ-YYYY" });
-    expect(screen.getByText(/DH-ZZZZ-YYYY/)).toBeInTheDocument();
+  it("does not show the recovery code until Reveal is clicked", () => {
+    renderCard();
+    expect(screen.getByRole("button", { name: "Reveal" })).toBeInTheDocument();
+    expect(screen.queryByText(/DH-/)).not.toBeInTheDocument();
+  });
+
+  it("fetches and shows the code only after Reveal is clicked", async () => {
+    const user = userEvent.setup();
+    mockRevealRecoveryCode.mockResolvedValue("DH-ZZZZ-YYYY");
+    renderCard();
+
+    await user.click(screen.getByRole("button", { name: "Reveal" }));
+
+    expect(mockRevealRecoveryCode).toHaveBeenCalledWith("campaign-1", "char-1");
+    await waitFor(() => expect(screen.getByText("Recovery: DH-ZZZZ-YYYY")).toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: "Reveal" })).not.toBeInTheDocument();
+  });
+
+  it("shows an error via toast when the reveal fails", async () => {
+    const user = userEvent.setup();
+    mockRevealRecoveryCode.mockRejectedValue(new Error("Network unreachable"));
+    renderCard();
+
+    await user.click(screen.getByRole("button", { name: "Reveal" }));
+
+    await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Network unreachable"));
   });
 
   it("links to the character sheet", () => {

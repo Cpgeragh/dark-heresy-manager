@@ -62,6 +62,10 @@ vi.mock("../../src/firebase/converters", () => ({
     type: "characters-collection",
     campaignId,
   }),
+  characterSummariesCollectionRef: (campaignId: string) => ({
+    type: "character-summaries-collection",
+    campaignId,
+  }),
 }));
 
 vi.mock("../../src/hooks/useFirestoreSubscription", () => ({
@@ -74,6 +78,7 @@ vi.mock("../../src/components/Toast/ToastContext", () => ({
 
 import { useClaimLogs } from "../../src/hooks/useClaimLogs";
 import { useCampaignCharacters } from "../../src/hooks/useCampaignCharacters";
+import { useCampaignCharacterSummaries } from "../../src/hooks/useCampaignCharacterSummaries";
 import { useCampaignCustomItems } from "../../src/hooks/useCampaignCustomItems";
 import { usePlayerCharacters } from "../../src/hooks/usePlayerCharacters";
 import { useSessions } from "../../src/hooks/useSessions";
@@ -86,8 +91,8 @@ beforeEach(() => {
 });
 
 describe("bounded Firestore hooks", () => {
-  it("filters a campaign character query to the current owner for a player", () => {
-    renderHook(() => useCampaignCharacters("campaign-1", "player-1", false));
+  it("filters a campaign character query to the current owner, regardless of role", () => {
+    renderHook(() => useCampaignCharacters("campaign-1", "player-1"));
 
     expect(mockWhere).toHaveBeenCalledWith("userId", "==", "player-1");
     expect(mockLimit).toHaveBeenCalledWith(100);
@@ -98,20 +103,27 @@ describe("bounded Firestore hooks", () => {
     );
   });
 
-  it("allows the DM's bounded campaign character query without an owner filter", () => {
-    renderHook(() => useCampaignCharacters("campaign-1", "dm-1", true));
+  it("does not query a player's own characters until both ids are known", () => {
+    renderHook(() => useCampaignCharacters("campaign-1", null));
+
+    expect(mockQuery).not.toHaveBeenCalled();
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(null, null, expect.any(Function));
+  });
+
+  it("allows the DM's bounded character-summary query, unfiltered, for the whole campaign", () => {
+    renderHook(() => useCampaignCharacterSummaries("campaign-1"));
 
     expect(mockWhere).not.toHaveBeenCalled();
     expect(mockLimit).toHaveBeenCalledWith(100);
     expect(mockUseQuerySubscription).toHaveBeenCalledWith(
       expect.anything(),
-      "campaign-characters:campaign-1:dm",
+      "campaign-character-summaries:campaign-1",
       expect.any(Function)
     );
   });
 
-  it("does not query campaign characters until the campaign role is known", () => {
-    renderHook(() => useCampaignCharacters("campaign-1", "user-1", null));
+  it("does not query character summaries until the campaign id is known", () => {
+    renderHook(() => useCampaignCharacterSummaries(null));
 
     expect(mockQuery).not.toHaveBeenCalled();
     expect(mockUseQuerySubscription).toHaveBeenCalledWith(null, null, expect.any(Function));

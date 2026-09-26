@@ -104,6 +104,7 @@ export interface CharacterSummaryDocument {
   career?: string;
   rank?: string;
   portraitUrl?: string;
+  userId: string | null;
 }
 
 /**

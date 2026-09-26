@@ -184,18 +184,19 @@ function renderPage(effectiveUserId = "player-1") {
 }
 
 describe("CampaignOverview — character query role", () => {
-  it("requests only the current player's full character documents", () => {
+  it("requests only the current player's own character documents", () => {
     renderPage("player-1");
 
     expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", false);
-    expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "player-1", false);
+    expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "player-1");
   });
 
-  it("requests the DM campaign character view only for the campaign DM", () => {
+  it("requests the campaign's character summaries for the campaign DM", () => {
     renderPage("dm-1");
 
     expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", true);
-    expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "dm-1", true);
+    expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "dm-1");
+    expect(useCampaignCharacterSummariesMock).toHaveBeenCalledWith("campaign-1");
   });
 });
 
@@ -263,10 +264,10 @@ describe("CampaignOverview", () => {
 
   it("renders characters and filters them by search", async () => {
     const user = userEvent.setup();
-    useCampaignCharactersMock.mockReturnValue({
-      characters: [
-        character({ id: "c1", header: { characterName: "Vex" } }),
-        character({ id: "c2", header: { characterName: "Thrun" } }),
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [
+        { id: "c1", campaignId: "campaign-1", characterName: "Vex", userId: "player-1" },
+        { id: "c2", campaignId: "campaign-1", characterName: "Thrun", userId: null },
       ],
       loading: false,
       error: null,

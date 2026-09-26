@@ -56,6 +56,11 @@ export async function applyOwnershipTransition(
     userId: newOwnerUid,
     isEditableByPlayer: newOwnerUid !== null,
   });
+  transaction.set(
+    campaignRef.collection("characterSummaries").doc(characterRef.id),
+    { userId: newOwnerUid },
+    { merge: true }
+  );
   if (membershipUpdate) {
     transaction.update(campaignRef, membershipUpdate);
   }

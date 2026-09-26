@@ -84,7 +84,7 @@ describe("Firestore Rules: characterSummaries", () => {
       dbAs(env, "player-1")
         .collection("campaigns/c1/characterSummaries")
         .doc("char1")
-        .set({ campaignId: "c1", characterName: "Test Acolyte" })
+        .set({ campaignId: "c1", characterName: "Test Acolyte", userId: "player-1" })
     ).resolves.toBeUndefined();
   });
 
@@ -97,7 +97,7 @@ describe("Firestore Rules: characterSummaries", () => {
       dbAs(env, "dm-1")
         .collection("campaigns/c1/characterSummaries")
         .doc("char1")
-        .set({ campaignId: "c1", characterName: "Test Acolyte" })
+        .set({ campaignId: "c1", characterName: "Test Acolyte", userId: "player-1" })
     ).resolves.toBeUndefined();
   });
 
@@ -110,7 +110,7 @@ describe("Firestore Rules: characterSummaries", () => {
       dbAs(env, "player-2")
         .collection("campaigns/c1/characterSummaries")
         .doc("char1")
-        .set({ campaignId: "c1", characterName: "Test Acolyte" })
+        .set({ campaignId: "c1", characterName: "Test Acolyte", userId: "player-1" })
     ).rejects.toThrow();
   });
 
@@ -123,7 +123,25 @@ describe("Firestore Rules: characterSummaries", () => {
       dbAs(env, "player-1")
         .collection("campaigns/c1/characterSummaries")
         .doc("char1")
-        .set({ campaignId: "c1", characterName: "Test Acolyte", recoveryCode: "DH-TEST-0001" })
+        .set({
+          campaignId: "c1",
+          characterName: "Test Acolyte",
+          userId: "player-1",
+          recoveryCode: "DH-TEST-0001",
+        })
+    ).rejects.toThrow();
+  });
+
+  it("rejects a summary missing the required userId field", async () => {
+    const env = await getTestEnv();
+    await createCampaign(env, "c1", "dm-1");
+    await createCharacter(env, "c1", "char1", { userId: "player-1" });
+
+    await expect(
+      dbAs(env, "player-1")
+        .collection("campaigns/c1/characterSummaries")
+        .doc("char1")
+        .set({ campaignId: "c1", characterName: "Test Acolyte" })
     ).rejects.toThrow();
   });
 
@@ -142,6 +160,7 @@ describe("Firestore Rules: characterSummaries", () => {
       batch.set(dmDb.collection("campaigns/c1/characterSummaries").doc(doc.id), {
         campaignId: "c1",
         characterName: "Repaired",
+        userId: doc.data().userId ?? null,
       });
     });
     await expect(batch.commit()).resolves.toBeUndefined();

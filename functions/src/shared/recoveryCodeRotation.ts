@@ -45,6 +45,13 @@ export function rotateRecoveryCodeInTransaction(
     ...additionalCharacterUpdates,
     recoveryCode: newCode,
   });
+  if ("userId" in additionalCharacterUpdates) {
+    transaction.set(
+      db.collection("campaigns").doc(campaignId).collection("characterSummaries").doc(characterId),
+      { userId: additionalCharacterUpdates.userId },
+      { merge: true }
+    );
+  }
 
   return newCode;
 }

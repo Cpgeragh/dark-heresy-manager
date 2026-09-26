@@ -22,6 +22,10 @@ import {
 import { registerIdentityCode as runRegisterIdentityCode } from "./operations/registerIdentityCode.js";
 import { revealIdentityCode as runRevealIdentityCode } from "./operations/revealIdentityCode.js";
 import {
+  revealRecoveryCode as runRevealRecoveryCode,
+  type RevealRecoveryCodeInput,
+} from "./operations/revealRecoveryCode.js";
+import {
   lookupRecoveryCode as runLookupRecoveryCode,
   type LookupRecoveryCodeInput,
   type LookupRecoveryCodeResult,
@@ -180,6 +184,26 @@ export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
       ],
       handler: ({ uid, data }) =>
         runRegisterRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
+    })
+);
+
+export const revealRecoveryCode = onCall<RevealRecoveryCodeInput>(
+  { timeoutSeconds: 30 },
+  (request) =>
+    protectedCallable<RevealRecoveryCodeInput, { code: string }>({
+      request,
+      operation: "reveal-recovery-code",
+      allowedFields: ["campaignId", "characterId"],
+      requiredFields: ["campaignId", "characterId"],
+      fieldShapes: { campaignId: "string", characterId: "string" },
+      rateLimits: [
+        {
+          key: `reveal-recovery-code:${request.auth?.uid ?? "anonymous"}`,
+          limit: 20,
+          windowMs: 60 * 60 * 1000,
+        },
+      ],
+      handler: ({ uid, data }) => runRevealRecoveryCode(data, uid),
     })
 );
 

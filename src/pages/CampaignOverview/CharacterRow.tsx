@@ -5,7 +5,11 @@ import { Link } from "react-router-dom";
 import type { Timestamp } from "firebase/firestore";
 import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
-import { deleteCharacter, preflightCharacterDeletion } from "../../services/characterService";
+import {
+  deleteCharacter,
+  preflightCharacterDeletion,
+  revealRecoveryCode,
+} from "../../services/characterService";
 import { uiSection } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
@@ -48,7 +52,6 @@ export function CharacterRow({
   characterId,
   characterName,
   userId,
-  recoveryCode,
   portraitUrl,
   isDM,
 }: {
@@ -56,12 +59,13 @@ export function CharacterRow({
   characterId: string;
   characterName: string;
   userId: string | null;
-  recoveryCode?: string;
   portraitUrl?: string;
   isDM: boolean;
 }) {
   recordComponentRender("CharacterRow");
   const [showHistory, setShowHistory] = useState(false);
+  const [revealedCode, setRevealedCode] = useState<string | null>(null);
+  const [revealing, setRevealing] = useState(false);
   const [deletePreflight, setDeletePreflight] = useState<{
     loading: boolean;
     result?: { jobId: string; totalCount: number };
@@ -90,6 +94,19 @@ export function CharacterRow({
       setDeleteProgress(null);
     }
   }, [deletePreflight.result, toast]);
+
+  const handleReveal = useCallback(async () => {
+    setRevealing(true);
+    try {
+      const code = await revealRecoveryCode(campaignId, characterId);
+      setRevealedCode(code);
+    } catch (err) {
+      console.error("Failed to reveal recovery code:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to load recovery code.");
+    } finally {
+      setRevealing(false);
+    }
+  }, [campaignId, characterId, toast]);
 
   const loadDeletePreflight = useCallback(async () => {
     setDeletePreflight({ loading: true });
@@ -133,7 +150,20 @@ export function CharacterRow({
                 {characterName}
               </span>
               <p className="text-xs lg:text-sm text-slate-500 font-code [font-feature-settings:'zero'] mt-0.5">
-                Recovery: {recoveryCode ?? "—"}
+                Recovery:{" "}
+                {revealedCode ?? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      void handleReveal();
+                    }}
+                    disabled={revealing}
+                    className="underline hover:text-slate-300 disabled:opacity-50"
+                  >
+                    {revealing ? "Revealing…" : "Reveal"}
+                  </button>
+                )}
               </p>
               <p className="text-xs lg:text-sm mt-0.5">
                 {userId ? (

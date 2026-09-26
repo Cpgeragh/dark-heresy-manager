@@ -742,9 +742,10 @@ service cloud.firestore {
 
       function validCharacterSummary(data) {
         return data.keys().hasOnly([
-                 'campaignId', 'characterName', 'playerName', 'career', 'rank', 'portraitUrl'
+                 'campaignId', 'characterName', 'playerName', 'career', 'rank', 'portraitUrl',
+                 'userId'
                ]) &&
-               data.keys().hasAll(['campaignId', 'characterName']) &&
+               data.keys().hasAll(['campaignId', 'characterName', 'userId']) &&
                data.campaignId == campaignId &&
                data.characterName is string &&
                data.characterName.size() > 0 &&
@@ -753,7 +754,8 @@ service cloud.firestore {
                validOptionalString(data, 'career', 100) &&
                validOptionalString(data, 'rank', 100) &&
                (!('portraitUrl' in data) ||
-                 (data.portraitUrl is string && data.portraitUrl.size() <= 350000));
+                 (data.portraitUrl is string && data.portraitUrl.size() <= 350000)) &&
+               (data.userId == null || data.userId is string);
       }
 
       allow get: if dmOwnsCampaign() || (request.auth != null && campaignMember(request.auth.uid));
