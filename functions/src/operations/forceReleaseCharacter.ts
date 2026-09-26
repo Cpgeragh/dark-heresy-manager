@@ -19,6 +19,7 @@ export interface ForceReleaseCharacterInput {
 export async function forceReleaseCharacter(
   input: ForceReleaseCharacterInput,
   callerUid: string,
+  hmacSecret: string,
   idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
@@ -58,7 +59,14 @@ export async function forceReleaseCharacter(
         callerUid,
         currentOwner,
         null,
-        { playerName: storedPlayerName }
+        {
+          previousRecoveryCode:
+            typeof characterData.recoveryCode === "string"
+              ? characterData.recoveryCode
+              : undefined,
+          recoveryCodeHmacSecret: hmacSecret,
+          playerName: storedPlayerName,
+        }
       );
       // See releaseCharacter.ts: the membership-removal check there widens this
       // transaction's read set, so it gets the same extra retry headroom.

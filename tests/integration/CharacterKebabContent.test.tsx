@@ -6,6 +6,25 @@ import { CharacterKebabContent } from "../../src/pages/CharacterSheet/CharacterK
 const noop = () => {};
 
 describe("CharacterKebabContent Recovery Code section", () => {
+  it("directs device moves to account recovery instead of character release", () => {
+    render(
+      <CharacterKebabContent
+        recoveryCode=""
+        canManageRecoveryCode={false}
+        onGenerateRecoveryCode={vi.fn()}
+        onRevokeRecoveryCode={vi.fn()}
+        canExport={false}
+        onExport={noop}
+        canPlayerRelease={true}
+        onPlayerRelease={noop}
+        isReleasing={false}
+      />
+    );
+    expect(
+      screen.getByText(/To move devices, connect the new device with your account recovery code/)
+    ).toBeInTheDocument();
+  });
+
   it("shows the code, a copy button, and a revoke button when the caller can manage it", () => {
     render(
       <CharacterKebabContent

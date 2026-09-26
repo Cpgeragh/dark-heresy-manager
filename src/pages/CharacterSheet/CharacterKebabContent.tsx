@@ -127,7 +127,8 @@ export function CharacterKebabContent({
         <div className="space-y-2">
           <p className={uiSubheading}>Release Character</p>
           <p className="text-xs lg:text-sm text-slate-400">
-            Unlinks this character from your account.
+            Unlinks this character from your account. To move devices, connect the new device with
+            your account recovery code instead.
           </p>
           <Button variant="danger" onClick={onPlayerRelease} disabled={isReleasing}>
             {isReleasing ? "Releasing…" : "Release Character"}

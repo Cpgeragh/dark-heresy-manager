@@ -1,9 +1,11 @@
 // functions/src/shared/ownershipTransition.ts
 //
-// The character-ownership + claim-log writes shared by release,
+// The ownership, Recovery Code and claim-log writes shared by release,
 // force-assign, and force-release. Each caller does its own permission
 // check and its own fresh-inside-transaction precondition check; this only
-// bundles the write shape once that's verified.
+// bundles the write shape once that's verified. Rotating the code in the
+// same transaction prevents a credential known by the previous owner from
+// outliving the ownership it protected.
 //
 // Also removes the previous owner from the campaign's memberIds when this
 // transition takes away their last character in the campaign — covering
@@ -15,6 +17,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 import type { Transaction, DocumentReference } from "firebase-admin/firestore";
 import { buildClaimLogPayload, type ClaimLogAction } from "./claimLog.js";
+import { rotateRecoveryCodeInTransaction } from "./recoveryCodeRotation.js";
 
 export async function applyOwnershipTransition(
   transaction: Transaction,
@@ -25,10 +28,12 @@ export async function applyOwnershipTransition(
   previousOwnerUid: string | null,
   newOwnerUid: string | null,
   options: {
+    previousRecoveryCode: string | undefined;
+    recoveryCodeHmacSecret: string;
     newOwnerAlreadyMember?: boolean;
     playerName?: string | null;
     deleteStoredPlayerName?: boolean;
-  } = {}
+  }
 ): Promise<void> {
   const losingOwner = previousOwnerUid !== null && previousOwnerUid !== newOwnerUid;
 
@@ -63,14 +68,16 @@ export async function applyOwnershipTransition(
   if (options.deleteStoredPlayerName) {
     characterUpdate["header.playerName"] = FieldValue.delete();
   }
-  transaction.update(characterRef, characterUpdate);
-  transaction.set(
-    campaignRef.collection("characterSummaries").doc(characterRef.id),
-    {
-      userId: newOwnerUid,
-      playerName: options.playerName || FieldValue.delete(),
-    },
-    { merge: true }
+  rotateRecoveryCodeInTransaction(
+    transaction,
+    characterRef.firestore,
+    characterRef,
+    campaignRef.id,
+    characterRef.id,
+    options.previousRecoveryCode,
+    options.recoveryCodeHmacSecret,
+    characterUpdate,
+    { playerName: options.playerName || FieldValue.delete() }
   );
   if (membershipUpdate) {
     transaction.update(campaignRef, membershipUpdate);

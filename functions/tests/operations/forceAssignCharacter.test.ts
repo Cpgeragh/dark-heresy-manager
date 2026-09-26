@@ -6,38 +6,60 @@ const mockCampaignGet = vi.fn();
 const mockTransactionGet = vi.fn();
 const mockTransactionUpdate = vi.fn();
 const mockTransactionSet = vi.fn();
+const mockTransactionDelete = vi.fn();
 const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<void>) => {
   await callback({
     get: mockTransactionGet,
     update: mockTransactionUpdate,
     set: mockTransactionSet,
+    delete: mockTransactionDelete,
   });
 });
 
 const mockClaimLogDoc = vi.fn(() => ({}));
-const mockCharacterRef = { id: "char-1", collection: vi.fn(() => ({ doc: mockClaimLogDoc })) };
+const mockRecoveryCodeHistoryDoc = vi.fn(() => ({ kind: "recovery-code-history" }));
+const mockCharacterRef = {
+  id: "char-1",
+  firestore: {} as unknown,
+  collection: vi.fn((name: string) => ({
+    doc: name === "recoveryCodeHistory" ? mockRecoveryCodeHistoryDoc : mockClaimLogDoc,
+  })),
+};
 const mockMembershipQuery = { __membershipQuery: true };
 const mockCharactersCollection = {
   doc: vi.fn(() => mockCharacterRef),
   where: vi.fn(() => mockMembershipQuery),
 };
-const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
+const mockSummaryRef = { kind: "character-summary" };
+const mockCampaignRef = {
+  id: "c1",
+  get: mockCampaignGet,
+  collection: vi.fn((name: string) =>
+    name === "characterSummaries" ? { doc: vi.fn(() => mockSummaryRef) } : mockCharactersCollection
+  ),
+};
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 const mockUserLinkGet = vi.fn();
 const mockProfileRef = { kind: "user-profile" };
+const mockRecoveryIndexDoc = vi.fn((id: string) => ({ kind: "recovery-index", id }));
+const mockRecoveryIndexCollection = { doc: mockRecoveryIndexDoc };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
   if (name === "userLinks") return { doc: vi.fn(() => ({ get: mockUserLinkGet })) };
   if (name === "userProfiles") return { doc: vi.fn(() => mockProfileRef) };
+  if (name === "recoveryIndex") return mockRecoveryIndexCollection;
   throw new Error(`Unexpected collection: ${name}`);
 });
 
+const mockFirestore = {
+  collection: mockCollection,
+  runTransaction: mockRunTransaction,
+};
+mockCharacterRef.firestore = mockFirestore;
+
 vi.mock("firebase-admin/firestore", () => ({
-  getFirestore: () => ({
-    collection: mockCollection,
-    runTransaction: mockRunTransaction,
-  }),
+  getFirestore: () => mockFirestore,
   FieldValue: {
     arrayUnion: (v: unknown) => ({ __arrayUnion: v }),
     arrayRemove: (v: unknown) => ({ __arrayRemove: v }),
@@ -47,7 +69,12 @@ vi.mock("firebase-admin/firestore", () => ({
 }));
 
 function setupTransactionGet(options: {
-  character: { exists: boolean; userId?: string | null };
+  character: {
+    exists: boolean;
+    userId?: string | null;
+    recoveryCode?: string;
+    header?: Record<string, unknown>;
+  };
   otherOwnedCharacterIds?: string[];
   campaignMemberIds?: string[];
 }) {
@@ -65,7 +92,11 @@ function setupTransactionGet(options: {
     }
     return Promise.resolve({
       exists: options.character.exists,
-      data: () => ({ userId: options.character.userId }),
+      data: () => ({
+        userId: options.character.userId,
+        recoveryCode: options.character.recoveryCode,
+        header: options.character.header,
+      }),
     });
   });
 }
@@ -82,7 +113,8 @@ describe("forceAssignCharacter", () => {
     await expect(
       forceAssignCharacter(
         { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
-        "dm-1"
+        "dm-1",
+        "secret"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
@@ -93,7 +125,8 @@ describe("forceAssignCharacter", () => {
     await expect(
       forceAssignCharacter(
         { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
-        "dm-1"
+        "dm-1",
+        "secret"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
   });
@@ -108,7 +141,8 @@ describe("forceAssignCharacter", () => {
     await expect(
       forceAssignCharacter(
         { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
-        "dm-1"
+        "dm-1",
+        "secret"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
@@ -120,7 +154,8 @@ describe("forceAssignCharacter", () => {
     await expect(
       forceAssignCharacter(
         { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
-        "dm-1"
+        "dm-1",
+        "secret"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
 
@@ -130,20 +165,29 @@ describe("forceAssignCharacter", () => {
   it("assigns an unclaimed character to an existing member and logs the force-assign", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     setupTransactionGet({
-      character: { exists: true, userId: null },
+      character: { exists: true, userId: null, recoveryCode: "DH-OLDC-ODE1" },
       campaignMemberIds: ["player-1"],
     });
 
     await forceAssignCharacter(
       { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
-      "dm-1"
+      "dm-1",
+      "secret"
     );
 
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
       userId: "player-1",
       isEditableByPlayer: true,
       "header.playerName": { __delete: true },
+      recoveryCode: expect.stringMatching(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/),
     });
+    expect(mockTransactionDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "recovery-index" })
+    );
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "recovery-index" }),
+      { campaignId: "c1", characterId: "char-1" }
+    );
     expect(mockTransactionSet).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ userId: "player-1", playerName: "Iris" }),
@@ -171,7 +215,8 @@ describe("forceAssignCharacter", () => {
     await expect(
       forceAssignCharacter(
         { campaignId: "c1", characterId: "char-1", targetUid: "new-player" },
-        "dm-1"
+        "dm-1",
+        "secret"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
 

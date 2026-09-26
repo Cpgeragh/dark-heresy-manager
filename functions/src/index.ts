@@ -305,23 +305,27 @@ export const claimCharacter = onCall<ClaimCharacterInput>(
   }
 );
 
-export const releaseCharacter = onCall<ReleaseCharacterInput>({ timeoutSeconds: 30 }, (request) => {
-  const callerUid = request.auth?.uid ?? "anonymous";
-  const operationId = request.data?.operationId;
-  return protectedCallable<ReleaseCharacterInput, void>({
-    request,
-    operation: "release-character",
-    allowedFields: ["campaignId", "characterId", "operationId"],
-    requiredFields: ["campaignId", "characterId"],
-    fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
-    rateLimits: [{ key: `release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
-    idempotencyKey: buildOperationIdempotencyKey("release-character", callerUid, operationId),
-    handler: ({ uid, data, idempotency }) => runReleaseCharacter(data, uid, idempotency),
-  });
-});
+export const releaseCharacter = onCall<ReleaseCharacterInput>(
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    const operationId = request.data?.operationId;
+    return protectedCallable<ReleaseCharacterInput, void>({
+      request,
+      operation: "release-character",
+      allowedFields: ["campaignId", "characterId", "operationId"],
+      requiredFields: ["campaignId", "characterId"],
+      fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
+      rateLimits: [{ key: `release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
+      idempotencyKey: buildOperationIdempotencyKey("release-character", callerUid, operationId),
+      handler: ({ uid, data, idempotency }) =>
+        runReleaseCharacter(data, uid, recoveryCodeHmacSecret.value(), idempotency),
+    });
+  }
+);
 
 export const forceReleaseCharacter = onCall<ForceReleaseCharacterInput>(
-  { timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const operationId = request.data?.operationId;
@@ -339,13 +343,14 @@ export const forceReleaseCharacter = onCall<ForceReleaseCharacterInput>(
         callerUid,
         operationId
       ),
-      handler: ({ uid, data, idempotency }) => runForceReleaseCharacter(data, uid, idempotency),
+      handler: ({ uid, data, idempotency }) =>
+        runForceReleaseCharacter(data, uid, recoveryCodeHmacSecret.value(), idempotency),
     });
   }
 );
 
 export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
-  { timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const operationId = request.data?.operationId;
@@ -368,7 +373,8 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
         callerUid,
         operationId
       ),
-      handler: ({ uid, data, idempotency }) => runForceAssignCharacter(data, uid, idempotency),
+      handler: ({ uid, data, idempotency }) =>
+        runForceAssignCharacter(data, uid, recoveryCodeHmacSecret.value(), idempotency),
     });
   }
 );

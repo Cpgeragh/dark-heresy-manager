@@ -17,6 +17,22 @@ if (!getApps().length) {
 }
 const adminDb = getFirestore();
 
+async function registerCharacterCode(campaignId: string, characterId: string): Promise<string> {
+  const registerRecoveryCode = httpsCallable<
+    { campaignId: string; characterId: string },
+    { code: string }
+  >(getTestFunctions(), "registerRecoveryCode");
+  return (await registerRecoveryCode({ campaignId, characterId })).data.code;
+}
+
+async function lookupCharacterCode(code: string): Promise<{ status: string }> {
+  const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+    getTestFunctions(),
+    "lookupRecoveryCode"
+  );
+  return (await lookupRecoveryCode({ code })).data;
+}
+
 describe("Functions: ownership operations", () => {
   afterAll(async () => {
     await teardownTestFunctions();
@@ -26,8 +42,9 @@ describe("Functions: ownership operations", () => {
     const playerUid = await signInTestUser();
     const campaignRef = adminDb.collection("campaigns").doc();
     const characterRef = campaignRef.collection("characters").doc();
-    await campaignRef.set({ dmId: "some-dm", name: "Test Campaign", memberIds: [playerUid] });
+    await campaignRef.set({ dmId: playerUid, name: "Test Campaign", memberIds: [playerUid] });
     await characterRef.set({ campaignId: campaignRef.id, userId: playerUid });
+    const previousCode = await registerCharacterCode(campaignRef.id, characterRef.id);
 
     const releaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
       getTestFunctions(),
@@ -37,6 +54,8 @@ describe("Functions: ownership operations", () => {
 
     const characterSnapshot = await characterRef.get();
     expect(characterSnapshot.data()?.userId).toBeNull();
+    expect(characterSnapshot.data()?.recoveryCode).not.toBe(previousCode);
+    expect(await lookupCharacterCode(previousCode)).toEqual({ status: "not-found" });
 
     const campaignSnapshot = await campaignRef.get();
     expect(campaignSnapshot.data()?.memberIds).not.toContain(playerUid);
@@ -98,6 +117,7 @@ describe("Functions: ownership operations", () => {
     const characterRef = campaignRef.collection("characters").doc();
     await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: ["some-player"] });
     await characterRef.set({ campaignId: campaignRef.id, userId: "some-player" });
+    const previousCode = await registerCharacterCode(campaignRef.id, characterRef.id);
 
     const forceReleaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
       getTestFunctions(),
@@ -107,6 +127,8 @@ describe("Functions: ownership operations", () => {
 
     const characterSnapshot = await characterRef.get();
     expect(characterSnapshot.data()?.userId).toBeNull();
+    expect(characterSnapshot.data()?.recoveryCode).not.toBe(previousCode);
+    expect(await lookupCharacterCode(previousCode)).toEqual({ status: "not-found" });
 
     const campaignSnapshot = await campaignRef.get();
     expect(campaignSnapshot.data()?.memberIds).not.toContain("some-player");
@@ -122,6 +144,7 @@ describe("Functions: ownership operations", () => {
       memberIds: ["target-player"],
     });
     await characterRef.set({ campaignId: campaignRef.id, userId: null });
+    const previousCode = await registerCharacterCode(campaignRef.id, characterRef.id);
 
     const forceAssignCharacter = httpsCallable<
       { campaignId: string; characterId: string; targetUid: string },
@@ -135,6 +158,8 @@ describe("Functions: ownership operations", () => {
 
     const characterSnapshot = await characterRef.get();
     expect(characterSnapshot.data()?.userId).toBe("target-player");
+    expect(characterSnapshot.data()?.recoveryCode).not.toBe(previousCode);
+    expect(await lookupCharacterCode(previousCode)).toEqual({ status: "not-found" });
 
     const campaignSnapshot = await campaignRef.get();
     expect(campaignSnapshot.data()?.memberIds).toContain("target-player");

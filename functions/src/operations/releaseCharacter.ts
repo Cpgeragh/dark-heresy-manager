@@ -19,6 +19,7 @@ export interface ReleaseCharacterInput {
 export async function releaseCharacter(
   input: ReleaseCharacterInput,
   callerUid: string,
+  hmacSecret: string,
   idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
@@ -51,7 +52,14 @@ export async function releaseCharacter(
         callerUid,
         currentOwner,
         null,
-        { playerName: storedPlayerName }
+        {
+          previousRecoveryCode:
+            typeof characterData.recoveryCode === "string"
+              ? characterData.recoveryCode
+              : undefined,
+          recoveryCodeHmacSecret: hmacSecret,
+          playerName: storedPlayerName,
+        }
       );
       // The membership-removal check below queries the characters subcollection,
       // widening this transaction's read set beyond the single document it used

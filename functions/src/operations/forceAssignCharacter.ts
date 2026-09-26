@@ -21,6 +21,7 @@ export interface ForceAssignCharacterInput {
 export async function forceAssignCharacter(
   input: ForceAssignCharacterInput,
   callerUid: string,
+  hmacSecret: string,
   idempotency: IdempotencyExecution<void> | null = null
 ): Promise<void> {
   const db = getFirestore();
@@ -52,7 +53,8 @@ export async function forceAssignCharacter(
       if (!characterSnapshot.exists) {
         throw new HttpsError("not-found", "Character not found.");
       }
-      const currentOwner = (characterSnapshot.data()?.userId as string | null | undefined) ?? null;
+      const characterData = characterSnapshot.data() ?? {};
+      const currentOwner = (characterData.userId as string | null | undefined) ?? null;
       if (currentOwner !== null) {
         throw new HttpsError(
           "failed-precondition",
@@ -65,7 +67,7 @@ export async function forceAssignCharacter(
       );
       const firstName = targetProfile.data()?.firstName;
       const livePlayerName = typeof firstName === "string" ? firstName.trim() || null : null;
-      const header = (characterSnapshot.data()?.header ?? {}) as Record<string, unknown>;
+      const header = (characterData.header ?? {}) as Record<string, unknown>;
       const storedPlayerName =
         typeof header.playerName === "string" ? header.playerName.trim() || null : null;
 
@@ -78,6 +80,11 @@ export async function forceAssignCharacter(
         null,
         input.targetUid,
         {
+          previousRecoveryCode:
+            typeof characterData.recoveryCode === "string"
+              ? characterData.recoveryCode
+              : undefined,
+          recoveryCodeHmacSecret: hmacSecret,
           newOwnerAlreadyMember: true,
           playerName: livePlayerName ?? storedPlayerName,
           deleteStoredPlayerName: livePlayerName !== null,
