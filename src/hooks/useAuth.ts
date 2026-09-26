@@ -11,7 +11,7 @@ interface UseAuthResult {
   currentUser: User | null;
   loading: boolean;
   error: Error | null;
-  onboarded: boolean;
+  onboarded: boolean | null;
   setOnboarded: (value: boolean) => void;
 }
 
@@ -19,9 +19,9 @@ export function useAuth(): UseAuthResult {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  // Default true so existing (legacy) users never see the onboarding screen.
-  // Flipped to false only when a brand-new user doc is created.
-  const [onboarded, setOnboarded] = useState(true);
+  // App.tsx's loading gate covers this whole window, so nothing ever
+  // reads this value while it's still null.
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
 
   useEffect(() => {
     let ignore = false;

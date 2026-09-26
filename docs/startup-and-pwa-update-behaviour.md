@@ -117,7 +117,7 @@ One additional clean-origin diagnostic run is excluded from the five-run success
 
 ### Campaign subscription startup
 
-With the backend available, campaign-list subscriptions were ready at 329.7 ms median on the explicit no-update visits. The remaining campaign-overview listeners reached their first snapshots at 667.4 ms median.
+With the backend available, campaign-list subscriptions were ready at 329.7 ms median on the explicit no-update visits. The remaining campaign-overview listeners reached their first snapshots at 667.4 ms median. These numbers were measured before the campaign provider was moved to start during the splash screen, alongside the rest of account resolution, and no longer reflect current startup sequencing; a fresh measurement is needed rather than trusting them as current.
 
 With the backend unavailable, cached campaign-list subscriptions were ready at 4267.9 ms and the direct campaign and character documents at 4581.9 ms. Fully offline values were effectively the same: 4274.6 ms and 4581.9 ms. This consistency matches the earlier small-campaign offline baseline and does not indicate a subscription fan-out regression.
 

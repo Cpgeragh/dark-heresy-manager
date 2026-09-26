@@ -98,8 +98,8 @@ export function assertFieldNestedBounds(value: unknown, label: string): void {
 }
 
 function assertNotesValue(value: unknown): void {
-  if (typeof value !== "string" && !Array.isArray(value)) {
-    throw new HttpsError("invalid-argument", "Notes must be text or an array.");
+  if (!Array.isArray(value)) {
+    throw new HttpsError("invalid-argument", "Notes must be an array.");
   }
   assertFieldNestedBounds(value, "Notes");
 }

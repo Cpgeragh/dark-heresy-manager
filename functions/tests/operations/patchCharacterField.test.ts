@@ -65,7 +65,7 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
         "dm-1"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
@@ -77,7 +77,7 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
         "dm-1"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
@@ -90,12 +90,13 @@ describe("patchCharacterField", () => {
       data: () => ({ userId: "player-1", isEditableByPlayer: false }),
     });
 
+    const notes = [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }];
     await patchCharacterField(
-      { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+      { campaignId: "c1", characterId: "char-1", field: "notes", value: notes },
       "dm-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { notes: "hi" });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { notes });
   });
 
   it("allows the DM to patch the header", async () => {
@@ -292,7 +293,12 @@ describe("patchCharacterField", () => {
     });
 
     await patchCharacterField(
-      { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+      {
+        campaignId: "c1",
+        characterId: "char-1",
+        field: "notes",
+        value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }],
+      },
       "dm-1"
     );
 
@@ -306,12 +312,13 @@ describe("patchCharacterField", () => {
       data: () => ({ userId: "player-1", isEditableByPlayer: true }),
     });
 
+    const notes = [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }];
     await patchCharacterField(
-      { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+      { campaignId: "c1", characterId: "char-1", field: "notes", value: notes },
       "player-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { notes: "hi" });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { notes });
   });
 
   it("rejects the owning player when the character is not editable", async () => {
@@ -323,7 +330,7 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
         "player-1"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
@@ -339,7 +346,7 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" },
+        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
         "someone-else"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));

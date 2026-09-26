@@ -19,12 +19,11 @@ import {
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
 import { createLocalId } from "../../utils/createLocalId";
-import { useDebouncedDraft } from "../../hooks/useDebouncedDraft";
 
 interface NotesTabProps {
-  notes: string | NoteEntry[];
+  notes: NoteEntry[];
   editable: boolean;
-  onSave: (value: string | NoteEntry[]) => void;
+  onSave: (value: NoteEntry[]) => void;
 }
 
 function formatDate(iso: string): string {
@@ -33,8 +32,7 @@ function formatDate(iso: string): string {
 }
 
 export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
-  const entries = Array.isArray(notes) ? notes : [];
-  const legacyText = typeof notes === "string" ? notes : "";
+  const entries = notes;
   const sorted = [...entries].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
   const [query, setQuery] = useState("");
@@ -44,7 +42,6 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const formScrollPositionRef = useRef(0);
-  const legacyDraft = useDebouncedDraft(legacyText, onSave, 600);
 
   const canSubmit = Boolean(title.trim()) && Boolean(text.trim());
 
@@ -80,13 +77,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       text: text.trim(),
       updatedAt: now,
     };
-    const base = legacyText.trim()
-      ? [
-          { id: createLocalId("note"), title: "Notes", text: legacyText.trim(), updatedAt: now },
-          ...entries,
-        ]
-      : entries;
-    onSave([...base, newEntry]);
+    onSave([...entries, newEntry]);
     closeAll();
   }
 
@@ -145,21 +136,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
         </div>
       )}
 
-      {entries.length === 0 && legacyText.trim() ? (
-        editable ? (
-          <textarea
-            value={legacyDraft.draft}
-            onChange={(event) => legacyDraft.updateDraft(event.target.value)}
-            onBlur={legacyDraft.flush}
-            placeholder="Campaign notes, reminders, character details, or anything else…"
-            className={editableTextareaClass(true) + " min-h-[240px] p-4 leading-relaxed"}
-          />
-        ) : (
-          <div className={`${uiSectionShell} p-3 lg:p-4`}>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">{legacyText}</p>
-          </div>
-        )
-      ) : sorted.length === 0 ? (
+      {sorted.length === 0 ? (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No notes yet.</p>
       ) : filtered.length === 0 ? (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No notes match your search.</p>

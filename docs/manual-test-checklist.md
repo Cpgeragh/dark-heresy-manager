@@ -963,6 +963,8 @@ custom item library admin table (§21).
 Use a disposable campaign with at least two players, several characters, one applied session, one unapplied session, messages, and custom items. Exercise character operations and JSON import/export before sessions. Refresh after every mutation and verify the owning player's view as well as the DM's.
 
 - [ ] Character search box filters the character list live, by name substring
+- [ ] DM: the character list shows a Reveal control instead of the recovery code itself; clicking it fetches and shows that one character's code, and the code is not present anywhere in the page before it's clicked
+- [ ] Player: their own character card on the campaign page shows the same Reveal control for their own recovery code, and clicking it works the same way
 - [ ] DM: create a new character — get back a recovery code in a toast that includes a copy button, distinct from the normal toast style
 - [ ] Character names stop at 100 characters, and rapidly pressing Create still produces only one character
 - [ ] DM: Import JSON (header kebab menu) — rejects any file missing `recoveryCode` or `isEditableByPlayer` with an error toast rather than importing a malformed character; a valid import is issued a **fresh** recovery code, it does not reuse whatever was in the file

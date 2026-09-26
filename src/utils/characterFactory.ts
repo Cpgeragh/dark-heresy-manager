@@ -121,7 +121,7 @@ export function createEmptyCharacterData(params: {
       majorPowers: [],
     },
 
-    notes: "",
+    notes: [],
   };
 }
 

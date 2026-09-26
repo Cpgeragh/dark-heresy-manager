@@ -24,11 +24,6 @@ import { EditButton } from "../ui/buttons/EditButton";
 import { UnlinkButton } from "../ui/buttons/UnlinkButton";
 import { PickerModal, PickerBody } from "../ui/pickers/PickerModal";
 import { formatFirstNameInput } from "../utils/firstName";
-import {
-  legacySecretCacheClearFailed,
-  legacySecretCacheNeedsClearing,
-  requestLegacySecretCacheClear,
-} from "../services/legacyCacheService";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 
@@ -68,7 +63,6 @@ export default function Settings({
   const [rotating, setRotating] = useState(false);
   const rotatingRef = useRef(false);
   const [rotateConfirmOpen, setRotateConfirmOpen] = useState(false);
-  const [clearOldCacheOpen, setClearOldCacheOpen] = useState(false);
 
   // ── Device link state ────────────────────────────────────────────────────
   const [disconnectingDevice, setDisconnectingDevice] = useState(false);
@@ -276,7 +270,6 @@ export default function Settings({
     remoteDisconnectTarget !== null ||
     disconnectConfirmOpen ||
     lastDeviceWarningOpen ||
-    clearOldCacheOpen ||
     deleteConfirmOpen;
   const currentDeviceName =
     devices?.find((device) => device.isCurrentDevice)?.name ?? "Current device";
@@ -444,59 +437,6 @@ export default function Settings({
             <PickerBody>
               <p className="text-sm lg:text-base text-slate-300">
                 Rotate code? A new one is generated and the old one stops working immediately.
-              </p>
-            </PickerBody>
-          </PickerModal>
-        )}
-
-        {legacySecretCacheNeedsClearing() && (
-          <section className={settingsRowClass}>
-            <div>
-              <span className={settingsLabelClass}>Old browser copy of recovery code</span>
-              <p className="text-xs text-slate-400">
-                Earlier versions may have saved the code in this browser. Clear its old offline data
-                after all edits have finished saving.
-              </p>
-              {legacySecretCacheClearFailed() && (
-                <p className="text-xs text-amber-300">
-                  Could not clear it. Close other app tabs, then try again.
-                </p>
-              )}
-            </div>
-            <Button variant="secondary" onClick={() => setClearOldCacheOpen(true)}>
-              Clear old copy
-            </Button>
-          </section>
-        )}
-
-        {clearOldCacheOpen && (
-          <PickerModal
-            title="Clear old browser data"
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => setClearOldCacheOpen(false)}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-sm"
-            footer={
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="neutral" onClick={() => setClearOldCacheOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={requestLegacySecretCacheClear}>Clear and reload</Button>
-              </div>
-            }
-          >
-            <PickerBody>
-              <p className="text-sm text-slate-300">
-                This removes this browser's offline copies, including any old recovery code. It does
-                not delete data saved on the server. Make sure you are online and all edits have
-                finished saving before continuing. Do this on each browser that used an earlier
-                version.
-              </p>
-              <p className="text-sm text-amber-300">
-                If you cannot clear every old browser, rotate the recovery code afterwards and save
-                the new one. The old code will then stop working.
               </p>
             </PickerBody>
           </PickerModal>

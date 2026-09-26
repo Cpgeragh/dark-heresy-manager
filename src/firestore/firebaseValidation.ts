@@ -456,8 +456,8 @@ function assertCharacterCoreTypes(data: UnknownRecord, requireComplete: boolean)
     if (key in data && !Array.isArray(data[key])) throw new Error(`${key} must be an array.`);
   }
 
-  if ("notes" in data && typeof data.notes !== "string" && !Array.isArray(data.notes)) {
-    throw new Error("notes must be text or an array.");
+  if ("notes" in data && !Array.isArray(data.notes)) {
+    throw new Error("notes must be an array.");
   }
   if ("portraitUrl" in data) {
     assertString(data.portraitUrl, "Portrait");

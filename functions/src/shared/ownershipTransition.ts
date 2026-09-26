@@ -56,6 +56,9 @@ export async function applyOwnershipTransition(
     userId: newOwnerUid,
     isEditableByPlayer: newOwnerUid !== null,
   });
+  // Keeps the summary's claimed/unclaimed status in sync: the DM's character
+  // list reads userId from here, not the full document, so this would go
+  // silently stale on every claim/release/force-assign without this write.
   transaction.set(
     campaignRef.collection("characterSummaries").doc(characterRef.id),
     { userId: newOwnerUid },

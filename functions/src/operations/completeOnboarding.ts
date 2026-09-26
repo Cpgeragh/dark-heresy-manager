@@ -30,27 +30,20 @@ export async function completeOnboarding(callerUid: string): Promise<void> {
       throw new HttpsError("failed-precondition", "This account does not have a valid profile.");
     }
 
-    if (accountSnapshot.exists) {
-      const account = accountSnapshot.data();
-      if (account?.status === "provisional" && account?.createdByDeviceUid !== callerUid) {
-        throw new HttpsError(
-          "permission-denied",
-          "Only the creating device can finish this setup."
-        );
-      }
-      if (account?.status !== "provisional" && account?.status !== "active") {
-        throw new HttpsError("failed-precondition", "This account is not available.");
-      }
-      if (account.status === "provisional") {
-        transaction.update(accountRef, {
-          status: "active",
-          activatedAt: FieldValue.serverTimestamp(),
-        });
-      }
+    const account = accountSnapshot.data();
+    if (account?.status === "provisional" && account?.createdByDeviceUid !== callerUid) {
+      throw new HttpsError("permission-denied", "Only the creating device can finish this setup.");
+    }
+    if (account?.status !== "provisional" && account?.status !== "active") {
+      throw new HttpsError("failed-precondition", "This account is not available.");
+    }
+    if (account.status === "provisional") {
+      transaction.update(accountRef, {
+        status: "active",
+        activatedAt: FieldValue.serverTimestamp(),
+      });
     }
 
-    // A missing account record is a legacy account. It remains usable until
-    // the one-off migration adds the explicit active record.
     transaction.set(userRef, { onboarded: true, recoveryBackedUp: true }, { merge: true });
   });
 }

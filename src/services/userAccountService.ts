@@ -40,8 +40,7 @@ export async function synchroniseUserAccount(uid: string): Promise<boolean> {
     await setDoc(reference, newUserDocument);
     onboarded = false;
   } else {
-    // Missing means a legacy user created before onboarding existed.
-    onboarded = (snapshot.data() as UserDocument).onboarded !== false;
+    onboarded = (snapshot.data() as UserDocument).onboarded === true;
   }
   return onboarded;
 }

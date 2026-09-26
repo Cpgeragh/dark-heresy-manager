@@ -19,6 +19,10 @@ function operationKey(uid: string, operationId: string): string {
   return `patch-character-field:${uid}:${operationHash}`;
 }
 
+function noteMarker(text: string) {
+  return [{ id: "marker", title: "Marker", text, updatedAt: "2026-01-01T00:00:00.000Z" }];
+}
+
 async function createCharacter(dmUid: string) {
   const campaignRef = adminDb.collection("campaigns").doc();
   const characterRef = campaignRef.collection("characters").doc();
@@ -27,7 +31,7 @@ async function createCharacter(dmUid: string) {
     campaignId: campaignRef.id,
     userId: null,
     isEditableByPlayer: false,
-    notes: "initial",
+    notes: noteMarker("initial"),
   });
   return { campaignRef, characterRef };
 }
@@ -49,19 +53,19 @@ describe("Functions: idempotency recovery", () => {
       campaignId: campaignRef.id,
       characterId: characterRef.id,
       field: "notes",
-      value: "recovered",
+      value: noteMarker("recovered"),
       operationId,
     };
 
     await expect(patchCharacterField(request)).rejects.toMatchObject({
       code: "functions/aborted",
     });
-    expect((await characterRef.get()).data()?.notes).toBe("initial");
+    expect((await characterRef.get()).data()?.notes).toEqual(noteMarker("initial"));
 
     await keyRef.update({ startedAt: Date.now() - LEASE_MS - 1 });
     await expect(patchCharacterField(request)).resolves.toBeDefined();
 
-    expect((await characterRef.get()).data()?.notes).toBe("recovered");
+    expect((await characterRef.get()).data()?.notes).toEqual(noteMarker("recovered"));
     expect((await keyRef.get()).data()).toEqual(
       expect.objectContaining({ status: "completed", result: null, expiresAt: expect.anything() })
     );
@@ -76,15 +80,17 @@ describe("Functions: idempotency recovery", () => {
       campaignId: campaignRef.id,
       characterId: characterRef.id,
       field: "notes",
-      value: "first result",
+      value: noteMarker("first result"),
       operationId,
     };
 
     await patchCharacterField(request);
-    await characterRef.update({ notes: "changed outside the operation" });
+    await characterRef.update({ notes: noteMarker("changed outside the operation") });
     await patchCharacterField(request);
 
-    expect((await characterRef.get()).data()?.notes).toBe("changed outside the operation");
+    expect((await characterRef.get()).data()?.notes).toEqual(
+      noteMarker("changed outside the operation")
+    );
   }, 20000);
 
   it("runs a fresh attempt after the completed result's replay window expires", async () => {
@@ -103,11 +109,11 @@ describe("Functions: idempotency recovery", () => {
       campaignId: campaignRef.id,
       characterId: characterRef.id,
       field: "notes",
-      value: "fresh attempt",
+      value: noteMarker("fresh attempt"),
       operationId,
     });
 
-    expect((await characterRef.get()).data()?.notes).toBe("fresh attempt");
+    expect((await characterRef.get()).data()?.notes).toEqual(noteMarker("fresh attempt"));
     expect((await keyRef.get()).data()).toEqual(
       expect.objectContaining({ status: "completed", completedAt: expect.any(Number) })
     );

@@ -773,7 +773,7 @@ export interface Character {
   experience: ExperienceBlock;
   psychic: PsychicBlock;
 
-  notes?: string | NoteEntry[];
+  notes?: NoteEntry[];
   portraitUrl?: string;
 
   /** True after the player confirms the required Homeworld/Career setup. */

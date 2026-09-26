@@ -1,147 +1,18 @@
 import { useState } from "react";
-import { describe, it, expect, vi } from "vitest";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { NotesTab } from "../../src/pages/CharacterSheet/NotesTab";
 import type { NoteEntry } from "../../src/types/Character";
 
-function NotesWiring({
-  initial,
-  editable = true,
-}: {
-  initial: string | NoteEntry[];
-  editable?: boolean;
-}) {
-  const [notes, setNotes] = useState<string | NoteEntry[]>(initial);
+function NotesWiring({ initial, editable = true }: { initial: NoteEntry[]; editable?: boolean }) {
+  const [notes, setNotes] = useState<NoteEntry[]>(initial);
   return <NotesTab notes={notes} editable={editable} onSave={setNotes} />;
 }
 
-describe("NotesTab legacy plain-text notes", () => {
-  it("shows legacy text in an editable textarea and saves keystrokes live", async () => {
-    const user = userEvent.setup();
-    render(<NotesWiring initial="Old campaign notes." />);
-
-    const textarea = screen.getByPlaceholderText(
-      "Campaign notes, reminders, character details, or anything else…"
-    );
-    expect(textarea).toHaveValue("Old campaign notes.");
-
-    await user.type(textarea, "!");
-    expect(textarea).toHaveValue("Old campaign notes.!");
-  });
-
-  it("shows legacy text as read-only plain text when not editable", () => {
-    render(<NotesWiring initial="Old campaign notes." editable={false} />);
-
-    expect(screen.getByText("Old campaign notes.")).toBeInTheDocument();
-    expect(
-      screen.queryByPlaceholderText(
-        "Campaign notes, reminders, character details, or anything else…"
-      )
-    ).not.toBeInTheDocument();
-  });
-
-  it("coalesces legacy note typing into one save after the user pauses", () => {
-    vi.useFakeTimers();
-    const onSave = vi.fn();
-    render(<NotesTab notes="Old" editable onSave={onSave} />);
-    const textarea = screen.getByPlaceholderText(
-      "Campaign notes, reminders, character details, or anything else…"
-    );
-
-    fireEvent.change(textarea, { target: { value: "Old notes" } });
-    fireEvent.change(textarea, { target: { value: "Old notes updated" } });
-    expect(onSave).not.toHaveBeenCalled();
-
-    act(() => vi.advanceTimersByTime(600));
-    expect(onSave).toHaveBeenCalledOnce();
-    expect(onSave).toHaveBeenCalledWith("Old notes updated");
-    vi.useRealTimers();
-  });
-
-  it("flushes a pending legacy note when the field loses focus", () => {
-    vi.useFakeTimers();
-    const onSave = vi.fn();
-    render(<NotesTab notes="Old" editable onSave={onSave} />);
-    const textarea = screen.getByPlaceholderText(
-      "Campaign notes, reminders, character details, or anything else…"
-    );
-
-    fireEvent.change(textarea, { target: { value: "Final draft" } });
-    fireEvent.blur(textarea);
-
-    expect(onSave).toHaveBeenCalledOnce();
-    expect(onSave).toHaveBeenCalledWith("Final draft");
-    vi.useRealTimers();
-  });
-
-  it("flushes the final pending legacy note on unmount", () => {
-    vi.useFakeTimers();
-    try {
-      const onSave = vi.fn();
-      const view = render(<NotesTab notes="Old" editable onSave={onSave} />);
-      const textarea = screen.getByPlaceholderText(
-        "Campaign notes, reminders, character details, or anything else…"
-      );
-
-      fireEvent.change(textarea, { target: { value: "Saved while leaving" } });
-      view.unmount();
-
-      expect(onSave).toHaveBeenCalledOnce();
-      expect(onSave).toHaveBeenCalledWith("Saved while leaving");
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("does not save twice when blur is followed by unmount", () => {
-    vi.useFakeTimers();
-    try {
-      const onSave = vi.fn();
-      const view = render(<NotesTab notes="Old" editable onSave={onSave} />);
-      const textarea = screen.getByPlaceholderText(
-        "Campaign notes, reminders, character details, or anything else…"
-      );
-
-      fireEvent.change(textarea, { target: { value: "One final draft" } });
-      fireEvent.blur(textarea);
-      view.unmount();
-
-      expect(onSave).toHaveBeenCalledOnce();
-      expect(onSave).toHaveBeenCalledWith("One final draft");
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("shows an empty state with no legacy text and no entries", () => {
-    render(<NotesWiring initial="" />);
-    expect(screen.getByText("No notes yet.")).toBeInTheDocument();
-  });
-});
-
 describe("NotesTab adding notes", () => {
-  it("converts legacy text into an entry when the first new note is added", async () => {
-    const user = userEvent.setup();
-    render(<NotesWiring initial="Old campaign notes." />);
-
-    await user.click(screen.getByRole("button", { name: "Add Note" }));
-    const dialog = screen.getByRole("dialog", { name: "Add Note" });
-    await user.type(screen.getByPlaceholderText("e.g. Session 12, Inquisitor Varn…"), "Session 12");
-    await user.type(
-      screen.getByPlaceholderText("What do you want to remember…"),
-      "Found the relic."
-    );
-    await user.click(within(dialog).getByRole("button", { name: "Add Note" }));
-
-    expect(screen.getByText("Notes")).toBeInTheDocument();
-    expect(screen.getByText("Old campaign notes.")).toBeInTheDocument();
-    expect(screen.getByText("Session 12")).toBeInTheDocument();
-    expect(screen.getByText("Found the relic.")).toBeInTheDocument();
-  });
-
   it("adds a note directly when there's no legacy text", async () => {
     const user = userEvent.setup();
     render(<NotesWiring initial={[]} />);

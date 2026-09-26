@@ -3,8 +3,10 @@ import { describe, it, expect } from "vitest";
 import { assertValidCharacterFieldValue } from "../../src/shared/characterFieldValidation";
 
 describe("assertValidCharacterFieldValue: notes", () => {
-  it("accepts a plain string within the character limit", () => {
-    expect(() => assertValidCharacterFieldValue("notes", "Some campaign notes.")).not.toThrow();
+  it("rejects a string", () => {
+    expect(() => assertValidCharacterFieldValue("notes", "Some campaign notes.")).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
   });
 
   it("accepts a well-formed array of note entries", () => {
@@ -34,16 +36,6 @@ describe("assertValidCharacterFieldValue: notes", () => {
     expect(() => assertValidCharacterFieldValue("notes", { title: "x" })).toThrow(
       expect.objectContaining({ code: "invalid-argument" })
     );
-  });
-
-  it("rejects a string over the character limit", () => {
-    expect(() => assertValidCharacterFieldValue("notes", "a".repeat(4001))).toThrow(
-      expect.objectContaining({ code: "invalid-argument" })
-    );
-  });
-
-  it("accepts a string at exactly the character limit", () => {
-    expect(() => assertValidCharacterFieldValue("notes", "a".repeat(4000))).not.toThrow();
   });
 
   it("rejects an array over the entry limit", () => {

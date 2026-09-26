@@ -485,7 +485,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdateNotes = useCallback(
-    (value: string | NoteEntry[]) => patchField("notes", value),
+    (value: NoteEntry[]) => patchField("notes", value),
     [patchField]
   );
 

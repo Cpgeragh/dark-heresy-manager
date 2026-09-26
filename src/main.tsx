@@ -3,12 +3,6 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
-import { clearIndexedDbPersistence } from "firebase/firestore";
-import { db } from "./firebase";
-import {
-  finishLegacySecretCacheClear,
-  isLegacySecretCacheClearRequested,
-} from "./services/legacyCacheService";
 import { SplashScreen } from "./components/SplashScreen";
 import { markUpdateStalled, markPostUpgrade } from "./pwaUpdateState";
 import {
@@ -21,17 +15,7 @@ import "@fontsource/im-fell-english/400.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 
-async function renderAppAfterCacheClear() {
-  if (isLegacySecretCacheClearRequested()) {
-    try {
-      // Only a deliberate Settings action can request this destructive purge.
-      // It runs before any Firestore listener starts on this reload.
-      await clearIndexedDbPersistence(db);
-      finishLegacySecretCacheClear(true);
-    } catch {
-      finishLegacySecretCacheClear(false);
-    }
-  }
+function renderApp() {
   const application = <App />;
   root.render(
     <React.StrictMode>
@@ -46,10 +30,6 @@ async function renderAppAfterCacheClear() {
       </BrowserRouter>
     </React.StrictMode>
   );
-}
-
-function renderApp() {
-  void renderAppAfterCacheClear();
 }
 
 startPwaStartup({

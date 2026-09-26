@@ -68,7 +68,7 @@ function emptyCharacter(campaignId, characterName, userId = null) {
     weaponTraining: { trained: [], exoticWeapons: [] },
     experience: { ranks: [], total: 0, spent: 0 },
     psychic: { psyRating: 0, disciplines: [], minorPowers: [], majorPowers: [] },
-    notes: "",
+    notes: [],
     backgroundComplete: true,
   };
 }
@@ -398,7 +398,14 @@ function largeCharacter(campaignId, uid) {
       known: true,
     })),
   };
-  character.notes = "N".repeat(3_000);
+  character.notes = [
+    {
+      id: "fixture-note",
+      title: "Fixture Note",
+      text: "N".repeat(3_000),
+      updatedAt: FIXED_NOW.toISOString(),
+    },
+  ];
   return character;
 }
 

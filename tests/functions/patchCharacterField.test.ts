@@ -25,19 +25,22 @@ describe("Functions: patchCharacterField", () => {
       campaignId: campaignRef.id,
       userId: null,
       isEditableByPlayer: false,
-      notes: "",
+      notes: [],
     });
 
+    const notes = [
+      { id: "n1", title: "Note", text: "The DM's own note.", updatedAt: "2026-01-01T00:00:00.000Z" },
+    ];
     const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
     await patchCharacterField({
       campaignId: campaignRef.id,
       characterId: characterRef.id,
       field: "notes",
-      value: "The DM's own note.",
+      value: notes,
     });
 
     const snapshot = await characterRef.get();
-    expect(snapshot.data()?.notes).toBe("The DM's own note.");
+    expect(snapshot.data()?.notes).toEqual(notes);
   }, 15000);
 
   it("lets the DM patch a character's header", async () => {
@@ -86,7 +89,7 @@ describe("Functions: patchCharacterField", () => {
       campaignId: campaignRef.id,
       userId: null,
       isEditableByPlayer: false,
-      notes: "",
+      notes: [],
     });
 
     const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
@@ -94,7 +97,9 @@ describe("Functions: patchCharacterField", () => {
       campaignId: campaignRef.id,
       characterId: characterRef.id,
       field: "notes",
-      value: "A private note.",
+      value: [
+        { id: "n1", title: "Note", text: "A private note.", updatedAt: "2026-01-01T00:00:00.000Z" },
+      ],
     });
 
     const summarySnapshot = await campaignRef
@@ -397,7 +402,7 @@ describe("Functions: patchCharacterField", () => {
       campaignId: campaignRef.id,
       userId: playerUid,
       isEditableByPlayer: true,
-      notes: "",
+      notes: [],
     });
 
     const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
@@ -437,7 +442,7 @@ describe("Functions: patchCharacterField", () => {
       campaignId: campaignRef.id,
       userId: playerUid,
       isEditableByPlayer: false,
-      notes: "",
+      notes: [],
     });
 
     const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
@@ -446,7 +451,9 @@ describe("Functions: patchCharacterField", () => {
         campaignId: campaignRef.id,
         characterId: characterRef.id,
         field: "notes",
-        value: "Should be rejected.",
+        value: [
+          { id: "n1", title: "Note", text: "Should be rejected.", updatedAt: "2026-01-01T00:00:00.000Z" },
+        ],
       })
     ).rejects.toMatchObject({ code: "functions/permission-denied" });
   }, 15000);
