@@ -44,6 +44,14 @@ export interface IdempotencyExecution<T> {
   ): Promise<T>;
 }
 
+export interface IdempotencyClaim<T> {
+  kind: "replay" | "claimed";
+  result?: T;
+  execution?: IdempotencyExecution<T>;
+  hasCompleted?: () => boolean;
+  release?: () => Promise<void>;
+}
+
 function finiteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
@@ -67,10 +75,7 @@ async function releaseOwnedLease(db: Firestore, key: string, leaseOwner: string)
   );
 }
 
-export async function withIdempotency<T>(
-  key: string,
-  handler: (execution: IdempotencyExecution<T>) => Promise<T>
-): Promise<T> {
+export async function claimIdempotency<T>(key: string): Promise<IdempotencyClaim<T>> {
   const db = getFirestore();
   const ref = db.collection(IDEMPOTENCY_COLLECTION).doc(key);
   const leaseOwner = randomUUID();
@@ -126,7 +131,7 @@ export async function withIdempotency<T>(
     { maxAttempts: 5 }
   );
 
-  if (claim.kind === "replay") return claim.result;
+  if (claim.kind === "replay") return { kind: "replay", result: claim.result };
 
   let completionCommitted = false;
   let transactionStarted = false;
@@ -159,17 +164,12 @@ export async function withIdempotency<T>(
     },
   };
 
-  try {
-    const result = await handler(execution);
-    if (!completionCommitted) {
-      throw new HttpsError(
-        "internal",
-        "The idempotent operation returned without committing its result."
-      );
-    }
-    return result;
-  } catch (error) {
-    if (!completionCommitted) {
+  return {
+    kind: "claimed",
+    execution,
+    hasCompleted: () => completionCommitted,
+    release: async () => {
+      if (completionCommitted) return;
       try {
         await releaseOwnedLease(db, key, leaseOwner);
       } catch (cleanupError) {
@@ -178,7 +178,28 @@ export async function withIdempotency<T>(
           cleanupError,
         });
       }
+    },
+  };
+}
+
+export async function withIdempotency<T>(
+  key: string,
+  handler: (execution: IdempotencyExecution<T>) => Promise<T>
+): Promise<T> {
+  const claim = await claimIdempotency<T>(key);
+  if (claim.kind === "replay") return claim.result as T;
+
+  try {
+    const result = await handler(claim.execution!);
+    if (!claim.hasCompleted!()) {
+      throw new HttpsError(
+        "internal",
+        "The idempotent operation returned without committing its result."
+      );
     }
+    return result;
+  } catch (error) {
+    await claim.release!();
     throw error;
   }
 }

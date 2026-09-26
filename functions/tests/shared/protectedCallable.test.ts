@@ -7,7 +7,7 @@ import { withSafeErrors } from "../../src/shared/errors";
 import { requireAuth } from "../../src/shared/auth";
 import { assertRequestFields } from "../../src/shared/validation";
 import { enforceRateLimit } from "../../src/shared/rateLimit";
-import { withIdempotency } from "../../src/shared/idempotency";
+import { claimIdempotency } from "../../src/shared/idempotency";
 import { recordCallableOutcome } from "../../src/shared/audit";
 
 vi.mock("firebase-functions", () => ({
@@ -25,12 +25,12 @@ vi.mock("../../src/shared/validation", () => ({
 }));
 vi.mock("../../src/shared/rateLimit", () => ({ enforceRateLimit: vi.fn() }));
 vi.mock("../../src/shared/idempotency", () => ({
-  withIdempotency: vi.fn(
-    (
-      _key: string,
-      handler: (execution: { runTransaction: ReturnType<typeof vi.fn> }) => Promise<unknown>
-    ) => handler({ runTransaction: vi.fn() })
-  ),
+  claimIdempotency: vi.fn(async () => ({
+    kind: "claimed" as const,
+    execution: { runTransaction: vi.fn() },
+    hasCompleted: () => true,
+    release: vi.fn(),
+  })),
 }));
 vi.mock("../../src/shared/audit", () => ({ recordCallableOutcome: vi.fn() }));
 
@@ -149,7 +149,33 @@ describe("protectedCallable", () => {
       handler: async () => "ok",
     });
 
-    expect(withIdempotency).toHaveBeenCalledWith("idem-1", expect.any(Function));
+    expect(claimIdempotency).toHaveBeenCalledWith("idem-1");
+  });
+
+  it("releases an idempotency claim if the rate limit rejects the call it raced against", async () => {
+    vi.mocked(enforceRateLimit).mockRejectedValueOnce(
+      new HttpsError("resource-exhausted", "Wait")
+    );
+    const release = vi.fn();
+    vi.mocked(claimIdempotency).mockResolvedValueOnce({
+      kind: "claimed",
+      execution: { runTransaction: vi.fn() },
+      hasCompleted: () => false,
+      release,
+    });
+
+    await expect(
+      protectedCallable({
+        request: makeRequest(),
+        operation: "test-op",
+        allowedFields: [],
+        rateLimits: [{ key: "key-a", limit: 1, windowMs: 1000 }],
+        idempotencyKey: "idem-1",
+        handler: async () => "ok",
+      })
+    ).rejects.toMatchObject({ code: "resource-exhausted" });
+
+    expect(release).toHaveBeenCalledOnce();
   });
 
   it("records a failure outcome and rethrows when the handler throws", async () => {

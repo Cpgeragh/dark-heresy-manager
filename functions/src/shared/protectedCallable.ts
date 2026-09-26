@@ -22,9 +22,11 @@ import {
   type FieldShape,
 } from "./validation.js";
 import { enforceRateLimit } from "./rateLimit.js";
-import { withIdempotency } from "./idempotency.js";
-import type { IdempotencyExecution } from "./idempotency.js";
+import { claimIdempotency } from "./idempotency.js";
+import type { IdempotencyClaim, IdempotencyExecution } from "./idempotency.js";
 import { recordCallableOutcome } from "./audit.js";
+
+type RateLimitConfig = readonly { key: string; limit: number; windowMs: number }[];
 
 export interface ProtectedCallableOptions<TData, TResult> {
   request: CallableRequest<TData>;
@@ -33,7 +35,7 @@ export interface ProtectedCallableOptions<TData, TResult> {
   requiredFields?: readonly string[];
   fieldShapes?: Record<string, FieldShape>;
   payloadBounds?: { maxBytes: number; maxStringCharacters: number };
-  rateLimits?: readonly { key: string; limit: number; windowMs: number }[];
+  rateLimits?: RateLimitConfig;
   idempotencyKey?: string;
   handler: (context: {
     uid: string;
@@ -55,6 +57,24 @@ async function recordOutcome(
   }
 }
 
+async function enforceAllRateLimits(
+  rateLimits: RateLimitConfig | undefined,
+  operation: string
+): Promise<void> {
+  if (!rateLimits) return;
+  for (const rateLimit of rateLimits) {
+    try {
+      await enforceRateLimit(rateLimit);
+    } catch (error) {
+      if (error instanceof HttpsError && error.code === "resource-exhausted") {
+        // No raw key or account identifier is logged.
+        logger.warn("rate-limit-rejected", { operation });
+      }
+      throw error;
+    }
+  }
+}
+
 export async function protectedCallable<TData, TResult>(
   options: ProtectedCallableOptions<TData, TResult>
 ): Promise<TResult> {
@@ -69,27 +89,44 @@ export async function protectedCallable<TData, TResult>(
       options.payloadBounds ?? { maxBytes: 4_000, maxStringCharacters: 500 }
     );
 
-    if (options.rateLimits) {
-      for (const rateLimit of options.rateLimits) {
-        try {
-          await enforceRateLimit(rateLimit);
-        } catch (error) {
-          if (error instanceof HttpsError && error.code === "resource-exhausted") {
-            // No raw key or account identifier is logged.
-            logger.warn("rate-limit-rejected", { operation: options.operation });
-          }
-          throw error;
-        }
+    // The rate-limit check and the idempotency claim touch different
+    // documents and don't depend on each other, so they run together
+    // instead of one after the other. If the rate limit rejects the call
+    // after the claim already succeeded, the claim is released rather
+    // than left behind as an orphaned in-progress lease.
+    let idempotencyClaim: IdempotencyClaim<TResult> | null = null;
+    if (options.idempotencyKey) {
+      const [rateLimitResult, claimResult] = await Promise.allSettled([
+        enforceAllRateLimits(options.rateLimits, options.operation),
+        claimIdempotency<TResult>(options.idempotencyKey),
+      ]);
+      if (claimResult.status === "fulfilled" && rateLimitResult.status === "rejected") {
+        await claimResult.value.release?.();
       }
+      if (rateLimitResult.status === "rejected") throw rateLimitResult.reason;
+      if (claimResult.status === "rejected") throw claimResult.reason;
+      idempotencyClaim = claimResult.value;
+    } else {
+      await enforceAllRateLimits(options.rateLimits, options.operation);
     }
 
     const run = (idempotency: IdempotencyExecution<TResult> | null) =>
       options.handler({ uid, appCheckVerified, data: options.request.data, idempotency });
 
     try {
-      const result = options.idempotencyKey
-        ? await withIdempotency(options.idempotencyKey, run)
-        : await run(null);
+      let result: TResult;
+      if (idempotencyClaim?.kind === "replay") {
+        result = idempotencyClaim.result as TResult;
+      } else if (idempotencyClaim?.kind === "claimed") {
+        try {
+          result = await run(idempotencyClaim.execution!);
+        } catch (error) {
+          await idempotencyClaim.release?.();
+          throw error;
+        }
+      } else {
+        result = await run(null);
+      }
       await recordOutcome(options.operation, uid, "success");
       return result;
     } catch (error) {
