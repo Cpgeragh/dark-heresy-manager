@@ -23,7 +23,11 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 
 ## Observability
 
-- [ ] App Check verification log-based metrics (`appcheck-successes`, `appcheck-failures`), the alert policy, and the dashboard chart recreated for the target project; these are per-project in Cloud Monitoring and do not carry over from staging
+- [ ] An enabled, verified notification channel exists in the target project and is attached to every alert policy
+- [ ] Function traffic above 30 requests in 10 minutes, any Function 5xx response in 10 minutes, and Firestore reads above 200 in 10 minutes each have an enabled alert policy
+- [ ] App Check verification log-based metrics (`appcheck-successes`, `appcheck-failures`), the failure alert policy, and the dashboard chart exist in the target project
+- [ ] The `rate-limit-rejections` log-based metric filters Cloud Function warning logs whose structured message is exactly `rate-limit-rejected`, with an enabled alert for any rejection in 10 minutes
+- [ ] Log-based metrics, alert policies, channels and dashboards are verified separately for each project because Cloud Monitoring configuration does not carry over between projects
 
 ## Client configuration
 
@@ -44,6 +48,8 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 ## Cost protections
 
 - [ ] Billing/budget alert live and correctly scoped for the target environment
+- [ ] `billingGuard` is deployed in its isolated project with a non-empty `BILLING_GUARD_BUDGET_ID` equal to the budget notification's bare `budgetId` attribute; dry-run mode is set intentionally
+- [ ] A dry-run Pub/Sub message with `budgetId` in its attributes and cost values in its JSON data is accepted as the configured budget before any live-fire drill
 - [ ] `MAX_JOB_TOTAL_COUNT` and other bulk-job ceilings still appropriate for the target environment's expected usage
 
 ## Backups

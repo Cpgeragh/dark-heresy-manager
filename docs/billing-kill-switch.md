@@ -10,7 +10,7 @@ Fires when actual spend reaches the same €10 monthly amount already configured
 
 ## Architecture
 
-A dedicated GCP project, `dark-heresy-billing-guard`, holds one Pub/Sub-triggered Cloud Function and nothing else. The existing budget publishes a notification to a Pub/Sub topic in this project on every threshold evaluation, in addition to its existing email alerts. The function reads each notification, and when the reported cost has reached the budget amount, calls the Cloud Billing API to detach billing from both monitored projects by name.
+A dedicated GCP project, `dark-heresy-billing-guard`, holds one Pub/Sub-triggered Cloud Function and nothing else. The existing budget publishes a notification to a Pub/Sub topic in this project on every threshold evaluation, in addition to its existing email alerts. The function matches the configured budget against the notification's `budgetId` message attribute, reads the cost and budget amounts from the base64-encoded JSON data, and calls the Cloud Billing API to detach billing from both monitored projects by name when the reported cost has reached the budget amount.
 
 The function never modifies billing on its own host project. Its service account holds the Project Billing Manager role (`roles/billing.projectManager`), granted individually on each of the two monitored projects, not the broader Billing Account Administrator role.
 
@@ -20,7 +20,7 @@ Both `dark-heresy-manager` and `dark-heresy-manager-staging` lose their billing 
 
 ## Dry-run testing
 
-Setting the `BILLING_GUARD_DRY_RUN` environment variable to `true` on the deployed function causes it to log the action it would take without calling the Cloud Billing API. Publishing a synthetic message to the Pub/Sub topic in this mode confirms the function receives, parses, and evaluates a notification correctly, without any risk to either monitored project. Dry-run mode does not exercise the actual Cloud Billing API call.
+Setting the `BILLING_GUARD_DRY_RUN` environment variable to `true` on the deployed function causes it to log the action it would take without calling the Cloud Billing API. A synthetic message must place the configured bare budget ID in the Pub/Sub `budgetId` attribute and place `costAmount` and `budgetAmount` in the JSON data. Publishing that message in dry-run mode confirms the function receives, parses, identifies and evaluates a notification correctly, without any risk to either monitored project. Dry-run mode does not exercise the actual Cloud Billing API call.
 
 ## Live-fire drill
 

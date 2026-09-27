@@ -40,18 +40,15 @@ describe("hasReachedCap", () => {
 });
 
 describe("matchesExpectedBudget", () => {
-  it("accepts only the exact configured budget ID", () => {
-    const notification = {
-      budgetId: "billingAccounts/123/budgets/abc",
-      costAmount: 10,
-      budgetAmount: 10,
-    };
-    expect(matchesExpectedBudget(notification, notification.budgetId)).toBe(true);
-    expect(matchesExpectedBudget(notification, "billingAccounts/123/budgets/other")).toBe(false);
-    expect(matchesExpectedBudget(notification, undefined)).toBe(false);
-    expect(matchesExpectedBudget({ costAmount: 10, budgetAmount: 10 }, notification.budgetId)).toBe(
-      false
-    );
+  it("accepts only the exact budget ID from the Pub/Sub message attributes", () => {
+    const budgetId = "configured-budget-id";
+    const attributes = { budgetId, billingAccountId: "billing-account-id" };
+
+    expect(matchesExpectedBudget(attributes, budgetId)).toBe(true);
+    expect(matchesExpectedBudget(attributes, "another-budget-id")).toBe(false);
+    expect(matchesExpectedBudget(attributes, undefined)).toBe(false);
+    expect(matchesExpectedBudget({}, budgetId)).toBe(false);
+    expect(matchesExpectedBudget(undefined, budgetId)).toBe(false);
   });
 });
 
