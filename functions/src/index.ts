@@ -137,7 +137,12 @@ import {
 // Production Cloud Monitoring (30 days ending 2026-09-24): at most 17 Function
 // requests in any ten-minute window. Keep wide headroom for normal actions,
 // but prevent unbounded scale; review after traffic grows.
-setGlobalOptions({ region: "europe-west2", maxInstances: 5, concurrency: 40 });
+setGlobalOptions({
+  region: "europe-west2",
+  maxInstances: 5,
+  concurrency: 40,
+  serviceAccount: "dh-functions-runtime@",
+});
 
 const heavyWorkOptions = { maxInstances: 2, concurrency: 5 } as const;
 
@@ -711,7 +716,12 @@ export const completeOnboarding = onCall({ timeoutSeconds: 30 }, (request) => {
 });
 
 export const deleteAccount = onCall(
-  { secrets: [identityCodeHmacSecret], timeoutSeconds: 60, ...heavyWorkOptions },
+  {
+    secrets: [identityCodeHmacSecret],
+    timeoutSeconds: 60,
+    serviceAccount: "dh-account-deletion@",
+    ...heavyWorkOptions,
+  },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<Record<string, never>, DeleteAccountResult>({

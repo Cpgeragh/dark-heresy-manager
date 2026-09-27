@@ -418,6 +418,8 @@ These ceilings are safety boundaries rather than product entitlements. They prev
 
 `firebase.json` binds both `firestore.rules` and `firestore.indexes.json` so a Firebase deployment reads the reviewed rules and index definitions from the same configuration. No production deployment is performed merely by editing or testing these files.
 
+`functions/src/index.ts` assigns every callable to a dedicated runtime identity instead of the project-wide default Compute service account. Ordinary callables run as `dh-functions-runtime@`, with Firestore data access and the two Recovery Code secrets required by their operations. `deleteAccount` runs separately as `dh-account-deletion@`, with Firestore data access, the identity-code secret and only the Firebase Authentication user-deletion permission. The project-relative `@` names resolve to matching service accounts in each target project, so staging and production keep the same permission boundary without sharing an identity.
+
 The local index file is the source of truth for production. Its complete non-automatic index inventory is:
 
 | Query surface                            | Required index                                        | Reason                                                                                                                                |

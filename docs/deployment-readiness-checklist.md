@@ -11,9 +11,14 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 ## Cloud Functions
 
 - [ ] All Functions build cleanly (`npm --prefix functions run build`)
+- [ ] `dh-functions-runtime` and `dh-account-deletion` service accounts exist in the target project; neither has a user-managed key
+- [ ] Both runtime accounts have `Cloud Datastore User`; no project-wide `Editor` role is used by either account
+- [ ] `dh-functions-runtime` can access `RECOVERY_CODE_HMAC_SECRET` and `IDENTITY_CODE_HMAC_SECRET`; `dh-account-deletion` can access only `IDENTITY_CODE_HMAC_SECRET`
+- [ ] `dh-account-deletion` has only the custom Firebase Authentication permission `firebaseauth.users.delete`; `dh-functions-runtime` has no Firebase Authentication administration permission
 - [ ] `recoveryCodeHmacSecret` configured in Secret Manager for the target project, not the local `.secret.local` placeholder
 - [ ] App Check confirmed wired in monitoring mode, deliberately not blocking requests for the target environment
 - [ ] Rate limits, idempotency, and audit logging confirmed working against a real deployed callable, not only the emulator
+- [ ] Every deployed Function uses the service account declared in `functions/src/index.ts`; only after that check, the old default Compute service account has its project-wide `Editor` role and both Recovery Code secret-access grants removed
 
 ## Observability
 
