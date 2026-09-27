@@ -14,7 +14,7 @@ import { expr, projectID } from "firebase-functions/params";
 import { protectedCallable } from "./shared/protectedCallable.js";
 import { withMinimumDuration } from "./shared/timingSafety.js";
 import { recoveryCodeHmacSecret, identityCodeHmacSecret } from "./shared/secrets.js";
-import { hashRecoveryCode, hashForKey } from "./shared/recoveryCode.js";
+import { hashRecoveryCode } from "./shared/recoveryCode.js";
 import { buildOperationIdempotencyKey } from "./shared/operationIdempotency.js";
 import {
   registerRecoveryCode as runRegisterRecoveryCode,
@@ -392,7 +392,7 @@ export const linkDevice = onCall<LinkDeviceInput>(
   { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
-    const codeHash = hashForKey(request.data?.code ?? "");
+    const codeHash = hashRecoveryCode(request.data?.code ?? "", identityCodeHmacSecret.value());
 
     return protectedCallable<LinkDeviceInput, void>({
       request,
