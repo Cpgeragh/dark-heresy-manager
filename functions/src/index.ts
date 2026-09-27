@@ -10,6 +10,7 @@ initializeApp();
 
 import { onCall } from "firebase-functions/v2/https";
 import { setGlobalOptions } from "firebase-functions/v2";
+import { expr, projectID } from "firebase-functions/params";
 import { protectedCallable } from "./shared/protectedCallable.js";
 import { withMinimumDuration } from "./shared/timingSafety.js";
 import { recoveryCodeHmacSecret, identityCodeHmacSecret } from "./shared/secrets.js";
@@ -134,6 +135,9 @@ import {
   type RepairSessionSummariesResult,
 } from "./operations/repairSessionSummaries.js";
 
+const functionsRuntimeServiceAccount = expr`dh-functions-runtime@${projectID}.iam.gserviceaccount.com`;
+const accountDeletionServiceAccount = expr`dh-account-deletion@${projectID}.iam.gserviceaccount.com`;
+
 // Production Cloud Monitoring (30 days ending 2026-09-24): at most 17 Function
 // requests in any ten-minute window. Keep wide headroom for normal actions,
 // but prevent unbounded scale; review after traffic grows.
@@ -141,7 +145,7 @@ setGlobalOptions({
   region: "europe-west2",
   maxInstances: 5,
   concurrency: 40,
-  serviceAccount: "dh-functions-runtime@",
+  serviceAccount: functionsRuntimeServiceAccount,
 });
 
 const heavyWorkOptions = { maxInstances: 2, concurrency: 5 } as const;
@@ -719,7 +723,7 @@ export const deleteAccount = onCall(
   {
     secrets: [identityCodeHmacSecret],
     timeoutSeconds: 60,
-    serviceAccount: "dh-account-deletion@",
+    serviceAccount: accountDeletionServiceAccount,
     ...heavyWorkOptions,
   },
   (request) => {

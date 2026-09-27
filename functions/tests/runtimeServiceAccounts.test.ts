@@ -1,10 +1,11 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import type { Expression } from "firebase-functions/params";
 
 vi.mock("firebase-admin/app", () => ({ initializeApp: vi.fn() }));
 
 type ExportedCallable = {
   __endpoint?: {
-    serviceAccountEmail?: string;
+    serviceAccountEmail?: string | Expression<string>;
   };
 };
 
@@ -14,10 +15,15 @@ beforeAll(async () => {
   exportedFunctions = await import("../src/index");
 });
 
+function serviceAccountExpression(callable: ExportedCallable): string | undefined {
+  const serviceAccount = callable.__endpoint?.serviceAccountEmail;
+  return typeof serviceAccount === "string" ? serviceAccount : serviceAccount?.toCEL();
+}
+
 describe("Cloud Function runtime service accounts", () => {
   it("uses the restricted account-deletion identity only for deleteAccount", () => {
-    expect(exportedFunctions.deleteAccount.__endpoint?.serviceAccountEmail).toBe(
-      "dh-account-deletion@"
+    expect(serviceAccountExpression(exportedFunctions.deleteAccount)).toBe(
+      "dh-account-deletion@{{ params.PROJECT_ID }}.iam.gserviceaccount.com"
     );
   });
 
@@ -28,7 +34,9 @@ describe("Cloud Function runtime service accounts", () => {
 
     expect(ordinaryCallables.length).toBeGreaterThan(0);
     for (const [name, callable] of ordinaryCallables) {
-      expect(callable.__endpoint?.serviceAccountEmail, name).toBe("dh-functions-runtime@");
+      expect(serviceAccountExpression(callable), name).toBe(
+        "dh-functions-runtime@{{ params.PROJECT_ID }}.iam.gserviceaccount.com"
+      );
     }
   });
 });
