@@ -19,6 +19,7 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 - [ ] App Check confirmed wired in monitoring mode, deliberately not blocking requests for the target environment
 - [ ] Rate limits, idempotency, and audit logging confirmed working against a real deployed callable, not only the emulator
 - [ ] Every deployed Function uses the service account declared in `functions/src/index.ts`; only after that check, the old default Compute service account has its project-wide `Editor` role and both Recovery Code secret-access grants removed
+- [ ] `firebase functions:list --project <alias> --json` shows the runtime limits declared in `functions/src/index.ts`: ordinary callables use a 30-second timeout, five instances and concurrency 40; bulk, deletion and repair callables use two instances and concurrency 5; only `deleteAccount` uses a 60-second timeout
 
 ## Observability
 
