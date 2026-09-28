@@ -24,6 +24,7 @@ import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { editableInputClass, uiSubheading, uiTextLabel } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
+import { LoadingDots } from "../ui/LoadingDots";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -238,7 +239,14 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         <label
           className={`block px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${importingCharacter ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
         >
-          {importingCharacter ? "Importing…" : "Import JSON"}
+          {importingCharacter ? (
+            <span>
+              Importing
+              <LoadingDots />
+            </span>
+          ) : (
+            "Import JSON"
+          )}
           <input
             type="file"
             accept=".json"
@@ -253,7 +261,14 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           disabled={repairingSummaries}
           className={`block w-full text-left px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${repairingSummaries ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
         >
-          {repairingSummaries ? "Repairing…" : "Repair Character Summaries"}
+          {repairingSummaries ? (
+            <span>
+              Repairing
+              <LoadingDots />
+            </span>
+          ) : (
+            "Repair Character Summaries"
+          )}
         </button>
         <button
           type="button"
@@ -261,7 +276,14 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           disabled={repairingSessionSummaries}
           className={`block w-full text-left px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${repairingSessionSummaries ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
         >
-          {repairingSessionSummaries ? "Repairing…" : "Repair Session Summaries"}
+          {repairingSessionSummaries ? (
+            <span>
+              Repairing
+              <LoadingDots />
+            </span>
+          ) : (
+            "Repair Session Summaries"
+          )}
         </button>
       </div>
     );
@@ -367,8 +389,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                     if (e.key === "Enter") void handleCreate();
                   }}
                 />
-                <Button onClick={handleCreate} disabled={creatingCharacter}>
-                  {creatingCharacter ? "Creating…" : "Create"}
+                <Button onClick={handleCreate} loading={creatingCharacter} loadingLabel="Creating">
+                  Create
                 </Button>
               </div>
 

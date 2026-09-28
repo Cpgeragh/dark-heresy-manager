@@ -109,7 +109,7 @@ describe("AdminTab Force Assign", () => {
 
   it("shows Assigning… and disables the button while isDmForceAssigning is true", () => {
     renderAdminTab({ character: unclaimedCharacter, isDmForceAssigning: true });
-    const button = screen.getByRole("button", { name: "Assigning…" });
+    const button = screen.getByRole("button", { name: "Assigning" });
     expect(button).toBeDisabled();
   });
 });

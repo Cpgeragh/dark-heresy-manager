@@ -56,7 +56,8 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
 
   const [code, setCode] = useState<string | null>(null);
   const [codeLoading, setCodeLoading] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState<"create" | "connect" | "finish" | null>(null);
+  const busy = busyAction !== null;
   const busyRef = useRef(false);
   const [name, setName] = useState(firstName ?? "");
   const [deviceName, setDeviceName] = useState("");
@@ -171,7 +172,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   async function handleFinish() {
     if (busyRef.current) return;
     busyRef.current = true;
-    setBusy(true);
+    setBusyAction("finish");
     try {
       await completeOnboarding();
       setSearchParams({}, { replace: true });
@@ -181,7 +182,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
       toast.error("Couldn't complete onboarding. Please try again.");
     } finally {
       busyRef.current = false;
-      setBusy(false);
+      setBusyAction(null);
     }
   }
 
@@ -198,7 +199,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
       return;
     }
     busyRef.current = true;
-    setBusy(true);
+    setBusyAction("create");
     try {
       const created = await createAccount(trimmedDeviceName);
       await saveFirstName(trimmedName);
@@ -207,21 +208,21 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
       setCopied(false);
       setSavedConfirmed(false);
       busyRef.current = false;
-      setBusy(false);
+      setBusyAction(null);
       goToStep("show-code");
     } catch (err) {
       console.error("Onboarding error:", err);
       toast.error("Couldn't create your account. Please try again.");
     } finally {
       busyRef.current = false;
-      setBusy(false);
+      setBusyAction(null);
     }
   }
 
   async function handleConnectExisting() {
     if (busyRef.current) return;
     busyRef.current = true;
-    setBusy(true);
+    setBusyAction("connect");
     try {
       await discardOnboardingSetup();
       resetRecoveryFlow();
@@ -231,7 +232,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
       toast.error("Couldn't open account connection. Please try again.");
     } finally {
       busyRef.current = false;
-      setBusy(false);
+      setBusyAction(null);
     }
   }
 
@@ -350,8 +351,10 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   fullWidth
                   size="lg"
                   disabled={busy || !name.trim() || !deviceName.trim()}
+                  loading={busyAction === "create"}
+                  loadingLabel="Setting up"
                 >
-                  {busy ? "Setting up…" : "Create new account"}
+                  Create new account
                 </Button>
 
                 <Button
@@ -360,8 +363,10 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   size="lg"
                   onClick={() => void handleConnectExisting()}
                   disabled={busy}
+                  loading={busyAction === "connect"}
+                  loadingLabel="Opening"
                 >
-                  {busy ? "Opening…" : "Connect existing account"}
+                  Connect existing account
                 </Button>
               </form>
             </Panel>
@@ -491,8 +496,15 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
 
                   <div className="border-t border-slate-700 px-4 py-3 lg:px-5 lg:py-4">
                     <div className="space-y-2">
-                      <Button type="submit" fullWidth size="lg" disabled={!savedConfirmed || busy}>
-                        {busy ? "Saving…" : "Continue to dashboard"}
+                      <Button
+                        type="submit"
+                        fullWidth
+                        size="lg"
+                        disabled={!savedConfirmed}
+                        loading={busy}
+                        loadingLabel="Saving"
+                      >
+                        Continue to dashboard
                       </Button>
                       <RequiredFieldsNote />
                     </div>
@@ -500,8 +512,12 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                 </form>
               ) : (
                 <div className="p-6 text-center">
-                  <Button onClick={() => void handleViewExistingCode()} disabled={codeLoading}>
-                    {codeLoading ? "Loading recovery code…" : "View recovery code"}
+                  <Button
+                    onClick={() => void handleViewExistingCode()}
+                    loading={codeLoading}
+                    loadingLabel="Loading recovery code"
+                  >
+                    View recovery code
                   </Button>
                 </div>
               )}
@@ -525,8 +541,12 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
               <Button variant="neutral" onClick={closeCancelSetup} disabled={discardingSetup}>
                 Keep setting up
               </Button>
-              <Button onClick={() => void handleDiscardSetup()} disabled={discardingSetup}>
-                {discardingSetup ? "Cancelling…" : "Cancel account setup"}
+              <Button
+                onClick={() => void handleDiscardSetup()}
+                loading={discardingSetup}
+                loadingLabel="Cancelling"
+              >
+                Cancel account setup
               </Button>
             </div>
           </div>

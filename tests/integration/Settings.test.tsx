@@ -212,7 +212,7 @@ describe("Settings recovery code", () => {
     await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
     await screen.findByText("DH-AAAA-BBBB");
     await user.click(screen.getByRole("button", { name: "Rotate Code" }));
-    await user.click(screen.getByRole("button", { name: "Yes, rotate" }));
+    await user.click(screen.getByRole("button", { name: "Rotate" }));
 
     expect(rotateRecoveryCodeMock).toHaveBeenCalledWith("user-1");
     expect(await screen.findByText("DH-EEEE-FFFF")).toBeInTheDocument();
@@ -230,7 +230,7 @@ describe("Settings recovery code", () => {
     await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
     await screen.findByText("DH-AAAA-BBBB");
     await user.click(screen.getByRole("button", { name: "Rotate Code" }));
-    await user.click(screen.getByRole("button", { name: "Yes, rotate" }));
+    await user.click(screen.getByRole("button", { name: "Rotate" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith(

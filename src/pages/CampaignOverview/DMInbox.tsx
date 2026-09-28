@@ -97,6 +97,7 @@ function ThreadView({
           requirePrompt="Type DELETE to clear all messages"
           size="sm"
           busy={clearing}
+          busyLabel="Clearing"
           onConfirm={handleClear}
         />
       </div>

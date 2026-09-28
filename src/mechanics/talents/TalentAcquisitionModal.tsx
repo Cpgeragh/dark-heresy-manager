@@ -570,12 +570,16 @@ export function TalentAcquisitionModal({
       footer={
         <div className="space-y-2">
           <RequiredFieldsNote />
-          <Button fullWidth onClick={handleApply} disabled={!canComplete || saving}>
-            {saving
-              ? "Saving…"
-              : entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals
-                ? "Continue to Reformed Skin"
-                : "Apply and add Talent"}
+          <Button
+            fullWidth
+            onClick={handleApply}
+            disabled={!canComplete}
+            loading={saving}
+            loadingLabel="Saving"
+          >
+            {entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals
+              ? "Continue to Reformed Skin"
+              : "Apply and add Talent"}
           </Button>
         </div>
       }

@@ -219,8 +219,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
         </p>
 
         <div className="grid grid-cols-2 gap-2">
-          <Button fullWidth onClick={handleSave} disabled={saving}>
-            {saving ? "Saving…" : "Save"}
+          <Button fullWidth onClick={handleSave} loading={saving} loadingLabel="Saving">
+            Save
           </Button>
           <Button variant="neutral" fullWidth onClick={handleCancelEdit} disabled={saving}>
             Cancel
@@ -249,8 +249,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                 XP Applied ✓
               </span>
             ) : (
-              <Button size="sm" onClick={handleApplyXp} disabled={applyingXp}>
-                {applyingXp ? "Applying…" : `Apply XP (${xpAffectedDocuments} docs)`}
+              <Button size="sm" onClick={handleApplyXp} loading={applyingXp} loadingLabel="Applying">
+                Apply XP
               </Button>
             ))}
           {isDM && onSave && (
@@ -286,10 +286,11 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                     <Button
                       variant="danger"
                       size="sm"
-                      disabled={deleting}
+                      loading={deleting}
+                      loadingLabel="Deleting"
                       onClick={() => handleDelete()}
                     >
-                      {deleting ? "…" : "Yes"}
+                      Yes
                     </Button>
                     <Button
                       variant="secondary"
@@ -315,6 +316,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                 question="Delete?"
                 size="sm"
                 busy={deleting}
+                busyLabel="Deleting"
                 onConfirm={() => handleDelete()}
               />
             ))}

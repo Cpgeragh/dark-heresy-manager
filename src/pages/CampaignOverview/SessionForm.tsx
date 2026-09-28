@@ -142,8 +142,8 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <Button fullWidth onClick={handleSave} disabled={saving}>
-          {saving ? "Saving…" : "Save Session"}
+        <Button fullWidth onClick={handleSave} loading={saving} loadingLabel="Saving">
+          Save Session
         </Button>
         <Button variant="neutral" fullWidth onClick={onClose} disabled={saving}>
           Cancel

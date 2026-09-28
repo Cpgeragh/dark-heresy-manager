@@ -88,12 +88,21 @@ export function IdentityRecoveryForm({
         />
       </div>
 
-      <Button type="submit" fullWidth size="lg" disabled={busy || !hasValidCode || !hasDeviceName}>
-        {flow.phase === "finishing"
-          ? "Opening account…"
-          : flow.phase === "linking" || flow.linkRequestPending
-            ? "Connecting…"
-            : checkLabel}
+      <Button
+        type="submit"
+        fullWidth
+        size="lg"
+        disabled={!hasValidCode || !hasDeviceName}
+        loading={busy || flow.linkRequestPending}
+        loadingLabel={
+          flow.phase === "finishing"
+            ? "Opening account"
+            : flow.phase === "linking" || flow.linkRequestPending
+              ? "Connecting"
+              : undefined
+        }
+      >
+        {checkLabel}
       </Button>
 
       {showFinishingStatus && flow.phase === "finishing" && (

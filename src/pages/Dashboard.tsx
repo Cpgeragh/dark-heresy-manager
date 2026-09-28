@@ -39,7 +39,11 @@ import { EditButton } from "../ui/buttons/EditButton";
 import { ArchiveButton } from "../ui/buttons/ArchiveButton";
 import { RemoveButton } from "../ui/buttons/RemoveButton";
 import { GearIcon } from "../ui/icons/GearIcon";
-import { uiIconButton } from "../ui/styles/buttonStyles";
+import {
+  uiCardLinkFeedback,
+  uiCardOverlayLinkFeedback,
+  uiIconButton,
+} from "../ui/styles/buttonStyles";
 import { ExpandChevron } from "../ui/icons/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
@@ -146,7 +150,7 @@ function PlayerCampaignRow({
   return (
     <Link
       to={buildRoute.campaignOverview(campaignId)}
-      className={uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"}
+      className={`${uiSection} flex items-center gap-2 ${uiCardLinkFeedback}`}
     >
       <span className="flex-1 font-medium text-slate-200 lg:text-lg">{campaignName}</span>
     </Link>
@@ -184,10 +188,6 @@ function DmCampaignList({
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
-  const [deleteProgress, setDeleteProgress] = useState<{
-    processedCount: number;
-    totalCount: number;
-  } | null>(null);
   const [deletePreflights, setDeletePreflights] = useState<Record<string, DeletePreflightState>>(
     {}
   );
@@ -202,7 +202,8 @@ function DmCampaignList({
     kind: "archive" | "delete";
   } | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
-  const [restoring, setRestoring] = useState(false);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+  const restoring = restoringId !== null;
   const [showArchived, setShowArchived] = useState(false);
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
   const toast = useToast();
@@ -315,7 +316,7 @@ function DmCampaignList({
 
   const handleRestore = useCallback(
     async (campaignId: string) => {
-      setRestoring(true);
+      setRestoringId(campaignId);
       try {
         await restoreCampaign(campaignId);
         toast.success("Campaign restored.");
@@ -323,7 +324,7 @@ function DmCampaignList({
         console.error("Failed to restore campaign:", err);
         toast.error("Failed to restore campaign. Please try again.");
       } finally {
-        setRestoring(false);
+        setRestoringId(null);
       }
     },
     [toast]
@@ -334,9 +335,8 @@ function DmCampaignList({
       const jobId = deletePreflights[campaignId]?.result?.jobId;
       if (!jobId) return;
       setDeleting(true);
-      setDeleteProgress(null);
       try {
-        await deleteCampaign(jobId, setDeleteProgress);
+        await deleteCampaign(jobId);
         toast.success("Campaign deleted.");
         return true;
       } catch (err) {
@@ -347,7 +347,6 @@ function DmCampaignList({
         return false;
       } finally {
         setDeleting(false);
-        setDeleteProgress(null);
       }
     },
     [deletePreflights, toast]
@@ -411,9 +410,7 @@ function DmCampaignList({
           {campaigns.map((campaign) => (
             <div
               key={campaign.id}
-              className={
-                uiSection + " relative flex items-center gap-3 has-[a:hover]:bg-slate-800 transition-colors"
-              }
+              className={`${uiSection} relative flex items-center gap-3 ${uiCardOverlayLinkFeedback}`}
             >
                 <Link
                   to={buildRoute.campaignOverview(campaign.id)}
@@ -453,7 +450,7 @@ function DmCampaignList({
           scrollPositionRef={createFormScrollPositionRef}
           canSubmit={campaignNameValid && inquisitorNameValid}
           submitLabel="Create campaign"
-          savingLabel="Creating…"
+          savingLabel="Creating"
           saving={creating}
           onSubmit={handleCreate}
           onClose={closeCreateForm}
@@ -465,8 +462,10 @@ function DmCampaignList({
               <RequiredFormLabel htmlFor="new-campaign-name">Campaign Name</RequiredFormLabel>
               <input
                 id="new-campaign-name"
+                name="new-campaign-name"
                 required
                 autoFocus
+                autoComplete="off"
                 className={`${editableInputClass(true)} mt-0.5`}
                 placeholder="Campaign name…"
                 value={newCampaignName}
@@ -484,6 +483,8 @@ function DmCampaignList({
               </label>
               <input
                 id="new-inquisitor-name"
+                name="new-inquisitor-name"
+                autoComplete="off"
                 className={`${editableInputClass(true)} mt-0.5`}
                 placeholder="Inquisitor name…"
                 value={newInquisitorName}
@@ -528,7 +529,9 @@ function DmCampaignList({
                     variant="secondary"
                     size="sm"
                     onClick={() => handleRestore(campaign.id)}
-                    disabled={restoring}
+                    disabled={restoring && restoringId !== campaign.id}
+                    loading={restoringId === campaign.id}
+                    loadingLabel="Restoring"
                   >
                     Restore
                   </Button>
@@ -650,9 +653,11 @@ function DmCampaignList({
                 type="submit"
                 form="edit-campaign-form"
                 variant="primary"
-                disabled={editing || !editNameValid || !editInquisitorNameValid}
+                disabled={!editNameValid || !editInquisitorNameValid}
+                loading={editing}
+                loadingLabel="Saving"
               >
-                {editing ? "Saving…" : "Save"}
+                Save
               </Button>
               <Button variant="neutral" disabled={editing} onClick={closeEditForm}>
                 Cancel
@@ -752,13 +757,13 @@ function DmCampaignList({
                 <Button
                   variant="primary"
                   disabled={
-                    pendingCampaignAction.kind === "archive"
-                      ? archiving
-                      : deleting ||
-                        deleteConfirmText !== "DELETE" ||
-                        deletePreflights[pendingCampaignAction.campaignId]?.loading ||
-                        !deletePreflights[pendingCampaignAction.campaignId]?.result
+                    pendingCampaignAction.kind === "delete" &&
+                    (deleteConfirmText !== "DELETE" ||
+                      deletePreflights[pendingCampaignAction.campaignId]?.loading ||
+                      !deletePreflights[pendingCampaignAction.campaignId]?.result)
                   }
+                  loading={pendingCampaignAction.kind === "archive" ? archiving : deleting}
+                  loadingLabel={pendingCampaignAction.kind === "archive" ? "Archiving" : "Deleting"}
                   onClick={async () => {
                     const succeeded =
                       pendingCampaignAction.kind === "archive"
@@ -771,15 +776,7 @@ function DmCampaignList({
                     }
                   }}
                 >
-                  {pendingCampaignAction.kind === "archive"
-                    ? archiving
-                      ? "Archiving…"
-                      : "Yes, archive"
-                    : deleting
-                      ? deleteProgress && deleteProgress.totalCount > 0
-                        ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
-                        : "Deleting…"
-                      : "Delete permanently"}
+                  {pendingCampaignAction.kind === "archive" ? "Archive" : "Delete permanently"}
                 </Button>
                 <Button
                   variant="neutral"
@@ -906,7 +903,7 @@ function ClaimCharacterSection() {
           scrollPositionRef={formScrollPositionRef}
           canSubmit={codeValid && !loading}
           submitLabel="Find character"
-          savingLabel="Checking…"
+          savingLabel="Checking"
           saving={loading}
           onSubmit={handleLookup}
           onClose={closeForm}

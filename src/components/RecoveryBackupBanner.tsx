@@ -105,8 +105,8 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
           {!copied && <p className="text-xs lg:text-sm text-amber-100/70">Copy your code first.</p>}
         </>
       ) : (
-        <Button onClick={reveal} disabled={busy}>
-          {busy ? "Loading…" : "Reveal my code"}
+        <Button onClick={reveal} loading={busy} loadingLabel="Loading">
+          Reveal my code
         </Button>
       )}
     </div>

@@ -72,6 +72,8 @@ export function FormField({
       {type === "textarea" ? (
         <textarea
           id={inputId}
+          name={inputId}
+          autoComplete="off"
           disabled={!editable}
           value={displayedValue}
           onChange={handleChange}
@@ -89,6 +91,8 @@ export function FormField({
       ) : (
         <input
           id={inputId}
+          name={inputId}
+          autoComplete="off"
           disabled={!editable}
           type={type}
           value={displayedValue}

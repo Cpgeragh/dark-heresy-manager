@@ -274,15 +274,15 @@ function XpTransactionModal({
             <Button
               variant={isSpend ? "primary" : isRemove ? "warningOutline" : "successOutline"}
               onClick={submit}
-              disabled={!validAmount || saving}
+              disabled={!validAmount}
+              loading={saving}
+              loadingLabel="Saving"
             >
-              {saving
-                ? "Saving…"
-                : isChangingRankUpCost
-                  ? "Confirm Change"
-                  : isSpend
-                    ? "Confirm Spend"
-                    : `Confirm ${title}`}
+              {isChangingRankUpCost
+                ? "Confirm Change"
+                : isSpend
+                  ? "Confirm Spend"
+                  : `Confirm ${title}`}
             </Button>
           </div>
         </div>
@@ -439,8 +439,13 @@ function RankUpModal({
             <Button variant="neutral" onClick={cancel} disabled={saving}>
               Cancel
             </Button>
-            <Button onClick={confirm} disabled={!selectedRank || saving}>
-              {saving ? "Saving…" : "Confirm Rank Up"}
+            <Button
+              onClick={confirm}
+              disabled={!selectedRank}
+              loading={saving}
+              loadingLabel="Saving"
+            >
+              Confirm Rank Up
             </Button>
           </div>
         </div>

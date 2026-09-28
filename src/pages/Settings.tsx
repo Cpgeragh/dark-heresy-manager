@@ -14,7 +14,11 @@ import { saveFirstName } from "../services/profileService";
 import { useToast } from "../components/Toast";
 import { InfoModal } from "../components/InfoModal";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { colourAmberPlain } from "../ui/styles/colourTokens";
+import {
+  colourAmberPlain,
+  colourMetadataLabelText,
+  colourSkyPlain,
+} from "../ui/styles/colourTokens";
 import { editableInputClass, uiInfoModalWrapper } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { ManageDevicesButton } from "../ui/buttons/ManageDevicesButton";
@@ -340,9 +344,11 @@ export default function Settings({
                 <Button
                   type="submit"
                   variant="primary"
-                  disabled={savingName || !nameDraft.trim() || nameDraft.trim() === firstName}
+                  disabled={!nameDraft.trim() || nameDraft.trim() === firstName}
+                  loading={savingName}
+                  loadingLabel="Saving"
                 >
-                  {savingName ? "Saving…" : "Save"}
+                  Save
                 </Button>
               </form>
             </PickerBody>
@@ -367,6 +373,7 @@ export default function Settings({
             className="justify-self-end"
             onClick={handleReveal}
             disabled={revealing}
+            loading={revealing}
           />
         </section>
 
@@ -385,7 +392,7 @@ export default function Settings({
                 <Button variant="primary" onClick={() => void handleCopyRecoveryCode()}>
                   Copy code
                 </Button>
-                <Button variant="ghost" onClick={() => setRotateConfirmOpen(true)}>
+                <Button variant="neutral" onClick={() => setRotateConfirmOpen(true)}>
                   Rotate Code
                 </Button>
               </div>
@@ -417,12 +424,13 @@ export default function Settings({
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="primary"
-                  disabled={rotating}
+                  loading={rotating}
+                  loadingLabel="Rotating"
                   onClick={async () => {
                     if (await handleRotate()) setRotateConfirmOpen(false);
                   }}
                 >
-                  {rotating ? "Rotating…" : "Yes, rotate"}
+                  Rotate
                 </Button>
                 <Button
                   variant="neutral"
@@ -472,7 +480,7 @@ export default function Settings({
             isEmpty={devices.length === 0}
             emptyMessage="No connected devices found."
             hideSearch
-            maxWidth="max-w-lg"
+            maxWidth="max-w-md"
             suspended={
               renameTarget !== null ||
               remoteDisconnectTarget !== null ||
@@ -486,7 +494,7 @@ export default function Settings({
                   key={device.uid}
                   className="rounded-lg border border-slate-700 bg-slate-900/40 p-3"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-slate-100">
                         {device.name ?? "Unnamed device"}
@@ -497,7 +505,7 @@ export default function Settings({
                           : "Link date unavailable"}
                       </p>
                       {device.isCurrentDevice && (
-                        <p className="mt-1 text-xs text-sky-300 lg:text-sm">Current device</p>
+                        <p className={`mt-1 text-xs lg:text-sm ${colourSkyPlain}`}>Current device</p>
                       )}
                     </div>
                     <div className="flex shrink-0 gap-2">
@@ -570,13 +578,11 @@ export default function Settings({
                   <Button
                     type="submit"
                     variant="primary"
-                    disabled={
-                      renamingDevice ||
-                      !renameDraft.trim() ||
-                      renameDraft.trim() === renameTarget.name
-                    }
+                    disabled={!renameDraft.trim() || renameDraft.trim() === renameTarget.name}
+                    loading={renamingDevice}
+                    loadingLabel="Saving"
                   >
-                    {renamingDevice ? "Saving…" : "Save"}
+                    Save
                   </Button>
                   <Button
                     type="button"
@@ -608,10 +614,11 @@ export default function Settings({
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="primary"
-                  disabled={disconnectingOtherDevice}
+                  loading={disconnectingOtherDevice}
+                  loadingLabel="Unlinking"
                   onClick={() => void handleDisconnectOtherDevice()}
                 >
-                  {disconnectingOtherDevice ? "Unlinking…" : "Yes, unlink"}
+                  Yes, unlink
                 </Button>
                 <Button
                   variant="neutral"
@@ -626,25 +633,25 @@ export default function Settings({
             <PickerBody>
               <dl className="space-y-3 text-sm lg:text-base">
                 <div>
-                  <dt className="font-semibold text-slate-100">Device</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
                   <dd className="text-slate-300">
                     {remoteDisconnectTarget.name ?? "Unnamed device"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-semibold text-slate-100">What happens</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
                   <dd className="text-slate-300">
                     This device will lose access to the account and return to Create Your Account.
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-semibold text-slate-100">Account data</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
                   <dd className="text-slate-300">
                     Campaigns and characters remain available on the other connected devices.
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-semibold text-slate-100">Recovery code</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Recovery code</dt>
                   <dd className="text-slate-300">
                     The code will be replaced. The replacement remains available under View Account
                     Recovery Code in Settings.
@@ -663,18 +670,19 @@ export default function Settings({
             onClose={() => !disconnectingDevice && setDisconnectConfirmOpen(false)}
             isEmpty={false}
             hideSearch
-            maxWidth="max-w-sm"
+            maxWidth="max-w-md"
             footer={
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="primary"
-                  disabled={disconnectingDevice}
+                  loading={disconnectingDevice}
+                  loadingLabel="Unlinking"
                   onClick={async () => {
                     const result = await handleDisconnectDevice(false);
                     if (result !== "failed") setDisconnectConfirmOpen(false);
                   }}
                 >
-                  {disconnectingDevice ? "Unlinking…" : "Yes, unlink"}
+                  Yes, unlink
                 </Button>
                 <Button
                   variant="neutral"
@@ -689,23 +697,23 @@ export default function Settings({
             <PickerBody>
               <dl className="space-y-3 text-sm lg:text-base">
                 <div>
-                  <dt className="font-semibold text-slate-100">Device</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
                   <dd className="text-slate-300">{currentDeviceName}</dd>
                 </div>
                 <div>
-                  <dt className="font-semibold text-slate-100">What happens</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
                   <dd className="text-slate-300">
                     This device will lose access to the account and return to Create Your Account.
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-semibold text-slate-100">Account data</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
                   <dd className="text-slate-300">
                     Campaigns and characters remain available on the other connected devices.
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-semibold text-slate-100">Reconnect</dt>
+                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Reconnect</dt>
                   <dd className="text-slate-300">
                     Use the account recovery code to connect this device again.
                   </dd>
@@ -763,7 +771,9 @@ export default function Settings({
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     variant="primary"
-                    disabled={deletingAccount || deleteConfirmText !== "DELETE"}
+                    disabled={deleteConfirmText !== "DELETE"}
+                    loading={deletingAccount}
+                    loadingLabel="Deleting"
                     onClick={async () => {
                       if (await handleDeleteAccount()) {
                         setDeleteConfirmOpen(false);
@@ -771,7 +781,7 @@ export default function Settings({
                       }
                     }}
                   >
-                    {deletingAccount ? "Deleting…" : "Delete permanently"}
+                    Delete permanently
                   </Button>
                   <Button
                     variant="neutral"
@@ -809,18 +819,18 @@ export default function Settings({
           <div className="space-y-4 p-4 lg:p-5">
             <dl className="space-y-3 text-sm lg:text-base">
               <div>
-                <dt className="font-semibold text-slate-100">Device</dt>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
                 <dd className="text-slate-300">{currentDeviceName}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-slate-100">What happens</dt>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
                 <dd className="text-slate-300">
                   This device will lose access to the account and return to Create Your Account. No
                   devices will remain connected.
                 </dd>
               </div>
               <div>
-                <dt className="font-semibold text-slate-100">Access</dt>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Access</dt>
                 <dd className="text-slate-300">
                   You will need the account recovery code to connect a device again.
                 </dd>
@@ -837,9 +847,10 @@ export default function Settings({
               <Button
                 variant="primary"
                 onClick={() => void handleDisconnectDevice(true)}
-                disabled={disconnectingDevice}
+                loading={disconnectingDevice}
+                loadingLabel="Unlinking"
               >
-                {disconnectingDevice ? "Unlinking…" : "Unlink anyway"}
+                Unlink anyway
               </Button>
             </div>
           </div>

@@ -217,7 +217,7 @@ describe("onboarding error propagation", () => {
     renderCodeStep();
 
     expect(screen.getByRole("heading", { name: "Save Your Recovery Code" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Loading recovery code…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Loading recovery code" })).toBeDisabled();
 
     resolveCode("RECOVERY-CODE");
     expect(await screen.findByText("RECOVERY-CODE")).toBeVisible();
@@ -272,6 +272,66 @@ describe("onboarding error propagation", () => {
 
     expect(await screen.findByText("NEW-CODE")).toBeVisible();
     expect(screen.getByRole("button", { name: "Back" })).toBeEnabled();
+  });
+
+  it("shows loading only on Create new account while the account is being created", async () => {
+    let finishCreate: (value: { accountId: string; code: string }) => void = () => undefined;
+    mockCreateAccount.mockReturnValue(
+      new Promise((resolve) => {
+        finishCreate = resolve;
+      })
+    );
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.type(screen.getByLabelText("First Name"), "david");
+    await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop");
+    await browserUser.click(screen.getByRole("button", { name: "Create new account" }));
+
+    expect(await screen.findByRole("button", { name: "Setting up" })).toHaveAttribute(
+      "aria-busy",
+      "true"
+    );
+    const connect = screen.getByRole("button", { name: "Connect existing account" });
+    expect(connect).toBeDisabled();
+    expect(connect).not.toHaveAttribute("aria-busy");
+
+    finishCreate({ accountId: "account-new", code: "NEW-CODE" });
+    expect(await screen.findByText("NEW-CODE")).toBeVisible();
+  });
+
+  it("shows loading only on Connect existing account while it opens", async () => {
+    let finishDiscard: () => void = () => undefined;
+    mockDiscardOnboardingSetup.mockReturnValue(
+      new Promise<void>((resolve) => {
+        finishDiscard = resolve;
+      })
+    );
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.type(screen.getByLabelText("First Name"), "david");
+    await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop");
+    await browserUser.click(screen.getByRole("button", { name: "Connect existing account" }));
+
+    expect(await screen.findByRole("button", { name: "Opening" })).toHaveAttribute(
+      "aria-busy",
+      "true"
+    );
+    const create = screen.getByRole("button", { name: "Create new account" });
+    expect(create).toBeDisabled();
+    expect(create).not.toHaveAttribute("aria-busy");
+
+    finishDiscard();
+    expect(await screen.findByRole("heading", { name: "Connect Existing Account" })).toBeVisible();
   });
 
   it("uses the same confirmation when browser Back leaves the code step", async () => {
@@ -391,7 +451,7 @@ describe("new-device linking", () => {
     fireEvent.click(screen.getByRole("button", { name: "Find account" }));
 
     expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001", "My laptop");
-    expect(await screen.findByRole("button", { name: "Opening account…" })).toBeDisabled();
+    expect(await screen.findByRole("button", { name: "Opening account" })).toBeDisabled();
     expect(onComplete).not.toHaveBeenCalled();
 
     rerender(

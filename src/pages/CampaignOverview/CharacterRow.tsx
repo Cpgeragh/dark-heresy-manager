@@ -12,6 +12,7 @@ import {
 } from "../../services/characterService";
 import { uiSection } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
+import { LoadingDots } from "../../ui/LoadingDots";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
 import { ModalShell } from "../../ui/modals/ModalShell";
@@ -71,10 +72,6 @@ export function CharacterRow({
     result?: { jobId: string; totalCount: number };
     error?: string;
   }>({ loading: false });
-  const [deleteProgress, setDeleteProgress] = useState<{
-    processedCount: number;
-    totalCount: number;
-  } | null>(null);
   const {
     logs,
     loading: logsLoading,
@@ -84,14 +81,11 @@ export function CharacterRow({
 
   const handleDelete = useCallback(async () => {
     if (!deletePreflight.result) return;
-    setDeleteProgress(null);
     try {
-      await deleteCharacter(deletePreflight.result.jobId, setDeleteProgress);
+      await deleteCharacter(deletePreflight.result.jobId);
     } catch (err) {
       console.error("Character deletion error:", err);
       toast.error(err instanceof Error ? err.message : "Failed to delete character.");
-    } finally {
-      setDeleteProgress(null);
     }
   }, [deletePreflight.result, toast]);
 
@@ -161,7 +155,14 @@ export function CharacterRow({
                     disabled={revealing}
                     className="underline hover:text-slate-300 disabled:opacity-50"
                   >
-                    {revealing ? "Revealing…" : "Reveal"}
+                    {revealing ? (
+                      <span>
+                        Revealing
+                        <LoadingDots />
+                      </span>
+                    ) : (
+                      "Reveal"
+                    )}
                   </button>
                 )}
               </p>
@@ -199,11 +200,7 @@ export function CharacterRow({
                   details={deleteDetails}
                   confirmDisabled={deletePreflight.loading || !deletePreflight.result}
                   onConfirm={handleDelete}
-                  busyLabel={
-                    deleteProgress && deleteProgress.totalCount > 0
-                      ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
-                      : "Deleting…"
-                  }
+                  busyLabel="Deleting"
                 />
               </>
             )}

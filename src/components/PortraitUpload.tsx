@@ -228,8 +228,13 @@ export function PortraitUpload({
             </div>
 
             <div className="flex gap-2">
-              <Button className="flex-1" onClick={handleSave} disabled={uploading}>
-                {uploading ? "Uploading…" : "Save"}
+              <Button
+                className="flex-1"
+                onClick={handleSave}
+                loading={uploading}
+                loadingLabel="Uploading"
+              >
+                Save
               </Button>
               <Button
                 variant="neutral"

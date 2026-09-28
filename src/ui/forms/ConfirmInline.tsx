@@ -11,6 +11,10 @@ import { Button } from "../buttons/Button";
 interface ConfirmInlineProps {
   /** Label on the resting trigger button. */
   triggerLabel: string;
+  /** Shows the loading style on the resting trigger while its action runs elsewhere. */
+  triggerLoading?: boolean;
+  /** Label shown with the loading dots on the resting trigger. Defaults to the trigger label. */
+  triggerLoadingLabel?: string;
   /** Short question shown when armed (simple confirm), e.g. "Delete?". */
   question?: string;
   onConfirm: () => void | Promise<void>;
@@ -19,7 +23,7 @@ interface ConfirmInlineProps {
   confirmDisabled?: boolean;
   /** Red (destructive, default) or amber (reversible, e.g. Archive). */
   variant?: "danger" | "warning";
-  /** Shows the busy label and disables the buttons while an action runs. */
+  /** Shows the loading style and disables the buttons while an action runs. */
   busy?: boolean;
   size?: "xs" | "sm" | "md";
   /** When set, the user must type this exact text before Yes is enabled. */
@@ -28,11 +32,14 @@ interface ConfirmInlineProps {
   requirePrompt?: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  /** Label shown with the loading dots on the confirm button. Defaults to the confirm label. */
   busyLabel?: string;
 }
 
 export function ConfirmInline({
   triggerLabel,
+  triggerLoading = false,
+  triggerLoadingLabel,
   question,
   onConfirm,
   onArm,
@@ -45,7 +52,7 @@ export function ConfirmInline({
   requirePrompt,
   confirmLabel = "Yes",
   cancelLabel = "No",
-  busyLabel = "…",
+  busyLabel,
 }: ConfirmInlineProps) {
   const [armed, setArmed] = useState(false);
   const [text, setText] = useState("");
@@ -89,7 +96,13 @@ export function ConfirmInline({
 
   if (!armed) {
     return (
-      <Button variant={triggerVariant} size={size} onClick={handle(arm)}>
+      <Button
+        variant={triggerVariant}
+        size={size}
+        loading={triggerLoading}
+        loadingLabel={triggerLoadingLabel}
+        onClick={handle(arm)}
+      >
         {triggerLabel}
       </Button>
     );
@@ -120,9 +133,11 @@ export function ConfirmInline({
             variant={confirmVariant}
             size={size}
             disabled={confirmDisabled}
+            loading={effectiveBusy}
+            loadingLabel={busyLabel}
             onClick={handle(runConfirm)}
           >
-            {effectiveBusy ? busyLabel : confirmLabel}
+            {confirmLabel}
           </Button>
           <Button variant="ghost" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
             {cancelLabel}
@@ -140,9 +155,11 @@ export function ConfirmInline({
           variant={confirmVariant}
           size={size}
           disabled={confirmDisabled}
+          loading={effectiveBusy}
+          loadingLabel={busyLabel}
           onClick={handle(runConfirm)}
         >
-          {effectiveBusy ? busyLabel : confirmLabel}
+          {confirmLabel}
         </Button>
         <Button variant="ghost" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
           {cancelLabel}

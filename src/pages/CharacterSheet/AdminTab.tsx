@@ -99,20 +99,32 @@ export function AdminTab({
 
         {/* ACTIONS */}
         <div className="flex flex-wrap gap-2 mt-4">
-          <Button variant="danger" onClick={onDMForceRelease} disabled={isDmForceReleasing}>
-            {isDmForceReleasing ? "Releasing…" : "Force Release Ownership"}
+          <Button
+            variant="danger"
+            onClick={onDMForceRelease}
+            loading={isDmForceReleasing}
+            loadingLabel="Releasing"
+          >
+            Force Release Ownership
           </Button>
 
-          <Button variant="warning" onClick={onDMToggleEdit} disabled={isDmTogglingEdit}>
-            {isDmTogglingEdit ? "Updating…" : "Toggle Player Edit Permission"}
+          <Button
+            variant="warning"
+            onClick={onDMToggleEdit}
+            loading={isDmTogglingEdit}
+            loadingLabel="Updating"
+          >
+            Toggle Player Edit Permission
           </Button>
 
           <Button
             variant="warning"
             onClick={() => setShowPlayerPicker(true)}
-            disabled={isDmForceAssigning || !canAssign}
+            disabled={!canAssign}
+            loading={isDmForceAssigning}
+            loadingLabel="Assigning"
           >
-            {isDmForceAssigning ? "Assigning…" : "Force Assign To…"}
+            Force Assign To…
           </Button>
         </div>
       </section>

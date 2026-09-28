@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { ThreadMessage } from "../types/Firestore";
 import { recordComponentRender } from "../performance/performanceMetrics";
+import { LoadingDots } from "../ui/LoadingDots";
 
 export function MessageThread({
   messages,
@@ -46,7 +47,14 @@ export function MessageThread({
           onClick={onLoadOlder}
           disabled={loadingOlder}
         >
-          {loadingOlder ? "Loading older messages…" : "Load older messages"}
+          {loadingOlder ? (
+            <span>
+              Loading older messages
+              <LoadingDots />
+            </span>
+          ) : (
+            "Load older messages"
+          )}
         </button>
       )}
       {olderError && (

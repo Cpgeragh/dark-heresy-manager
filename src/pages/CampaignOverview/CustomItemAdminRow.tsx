@@ -120,33 +120,51 @@ export function CustomItemAdminRow({
         </div>
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           {item.status === "draft" && (
-            <Button size="xs" onClick={() => publishDefinition(item)} disabled={busy}>
-              {busyAction === "publish" ? "Publishing…" : "Publish"}
+            <Button
+              size="xs"
+              onClick={() => publishDefinition(item)}
+              disabled={busy && busyAction !== "publish"}
+              loading={busyAction === "publish"}
+              loadingLabel="Publishing"
+            >
+              Publish
             </Button>
           )}
           {item.status !== "archived" && (
             <ConfirmInline
-              triggerLabel={busyAction === "archive" ? "Archiving…" : "Archive"}
+              triggerLabel="Archive"
+              triggerLoading={busyAction === "archive"}
+              triggerLoadingLabel="Archiving"
               question="Archive and remove copies?"
               variant="warning"
               size="xs"
               busy={busy}
+              busyLabel="Archiving"
               onConfirm={() => archiveDefinition(item)}
             />
           )}
           {item.status === "published" && !!item.draftVersionId && (
             <ConfirmInline
-              triggerLabel={busyAction === "updateAll" ? "Updating…" : "Update All Copies"}
+              triggerLabel="Update All Copies"
+              triggerLoading={busyAction === "updateAll"}
+              triggerLoadingLabel="Updating"
               question="Publish and update copies?"
               variant="warning"
               size="xs"
               busy={busy}
+              busyLabel="Updating"
               onConfirm={() => updateAllCopies(item)}
             />
           )}
           {item.status === "archived" && (
-            <Button size="xs" onClick={handleRestore} disabled={busy}>
-              {busyAction === "restore" ? "Restoring…" : "Restore"}
+            <Button
+              size="xs"
+              onClick={handleRestore}
+              disabled={busy && busyAction !== "restore"}
+              loading={busyAction === "restore"}
+              loadingLabel="Restoring"
+            >
+              Restore
             </Button>
           )}
           {item.status === "archived" && (
@@ -155,7 +173,7 @@ export function CustomItemAdminRow({
               question="Permanently delete?"
               onConfirm={handleDelete}
               busy={busyAction === "delete"}
-              busyLabel="Deleting…"
+              busyLabel="Deleting"
               variant="danger"
               size="sm"
               onArm={() =>

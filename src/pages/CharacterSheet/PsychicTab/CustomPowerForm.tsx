@@ -333,8 +333,14 @@ export function CustomPowerForm({
         </div>
 
         <div className="flex gap-2 pt-1">
-          <Button className="flex-1" onClick={handleAdd} disabled={!canAdd || saving}>
-            {saving ? "Saving..." : initialPower ? "Save Power" : "Add Power"}
+          <Button
+            className="flex-1"
+            onClick={handleAdd}
+            disabled={!canAdd}
+            loading={saving}
+            loadingLabel="Saving"
+          >
+            {initialPower ? "Save Power" : "Add Power"}
           </Button>
           <Button variant="neutral" className="flex-1" onClick={onCancel}>
             Cancel

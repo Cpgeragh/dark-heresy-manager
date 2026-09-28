@@ -7,6 +7,7 @@ import { PortraitUpload } from "../../components/PortraitUpload";
 import { revealRecoveryCode } from "../../services/characterService";
 import { useToast } from "../../components/Toast";
 import type { CharacterListItem } from "../../types/Firestore";
+import { LoadingDots } from "../../ui/LoadingDots";
 
 export function MyCharacterCard({
   character,
@@ -103,7 +104,14 @@ export function MyCharacterCard({
                 disabled={revealing}
                 className="underline hover:text-slate-400 disabled:opacity-50"
               >
-                {revealing ? "Revealing…" : "Reveal"}
+                {revealing ? (
+                  <span>
+                    Revealing
+                    <LoadingDots />
+                  </span>
+                ) : (
+                  "Reveal"
+                )}
               </button>
             )}
           </div>

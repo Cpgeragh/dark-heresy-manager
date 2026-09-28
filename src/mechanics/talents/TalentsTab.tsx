@@ -626,10 +626,11 @@ export function TalentsTab({
             <div className="space-y-2">
               <Button
                 fullWidth
-                disabled={savingTalentMutation}
+                loading={savingTalentMutation}
+                loadingLabel="Saving"
                 onClick={() => void applyTalentRemoval(pendingEffectDeletion, true)}
               >
-                {savingTalentMutation ? "Saving…" : "Delete and restore recorded changes"}
+                Delete and restore recorded changes
               </Button>
               <Button
                 fullWidth

@@ -21,11 +21,11 @@ export const colourMeta = "border-slate-700 bg-slate-900/40 text-slate-300";
 export const colourValue = "border-amber-700/50 bg-slate-900/40 text-amber-400/80";
 export const colourRank = colourFuchsia;
 export const colourCareerPathOutline =
-  "border border-fuchsia-500 text-fuchsia-300 enabled:hover:bg-fuchsia-500/10";
+  "border border-fuchsia-500 text-fuchsia-300 enabled:hover:bg-fuchsia-500/10 enabled:active:bg-fuchsia-500/20";
 export const colourCareerPathOutlineMuted =
-  "border border-fuchsia-500/50 text-fuchsia-300/60 enabled:hover:border-fuchsia-500/70 enabled:hover:bg-fuchsia-500/5 enabled:hover:text-fuchsia-300/80";
+  "border border-fuchsia-500/50 text-fuchsia-300/60 enabled:hover:border-fuchsia-500/70 enabled:hover:bg-fuchsia-500/5 enabled:hover:text-fuchsia-300/80 enabled:active:bg-fuchsia-500/10";
 export const colourButtonNeutralOutline =
-  "border border-slate-500 text-slate-200 enabled:hover:bg-slate-800";
+  "border border-slate-500 text-slate-200 enabled:hover:bg-slate-800 enabled:active:bg-slate-700/75";
 export const colourInactive = "border-slate-600 bg-slate-800/40 text-slate-300";
 export const colourSky = "border-sky-500/50 bg-sky-500/10 text-sky-300";
 export const colourRose = "border-rose-500/50 bg-rose-500/10 text-rose-300";

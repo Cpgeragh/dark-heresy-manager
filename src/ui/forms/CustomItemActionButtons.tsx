@@ -38,27 +38,39 @@ export function CustomItemActionButtons({
         </Button>
       )}
       {isDM && !libraryItem.publishedVersionId && libraryItem.status === "draft" && (
-        <Button size="xs" onClick={onPublish} disabled={busy}>
-          {busyAction === "publish" ? "Publishing..." : "Publish"}
+        <Button
+          size="xs"
+          onClick={onPublish}
+          disabled={busy && busyAction !== "publish"}
+          loading={busyAction === "publish"}
+          loadingLabel="Publishing"
+        >
+          Publish
         </Button>
       )}
       {isDM && libraryItem.status !== "archived" && (
         <ConfirmInline
-          triggerLabel={busyAction === "archive" ? "Archiving..." : "Archive"}
+          triggerLabel="Archive"
+          triggerLoading={busyAction === "archive"}
+          triggerLoadingLabel="Archiving"
           size="xs"
           variant="warning"
           question="Archive and remove copies?"
           busy={busy}
+          busyLabel="Archiving"
           onConfirm={() => onArchive?.()}
         />
       )}
       {isDM && !!libraryItem.publishedVersionId && !!libraryItem.draftVersionId && (
         <ConfirmInline
-          triggerLabel={busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+          triggerLabel="Update All Copies"
+          triggerLoading={busyAction === "updateAll"}
+          triggerLoadingLabel="Updating"
           size="xs"
           variant="warning"
           question="Publish and update copies?"
           busy={busy}
+          busyLabel="Updating"
           onConfirm={() => onUpdateAllCopies?.()}
         />
       )}

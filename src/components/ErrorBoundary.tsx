@@ -76,8 +76,8 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
   const isDev = import.meta.env.DEV;
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-4">
+    <div className="fixed inset-0 z-40 flex overflow-y-auto bg-slate-950 p-4 pt-14">
+      <div className="m-auto w-full max-w-md space-y-4">
         {/* Error Icon */}
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center">

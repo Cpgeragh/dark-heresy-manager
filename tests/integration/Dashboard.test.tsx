@@ -166,6 +166,22 @@ describe("Dashboard DM campaign list", () => {
     );
   });
 
+  it("asks the browser not to autofill the campaign create fields", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    const form = screen.getByRole("dialog", { name: "Create Campaign" });
+
+    for (const field of [
+      within(form).getByLabelText("Campaign Name *"),
+      within(form).getByLabelText(/Inquisitor Name/),
+    ]) {
+      expect(field).toHaveAttribute("autocomplete", "off");
+      expect(field).toHaveAttribute("name");
+    }
+  });
+
   it("keeps campaign creation disabled until the required name is valid", async () => {
     const user = userEvent.setup();
     renderDashboard();
@@ -371,12 +387,12 @@ describe("Dashboard DM campaign list", () => {
       })
     );
     const archiveDialog = screen.getByRole("dialog", { name: "Archive Campaign" });
-    await user.click(within(archiveDialog).getByRole("button", { name: "Yes, archive" }));
+    await user.click(within(archiveDialog).getByRole("button", { name: "Archive" }));
 
     expect(archiveCampaignMock).toHaveBeenCalledWith("campaign-1");
   });
 
-  it("runs the delete-with-preflight-and-progress flow for an active campaign", async () => {
+  it("runs the delete-with-preflight flow for an active campaign", async () => {
     const user = userEvent.setup();
     preflightCampaignDeletionMock.mockResolvedValue({ jobId: "job-1", totalCount: 5 });
     useCampaignsContextMock.mockReturnValue({
@@ -404,7 +420,7 @@ describe("Dashboard DM campaign list", () => {
     );
     await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
 
-    expect(deleteCampaignMock).toHaveBeenCalledWith("job-1", expect.any(Function));
+    expect(deleteCampaignMock).toHaveBeenCalledWith("job-1");
   });
 
   it("reuses the deletion preflight when the active confirmation is reopened", async () => {
@@ -461,7 +477,7 @@ describe("Dashboard DM campaign list", () => {
     );
     await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
     expect(preflightCampaignDeletionMock).toHaveBeenCalledWith("campaign-2");
-    expect(deleteCampaignMock).toHaveBeenCalledWith("archived-job", expect.any(Function));
+    expect(deleteCampaignMock).toHaveBeenCalledWith("archived-job");
   });
 
   it("shows archived campaigns behind a toggle, with a working restore action", async () => {

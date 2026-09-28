@@ -28,7 +28,7 @@ export function CustomFormFooter({
   onSubmit,
   onCancel,
   saving = false,
-  savingLabel = "Saving...",
+  savingLabel = "Saving",
   className = "",
   formId,
 }: CustomFormFooterProps) {
@@ -41,9 +41,11 @@ export function CustomFormFooter({
           form={formId}
           fullWidth
           onClick={formId ? undefined : onSubmit}
-          disabled={!canSubmit || saving}
+          disabled={!canSubmit}
+          loading={saving}
+          loadingLabel={savingLabel}
         >
-          {saving ? savingLabel : submitLabel}
+          {submitLabel}
         </Button>
         <Button type="button" variant="neutral" fullWidth onClick={onCancel} disabled={saving}>
           Cancel

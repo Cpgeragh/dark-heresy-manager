@@ -74,7 +74,7 @@ describe("MessageThread", () => {
 
   it("shows a busy label and disables the button while loading older messages", () => {
     renderThread({ messages: [message()], hasOlderMessages: true, loadingOlder: true });
-    expect(screen.getByRole("button", { name: "Loading older messages…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Loading older messages" })).toBeDisabled();
   });
 
   it("shows an error when loading older messages fails", () => {

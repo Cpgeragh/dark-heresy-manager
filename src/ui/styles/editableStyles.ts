@@ -77,6 +77,9 @@ export const uiFormLabel = "text-xs lg:text-sm font-medium uppercase tracking-wi
 export const uiFormLabelBlue = `text-xs lg:text-sm font-medium uppercase tracking-wide ${colourMetadataLabelText}`;
 export const uiFormLabelSecondary = "block text-xs lg:text-sm text-slate-400 mb-1";
 export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]";
+
+/** Small circular loading spinner. Set its size with width and height classes where it is used. */
+export const uiSpinner = "rounded-full border-2 border-slate-800 border-t-red-600 animate-spin";
 export const uiSubheading =
   "text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide";
 export const uiItemName = "text-sm lg:text-base font-medium text-slate-200";

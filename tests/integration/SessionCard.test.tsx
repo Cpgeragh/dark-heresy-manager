@@ -86,7 +86,7 @@ describe("SessionCard", () => {
     renderWithToast(
       <SessionCard session={session} characters={characters} isDM={true} onApplyXp={vi.fn()} />
     );
-    expect(screen.getByRole("button", { name: "Apply XP (4 docs)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Apply XP" })).toBeInTheDocument();
   });
 });
 

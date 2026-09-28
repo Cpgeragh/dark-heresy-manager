@@ -89,8 +89,14 @@ export function CharacterKebabContent({
                 Share
               </Button>
               {canManageRecoveryCode && (
-                <Button variant="danger" size="sm" onClick={handleRevoke} disabled={revoking}>
-                  {revoking ? "Revoking…" : "Revoke"}
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={handleRevoke}
+                  loading={revoking}
+                  loadingLabel="Revoking"
+                >
+                  Revoke
                 </Button>
               )}
             </div>
@@ -104,8 +110,14 @@ export function CharacterKebabContent({
             <p className="text-xs lg:text-sm text-slate-400">
               This character has no Recovery Code yet.
             </p>
-            <Button variant="secondary" size="sm" onClick={handleGenerate} disabled={generating}>
-              {generating ? "Generating…" : "Generate Recovery Code"}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleGenerate}
+              loading={generating}
+              loadingLabel="Generating"
+            >
+              Generate Recovery Code
             </Button>
             {generateError && <p className="text-xs lg:text-sm text-red-400">{generateError}</p>}
           </div>
@@ -130,8 +142,13 @@ export function CharacterKebabContent({
             Unlinks this character from your account. To move devices, connect the new device with
             your account recovery code instead.
           </p>
-          <Button variant="danger" onClick={onPlayerRelease} disabled={isReleasing}>
-            {isReleasing ? "Releasing…" : "Release Character"}
+          <Button
+            variant="danger"
+            onClick={onPlayerRelease}
+            loading={isReleasing}
+            loadingLabel="Releasing"
+          >
+            Release Character
           </Button>
         </div>
       )}

@@ -46,8 +46,13 @@ export function MessageInput({
         }}
         disabled={disabled || sending}
       />
-      <Button onClick={handleSend} disabled={disabled || sending || !text.trim()}>
-        {sending ? "…" : "Send"}
+      <Button
+        onClick={handleSend}
+        disabled={disabled || !text.trim()}
+        loading={sending}
+        loadingLabel="Sending"
+      >
+        Send
       </Button>
     </div>
   );

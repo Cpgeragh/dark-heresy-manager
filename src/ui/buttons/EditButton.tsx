@@ -1,23 +1,7 @@
-import type { ButtonHTMLAttributes } from "react";
-import { uiIconButton } from "../styles/buttonStyles";
+import { IconButton, type IconButtonProps } from "./IconButton";
+import { uiIconButtonIconSize } from "../styles/buttonStyles";
 import { PencilIcon } from "../icons/PencilIcon";
 
-type EditButtonProps = Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  "aria-label" | "children" | "type"
-> & {
-  label: string;
-};
-
-export function EditButton({ label, className = "", ...buttonProps }: EditButtonProps) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className={`${uiIconButton} ${className}`.trim()}
-      {...buttonProps}
-    >
-      <PencilIcon className="w-[18px] h-[18px]" />
-    </button>
-  );
+export function EditButton(props: Omit<IconButtonProps, "size">) {
+  return <IconButton {...props} icon={<PencilIcon className={uiIconButtonIconSize.md} />} />;
 }

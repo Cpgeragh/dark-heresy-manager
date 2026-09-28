@@ -83,8 +83,13 @@ export function CompleteBackgroundSetupModal({
         <Button variant="neutral" onClick={onReturnToDashboard} disabled={saving}>
           Return
         </Button>
-        <Button onClick={onComplete} disabled={!editable || !canContinue || saving}>
-          {saving ? "Saving…" : "Continue"}
+        <Button
+          onClick={onComplete}
+          disabled={!editable || !canContinue}
+          loading={saving}
+          loadingLabel="Saving"
+        >
+          Continue
         </Button>
       </div>
     </ModalShell>

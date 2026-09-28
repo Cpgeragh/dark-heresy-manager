@@ -101,7 +101,7 @@ describe("CharacterRow reveal flow", () => {
     await user.click(screen.getByRole("button", { name: "Reveal" }));
 
     expect(mockRevealRecoveryCode).toHaveBeenCalledWith("campaign-1", "char-1");
-    expect(screen.getByRole("button", { name: "Revealing…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Revealing" })).toBeDisabled();
 
     resolveReveal!("DH-AAAA-BBBB");
     await waitFor(() => expect(screen.getByText("Recovery: DH-AAAA-BBBB")).toBeInTheDocument());
@@ -166,14 +166,13 @@ describe("CharacterRow delete flow", () => {
     expect(screen.getByRole("button", { name: "Yes" })).toBeDisabled();
   });
 
-  it("drives the delete job and shows live chunk progress on the confirm button", async () => {
+  it("drives the delete job and shows a loading confirm button without a count", async () => {
     const user = userEvent.setup();
     mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 10 });
     let resolveDelete: () => void;
     mockDeleteCharacter.mockImplementation(
-      (_jobId: string, onProgress?: (p: { processedCount: number; totalCount: number }) => void) =>
+      () =>
         new Promise<void>((resolve) => {
-          onProgress?.({ processedCount: 4, totalCount: 10 });
           resolveDelete = resolve;
         })
     );
@@ -183,14 +182,14 @@ describe("CharacterRow delete flow", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Yes" })).toBeEnabled());
     await user.click(screen.getByRole("button", { name: "Yes" }));
 
-    expect(mockDeleteCharacter).toHaveBeenCalledWith("job-1", expect.any(Function));
+    expect(mockDeleteCharacter).toHaveBeenCalledWith("job-1");
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Deleting… (4/10)" })).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "Deleting" })).toBeInTheDocument()
     );
 
     resolveDelete!();
     await waitFor(() =>
-      expect(screen.queryByRole("button", { name: /Deleting…/ })).not.toBeInTheDocument()
+      expect(screen.queryByRole("button", { name: /Deleting/ })).not.toBeInTheDocument()
     );
   });
 
