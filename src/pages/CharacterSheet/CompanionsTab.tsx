@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import type { CompanionItem } from "../../types/Character";
 import { COMPANION_REFERENCE, type CompanionRef } from "../../data/reference/companionReference";
 import { Button } from "../../ui/buttons/Button";
@@ -11,11 +11,13 @@ import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { StatChip } from "../../ui/chips/StatChip";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
+import { usePendingClick } from "../../ui/usePendingClick";
 import { uiExpandButton, uiPickerPressFeedback } from "../../ui/styles/buttonStyles";
 import {
   uiInfoModalWrapper,
   uiItemName,
   uiSectionShell,
+  uiSpinner,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
@@ -45,24 +47,29 @@ function CompanionPickerCard({
   onSelect,
 }: {
   companionReference: CompanionRef;
-  onSelect?: () => void;
+  onSelect?: () => void | Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const toggle = () => setExpanded((current) => !current);
+  const { pending, handleClick: handleSelect } = usePendingClick(
+    onSelect ? (_event: MouseEvent<HTMLButtonElement>) => onSelect() : undefined
+  );
 
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
       <div className="relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group">
         <button
           type="button"
-          onClick={onSelect ?? toggle}
+          onClick={onSelect ? handleSelect : toggle}
+          disabled={pending}
+          aria-busy={pending || undefined}
           aria-expanded={onSelect ? undefined : expanded}
           aria-label={
             onSelect
               ? `Select ${companionReference.name}`
               : `${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`
           }
-          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(Boolean(onSelect))}`}
+          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(Boolean(onSelect))} ${pending ? "cursor-wait" : ""}`}
         />
         <div className={`${uiExpandButton} relative pointer-events-none flex items-center gap-2`}>
           <div className="flex items-center gap-1.5">
@@ -77,15 +84,19 @@ function CompanionPickerCard({
               />
             </span>
           </div>
-          <button
-            type="button"
-            aria-expanded={expanded}
-            aria-label={expanded ? "Collapse companion details" : "Expand companion details"}
-            onClick={toggle}
-            className="relative z-10 pointer-events-auto p-1 -m-1 ml-auto"
-          >
-            <ExpandChevron expanded={expanded} />
-          </button>
+          {pending ? (
+            <span className={`${uiSpinner} relative z-10 h-4 w-4 ml-auto`} aria-hidden="true" />
+          ) : (
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-label={expanded ? "Collapse companion details" : "Expand companion details"}
+              onClick={toggle}
+              className="relative z-10 pointer-events-auto p-1 -m-1 ml-auto"
+            >
+              <ExpandChevron expanded={expanded} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -110,7 +121,7 @@ function CompanionPicker({
 }: {
   editable: boolean;
   currentIds: string[];
-  onSelect: (companionReference: CompanionRef) => void;
+  onSelect: (companionReference: CompanionRef) => void | Promise<void>;
   onClose: () => void;
 }) {
   const available = COMPANION_REFERENCE.filter(
@@ -309,7 +320,7 @@ function CompanionCard({
 }: {
   companion: CompanionItem;
   editable: boolean;
-  onRemove: () => void;
+  onRemove: () => void | Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(true);
   const companionReference = COMPANION_REFERENCE.find(
@@ -361,7 +372,7 @@ export function CompanionsTab({
 }: {
   companions: CompanionItem[];
   editable: boolean;
-  onUpdate: (next: CompanionItem[]) => void;
+  onUpdate: (next: CompanionItem[]) => void | Promise<void>;
 }) {
   const [showPicker, setShowPicker] = useState(false);
 
@@ -395,7 +406,7 @@ export function CompanionsTab({
         <CompanionPicker
           editable={editable}
           currentIds={companions.map((companion) => companion.referenceId)}
-          onSelect={(companionReference) => {
+          onSelect={(companionReference) =>
             onUpdate([
               ...companions,
               {
@@ -404,8 +415,8 @@ export function CompanionsTab({
                 name: companionReference.name,
                 source: companionReference.source,
               },
-            ]);
-          }}
+            ])
+          }
           onClose={() => setShowPicker(false)}
         />
       )}

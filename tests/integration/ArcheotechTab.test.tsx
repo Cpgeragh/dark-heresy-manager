@@ -1,6 +1,6 @@
 // tests/integration/ArcheotechTab.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import type {
@@ -186,5 +186,32 @@ describe("ArcheotechTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
 
     expect(onUpdate).toHaveBeenCalledWith([]);
+  });
+
+  it("shows a spinner on the equip toggle while the change is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    const item: ArcheotechItem = {
+      id: "a1",
+      name: GRENADE_NAME,
+      referenceId: "belecane-pattern-stasis-grenade",
+      type: "Grenade",
+      equipped: false,
+    };
+    renderTab({ archeotech: [item], onUpdate });
+
+    const equipButton = screen.getAllByRole("button", { name: "Equip" })[0];
+    await user.click(equipButton);
+
+    expect(equipButton).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => finish());
+    expect(equipButton).not.toHaveAttribute("aria-busy");
   });
 });

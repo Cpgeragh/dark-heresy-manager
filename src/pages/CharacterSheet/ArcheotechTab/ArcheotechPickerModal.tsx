@@ -25,8 +25,8 @@ import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScre
 interface Props {
   editable?: boolean;
   customItems?: CampaignCustomItem<"archeotech">[];
-  onSelect: (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => void;
-  onSelectCustomItem?: (item: CampaignCustomItem<"archeotech">) => void;
+  onSelect: (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => void | Promise<void>;
+  onSelectCustomItem?: (item: CampaignCustomItem<"archeotech">) => void | Promise<void>;
   onCustom: () => void;
   onClose: () => void;
   suspended?: boolean;
@@ -92,9 +92,9 @@ export function ArcheotechPickerModal({
     if (needsGmInput(ref)) {
       setPending(ref);
       resetAssignedItemMeta();
-    } else {
-      onSelect(ref);
+      return;
     }
+    return onSelect(ref);
   }
 
   function handleAssignedBack() {
@@ -102,9 +102,9 @@ export function ArcheotechPickerModal({
     resetAssignedItemMeta();
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!pending || !canConfirm) return;
-    onSelect(pending, formatMoneyInput(gmCost), gmRarity);
+    await onSelect(pending, formatMoneyInput(gmCost), gmRarity);
     handleAssignedBack();
   }
 

@@ -23,7 +23,7 @@ import { createLocalId } from "../../utils/createLocalId";
 interface NotesTabProps {
   notes: NoteEntry[];
   editable: boolean;
-  onSave: (value: NoteEntry[]) => void;
+  onSave: (value: NoteEntry[]) => void | Promise<void>;
 }
 
 function formatDate(iso: string): string {
@@ -98,9 +98,9 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
     closeAll();
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!deleteArmed) return;
-    onSave(entries.filter((entry) => entry.id !== deleteArmed.id));
+    await onSave(entries.filter((entry) => entry.id !== deleteArmed.id));
     setDeleteArmed(null);
   }
 

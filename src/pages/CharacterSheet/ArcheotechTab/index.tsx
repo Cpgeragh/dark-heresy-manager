@@ -94,7 +94,7 @@ export function ArcheotechTab({
   const addFromRef = useCallback(
     (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => {
       if (!editable) return;
-      onUpdate([
+      return onUpdate([
         ...archeotech,
         {
           id: crypto.randomUUID(),
@@ -219,7 +219,7 @@ export function ArcheotechTab({
   const removeItem = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(archeotech.filter((a) => a.id !== id));
+      return onUpdate(archeotech.filter((a) => a.id !== id));
     },
     [editable, archeotech, onUpdate]
   );
@@ -227,7 +227,7 @@ export function ArcheotechTab({
   const toggleEquip = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(archeotech.map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)));
+      return onUpdate(archeotech.map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)));
     },
     [editable, archeotech, onUpdate]
   );

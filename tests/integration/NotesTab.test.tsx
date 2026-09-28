@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { describe, it, expect } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -177,5 +177,26 @@ describe("NotesTab editing and deleting", () => {
     await user.click(screen.getByRole("button", { name: "Delete" }));
     expect(screen.queryByText("Session 12")).not.toBeInTheDocument();
     expect(screen.getByText("No notes yet.")).toBeInTheDocument();
+  });
+
+  it("shows a spinner on Delete while the removal is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onSave = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<NotesTab notes={oneEntry()} editable onSave={onSave} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(screen.getByRole("button", { name: "Delete" })).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
+
+    await act(async () => finish());
+    expect(screen.queryByRole("dialog", { name: "Delete Note" })).not.toBeInTheDocument();
   });
 });

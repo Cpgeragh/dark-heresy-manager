@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { CompanionsTab } from "../../src/pages/CharacterSheet/CompanionsTab";
 
@@ -50,5 +51,64 @@ describe("CompanionsTab", () => {
 
     expect(screen.getByRole("dialog", { name: "View Companions" })).toBeInTheDocument();
     expect(screen.getByText("4/8/12/24")).toBeInTheDocument();
+  });
+
+  it("shows a spinner on the picker card while adding a companion is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<CompanionsTab companions={[]} editable onUpdate={onUpdate} />);
+
+    await user.click(screen.getByRole("button", { name: "Add companion" }));
+    const selectButton = screen.getByRole("button", {
+      name: "Select Adeptus Arbites Cyber-Mastiff",
+    });
+    await user.click(selectButton);
+
+    expect(selectButton).toHaveAttribute("aria-busy", "true");
+    expect(selectButton).toBeDisabled();
+
+    await act(async () => finish());
+    expect(selectButton).not.toHaveAttribute("aria-busy");
+  });
+
+  it("shows a spinner on Remove while a companion removal is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(
+      <CompanionsTab
+        editable
+        onUpdate={onUpdate}
+        companions={[
+          {
+            id: "companion-1",
+            referenceId: "ih-adeptus-arbites-cyber-mastiff",
+            name: "Adeptus Arbites Cyber-Mastiff",
+            source: "IH",
+          },
+        ]}
+      />
+    );
+
+    const removeButton = screen.getByRole("button", {
+      name: "Remove Adeptus Arbites Cyber-Mastiff",
+    });
+    await user.click(removeButton);
+
+    expect(removeButton).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => finish());
+    expect(removeButton).not.toHaveAttribute("aria-busy");
   });
 });
