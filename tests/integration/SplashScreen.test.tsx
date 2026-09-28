@@ -20,4 +20,12 @@ describe("SplashScreen", () => {
     render(<SplashScreen label="Reconnecting…" />);
     expect(screen.getByText("Reconnecting…")).toBeInTheDocument();
   });
+
+  it("shows updates in the app's plain amber with animated dots", () => {
+    const { container } = render(<SplashScreen label="Updating…" />);
+    const label = container.querySelector(".text-amber-300");
+
+    expect(label).toHaveTextContent("Updating...");
+    expect(label?.querySelectorAll("span")).toHaveLength(3);
+  });
 });

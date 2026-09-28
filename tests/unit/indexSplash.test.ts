@@ -33,13 +33,16 @@ describe("static splash in index.html", () => {
     expect(script).toBeLessThan(indexHtml.indexOf('src="/src/main.tsx"'));
   });
 
-  it("says Updating when the just-upgraded note is present", () => {
+  it("shows amber Updating text with three moving dots when the just-upgraded note is present", () => {
     document.body.innerHTML = '<span id="splash-label"></span>';
     sessionStorage.setItem(PWA_JUST_UPGRADED_KEY, "1");
 
     runLabelScript();
 
-    expect(document.getElementById("splash-label")?.textContent).toBe("Updating…");
+    const label = document.getElementById("splash-label");
+    expect(label).toHaveTextContent("Updating...");
+    expect(label).toHaveClass("text-amber-300");
+    expect(label?.querySelectorAll("span")).toHaveLength(3);
   });
 
   it("leaves the label empty on a normal open", () => {

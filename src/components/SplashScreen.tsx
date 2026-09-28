@@ -1,9 +1,12 @@
+import { LoadingDots } from "../ui/LoadingDots";
+
 interface SplashScreenProps {
   label: string;
 }
 
 export function SplashScreen({ label }: SplashScreenProps) {
   const showLabel = label !== "Loading…";
+  const isUpdating = label === "Updating…";
 
   return (
     <div className="min-h-svh flex flex-col items-center justify-center gap-5 bg-slate-950 text-slate-100">
@@ -46,8 +49,19 @@ export function SplashScreen({ label }: SplashScreenProps) {
 
       <div className="h-4 flex items-center justify-center">
         {showLabel && (
-          <span className="text-[0.6rem] tracking-widest text-slate-500 uppercase leading-none whitespace-nowrap">
-            {label}
+          <span
+            className={`text-[0.6rem] tracking-widest uppercase leading-none whitespace-nowrap ${
+              isUpdating ? "text-amber-300" : "text-slate-500"
+            }`}
+          >
+            {isUpdating ? (
+              <>
+                Updating
+                <LoadingDots />
+              </>
+            ) : (
+              label
+            )}
           </span>
         )}
       </div>
