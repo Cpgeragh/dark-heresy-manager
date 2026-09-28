@@ -1,11 +1,11 @@
 // src/utils/bulkJobClient.ts
 // Drives a resumable server-side job (functions/src/shared/bulkJobs.ts) to
 // completion by repeatedly calling its "process next chunk" callable until
-// it reports done. Shared by every client feature built on that pattern —
+// it reports done. Shared by every client feature built on that pattern,
 // character/campaign/custom-item bulk jobs
-// later — so the polling loop only exists in one place.
+// later, so the polling loop only exists in one place.
 //
-// If processChunk throws, the loop stops and the error propagates — the
+// If processChunk throws, the loop stops and the error propagates. The
 // job itself stays resumable server-side (its checkpoint is untouched), so
 // the caller can retry by driving the same jobId again.
 

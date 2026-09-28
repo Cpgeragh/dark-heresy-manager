@@ -1,44 +1,49 @@
 # Dependency security assessment
 
-Last reviewed: 5 September 2026.
+Last reviewed: 28 September 2026.
 
-## Runtime audit status
+Repository paths in this document refer to the checked-out commit.
 
-Run `npm audit --omit=dev` from each package root before release and after dependency changes.
+## Runtime audit snapshot
 
-| Package root | Runtime findings | Assessment |
-| --- | ---: | --- |
-| Root application | 0 | No known runtime advisories. |
-| `functions/` | 7 moderate | Accepted transitive findings described below. |
-| `billing-guard/` | 7 moderate | Accepted transitive findings described below. |
+Run `npm audit --omit=dev` in each package root before release and after dependency changes.
 
-The Functions package uses `firebase-admin` 14.3.0 and `firebase-functions` 7.3.2. Updating Firebase Admin removed the actionable Firestore dependency findings, while updating `qs` to 6.16.0 removed the Express query-parser findings.
+| Package root     | Moderate | High | Critical | Assessment                                           |
+| ---------------- | -------: | ---: | -------: | ---------------------------------------------------- |
+| Repository root  |        0 |    0 |        0 | No known runtime advisory in the installed lockfile  |
+| `functions/`     |       10 |    0 |        0 | Accepted transitive Google SDK chain described below |
+| `billing-guard/` |       10 |    0 |        0 | Accepted transitive Google SDK chain described below |
 
-## Accepted Google SDK dependency chain
+The totals are a dated lockfile snapshot. Re-run the commands rather than copying them into release evidence.
 
-The remaining audit entries in both server packages are the inherited package-level effects of one `uuid` advisory:
+```bash
+npm audit --omit=dev
+npm --prefix functions audit --omit=dev
+npm --prefix billing-guard audit --omit=dev
+```
 
-`firebase-functions` -> `firebase-admin` -> `@google-cloud/storage` -> `retry-request` / `teeny-request` / `gaxios` -> `uuid`
+## Accepted transitive advisory
 
-They are currently accepted for these reasons:
+The server-package findings are package-level effects of the same `uuid` advisory.
 
-- Neither server package imports Firebase Admin Storage or `@google-cloud/storage`.
-- `billing-guard/` does not import Firebase Admin at all. Firebase Functions installs it as a peer dependency.
-- The advisory affects UUID v3, v5 and v6 calls that receive a caller-provided output buffer. The installed `gaxios` and `teeny-request` implementations call only `uuid.v4()`, and project code does not import `uuid`.
-- The latest compatible Firebase SDKs still install the affected Cloud Storage chain.
-- npm's proposed automatic fix downgrades Firebase Admin or Firebase Functions to old major versions. Forcing major transitive overrides would create an unsupported dependency combination.
+| Dependency edge                              | Why it is present                                      |
+| -------------------------------------------- | ------------------------------------------------------ |
+| `firebase-functions` to `firebase-admin`     | Supported Firebase Functions peer/runtime relationship |
+| `firebase-admin` to `@google-cloud/storage`  | Firebase Admin transitive dependency                   |
+| `@google-cloud/storage` to request libraries | Google Cloud transport implementation                  |
+| Request libraries to `uuid`                  | Transitive identifier utility                          |
 
-These findings must be reassessed when Google publishes a compatible dependency update, if either project begins using Cloud Storage, if the Google libraries change how they call `uuid`, or if the advisory's affected conditions change.
+The current risk is accepted because project code does not import the affected `uuid` API, `billing-guard/` does not use Firebase Admin Storage, and npm reports no compatible automatic fix for the top-level supported packages. Forced downgrades or unsupported transitive overrides are not an acceptable remediation.
 
-## Development tooling audit
+Acceptance must be reassessed when:
 
-The root development tools were reviewed on 5 September 2026. Firebase Admin was updated to 14.3.0, Firebase CLI to 15.29.0, PostCSS to 8.5.28, Vite to 7.3.6 and esbuild to 0.28.2. Compatible transitive updates removed every low, high and critical development finding.
+- Firebase Functions or Firebase Admin publishes a compatible dependency update;
+- either deployed package begins using Cloud Storage;
+- the advisory's affected API or exploit conditions change; or
+- a release audit reports a high or critical runtime finding.
 
-The full root audit retains 23 moderate package-level findings, while `npm audit --omit=dev` reports zero runtime findings. The remaining development-only paths come from:
+## Development dependencies
 
-- the Firebase Admin Cloud Storage chain assessed above; and
-- dependencies bundled with the latest Firebase CLI, including its Cloud SQL connector, Pub/Sub telemetry, MCP and Exegesis HTTP tooling, JSON streaming, Express query parsing and Google authentication utilities.
+Development-only findings do not ship in the browser bundle or deployed application code, but local tooling still processes repository input and credentials. Run a full `npm audit` when changing build, emulator, test, or deployment tooling. Do not suppress findings solely because they are development dependencies.
 
-These tools run only during local testing, emulation and deployment; none are shipped in the browser application or deployed as application runtime dependencies. The repository does not feed untrusted archives, project files, custom browser statistics, tracing baggage or query-parser input into these tools during its normal workflows. npm offers no supported compatible update for the remaining paths and its forced proposal would downgrade Firebase CLI to 10.1.1. That downgrade and unsupported transitive overrides are rejected.
-
-The development findings must be reassessed when Firebase CLI or Firebase Admin publishes a compatible dependency update, whenever local tooling begins processing untrusted input, or before adopting a new emulator or deployment workflow.
+Release decisions must record the advisory, affected path, reachable project behaviour, available supported fix, and owner. A numeric audit total without that mapping is insufficient.

@@ -1,5 +1,5 @@
 // src/pages/CharacterSheet/weapons/MeleeCard.tsx
-// MeleeCard — see MeleePicker.tsx and CustomMeleeForm.tsx for the weapon picker and custom-weapon form.
+// MeleeCard: see MeleePicker.tsx and CustomMeleeForm.tsx for the weapon picker and custom-weapon form.
 
 import { useState, useEffect } from "react";
 import type { MeleeWeapon, WeaponAmmoEntry } from "../../../types/Character";
@@ -283,7 +283,7 @@ export function MeleeCard({
     <div
       className={`${weapon.concealedBionic ? "border border-pink-500/60 bg-pink-900/10" : uiSectionShell} overflow-hidden`}
     >
-      {/* Header — always visible */}
+      {/* Header: always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
         {!forceExpanded && (
           <button

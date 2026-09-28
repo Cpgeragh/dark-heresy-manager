@@ -99,7 +99,7 @@ export function characterSummariesCollectionRef(campaignId: string) {
 
 /**
  * USER CONVERTER
- * - No id field to strip/inject — ensures the document shape is typed
+ * - No id field to strip/inject; ensures the document shape is typed
  */
 export const userConverter: FirestoreDataConverter<UserDocument> = {
   toFirestore(user: UserDocument) {

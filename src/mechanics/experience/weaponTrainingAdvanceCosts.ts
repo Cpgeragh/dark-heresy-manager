@@ -58,7 +58,7 @@ export function getUnlockedExoticWeaponSlots(
     .reduce((total, entry) => total + (entry.advance.repeatableAtThisRank ?? 1), 0);
 }
 
-/** Total XP currently spent on Weapon Training — the five fixed groups (real cost, or a DM's manual override) plus manually-costed Exotic weapons. */
+/** Total XP currently spent on Weapon Training: the five fixed groups (real cost, or a DM's manual override) plus manually-costed Exotic weapons. */
 export function getWeaponTrainingSpent(character: Character): number {
   const { career, rank } = character.header;
   const { trained, manualCosts, xpPurchases, exoticWeapons } = character.weaponTraining;

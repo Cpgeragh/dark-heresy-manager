@@ -8,7 +8,7 @@
 // outliving the ownership it protected.
 //
 // Also removes the previous owner from the campaign's memberIds when this
-// transition takes away their last character in the campaign — covering
+// transition takes away their last character in the campaign, covering
 // release and force-release, since either can leave someone with no
 // characters left here. Force-assign only ever targets an unclaimed
 // character, so previousOwnerUid is always null there and this removal

@@ -1,6 +1,6 @@
 // src/pages/Dashboard.tsx
 //
-// Unified dashboard — shows both sections on one screen:
+// Unified dashboard. Shows both sections on one screen:
 //   • DM section  (create / manage campaigns, QR codes)
 //   • Player section (campaigns you play in, claim character)
 

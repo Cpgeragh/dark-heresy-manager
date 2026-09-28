@@ -57,7 +57,7 @@ export function AdminTab({
         DM-only controls. Changes here immediately affect player access.
       </p>
 
-      {/* LATEST EVENT — available only after the DM deliberately opens History. */}
+      {/* LATEST EVENT: available only after the DM deliberately opens History. */}
       {showClaimHistory && latest && (
         <p className="text-xs lg:text-sm text-slate-400">
           Last ownership event:{" "}

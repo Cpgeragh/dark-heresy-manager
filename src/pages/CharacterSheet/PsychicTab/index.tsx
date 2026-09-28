@@ -567,7 +567,7 @@ export function PsychicTab({
     <div className="space-y-6">
       {/* PSY RATING & DISCIPLINES ────────────────────────────────────────── */}
       <div className={uiSection + " flex flex-col items-center space-y-3"}>
-        {/* Psy Rating — derived from highest Psy Rating talent */}
+        {/* Psy Rating: derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-2">
           <span className={uiFormLabel}>Psy Rating</span>
           <div className="relative inline-flex">
@@ -596,7 +596,7 @@ export function PsychicTab({
           </div>
         </div>
 
-        {/* Disciplines — read-only status chips activated through Psy Rating Talents */}
+        {/* Disciplines: read-only status chips activated through Psy Rating Talents */}
         <div>
           <p className={`${uiFormLabel} mb-1.5 text-center`}>Disciplines</p>
           <div className="flex flex-wrap gap-1.5 justify-center">

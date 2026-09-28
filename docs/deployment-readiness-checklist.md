@@ -15,7 +15,7 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 - [ ] Both runtime accounts have `Cloud Datastore User`; no project-wide `Editor` role is used by either account
 - [ ] `dh-functions-runtime` can access `RECOVERY_CODE_HMAC_SECRET` and `IDENTITY_CODE_HMAC_SECRET`; `dh-account-deletion` can access only `IDENTITY_CODE_HMAC_SECRET`
 - [ ] `dh-account-deletion` has only the custom Firebase Authentication permission `firebaseauth.users.delete`; `dh-functions-runtime` has no Firebase Authentication administration permission
-- [ ] `recoveryCodeHmacSecret` configured in Secret Manager for the target project, not the local `.secret.local` placeholder
+- [ ] `RECOVERY_CODE_HMAC_SECRET` and `IDENTITY_CODE_HMAC_SECRET` are configured in Secret Manager for the target project, not taken from local `.secret.local` placeholders
 - [ ] App Check confirmed wired in monitoring mode, deliberately not blocking requests for the target environment
 - [ ] Rate limits, idempotency, and audit logging confirmed working against a real deployed callable, not only the emulator
 - [ ] Every deployed Function uses the service account declared in `functions/src/index.ts`; only after that check, the old default Compute service account has its project-wide `Editor` role and both Recovery Code secret-access grants removed
@@ -33,11 +33,19 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 
 - [ ] Correct `.env.<environment>` file used for the build (`vite build --mode <environment>`)
 - [ ] `src/firebase.ts`'s fail-fast config check confirmed to actually catch a missing value before deploying, not just assumed
-- [ ] No client code calls a deployed Function unless that integration has actually been built and tested, currently none does
+- [ ] Every client `httpsCallable` integration has a matching deployed Function export and has been exercised against the Functions emulator; compare the client wrapper names with `functions/src/index.ts` before deployment
+
+## Hosting
+
+- [ ] `firebase.json`'s hosting predeploy runs `scripts/buildForDeploy.mjs`; confirm `GCLOUD_PROJECT` selects staging mode only for `dark-heresy-manager-staging` and that each approved production target uses the default production build
+- [ ] The hosting predeploy rebuilds `dist` and runs `npm run check:build-inventory`; do not bypass the hook or deploy older local output
+- [ ] `firebase.json` hosting headers, SPA rewrite, and predeploy hook still match the intended production behavior
+- [ ] The staging smoke test covers a direct SPA deep link, the service-worker update path, and the deployed Content Security Policy before production deployment
 
 ## Tests
 
 - [ ] `tsc -b --noEmit` clean
+- [ ] `npm run check:deployment:local` green (safety checks, production build, build inventory, and all four test layers)
 - [ ] `npm run test:all` green (client suite, rules emulator, Functions unit, Functions real-emulator, all four layers)
 
 ## Credential hygiene
@@ -60,4 +68,5 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 
 - [ ] Firestore rules: redeploy the prior version directly from git history (`git show <prior-commit>:firestore.rules`)
 - [ ] Functions: redeploy from the prior known-good git commit
+- [ ] Hosting: roll back to the previous Firebase Hosting release or redeploy the prior known-good build from its git commit, then smoke-test deep links and the service-worker update path
 - [ ] Staging specifically: disposable and isolated by design, a broken deploy there has no real-user impact

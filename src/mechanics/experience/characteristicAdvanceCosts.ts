@@ -18,7 +18,7 @@ export const CHARACTERISTIC_ADVANCE_TIERS = [
  * Cost of each of the 4 Characteristic Advance tiers for this career, in
  * order. Undefined entries mean no cost data exists yet for that career.
  * Null entries mean this characteristic is confirmed unbuyable for this
- * career (e.g. Tech-Priest's Fellowship) — distinct from "not transcribed
+ * career (e.g. Tech-Priest's Fellowship); distinct from "not transcribed
  * yet".
  */
 export function getCharacteristicTierCosts(

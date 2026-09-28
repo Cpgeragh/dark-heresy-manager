@@ -7,7 +7,7 @@
 //
 // Order matters: cheapest, most decisive checks run first (auth, request
 // shape) before anything that costs a Firestore read/write (rate limiting,
-// the handler itself). Audit and metric recording never fail the call —
+// the handler itself). Audit and metric recording never fail the call;
 // they're observability, not a gate, so a logging failure never masks or
 // blocks a real result.
 

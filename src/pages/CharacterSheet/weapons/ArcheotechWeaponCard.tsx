@@ -87,7 +87,7 @@ export function ArcheotechWeaponCard({
 
   return (
     <div className={containerClass}>
-      {/* Header — always visible */}
+      {/* Header: always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
         <button
           type="button"
@@ -145,7 +145,7 @@ export function ArcheotechWeaponCard({
             </div>
           )}
 
-          {/* Stat chips — only for items with structured weapon data */}
+          {/* Stat chips: only for items with structured weapon data */}
           {hasWeaponStats && (
             <div className="flex flex-wrap gap-1.5">
               {range && <StatChip label="Range" value={range} />}

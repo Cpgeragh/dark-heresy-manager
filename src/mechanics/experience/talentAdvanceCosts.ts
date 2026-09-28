@@ -123,7 +123,7 @@ export function getTalentRankChips(
   return chips;
 }
 
-/** Total XP currently spent on Talents and Traits — real cost first, falling back to a manually-entered one. Granted entries are free by construction. */
+/** Total XP currently spent on Talents and Traits: real cost first, falling back to a manually-entered one. Granted entries are free by construction. */
 export function getTalentsSpent(character: Character): number {
   const career = character.header.career;
   const rank = character.header.rank;

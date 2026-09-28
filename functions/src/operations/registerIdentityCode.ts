@@ -1,9 +1,9 @@
 // functions/src/operations/registerIdentityCode.ts
 //
-// Mints and hashes a user's identity recovery code — the
-// first server-side registration point for whole-account recovery, mirrors
-// registerRecoveryCode.ts's exact HMAC pattern but for identity codes
-// rather than a single character. identitySecret/{uid}'s plaintext copy is
+// Mints and hashes a user's identity recovery code. This is the
+// first server-side registration point for whole-account recovery; it
+// mirrors registerRecoveryCode.ts's exact HMAC pattern but for identity
+// codes rather than a single character. identitySecret/{uid}'s plaintext copy is
 // server-readable only; the client reveals it through a protected callable.
 // The hash-derived identityRecoveryIndex/{hash} entry is the recovery proof.
 //

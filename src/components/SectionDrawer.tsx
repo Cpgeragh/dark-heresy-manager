@@ -148,7 +148,7 @@ function SectionDrawerContent({
 
   return (
     <>
-      {/* Trigger — hamburger only */}
+      {/* Trigger: hamburger only */}
       <button
         type="button"
         onClick={open}
@@ -188,7 +188,7 @@ function SectionDrawerContent({
 
         {/* Sliding panels */}
         <div className="relative overflow-hidden flex-1">
-          {/* Level 1 — Categories */}
+          {/* Level 1: Categories */}
           <div
             className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
               level === "categories" ? "translate-x-0" : "-translate-x-full"
@@ -210,7 +210,7 @@ function SectionDrawerContent({
             </ul>
           </div>
 
-          {/* Level 2 — Pages */}
+          {/* Level 2: Pages */}
           <div
             className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
               level === "pages" ? "translate-x-0" : "translate-x-full"

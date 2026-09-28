@@ -6,8 +6,8 @@
 // the server resolves which character that actually is, so claiming is
 // only possible by someone who genuinely has the code. Both the existence
 // and ownership checks happen inside the transaction, not as a pre-read,
-// so a genuine race between two claim attempts — or a character deleted
-// mid-flight — fails cleanly instead of silently overwriting.
+// so a genuine race between two claim attempts (or a character deleted
+// mid-flight) fails cleanly instead of silently overwriting.
 
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";

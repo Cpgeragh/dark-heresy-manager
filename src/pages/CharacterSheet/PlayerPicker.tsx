@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet/PlayerPicker.tsx
 // Lets a DM pick a campaign member by name to force-assign a character to.
-// Names are resolved from each member's public profile on open — a one-off
+// Names are resolved from each member's public profile on open, a one-off
 // fetch, not a live subscription, since this is an occasional admin action.
 
 import { useEffect, useState } from "react";

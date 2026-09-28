@@ -1,8 +1,8 @@
 // functions/src/operations/linkDevice.ts
 //
 // Connects a device to a permanent account using an identity recovery
-// code. Looks the code up by its HMAC-derived hash in identityRecoveryIndex
-// — the same trust boundary claimCharacter relies on for character codes: a
+// code. Looks the code up by its HMAC-derived hash in identityRecoveryIndex,
+// the same trust boundary claimCharacter relies on for character codes: a
 // hash match alone is proof the caller knew the real code.
 
 import { getFirestore, FieldValue } from "firebase-admin/firestore";

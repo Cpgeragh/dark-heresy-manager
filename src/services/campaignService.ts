@@ -118,7 +118,7 @@ const callProcessCampaignDeletionChunk = httpsCallable<
 
 /**
  * Starts a resumable campaign-deletion job and returns its exact document
- * count, without deleting anything yet — the preview step for a delete
+ * count, without deleting anything yet, the preview step for a delete
  * confirmation. Pass the returned jobId to deleteCampaign to run it.
  */
 export async function preflightCampaignDeletion(

@@ -160,7 +160,7 @@ export async function repairCharacterSummaries(campaignId: string): Promise<numb
 
 /**
  * Patch update a character document with a partial object.
- * Only the fields in `partial` will be updated — Firestore merges the
+ * Only the fields in `partial` will be updated; Firestore merges the
  * partial object at the field level. `id` in partial (if present) is
  * ignored by the converter.
  */
@@ -340,7 +340,7 @@ const callProcessCharacterDeletionChunk = httpsCallable<
 
 /**
  * Starts a resumable character-deletion job and returns its exact document
- * count, without deleting anything yet — the preview step for a delete
+ * count, without deleting anything yet, the preview step for a delete
  * confirmation. Pass the returned jobId to deleteCharacter to run it.
  */
 export async function preflightCharacterDeletion(

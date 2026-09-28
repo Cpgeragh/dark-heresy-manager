@@ -1,7 +1,7 @@
 // functions/src/operations/reconcileCharacterSpentXp.ts
 //
 // Corrects the derived experience.spent total from a client-supplied
-// recomputation (src/features/experience/xpSpent.ts's getSpentXp — pure
+// recomputation (src/features/experience/xpSpent.ts's getSpentXp, pure
 // arithmetic over already-owned purchases). This operation validates the
 // value's structure but does not re-evaluate its game-rule correctness. It
 // reads the character inside its own transaction and merges only

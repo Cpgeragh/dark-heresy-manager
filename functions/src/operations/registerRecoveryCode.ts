@@ -1,7 +1,7 @@
 // functions/src/operations/registerRecoveryCode.ts
 //
 // (Re)generates a character's Recovery Code and registers its
-// HMAC-derived lookup entry. The raw code is never chosen by the client —
+// HMAC-derived lookup entry. The raw code is never chosen by the client;
 // only this operation mints one, which is what makes the derived lookup ID
 // real protection rather than a hash of something the client controls. The
 // character is read inside the transaction, not as a pre-read, so two

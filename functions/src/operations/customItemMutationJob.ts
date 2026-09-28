@@ -17,11 +17,11 @@
 //
 // The item-level transition (publish or archive) is always one or two small
 // document writes regardless of campaign size, so it happens once,
-// synchronously, in start — not chunked. Unlike the two deletion jobs this
+// synchronously, in start, not chunked. Unlike the two deletion jobs this
 // is a flat, single-level sweep (no nested subcollections), so the
 // checkpoint is just a character-id cursor. totalCount/processedCount count
 // characters *scanned* (an exact, cheap aggregate count, consistent
-// denominator/numerator), not characters actually mutated — Firestore has
+// denominator/numerator), not characters actually mutated. Firestore has
 // no aggregate query for "characters whose gear array contains X", so an
 // exact mutated-count would need the same full-collection read the client
 // already does today, which is exactly the cost this job exists to avoid

@@ -84,7 +84,7 @@ interface Props {
   query: string;
   onQueryChange: (q: string) => void;
   onClose: () => void;
-  /** True when the filtered list is empty — renders the empty-state message. */
+  /** True when the filtered list is empty: renders the empty-state message. */
   isEmpty: boolean;
   emptyMessage?: string;
   /** Content for a non-close header action, such as a two-step modal's back arrow. */

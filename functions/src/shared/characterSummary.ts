@@ -1,7 +1,7 @@
 // functions/src/shared/characterSummary.ts
 //
 // Server-side mirror of characterService.ts's computeCharacterSummary and
-// touchesCharacterSummary — the restricted per-character summary record
+// touchesCharacterSummary, the restricted per-character summary record
 // (campaigns/{campaignId}/characterSummaries/{characterId}) other campaign
 // members can read. functions/ cannot import from src/, so this is
 // deliberately duplicated and must be kept in sync by hand.

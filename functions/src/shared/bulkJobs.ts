@@ -22,14 +22,14 @@ import { IDEMPOTENCY_COLLECTION } from "./idempotency.js";
 const BULK_JOBS_COLLECTION = "bulkJobs";
 const LEASE_DURATION_MS = 60 * 1000;
 // A job untouched this long since creation is treated as abandoned the next
-// time anything tries to access it — expiry is lazy and access-triggered
+// time anything tries to access it. Expiry is lazy and access-triggered
 // only, not a proactive sweep, so an abandoned job's Firestore row lingers
 // until something happens to read it again.
 const JOB_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
 // Bounds a single job's processing time and blast radius. At Blaze pricing
 // even 100,000 document operations costs cents, so this ceiling isn't
-// protecting a cost quota — it's keeping any one job's scope contained.
+// protecting a cost quota, it's keeping any one job's scope contained.
 export const MAX_JOB_TOTAL_COUNT = 100_000;
 
 export type BulkJobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
@@ -322,9 +322,9 @@ export async function cancelBulkJob(jobId: string, actorUid: string): Promise<vo
 
 // A chunk failure is retried automatically, rather than permanently failing
 // the job, when it looks transient (a Firestore/gRPC blip) and the job
-// hasn't already used up its retry budget. Everything else — a deliberate
+// hasn't already used up its retry budget. Everything else (a deliberate
 // HttpsError like permission-denied/not-found/failed-precondition, or any
-// error with no recognisable code — is treated as permanent, since only a
+// error with no recognisable code) is treated as permanent, since only a
 // genuinely transient failure deserves an automatic retry.
 export const MAX_CHUNK_RETRIES = 5;
 
@@ -367,8 +367,8 @@ async function releaseLeaseForRetry(jobId: string, leaseId: string, error: strin
  * failJob directly. A retriable-looking error under the retry cap releases
  * the lease and leaves the job resumable (checkpoint untouched) instead of
  * failing it, returning true so the caller can return its normal in-progress
- * result rather than throwing. Anything else — a non-retriable error, or
- * one that's exhausted the retry cap — permanently fails the job via
+ * result rather than throwing. Anything else (a non-retriable error, or
+ * one that's exhausted the retry cap) permanently fails the job via
  * failJob, returning false so the caller rethrows it.
  */
 export async function handleChunkFailure(

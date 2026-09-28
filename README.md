@@ -1,57 +1,119 @@
 # Dark Heresy Manager
 
-A campaign and character management app for Dark Heresy (1st Edition), built as an installable Progressive Web App. A Game Master runs one or more campaigns; players claim and manage their own character sheets within them.
+Dark Heresy Manager is an installable Progressive Web App for running Dark Heresy First Edition campaigns. Game Masters manage the campaign, while players claim characters with Recovery Codes and use the same account across connected devices.
 
-## Tech stack
+Repository paths and documentation links refer to the checked-out commit.
 
-- React 19 + TypeScript, built with Vite
-- Tailwind CSS
-- Firebase: Firestore (data), Authentication (anonymous sign-in), Cloud Functions (protected server-side operations), Firebase Hosting
-- Vite PWA plugin for offline support and installability
+## Product capabilities
 
-## Project structure
+| Area         | Current capability                                                                                                                                   |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accounts     | Anonymous Firebase Authentication backed by permanent application accounts, Recovery Codes, and up to 10 connected devices                           |
+| Campaigns    | Game Master campaign administration, active and archived campaigns, and bounded membership                                                           |
+| Characters   | Twenty character-sheet sections, portrait storage in the character document, JSON export and import, ownership claims, and controlled player editing |
+| Sessions     | Private Game Master notes, member-safe summaries, attendance, XP awards, reversal, and repair tooling                                                |
+| Messaging    | One private thread per character with 100-message pages and a bounded Game Master inbox                                                              |
+| Custom items | Draft, publish, archive, restore, version, propagate, and remove workflows                                                                           |
+| Offline use  | Installable PWA shell and persistent multi-tab Firestore cache; callable mutations require a network connection                                      |
 
-- `src/` — the React application (pages, character-sheet tabs, hooks, services, Firestore data layer, game-rules reference data)
-- `functions/` — an independent Cloud Functions project for server-side operations that can't be trusted to the client (recovery codes, ownership transfers, resumable bulk jobs)
-- `billing-guard/` — a small standalone Cloud Function that acts as an automatic billing kill switch
-- `tests/` — unit, integration, Firestore-rules, and Cloud Functions test suites
-- `docs/` — architecture, security, backup, and deployment documentation (see below)
+## Technology
 
-## Getting started
+| Layer           | Implementation                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| Client          | React 19, TypeScript, Vite, Tailwind CSS                                                             |
+| Backend         | Firebase Authentication, Firestore, and second-generation callable Cloud Functions                   |
+| Hosting         | Firebase Hosting with SPA rewrites, security headers, and PWA cache controls                         |
+| Tests           | Vitest, Firebase Local Emulator Suite, and Firestore Rules Unit Testing                              |
+| Cost protection | Bounded queries, product limits, callable rate limits, runtime limits, and an isolated billing guard |
+
+## Local requirements
+
+| Requirement          | Reason                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| Node.js 22           | Matches the Cloud Functions runtime declared by the `engines.node` field in `functions/package.json` |
+| npm                  | Installs the root application and the independent Functions packages                                 |
+| Java JDK 11 or newer | Required by the Firestore emulator                                                                   |
+
+Install the application and Functions dependencies:
 
 ```bash
 npm install
-npm run dev
+npm --prefix functions install
 ```
 
-## Scripts
+Install `billing-guard` dependencies only when testing or deploying that isolated project:
 
-**App**
-- `npm run dev` — start the Vite dev server
-- `npm run build` — typecheck and build for production
-- `npm run lint` — run ESLint
-- `npm run format` / `npm run format:check` — run or check Prettier across the app, tests, Functions, and billing-guard
+```bash
+npm --prefix billing-guard install
+```
 
-**Tests**
-- `npm run test` — Vitest in watch mode (fast suite)
-- `npm run test:run` — the fast suite plus the heavier integration files, once
-- `npm run test:rules` — Firestore security-rules tests against the local emulator
-- `npm run test:functions` — Cloud Functions tests against the local emulator
-- `npm run test:functions:unit` — Cloud Functions unit tests (mocked Firestore, no emulator)
-- `npm run test:all` — every suite above
+## Safe local development
 
-**Safety checks**
-- `npm run check:safety` — local secret-scanning and lockfile-consistency checks
-- `npm run check:deployment:local` — safety checks, production build, and the full test suite
+Use the guarded local environment for application work that must not contact staging or production:
+
+```bash
+npm run performance:local
+```
+
+This command builds the Functions package, starts the Auth, Firestore, and Functions emulators for the fixed `dh-test` project, and serves the app at `http://127.0.0.1:4175`.
+
+Use `npm run dev` only with a populated `.env` that intentionally targets a Firebase project. The application validates these keys in `src/firebase.ts` inside `requiredEnvVars`:
+
+```text
+VITE_FIREBASE_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID
+VITE_RECAPTCHA_SITE_KEY
+```
+
+Copy `.env.example` to `.env`, supply the selected project's public web configuration, and confirm the project ID before starting Vite. Staging also requires the reCAPTCHA Enterprise site key. Do not place server secrets or service-account credentials in a `VITE_` variable.
+
+## Common commands
+
+| Command                          | Purpose                                                                                       |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run dev`                    | Start Vite with the Firebase configuration in the selected environment file                   |
+| `npm run build`                  | Type-check the repository and create a production build                                       |
+| `npm run preview`                | Serve the most recent production build locally                                                |
+| `npm run lint`                   | Run ESLint                                                                                    |
+| `npm run format:check`           | Check source formatting without changing files                                                |
+| `npm run test`                   | Run the fast application suite in watch mode                                                  |
+| `npm run test:run`               | Run the complete fast and heavy application suites once                                       |
+| `npm run test:rules`             | Run Firestore rules tests against the local emulator                                          |
+| `npm run test:functions:unit`    | Run mocked Functions unit tests                                                               |
+| `npm run test:functions`         | Run client-to-Functions integration tests against local emulators                             |
+| `npm run test:all`               | Run all four test layers                                                                      |
+| `npm run check:safety`           | Check local secrets and lockfile consistency without a network request                        |
+| `npm run check:build-inventory`  | Validate the generated PWA asset and precache inventory                                       |
+| `npm run check:deployment:local` | Run safety checks, the production build, build-inventory validation, and all four test layers |
+
+The complete command catalogue and contribution workflow are in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Repository layout
+
+| Path             | Responsibility                                                                               |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| `src/`           | React pages, shared UI, hooks, services, Firestore helpers, domain logic, and reference data |
+| `functions/`     | Protected callable operations and their independent unit tests                               |
+| `billing-guard/` | Isolated Pub/Sub billing guard deployed to its own project                                   |
+| `tests/`         | Application, integration, Firestore rules, and callable-emulator tests                       |
+| `scripts/`       | Local safety, deployment build, PWA inventory, and performance-environment tooling           |
+| `docs/`          | Architecture, operations, policies, performance contracts, and manual verification           |
 
 ## Documentation
 
-- [`docs/architecture.md`](docs/architecture.md) — system overview, data model, and the authoritative product-limits table
-- [`SECURITY_RULES.md`](SECURITY_RULES.md) — Firestore security rules reference
-- [`docs/manual-test-checklist.md`](docs/manual-test-checklist.md) — manual functional test checklist
-- [`docs/accessibility-test-checklist.md`](docs/accessibility-test-checklist.md) — accessibility test checklist
-- [`docs/backup-policy.md`](docs/backup-policy.md) — backup configuration and retention
-- [`docs/data-lifecycle-policy.md`](docs/data-lifecycle-policy.md) — what happens to data over time (retention, deletion, cleanup)
-- [`docs/deployment-readiness-checklist.md`](docs/deployment-readiness-checklist.md) — pre-deployment checklist
-- [`docs/billing-kill-switch.md`](docs/billing-kill-switch.md) — the automatic billing kill switch
-- [`docs/dependency-security-assessment.md`](docs/dependency-security-assessment.md) — dependency security assessment
+| Document                                                                 | Use                                                                  |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [Application architecture](docs/architecture.md)                         | Runtime boundaries, data ownership, limits, and deployment structure |
+| [Firestore security boundary](SECURITY_RULES.md)                         | Current client access rules and server-only paths                    |
+| [Data lifecycle policy](docs/data-lifecycle-policy.md)                   | Retention, deletion, recovery data, and exports                      |
+| [Backup policy](docs/backup-policy.md)                                   | Current backup schedule and restore boundary                         |
+| [Billing guard](docs/billing-kill-switch.md)                             | Budget notification, dry-run, deactivation, and recovery procedure   |
+| [Dependency security assessment](docs/dependency-security-assessment.md) | Dated runtime audit results and accepted transitive risk             |
+| [Performance verification](docs/final-performance-verification.md)       | Current performance regression standard                              |
+| [Manual test checklist](docs/manual-test-checklist.md)                   | Functional manual test coverage                                      |
+| [Accessibility checklist](docs/accessibility-test-checklist.md)          | Screen-reader, keyboard, and contrast coverage                       |
+| [Deployment readiness checklist](docs/deployment-readiness-checklist.md) | Staging and production release gate                                  |

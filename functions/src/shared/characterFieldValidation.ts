@@ -3,7 +3,7 @@
 // Server-side validators for individual Character document fields, used by
 // patchCharacterField. functions/ cannot import from src/, so these limits
 // are deliberately duplicated from src/constants/productLimits.ts and must
-// be kept in sync by hand — the same coupling already accepted for the
+// be kept in sync by hand, the same coupling already accepted for the
 // Recovery Code format (recoveryCode.ts) and the custom-item copy-mutation
 // logic (customItemCopyMutation.ts).
 
@@ -21,7 +21,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * Recursively bounds a single field's value the same way the client's
- * assertNestedDataBounds bounds the whole character document — byte size,
+ * assertNestedDataBounds bounds the whole character document: byte size,
  * array length, object key count, nesting depth, and per-string character
  * length. Shared by every field validator in this file, present and future.
  */

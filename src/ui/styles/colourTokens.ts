@@ -1,10 +1,10 @@
 // src/ui/styles/colourTokens.ts
 
-// Lighter border and dimmer text than colourArcheotech — see colourArcheotech for the richer amber used for archeotech items.
+// Lighter border and dimmer text than colourArcheotech. See colourArcheotech for the richer amber used for archeotech items.
 export const colourAmberFaint = "border-amber-400/40 bg-amber-500/10 text-amber-300";
 export const colourFuchsia = "border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300";
 export const colourStacks = "border-sky-700/50 bg-sky-500/10 text-sky-400";
-// Darker border, brighter text — see colourAmberFaint for the lighter amber used for draft status and ammo types.
+// Darker border, brighter text. See colourAmberFaint for the lighter amber used for draft status and ammo types.
 export const colourArcheotech = "border-amber-700/50 bg-amber-500/10 text-amber-400";
 export const colourViolet = "border-violet-500/50 bg-violet-500/10 text-violet-300";
 export const colourEmerald = "border-emerald-500/50 bg-emerald-500/10 text-emerald-300";
@@ -32,7 +32,7 @@ export const colourRose = "border-rose-500/50 bg-rose-500/10 text-rose-300";
 export const colourCyan = "border-cyan-500/50 bg-cyan-500/10 text-cyan-300";
 export const colourPurple = "bg-purple-700/40 border-purple-500 text-purple-300";
 export const colourTeal = "bg-teal-900/40 border-teal-700/50 text-teal-300";
-// Lighter variant — used for weapon class and ammo-type chips (Basic weapon class, Exotic ammo).
+// Lighter variant: used for weapon class and ammo-type chips (Basic weapon class, Exotic ammo).
 export const colourTealLight = "border-teal-500/50 bg-teal-500/10 text-teal-300";
 export const colourOrange = "border-orange-500/50 bg-orange-500/10 text-orange-300";
 export const colourActiveSky =
@@ -43,7 +43,7 @@ export const colourActiveOrange =
   "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50";
 export const colourActiveEmerald =
   "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50";
-// Lighter "outlined" active/pressed style — border+text only, hover tint, no solid fill.
+// Lighter "outlined" active/pressed style: border+text only, hover tint, no solid fill.
 // Distinct from colourActiveXxx above (solid bg-600/80 fill + white text).
 export const colourActiveOutlineTeal =
   "border-teal-400 text-teal-400 font-semibold hover:bg-teal-400/10";
@@ -61,5 +61,5 @@ export const colourButtonOutlineOrange =
   "!border-orange-500 !text-orange-400 enabled:hover:!bg-orange-500/10";
 export const colourButtonOutlineCyan =
   "!border-cyan-500 !text-cyan-300 enabled:hover:!bg-cyan-500/10";
-// Same style, no hover — for static/non-interactive display (e.g. a chip that isn't itself clickable).
+// Same style, no hover: for static/non-interactive display (e.g. a chip that isn't itself clickable).
 export const colourOutlineFuchsia = "border-fuchsia-400 text-fuchsia-400 font-semibold";

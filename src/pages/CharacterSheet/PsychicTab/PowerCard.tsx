@@ -35,7 +35,7 @@ interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   pickerMode?: boolean;
 }
 
-/** Shared stat row — used in both the card and the InfoModal header. */
+/** Shared stat row: used in both the card and the InfoModal header. */
 function PowerIdentityChips({
   power,
   talentSourceName,

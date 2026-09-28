@@ -76,7 +76,7 @@ export function CharacteristicField({
   }, [base]);
 
   const handleBaseChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    // Strip anything that isn't a digit — no minus, no decimal, no letters
+    // Strip anything that isn't a digit: no minus, no decimal, no letters
     setDraft(e.target.value.replace(/\D/g, ""));
   }, []);
 

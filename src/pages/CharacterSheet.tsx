@@ -268,7 +268,7 @@ export default function CharacterSheet({
   // permanent even if a field is changed later.
   const backgroundSatisfied = character ? isBackgroundComplete(character) : true;
 
-  // Single source of truth for experience.spent — recalculated from what's
+  // Single source of truth for experience.spent, recalculated from what's
   // actually owned. The local comparison avoids a transaction read in the
   // normal case; the service rechecks a fresh snapshot before correcting only
   // the derived nested field, making concurrent tabs settle after one write.
@@ -291,13 +291,13 @@ export default function CharacterSheet({
       const atFloor = onCharSheet && !window.location.search.includes("tab=");
 
       if (!onCharSheet) {
-        // Safety net — redirect back if somehow the sentinel was exhausted
+        // Safety net: redirect back if somehow the sentinel was exhausted
         navigate(`${basePath}?tab=stats`, { replace: true });
       } else if (atFloor) {
-        // Hit the floor (stats, no tab param) — replenish the sentinel
+        // Hit the floor (stats, no tab param), replenish the sentinel
         window.history.pushState(null, "", window.location.href);
       }
-      // Tab-to-tab back navigation — do nothing, works normally
+      // Tab-to-tab back navigation: do nothing, works normally
     };
 
     window.addEventListener("popstate", handlePopState);

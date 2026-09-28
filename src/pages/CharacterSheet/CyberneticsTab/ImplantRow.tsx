@@ -182,7 +182,7 @@ export function ImplantRow({
         ⓘ
       </button>
 
-      {/* Craftsmanship badge — clickable when editable */}
+      {/* Craftsmanship badge: clickable when editable */}
       {/* Remove */}
       {editable && !item.grantedByTalentEntryUid && (
         <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />

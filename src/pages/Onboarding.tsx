@@ -1,6 +1,6 @@
 // src/pages/Onboarding.tsx
 // First-launch screen: the user gets a recovery code, or links this browser to
-// an existing identity. Only shown once — after completion the user doc is marked
+// an existing identity. Only shown once; after completion the user doc is marked
 // onboarded: true and this screen is never shown again.
 
 import { useState, useEffect, useLayoutEffect, useRef } from "react";

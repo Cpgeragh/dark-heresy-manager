@@ -53,7 +53,7 @@ export function naturalArmourBonus(traits: TalentEntry[]): number {
   return Number.isFinite(value) ? value : 0;
 }
 
-/** Total worn AP for a given location — highest value wins, pieces do not stack */
+/** Total worn AP for a given location: highest value wins, pieces do not stack */
 export function wornApAt(pieces: WornArmourPiece[], loc: ArmourLocationKey): number {
   const values = pieces
     .filter((p) => p.worn)

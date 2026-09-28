@@ -1,5 +1,5 @@
 // src/pages/CharacterSheet/weapons/GrenadeCard.tsx
-// GrenadeCard — see GrenadePicker.tsx and CustomGrenadeForm.tsx for the picker and custom-item form.
+// GrenadeCard: see GrenadePicker.tsx and CustomGrenadeForm.tsx for the picker and custom-item form.
 
 import { useState } from "react";
 import type { GrenadeItem } from "../../../types/Character";
@@ -78,7 +78,7 @@ export function GrenadeCard({
     setExpanded(expansionSource);
   }
 
-  // ── Stowed overflow card — read-only, always collapsed ────────────────────
+  // Stowed overflow card: read-only, always collapsed
   if (isStowedCard) {
     return (
       <div className={uiSection + " opacity-60"}>
@@ -112,7 +112,7 @@ export function GrenadeCard({
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
-      {/* Header — always visible */}
+      {/* Header: always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
         <button
           type="button"

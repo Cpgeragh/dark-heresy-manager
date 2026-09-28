@@ -1,5 +1,5 @@
 // src/hooks/useCampaignCharacterSummaries.ts
-// Real-time subscription to a campaign's restricted character summaries —
+// Real-time subscription to a campaign's restricted character summaries:
 // name, player name, portrait, career, rank only. Powers the player-facing
 // party roster; never carries a Recovery Code.
 

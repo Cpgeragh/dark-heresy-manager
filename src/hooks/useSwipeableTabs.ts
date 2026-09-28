@@ -7,7 +7,7 @@ type TransitionState = "idle" | "sliding";
  * Trauma/Disorders" or "Malignancies/Minor Mutations/Major Mutations" cards).
  *
  * Claims the gesture properly via `preventDefault` once a drag is recognised
- * as horizontal, instead of only comparing touch start/end position — that
+ * as horizontal, instead of only comparing touch start/end position; that
  * matters because otherwise the browser/OS's own edge-swipe navigation
  * competes for the same touch the whole time and can win. Reacts to touches
  * starting anywhere in the container, including on top of buttons/links/

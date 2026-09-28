@@ -519,7 +519,7 @@ export function CharacteristicsTab({
         )}
       </div>
 
-      {/* Main stats — mount only the active responsive layout. */}
+      {/* Main stats: mount only the active responsive layout. */}
       {!isDesktopLayout ? (
         <div ref={containerRef} className="overflow-x-hidden py-3">
           <div

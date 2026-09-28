@@ -524,7 +524,7 @@ export function BackgroundTab({
         </section>
       </div>
 
-      {/* Mobile — tab switcher between Appearance and Background */}
+      {/* Mobile: tab switcher between Appearance and Background */}
       <div ref={containerRef} className="lg:hidden space-y-4">
         <SegmentedTabs
           id={BACKGROUND_TABS_ID}
@@ -545,7 +545,7 @@ export function BackgroundTab({
         </section>
       </div>
 
-      {/* Desktop — side by side */}
+      {/* Desktop: side by side */}
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
         {appearanceSection}
         {backgroundSection}

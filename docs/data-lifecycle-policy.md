@@ -1,41 +1,63 @@
-# Data Lifecycle Policy
+# Data lifecycle policy
+
+Repository paths in this document refer to the checked-out commit.
 
 ## Account deletion
 
-Account deletion is available from every device connected to the account. A user who owns campaigns must transfer or delete every owned campaign before deleting the account. Disconnecting a device removes only that device's access; disconnecting the final device requires an additional warning because the recovery code is then the only way back into the account.
+An account that owns campaigns cannot be deleted. The user must transfer or delete every owned campaign first.
 
-An approved deletion releases every character claimed by the account, removes the account from affected campaign memberships, revokes its identity-recovery code, removes direct and inbound device links, deletes the user and public-profile documents, and then deletes the anonymous Firebase Authentication user. Firestore cleanup is bounded and atomic; an operation that would exceed the safe transaction ceiling is refused before any account data changes.
+The protected account-deletion operation performs a bounded Firestore transaction that:
 
-Historical claim entries remain with their character until that character or campaign is deleted. New protected-operation audit entries retain only a stable SHA-256 actor identifier, not the raw Firebase UID; audit documents written before that change may still contain a raw UID. Neither claim history nor new audit records contain a Recovery Code or the user's profile name. Aggregate usage metrics contain no UID.
+- releases characters owned by the account;
+- removes the account from affected campaign memberships;
+- deletes the identity recovery index and plaintext identity secret;
+- deletes every `userLinks` document whose `primaryUid` points to the account;
+- deletes the account record and public profile; and
+- resets linked-device onboarding documents where applicable.
 
-## Campaign ownership
+The operation rejects the request before writing if cleanup would exceed the 440-write transaction ceiling. It does not delete the primary `users/{accountId}` document as part of that transaction.
 
-Account deletion never silently deletes or abandons an owned campaign. The owner must explicitly transfer or delete it first. Campaign deletion removes its characters, claim logs, XP proposals, character summaries, private sessions, member-safe session summaries, threads and messages, custom items and their versions, Recovery Index entries, and finally the campaign document.
+After Firestore cleanup, the function asks Firebase Authentication to delete the collected linked-device UIDs. Authentication identity coverage when linked-device records exist is `Pending verification`; do not promise deletion of every historical Authentication UID until an integration test proves the exact set.
+
+Claim history remains with each character. Protected-operation audit records use a stable SHA-256 actor identifier for new entries; older records may contain the earlier identifier format. Backups and exports are unaffected by online account deletion.
+
+## Campaign and character deletion
+
+Campaign and character deletion use protected resumable jobs. The protected preflight authorizes the caller, counts affected documents, and stores a job without deleting descendants. The client displays that count; user confirmation starts bounded chunk processing. The server reauthorizes processing but does not compare a new count at confirmation time. Parent documents are deleted last.
+
+| Deletion target | Descendant data removed before the parent                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Character       | Claim logs, legacy XP proposals, messages, thread summary, recovery index, and character summary                                                                    |
+| Campaign        | Characters and their descendants, sessions and summaries, threads and messages, custom items and versions, and recovery indexes                                         |
+
+Preflight fails with `failed-precondition` when a target character lacks a valid Recovery Code because its Recovery Index entry cannot be located safely. It fails with `resource-exhausted` above 100,000 affected documents. If processing stops, the job can resume. The UI must not claim completion until the backend reports the terminal completed state.
+
+## Ownership and membership
+
+Releasing a character clears its owner and player-edit permission. When the account owns no remaining character in that campaign, the ownership operation may remove the account from campaign membership according to the protected transition contract.
+
+Account deletion never silently deletes an owned campaign or leaves it without a DM.
 
 ## Sessions
 
-Full session documents, including private DM notes, are readable only by the campaign DM or a device linked to that DM. Campaign members read a separate session-summary document containing the date, shared recap, XP, attendees, creation time, and applied-XP state; it never contains DM notes. Session creation, shared-field editing, XP application, and deletion update the private record and its safe summary atomically. The protected DM-only repair operation rebuilds historical summaries from an entirely validated source page and stops before any write if the campaign exceeds 200 sessions or any source record is invalid.
+Full session documents may contain private DM notes. Member-safe summaries deliberately exclude those notes. Protected session operations keep the full record and summary consistent and apply XP under the same validated operation.
 
-## Character ownership and deletion
+The DM-only summary repair operation validates its entire source page before writing. It refuses a campaign beyond its supported 200-session page and refuses invalid source data without partial repair.
 
-Releasing a claimed character clears its owner and editing permission. The user is removed from campaign membership when they own no remaining character there. Character deletion removes its claim log, XP proposals, message thread, Recovery Index entry, character summary, and character document.
+## Messages and claim history
 
-## Messages
+Messages remain until the DM clears a thread or its character or campaign is deleted. Clearing runs in bounded pages and resets the thread summary after message removal. No automatic age-based or count-based retention is promised.
 
-Messages are retained until a DM clears the thread or the related character or campaign is deleted. There is no automatic numeric-retention promise. Clearing occurs in bounded pages and resets the thread summary after all message documents are removed.
-
-## Claim logs
-
-Claim logs are ownership-history records. They are retained until their character or campaign is deleted. The 50-entry setting used by the interface is a page size, not a retention limit.
+Claim logs remain until their character or campaign is deleted. The 50-entry client value is a read-page limit, not a retention limit.
 
 ## Custom-item versions
 
-Versions are retained until their custom item or campaign is deleted. There is no automatic numeric-retention promise.
+Versions remain until their custom item or campaign is deleted. Firestore rules restrict each `versionNumber` and the parent item's `latestVersionNumber` to the range 1 through 50, which blocks version 51 in the normal incrementing client workflow. They do not count distinct version documents, require version numbers to be unique or sequential, or enforce a 50-document collection limit. No automatic retention process removes older versions.
 
 ## Recovery data
 
-A character Recovery Code can be revoked independently. Claiming consumes the submitted code and rotates the character to a new code. An account-level identity-recovery code can be rotated or explicitly revoked. Account deletion also revokes it and removes linked-device access.
+Character and identity recovery indexes are server-owned. A successful character claim consumes the submitted code and rotates recovery material. Identity recovery can be rotated or revoked. Account deletion removes its current identity recovery records and linked-device access.
 
 ## Backups and exports
 
-Manual staging exports remain in their selected Cloud Storage destination until deliberately deleted or covered by a separately configured bucket lifecycle rule. Account deletion does not retroactively alter an existing export. There is no scheduled export or automatic retention policy.
+Online deletion does not rewrite existing backups or exports. Firestore scheduled backups follow the retention configured on the live database. Manual exports follow the lifecycle policy of their destination Cloud Storage bucket. See `docs/backup-policy.md` for recovery coverage and current verification gaps.

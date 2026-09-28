@@ -50,7 +50,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
       <AppHeaderShell
         left={
           <>
-            {/* Left icon — home/back */}
+            {/* Left icon: home/back */}
             {(backHref || currentPath !== ROUTES.DASHBOARD) && (
               <Link
                 to={backHref ?? ROUTES.DASHBOARD}
@@ -88,7 +88,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
         right={
           <>
             {/* Settings + kebab */}
-            {/* Settings — dashboard only */}
+            {/* Settings: dashboard only */}
             {isOnDashboard && (
               <button
                 type="button"

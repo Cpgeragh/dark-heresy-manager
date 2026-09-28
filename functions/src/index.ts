@@ -138,9 +138,9 @@ import {
 const functionsRuntimeServiceAccount = expr`dh-functions-runtime@${projectID}.iam.gserviceaccount.com`;
 const accountDeletionServiceAccount = expr`dh-account-deletion@${projectID}.iam.gserviceaccount.com`;
 
-// Production Cloud Monitoring (30 days ending 2026-09-24): at most 17 Function
-// requests in any ten-minute window. Keep wide headroom for normal actions,
-// but prevent unbounded scale; review after traffic grows.
+// Production traffic is far below this ceiling. These limits keep wide
+// headroom for normal actions while preventing unbounded scale. Recheck live
+// via Cloud Monitoring before raising or lowering maxInstances or concurrency.
 setGlobalOptions({
   region: "europe-west2",
   maxInstances: 5,

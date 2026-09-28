@@ -11,7 +11,7 @@ interface BackgroundPickerFieldProps {
   disabled: boolean;
   onClick: () => void;
   info?: ReactNode;
-  /** Smaller box/text — for short single-word values in narrow grid cells. */
+  /** Smaller box/text: for short single-word values in narrow grid cells. */
   compact?: boolean;
 }
 

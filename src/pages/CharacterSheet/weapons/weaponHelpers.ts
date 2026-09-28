@@ -55,7 +55,7 @@ export function isIntegratedMeleeRef(ref: MeleeWeaponRef): boolean {
 
 export function isIntegratedRangedWeapon(weapon: RangedWeapon): boolean {
   // referenceId is the primary check. The name fallback handles weapons added
-  // before referenceId existed — legacy data only has a name, not an id.
+  // before referenceId existed; legacy data only has a name, not an id.
   return (
     weapon.integrated === true ||
     (weapon.referenceId ? INTEGRATED_RANGED_IDS.has(weapon.referenceId) : false) ||
@@ -65,7 +65,7 @@ export function isIntegratedRangedWeapon(weapon: RangedWeapon): boolean {
 
 export function isIntegratedMeleeWeapon(weapon: MeleeWeapon): boolean {
   // referenceId is the primary check. The name fallback handles weapons added
-  // before referenceId existed — legacy data only has a name, not an id.
+  // before referenceId existed; legacy data only has a name, not an id.
   return (
     weapon.integrated === true ||
     (weapon.referenceId ? INTEGRATED_MELEE_IDS.has(weapon.referenceId) : false) ||

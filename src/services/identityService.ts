@@ -1,6 +1,6 @@
 // src/services/identityService.ts
 // Generates and stores a user's identity recovery record.
-// One record per user — covers all their campaigns and characters.
+// One record per user; it covers all their campaigns and characters.
 
 import { httpsCallable } from "firebase/functions";
 import { functions } from "../firebase";

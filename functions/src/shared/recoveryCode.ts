@@ -2,7 +2,7 @@
 //
 // Server-side Recovery Code generation and HMAC hashing. The
 // generation format (prefix, segment lengths, alphabet) deliberately
-// mirrors src/utils/recoveryCode.ts and src/constants/ui.ts exactly — the
+// mirrors src/utils/recoveryCode.ts and src/constants/ui.ts exactly. The
 // two projects are independent (functions/ can't import from src/), so if
 // that format ever changes, this needs updating to match.
 

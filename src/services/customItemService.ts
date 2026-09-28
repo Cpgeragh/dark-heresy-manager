@@ -494,7 +494,7 @@ async function driveCustomItemMutationJob(
  * Publishes the target version and propagates it to every character copy,
  * via the resumable startCustomItemMutationJob/processCustomItemMutationChunk
  * Functions (mode "publish-and-update"). Runs start and drain together as
- * one call — the item-level publish transition happens immediately once
+ * one call; the item-level publish transition happens immediately once
  * called, so there is no separate non-mutating preview step. Returns the
  * number of copies actually updated.
  */
@@ -580,7 +580,7 @@ export async function removeAllCustomItemCopies({
 /**
  * Archives the definition and strips every character copy, via the
  * resumable job (mode "archive-and-remove"). Runs start and drain together
- * as one call — the archive transition happens immediately once called, so
+ * as one call; the archive transition happens immediately once called, so
  * there is no separate non-mutating preview step. Returns the number of
  * copies actually removed.
  */

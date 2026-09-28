@@ -170,7 +170,7 @@ export interface CustomLibraryLinkFields {
 /**
  * A single ammo type carried for a ranged weapon.
  * A weapon can carry multiple types simultaneously (e.g. standard + specialist).
- * One entry is marked `loaded` — the currently chambered type.
+ * One entry is marked `loaded`: the currently chambered type.
  */
 export interface WeaponAmmoEntry {
   id: string; // unique per entry (crypto.randomUUID())
@@ -205,7 +205,7 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
   weight?: string;
   value?: string;
   availability?: string;
-  source?: string; // e.g. "CR", "BoJ" — which book to look this up in
+  source?: string; // e.g. "CR", "BoJ": which book to look this up in
   custom?: boolean; // true when created via "Add Custom"
   craftsmanship?: WeaponCraftsmanship;
   upgrades?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
@@ -215,7 +215,7 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
   activeMagazineSlotId?: string; // the currently selected internal magazine
   ammoTracking?: "clip" | "loose"; // clip = spare clips plus partial rounds; loose = rounds only
   ammoType?: string; // custom/reference ammo family label used for chip display and ammo filtering
-  quantity?: number; // for thrown weapons (bolas, throwing stars) — how many carried
+  quantity?: number; // for thrown weapons (bolas, throwing stars): how many carried
   description?: string; // rules text copied from reference data when needed
   integrated?: boolean; // true for custom built-in weapons without a reference id
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top
@@ -239,7 +239,7 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   custom?: boolean;
   craftsmanship?: WeaponCraftsmanship;
   upgrades?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
-  quantity?: number; // for thrown melee weapons (knives, spears) — how many carried
+  quantity?: number; // for thrown melee weapons (knives, spears): how many carried
   alternateRangedAmmoEntries?: WeaponAmmoEntry[]; // ammunition carried for a built-in ranged profile
   loadedAlternateRangedAmmoId?: string; // selected entry for a built-in ranged profile
   alternateRangedAmmoReferenceId?: string; // loaded ammunition for a built-in ranged profile
@@ -307,7 +307,7 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
   upgrades?: string[];
   qualities?: ArmourQuality[];
   custom?: boolean; // true when created via "Add Custom"
-  /** true for force fields — no locations or AP, tracked separately in the Armour tab */
+  /** true for force fields; no locations or AP, tracked separately in the Armour tab */
   isForceField?: boolean;
   /** Protection Rating for force fields */
   protectionRating?: number;
@@ -435,7 +435,7 @@ export interface GrenadeItem extends CustomLibraryLinkFields {
   referenceId?: string; // links back to GrenadeRef.id
   name: string;
   quantity: number;
-  /** "Grenade" or "Mine" — used to exclude mines from launcher panels */
+  /** "Grenade" or "Mine": used to exclude mines from launcher panels */
   type?: string;
   equipped?: boolean; // true = up to 3 shown in expanded card, remainder in stowed card
   class?: string;
@@ -540,12 +540,12 @@ export interface TraitAcquisitionDetails {
 }
 
 export interface HomeworldTraitChoices {
-  /** Noble Born — second Peer group granted by Supremely Connected. */
+  /** Noble Born: second Peer group granted by Supremely Connected. */
   peerGroup?: string;
-  /** Schola Progenium — Las or SP selections granted by Skill at Arms. */
+  /** Schola Progenium: Las or SP selections granted by Skill at Arms. */
   basicWeaponGroup?: "Las" | "SP";
   pistolWeaponGroup?: "Las" | "SP";
-  /** Mind Cleansed — the once-only starting Insanity roll. */
+  /** Mind Cleansed: the once-only starting Insanity roll. */
   startingInsanity?: number;
 }
 

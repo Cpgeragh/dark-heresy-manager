@@ -1,8 +1,8 @@
 // functions/src/operations/revokeRecoveryCode.ts
 //
 // Invalidates a character's current Recovery Code without issuing
-// a replacement — for when a DM knows a code has leaked and wants it dead
-// immediately, decoupled from generating and distributing a new one. An
+// a replacement. This is for when a DM knows a code has leaked and wants it
+// dead immediately, decoupled from generating and distributing a new one. An
 // empty string represents "no usable code," the same convention
 // buildCampaignDeletionPlan/buildCharacterDeletionPlan already use (any
 // value failing the DH-XXXX-YYYY format check is already treated as

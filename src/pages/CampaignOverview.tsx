@@ -315,7 +315,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     >
       <PageShell title={campaign?.name ?? "Campaign Overview"}>
         <Panel>
-          {/* GM / Inquisitor name — shown to everyone */}
+          {/* GM / Inquisitor name: shown to everyone */}
           {(campaign.gmName || campaign.inquisitorName) && (
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {campaign.gmName && (
@@ -331,7 +331,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             </div>
           )}
 
-          {/* Session form — shown inline when creating */}
+          {/* Session form: shown inline when creating */}
           {isDM && showSessionForm && (
             <SessionForm
               campaignId={campaignId}
@@ -340,7 +340,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             />
           )}
 
-          {/* CHARACTERS — DM admin view */}
+          {/* CHARACTERS: DM admin view */}
           {isDM && (
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
@@ -394,7 +394,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             </div>
           )}
 
-          {/* MY CHARACTERS — player view */}
+          {/* MY CHARACTERS: player view */}
           {!isDM && (
             <div>
               <SectionHeader className="mb-3">My Characters</SectionHeader>
@@ -412,7 +412,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             </div>
           )}
 
-          {/* PARTY — player view */}
+          {/* PARTY: player view */}
           {!isDM && (
             <div>
               <SectionHeader className="mb-3">Party</SectionHeader>
@@ -430,7 +430,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             </div>
           )}
 
-          {/* MESSAGES — DM only */}
+          {/* MESSAGES: DM only */}
           {isDM && (
             <div>
               <SectionHeader className="mb-3">Messages</SectionHeader>
@@ -442,7 +442,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             </div>
           )}
 
-          {/* CUSTOM ITEM LIBRARY — DM only */}
+          {/* CUSTOM ITEM LIBRARY: DM only */}
           {isDM && (
             <div>
               <SectionHeader className="mb-3">Custom Item Library</SectionHeader>

@@ -3,7 +3,7 @@
 // styling so the standalone action buttons across the app stay consistent.
 //
 // NOT for: icon buttons, toggle chips, tab buttons, steppers/quantity controls,
-// picker rows, or expandable card headers — those are their own components.
+// picker rows, or expandable card headers; those are their own components.
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import {

@@ -300,7 +300,7 @@ export function InsanityPanel({
         <InsanityStatusChips points={effectivePoints} />
       </div>
 
-      {/* Mobile — tab switcher between Temporary Trauma and Disorders */}
+      {/* Mobile: tab switcher between Temporary Trauma and Disorders */}
       <div ref={containerRef} className="lg:hidden space-y-4">
         <SegmentedTabs
           id={INSANITY_TABS_ID}
@@ -342,7 +342,7 @@ export function InsanityPanel({
         </section>
       </div>
 
-      {/* Desktop — side by side */}
+      {/* Desktop: side by side */}
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
         <section className={`${sectionClassName} space-y-2`}>
           <TraumaHeader editable={editable} onAdd={() => setShowTraumaPicker(true)} />

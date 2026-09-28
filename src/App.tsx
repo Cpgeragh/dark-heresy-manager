@@ -52,7 +52,7 @@ function AppContent() {
   const { currentUser, loading, error: authError, onboarded, setOnboarded } = useAuth();
 
   // -------------------------------------------------
-  // DEVICE CONNECTION — must be called unconditionally before any early returns
+  // DEVICE CONNECTION: must be called unconditionally before any early returns
   // -------------------------------------------------
   const {
     effectiveUserId,

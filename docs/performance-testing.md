@@ -1,30 +1,33 @@
-# Local performance testing
+# Local performance test harness
 
-The performance environment is a disposable local-only copy of the application. It connects the
-browser to the Firebase Auth, Firestore and Functions emulators and never needs production data.
+Repository paths in this document refer to the checked-out commit.
+
+The performance harness is a disposable local environment connected only to Firebase emulators. It provides deterministic data profiles and metadata-only instrumentation; it does not establish production performance by itself.
 
 ## Safety boundary
 
-Performance mode starts only when Vite's mode is `performance` and the Firebase project ID is
-exactly `dh-test`. The browser then connects to fixed services on `127.0.0.1`:
+Performance mode requires Vite mode `performance` and Firebase project ID `dh-test`. The browser connects to fixed loopback endpoints:
 
-- Auth: `9099`
-- Firestore: `8080`
-- Functions: `5001`
+| Service                 | Host        | Port |
+| ----------------------- | ----------- | ---: |
+| Authentication emulator | `127.0.0.1` | 9099 |
+| Firestore emulator      | `127.0.0.1` | 8080 |
+| Functions emulator      | `127.0.0.1` | 5001 |
+| Vite preview            | `127.0.0.1` | 4175 |
 
-The fixture seeder has the same fixed project and host restrictions. It refuses conflicting
-environment values before importing Firebase Admin or deleting data. Its reset affects only the
-running `dh-test` Firestore emulator.
+The fixture seeder refuses conflicting environment values. Its reset operation targets only the running `dh-test` Firestore emulator.
 
-## Starting the environment
+## Start and seed
 
-Run `npm run performance:local`. This builds the local Functions code, starts the three Firebase
-emulators, and serves the app at `http://127.0.0.1:4175` in performance mode. Open the app once so
-Firebase Auth creates its normal anonymous emulator account.
+Start the emulators and application from the repository root:
 
-In another terminal, select one fixture at a time:
+```bash
+npm run performance:local
+```
 
-```text
+Open `http://127.0.0.1:4175` once so the Auth emulator creates an anonymous user. In a second terminal, load one profile:
+
+```bash
 npm run performance:seed -- --profile empty
 npm run performance:seed -- --profile small
 npm run performance:seed -- --profile large-character
@@ -32,103 +35,55 @@ npm run performance:seed -- --profile large-dm
 npm run performance:seed -- --profile long-thread
 ```
 
-Reload the displayed route after seeding. `new-account` clears Firestore and deliberately leaves
-the existing anonymous Auth account without application records, exercising first-run onboarding.
+Reload the route printed by the seeder.
 
-## Reproducible fixture definitions
+| Profile           | Intended scenario                                                |
+| ----------------- | ---------------------------------------------------------------- |
+| `new-account`     | Authenticated user without application records                   |
+| `empty`           | Completed account without campaigns                              |
+| `small`           | Ordinary mixed DM and player data                                |
+| `large-character` | Dense character-sheet collections and long notes                 |
+| `large-dm`        | Campaign, roster, session, custom-item, and inbox query pressure |
+| `long-thread`     | Current message window plus older pages                          |
 
-| Profile           | Stored load                                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| `new-account`     | No Firestore documents                                                                                         |
-| `empty`           | Completed account and profile, no campaigns                                                                    |
-| `small`           | One DM campaign, one joined campaign, four characters, eight sessions, twelve custom items and thirty messages |
-| `large-character` | One character with 180-entry load-bearing collections, a 90-key map and 3,000-character notes                  |
-| `large-dm`        | 45 campaigns; selected campaign has 90 characters, 180 sessions, 180 custom items and 90 thread summaries      |
-| `long-thread`     | One campaign, one character and 300 messages, giving one live page and two older pages                         |
+Fixture sizes are defined by `scripts/seedPerformanceFixtures.mjs`; do not duplicate their numeric contents here.
 
-Dates, document IDs, names and values are deterministic. The only variable is the anonymous local
-user ID to which the profile is attached.
+## Instrumentation contract
 
-## Measurement signals
+Performance mode exposes `window.__DHM_PERFORMANCE__`. Its snapshot contains metadata only:
 
-Performance mode exposes `window.__DHM_PERFORMANCE__`. It contains bounded, metadata-only events;
-no character or message content is recorded. `snapshot()` returns:
+- React commit durations;
+- listener start, snapshot, and stop events with result counts;
+- current active-listener count;
+- named journey marks;
+- mutation acknowledgement durations and sanitized error codes; and
+- JavaScript heap size when the browser exposes it.
 
-- React commit durations from the application profiler
-- listener start, first/subsequent snapshot and stop events, including result counts
-- active listener count
-- custom journey marks that can bracket a mutation and its following listener snapshot
-- JavaScript heap size when the browser exposes it
+Call `reset()` immediately before one journey and use `mark(name)` for deterministic boundaries. Mutation completion measures promise settlement, not the later listener update; correlate it with the next relevant listener snapshot for end-to-end synchronization.
 
-Use `reset()` immediately before an individual journey and `mark(name)` for its deterministic start
-and end signals. Timing thresholds are intentionally not asserted in the automated tests until a
-stable baseline has been gathered on the same machine.
+Automation in an isolated page context can dispatch `dhm-performance-snapshot-request` and read `data-dhm-performance-snapshot` from the root element. Reset and named-mark events are `dhm-performance-reset` and `dhm-performance-mark`. The transparent `#dhm-performance-snapshot` control provides the same snapshot when direct event dispatch is unavailable.
 
-Browser automation that runs in an isolated page context can request the same data without direct
-global access: dispatch `dhm-performance-snapshot-request`, then read the
-`data-dhm-performance-snapshot` attribute on the root HTML element. Reset and named-mark requests
-use `dhm-performance-reset` and `dhm-performance-mark`; the latter reads its name from
-`data-dhm-performance-mark`.
+## Offline controls
 
-Where custom event dispatch is unavailable, click the performance-only transparent button
-`#dhm-performance-snapshot` and read the same root attribute. Snapshot serialisation still occurs
-only on request. Native modal dialogs occupy the browser top layer and block controls behind them;
-reset before opening such a dialog and request its snapshot after closing it.
+Performance builds expose two transparent controls:
 
-Mutation services also emit paired metadata-only events:
+| Control                              | Result                                                               |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| `#dhm-performance-firestore-disable` | Awaits Firestore network disablement and records the disabled marker |
+| `#dhm-performance-firestore-enable`  | Awaits Firestore network enablement and records the enabled marker   |
 
-- `mutation-start` records the operation name, a monotonically increasing `mutationId`, and the
-  start time.
-- `mutation-complete` records the matching ID and acknowledgement duration.
-- `mutation-error` records the matching ID, acknowledgement duration, and a sanitised Firebase
-  error code when one is available.
+These controls affect direct Firestore operations. Callable Functions are not queued by the Firestore offline cache and require an explicit retry after failure.
 
-The duration ends when the write, batch, transaction, or callable promise settles. It is therefore
-write-acknowledgement latency, not listener turnaround. To measure end-to-end synchronisation,
-reset immediately before the action and correlate the mutation's completion with the relevant
-subsequent listener snapshot. Payloads, field values, message text, and raw error messages are
-never recorded.
+## Measurement method
 
-Performance mode provides two additional transparent controls for deterministic offline tests:
+Use one recorded test environment for each comparison and warm lazy modules before repeated measurements. The baseline record must contain:
 
-- `#dhm-performance-firestore-disable` awaits `disableNetwork(db)` and sets
-  `data-dhm-performance-firestore-network="disabled"` on the root element.
-- `#dhm-performance-firestore-enable` awaits `enableNetwork(db)` and sets the same attribute to
-  `"enabled"`.
+- browser version and hardware;
+- machine power profile and network state;
+- fixture, route, and exact journey;
+- build commit and build mode; and
+- median and high-percentile values from multiple successful runs.
 
-Both controls add a matching `firestore-network:*` mark after the transition completes. They
-affect direct Firestore operations only. Callable Functions are not queued by Firestore's offline
-cache; a callable mutation that reports a failure still requires an explicit retry. These controls
-exist only in the guarded local performance build.
+Exclude emulator startup, fixture seeding, browser-control latency, file chooser interaction, service-worker build time, and test-runner contention. Mark discarded runs instead of combining them with successful samples.
 
-## Repeated-use lifecycle measurements
-
-Use repeated cycles when investigating performance that may degrade during a long application
-session. Warm the route or interface once before recording cycles when it loads a lazy module,
-reference data, images, or a substantial Firestore result for the first time.
-
-For every measured cycle:
-
-1. Record the settled baseline before the action.
-2. Open the drawer, modal, picker, or route and record its active state where possible.
-3. Close it or navigate away, wait for the deterministic settled signal, and record the new
-   baseline.
-4. Compare total DOM nodes, active Firestore listeners, and heap size when exposed.
-5. Repeat enough later cycles to determine whether post-cleanup values stabilise, fall, or continue
-   to grow.
-
-Event-handler and timer counts are not exposed by the performance recorder. Check their ownership
-through source pairing and focused lifecycle tests unless a guarded measurement-only instrument is
-separately justified. Do not monkey-patch browser globals during an ordinary performance run; the
-instrumentation can change the lifecycle being measured.
-
-Do not diagnose a leak from a single high heap value or from memory that remains allocated after
-the first use. Lazy modules, decoded assets, reference data, Firestore caches, and browser-managed
-rendering structures can remain allocated for reuse. Require repeatable upward growth after warm-up
-and corroborate it with a structural signal or an identified retained owner before proposing a
-cleanup correction.
-
-Exclude emulator startup, fixture seeding, browser-control delays, file-chooser interaction,
-service-worker build or installation time, and test-runner contention from product lifecycle
-conclusions. Record discarded or incomplete cycles rather than combining them with successful
-measurements.
+A memory leak requires repeatable post-warm-up growth plus a retained owner or structural signal. A single heap peak is insufficient.

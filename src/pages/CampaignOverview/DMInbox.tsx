@@ -21,7 +21,7 @@ function getCharacterLabel(characterId: string, characters: CharacterListItem[])
   return char?.header?.characterName ?? `${characterId.slice(0, 8)}…`;
 }
 
-// ── ThreadView — only mounted when a thread is expanded ───────────────────────
+// ThreadView: only mounted when a thread is expanded
 
 function ThreadView({
   campaignId,

@@ -22,7 +22,7 @@ import { measurePerformanceMutation } from "../performance/performanceMetrics";
 
 /**
  * Sends a message in a character-DM thread and updates the thread summary.
- * Thread is keyed by characterId — one thread per character, not per player.
+ * Thread is keyed by characterId: one thread per character, not per player.
  * Thread summary is created automatically on first message (setDoc + merge).
  * If sender is the player (isFromPlayer), increments unreadForDM on the summary.
  */
@@ -88,7 +88,7 @@ export async function sendMessage(
 }
 
 /**
- * Resets the unread counter on a thread — called when the DM opens a conversation.
+ * Resets the unread counter on a thread, called when the DM opens a conversation.
  */
 export async function markThreadRead(
   campaignId: string,

@@ -1,65 +1,77 @@
-# Dark Heresy Manager — Firestore security boundary
+# Firestore security boundary
 
-This document describes the current `firestore.rules` contract. The rules file is authoritative; this overview explains its intent and the behaviours covered by the emulator suite.
+Repository paths in this document refer to the checked-out commit.
 
-## Shared identity model
+`firestore.rules` is authoritative for client access. Trusted Cloud Functions use the Admin SDK and enforce their own authorization and validation.
 
-Every request must be authenticated unless a rule explicitly says otherwise. No current application path permits unauthenticated Firestore access.
+## Identity and default policy
 
-`playerOwnsOrLinked(ownerId)` and `dmOwnsOrLinked(dmId)` treat the signed-in account itself and any device with a matching `userLinks` document pointing at it as the same effective account. This is used consistently for character ownership, DM authority, profiles, messaging and recovery-code management.
+All unlisted paths are denied. Every permitted client operation requires Firebase Authentication.
 
-## Users and profiles
+The `playerOwnsOrLinked` and `dmOwnsOrLinked` helpers resolve a device through `userLinks` to its permanent account. A linked device therefore receives the same account-level ownership checks as the primary identity where those helpers are used.
 
-`/users/{uid}` is readable and writable only by that exact authenticated UID. Writes allow only the recognised account-state fields and validate their types.
+## Top-level collections
 
-`/userProfiles/{uid}` is an authenticated first-name directory. Any authenticated user may read a profile so names can be shown in campaign UI. Only that profile's effective owner may create or update it, the document may contain only one non-empty `firstName` of at most 50 characters, and client deletion is denied.
+| Path                           | Client read access                                                                                         | Client write access                                                        |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `users/{uid}`                  | Exact authenticated UID                                                                                    | Exact UID may create or update under the recognized field and type contract; deletion is denied |
+| `userProfiles/{accountId}`     | Authenticated single-document reads; collection listing denied                                             | Denied; display-name changes use the protected backend                     |
+| `accounts/{accountId}`         | Denied                                                                                                     | Denied                                                                     |
+| `userLinks/{uid}`              | A device may get its own link; an account may list its bounded device set with the required account filter | Denied; linking and disconnecting use protected backend operations         |
+| `recoveryIndex/{hash}`         | Denied                                                                                                     | Denied                                                                     |
+| `identityRecoveryIndex/{hash}` | Denied                                                                                                     | Denied                                                                     |
+| `identitySecret/{accountId}`   | Denied                                                                                                     | Denied                                                                     |
 
-## Campaigns
+Recovery lookups, rotation, revocation, linking, and account lifecycle operations must use the callable functions under `functions/src/operations/`.
 
-Any authenticated user may read campaign metadata. Any user may create a campaign when its `dmId` is their own UID and the document has the approved shape. Campaign names are limited to 100 characters, member lists to 100 entries, and optional GM/Inquisitor names to 100 characters.
+## Campaigns and characters
 
-The DM or a device linked to the DM's account may edit campaign metadata without transferring `dmId`, and may delete the campaign. A claimant may only add their effective identity to `memberIds`; they cannot remove existing members or change another field.
+| Resource           | Read access                                                                 | Create, update, and delete boundaries                                                                                                                                                                                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Campaign           | DM or current member; list queries must be limited to at most 100 documents | Creation and deletion are server-only. The DM may update the approved metadata fields but cannot transfer `dmId`.                                                                                                                                                                                     |
+| Character          | Campaign DM or effective owner; campaign lists are limited to 100           | The DM may create an unclaimed, non-player-editable character whose `recoveryCode` field is empty. Direct updates cannot change ownership, recovery data, or fields migrated to `patchCharacterField`. The DM may delete a character; the application uses the protected resumable deletion workflow. |
+| Character summary  | Campaign DM or member; lists are limited to 100                             | The DM or effective character owner may maintain a validated summary. Deletion is allowed only when the character is deleted in the same atomic write.                                                                                                                                                |
+| Claim log          | DM only; lists are limited to 440                                           | Create and update are denied. Deletion is allowed only with deletion of the parent character.                                                                                                                                                                                                         |
+| Legacy XP proposal | DM or effective character owner; lists are limited to 440                   | Create and update are denied. DM cleanup is allowed only with deletion of the parent character.                                                                                                                                                                                                       |
 
-## Characters and audit history
-
-Any authenticated user may read campaign character documents. Only the DM may create a character, and a new character must be unclaimed, player editing must be disabled, and a recovery code must exist.
-
-The DM may update or delete a character. An owning player or a device linked to their account may edit only while `isEditableByPlayer` is true and cannot change `userId`, `isEditableByPlayer` or `recoveryCode`. A claim may only move `userId` from null to the claimant's effective identity.
-
-Claim-log entries are DM-readable only and immutable after creation. Players may add their own valid claim/release events; DMs may add their own force-assign/force-release events. A log may be deleted only by the DM in the same atomic operation that deletes its parent character.
-
-XP proposals are readable by the DM and effective character owner. The owner may create only their own pending proposal; only the DM may update or delete it.
-
-The collection-group character rule permits a user to query only characters owned by their effective identity.
+The collection-group character query is restricted to the effective owner's characters and a maximum requested limit of 1,000 documents.
 
 ## Custom-item library
 
-Published custom items and versions are authenticated-readable. A draft or archived item is additionally visible to its creator and the campaign DM. New items must be drafts in a recognised category and must be tied to their effective creator.
+Published custom items and versions are readable by authenticated users. Draft or archived records are visible only to the campaign DM and the effective creator. Item queries are limited to 200 documents and version queries to 100 documents.
 
-Creators may edit only the approved draft/version fields and cannot change immutable ownership, campaign, category or published-version identity. The DM has full campaign-library control. A custom item may be deleted only by the DM after it is archived, or as part of removing the campaign; version documents are DM-deletable.
-
-## Character recovery and account/device recovery
-
-`/recoveryIndex/{code}` and `/identityRecoveryIndex/{hash}` are managed exclusively by trusted Cloud Functions through the Admin SDK; clients have no read or write access to either. Character claiming, Recovery Code lookup/registration/revocation, and identity-code registration all go through the corresponding protected callables (see `functions/src/operations/`) rather than direct Firestore access.
-
-`/identitySecret/{uid}` contains only a bounded recovery code and is readable/writable by that effective account (owner or a linked device) so Settings can reveal or rotate it; a write must contain exactly one `code` field passing `validRecoveryCode`.
-
-`/userLinks/{uid}` is readable and deletable only by that secondary UID; creating or updating a link happens through the `linkDevice` callable rather than a direct client write.
+Creators may create validated drafts and edit only the permitted draft fields. The item's identity fields remain immutable. The campaign DM controls publication and may delete an archived item or delete items as part of campaign deletion. Version deletion is DM-only.
 
 ## Sessions and messaging
 
-Sessions are authenticated-readable and DM-writable. The rules enforce exact recognised fields, timestamps, 4,000-character summary/private-note ceilings, whole XP from 0 to 100,000 and at most 100 attendees.
+Full session documents, including private DM notes, are DM-only. Member-readable session summaries exclude DM notes. Both query types are limited to 200 documents. Session summaries are writable only by the DM.
 
-Thread summaries and messages are visible only to the campaign DM or effective character owner. Thread data has an exact shape; message previews and bodies are limited to 2,000 characters and unread counts are bounded. A player's send transition may change only the preview/timestamp/unread fields and must increment the DM unread count by exactly one. A message's `fromUid` must be the sender's effective identity. Messages cannot be edited; only the DM may clear messages or their thread summary.
+Threads and messages are visible only to the campaign DM and the effective owner of the thread's character. Thread and message queries are limited to 100 documents.
 
-## Deployment and verification
+| Field                    |              Enforced maximum |
+| ------------------------ | ----------------------------: |
+| Thread preview           |                500 characters |
+| Message body             |              2,000 characters |
+| Session summary          |              4,000 characters |
+| Private DM session notes |              4,000 characters |
+| Session attendees        |             100 character IDs |
+| Session XP award         | 100,000 whole XP per attendee |
 
-`firebase.json` references both `firestore.rules` and `firestore.indexes.json`, preventing a normal reviewed deployment from silently omitting the index configuration. Nothing in this repository configuration deploys automatically.
+A player send must increment the DM unread count by exactly one. A message sender must resolve to the authenticated effective account. Messages cannot be edited; only the DM may clear thread messages or delete their summary.
 
-The emulator suite under `tests/firestore` verifies allowed and denied operations, field/type/size validation, query boundaries, linked identities, ownership transitions, immutable audit records and batch behaviour. Run it with:
+## Enforcement and verification
 
-```text
+`firebase.json` deploys `firestore.rules` together with `firestore.indexes.json`. The emulator tests under `tests/firestore/` cover these contracts:
+
+- allowed and denied operations;
+- query bounds and linked identities;
+- immutable fields and ownership transitions; and
+- deletion preconditions.
+
+Run the rules suite from the repository root:
+
+```bash
 npm run test:rules
 ```
 
-All paths not granted by an explicit rule are denied by default.
+Rule changes must update the corresponding emulator tests in the same change.

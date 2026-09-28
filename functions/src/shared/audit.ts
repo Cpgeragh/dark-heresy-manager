@@ -1,8 +1,8 @@
 // functions/src/shared/audit.ts
 //
 // Shared audit-record writing for protected callables. Records
-// are deliberately bounded — a small number of primitive metadata fields,
-// each capped in length — so a caller can't accidentally (or deliberately)
+// are deliberately bounded to a small number of primitive metadata fields,
+// each capped in length, so a caller can't accidentally (or deliberately)
 // dump an entire request payload, a Recovery Code, or other sensitive data
 // into a durable log. Callers still choose which fields are safe to record
 // for their own operation; this only bounds the shape.

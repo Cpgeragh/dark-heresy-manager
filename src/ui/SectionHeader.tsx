@@ -4,7 +4,7 @@
 // styling. Use as="h3" for a section nested beneath another section heading.
 //
 // For form-field labels that happen to reuse this style, keep a <span> inside
-// the <label> instead — those are not document sections.
+// the <label> instead; those are not document sections.
 
 import type { ReactNode } from "react";
 import { uiSectionHeader } from "./styles/editableStyles";

@@ -2,7 +2,7 @@
 // Resolves the permanent account id connected to this device.
 //
 // Uses an onSnapshot listener so the state updates automatically when
-// Server connection operations write to (or delete from) userLinks/{myUid} —
+// Server connection operations write to (or delete from) userLinks/{myUid},
 // no page reload required.
 
 import { doc, type DocumentData } from "firebase/firestore";

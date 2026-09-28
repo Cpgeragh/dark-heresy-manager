@@ -27,11 +27,11 @@ export function editableTextareaClass(isEditable: boolean, resize: FieldResize =
 // ─── Shared UI tokens ─────────────────────────────────────────────────────────
 // Use these instead of hardcoding the same Tailwind strings across components.
 
-/** Section header label — amber left-border accent, sits outside or at the top of its box. */
+/** Section header label: amber left-border accent, sits outside or at the top of its box. */
 export const uiSectionHeader =
   "border-l-2 border-red-700 pl-2 text-xs lg:text-sm font-cinzel font-semibold uppercase tracking-widest text-red-500";
 
-/** Standard card shell — bright border and semi-transparent background, without padding. */
+/** Standard card shell: bright border and semi-transparent background, without padding. */
 export const uiSectionShell = "rounded-lg border border-slate-500 bg-slate-900/60";
 
 /** Standard padded section card. */
@@ -42,11 +42,11 @@ export const uiCell = "rounded border border-slate-500 bg-slate-900/60";
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
 export const uiCellLabel = "text-[10px] lg:text-xs text-slate-300 leading-tight";
 
-/** Value inside a compact stat cell (tight column grids — keeps text-base to fit). */
+/** Value inside a compact stat cell (tight column grids, keeps text-base to fit). */
 export const uiCellValueSm =
   "text-base lg:text-lg font-semibold font-code text-slate-200 leading-tight";
 
-/** Value inside a standard-width display cell — matches the Stepper value size. */
+/** Value inside a standard-width display cell: matches the Stepper value size. */
 export const uiCellValue = "text-xl lg:text-2xl font-semibold font-code text-slate-200";
 
 // ─── Shared text tone tokens ─────────────────────────────────────────────────

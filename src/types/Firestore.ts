@@ -92,7 +92,7 @@ export interface CharacterListItem {
 /**
  * Character summary document stored in
  * /campaigns/{campaignId}/characterSummaries/{characterId}
- * A restricted, campaign-member-readable view of a character — name,
+ * A restricted, campaign-member-readable view of a character: name,
  * player name, career, rank, and portrait only. Never the Recovery Code
  * or any other sheet data. Kept in sync with the real character document
  * by characterService.ts's write functions.
@@ -144,7 +144,7 @@ export interface ThreadMessage {
 }
 
 /**
- * Thread summary doc — one per player per campaign.
+ * Thread summary doc: one per player per campaign.
  * Stored in /campaigns/{campaignId}/threads/{playerUid}
  */
 export interface ThreadSummary {

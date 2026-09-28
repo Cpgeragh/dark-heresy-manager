@@ -3,8 +3,8 @@
 // Duplicates the per-character custom-item copy update/removal
 // logic from src/services/customItemService.ts (buildCharacterCopyUpdate,
 // buildCharacterCopyRemoval, updateLinkedArray). functions/ cannot import
-// from src/, so this is a deliberate, minimal, structurally-typed copy —
-// keep it in sync with the client version if that logic ever changes.
+// from src/, so this is a deliberate, minimal, structurally-typed copy.
+// Keep it in sync with the client version if that logic ever changes.
 
 export type CustomItemCategory =
   | "gear"

@@ -1,7 +1,7 @@
 // src/services/profileService.ts
 //
 // Reads/writes the public first-name directory at /userProfiles/{uid}.
-// First name only — see Firestore rules and UserProfileDocument.
+// First name only. See Firestore rules and UserProfileDocument.
 
 import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";

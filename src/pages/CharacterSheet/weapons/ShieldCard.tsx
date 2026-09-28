@@ -59,7 +59,7 @@ export function ShieldCard({
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
-      {/* Header — always visible */}
+      {/* Header: always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
         <button
           type="button"

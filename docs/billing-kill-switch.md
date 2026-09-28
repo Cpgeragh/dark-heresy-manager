@@ -1,51 +1,113 @@
-# Billing Kill Switch
+# Billing kill switch
 
-## Purpose
+Repository paths in this document refer to the checked-out commit.
 
-A dedicated, isolated mechanism that disables billing entirely on both `dark-heresy-manager` and `dark-heresy-manager-staging` when total spend on the shared billing account reaches its configured cap. This is a hard backstop, distinct from the alerts-only budget notification, which only sends email and does not stop any usage.
+## Purpose and boundary
 
-## Threshold
+The isolated `billing-guard/` package receives Cloud Billing budget notifications and can detach billing from these monitored projects:
 
-Fires when actual spend reaches the same €10 monthly amount already configured on the "Dark Heresy Manager Billing Alert" budget, on the shared billing account (`018888-6B5370-BF916B`) both monitored projects use.
+| Project ID                    | Role                   |
+| ----------------------------- | ---------------------- |
+| `dark-heresy-manager`         | Production application |
+| `dark-heresy-manager-staging` | Staging application    |
 
-## Architecture
+The guard runs in the separate `dark-heresy-billing-guard` project. It does not detach billing from its own host project.
 
-A dedicated GCP project, `dark-heresy-billing-guard`, holds one Pub/Sub-triggered Cloud Function and nothing else. The existing budget publishes a notification to a Pub/Sub topic in this project on every threshold evaluation, in addition to its existing email alerts. The function matches the configured budget against the notification's `budgetId` message attribute, reads the cost and budget amounts from the base64-encoded JSON data, and calls the Cloud Billing API to detach billing from both monitored projects by name when the reported cost has reached the budget amount.
+Detaching a billing account is a cost-containment backstop, not a graceful shutdown. Google Cloud services stop, while Firebase projects are downgraded to the Spark plan and may exceed its quotas. Google warns that some Cloud resources can be removed and become non-recoverable. In-flight work, delayed budget events, and usage posted after the notification can still create cost. A verified backup and a named recovery operator are prerequisites for a live trigger.
 
-The function never modifies billing on its own host project. Its service account holds the Project Billing Manager role (`roles/billing.projectManager`), granted individually on each of the two monitored projects, not the broader Billing Account Administrator role.
+## Event and authorization flow
 
-## Effect when triggered
+```mermaid
+flowchart LR
+  subgraph BillingBoundary[Cloud Billing boundary]
+    Budget[Budget evaluation]
+    API[Cloud Billing API]
+  end
+  subgraph GuardBoundary[Billing guard project]
+    Topic[Pub/Sub topic: budget-alerts]
+    Guard[Budget guard function]
+  end
+  subgraph AppBoundary[Monitored project boundary]
+    Prod[Production project]
+    Stage[Staging project]
+  end
 
-Both `dark-heresy-manager` and `dark-heresy-manager-staging` lose their billing account link. Every service requiring billing stops accepting new usage. In-flight requests at the moment of disablement complete normally. No data is deleted by this action.
+  Budget -->|async Pub/Sub event| Topic
+  Topic -->|async function invocation| Guard
+  Guard -->|async REST: detach billing| API
+  API -->|asynchronous project state change| Prod
+  API -->|asynchronous project state change| Stage
 
-## Dry-run testing
+  classDef billing fill:#fff0db,stroke:#a66321,color:#111;
+  classDef guard fill:#e8f1ff,stroke:#3767a6,color:#111;
+  classDef project fill:#e7f7eb,stroke:#3b7d44,color:#111;
+  class Budget,API billing;
+  class Topic,Guard guard;
+  class Prod,Stage project;
+  LegendBilling[Orange: Cloud Billing]:::billing
+  LegendGuard[Blue: isolated guard]:::guard
+  LegendProject[Green: monitored projects]:::project
+```
 
-Setting the `BILLING_GUARD_DRY_RUN` environment variable to `true` on the deployed function causes it to log the action it would take without calling the Cloud Billing API. A synthetic message must place the configured bare budget ID in the Pub/Sub `budgetId` attribute and place `costAmount` and `budgetAmount` in the JSON data. Publishing that message in dry-run mode confirms the function receives, parses, identifies and evaluates a notification correctly, without any risk to either monitored project. Dry-run mode does not exercise the actual Cloud Billing API call.
+The deployed function's service account requires Project Billing Manager on each monitored project. It does not require Billing Account Administrator.
 
-## Live-fire drill
+## Runtime configuration
 
-A dry run does not prove the Cloud Billing API call itself succeeds with the granted permissions. Confirming that requires an actual disable-and-relink cycle, run deliberately and separately from ordinary testing:
+The values below are environment variables on the deployed billing-guard function, not browser variables and not root `.env` values.
 
-1. Confirm current spend on the billing account is near zero, so a live drill does not coincide with genuine usage being cut off unexpectedly hard.
-2. Publish a synthetic message to the Pub/Sub topic with `BILLING_GUARD_DRY_RUN` unset or `false`.
-3. Confirm both projects show no billing account linked (Console: each project's Billing page; or `gcloud billing projects describe <PROJECT_ID>`).
-4. Relink billing to both projects (see Recovery, below).
-5. Confirm both projects show the billing account relinked and services resume.
+| Variable                  | Required value                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| `BILLING_GUARD_BUDGET_ID` | Bare budget ID expected in the Pub/Sub `budgetId` attribute                                   |
+| `BILLING_GUARD_DRY_RUN`   | `true` to log actions without calling the Cloud Billing API; unset or `false` for live action |
 
-## Recovery
+The topic name `budget-alerts`, region `europe-west2`, monitored project IDs, and runtime service account are defined in `billing-guard/src/index.ts`.
 
-Relinking billing restores both projects. No other recovery step exists or is needed; this action does not disable APIs, delete resources, or alter Firestore data.
+## Live configuration status
 
-Console: for each project, open the project's Billing page and link the billing account (`018888-6B5370-BF916B`).
+The budget amount, billing-account link, topic connection, IAM grants, and deployed environment variables exist outside this repository.
 
-Precise navigation: Firebase Console → open the project → Settings in the menu → Usage and billing → Details & settings tab → Modify plan → Blaze → select the existing billing account.
+| Check                                     | Status                    |
+| ----------------------------------------- | ------------------------- |
+| Budget threshold and currency             | Pending live verification |
+| Budget-to-topic connection                | Pending live verification |
+| Function deployment and runtime variables | Pending live verification |
+| Project-level IAM grants                  | Pending live verification |
+| End-to-end detach and relink drill        | Pending live verification |
 
-Command line, per project:
+Do not state a monetary threshold or billing-account ID in durable documentation unless it is verified at the time of publication.
 
-    gcloud billing projects link <PROJECT_ID> --billing-account=018888-6B5370-BF916B
+## Dry-run verification
 
-The exact time services take to resume accepting requests after relinking has not been measured for this project pair and should be confirmed during the live-fire drill above, not assumed.
+A synthetic Pub/Sub event must provide:
+
+| Field | Location | Value |
+| --- | --- | --- |
+| `budgetId` | Pub/Sub attribute | Configured bare budget ID |
+| `costAmount` | JSON message data | Numeric cost in `currencyCode` units |
+| `budgetAmount` | JSON message data | Numeric budget in `currencyCode` units |
+| `currencyCode` | JSON message data | Currency for both amount fields when supplied |
+
+With `BILLING_GUARD_DRY_RUN=true`, the function must match the budget and log the proposed project actions without calling the Cloud Billing API.
+
+Dry-run success does not prove IAM permission or the detach request.
+
+## Controlled live drill and recovery
+
+1. Confirm the current budget, billing account, IAM bindings, project health, and on-call owner.
+2. Ensure no real budget incident is in progress.
+3. Set `BILLING_GUARD_DRY_RUN=false` and publish a controlled qualifying event.
+4. Verify each project with `gcloud billing projects describe PROJECT_ID`.
+5. Relink the approved billing account to each project.
+6. Verify billing state and representative application services before closing the drill.
+
+Relink a project with:
+
+```bash
+gcloud billing projects link PROJECT_ID --billing-account=BILLING_ACCOUNT_ID
+```
+
+Recovery time is `Pending re-measurement`; do not promise an immediate return to service.
 
 ## Removal
 
-This mechanism is separate from the underlying app and the shared budget's email alerts. Removing it means deleting the Pub/Sub topic's connection to the budget and, if no longer wanted at all, deleting the `dark-heresy-billing-guard` project. Both monitored projects and the existing email alerts are unaffected by its removal.
+Disable or remove the budget's Pub/Sub notification, remove the deployed guard function and topic if no longer required, and revoke its project-level IAM grants. Confirm that ordinary email budget alerts remain configured as intended. Deleting the guard project is a separate destructive action and requires an explicit inventory of any other resources it contains.
