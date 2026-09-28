@@ -3,14 +3,6 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const deferredDashboard = vi.hoisted(() => {
-  let resolve!: () => void;
-  const ready = new Promise<void>((done) => {
-    resolve = done;
-  });
-  return { ready, resolve };
-});
-
 const authState = vi.hoisted(() => ({
   currentUser: { uid: "user-1" } as { uid: string } | null,
   loading: false,
@@ -59,10 +51,7 @@ vi.mock("../../src/components/Toast", () => ({
   useToast: () => ({ warning: vi.fn() }),
 }));
 
-vi.mock("../../src/pages/Dashboard", async () => {
-  await deferredDashboard.ready;
-  return { default: () => <div>Deferred dashboard</div> };
-});
+vi.mock("../../src/pages/Dashboard", () => ({ default: () => <div>Dashboard</div> }));
 vi.mock("../../src/pages/CharacterSheet", () => ({ default: () => null }));
 vi.mock("../../src/pages/CampaignOverview", () => ({ default: () => null }));
 vi.mock("../../src/pages/Onboarding", () => ({ default: () => null }));
@@ -80,7 +69,7 @@ describe("App loading boundaries", () => {
     campaignProviderRenderMock.mockClear();
   });
 
-  it("keeps the application shell visible while a direct route loads", async () => {
+  it("renders the dashboard without an intermediate page-loading state", () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
@@ -88,11 +77,8 @@ describe("App loading boundaries", () => {
     );
 
     expect(screen.getByText("Application header")).toBeInTheDocument();
-    expect(screen.getByText("Loading page…")).toBeInTheDocument();
-
-    deferredDashboard.resolve();
-
-    expect(await screen.findByText("Deferred dashboard")).toBeInTheDocument();
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    expect(screen.queryByText("Loading page…")).not.toBeInTheDocument();
   });
 
   it("shows an explicit account error instead of an indefinite loading state", () => {
@@ -108,8 +94,7 @@ describe("App loading boundaries", () => {
     expect(screen.getByText("Unable to load your account. Please refresh.")).toBeInTheDocument();
   });
 
-  it("starts campaign-list subscriptions before the dashboard route loads", async () => {
-    deferredDashboard.resolve();
+  it("starts campaign-list subscriptions before rendering dashboard routes", () => {
     const campaignView = render(
       <MemoryRouter initialEntries={["/campaign/campaign-1"]}>
         <App />
@@ -125,7 +110,7 @@ describe("App loading boundaries", () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByText("Deferred dashboard")).toBeInTheDocument();
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(campaignProviderRenderMock).toHaveBeenCalled();
   });
 });

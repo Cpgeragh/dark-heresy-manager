@@ -19,8 +19,8 @@ import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 import { consumeUpdateStalled, consumePostUpgrade } from "./pwaUpdateState";
 import { LoadingState } from "./ui/LoadingState";
 import Settings from "./pages/Settings";
+import Dashboard from "./pages/Dashboard";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CharacterSheet = lazy(() => import("./pages/CharacterSheet"));
 const CampaignOverview = lazy(() => import("./pages/CampaignOverview"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));

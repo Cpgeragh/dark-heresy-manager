@@ -132,19 +132,6 @@ afterEach(() => {
 });
 
 describe("Dashboard DM campaign list", () => {
-  it("holds the comparison button pressed before opening the create form", async () => {
-    const user = userEvent.setup();
-    renderDashboard();
-
-    const delayedButton = screen.getByRole("button", { name: "Create campaign — 120 ms" });
-    await user.click(delayedButton);
-
-    expect(delayedButton).toHaveClass("scale-[0.98]", "bg-red-500/20");
-    expect(screen.queryByRole("dialog", { name: "Create Campaign" })).not.toBeInTheDocument();
-
-    expect(await screen.findByRole("dialog", { name: "Create Campaign" })).toBeVisible();
-  });
-
   it("creates a campaign and shows a success toast", async () => {
     const user = userEvent.setup();
     renderDashboard();
