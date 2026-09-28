@@ -49,9 +49,9 @@ export function ArcheotechWeaponCard({
   item: ArcheotechItem;
   strengthBonus?: number;
   editable?: boolean;
-  onRemove?: () => void;
+  onRemove?: () => void | Promise<void>;
   isEquipped?: boolean;
-  onToggleEquip?: () => void;
+  onToggleEquip?: () => void | Promise<void>;
   slotsDisabled?: boolean;
   highlightAsArcheotech?: boolean;
 } & CustomItemLibraryActionProps<"archeotech">) {

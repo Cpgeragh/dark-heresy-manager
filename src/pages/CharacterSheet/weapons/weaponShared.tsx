@@ -21,7 +21,7 @@ import {
   uiItemName,
 } from "../../../ui/styles/editableStyles";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
-import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/styles/colourTokens";
+import { colourEmerald, colourMeta } from "../../../ui/styles/colourTokens";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 
@@ -130,64 +130,34 @@ export function EquipToggle({
   disabled,
   editable,
   onChange,
-  labels = { equipped: "Equipped", unequipped: "Equip" },
 }: {
   equipped: boolean;
   disabled: boolean;
   editable: boolean;
-  onChange: () => void;
-  labels?: { equipped: string; unequipped: string };
+  onChange: () => void | Promise<void>;
 }) {
   if (!editable) {
     return equipped ? (
       <Chip size="sm" className={`${colourEmerald} uppercase tracking-wide shrink-0`}>
-        {labels.equipped}
+        Equipped
       </Chip>
     ) : null;
   }
   return (
-    <button
-      type="button"
+    <Button
+      size="xs"
+      variant={equipped ? "successOutline" : "ghost"}
       disabled={disabled && !equipped}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (!disabled || equipped) onChange();
+      loadingLabel={equipped ? "Unequipping" : "Equipping"}
+      title={equipped ? "Click to unequip" : disabled ? "Slots full" : "Click to equip"}
+      className="relative z-10 pointer-events-auto shrink-0"
+      onClick={(event) => {
+        event.stopPropagation();
+        if (!disabled || equipped) return onChange();
       }}
-      title={equipped ? "Click to stow" : disabled ? "Slots full" : "Click to equip"}
-      className={`relative z-10 pointer-events-auto flex items-center gap-1 shrink-0 group transition ${
-        disabled && !equipped ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-      }`}
     >
-      <div
-        className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition ${
-          equipped ? colourEmerald : "border-slate-600 group-hover:border-slate-400"
-        }`}
-      >
-        {equipped && (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 10 10"
-            fill="none"
-            className="w-2 h-2"
-          >
-            <path
-              stroke="currentColor"
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M1.5 5l2.5 2.5 4.5-4.5"
-            />
-          </svg>
-        )}
-      </div>
-      <span
-        className={`text-[10px] lg:text-xs uppercase tracking-wide ${
-          equipped ? colourEmeraldPlain : "text-slate-500 group-hover:text-slate-300"
-        }`}
-      >
-        {equipped ? labels.equipped : labels.unequipped}
-      </span>
-    </button>
+      {equipped ? "Unequip" : "Equip"}
+    </Button>
   );
 }
 
