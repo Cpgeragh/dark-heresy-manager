@@ -25,7 +25,31 @@
     <meta name="theme-color" content="#0F172A" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="min-h-svh flex flex-col items-center justify-center gap-5 bg-slate-950 text-slate-100">
+        <div class="flex flex-col items-center gap-3">
+          <div class="h-20 w-[51px] flex items-center justify-center">
+            <img src="/splash-inquisition-emblem.webp" alt="" class="h-20 w-[51px] object-contain" loading="eager" fetchpriority="high" />
+          </div>
+          <div class="h-[58px] max-w-[calc(100vw-2rem)] flex flex-col items-center justify-center gap-1 text-center">
+            <span class="font-cinzel text-4xl font-bold tracking-[0.1em] text-red-600 leading-none whitespace-nowrap">Dark Heresy</span>
+            <span class="font-cinzel text-sm tracking-[0.55em] text-slate-300 uppercase leading-none whitespace-nowrap">Manager</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 w-64">
+          <div class="flex-1 border-t-4 border-double border-slate-800"></div>
+          <div class="h-4 w-[43px] flex items-center justify-center">
+            <img src="/splash-aquila-divider.webp" alt="" class="h-4 w-[43px] object-contain opacity-60" loading="eager" fetchpriority="high" />
+          </div>
+          <div class="flex-1 border-t-4 border-double border-slate-800"></div>
+        </div>
+        <div class="w-8 h-8 rounded-full border-2 border-slate-800 border-t-red-600 animate-spin"></div>
+        <div class="h-4 flex items-center justify-center">
+          <span id="splash-label" class="text-[0.6rem] tracking-widest text-slate-500 uppercase leading-none whitespace-nowrap"></span>
+        </div>
+      </div>
+    </div>
+    <script src="/splash-label.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

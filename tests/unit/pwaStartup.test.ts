@@ -27,6 +27,7 @@ function createHarness(overrides: Partial<PwaStartupOptions> = {}) {
     installing: null as unknown,
     waiting: null as unknown,
     update: vi.fn<() => Promise<unknown>>().mockResolvedValue(undefined),
+    addEventListener: vi.fn<(type: string, listener: () => void) => void>(),
   };
 
   const options: PwaStartupOptions = {
@@ -91,12 +92,13 @@ describe("PWA startup coordination", () => {
     expect(harness.marks).toContain("startup:first-visit-or-no-controller");
   });
 
-  it("uses the registration helper's single check on a controlled visit with no update", () => {
+  it("runs an explicit startup check before rendering a controlled visit", async () => {
     const harness = createHarness();
 
     harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
+    await Promise.resolve();
 
-    expect(harness.registration.update).not.toHaveBeenCalled();
+    expect(harness.registration.update).toHaveBeenCalledOnce();
     expect(harness.scheduled.map(({ delayMs }) => delayMs)).toContain(PWA_UPDATE_CHECK_FALLBACK_MS);
     expect(harness.renders).toEqual(["loading", "app"]);
     expect(harness.marks).toContain("startup:update-check-complete");
@@ -124,7 +126,7 @@ describe("PWA startup coordination", () => {
     expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBeUndefined();
   });
 
-  it("marks an activated update before the helper-requested reload", () => {
+  it("shows Updating when activation happens before the startup check settles", () => {
     const harness = createHarness();
     harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
 
@@ -132,7 +134,7 @@ describe("PWA startup coordination", () => {
     harness.callbacks()?.onNeedReload();
 
     expect(harness.options.reloadPage).toHaveBeenCalledOnce();
-    expect(harness.renders).toEqual(["loading", "app", "updating"]);
+    expect(harness.renders).toEqual(["loading", "updating"]);
     expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBe("1");
     expect(harness.marks).toContain("startup:update-activated");
   });
@@ -176,5 +178,100 @@ describe("PWA startup coordination", () => {
 
     expect(neverRegistered.renders).toEqual(["loading", "app"]);
     expect(neverRegistered.marks).toContain("startup:update-check-safety-fallback");
+  });
+
+  it("listens for a new version before it decides whether one is downloading", () => {
+    const harness = createHarness();
+
+    harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
+
+    expect(harness.registration.addEventListener).toHaveBeenCalledWith(
+      "updatefound",
+      expect.any(Function)
+    );
+  });
+
+  it("never replaces an already-rendered app with the updating splash", async () => {
+    const harness = createHarness();
+    harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
+    await Promise.resolve();
+    expect(harness.renders).toEqual(["loading", "app"]);
+
+    let statechange: () => void = () => undefined;
+    const worker = {
+      state: "installing",
+      addEventListener: (_type: string, listener: () => void) => {
+        statechange = listener;
+      },
+    };
+    harness.registration.installing = worker;
+    harness.registration.addEventListener.mock.calls[0][1]();
+
+    expect(harness.renders).toEqual(["loading", "app"]);
+    expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBeUndefined();
+    expect(harness.marks).toContain("startup:update-announced");
+
+    worker.state = "activated";
+    statechange();
+
+    expect(harness.renders).toEqual(["loading", "app"]);
+    expect(harness.options.reloadPage).toHaveBeenCalledOnce();
+    expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBe("1");
+  });
+
+  it("reloads once when a downloading version becomes active", () => {
+    const harness = createHarness();
+    let statechange: () => void = () => undefined;
+    const worker = {
+      state: "installing",
+      addEventListener: (_type: string, listener: () => void) => {
+        statechange = listener;
+      },
+    };
+    harness.registration.installing = worker;
+
+    harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
+    expect(harness.renders).toEqual(["loading", "updating"]);
+    expect(harness.options.reloadPage).not.toHaveBeenCalled();
+
+    worker.state = "activated";
+    statechange();
+    statechange();
+
+    expect(harness.options.reloadPage).toHaveBeenCalledOnce();
+    expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBe("1");
+  });
+
+  it("reloads straight away when the downloading version is already active", () => {
+    const harness = createHarness();
+    harness.registration.installing = { state: "activated" };
+
+    harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
+
+    expect(harness.options.reloadPage).toHaveBeenCalledOnce();
+  });
+
+  it("opens the app with a warning when a new version fails to install", () => {
+    const harness = createHarness();
+    let statechange: () => void = () => undefined;
+    const worker = {
+      state: "installing",
+      addEventListener: (_type: string, listener: () => void) => {
+        statechange = listener;
+      },
+    };
+    harness.registration.installing = worker;
+    harness.callbacks()?.onRegisteredSW("/sw.js", harness.registration);
+
+    worker.state = "redundant";
+    statechange();
+
+    expect(harness.renders).toEqual(["loading", "updating", "app"]);
+    expect(harness.options.markUpdateStalled).toHaveBeenCalledOnce();
+    expect(harness.storageValues.get(PWA_JUST_UPGRADED_KEY)).toBeUndefined();
+  });
+
+  it("waits five minutes for a download before giving up", () => {
+    expect(PWA_STALLED_UPDATE_FALLBACK_MS).toBe(5 * 60 * 1000);
   });
 });

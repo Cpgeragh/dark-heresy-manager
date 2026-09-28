@@ -1,11 +1,18 @@
 export const PWA_UPDATE_CHECK_FALLBACK_MS = 3_000;
-export const PWA_STALLED_UPDATE_FALLBACK_MS = 30_000;
+export const PWA_STALLED_UPDATE_FALLBACK_MS = 300_000;
 
 export const PWA_JUST_UPGRADED_KEY = "pwa-just-upgraded";
 
 interface ServiceWorkerRegistrationLike {
   installing: unknown;
   waiting: unknown;
+  update: () => Promise<unknown>;
+  addEventListener?: (type: "updatefound", listener: () => void) => void;
+}
+
+interface ServiceWorkerLike {
+  state?: string;
+  addEventListener?: (type: "statechange", listener: () => void) => void;
 }
 
 interface ServiceWorkerRegistrationOptions {
@@ -41,14 +48,14 @@ export interface PwaStartupOptions {
 }
 
 /**
- * Coordinates the existing production PWA startup flow behind injectable
- * browser dependencies so every update state can be measured and tested.
- * This intentionally preserves the current three- and thirty-second safety
- * behaviour; corrections are considered only after the measurements.
+ * Coordinates the PWA startup flow behind injectable browser dependencies so
+ * every update state can be measured and tested. The startup update check is
+ * capped at three seconds and a stalled update download at five minutes.
  */
 export function startPwaStartup(options: PwaStartupOptions): void {
   let settled = false;
   let reloadRequested = false;
+  let updating = false;
 
   const renderApp = () => {
     if (settled) return;
@@ -57,19 +64,28 @@ export function startPwaStartup(options: PwaStartupOptions): void {
     options.renderApp();
   };
 
+  // Last resort when a new version never finishes installing: open the app and warn.
+  const giveUpOnUpdate = () => {
+    if (!updating || reloadRequested) return;
+    updating = false;
+    settled = false;
+    options.mark("startup:update-stalled-fallback");
+    options.storage.removeItem(PWA_JUST_UPGRADED_KEY);
+    options.markUpdateStalled();
+    renderApp();
+  };
+
+  // Shows the updating splash at startup, or later once a new version starts downloading.
   const renderUpdating = () => {
-    if (settled) return;
+    // Once the main application has rendered, never replace it with the
+    // updating splash. A late update can finish in the background and reload.
+    if (settled || reloadRequested) return;
+    updating = true;
     settled = true;
     options.mark("startup:update-detected");
     options.storage.setItem(PWA_JUST_UPGRADED_KEY, "1");
     options.renderUpdating();
-    options.schedule(() => {
-      settled = false;
-      options.mark("startup:update-stalled-fallback");
-      options.storage.removeItem(PWA_JUST_UPGRADED_KEY);
-      options.markUpdateStalled();
-      renderApp();
-    }, PWA_STALLED_UPDATE_FALLBACK_MS);
+    options.schedule(giveUpOnUpdate, PWA_STALLED_UPDATE_FALLBACK_MS);
   };
 
   const reloadForActivatedUpdate = () => {
@@ -77,8 +93,27 @@ export function startPwaStartup(options: PwaStartupOptions): void {
     reloadRequested = true;
     options.mark("startup:update-activated");
     options.storage.setItem(PWA_JUST_UPGRADED_KEY, "1");
-    options.renderUpdating();
+    // If startup is still on the neutral loading splash, switch it to
+    // Updating. If the app is already visible, leave it alone until reload.
+    if (!settled) {
+      settled = true;
+      updating = true;
+      options.renderUpdating();
+    }
     options.reloadPage();
+  };
+
+  // The registration helper only reports a version it hears about after registering,
+  // so follow the downloading version directly.
+  const watchUpdate = (worker: unknown) => {
+    const candidate = worker as ServiceWorkerLike | null;
+    if (!candidate) return;
+    const check = () => {
+      if (candidate.state === "activated") reloadForActivatedUpdate();
+      else if (candidate.state === "redundant") giveUpOnUpdate();
+    };
+    check();
+    candidate.addEventListener?.("statechange", check);
   };
 
   options.mark("startup:bootstrap");
@@ -119,19 +154,48 @@ export function startPwaStartup(options: PwaStartupOptions): void {
     onNeedReload: reloadForActivatedUpdate,
     onRegisteredSW(_serviceWorkerUrl, registration) {
       options.mark("startup:service-worker-registered");
-      options.mark("startup:update-check-complete");
       if (!registration || !options.hasController()) {
+        options.mark("startup:update-check-complete");
         options.mark("startup:first-visit-or-no-controller");
         renderApp();
         return;
       }
 
       options.mark("startup:controlled-visit");
-      if (registration.installing || registration.waiting) renderUpdating();
-      else {
-        options.mark("startup:no-update");
-        renderApp();
+      // Listen first, so a version announced from now on is never missed.
+      registration.addEventListener?.("updatefound", () => {
+        options.mark("startup:update-announced");
+        renderUpdating();
+        watchUpdate(registration.installing);
+      });
+      const downloading = registration.installing ?? registration.waiting;
+      if (downloading) {
+        options.mark("startup:update-check-complete");
+        renderUpdating();
+        watchUpdate(downloading);
+        return;
       }
+
+      // Keep the neutral loading splash visible while making the explicit
+      // startup check used by the known-good flow. The updatefound listener
+      // above closes the race between starting this check and inspecting it.
+      registration
+        .update()
+        .then(() => {
+          options.mark("startup:update-check-complete");
+          const discovered = registration.installing ?? registration.waiting;
+          if (discovered) {
+            renderUpdating();
+            watchUpdate(discovered);
+          } else {
+            options.mark("startup:no-update");
+            renderApp();
+          }
+        })
+        .catch(() => {
+          options.mark("startup:update-check-error");
+          renderApp();
+        });
     },
     onRegisterError() {
       options.mark("startup:service-worker-registration-error");
