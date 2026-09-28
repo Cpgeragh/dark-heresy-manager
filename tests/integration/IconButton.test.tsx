@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { EditButton } from "../../src/ui/buttons/EditButton";
@@ -29,5 +29,39 @@ describe("icon buttons", () => {
     await user.click(button);
 
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("shows a spinner while a promise-returning click is pending, then recovers", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onClick = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<EditButton label="Edit name" onClick={onClick} />);
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+    const button = screen.getByRole("button", { name: "Edit name" });
+    expect(button).toHaveAttribute("aria-busy", "true");
+    expect(button).toBeDisabled();
+    expect(button.querySelector("svg")).toBeNull();
+    await user.click(button);
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    await act(async () => finish());
+    const recovered = screen.getByRole("button", { name: "Edit name" });
+    expect(recovered).not.toHaveAttribute("aria-busy");
+    expect(recovered.querySelector("svg")).not.toBeNull();
+  });
+
+  it("does not go busy when the click handler returns nothing", async () => {
+    const user = userEvent.setup();
+    render(<EditButton label="Edit name" onClick={() => undefined} />);
+
+    await user.click(screen.getByRole("button", { name: "Edit name" }));
+
+    expect(screen.getByRole("button", { name: "Edit name" })).not.toHaveAttribute("aria-busy");
   });
 });

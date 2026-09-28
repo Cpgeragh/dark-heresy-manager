@@ -100,6 +100,7 @@ const CAMPAIGN_GROUP_TABS = [
 ] as const satisfies readonly SegmentedTabOption<CampaignGroup>[];
 const CAMPAIGN_GROUP_TABS_ID = "dashboard-campaign-groups";
 const DELETE_PREFLIGHT_CACHE_MS = 60 * 60 * 1000;
+const PRESS_FEEDBACK_TEST_DELAY_MS = 120;
 const campaignActionRowClass =
   "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4 lg:py-5";
 const campaignActionLabelClass =
@@ -178,6 +179,8 @@ function DmCampaignList({
   const [newCampaignName, setNewCampaignName] = useState("");
   const [newInquisitorName, setNewInquisitorName] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [delayedCreatePressed, setDelayedCreatePressed] = useState(false);
+  const delayedCreateTimerRef = useRef<number | null>(null);
   const createFormScrollPositionRef = useRef(0);
   const createOperationIdRef = useRef<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -207,6 +210,25 @@ function DmCampaignList({
   const [showArchived, setShowArchived] = useState(false);
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
   const toast = useToast();
+
+  useEffect(
+    () => () => {
+      if (delayedCreateTimerRef.current !== null) {
+        window.clearTimeout(delayedCreateTimerRef.current);
+      }
+    },
+    []
+  );
+
+  const openCreateFormWithPressDelay = useCallback(() => {
+    if (delayedCreateTimerRef.current !== null) return;
+    setDelayedCreatePressed(true);
+    delayedCreateTimerRef.current = window.setTimeout(() => {
+      delayedCreateTimerRef.current = null;
+      setDelayedCreatePressed(false);
+      setShowCreateForm(true);
+    }, PRESS_FEEDBACK_TEST_DELAY_MS);
+  }, []);
 
   const handleCreate = useCallback(async () => {
     if (creatingRef.current) return;
@@ -442,7 +464,15 @@ function DmCampaignList({
         <CampaignListLimitNotice />
       )}
 
-      <Button onClick={() => setShowCreateForm(true)}>Create campaign</Button>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => setShowCreateForm(true)}>Create campaign</Button>
+        <Button
+          className={delayedCreatePressed ? "scale-[0.98] bg-red-500/20" : ""}
+          onClick={openCreateFormWithPressDelay}
+        >
+          Create campaign — 120 ms
+        </Button>
+      </div>
 
       {showCreateForm && (
         <CustomFormShell

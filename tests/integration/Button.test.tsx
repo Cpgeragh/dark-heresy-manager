@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Button } from "../../src/ui/buttons/Button";
@@ -42,5 +42,36 @@ describe("Button", () => {
 
     rerender(<Button loading>Save</Button>);
     expect(screen.getByRole("button", { name: "Save" })).not.toHaveClass("disabled:opacity-50");
+  });
+
+  it("stays busy while a promise-returning click is pending, then recovers", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onClick = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<Button onClick={onClick}>Save</Button>);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    const button = screen.getByRole("button", { name: "Save" });
+    expect(button).toHaveAttribute("aria-busy", "true");
+    expect(button).toBeDisabled();
+    await user.click(button);
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    await act(async () => finish());
+    expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute("aria-busy");
+  });
+
+  it("does not go busy when the click handler returns nothing", async () => {
+    const user = userEvent.setup();
+    render(<Button onClick={() => undefined}>Save</Button>);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute("aria-busy");
   });
 });

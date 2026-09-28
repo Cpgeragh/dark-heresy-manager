@@ -2,22 +2,25 @@
 // Shared reference-picker layout: header, search input, scrollable list, and footer.
 
 import { useLayoutEffect, useRef } from "react";
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
-import { editableInputClass } from "../styles/editableStyles";
+import type { ButtonHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
+import { editableInputClass, uiSpinner } from "../styles/editableStyles";
 import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
 import { PlusIcon } from "../icons/PlusIcon";
 import { uiPickerPressFeedback } from "../styles/buttonStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
+import { usePendingClick } from "../usePendingClick";
 
 export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`p-4 lg:p-5 space-y-4 ${className}`.trim()} {...props} />;
 }
 
-export type PickerRowProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+export type PickerRowProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
   interactive?: boolean;
   selected?: boolean;
   card?: boolean;
+  /** A handler that returns a promise keeps the row busy, with a spinner, until it settles. */
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => unknown;
 };
 
 export function PickerRow({
@@ -33,22 +36,32 @@ export function PickerRow({
   ...props
 }: PickerRowProps) {
   recordComponentRender("PickerRow");
+  const { pending, handleClick } = usePendingClick(onClick);
   const respondsToInput = interactive && !disabled;
 
   return (
     <button
       type={type}
-      disabled={disabled}
-      onClick={respondsToInput ? onClick : undefined}
+      disabled={disabled || pending}
+      aria-busy={pending || undefined}
+      onClick={respondsToInput ? handleClick : undefined}
       tabIndex={respondsToInput ? tabIndex : -1}
-      className={`w-full text-left ${card ? "p-3 lg:p-4" : "px-4 lg:px-5 py-3 lg:py-4"} transition ${
+      className={`relative w-full text-left ${card ? "p-3 lg:p-4" : "px-4 lg:px-5 py-3 lg:py-4"} transition ${
         respondsToInput ? "group" : ""
       } ${selected ? "bg-slate-800" : respondsToInput ? "hover:bg-slate-800" : ""} ${
         respondsToInput ? "cursor-pointer" : disabled ? "" : "cursor-default"
-      } ${uiPickerPressFeedback(respondsToInput)} disabled:opacity-40 disabled:cursor-not-allowed ${className}`.trim()}
+      } ${uiPickerPressFeedback(respondsToInput)} ${
+        pending ? "cursor-wait" : "disabled:opacity-40 disabled:cursor-not-allowed"
+      } ${className}`.trim()}
       {...props}
     >
       {children}
+      {pending && (
+        <span
+          className={`${uiSpinner} absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2`}
+          aria-hidden="true"
+        />
+      )}
     </button>
   );
 }
