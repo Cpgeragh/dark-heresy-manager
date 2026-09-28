@@ -192,7 +192,7 @@ export function GearTab({
   const addConsumableFromRef = useCallback(
     (ref: ConsumableRef) => {
       if (!editable) return;
-      onUpdateConsumables([
+      return onUpdateConsumables([
         ...consumables,
         {
           id: crypto.randomUUID(),
@@ -221,7 +221,7 @@ export function GearTab({
   const removeConsumable = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateConsumables(consumables.filter((c) => c.id !== id));
+      return onUpdateConsumables(consumables.filter((c) => c.id !== id));
     },
     [editable, consumables, onUpdateConsumables]
   );
@@ -346,7 +346,7 @@ export function GearTab({
   const addFromRef = useCallback(
     (ref: GearRef, gmValue?: string, gmRarity?: string) => {
       if (!editable) return;
-      onUpdate([
+      return onUpdate([
         ...gear,
         {
           id: crypto.randomUUID(),
@@ -448,7 +448,7 @@ export function GearTab({
   const removeItem = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(gear.filter((g) => g.id !== id));
+      return onUpdate(gear.filter((g) => g.id !== id));
     },
     [editable, gear, onUpdate]
   );

@@ -1,6 +1,6 @@
 // tests/integration/DrugsTab.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import type {
@@ -170,5 +170,50 @@ describe("DrugsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
 
     expect(onUpdate).toHaveBeenCalledWith([]);
+  });
+
+  it("shows a spinner on a drug row while the add is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    renderTab({ onUpdate });
+
+    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByText(DRUG_NAME));
+
+    const row = screen.getByText(DRUG_NAME).closest("button");
+    expect(row).toHaveAttribute("aria-busy", "true");
+    expect(row).toBeDisabled();
+
+    await act(async () => finish());
+    expect(row).not.toHaveAttribute("aria-busy");
+  }, 15000);
+
+  it("shows a spinner on Remove while a drug removal is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    const drug: DrugItem = { id: "d1", name: "Obscura", referenceId: "obscura", quantity: 1 };
+    renderTab({ drugs: [drug], onUpdate });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+
+    expect(screen.getAllByRole("button", { name: "Remove" })[0]).toHaveAttribute(
+      "aria-busy",
+      "true"
+    );
+
+    await act(async () => finish());
+    expect(screen.getAllByRole("button", { name: "Remove" })[0]).not.toHaveAttribute("aria-busy");
   });
 });

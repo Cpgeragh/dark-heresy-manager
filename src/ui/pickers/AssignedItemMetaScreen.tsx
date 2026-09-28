@@ -15,7 +15,7 @@ interface AssignedItemMetaScreenProps extends Omit<
   confirmLabel: string;
   canConfirm: boolean;
   onBack: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   showRarityPicker: boolean;
   setGmRarity: (value: string) => void;
   setShowRarityPicker: (show: boolean) => void;

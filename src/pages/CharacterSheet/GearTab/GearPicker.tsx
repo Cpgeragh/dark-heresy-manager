@@ -22,8 +22,8 @@ import { recordComponentRender } from "../../../performance/performanceMetrics";
 interface Props {
   editable?: boolean;
   customItems?: CampaignCustomItem<"gear">[];
-  onSelect: (ref: GearRef, gmValue?: string, gmRarity?: string) => void;
-  onSelectCustomItem?: (item: CampaignCustomItem<"gear">) => void;
+  onSelect: (ref: GearRef, gmValue?: string, gmRarity?: string) => void | Promise<void>;
+  onSelectCustomItem?: (item: CampaignCustomItem<"gear">) => void | Promise<void>;
   onCustom: () => void;
   onClose: () => void;
   suspended?: boolean;
@@ -75,7 +75,7 @@ export function GearPicker({
       resetAssignedItemMeta();
       return;
     }
-    onSelect(ref);
+    return onSelect(ref);
   }
 
   function handleAssignedBack() {
@@ -83,9 +83,9 @@ export function GearPicker({
     resetAssignedItemMeta();
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!pending || !canConfirm) return;
-    onSelect(pending, formatMoneyInput(gmCost), pendingNeedsRarity ? gmRarity : undefined);
+    await onSelect(pending, formatMoneyInput(gmCost), pendingNeedsRarity ? gmRarity : undefined);
     handleAssignedBack();
   }
 

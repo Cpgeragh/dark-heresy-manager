@@ -21,7 +21,7 @@ interface Props extends CustomItemLibraryActionProps<"consumable"> {
   item: ConsumableItem;
   editable: boolean;
   onUpdateQty: (id: string, qty: number) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => void | Promise<void>;
 }
 
 export function ConsumableRow({

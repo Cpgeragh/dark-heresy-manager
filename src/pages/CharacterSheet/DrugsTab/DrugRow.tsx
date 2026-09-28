@@ -36,7 +36,7 @@ export function DrugRow({
   item: DrugItem;
   editable: boolean;
   onUpdateQty: (id: string, qty: number) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => void | Promise<void>;
 } & CustomItemLibraryActionProps<"drug">) {
   recordComponentRender("DrugRow");
   const ref = DRUGS_REFERENCE.find((r) => r.id === item.referenceId);

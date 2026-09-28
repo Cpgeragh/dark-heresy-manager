@@ -14,7 +14,7 @@ import { recordComponentRender } from "../../../performance/performanceMetrics";
 interface Props extends CustomItemLibraryActionProps<"gear"> {
   item: GearItem;
   editable: boolean;
-  onRemove: () => void;
+  onRemove: () => void | Promise<void>;
 }
 
 export function ItemRow({

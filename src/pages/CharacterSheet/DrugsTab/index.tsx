@@ -90,7 +90,7 @@ export function DrugsTab({
   const addDrug = useCallback(
     (ref: DrugRef) => {
       if (!editable) return;
-      onUpdate([
+      return onUpdate([
         ...drugs,
         {
           id: crypto.randomUUID(),
@@ -208,7 +208,7 @@ export function DrugsTab({
   const removeDrug = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(drugs.filter((d) => d.id !== id));
+      return onUpdate(drugs.filter((d) => d.id !== id));
     },
     [editable, drugs, onUpdate]
   );

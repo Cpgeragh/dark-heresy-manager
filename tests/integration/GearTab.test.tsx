@@ -1,6 +1,6 @@
 // tests/integration/GearTab.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
@@ -306,5 +306,89 @@ describe("GearTab", () => {
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdateConsumables).toHaveBeenCalledWith([]);
+  });
+
+  it("shows a spinner on a gear row while the add is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    renderTab({ onUpdate });
+
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByText(GEAR_NAME));
+
+    const row = screen.getByText(GEAR_NAME).closest("button");
+    expect(row).toHaveAttribute("aria-busy", "true");
+    expect(row).toBeDisabled();
+
+    await act(async () => finish());
+    expect(row).not.toHaveAttribute("aria-busy");
+  }, 15000);
+
+  it("shows a spinner on a consumable row while the add is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdateConsumables = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    renderTab({ onUpdateConsumables });
+
+    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByText(CONSUMABLE_NAME));
+
+    const row = screen.getByText(CONSUMABLE_NAME).closest("button");
+    expect(row).toHaveAttribute("aria-busy", "true");
+    expect(row).toBeDisabled();
+
+    await act(async () => finish());
+    expect(row).not.toHaveAttribute("aria-busy");
+  }, 15000);
+
+  it("shows a spinner on Remove while a gear removal is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    const item: GearItem = { id: "g1", name: "Grapnel", referenceId: "grapnel" };
+    renderTab({ gear: [item], onUpdate });
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => finish());
+    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
+  });
+
+  it("shows a spinner on Remove while a consumable removal is being saved", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onUpdateConsumables = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    const item: ConsumableItem = { id: "c1", name: "Stimm", referenceId: "stimm", quantity: 2 };
+    renderTab({ consumables: [item], onUpdateConsumables });
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => finish());
+    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
   });
 });
