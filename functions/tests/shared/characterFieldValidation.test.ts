@@ -1,6 +1,9 @@
 // functions/tests/shared/characterFieldValidation.test.ts
 import { describe, it, expect } from "vitest";
-import { assertValidCharacterFieldValue } from "../../src/shared/characterFieldValidation";
+import {
+  assertValidCharacterFieldValue,
+  assertValidCharacterFieldTransition,
+} from "../../src/shared/characterFieldValidation";
 
 describe("assertValidCharacterFieldValue: notes", () => {
   it("rejects a string", () => {
@@ -359,5 +362,178 @@ describe("assertValidCharacterFieldValue: unknown fields", () => {
     expect(() => assertValidCharacterFieldValue("notARealCharacterField", { total: 100 })).toThrow(
       expect.objectContaining({ code: "invalid-argument" })
     );
+  });
+});
+
+describe("assertValidCharacterFieldTransition: characteristics", () => {
+  const adeptCharacter = { header: { career: "Adept" } };
+  const zeroWs = { base: 30, advances: 0 };
+
+  it("accepts an advance that pays the real, career-derived cost", () => {
+    const oldValue = makeCharacteristics({ ws: zeroWs });
+    const newValue = makeCharacteristics({
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 500 } } },
+    });
+
+    expect(() =>
+      assertValidCharacterFieldTransition("characteristics", oldValue, newValue, adeptCharacter)
+    ).not.toThrow();
+  });
+
+  it("rejects an advance recorded at a cheaper cost than the career table says", () => {
+    const oldValue = makeCharacteristics({ ws: zeroWs });
+    const newValue = makeCharacteristics({
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 1 } } },
+    });
+
+    expect(() =>
+      assertValidCharacterFieldTransition("characteristics", oldValue, newValue, adeptCharacter)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects an advance with no purchase record at all when a real cost exists", () => {
+    const oldValue = makeCharacteristics({ ws: zeroWs });
+    const newValue = makeCharacteristics({ ws: { base: 30, advances: 1 } });
+
+    expect(() =>
+      assertValidCharacterFieldTransition("characteristics", oldValue, newValue, adeptCharacter)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects advancing a characteristic confirmed unbuyable for the career", () => {
+    const oldValue = makeCharacteristics({});
+    const newValue = makeCharacteristics({
+      fel: { base: 30, advances: 1, advancePurchases: { simple: { cost: 1 } } },
+    });
+    const techPriest = { header: { career: "Tech-Priest" } };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("characteristics", oldValue, newValue, techPriest)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("stays permissive when no career is set, matching the client's own existing behaviour", () => {
+    const oldValue = makeCharacteristics({ ws: zeroWs });
+    const newValue = makeCharacteristics({ ws: { base: 30, advances: 1 } });
+    const noCareer = { header: {} };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("characteristics", oldValue, newValue, noCareer)
+    ).not.toThrow();
+  });
+
+  it("does not check a decrease, since it can only refund, never create free XP", () => {
+    const oldValue = makeCharacteristics({
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 500 } } },
+    });
+    const newValue = makeCharacteristics({ ws: zeroWs });
+
+    expect(() =>
+      assertValidCharacterFieldTransition("characteristics", oldValue, newValue, adeptCharacter)
+    ).not.toThrow();
+  });
+
+  it("rejects advancing past the four real tiers", () => {
+    const oldValue = makeCharacteristics({ ws: zeroWs });
+    const newValue = makeCharacteristics({ ws: { base: 30, advances: 5 } });
+
+    expect(() =>
+      assertValidCharacterFieldTransition("characteristics", oldValue, newValue, adeptCharacter)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+});
+
+describe("assertValidCharacterFieldTransition: fields with no registered check", () => {
+  it("is a no-op, since most fields don't have a transition validator yet", () => {
+    expect(() =>
+      assertValidCharacterFieldTransition(
+        "gear",
+        [],
+        [{ id: "g1", name: "Rope" }],
+        { header: {} },
+        false
+      )
+    ).not.toThrow();
+  });
+});
+
+describe("assertValidCharacterFieldTransition: skills", () => {
+  const archivist = { header: { career: "Adept", rank: "Archivist" } };
+
+  it("accepts training a skill that's on the career table at the real cost", () => {
+    const newValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } }];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, archivist, false)
+    ).not.toThrow();
+  });
+
+  it("rejects training a career-table skill at the wrong cost", () => {
+    const newValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 1 } } }];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, archivist, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects advancing a skill that's locked at the character's current rank", () => {
+    const oldValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } }];
+    const newValue = [
+      {
+        id: "drive-ground",
+        level: "+10",
+        xpPurchases: { trained: { cost: 100 }, "+10": { cost: 100 } },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", oldValue, newValue, archivist, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a non-DM training a skill that isn't on the career table at all", () => {
+    const newValue = [
+      {
+        id: "not-a-real-skill",
+        level: "trained",
+        manualCosts: { trained: 50 },
+        xpPurchases: { trained: { cost: 50 } },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, archivist, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("allows the DM to train a skill that isn't on the career table, at a DM-set cost", () => {
+    const newValue = [
+      {
+        id: "not-a-real-skill",
+        level: "trained",
+        manualCosts: { trained: 50 },
+        xpPurchases: { trained: { cost: 50 } },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, archivist, true)
+    ).not.toThrow();
+  });
+
+  it("rejects even the DM setting a skill's level with no cost record at all", () => {
+    const newValue = [{ id: "not-a-real-skill", level: "trained" }];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, archivist, true)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("does not check a downgrade back to untrained, since removal can only refund", () => {
+    const oldValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } }];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", oldValue, [], archivist, false)
+    ).not.toThrow();
   });
 });

@@ -8,6 +8,12 @@
 // logic (customItemCopyMutation.ts).
 
 import { HttpsError } from "firebase-functions/v2/https";
+import {
+  CHARACTERISTIC_ADVANCE_TIERS,
+  getCharacteristicTierCosts,
+  getNextSkillTierAccess,
+  type CharacteristicKey,
+} from "shared-rules";
 
 const CHARACTER_FIELD_BYTES = 900_000; // matches PRODUCT_LIMITS.characterDocumentBytes
 const CHARACTER_FIELD_ARRAY_ENTRIES = 200; // matches PRODUCT_LIMITS.characterArrayEntries
@@ -266,4 +272,217 @@ export function assertValidCharacterFieldValue(field: string, value: unknown): v
     throw new HttpsError("invalid-argument", `Field "${field}" cannot be patched this way.`);
   }
   validator(value);
+}
+
+/**
+ * Unlike CharacterFieldValidator, a transition validator sees the character's
+ * current stored data too, since whether a change is legitimate can depend on
+ * what it's changing from (the career, what's already been paid for), not just
+ * whether the new value is shaped correctly on its own.
+ */
+export type CharacterFieldTransitionValidator = (
+  oldValue: unknown,
+  newValue: unknown,
+  character: Record<string, unknown>,
+  isDM: boolean
+) => void;
+
+function getCareerFromCharacter(character: Record<string, unknown>): string | undefined {
+  const header = character.header;
+  if (!isRecord(header)) return undefined;
+  const career = header.career;
+  return typeof career === "string" ? career : undefined;
+}
+
+function getRankFromCharacter(character: Record<string, unknown>): string | undefined {
+  const header = character.header;
+  if (!isRecord(header)) return undefined;
+  const rank = header.rank;
+  return typeof rank === "string" ? rank : undefined;
+}
+
+function getCharFieldAdvances(value: unknown, key: string): number {
+  if (!isRecord(value)) return 0;
+  const field = value[key];
+  if (!isRecord(field)) return 0;
+  const advances = field.advances;
+  return typeof advances === "number" ? advances : 0;
+}
+
+function getCharFieldPurchaseCost(value: unknown, key: string, tier: string): number | undefined {
+  if (!isRecord(value)) return undefined;
+  const field = value[key];
+  if (!isRecord(field)) return undefined;
+  const purchases = field.advancePurchases;
+  if (!isRecord(purchases)) return undefined;
+  const record = purchases[tier];
+  if (!isRecord(record)) return undefined;
+  const cost = record.cost;
+  return typeof cost === "number" ? cost : undefined;
+}
+
+/**
+ * Rejects a characteristics patch that advances a stat without paying the real,
+ * career-derived cost for it, or that advances a stat that's confirmed unbuyable
+ * for the character's career. Where the career simply has no cost data
+ * transcribed yet, this stays permissive, matching the client's own existing
+ * behaviour, rather than enforcing a stricter rule than the app already does.
+ * Decreases (refunds/undo) are not checked, only advances can create free XP.
+ */
+function assertValidCharacteristicsTransition(
+  oldValue: unknown,
+  newValue: unknown,
+  character: Record<string, unknown>,
+  _isDM: boolean
+): void {
+  const career = getCareerFromCharacter(character);
+  for (const key of CHARACTERISTIC_KEYS) {
+    const oldAdvances = getCharFieldAdvances(oldValue, key);
+    const newAdvances = getCharFieldAdvances(newValue, key);
+    if (newAdvances <= oldAdvances) continue;
+
+    const tierCosts = getCharacteristicTierCosts(career, key as CharacteristicKey);
+    for (let index = oldAdvances; index < newAdvances; index += 1) {
+      const tier = CHARACTERISTIC_ADVANCE_TIERS[index];
+      if (!tier) {
+        throw new HttpsError(
+          "invalid-argument",
+          `Characteristic "${key}" cannot be advanced past ${CHARACTERISTIC_ADVANCE_TIERS.length} tiers.`
+        );
+      }
+      const expectedCost = tierCosts[index];
+      if (expectedCost === null) {
+        throw new HttpsError(
+          "invalid-argument",
+          `Characteristic "${key}" cannot be advanced to "${tier}" for this career.`
+        );
+      }
+      if (typeof expectedCost !== "number") {
+        continue;
+      }
+      const recordedCost = getCharFieldPurchaseCost(newValue, key, tier);
+      if (recordedCost !== expectedCost) {
+        throw new HttpsError(
+          "invalid-argument",
+          `Characteristic "${key}" tier "${tier}" costs ${expectedCost} XP, not ${recordedCost ?? "nothing"}.`
+        );
+      }
+    }
+  }
+}
+
+const SKILL_TIERS = ["trained", "+10", "+20"] as const;
+
+function skillTierIndex(level: unknown): number {
+  if (level === "untrained" || typeof level !== "string") return -1;
+  const index = (SKILL_TIERS as readonly string[]).indexOf(level);
+  return index;
+}
+
+function findSkillById(value: unknown, id: string): Record<string, unknown> | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.find((entry) => isRecord(entry) && entry.id === id) as
+    | Record<string, unknown>
+    | undefined;
+}
+
+function getSkillPurchaseCost(skill: Record<string, unknown> | undefined, tier: string): number | undefined {
+  if (!skill) return undefined;
+  const purchases = skill.xpPurchases;
+  if (!isRecord(purchases)) return undefined;
+  const record = purchases[tier];
+  if (!isRecord(record)) return undefined;
+  const cost = record.cost;
+  return typeof cost === "number" ? cost : undefined;
+}
+
+/**
+ * Rejects a skills patch that advances a skill's tier without paying the real
+ * cost for it. A skill on the character's own career table must match that
+ * table's exact cost. A skill genuinely locked (exists on some career's table,
+ * not reachable yet) can never legitimately advance at all. A skill not on any
+ * career table can only be priced by the DM (the client's own UI already
+ * restricts "Upgrade with manual cost" / "Train with manual cost" to the DM,
+ * this is that same rule enforced server-side); the DM's chosen cost itself is
+ * trusted, not re-derived, since there's no table to check it against.
+ * Decreases and removals are not checked, only advances can create free XP.
+ */
+function assertValidSkillsTransition(
+  oldValue: unknown,
+  newValue: unknown,
+  character: Record<string, unknown>,
+  isDM: boolean
+): void {
+  if (!Array.isArray(newValue)) return;
+  const career = getCareerFromCharacter(character);
+  const rank = getRankFromCharacter(character);
+
+  for (const entry of newValue) {
+    if (!isRecord(entry) || typeof entry.id !== "string") continue;
+    const id = entry.id;
+    const oldSkill = findSkillById(oldValue, id);
+    const oldIndex = oldSkill ? skillTierIndex(oldSkill.level) : -1;
+    const newIndex = skillTierIndex(entry.level);
+    if (newIndex <= oldIndex) continue;
+
+    let currentLevel: string = oldSkill ? (oldSkill.level as string) : "untrained";
+    for (let index = oldIndex + 1; index <= newIndex; index += 1) {
+      const tier = SKILL_TIERS[index];
+      if (!tier) {
+        throw new HttpsError(
+          "invalid-argument",
+          `Skill "${id}" cannot be advanced past ${SKILL_TIERS.length} tiers.`
+        );
+      }
+      const access = getNextSkillTierAccess(career, rank, id, currentLevel as never);
+      if (access.status === "maxed" || access.status === "locked") {
+        throw new HttpsError("invalid-argument", `Skill "${id}" cannot be advanced right now.`);
+      }
+      const recordedCost = getSkillPurchaseCost(entry, tier);
+      if (access.status === "unlocked") {
+        if (recordedCost !== access.cost) {
+          throw new HttpsError(
+            "invalid-argument",
+            `Skill "${id}" tier "${tier}" costs ${access.cost} XP, not ${recordedCost ?? "nothing"}.`
+          );
+        }
+      } else {
+        // "not-on-career": only the DM may price a skill with no career-table cost.
+        if (!isDM) {
+          throw new HttpsError(
+            "invalid-argument",
+            `Skill "${id}" isn't on this career's table and can only be priced by the DM.`
+          );
+        }
+        if (typeof recordedCost !== "number") {
+          throw new HttpsError(
+            "invalid-argument",
+            `Skill "${id}" tier "${tier}" needs a DM-set cost recorded.`
+          );
+        }
+      }
+      currentLevel = tier;
+    }
+  }
+}
+
+const CHARACTER_FIELD_TRANSITION_VALIDATORS: Partial<
+  Record<string, CharacterFieldTransitionValidator>
+> = {
+  characteristics: assertValidCharacteristicsTransition,
+  skills: assertValidSkillsTransition,
+};
+
+/** A no-op for any field without a registered transition validator, deliberately
+ * permissive: most fields don't have one yet, and that's not itself an error. */
+export function assertValidCharacterFieldTransition(
+  field: string,
+  oldValue: unknown,
+  newValue: unknown,
+  character: Record<string, unknown>,
+  isDM: boolean
+): void {
+  const validator = CHARACTER_FIELD_TRANSITION_VALIDATORS[field];
+  if (!validator) return;
+  validator(oldValue, newValue, character, isDM);
 }

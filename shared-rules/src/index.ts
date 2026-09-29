@@ -11,10 +11,37 @@ export {
 export { findCareerByName, CAREER_LIST } from "./careerData.js";
 export { CAREER_ADVANCES, type CharacteristicKey } from "./careerAdvancesReference.js";
 export { SkillSource } from "./skillSource.js";
+export { TALENT_LIST, type TalentData, type TalentBehaviour } from "./talentData.js";
+export {
+  WEAPON_TRAINING_GROUPS,
+  type WeaponTrainingItem,
+  type WeaponTrainingGroup,
+} from "./weaponTrainingData.js";
+export {
+  getAllCareerAdvances,
+  getUnlockedCareerAdvances,
+  type AccessibleCareerAdvance,
+} from "./careerAdvanceAccess.js";
+export {
+  getCurrentCareerRank,
+  makeSourceRankPurchase,
+  makeCurrentRankPurchase,
+  type CurrentCareerRank,
+} from "./purchaseAttribution.js";
+export {
+  getUnlockedSkillTrainingCosts,
+  getNextSkillTierAccess,
+  getSkillsSpent,
+  type SkillTierAccess,
+} from "./skillAdvanceCosts.js";
 export type {
   CharacteristicAdvanceTier,
   Characteristics,
   CharField,
   XpPurchaseRecord,
   CharacterForCharacteristicCosts,
+  SkillAdvanceLevel,
+  SkillEntryForCost,
+  CharacterForSkillCosts,
+  WeaponTrainingTalentId,
 } from "./types.js";

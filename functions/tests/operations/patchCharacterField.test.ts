@@ -400,4 +400,129 @@ describe("patchCharacterField", () => {
     expect(mockCampaignGet).not.toHaveBeenCalled();
     expect(mockTransactionGet).not.toHaveBeenCalled();
   });
+
+  const OTHER_CHARACTERISTICS = {
+    bs: { base: 30, advances: 0 },
+    s: { base: 30, advances: 0 },
+    t: { base: 30, advances: 0 },
+    ag: { base: 30, advances: 0 },
+    int: { base: 30, advances: 0 },
+    per: { base: 30, advances: 0 },
+    wp: { base: 30, advances: 0 },
+    fel: { base: 30, advances: 0 },
+  };
+
+  it("allows a characteristics advance that pays the real, career-derived cost", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { career: "Adept" },
+        characteristics: { ws: { base: 30, advances: 0 }, ...OTHER_CHARACTERISTICS },
+      }),
+    });
+
+    const characteristics = {
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 500 } } },
+      ...OTHER_CHARACTERISTICS,
+    };
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "characteristics", value: characteristics },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { characteristics });
+  });
+
+  it("rejects a characteristics advance recorded at a cheaper cost than the career table says", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { career: "Adept" },
+        characteristics: { ws: { base: 30, advances: 0 }, ...OTHER_CHARACTERISTICS },
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "characteristics",
+          value: {
+            ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 1 } } },
+            ...OTHER_CHARACTERISTICS,
+          },
+        },
+        "dm-1"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("allows the DM to train a skill that isn't on the career table at a DM-set cost", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { career: "Adept", rank: "Archivist" },
+        skills: [],
+      }),
+    });
+
+    const skills = [
+      {
+        id: "not-a-real-skill",
+        level: "trained",
+        manualCosts: { trained: 50 },
+        xpPurchases: { trained: { cost: 50 } },
+      },
+    ];
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "skills", value: skills },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { skills });
+  });
+
+  it("rejects a player training a skill that isn't on the career table, even with a cost attached", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        header: { career: "Adept", rank: "Archivist" },
+        skills: [],
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "skills",
+          value: [
+            {
+              id: "not-a-real-skill",
+              level: "trained",
+              manualCosts: { trained: 50 },
+              xpPurchases: { trained: { cost: 50 } },
+            },
+          ],
+        },
+        "player-1"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
 });

@@ -8,6 +8,8 @@ import {
   getCharacteristicTierCosts,
   getCharacteristicAdvancesSpent,
   CHARACTERISTIC_ADVANCE_TIERS,
+  TALENT_LIST,
+  WEAPON_TRAINING_GROUPS,
   type CharacterForCharacteristicCosts,
 } from "shared-rules";
 
@@ -65,5 +67,13 @@ describe("shared-rules wiring", () => {
 
   it("exposes the four characteristic advance tiers in order", () => {
     expect(CHARACTERISTIC_ADVANCE_TIERS).toEqual(["simple", "intermediate", "trained", "expert"]);
+  });
+
+  it("exposes every weapon training group and a talent entry for each group label", () => {
+    const items = WEAPON_TRAINING_GROUPS.flatMap((group) => group.items);
+    expect(items).toHaveLength(32);
+    for (const group of WEAPON_TRAINING_GROUPS) {
+      expect(TALENT_LIST.some((talent) => talent.name === group.label)).toBe(true);
+    }
   });
 });

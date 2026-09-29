@@ -9,7 +9,10 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { assertCanEditCharacter } from "../shared/characterAuthorization.js";
-import { assertValidCharacterFieldValue } from "../shared/characterFieldValidation.js";
+import {
+  assertValidCharacterFieldValue,
+  assertValidCharacterFieldTransition,
+} from "../shared/characterFieldValidation.js";
 import { computeCharacterSummary, isSummaryRelevantField } from "../shared/characterSummary.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
@@ -74,6 +77,10 @@ export async function patchCharacterField(
       }
       const characterData = characterSnapshot.data() ?? {};
       await assertCanEditCharacter(db, callerUid, dmId, characterData);
+      const isDM = callerUid === dmId;
+      for (const [field, value] of Object.entries(patch)) {
+        assertValidCharacterFieldTransition(field, characterData[field], value, characterData, isDM);
+      }
       const updatesSummary = Object.keys(patch).some(isSummaryRelevantField);
       let livePlayerName: string | null = null;
       if (updatesSummary && typeof characterData.userId === "string") {
