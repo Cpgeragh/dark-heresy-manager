@@ -19,6 +19,8 @@ import {
   getGrantedExoticWeapons,
   getGrantedWeaponTrainingIds,
 } from "../../mechanics/talents/talentEffects";
+import { EXOTIC_TRAINING_ACTIVE_STYLE } from "./exoticWeaponTrainingStyles";
+import { ExoticCustomWeaponButton } from "./ExoticCustomWeaponButton";
 
 const WEAPON_TRAINING_GROUP_RGB: Record<string, string> = {
   "Basic Weapon Training": "45,212,191", // teal-400
@@ -44,12 +46,6 @@ const WEAPON_TRAINING_GROUP_INACTIVE_STYLE: Record<string, string> = {
   "Thrown Weapon Training": "border-amber-700/50 bg-amber-950/15 text-amber-400/50",
 };
 
-const EXOTIC_TRAINING_RGB = "232,121,249"; // fuchsia-400
-const EXOTIC_TRAINING_ACTIVE_STYLE =
-  "border-fuchsia-500/60 bg-fuchsia-950/50 text-fuchsia-300 font-semibold";
-const EXOTIC_TRAINING_INACTIVE_STYLE =
-  "border-fuchsia-700/50 bg-fuchsia-950/15 text-fuchsia-400/50";
-
 /** CSS custom properties driving the shared `animate-psy-pulse` keyframe (see tailwind.config.cjs). */
 function weaponTrainingPulseVars(rgb: string): CSSProperties {
   return {
@@ -57,10 +53,7 @@ function weaponTrainingPulseVars(rgb: string): CSSProperties {
     "--glow-hi": `0 0 2px rgba(255,255,255,1), 0 0 6px rgba(${rgb},1), 0 0 22px rgba(${rgb},0.9)`,
   } as CSSProperties;
 }
-import {
-  getUnlockedExoticWeaponSlots,
-  getWeaponTrainingPurchase,
-} from "../../mechanics/experience/weaponTrainingAdvanceCosts";
+import { getWeaponTrainingPurchase } from "../../mechanics/experience/weaponTrainingAdvanceCosts";
 import { makeCurrentRankPurchase } from "../../mechanics/experience/purchaseAttribution";
 
 interface WeaponTrainingTabProps {
@@ -99,7 +92,6 @@ export function WeaponTrainingTab({
     name: string;
   } | null>(null);
 
-  const [showExoticChoice, setShowExoticChoice] = useState(false);
   const [exoticFormMode, setExoticFormMode] = useState<"slot" | "bonus" | null>(null);
   const [newExoticName, setNewExoticName] = useState("");
   const [newExoticCost, setNewExoticCost] = useState("");
@@ -171,30 +163,9 @@ export function WeaponTrainingTab({
     onUpdate,
   ]);
 
-  const nonBonusExoticCount = weaponTraining.exoticWeapons.filter((weapon) => !weapon.bonus).length;
-  const unlockedExoticSlots = getUnlockedExoticWeaponSlots(career, rank);
-  const hasAvailableExoticSlot = nonBonusExoticCount < unlockedExoticSlots;
-  const exoticTriggerClickable = editable && (isDM || hasAvailableExoticSlot);
-
   const openExoticForm = useCallback((mode: "slot" | "bonus") => {
     setExoticFormMode(mode);
-    setShowExoticChoice(false);
   }, []);
-
-  const handleExoticTriggerClick = useCallback(() => {
-    if (!editable) return;
-    if (hasAvailableExoticSlot && !isDM) {
-      openExoticForm("slot");
-      return;
-    }
-    if (hasAvailableExoticSlot && isDM) {
-      setShowExoticChoice(true);
-      return;
-    }
-    if (canConfirmManualCostPurchase(isDM)) {
-      openExoticForm("bonus");
-    }
-  }, [editable, isDM, hasAvailableExoticSlot, openExoticForm]);
 
   const canConfirmExotic = newExoticName.trim() !== "" && newExoticCost.trim() !== "";
 
@@ -342,20 +313,7 @@ export function WeaponTrainingTab({
               {weapon}
             </button>
           ))}
-          <button
-            type="button"
-            disabled={!exoticTriggerClickable}
-            onClick={handleExoticTriggerClick}
-            aria-label="Add Exotic Weapon"
-            style={
-              hasAvailableExoticSlot ? weaponTrainingPulseVars(EXOTIC_TRAINING_RGB) : undefined
-            }
-            className={`px-2.5 lg:px-3 py-1 lg:py-1.5 min-w-20 rounded border-2 border-dashed text-xs lg:text-sm ${EXOTIC_TRAINING_INACTIVE_STYLE} ${
-              hasAvailableExoticSlot ? "animate-psy-pulse" : ""
-            } ${exoticTriggerClickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`}
-          >
-            <span aria-hidden="true">&nbsp;</span>
-          </button>
+          {isDM && <ExoticCustomWeaponButton onClick={() => openExoticForm("bonus")} />}
         </div>
         {grantedExotics.length > 0 && (
           <p className="mt-1 text-xs text-amber-300">Granted by Sicarius Tutoring (Guardsman)</p>
@@ -485,27 +443,6 @@ export function WeaponTrainingTab({
             <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
               Remove {pendingRemoveExotic.name}?
             </p>
-          </PickerBody>
-        </PickerModal>
-      )}
-
-      {showExoticChoice && (
-        <PickerModal
-          title="Add Exotic Weapon"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setShowExoticChoice(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-        >
-          <PickerBody>
-            <Button className="w-full" onClick={() => openExoticForm("slot")}>
-              Use an available training slot
-            </Button>
-            <Button className="w-full" variant="ghost" onClick={() => openExoticForm("bonus")}>
-              Add as a bonus (doesn't use a slot)
-            </Button>
           </PickerBody>
         </PickerModal>
       )}

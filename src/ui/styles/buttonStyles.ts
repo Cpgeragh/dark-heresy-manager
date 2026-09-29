@@ -33,3 +33,6 @@ export const uiIconButtonIconSize = { md: "w-[18px] h-[18px]", sm: "w-4 h-4" } a
 export const uiIconButtonCompact = `inline-flex items-center justify-center rounded-lg border border-red-500 text-red-500 enabled:hover:bg-red-500/10 enabled:active:bg-red-500/20 ${uiButtonPressShrink} transition p-1 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed`;
 
 export const uiIconButton = `inline-flex items-center justify-center rounded-lg border border-red-500 text-red-500 enabled:hover:bg-red-500/10 enabled:active:bg-red-500/20 ${uiButtonPressShrink} transition p-1.5 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed`;
+
+/** Same shape as uiIconButton, fuchsia instead of red, for a DM's off-catalog custom-entry action. */
+export const uiIconButtonCustom = `inline-flex items-center justify-center rounded-lg border border-fuchsia-500 text-fuchsia-400 enabled:hover:bg-fuchsia-500/10 enabled:active:bg-fuchsia-500/20 ${uiButtonPressShrink} transition p-1.5 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 disabled:cursor-not-allowed`;
