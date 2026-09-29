@@ -86,3 +86,19 @@ export type WeaponTrainingTalentId =
 export interface CharacterForSkillCosts {
   skills: SkillEntryForCost[];
 }
+
+export interface WeaponTrainingExoticEntryForCost {
+  cost: number;
+  xpPurchase?: XpPurchaseRecord;
+}
+
+/** The minimal shape of a character this package's weapon-training-cost logic reads. */
+export interface CharacterForWeaponTrainingCosts {
+  header: { career?: string; rank?: string };
+  weaponTraining: {
+    trained: WeaponTrainingTalentId[];
+    exoticWeapons: WeaponTrainingExoticEntryForCost[];
+    manualCosts?: Partial<Record<WeaponTrainingTalentId, number>>;
+    xpPurchases?: Partial<Record<WeaponTrainingTalentId, XpPurchaseRecord>>;
+  };
+}

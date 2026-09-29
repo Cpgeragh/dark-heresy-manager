@@ -525,4 +525,61 @@ describe("patchCharacterField", () => {
     ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
+
+  it("allows the DM to train a weapon group that isn't unlocked, at a DM-set cost", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { career: "Guardsman", rank: "Conscript" },
+        weaponTraining: { trained: [], exoticWeapons: [] },
+      }),
+    });
+
+    const weaponTraining = {
+      trained: ["basic-bolt"],
+      exoticWeapons: [],
+      manualCosts: { "basic-bolt": 350 },
+      xpPurchases: { "basic-bolt": { cost: 350 } },
+    };
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "weaponTraining", value: weaponTraining },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { weaponTraining });
+  });
+
+  it("rejects a player training a weapon group that isn't unlocked, even with a cost attached", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        header: { career: "Guardsman", rank: "Conscript" },
+        weaponTraining: { trained: [], exoticWeapons: [] },
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "weaponTraining",
+          value: {
+            trained: ["basic-bolt"],
+            exoticWeapons: [],
+            manualCosts: { "basic-bolt": 0 },
+            xpPurchases: { "basic-bolt": { cost: 0 } },
+          },
+        },
+        "player-1"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
 });

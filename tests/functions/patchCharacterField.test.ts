@@ -297,7 +297,14 @@ describe("Functions: patchCharacterField", () => {
   }, 15000);
 
   it.each([
-    ["weaponTraining", { trained: ["basic"] }],
+    [
+      "weaponTraining",
+      {
+        trained: ["basic-bolt"],
+        exoticWeapons: [],
+        xpPurchases: { "basic-bolt": { cost: 350 } },
+      },
+    ],
     ["insanity", { points: 5 }],
     ["cybernetics", [{ id: "c1", name: "Bionic Arm" }]],
     ["rangedWeapons", [{ id: "r1", name: "Laspistol" }]],
@@ -338,7 +345,17 @@ describe("Functions: patchCharacterField", () => {
     ["shields", [{ id: "s1", name: "Riot Shield" }]],
     ["armour", [{ id: "a1", name: "Flak Vest" }]],
     ["companions", [{ id: "co1", name: "Cyber-mastiff" }]],
-    ["skills", [{ id: "sk1", level: "trained" }]],
+    [
+      "skills",
+      [
+        {
+          id: "sk1",
+          level: "trained",
+          manualCosts: { trained: 50 },
+          xpPurchases: { trained: { cost: 50 } },
+        },
+      ],
+    ],
     ["wounds", { total: 10, current: 8, criticalDamage: 0, fatigue: 0 }],
     ["fate", { total: 3, current: 2 }],
     ["corruption", { points: 5, malignancies: [] }],

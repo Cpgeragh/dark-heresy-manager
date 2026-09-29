@@ -18,6 +18,11 @@ export {
   type WeaponTrainingGroup,
 } from "./weaponTrainingData.js";
 export {
+  getWeaponTrainingPurchase,
+  getWeaponTrainingCost,
+  getWeaponTrainingSpent,
+} from "./weaponTrainingAdvanceCosts.js";
+export {
   getAllCareerAdvances,
   getUnlockedCareerAdvances,
   type AccessibleCareerAdvance,
@@ -44,4 +49,5 @@ export type {
   SkillEntryForCost,
   CharacterForSkillCosts,
   WeaponTrainingTalentId,
+  CharacterForWeaponTrainingCosts,
 } from "./types.js";

@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   getWeaponTrainingCost,
-  getUnlockedExoticWeaponSlots,
   getWeaponTrainingSpent,
 } from "../../src/mechanics/experience/weaponTrainingAdvanceCosts";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
@@ -38,16 +37,6 @@ describe("getWeaponTrainingCost", () => {
 
   it("returns undefined when no career is set", () => {
     expect(getWeaponTrainingCost(undefined, undefined, "basic-las")).toBeUndefined();
-  });
-});
-
-describe("getUnlockedExoticWeaponSlots", () => {
-  it("is zero when the career has no unlocked Exotic Weapon Training entries yet", () => {
-    expect(getUnlockedExoticWeaponSlots("Guardsman", "Conscript")).toBe(0);
-  });
-
-  it("sums repeatableAtThisRank across unlocked entries", () => {
-    expect(getUnlockedExoticWeaponSlots("Guardsman", "Captain")).toBe(1);
   });
 });
 

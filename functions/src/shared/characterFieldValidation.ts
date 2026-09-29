@@ -12,7 +12,10 @@ import {
   CHARACTERISTIC_ADVANCE_TIERS,
   getCharacteristicTierCosts,
   getNextSkillTierAccess,
+  getWeaponTrainingPurchase,
+  WEAPON_TRAINING_GROUPS,
   type CharacteristicKey,
+  type WeaponTrainingTalentId,
 } from "shared-rules";
 
 const CHARACTER_FIELD_BYTES = 900_000; // matches PRODUCT_LIMITS.characterDocumentBytes
@@ -466,11 +469,125 @@ function assertValidSkillsTransition(
   }
 }
 
+const WEAPON_TRAINING_IDS: ReadonlySet<string> = new Set(
+  WEAPON_TRAINING_GROUPS.flatMap((group) => group.items.map((item) => item.id))
+);
+
+function getWeaponTrainingRecordedCost(
+  block: Record<string, unknown>,
+  id: string
+): number | undefined {
+  const purchases = block.xpPurchases;
+  if (!isRecord(purchases)) return undefined;
+  const record = purchases[id];
+  if (!isRecord(record)) return undefined;
+  const cost = record.cost;
+  return typeof cost === "number" ? cost : undefined;
+}
+
+/**
+ * Identifies an exotic weapon entry by the fields that matter for cost, not by the whole
+ * entry, since Firestore stores map keys in a different order from the browser.
+ */
+function exoticWeaponKey(entry: unknown): string | undefined {
+  if (!isRecord(entry)) return undefined;
+  const purchaseCost = isRecord(entry.xpPurchase) ? entry.xpPurchase.cost : undefined;
+  return `${String(entry.name)}|${String(entry.cost)}|${String(purchaseCost)}|${String(entry.bonus === true)}`;
+}
+
+/**
+ * Rejects a weapon training patch that adds a fixed weapon group without paying the real
+ * cost for it. A group unlocked on the character's own career table must be recorded at
+ * exactly that table's cost. Any other group can only be priced by the DM (the client's own
+ * UI already restricts this), and the DM's chosen cost is trusted since there is no table to
+ * check it against, but a cost record must still exist. Only the DM can add an exotic weapon,
+ * with a name and a cost. Removals are not checked, only additions can create free XP.
+ */
+function assertValidWeaponTrainingTransition(
+  oldValue: unknown,
+  newValue: unknown,
+  character: Record<string, unknown>,
+  isDM: boolean
+): void {
+  if (!isRecord(newValue)) return;
+  if (!Array.isArray(newValue.trained)) {
+    throw new HttpsError("invalid-argument", "Weapon training must include its trained list.");
+  }
+  if (!Array.isArray(newValue.exoticWeapons)) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Weapon training must include its exotic weapons list."
+    );
+  }
+  const career = getCareerFromCharacter(character);
+  const rank = getRankFromCharacter(character);
+  const previouslyTrained =
+    isRecord(oldValue) && Array.isArray(oldValue.trained) ? oldValue.trained : [];
+
+  for (const id of newValue.trained) {
+    if (previouslyTrained.includes(id)) continue;
+    if (typeof id !== "string" || !WEAPON_TRAINING_IDS.has(id)) {
+      throw new HttpsError("invalid-argument", "Weapon training contains an unknown group.");
+    }
+    const purchase = getWeaponTrainingPurchase(career, rank, id as WeaponTrainingTalentId);
+    const recordedCost = getWeaponTrainingRecordedCost(newValue, id);
+    if (purchase) {
+      if (recordedCost !== purchase.cost) {
+        throw new HttpsError(
+          "invalid-argument",
+          `Weapon training "${id}" costs ${purchase.cost} XP, not ${recordedCost ?? "nothing"}.`
+        );
+      }
+    } else {
+      if (!isDM) {
+        throw new HttpsError(
+          "invalid-argument",
+          `Weapon training "${id}" isn't unlocked on this career's table and can only be priced by the DM.`
+        );
+      }
+      if (typeof recordedCost !== "number") {
+        throw new HttpsError(
+          "invalid-argument",
+          `Weapon training "${id}" needs a DM-set cost recorded.`
+        );
+      }
+    }
+  }
+
+  const unmatched = new Map<string, number>();
+  const previousExotics =
+    isRecord(oldValue) && Array.isArray(oldValue.exoticWeapons) ? oldValue.exoticWeapons : [];
+  for (const entry of previousExotics) {
+    const key = exoticWeaponKey(entry);
+    if (key) unmatched.set(key, (unmatched.get(key) ?? 0) + 1);
+  }
+  for (const entry of newValue.exoticWeapons) {
+    const key = exoticWeaponKey(entry);
+    const available = key ? (unmatched.get(key) ?? 0) : 0;
+    if (key && available > 0) {
+      unmatched.set(key, available - 1);
+      continue;
+    }
+    if (!isDM) {
+      throw new HttpsError("invalid-argument", "Only the DM can add an exotic weapon.");
+    }
+    if (
+      !isRecord(entry) ||
+      typeof entry.name !== "string" ||
+      entry.name.trim() === "" ||
+      typeof entry.cost !== "number"
+    ) {
+      throw new HttpsError("invalid-argument", "An exotic weapon needs a name and a DM-set cost.");
+    }
+  }
+}
+
 const CHARACTER_FIELD_TRANSITION_VALIDATORS: Partial<
   Record<string, CharacterFieldTransitionValidator>
 > = {
   characteristics: assertValidCharacteristicsTransition,
   skills: assertValidSkillsTransition,
+  weaponTraining: assertValidWeaponTrainingTransition,
 };
 
 /** A no-op for any field without a registered transition validator, deliberately

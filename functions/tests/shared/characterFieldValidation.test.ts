@@ -537,3 +537,94 @@ describe("assertValidCharacterFieldTransition: skills", () => {
     ).not.toThrow();
   });
 });
+
+describe("assertValidCharacterFieldTransition: weaponTraining", () => {
+  const guardsman = { header: { career: "Guardsman", rank: "Conscript" } };
+  const empty = { trained: [], exoticWeapons: [] };
+  const trainLas = (cost?: number) => ({
+    ...empty,
+    trained: ["basic-las"],
+    ...(cost === undefined ? {} : { xpPurchases: { "basic-las": { cost } } }),
+  });
+  const trainBolt = {
+    ...empty,
+    trained: ["basic-bolt"],
+    manualCosts: { "basic-bolt": 350 },
+    xpPurchases: { "basic-bolt": { cost: 350 } },
+  };
+  const needlePistol = { name: "Needle Pistol", cost: 200, xpPurchase: { cost: 200 } };
+  const check = (oldValue: unknown, newValue: unknown, isDM: boolean) => () =>
+    assertValidCharacterFieldTransition("weaponTraining", oldValue, newValue, guardsman, isDM);
+
+  it("accepts training a group that's on the career table at the real cost", () => {
+    expect(check(empty, trainLas(100), false)).not.toThrow();
+  });
+
+  it("rejects training a career-table group at the wrong cost", () => {
+    expect(check(empty, trainLas(1), false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects training a career-table group with no cost record at all", () => {
+    expect(check(empty, trainLas(), false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a non-DM training a group that isn't unlocked yet", () => {
+    expect(check(empty, trainBolt, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("allows the DM to train a group that isn't unlocked, at a DM-set cost", () => {
+    expect(check(empty, trainBolt, true)).not.toThrow();
+  });
+
+  it("rejects even the DM adding a locked group with no cost record", () => {
+    expect(check(empty, { ...empty, trained: ["basic-bolt"] }, true)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a group that doesn't exist", () => {
+    const unknown = {
+      ...empty,
+      trained: ["not-a-group"],
+      xpPurchases: { "not-a-group": { cost: 5 } },
+    };
+    expect(check(empty, unknown, true)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("does not check a removal, since it can only refund", () => {
+    expect(check(trainLas(100), empty, false)).not.toThrow();
+  });
+
+  it("rejects a non-DM adding an exotic weapon, even with a cost", () => {
+    expect(check(empty, { ...empty, exoticWeapons: [needlePistol] }, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("allows the DM to add an exotic weapon with a name and a cost", () => {
+    expect(check(empty, { ...empty, exoticWeapons: [needlePistol] }, true)).not.toThrow();
+  });
+
+  it("rejects the DM adding an exotic weapon with no cost", () => {
+    expect(check(empty, { ...empty, exoticWeapons: [{ name: "Web Pistol" }] }, true)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("accepts a player's patch that leaves existing exotic weapons alone, whatever the key order", () => {
+    const stored = {
+      ...empty,
+      exoticWeapons: [{ xpPurchase: { cost: 200 }, cost: 200, name: "Needle Pistol" }],
+    };
+    const patched = { ...trainLas(100), exoticWeapons: [needlePistol] };
+    expect(check(stored, patched, false)).not.toThrow();
+  });
+});
