@@ -459,9 +459,23 @@ describe("assertValidCharacterFieldTransition: fields with no registered check",
 
 describe("assertValidCharacterFieldTransition: skills", () => {
   const archivist = { header: { career: "Adept", rank: "Archivist" } };
+  const blackPriest = {
+    header: { career: "Cleric", rank: "Preacher" },
+    experience: {
+      alternateRanks: [
+        {
+          alternateRankId: "black-priest-of-maccabeus",
+          replacedRankId: "preacher",
+          takenAtTier: 4,
+        },
+      ],
+    },
+  };
 
   it("accepts training a skill that's on the career table at the real cost", () => {
-    const newValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } }];
+    const newValue = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } },
+    ];
 
     expect(() =>
       assertValidCharacterFieldTransition("skills", [], newValue, archivist, false)
@@ -469,7 +483,9 @@ describe("assertValidCharacterFieldTransition: skills", () => {
   });
 
   it("rejects training a career-table skill at the wrong cost", () => {
-    const newValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 1 } } }];
+    const newValue = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 1 } } },
+    ];
 
     expect(() =>
       assertValidCharacterFieldTransition("skills", [], newValue, archivist, false)
@@ -477,7 +493,9 @@ describe("assertValidCharacterFieldTransition: skills", () => {
   });
 
   it("rejects advancing a skill that's locked at the character's current rank", () => {
-    const oldValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } }];
+    const oldValue = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } },
+    ];
     const newValue = [
       {
         id: "drive-ground",
@@ -530,11 +548,41 @@ describe("assertValidCharacterFieldTransition: skills", () => {
   });
 
   it("does not check a downgrade back to untrained, since removal can only refund", () => {
-    const oldValue = [{ id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } }];
+    const oldValue = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } },
+    ];
 
     expect(() =>
       assertValidCharacterFieldTransition("skills", oldValue, [], archivist, false)
     ).not.toThrow();
+  });
+
+  it("accepts a Skill from the selected Alternate Rank at its printed cost", () => {
+    const newValue = [
+      {
+        id: "forbidden-daemonology",
+        level: "trained",
+        xpPurchases: { trained: { cost: 100 } },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, blackPriest, false)
+    ).not.toThrow();
+  });
+
+  it("does not treat the replaced normal Rank table as an ordinary player purchase", () => {
+    const newValue = [
+      {
+        id: "disguise",
+        level: "trained",
+        xpPurchases: { trained: { cost: 300 } },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, blackPriest, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 });
 
@@ -558,6 +606,30 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
 
   it("accepts training a group that's on the career table at the real cost", () => {
     expect(check(empty, trainLas(100), false)).not.toThrow();
+  });
+
+  it("accepts Weapon Training from a selected Alternate Rank at its printed cost", () => {
+    const character = {
+      header: { career: "Cleric", rank: "Preacher" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+            takenAtTier: 4,
+          },
+        ],
+      },
+    };
+    const trained = {
+      ...empty,
+      trained: ["melee-power"],
+      xpPurchases: { "melee-power": { cost: 200 } },
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", empty, trained, character, false)
+    ).not.toThrow();
   });
 
   it("rejects training a career-table group at the wrong cost", () => {

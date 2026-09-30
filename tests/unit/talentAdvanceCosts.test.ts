@@ -50,6 +50,25 @@ describe("getNextTalentCost", () => {
   it("returns undefined for a talent on the career's table but at a rank not yet reached", () => {
     expect(getNextTalentCost("Guardsman", "Conscript", "hatred", "Xeno", [])).toBeUndefined();
   });
+
+  it("uses a selected Alternate Rank Talent and its printed cost", () => {
+    expect(
+      getNextTalentCost(
+        "Cleric",
+        "Preacher",
+        "pure-faith",
+        undefined,
+        [],
+        [
+          {
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+            takenAtTier: 4,
+          },
+        ]
+      )
+    ).toBe(300);
+  });
 });
 
 describe("getNextTalentCost, trait entries", () => {
@@ -112,6 +131,18 @@ describe("getTalentRankChips", () => {
 
   it("returns empty for a talent never on the career's table", () => {
     expect(getTalentRankChips("Guardsman", "psy-rating-1", undefined)).toEqual([]);
+  });
+
+  it("uses the Alternate Rank name for a selected replacement table", () => {
+    expect(
+      getTalentRankChips("Cleric", "pure-faith", undefined, [
+        {
+          alternateRankId: "black-priest-of-maccabeus",
+          replacedRankId: "preacher",
+          takenAtTier: 4,
+        },
+      ])
+    ).toContain("Black Priest of Maccabeus");
   });
 });
 

@@ -48,6 +48,34 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
     expect(within(card!).queryByText(/XP$/)).not.toBeInTheDocument();
   });
 
+  it("uses the selected Alternate Rank table in the Faith Talent picker", async () => {
+    const user = userEvent.setup();
+    render(
+      <TalentsTab
+        talents={makeTalents()}
+        career="Cleric"
+        rank="Preacher"
+        alternateRanks={[
+          {
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+            takenAtTier: 4,
+          },
+        ]}
+        psychic={emptyPsychic}
+        editable
+        onUpdateTalents={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Add Faith Talent" })[0]);
+    const dialog = within(screen.getByRole("dialog", { name: "Add Faith Talent" }));
+    const pureFaith = dialog.getByText("Pure Faith").closest("button");
+    expect(pureFaith).toBeInTheDocument();
+    expect(within(pureFaith!).getByText("300 XP")).toBeInTheDocument();
+    expect(within(pureFaith!).getByText("Black Priest of Maccabeus")).toBeInTheDocument();
+  });
+
   it("passes career and rank down into the Trait picker too", async () => {
     const user = userEvent.setup();
     render(

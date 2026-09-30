@@ -2,6 +2,7 @@
 
 import { useState, useCallback, type CSSProperties } from "react";
 import type {
+  AlternateRankSelection,
   TalentsAndTraitsBlock,
   WeaponTrainingBlock,
   WeaponTrainingExoticEntry,
@@ -63,6 +64,7 @@ interface WeaponTrainingTabProps {
   talents?: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
   isDM?: boolean;
 }
 
@@ -79,6 +81,7 @@ export function WeaponTrainingTab({
   talents,
   career,
   rank,
+  alternateRanks = [],
   isDM = false,
 }: WeaponTrainingTabProps) {
   const [pendingTrain, setPendingTrain] = useState<
@@ -226,7 +229,7 @@ export function WeaponTrainingTab({
               const active = owned || granted;
               const purchase = active
                 ? undefined
-                : getWeaponTrainingPurchase(career, rank, trainingId);
+                : getWeaponTrainingPurchase(career, rank, trainingId, alternateRanks);
               const cost = purchase?.cost;
               const pulsing = !active && purchase !== undefined;
               const clickable =

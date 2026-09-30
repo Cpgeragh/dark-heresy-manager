@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import type {
   ArcheotechItem,
+  AlternateRankSelection,
   Character,
   CyberneticItem,
   InsanityBlock,
@@ -14,7 +15,7 @@ import type {
 import { TALENT_LIST, type TalentData } from "../../data/reference/talentData";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
-import { uiFormLabel, uiSection, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import { uiSection, uiTextPlaceholder } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
@@ -24,24 +25,22 @@ import {
 } from "../../ui/styles/segmentedTabStyles";
 import { EntryCard, TalentGroupCard } from "./TalentEntryCards";
 import { TalentPickerModal } from "./TalentPickerModal";
-import {
-  getAvailablePsychicTalentPurchases,
-  getTalentBehaviour,
-  needsTalentAcquisition,
-} from "./talentUtils";
+import { getAvailablePsychicTalentPurchases, getTalentBehaviour } from "./talentUtils";
 import { getGrantedTalentEntries, filterTalentEntriesCoveredByGrants } from "./talentEffects";
-import { TalentAcquisitionModal, type TalentAcquisitionResult } from "./TalentAcquisitionModal";
 import { buildTalentRemovalUpdate, hasRestorableTalentEffect } from "./talentRemovalRules";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import { Button } from "../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { uiTextBody } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
+import { getFaithTalentGroupChip, type FaithTalentGroupChip } from "./faithTalentGroups";
+import { useTalentAcquisitionFlow } from "./useTalentAcquisitionFlow";
 
 interface TalentsTabProps {
   talents: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
   psychic: PsychicBlock;
   cybernetics?: CyberneticItem[];
   rangedWeapons?: RangedWeapon[];
@@ -56,13 +55,6 @@ interface TalentsTabProps {
   onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
 }
 
-const FAITH_GROUP_LABELS: Record<string, string> = {
-  sign: "Emperor's Sign",
-  mercy: "Emperor's Mercy",
-  wrath: "Emperor's Wrath",
-};
-
-const FAITH_GROUP_ORDER = ["mercy", "sign", "wrath"] as const;
 const VIEW_GROUPS = ["talents", "faith"] as const;
 type ViewGroup = (typeof VIEW_GROUPS)[number];
 const TALENT_TABS = [
@@ -87,12 +79,9 @@ const FAITH_TALENT_LIST = TALENT_LIST.filter((talent) => !!talent.faithGroup);
 const FAITH_TALENT_IDS = new Set(FAITH_TALENT_LIST.map((talent) => talent.id));
 const TALENT_BY_ID = new Map(TALENT_LIST.map((talent) => [talent.id, talent]));
 
-function getFaithGroup(talentId: string): string | undefined {
-  return FAITH_TALENT_LIST.find((talent) => talent.id === talentId)?.faithGroup;
-}
-
 function FaithTalentSection({
   entries,
+  psychic,
   editable,
   isDM,
   onAdd,
@@ -100,8 +89,10 @@ function FaithTalentSection({
   pickerSuspended = false,
   career,
   rank,
+  alternateRanks,
 }: {
   entries: TalentEntry[];
+  psychic: PsychicBlock;
   editable: boolean;
   isDM: boolean;
   onAdd: (entry: TalentEntry) => void;
@@ -109,37 +100,9 @@ function FaithTalentSection({
   pickerSuspended?: boolean;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
 }) {
   const [showPicker, setShowPicker] = useState(false);
-  const faithTalentCards = useMemo(
-    () =>
-      FAITH_GROUP_ORDER.map((group) => {
-        const groupEntries = entries
-          .filter((entry) => getFaithGroup(entry.talentId) === group)
-          .sort((a, b) => a.name.localeCompare(b.name));
-        return (
-          <div key={group}>
-            <p className={`${uiFormLabel} mb-1.5`}>{FAITH_GROUP_LABELS[group]}</p>
-            {groupEntries.length === 0 && (
-              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
-            )}
-            <div className="grid grid-cols-1 gap-2">
-              {groupEntries.map((entry) => (
-                <EntryCard
-                  key={entry.uid}
-                  entry={entry}
-                  editable={editable}
-                  onRemove={onRemove}
-                  confirmDeletion
-                  statusAfterSource
-                />
-              ))}
-            </div>
-          </div>
-        );
-      }),
-    [editable, entries, onRemove]
-  );
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
@@ -150,8 +113,19 @@ function FaithTalentSection({
           <ViewButton label="View Faith Talents" onClick={() => setShowPicker(true)} />
         )}
       </div>
-      <section className={uiSection + " space-y-4"}>
-        {faithTalentCards}
+      <section className={uiSection + " space-y-2"}>
+        {entries.length === 0 && (
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
+        )}
+        <div className="grid grid-cols-1 gap-2">
+          <TalentCards
+            entries={entries}
+            psychic={psychic}
+            editable={editable}
+            onRemove={onRemove}
+            getStatusChip={(talentId) => getFaithTalentGroupChip(TALENT_BY_ID.get(talentId))}
+          />
+        </div>
         {showPicker && (
           <TalentPickerModal
             title={editable ? "Add Faith Talent" : "View Faith Talents"}
@@ -165,6 +139,7 @@ function FaithTalentSection({
             suspended={pickerSuspended}
             career={career}
             rank={rank}
+            alternateRanks={alternateRanks}
           />
         )}
       </section>
@@ -177,11 +152,13 @@ const TalentCards = memo(function TalentCards({
   psychic,
   editable,
   onRemove,
+  getStatusChip,
 }: {
   entries: TalentEntry[];
   psychic: PsychicBlock;
   editable: boolean;
   onRemove: (uid: string) => void;
+  getStatusChip?: (talentId: string) => FaithTalentGroupChip | undefined;
 }) {
   recordComponentRender("TalentCards");
   const groups = new Map<string, TalentEntry[]>();
@@ -200,6 +177,7 @@ const TalentCards = memo(function TalentCards({
     .map(([talentId, talentEntries]) => {
       const reference = TALENT_BY_ID.get(talentId) as TalentData | undefined;
       const behaviour = reference ? getTalentBehaviour(reference) : { kind: "ordinary" as const };
+      const statusChip = getStatusChip?.(talentId);
 
       if (behaviour.kind === "ranked") {
         return (
@@ -211,6 +189,8 @@ const TalentCards = memo(function TalentCards({
             onRemove={onRemove}
             confirmDeletion
             statusAfterSource
+            statusChip={statusChip?.label}
+            statusChipClassName={statusChip?.className}
           />
         );
       }
@@ -255,6 +235,8 @@ const TalentCards = memo(function TalentCards({
             editable={editable}
             onRemove={onRemove}
             statusAfterSource
+            statusChip={statusChip?.label}
+            statusChipClassName={statusChip?.className}
           />
         );
       }
@@ -266,6 +248,8 @@ const TalentCards = memo(function TalentCards({
           editable={editable}
           onRemove={onRemove}
           confirmDeletion
+          statusChip={statusChip?.label}
+          statusChipClassName={statusChip?.className}
           statusAfterSource
           removable={
             !entry.grantedByTalentEntryUid &&
@@ -297,6 +281,7 @@ function RegularTalentSection({
   pickerSuspended = false,
   career,
   rank,
+  alternateRanks,
 }: {
   entries: TalentEntry[];
   psychic: PsychicBlock;
@@ -308,6 +293,7 @@ function RegularTalentSection({
   pickerSuspended?: boolean;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
 }) {
   const [showPicker, setShowPicker] = useState(false);
   return (
@@ -345,6 +331,7 @@ function RegularTalentSection({
             suspended={pickerSuspended}
             career={career}
             rank={rank}
+            alternateRanks={alternateRanks}
           />
         )}
       </section>
@@ -356,6 +343,7 @@ export function TalentsTab({
   talents,
   career,
   rank,
+  alternateRanks,
   psychic,
   cybernetics = [],
   rangedWeapons = [],
@@ -370,66 +358,33 @@ export function TalentsTab({
   onUpdateCharacter,
 }: TalentsTabProps) {
   recordComponentRender("TalentsTab");
-  const [pendingAcquisition, setPendingAcquisition] = useState<TalentEntry | null>(null);
   const [savingTalentMutation, setSavingTalentMutation] = useState(false);
   const [pendingEffectDeletion, setPendingEffectDeletion] = useState<TalentEntry | null>(null);
-  const handleAddTalent = useCallback(
-    (entry: TalentEntry) => {
-      const psyRatingMatch = entry.talentId.match(/^psy-rating-[1-6]$/);
-      const psyRating = psyRatingMatch ? Number(entry.talentId.slice(-1)) : 0;
-      const minorGrants =
-        psyRating === 1 || psyRating === 2 ? Math.ceil(willpowerBonus / 2) : undefined;
-      const preparedEntry = psyRatingMatch
-        ? {
-            ...entry,
-            acquisition: {
-              ...entry.acquisition,
-              psyRatingWillpowerBonus: willpowerBonus,
-              ...(minorGrants !== undefined ? { psyRatingMinorPowerGrants: minorGrants } : {}),
-            },
-          }
-        : entry;
-      if (needsTalentAcquisition(preparedEntry, talents)) {
-        setPendingAcquisition(preparedEntry);
-        return;
-      }
-      onUpdateTalents({ ...talents, talents: [...talents.talents, preparedEntry] });
-    },
-    [talents, onUpdateTalents, willpowerBonus]
-  );
-
-  const handleAcquisitionComplete = useCallback(
-    async (result: TalentAcquisitionResult): Promise<boolean> => {
-      const nextTalents = {
-        ...talents,
-        talents: [...talents.talents, result.entry, ...(result.additionalTalentEntries ?? [])],
-      };
-      const grantedDiscipline = result.entry.acquisition?.psyRatingNewDiscipline
-        ? result.entry.acquisition.psyRatingDiscipline
-        : undefined;
-      const nextPsychic =
-        grantedDiscipline && !(psychic.disciplines ?? []).includes(grantedDiscipline)
-          ? { ...psychic, disciplines: [...(psychic.disciplines ?? []), grantedDiscipline] }
-          : psychic;
-      if (onUpdateCharacter) {
-        const saved = await onUpdateCharacter({
-          talentsAndTraits: nextTalents,
-          ...(nextPsychic !== psychic ? { psychic: nextPsychic } : {}),
-          ...(result.cybernetics ? { cybernetics: result.cybernetics } : {}),
-          ...(result.rangedWeapons ? { rangedWeapons: result.rangedWeapons } : {}),
-          ...(result.meleeWeapons ? { meleeWeapons: result.meleeWeapons } : {}),
-          ...(result.archeotech ? { archeotech: result.archeotech } : {}),
-          ...(result.insanity ? { insanity: result.insanity } : {}),
-        });
-        if (saved === false) return false;
-      } else {
-        onUpdateTalents(nextTalents);
-      }
-      setPendingAcquisition(null);
+  const saveTalentAcquisition = useCallback(
+    async (partial: Partial<Character>): Promise<boolean> => {
+      if (onUpdateCharacter) return onUpdateCharacter(partial);
+      if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
       return true;
     },
-    [talents, psychic, onUpdateCharacter, onUpdateTalents]
+    [onUpdateCharacter, onUpdateTalents]
   );
+  const {
+    addTalent: handleAddTalent,
+    acquisitionPending,
+    acquisitionModal,
+  } = useTalentAcquisitionFlow({
+    talents,
+    career,
+    psychic,
+    cybernetics,
+    rangedWeapons,
+    meleeWeapons,
+    archeotech,
+    insanity,
+    willpowerBonus,
+    weaponTraining,
+    onSave: saveTalentAcquisition,
+  });
   const applyTalentRemoval = useCallback(
     async (entry: TalentEntry, restoreOneTimeEffects: boolean) => {
       const update = buildTalentRemovalUpdate({
@@ -527,20 +482,23 @@ export function TalentsTab({
                   isDM={isDM}
                   onAdd={handleAddTalent}
                   onRemove={handleRemoveTalent}
-                  pickerSuspended={pendingAcquisition !== null}
+                  pickerSuspended={acquisitionPending}
                   career={career}
                   rank={rank}
+                  alternateRanks={alternateRanks}
                 />
               ) : (
                 <FaithTalentSection
                   entries={faithEntries}
+                  psychic={psychic}
                   editable={editable}
                   isDM={isDM}
                   onAdd={handleAddTalent}
                   onRemove={handleRemoveTalent}
-                  pickerSuspended={pendingAcquisition !== null}
+                  pickerSuspended={acquisitionPending}
                   career={career}
                   rank={rank}
+                  alternateRanks={alternateRanks}
                 />
               )}
             </section>
@@ -553,9 +511,10 @@ export function TalentsTab({
             isDM={isDM}
             onAdd={handleAddTalent}
             onRemove={handleRemoveTalent}
-            pickerSuspended={pendingAcquisition !== null}
+            pickerSuspended={acquisitionPending}
             career={career}
             rank={rank}
+            alternateRanks={alternateRanks}
           />
         )}
       </div>
@@ -571,42 +530,28 @@ export function TalentsTab({
           onAdd={handleAddTalent}
           onRemove={handleRemoveTalent}
           columns={showFaith ? 1 : 2}
-          pickerSuspended={pendingAcquisition !== null}
+          pickerSuspended={acquisitionPending}
           career={career}
           rank={rank}
+          alternateRanks={alternateRanks}
         />
         {showFaith && (
           <FaithTalentSection
             entries={faithEntries}
+            psychic={psychic}
             editable={editable}
             isDM={isDM}
             onAdd={handleAddTalent}
             onRemove={handleRemoveTalent}
-            pickerSuspended={pendingAcquisition !== null}
+            pickerSuspended={acquisitionPending}
             career={career}
             rank={rank}
+            alternateRanks={alternateRanks}
           />
         )}
       </div>
 
-      {pendingAcquisition && (
-        <TalentAcquisitionModal
-          entry={pendingAcquisition}
-          talents={talents}
-          career={career}
-          currentHomeworldId={talents.homeworld}
-          cybernetics={cybernetics}
-          rangedWeapons={rangedWeapons}
-          meleeWeapons={meleeWeapons}
-          archeotech={archeotech}
-          insanity={insanity}
-          willpowerBonus={willpowerBonus}
-          knownDisciplines={psychic.disciplines ?? []}
-          weaponTraining={weaponTraining}
-          onComplete={handleAcquisitionComplete}
-          onClose={() => setPendingAcquisition(null)}
-        />
-      )}
+      {acquisitionModal}
 
       {pendingEffectDeletion && (
         <PickerModal

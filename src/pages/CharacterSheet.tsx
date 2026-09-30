@@ -77,6 +77,13 @@ const TalentsTab = memo(
     import("../mechanics/talents/TalentsTab").then(({ TalentsTab }) => ({ default: TalentsTab }))
   )
 );
+const EliteAdvancesTab = memo(
+  lazy(() =>
+    import("../mechanics/eliteAdvances/EliteAdvancesTab").then(({ EliteAdvancesTab }) => ({
+      default: EliteAdvancesTab,
+    }))
+  )
+);
 const WeaponsTab = memo(
   lazy(() =>
     import("./CharacterSheet/WeaponsTab").then(({ WeaponsTab }) => ({ default: WeaponsTab }))
@@ -571,6 +578,7 @@ export default function CharacterSheet({
     stats: "Characteristics",
     skills: "Skills",
     talents: "Talents",
+    "elite-advances": "Elite Advances",
     training: "Weapon Training",
     traits: "Traits",
     weapons: "Weapons",
@@ -731,6 +739,7 @@ export default function CharacterSheet({
                   talents={character.talentsAndTraits}
                   career={character.header.career}
                   rank={character.header.rank}
+                  alternateRanks={character.experience.alternateRanks}
                   isDM={isDM}
                 />
               )}
@@ -740,6 +749,7 @@ export default function CharacterSheet({
                   talents={character.talentsAndTraits}
                   career={character.header.career}
                   rank={character.header.rank}
+                  alternateRanks={character.experience.alternateRanks}
                   psychic={character.psychic}
                   cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
                   rangedWeapons={character.rangedWeapons}
@@ -755,12 +765,34 @@ export default function CharacterSheet({
                 />
               )}
 
+              {activeTab === "elite-advances" && (
+                <EliteAdvancesTab
+                  talents={character.talentsAndTraits}
+                  skills={character.skills}
+                  experience={character.experience}
+                  insanity={character.insanity}
+                  psychic={character.psychic}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  rangedWeapons={character.rangedWeapons}
+                  meleeWeapons={character.meleeWeapons}
+                  archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  willpowerBonus={getCharBonus("wp")}
+                  weaponTraining={character.weaponTraining}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  isDM={isDM}
+                  editable={allowedToEdit}
+                  onUpdateCharacter={patchFieldsWithResult}
+                />
+              )}
+
               {activeTab === "training" && (
                 <WeaponTrainingTab
                   weaponTraining={character.weaponTraining}
                   talents={character.talentsAndTraits}
                   career={character.header.career}
                   rank={character.header.rank}
+                  alternateRanks={character.experience.alternateRanks}
                   editable={allowedToEdit}
                   isDM={isDM}
                   onUpdate={handleUpdateWeaponTraining}
@@ -772,6 +804,7 @@ export default function CharacterSheet({
                   talents={character.talentsAndTraits}
                   career={character.header.career}
                   rank={character.header.rank}
+                  alternateRanks={character.experience.alternateRanks}
                   cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
                   gear={character.gear ?? EMPTY_GEAR}
                   editable={allowedToEdit}

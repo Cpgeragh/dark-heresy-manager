@@ -38,6 +38,18 @@ describe("getWeaponTrainingCost", () => {
   it("returns undefined when no career is set", () => {
     expect(getWeaponTrainingCost(undefined, undefined, "basic-las")).toBeUndefined();
   });
+
+  it("uses Weapon Training from a selected Alternate Rank table", () => {
+    expect(
+      getWeaponTrainingCost("Cleric", "Preacher", "melee-power", [
+        {
+          alternateRankId: "black-priest-of-maccabeus",
+          replacedRankId: "preacher",
+          takenAtTier: 4,
+        },
+      ])
+    ).toBe(200);
+  });
 });
 
 describe("getWeaponTrainingSpent", () => {

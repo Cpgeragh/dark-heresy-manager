@@ -9,20 +9,30 @@ import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
 // NAVIGATION STRUCTURE
 // ================================================================
 
+interface SectionTab {
+  id: TabId;
+  label: string;
+}
+
+function alphabetiseTabs(tabs: readonly SectionTab[]): SectionTab[] {
+  return [...tabs].sort((left, right) => left.label.localeCompare(right.label, "en-GB"));
+}
+
 const CATEGORIES: {
   label: string;
   dmOnly?: boolean;
-  tabs: { id: TabId; label: string }[];
+  tabs: SectionTab[];
 }[] = [
   {
     label: "Abilities",
-    tabs: [
+    tabs: alphabetiseTabs([
+      { id: "elite-advances", label: "Elite Advances" },
       { id: "psychic", label: "Psychic" },
       { id: "skills", label: "Skills" },
       { id: "talents", label: "Talents" },
       { id: "traits", label: "Traits" },
       { id: "training", label: "Weapon Training" },
-    ],
+    ]),
   },
   {
     label: "Admin",

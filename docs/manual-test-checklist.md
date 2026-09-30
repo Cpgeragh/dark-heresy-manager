@@ -1,6 +1,6 @@
 # Manual Test Checklist: Complete App
 
-Thirty-three pages and cross-cutting sections, containing comprehensive checks. Every item
+Thirty-four pages and cross-cutting sections, containing comprehensive checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom: read
@@ -106,9 +106,7 @@ Record all nine starting values. For each characteristic, set a simple Base valu
 - [ ] With multiple movement-affecting traits active at once (e.g. Size + Quadruped + Unnatural Speed), the multiplying/halving traits (Amorphous, Crawler, Quadruped) apply to the base Agility Bonus first, then Size's flat adjustment, then Unnatural Speed doubles the result last: confirm the displayed Half/Full/Charge/Run numbers reflect that order
 - [ ] Movement's "Modifiers" list is alphabetical regardless of which order the traits were acquired in
 
-**Watch for:** the adjustment badge and its info popup are driven entirely
-by Corruption entries: this is the other half of the cross-page link from
-Corruption & Mutations above.
+**Watch for:** the adjustment badge and its information popup are driven by recorded modifier sources. Corruption entries and packaged Elite Advances must remain separate named sources.
 
 ## 5. Skills
 
@@ -357,7 +355,7 @@ below deliberately change several of those pages.
 
 **Faith Talents and read-only mode:**
 
-- [ ] Faith Talents land under the correct **Emperor's Mercy / Emperor's Sign / Emperor's Wrath** heading
+- [ ] Faith Talents share one alphabetical list and show the correct **General / Emperor's Sign / Emperor's Mercy / Emperor's Wrath** chip
 - [ ] The Faith picker stays open after an addition and removes the now-owned non-repeatable Talent
 - [ ] Faith Talent deletion uses Delete/Cancel and removes only the chosen entry
 - [ ] In View mode, Talent and Faith pickers remain searchable and information popups work, but cards do not add, delete, or show selection feedback
@@ -717,6 +715,7 @@ Use two profiles: the owning player and the DM. Begin on a character with enough
 - [ ] Rank Up remains disabled until Spent XP reaches the next rank band's minimum; Total XP alone never unlocks it
 - [ ] Confirming Rank Up advances exactly one named rank and updates the Background page's read-only Rank automatically
 - [ ] At a Career split, the confirmation requires one valid next path; after choosing it, later reached cards and next ranks remain on that path (including Adept's shared Scholar rank)
+- [ ] With one available Alternate Rank, the normal and Alternate Rank appear as two inline Rank type choices; with two or more available Alternate Ranks, a separate Rank type picker opens, uses an X close action, and returns only the selected Rank type to the confirmation
 - [ ] The Rank Up review offers one optional **Spend XP** action for the Rank Up cost; once applied, the card shows Amount, Reason, and a compact **Change XP Cost** action
 - [ ] At the final Career rank, no further Rank Up action appears; Add XP remains available in Edit mode and the DM can still Remove XP
 - [ ] In player Edit mode, the player sees Add XP but never Remove XP or Rank Up; in View mode no XP or Rank actions are interactive for either role
@@ -1155,14 +1154,41 @@ Do not deploy between these checks.
 
 ---
 
+## 34. Elite Advances and Alternate Ranks
+
+Alternate Rank selection, packaged Elite Advances, missed-rank purchases and GM-approved purchases.
+
+### How to test this page
+
+Use a Cleric approaching Rank 4 and a separate Cleric who has already selected Black Priest of Maccabeus. Test as both the owning player and the GM. Record XP, Insanity, Toughness and Fellowship before each purchase, then leave the page, return and refresh.
+
+- [ ] Rank Up offers Black Priest of Maccabeus from Rank 4 onwards, records the selection once and continues the character's underlying Cleric rank progression
+- [ ] After Black Priest replaces a normal Cleric Rank, Experience displays Black Priest on that Rank card while later underlying Career progression still works
+- [ ] Skills, Talents, Faith Talents and Weapon Training use the Black Priest advancement table and printed costs; ordinary Career pickers do not expose advances belonging only to the replaced normal Rank
+- [ ] The Abilities drawer lists Elite Advances alphabetically between Talents and Traits
+- [ ] Add Elite Advance opens one picker with Special, Skills and Talents categories
+- [ ] Encarta Maleficarum appears in the normal Special picker only after Black Priest of Maccabeus has been selected
+- [ ] Encarta Maleficarum costs 500 XP and requires three recorded values from 1 to 5: Insanity gained, Toughness reduction and Fellowship reduction
+- [ ] Buying Encarta Maleficarum creates one Elite Advances card, adds the recorded Insanity, applies both Characteristic reductions and adds 500 XP to the current rank ledger
+- [ ] Encarta Maleficarum grants Forbidden Lore (Ordos: Malleus) and Insanely Faithful with Elite Advance provenance
+- [ ] Removing Encarta Maleficarum removes its grants and Characteristic reductions, and subtracts only the Insanity recorded for that purchase
+- [ ] Skills and Talents from the replaced normal rank do not appear as missed-rank options until the character reaches the following Career rank
+- [ ] Each missed-rank Skill or Talent costs its printed normal-rank price plus 50 XP
+- [ ] A Skill bought through Elite Advances appears on Skills with its source and exact cost; it does not remain as an Elite Advances card
+- [ ] A normal Talent bought through Elite Advances appears on Talents with its source and exact cost; it does not remain as an Elite Advances card
+- [ ] A Faith Talent bought through Elite Advances appears on Faith Talents with its source and exact cost; it does not remain as an Elite Advances card
+- [ ] Buying a Talent that requires an acquisition form through Show all opens the same form used by the normal Talents page and does not save before that form is completed
+- [ ] Show all is browse-only for a player and purchasable only by the GM
+- [ ] A GM-entered Show all Skill or Talent cost below 200 XP is rejected
+- [ ] Lowering or removing a Skill tier removes the matching Elite Advance provenance and XP record
+
+**Watch for:** the replaced rank must not leak into the normal missed-rank list early. Direct Skill and Talent purchases belong on their normal pages, while only packaged advances remain on Elite Advances.
+
 ## Coverage notes
 
-This checklist covers the 20 character-sheet sections, the cross-cutting
-systems, and the app-shell pages outside the character sheet. Sections
-21–33 cover systems and pages such as Dashboard, Onboarding, Settings,
-Campaign Overview, and Messages.
+This checklist covers the 21 character-sheet sections, the cross-cutting systems, and the app-shell pages outside the character sheet. Sections 21–33 cover systems and pages such as Dashboard, Onboarding, Settings, Campaign Overview and Messages. Section 34 covers the added Elite Advance and Alternate Rank flow.
 
-**Character-sheet source review (§1–20):** The reviewed scope includes every
+**Character-sheet source review (§1–20 and §34):** The reviewed scope includes every
 tab component, picker, custom-item form, and the shared hooks and helpers
 behind them:
 `useCharacterSheet` and its five constituent hooks (`useCharacterPermissions`,

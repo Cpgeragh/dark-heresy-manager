@@ -127,6 +127,8 @@ export function SkillRow({
   );
 
   const purchasedLevel = skill.baseLevel ?? skill.level;
+  const eliteAdvancePurchase =
+    purchasedLevel === "untrained" ? undefined : skill.eliteAdvancePurchases?.[purchasedLevel];
   const downgradeLevel: SkillAdvanceLevel | undefined =
     purchasedLevel === "+20" ? "+10" : purchasedLevel === "+10" ? "trained" : undefined;
   const downgradeLabel = downgradeLevel === "trained" ? "Trained" : downgradeLevel;
@@ -231,6 +233,11 @@ export function SkillRow({
             </div>
             <StatChip label="Total" value={skill.total ?? "—"} />
           </div>
+          {eliteAdvancePurchase && (
+            <p className={`text-sm ${colourAmberPlain}`}>
+              Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
+            </p>
+          )}
           {talentSourceSummary && (
             <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
           )}
@@ -304,6 +311,11 @@ export function SkillRow({
             </div>
             <StatChip label="Total" value={skill.total ?? "—"} />
           </div>
+          {eliteAdvancePurchase && (
+            <p className={`text-sm ${colourAmberPlain}`}>
+              Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
+            </p>
+          )}
           {talentSourceSummary && (
             <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
           )}

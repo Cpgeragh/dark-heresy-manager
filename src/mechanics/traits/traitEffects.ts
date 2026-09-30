@@ -11,6 +11,7 @@ import type {
   WeaponTrainingTalentId,
 } from "../../types/Character";
 import { SANCTIONING_RESULTS } from "./sanctioningReference";
+import { getEliteAdvanceTraitGrants } from "../eliteAdvances/eliteAdvanceEffects";
 
 export interface TraitModifierSource {
   name: string;
@@ -77,6 +78,17 @@ export function getDerivedTraitEntries(
   career?: string
 ): TalentEntry[] {
   const grants: TalentEntry[] = [];
+  for (const grant of getEliteAdvanceTraitGrants(talents)) {
+    const reference = TRAIT_LIST.find((trait) => trait.id === grant.referenceId);
+    grants.push({
+      uid: `grant:${grant.origin.uid}:${grant.referenceId}`,
+      talentId: grant.referenceId,
+      name: reference?.name ?? grant.referenceId,
+      grantedByTalentEntryUid: grant.origin.uid,
+      grantedByTalentName: grant.origin.name,
+      grantedByType: "Elite Advance",
+    });
+  }
   const selectedHomeworld = HOMEWORLD_LIST.find((homeworld) => homeworld.id === talents.homeworld);
   if (selectedHomeworld) {
     grants.push(

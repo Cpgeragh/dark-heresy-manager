@@ -72,4 +72,34 @@ describe("getUnlockedCareerAdvances", () => {
   it("returns an empty array when no rank is given", () => {
     expect(getUnlockedCareerAdvances("Guardsman", undefined)).toEqual([]);
   });
+
+  it("replaces the normal Rank table with the selected Alternate Rank table", () => {
+    const unlocked = getUnlockedCareerAdvances("Cleric", "Preacher", [
+      {
+        alternateRankId: "black-priest-of-maccabeus",
+        replacedRankId: "preacher",
+        takenAtTier: 4,
+      },
+    ]);
+    const replacedRankEntries = unlocked.filter((entry) => entry.rankId === "preacher");
+
+    expect(replacedRankEntries).not.toHaveLength(0);
+    expect(
+      replacedRankEntries.every((entry) => entry.alternateRankId === "black-priest-of-maccabeus")
+    ).toBe(true);
+    expect(
+      replacedRankEntries.some(
+        (entry) =>
+          entry.advance.kind === "skill" && entry.advance.skillId === "forbidden-daemonology"
+      )
+    ).toBe(true);
+    expect(
+      replacedRankEntries.some(
+        (entry) =>
+          entry.advance.kind === "skill" &&
+          entry.advance.skillId === "barter" &&
+          entry.advance.level === "+10"
+      )
+    ).toBe(false);
+  });
 });

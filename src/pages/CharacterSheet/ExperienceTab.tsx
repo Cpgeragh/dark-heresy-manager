@@ -30,6 +30,7 @@ import {
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/chips/Chip";
+import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
 import { Button } from "../../ui/buttons/Button";
 import { ModalShell } from "../../ui/modals/ModalShell";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
@@ -37,6 +38,7 @@ import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { InfoModal } from "../../components/InfoModal";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
+import { PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
   segmentedTabId,
@@ -70,6 +72,7 @@ const ENTRY_KIND_LABELS: Record<RankCardEntryKind, string> = {
   skill: "Skill",
   talent: "Talent",
   trait: "Trait",
+  "elite-advance": "Elite Advance",
   "weapon-training": "Weapon Training",
   "xp-spend": "XP Spend",
 };
@@ -79,6 +82,7 @@ const ENTRY_KIND_CLASSES: Record<RankCardEntryKind, string> = {
   skill: "border-blue-700/60 bg-blue-950/30 text-blue-300",
   talent: "border-amber-700/60 bg-amber-950/30 text-amber-300",
   trait: "border-violet-700/60 bg-violet-950/30 text-violet-300",
+  "elite-advance": "border-fuchsia-700/60 bg-fuchsia-950/30 text-fuchsia-300",
   "weapon-training": "border-emerald-700/60 bg-emerald-950/30 text-emerald-300",
   "xp-spend": "border-red-700/60 bg-red-950/30 text-red-300",
 };
@@ -304,13 +308,39 @@ function RankUpModal({
   onConfirm: (partial: Record<string, unknown>) => Promise<boolean>;
   onClose: () => void;
 }) {
-  const [selectedRankId, setSelectedRankId] = useState(
-    progression.nextRanks.length === 1 ? progression.nextRanks[0].id : ""
+  const currentAlternateRank = (character.experience.alternateRanks ?? [])
+    .filter((selection) => selection.replacedRankId === progression.currentRank.id)
+    .map((selection) =>
+      ALTERNATE_RANKS.find((alternateRank) => alternateRank.id === selection.alternateRankId)
+    )
+    .find((alternateRank) => alternateRank !== undefined);
+  const initialRank = progression.nextRanks.length === 1 ? progression.nextRanks[0] : undefined;
+  const getAvailableAlternateRanks = (
+    rank: CareerRankProgression["nextRanks"][number] | undefined
+  ) =>
+    ALTERNATE_RANKS.filter(
+      (alternateRank) =>
+        alternateRank.requiredCareerId === progression.career.id &&
+        rank !== undefined &&
+        rank.tier >= alternateRank.minimumRank &&
+        !(character.experience.alternateRanks ?? []).some(
+          (selection) => selection.alternateRankId === alternateRank.id
+        )
+    ).sort((left, right) => left.name.localeCompare(right.name));
+  const [selectedRankId, setSelectedRankId] = useState(initialRank?.id ?? "");
+  const [selectedAlternateRankId, setSelectedAlternateRankId] = useState("");
+  const [rankTypePickerOpen, setRankTypePickerOpen] = useState(
+    () => getAvailableAlternateRanks(initialRank).length >= 2
   );
   const [xpAction, setXpAction] = useState<XpAction | null>(null);
   const [rankUpExperience, setRankUpExperience] = useState(character.experience);
   const [saving, setSaving] = useState(false);
   const selectedRank = progression.nextRanks.find((rank) => rank.id === selectedRankId);
+  const availableAlternateRanks = getAvailableAlternateRanks(selectedRank);
+  const selectedAlternateRank = availableAlternateRanks.find(
+    (alternateRank) => alternateRank.id === selectedAlternateRankId
+  );
+  const selectedRankTypeName = selectedAlternateRank?.name ?? selectedRank?.name;
   const remaining = rankUpExperience.total - rankUpExperience.spent;
   const appliedRankUpCosts = (rankUpExperience.transactions ?? []).filter(
     (transaction) =>
@@ -327,10 +357,23 @@ function RankUpModal({
 
   const confirm = async () => {
     if (!selectedRank) return;
+    const nextExperience = selectedAlternateRankId
+      ? {
+          ...rankUpExperience,
+          alternateRanks: [
+            ...(rankUpExperience.alternateRanks ?? []),
+            {
+              alternateRankId: selectedAlternateRankId,
+              replacedRankId: selectedRank.id,
+              takenAtTier: selectedRank.tier,
+            },
+          ],
+        }
+      : rankUpExperience;
     setSaving(true);
     const saved = await onConfirm({
-      experience: rankUpExperience,
-      header: applyCareerRankUp(character.header, rankUpExperience.spent, selectedRank.id),
+      experience: nextExperience,
+      header: applyCareerRankUp(character.header, nextExperience.spent, selectedRank.id),
     });
     setSaving(false);
     if (saved !== false) onClose();
@@ -353,14 +396,14 @@ function RankUpModal({
         ariaLabel="Confirm Rank Up"
         onClose={cancel}
         className="max-w-lg overflow-y-auto"
-        suspended={xpAction !== null || saving}
+        suspended={xpAction !== null || rankTypePickerOpen || saving}
       >
         <ModalHeader title="Confirm Rank Up" onClose={cancel} />
         <div className="space-y-4 p-4 lg:p-5">
           <div>
             <div className={uiTextLabel}>Current Rank</div>
             <div className="mt-1 text-lg text-slate-100 lg:text-xl">
-              {progression.currentRank.name}
+              {currentAlternateRank?.name ?? progression.currentRank.name}
             </div>
           </div>
 
@@ -379,8 +422,12 @@ function RankUpModal({
                 progression.nextRanks.map((rank) => (
                   <Button
                     key={rank.id}
-                    variant={selectedRankId === rank.id ? "careerPath" : "careerPathMuted"}
-                    onClick={() => setSelectedRankId(rank.id)}
+                    variant={selectedRankId === rank.id ? "careerBranch" : "careerBranchMuted"}
+                    onClick={() => {
+                      setSelectedRankId(rank.id);
+                      setSelectedAlternateRankId("");
+                      setRankTypePickerOpen(getAvailableAlternateRanks(rank).length >= 2);
+                    }}
                     aria-pressed={selectedRankId === rank.id}
                   >
                     {rank.name}
@@ -389,6 +436,49 @@ function RankUpModal({
               )}
             </div>
           </div>
+
+          {availableAlternateRanks.length === 1 && (
+            <div className="space-y-2">
+              <div className={uiTextLabel}>Rank type</div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Button
+                  variant={selectedAlternateRankId === "" ? "careerPath" : "careerPathMuted"}
+                  onClick={() => setSelectedAlternateRankId("")}
+                  aria-pressed={selectedAlternateRankId === ""}
+                >
+                  {selectedRank?.name ?? "Normal Career Rank"}
+                </Button>
+                {availableAlternateRanks.map((alternateRank) => (
+                  <Button
+                    key={alternateRank.id}
+                    variant={
+                      selectedAlternateRankId === alternateRank.id
+                        ? "careerPath"
+                        : "careerPathMuted"
+                    }
+                    onClick={() => setSelectedAlternateRankId(alternateRank.id)}
+                    aria-pressed={selectedAlternateRankId === alternateRank.id}
+                  >
+                    {alternateRank.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {availableAlternateRanks.length >= 2 && selectedRankTypeName && (
+            <div className="space-y-2">
+              <div className={uiTextLabel}>Rank type</div>
+              <Button
+                className="w-full"
+                variant="careerPath"
+                onClick={() => setRankTypePickerOpen(true)}
+                aria-haspopup="dialog"
+              >
+                {selectedRankTypeName}
+              </Button>
+            </div>
+          )}
 
           {appliedRankUpCosts.length === 0 ? (
             <section className={`${uiSectionShell} space-y-3 p-3`}>
@@ -450,6 +540,42 @@ function RankUpModal({
           </div>
         </div>
       </ModalShell>
+
+      {rankTypePickerOpen && selectedRank && (
+        <PickerModal
+          title="Choose Rank Type"
+          query=""
+          onQueryChange={() => {}}
+          onClose={() => setRankTypePickerOpen(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-lg"
+        >
+          <PickerRow
+            selected={selectedAlternateRankId === ""}
+            aria-pressed={selectedAlternateRankId === ""}
+            onClick={() => {
+              setSelectedAlternateRankId("");
+              setRankTypePickerOpen(false);
+            }}
+          >
+            <span className={`${uiItemName} group-hover:text-white`}>{selectedRank.name}</span>
+          </PickerRow>
+          {availableAlternateRanks.map((alternateRank) => (
+            <PickerRow
+              key={alternateRank.id}
+              selected={selectedAlternateRankId === alternateRank.id}
+              aria-pressed={selectedAlternateRankId === alternateRank.id}
+              onClick={() => {
+                setSelectedAlternateRankId(alternateRank.id);
+                setRankTypePickerOpen(false);
+              }}
+            >
+              <span className={`${uiItemName} group-hover:text-white`}>{alternateRank.name}</span>
+            </PickerRow>
+          ))}
+        </PickerModal>
+      )}
 
       {xpAction && (
         <XpTransactionModal
@@ -675,7 +801,8 @@ export function ExperienceTab({
   );
   const [xpAction, setXpAction] = useState<XpAction | null>(null);
   const [rankUpOpen, setRankUpOpen] = useState(false);
-  const currentRankCardId = rankCards.find((card) => card.isCurrent)?.rankId;
+  const currentRankCard = rankCards.find((card) => card.isCurrent);
+  const currentRankCardId = currentRankCard?.rankId;
   const [rankExpansion, setRankExpansion] = useState(() => ({
     currentRankCardId,
     expandedRankIds: new Set(currentRankCardId ? [currentRankCardId] : []),
@@ -751,7 +878,7 @@ export function ExperienceTab({
               <div>
                 <div className={uiTextLabel}>Current Rank</div>
                 <div className="mt-1 text-lg text-slate-100 lg:text-xl">
-                  {progression.currentRank.name}
+                  {currentRankCard?.name ?? progression.currentRank.name}
                 </div>
               </div>
               <div className="sm:text-right">

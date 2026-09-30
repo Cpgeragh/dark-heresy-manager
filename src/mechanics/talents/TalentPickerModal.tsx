@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import type { TalentEntry } from "../../types/Character";
+import type { AlternateRankSelection, TalentEntry } from "../../types/Character";
 import type { TalentData } from "../../data/reference/talentData";
 import type { TraitData } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
@@ -49,6 +49,7 @@ import {
   needsTalentAcquisition,
   normaliseSources,
 } from "./talentUtils";
+import { getFaithTalentGroupChip } from "./faithTalentGroups";
 
 export type AnyListItem = TalentData | TraitData;
 
@@ -57,6 +58,7 @@ type DetailChoice = { detailLabel: string; displayPrefix?: string } | null;
 export function TalentPickerModal({
   title,
   listData,
+  overflowListData,
   entries,
   useTalentBehaviours = false,
   editable = true,
@@ -68,11 +70,17 @@ export function TalentPickerModal({
   onSelectCustomItem,
   onCustomAction,
   customActionLabel = "Custom",
+  showAllLabel = "Show all",
+  minimumManualCost = 0,
+  initialShowOverflow = false,
+  overflowBackCloses = false,
   career,
   rank,
+  alternateRanks = [],
 }: {
   title: string;
   listData: readonly AnyListItem[];
+  overflowListData?: readonly AnyListItem[];
   entries: readonly TalentEntry[];
   useTalentBehaviours?: boolean;
   editable?: boolean;
@@ -84,12 +92,17 @@ export function TalentPickerModal({
   onSelectCustomItem?: (item: CampaignCustomItem<"trait">) => void;
   onCustomAction?: () => void;
   customActionLabel?: string;
+  showAllLabel?: string;
+  minimumManualCost?: number;
+  initialShowOverflow?: boolean;
+  overflowBackCloses?: boolean;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
 }) {
   recordComponentRender("TalentPickerModal");
   const [query, setQuery] = useState("");
-  const [showOverflow, setShowOverflow] = useState(false);
+  const [showOverflow, setShowOverflow] = useState(initialShowOverflow);
   const [picked, setPicked] = useState<AnyListItem | null>(null);
   const [specialisation, setSpecialisation] = useState("");
   const [showChoicePicker, setShowChoicePicker] = useState(false);
@@ -105,6 +118,8 @@ export function TalentPickerModal({
   const overflowScrollPositionRef = useRef(0);
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
   const canMakeManualPurchase = editable && isDM;
+  const allListData = overflowListData ?? listData;
+  const hasOverflow = career !== undefined || overflowListData !== undefined;
 
   const filtered = useMemo(() => {
     const seen = new Set<string>();
@@ -124,18 +139,18 @@ export function TalentPickerModal({
         ) {
           return false;
         }
-        if (career && !hasAnyUnlockedTalentOption(career, rank, item.id, entries)) {
+        if (career && !hasAnyUnlockedTalentOption(career, rank, item.id, entries, alternateRanks)) {
           return false;
         }
         return !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery);
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [career, entries, listData, query, rank, useTalentBehaviours]);
+  }, [alternateRanks, career, entries, listData, query, rank, useTalentBehaviours]);
 
   const overflowFiltered = useMemo(() => {
     const seen = new Set<string>();
     const normalizedQuery = query.trim().toLocaleLowerCase();
-    return [...listData]
+    return [...allListData]
       .filter((item) => {
         if (seen.has(item.id)) return false;
         seen.add(item.id);
@@ -153,7 +168,7 @@ export function TalentPickerModal({
         return !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery);
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [entries, listData, query, useTalentBehaviours]);
+  }, [allListData, entries, query, useTalentBehaviours]);
 
   const filteredCustom = useMemo(
     () =>
@@ -190,8 +205,15 @@ export function TalentPickerModal({
               return {
                 value,
                 label: value,
-                cost: getNextTalentCost(career, rank, talentData.id, lookupValue, entries),
-                rankChips: getTalentRankChips(career, talentData.id, lookupValue),
+                cost: getNextTalentCost(
+                  career,
+                  rank,
+                  talentData.id,
+                  lookupValue,
+                  entries,
+                  alternateRanks
+                ),
+                rankChips: getTalentRankChips(career, talentData.id, lookupValue, alternateRanks),
               };
             })
             .filter((option) => showOverflow || option.cost !== undefined);
@@ -232,8 +254,8 @@ export function TalentPickerModal({
                 value,
                 label,
                 ...(ownedCount !== undefined ? { ownedCount } : {}),
-                cost: getNextTalentCost(career, rank, trait.id, value, entries),
-                rankChips: getTalentRankChips(career, trait.id, value),
+                cost: getNextTalentCost(career, rank, trait.id, value, entries, alternateRanks),
+                rankChips: getTalentRankChips(career, trait.id, value, alternateRanks),
               };
             })
             .filter((option) => showOverflow || option.cost !== undefined);
@@ -300,7 +322,14 @@ export function TalentPickerModal({
       else resetPicked();
       return;
     }
-    const purchase = getNextTalentPurchase(career, rank, item.id, itemSpecialisation, entries);
+    const purchase = getNextTalentPurchase(
+      career,
+      rank,
+      item.id,
+      itemSpecialisation,
+      entries,
+      alternateRanks
+    );
     if (!purchase) return;
     onAdd({
       ...makeTalentEntry(item as TalentData, itemSpecialisation),
@@ -343,7 +372,7 @@ export function TalentPickerModal({
 
   if (pendingManualCost && canMakeManualPurchase) {
     const cost = Number(manualCostInput);
-    const canConfirm = manualCostInput.trim() !== "";
+    const canConfirm = manualCostInput.trim() !== "" && cost >= minimumManualCost;
     return (
       <PickerModal
         title={`Buy ${pendingManualCost.talent.name}`}
@@ -389,6 +418,9 @@ export function TalentPickerModal({
             placeholder="0"
             className={editableInputClass(true) + " mt-0.5"}
           />
+          {minimumManualCost > 0 && (
+            <p className={`mt-1 text-xs ${uiTextPlaceholder}`}>Minimum {minimumManualCost} XP.</p>
+          )}
         </PickerBody>
       </PickerModal>
     );
@@ -401,7 +433,7 @@ export function TalentPickerModal({
         placeholder="Search…"
         query={query}
         onQueryChange={setQuery}
-        onClose={() => setShowOverflow(false)}
+        onClose={() => (overflowBackCloses ? onClose() : setShowOverflow(false))}
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
         suspended={suspended}
@@ -437,6 +469,7 @@ export function TalentPickerModal({
           {overflowFiltered.map((item) => {
             const row = item as TalentData;
             const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
+            const faithGroupChip = getFaithTalentGroupChip(row);
             const itemBehaviour = useTalentBehaviours ? getTalentBehaviour(row) : null;
             const usesChoicePicker =
               itemBehaviour?.kind === "fixed-repeatable" ||
@@ -500,6 +533,9 @@ export function TalentPickerModal({
                         {source}
                       </Chip>
                     ))}
+                    {faithGroupChip && (
+                      <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
+                    )}
                     {ownedCount > 0 && (
                       <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
                         Owned: {ownedCount}
@@ -638,13 +674,13 @@ export function TalentPickerModal({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       filterRow={
-        career && (
+        hasOverflow && (
           <button
             type="button"
             onClick={() => setShowOverflow(true)}
             className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left"
           >
-            Show all
+            {showAllLabel}
           </button>
         )
       }
@@ -658,6 +694,7 @@ export function TalentPickerModal({
         {filtered.map((item) => {
           const row = item as TalentData;
           const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
+          const faithGroupChip = getFaithTalentGroupChip(row);
           const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
           const itemBehaviour = useTalentBehaviours ? getTalentBehaviour(row) : null;
           const showsOwnedCount =
@@ -691,7 +728,7 @@ export function TalentPickerModal({
           const opensNextStep = usesChoicePicker || usesTextEntry || opensAcquisition;
           const cost =
             career && !usesChoicePicker && !usesTextEntry
-              ? getNextTalentCost(career, rank, item.id, undefined, entries)
+              ? getNextTalentCost(career, rank, item.id, undefined, entries, alternateRanks)
               : undefined;
           const rankChips =
             career && !usesChoicePicker && !usesTextEntry
@@ -745,6 +782,9 @@ export function TalentPickerModal({
                       {source}
                     </Chip>
                   ))}
+                  {faithGroupChip && (
+                    <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
+                  )}
                   {ownedLabel && (
                     <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
                       {ownedLabel}

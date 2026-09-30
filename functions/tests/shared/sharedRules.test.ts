@@ -1,7 +1,6 @@
 // functions/tests/shared/sharedRules.test.ts
-// Proves the shared-rules package is genuinely wired into functions/, not just that
-// `npm install` succeeded. This is Stage 1 of the server-side rule validation plan:
-// the package itself, no real patchCharacterField validation built on it yet.
+// Calls real exports from the shared-rules package with real inputs, confirming that
+// functions/ can import and use the package's rule logic and data.
 
 import { describe, it, expect } from "vitest";
 import {

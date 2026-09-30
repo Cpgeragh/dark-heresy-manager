@@ -14,6 +14,7 @@ import {
   getNextSkillTierAccess,
   getWeaponTrainingPurchase,
   WEAPON_TRAINING_GROUPS,
+  type AlternateRankSelection,
   type CharacteristicKey,
   type WeaponTrainingTalentId,
 } from "shared-rules";
@@ -304,6 +305,30 @@ function getRankFromCharacter(character: Record<string, unknown>): string | unde
   return typeof rank === "string" ? rank : undefined;
 }
 
+function getAlternateRanksFromCharacter(
+  character: Record<string, unknown>
+): AlternateRankSelection[] {
+  const experience = character.experience;
+  if (!isRecord(experience) || !Array.isArray(experience.alternateRanks)) return [];
+  return experience.alternateRanks.flatMap((entry) => {
+    if (
+      !isRecord(entry) ||
+      typeof entry.alternateRankId !== "string" ||
+      typeof entry.replacedRankId !== "string" ||
+      typeof entry.takenAtTier !== "number"
+    ) {
+      return [];
+    }
+    return [
+      {
+        alternateRankId: entry.alternateRankId,
+        replacedRankId: entry.replacedRankId,
+        takenAtTier: entry.takenAtTier,
+      },
+    ];
+  });
+}
+
 function getCharFieldAdvances(value: unknown, key: string): number {
   if (!isRecord(value)) return 0;
   const field = value[key];
@@ -389,7 +414,10 @@ function findSkillById(value: unknown, id: string): Record<string, unknown> | un
     | undefined;
 }
 
-function getSkillPurchaseCost(skill: Record<string, unknown> | undefined, tier: string): number | undefined {
+function getSkillPurchaseCost(
+  skill: Record<string, unknown> | undefined,
+  tier: string
+): number | undefined {
   if (!skill) return undefined;
   const purchases = skill.xpPurchases;
   if (!isRecord(purchases)) return undefined;
@@ -419,6 +447,7 @@ function assertValidSkillsTransition(
   if (!Array.isArray(newValue)) return;
   const career = getCareerFromCharacter(character);
   const rank = getRankFromCharacter(character);
+  const alternateRanks = getAlternateRanksFromCharacter(character);
 
   for (const entry of newValue) {
     if (!isRecord(entry) || typeof entry.id !== "string") continue;
@@ -437,7 +466,13 @@ function assertValidSkillsTransition(
           `Skill "${id}" cannot be advanced past ${SKILL_TIERS.length} tiers.`
         );
       }
-      const access = getNextSkillTierAccess(career, rank, id, currentLevel as never);
+      const access = getNextSkillTierAccess(
+        career,
+        rank,
+        id,
+        currentLevel as never,
+        alternateRanks
+      );
       if (access.status === "maxed" || access.status === "locked") {
         throw new HttpsError("invalid-argument", `Skill "${id}" cannot be advanced right now.`);
       }
@@ -521,6 +556,7 @@ function assertValidWeaponTrainingTransition(
   }
   const career = getCareerFromCharacter(character);
   const rank = getRankFromCharacter(character);
+  const alternateRanks = getAlternateRanksFromCharacter(character);
   const previouslyTrained =
     isRecord(oldValue) && Array.isArray(oldValue.trained) ? oldValue.trained : [];
 
@@ -529,7 +565,12 @@ function assertValidWeaponTrainingTransition(
     if (typeof id !== "string" || !WEAPON_TRAINING_IDS.has(id)) {
       throw new HttpsError("invalid-argument", "Weapon training contains an unknown group.");
     }
-    const purchase = getWeaponTrainingPurchase(career, rank, id as WeaponTrainingTalentId);
+    const purchase = getWeaponTrainingPurchase(
+      career,
+      rank,
+      id as WeaponTrainingTalentId,
+      alternateRanks
+    );
     const recordedCost = getWeaponTrainingRecordedCost(newValue, id);
     if (purchase) {
       if (recordedCost !== purchase.cost) {

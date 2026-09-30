@@ -2,27 +2,89 @@
 
 import { findCareerByName } from "./careerData.js";
 import { CAREER_ADVANCES, type CareerAdvanceRef } from "./careerAdvancesReference.js";
+import { ALTERNATE_RANKS, type AlternateRankAdvance } from "./alternateRankData.js";
+import type { AlternateRankSelection } from "./types.js";
 
 export interface AccessibleCareerAdvance {
   rankId: string;
+  rankName?: string;
+  alternateRankId?: string;
   advance: CareerAdvanceRef;
 }
 
+function asCareerAdvance(advance: AlternateRankAdvance): CareerAdvanceRef | undefined {
+  if (advance.kind === "elite-advance") return undefined;
+  if (advance.kind === "skill") {
+    return {
+      kind: "skill",
+      skillId: advance.skillId,
+      level: advance.level,
+      cost: advance.cost,
+      prerequisites: advance.prerequisites,
+    };
+  }
+  return {
+    kind: "talent",
+    talentId: advance.talentId,
+    specialisation: advance.specialisation,
+    cost: advance.cost,
+    prerequisites: advance.prerequisites,
+  };
+}
+
+function getSelectedAlternateTables(
+  careerId: string,
+  selections: readonly AlternateRankSelection[]
+): { selection: AlternateRankSelection; name: string; advances: CareerAdvanceRef[] }[] {
+  return selections.flatMap((selection) => {
+    const alternateRank = ALTERNATE_RANKS.find(
+      (candidate) =>
+        candidate.id === selection.alternateRankId && candidate.requiredCareerId === careerId
+    );
+    if (!alternateRank) return [];
+    return [
+      {
+        selection,
+        name: alternateRank.name,
+        advances: alternateRank.advances.flatMap((advance) => {
+          const mapped = asCareerAdvance(advance);
+          return mapped ? [mapped] : [];
+        }),
+      },
+    ];
+  });
+}
+
 /** Every advance across the whole career, every rank, regardless of whether reached yet. */
-export function getAllCareerAdvances(career: string | undefined): AccessibleCareerAdvance[] {
+export function getAllCareerAdvances(
+  career: string | undefined,
+  alternateRanks: readonly AlternateRankSelection[] = []
+): AccessibleCareerAdvance[] {
   const careerData = findCareerByName(career);
   if (!careerData) return [];
   const advancesData = CAREER_ADVANCES.find((c) => c.careerId === careerData.id);
   if (!advancesData) return [];
-  return advancesData.rankTables.flatMap((table) =>
-    table.advances.map((advance) => ({ rankId: table.rankId, advance }))
+  const selectedTables = getSelectedAlternateTables(careerData.id, alternateRanks);
+  const replacedRankIds = new Set(selectedTables.map(({ selection }) => selection.replacedRankId));
+  const careerAdvances = advancesData.rankTables
+    .filter((table) => !replacedRankIds.has(table.rankId))
+    .flatMap((table) => table.advances.map((advance) => ({ rankId: table.rankId, advance })));
+  const alternateAdvances = selectedTables.flatMap(({ selection, name, advances }) =>
+    advances.map((advance) => ({
+      rankId: selection.replacedRankId,
+      rankName: name,
+      alternateRankId: selection.alternateRankId,
+      advance,
+    }))
   );
+  return [...careerAdvances, ...alternateAdvances];
 }
 
 /** Every advance from ranks at-or-below the character's current rank, following the correct branch. */
 export function getUnlockedCareerAdvances(
   career: string | undefined,
-  rank: string | undefined
+  rank: string | undefined,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): AccessibleCareerAdvance[] {
   const careerData = findCareerByName(career);
   if (!careerData) return [];
@@ -38,5 +100,7 @@ export function getUnlockedCareerAdvances(
       )
       .map((r) => r.id)
   );
-  return getAllCareerAdvances(career).filter((entry) => unlockedRankIds.has(entry.rankId));
+  return getAllCareerAdvances(career, alternateRanks).filter((entry) =>
+    unlockedRankIds.has(entry.rankId)
+  );
 }

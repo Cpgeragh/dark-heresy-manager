@@ -14,6 +14,12 @@ export interface XpPurchaseRecord {
   purchasedAtRankId?: string;
 }
 
+export interface AlternateRankSelection {
+  alternateRankId: string;
+  replacedRankId: string;
+  takenAtTier: number;
+}
+
 export interface CharField {
   base: number;
   advances: number;
@@ -95,6 +101,7 @@ export interface WeaponTrainingExoticEntryForCost {
 /** The minimal shape of a character this package's weapon-training-cost logic reads. */
 export interface CharacterForWeaponTrainingCosts {
   header: { career?: string; rank?: string };
+  experience?: { alternateRanks?: AlternateRankSelection[] };
   weaponTraining: {
     trained: WeaponTrainingTalentId[];
     exoticWeapons: WeaponTrainingExoticEntryForCost[];

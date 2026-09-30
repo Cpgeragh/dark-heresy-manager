@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { TalentEntry } from "../../types/Character";
 import { TALENT_LIST } from "../../data/reference/talentData";
 import { TRAIT_LIST } from "../../data/reference/traitData";
@@ -34,10 +34,12 @@ interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   displayName?: string;
   secondaryText?: string;
   statusChip?: string;
+  statusChipClassName?: string;
   removable?: boolean;
   deletionBlockedMessage?: string;
   statusAfterSource?: boolean;
-  deletionNoun?: "Talent" | "Trait";
+  deletionNoun?: "Talent" | "Trait" | "Elite Advance";
+  infoContent?: ReactNode;
 }
 
 export function EntryCard({
@@ -48,10 +50,12 @@ export function EntryCard({
   displayName,
   secondaryText,
   statusChip,
+  statusChipClassName,
   removable = true,
   deletionBlockedMessage,
   statusAfterSource = false,
   deletionNoun = "Talent",
+  infoContent,
   libraryItem,
   isDM = false,
   canEditDefinition = false,
@@ -65,6 +69,7 @@ export function EntryCard({
   const [deleteArmed, setDeleteArmed] = useState(false);
   const shownName = displayName ?? entry.name;
   const isGranted = Boolean(entry.grantedByTalentEntryUid);
+  const eliteAdvanceSource = entry.eliteAdvancePurchase?.sourceName;
   const description =
     TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId] ?? entry.description;
   const refData = (
@@ -81,37 +86,39 @@ export function EntryCard({
       <div className="min-w-0 space-y-1.5">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} break-words`}>{shownName}</span>
-          {(description || entry.notes) && (
+          {(infoContent || description || entry.notes) && (
             <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={shownName}
                 content={
-                  <div className="space-y-3">
-                    {description && (
-                      <p className={`text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
-                    )}
-                    {entry.notes && (
-                      <div>
-                        <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                        <div className="space-y-2">
-                          {entry.notes.split("\n\n").map((group, index) => {
-                            const breakAt = group.indexOf("\n");
-                            const heading = breakAt === -1 ? group : group.slice(0, breakAt);
-                            const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
-                            return (
-                              <p
-                                key={index}
-                                className={`text-sm ${uiTextBody} leading-relaxed whitespace-pre-line`}
-                              >
-                                <span className="font-semibold">{heading}</span>
-                                {body && `\n${body}`}
-                              </p>
-                            );
-                          })}
+                  infoContent ?? (
+                    <div className="space-y-3">
+                      {description && (
+                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
+                      )}
+                      {entry.notes && (
+                        <div>
+                          <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+                          <div className="space-y-2">
+                            {entry.notes.split("\n\n").map((group, index) => {
+                              const breakAt = group.indexOf("\n");
+                              const heading = breakAt === -1 ? group : group.slice(0, breakAt);
+                              const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
+                              return (
+                                <p
+                                  key={index}
+                                  className={`text-sm ${uiTextBody} leading-relaxed whitespace-pre-line`}
+                                >
+                                  <span className="font-semibold">{heading}</span>
+                                  {body && `\n${body}`}
+                                </p>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )
                 }
               />
             </span>
@@ -125,6 +132,11 @@ export function EntryCard({
             {entry.grantedByTalentName} ({entry.grantedByType}): Granted
           </p>
         )}
+        {!statusAfterSource && eliteAdvanceSource && (
+          <p className={`text-sm ${colourAmberPlain}`}>
+            Gained from: {eliteAdvanceSource} (Elite Advance)
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-1.5">
           {refSources.map((source) => (
             <Chip key={source} className={`bg-slate-800/40 font-code ${sourceColour(source)}`}>
@@ -132,7 +144,13 @@ export function EntryCard({
             </Chip>
           ))}
           {statusChip && (
-            <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">{statusChip}</Chip>
+            <Chip
+              className={
+                statusChipClassName ?? "border-amber-500/60 bg-amber-950/30 text-amber-300"
+              }
+            >
+              {statusChip}
+            </Chip>
           )}
         </div>
         {statusAfterSource && secondaryText && (
@@ -141,6 +159,11 @@ export function EntryCard({
         {statusAfterSource && isGranted && (
           <p className={`text-sm ${colourAmberPlain}`}>
             {entry.grantedByTalentName} ({entry.grantedByType}): Granted
+          </p>
+        )}
+        {statusAfterSource && eliteAdvanceSource && (
+          <p className={`text-sm ${colourAmberPlain}`}>
+            Gained from: {eliteAdvanceSource} (Elite Advance)
           </p>
         )}
         {libraryItem && (
@@ -212,12 +235,16 @@ export function TalentGroupCard({
   editable,
   onRemove,
   statusAfterSource = false,
+  statusChip,
+  statusChipClassName,
 }: {
   name: string;
   entries: readonly TalentEntry[];
   editable: boolean;
   onRemove: (uid: string) => void;
   statusAfterSource?: boolean;
+  statusChip?: string;
+  statusChipClassName?: string;
 }) {
   recordComponentRender("TalentGroupCard");
   const [expanded, setExpanded] = useState(false);
@@ -248,6 +275,8 @@ export function TalentGroupCard({
                 confirmDeletion
                 removable={!entry.grantedByTalentEntryUid}
                 statusAfterSource={statusAfterSource}
+                statusChip={statusChip}
+                statusChipClassName={statusChipClassName}
               />
             ))}
         </div>

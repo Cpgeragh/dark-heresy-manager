@@ -24,6 +24,10 @@ export const colourCareerPathOutline =
   "border border-fuchsia-500 text-fuchsia-300 enabled:hover:bg-fuchsia-500/10 enabled:active:bg-fuchsia-500/20";
 export const colourCareerPathOutlineMuted =
   "border border-fuchsia-500/50 text-fuchsia-300/60 enabled:hover:border-fuchsia-500/70 enabled:hover:bg-fuchsia-500/5 enabled:hover:text-fuchsia-300/80 enabled:active:bg-fuchsia-500/10";
+export const colourCareerBranchOutline =
+  "border border-emerald-500 text-emerald-300 enabled:hover:bg-emerald-500/10 enabled:active:bg-emerald-500/20";
+export const colourCareerBranchOutlineMuted =
+  "border border-emerald-500/50 text-emerald-300/60 enabled:hover:border-emerald-500/70 enabled:hover:bg-emerald-500/5 enabled:hover:text-emerald-300/80 enabled:active:bg-emerald-500/10";
 export const colourButtonNeutralOutline =
   "border border-slate-500 text-slate-200 enabled:hover:bg-slate-800 enabled:active:bg-slate-700/75";
 export const colourInactive = "border-slate-600 bg-slate-800/40 text-slate-300";

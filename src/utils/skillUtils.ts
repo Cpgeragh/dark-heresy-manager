@@ -22,6 +22,7 @@ export function buildSkillCatalogue(ownedSkills: readonly SkillEntry[]): SkillEn
       notes: owned.notes,
       manualCosts: owned.manualCosts,
       xpPurchases: owned.xpPurchases,
+      eliteAdvancePurchases: owned.eliteAdvancePurchases,
     };
   });
 

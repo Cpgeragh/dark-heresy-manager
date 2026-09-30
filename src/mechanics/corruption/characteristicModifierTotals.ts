@@ -11,6 +11,7 @@ import {
   getTraitCharacteristicModifierSources,
   getTraitCharacteristicModifierTotals,
 } from "../traits/traitEffects";
+import { getEliteAdvanceCharacteristicModifierSources } from "../eliteAdvances/eliteAdvanceEffects";
 
 export type CharacteristicTotals = Partial<
   Record<CharacteristicModifier["characteristic"], number>
@@ -57,7 +58,16 @@ export function getCharacteristicModifierTotals(
     ? combineCharacteristicModifierTotals(
         totals,
         getTalentCharacteristicModifierTotals(talents),
-        getTraitCharacteristicModifierTotals(talents, career)
+        getTraitCharacteristicModifierTotals(talents, career),
+        Object.fromEntries(
+          CHARACTERISTIC_KEYS.map((characteristic) => [
+            characteristic,
+            getEliteAdvanceCharacteristicModifierSources(talents, characteristic).reduce(
+              (sum, source) => sum + source.amount,
+              0
+            ),
+          ])
+        )
       )
     : totals;
 }
@@ -71,7 +81,8 @@ export interface CharacteristicModifierSource {
     | "Talent"
     | "Trait"
     | "Career"
-    | "Homeworld";
+    | "Homeworld"
+    | "Elite Advance";
   amount: number;
 }
 
@@ -139,6 +150,7 @@ export function getCharacteristicModifierBreakdown(
       const derived = [
         ...getTalentCharacteristicModifierSources(talents, characteristic),
         ...getTraitCharacteristicModifierSources(talents, characteristic, career),
+        ...getEliteAdvanceCharacteristicModifierSources(talents, characteristic),
       ];
       if (derived.length === 0) continue;
       (sources[characteristic] ??= []).push(...derived);
@@ -191,6 +203,7 @@ export function getCharacteristicModifierSources(
   if (talents) {
     sources.push(...getTalentCharacteristicModifierSources(talents, characteristic));
     sources.push(...getTraitCharacteristicModifierSources(talents, characteristic, career));
+    sources.push(...getEliteAdvanceCharacteristicModifierSources(talents, characteristic));
   }
   return sources;
 }

@@ -26,6 +26,7 @@ const browserUnitTests = [
   "tests/unit/firebase.test.ts",
   "tests/unit/gearSnapshotHelpers.test.ts",
   "tests/unit/identityService.test.ts",
+  "tests/unit/indexSplash.test.ts",
   "tests/unit/messageDrawer.test.tsx",
   "tests/unit/performanceMetrics.test.ts",
   "tests/unit/portraitService.test.ts",

@@ -26,6 +26,6 @@ describe("SplashScreen", () => {
     const label = container.querySelector(".text-amber-300");
 
     expect(label).toHaveTextContent("Updating...");
-    expect(label?.querySelectorAll("span")).toHaveLength(3);
+    expect(label?.querySelector('[aria-hidden="true"]')?.children).toHaveLength(3);
   });
 });

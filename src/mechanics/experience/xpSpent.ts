@@ -20,6 +20,13 @@ function getDmSpent(character: Character): number {
   );
 }
 
+function getEliteAdvancesSpent(character: Character): number {
+  return (character.talentsAndTraits.eliteAdvances ?? []).reduce(
+    (total, entry) => total + (entry.xpPurchase?.cost ?? 0),
+    0
+  );
+}
+
 /** The single source of truth for how much XP a character has spent. */
 export function getSpentXp(character: Character): number {
   return (
@@ -28,6 +35,7 @@ export function getSpentXp(character: Character): number {
     getCharacteristicAdvancesSpent(character) +
     getSkillsSpent(character) +
     getTalentsSpent(character) +
+    getEliteAdvancesSpent(character) +
     getWeaponTrainingSpent(character)
   );
 }

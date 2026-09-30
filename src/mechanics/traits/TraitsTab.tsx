@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type {
+  AlternateRankSelection,
   CyberneticItem,
   GearItem,
   TalentsAndTraitsBlock,
@@ -34,6 +35,7 @@ interface TraitsTabProps {
   talents: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
   cybernetics?: CyberneticItem[];
   gear?: GearItem[];
   editable: boolean;
@@ -121,6 +123,7 @@ export function TraitsTab({
   talents,
   career,
   rank,
+  alternateRanks,
   cybernetics = [],
   gear = [],
   editable,
@@ -403,6 +406,7 @@ export function TraitsTab({
               entries={displayTraits}
               career={career}
               rank={rank}
+              alternateRanks={alternateRanks}
               editable={editable}
               isDM={isDM}
               onAdd={handleAddTrait}

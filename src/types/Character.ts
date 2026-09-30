@@ -71,6 +71,9 @@ export interface SkillEntry {
   manualCosts?: Partial<Record<Exclude<SkillAdvanceLevel, "untrained">, number>>;
   /** Exact paid cost and rank attribution for each purchased tier. */
   xpPurchases?: Partial<Record<Exclude<SkillAdvanceLevel, "untrained">, XpPurchaseRecord>>;
+  eliteAdvancePurchases?: Partial<
+    Record<Exclude<SkillAdvanceLevel, "untrained">, EliteAdvancePurchase>
+  >;
 }
 
 /**
@@ -571,7 +574,33 @@ export interface TalentEntry extends CustomLibraryLinkFields {
   /** Display-only provenance for a grant calculated from another purchase; never saved as a purchase. */
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
-  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld";
+  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld" | "Elite Advance";
+  eliteAdvancePurchase?: EliteAdvancePurchase;
+}
+
+export interface EliteAdvancePurchase {
+  source: "missed-rank" | "gm-approved" | "faith-talent";
+  cost: number;
+  sourceName: string;
+  alternateRankId?: string;
+  replacedRankId?: string;
+}
+
+export interface EliteAdvanceEntry {
+  uid: string;
+  eliteAdvanceId: string;
+  name: string;
+  xpPurchase?: XpPurchaseRecord;
+  acquisition?: {
+    insanityGained?: number;
+    characteristicReductions?: Partial<Record<keyof Characteristics, number>>;
+  };
+}
+
+export interface AlternateRankSelection {
+  alternateRankId: string;
+  replacedRankId: string;
+  takenAtTier: number;
 }
 
 export interface TalentsAndTraitsBlock {
@@ -584,6 +613,7 @@ export interface TalentsAndTraitsBlock {
   careerStartingChoices?: CareerStartingChoices;
   talents: TalentEntry[];
   traits: TalentEntry[];
+  eliteAdvances?: EliteAdvanceEntry[];
 }
 
 export type WeaponTrainingTalentId =
@@ -668,6 +698,7 @@ export interface ExperienceBlock {
   spent: number;
   /** XP awards plus DM-entered removals and manual spending, retained as an auditable ledger. */
   transactions?: XpTransaction[];
+  alternateRanks?: AlternateRankSelection[];
 }
 
 /**

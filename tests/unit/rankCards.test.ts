@@ -185,4 +185,25 @@ describe("buildRankCards", () => {
     const spent = buildRankCards(makeCharacter()).reduce((sum, card) => sum + card.spentTotal, 0);
     expect(spent).toBe(750);
   });
+
+  it("displays an Alternate Rank name on the Rank card it replaced", () => {
+    const character = makeCharacter();
+    character.header = {
+      ...character.header,
+      career: "Cleric",
+      rank: "Preacher",
+      careerPath: undefined,
+    };
+    character.experience.alternateRanks = [
+      {
+        alternateRankId: "black-priest-of-maccabeus",
+        replacedRankId: "preacher",
+        takenAtTier: 4,
+      },
+    ];
+
+    const preacher = buildRankCards(character).find((card) => card.rankId === "preacher");
+    expect(preacher?.name).toBe("Black Priest of Maccabeus");
+    expect(preacher?.isCurrent).toBe(true);
+  });
 });

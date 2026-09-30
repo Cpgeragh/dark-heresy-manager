@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type {
+  AlternateRankSelection,
   Characteristics,
   CorruptionBlock,
   SkillEntry,
@@ -53,6 +54,7 @@ interface SkillsTabProps {
   talents?: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
   isDM?: boolean;
 }
 
@@ -129,6 +131,7 @@ export function SkillsTab({
   talents,
   career,
   rank,
+  alternateRanks = [],
   isDM = false,
 }: SkillsTabProps) {
   recordComponentRender("SkillsTab");
@@ -138,8 +141,8 @@ export function SkillsTab({
   // undefined (not an empty Map) when no career is set, so AddSkillModal knows
   // to show every skill unrestricted rather than reading "no matches yet".
   const unlockedSkillTrainingCosts = useMemo(
-    () => (career ? getUnlockedSkillTrainingCosts(career, rank) : undefined),
-    [career, rank]
+    () => (career ? getUnlockedSkillTrainingCosts(career, rank, alternateRanks) : undefined),
+    [alternateRanks, career, rank]
   );
   const [activeView, setActiveView] = useState<SkillsView>("basic");
   const {
@@ -235,9 +238,10 @@ export function SkillsTab({
       const nextIndex = skillTierIndex(level);
       const xpPurchases = { ...owned?.xpPurchases };
       const manualCosts = { ...owned?.manualCosts };
+      const eliteAdvancePurchases = { ...owned?.eliteAdvancePurchases };
 
       if (nextIndex > currentIndex) {
-        const access = getNextSkillTierAccess(career, rank, id, currentLevel);
+        const access = getNextSkillTierAccess(career, rank, id, currentLevel, alternateRanks);
         if (access.status === "unlocked" && access.level === level) {
           xpPurchases[level] = access.purchase;
         }
@@ -246,6 +250,7 @@ export function SkillsTab({
           const tier = PURCHASED_SKILL_TIERS[index];
           delete xpPurchases[tier];
           delete manualCosts[tier];
+          delete eliteAdvancePurchases[tier];
         }
       }
 
@@ -265,12 +270,14 @@ export function SkillsTab({
         level,
         xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
         manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
+        eliteAdvancePurchases:
+          Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
       };
       onUpdate(
         owned ? skills.map((skill) => (skill.id === id ? updated : skill)) : [...skills, updated]
       );
     },
-    [career, computedSkills, onUpdate, rank, skills]
+    [alternateRanks, career, computedSkills, onUpdate, rank, skills]
   );
 
   const handleAdd = useCallback(
@@ -279,7 +286,7 @@ export function SkillsTab({
       const definition = getSkillDefinition(id);
       if (!definition) return;
 
-      const access = getNextSkillTierAccess(career, rank, id, "untrained");
+      const access = getNextSkillTierAccess(career, rank, id, "untrained", alternateRanks);
       const purchase =
         manualCost !== undefined
           ? makeCurrentRankPurchase(career, rank, manualCost)
@@ -296,13 +303,13 @@ export function SkillsTab({
         },
       ]);
     },
-    [career, onUpdate, rank, skills]
+    [alternateRanks, career, onUpdate, rank, skills]
   );
 
   const getNextTierAccess = useCallback(
     (skillId: string, level: SkillEntry["level"]) =>
-      getNextSkillTierAccess(career, rank, skillId, level),
-    [career, rank]
+      getNextSkillTierAccess(career, rank, skillId, level, alternateRanks),
+    [alternateRanks, career, rank]
   );
 
   const handleManualUpgrade = useCallback(

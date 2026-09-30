@@ -2,6 +2,7 @@
 
 import type {
   CharacterForSkillCosts,
+  AlternateRankSelection,
   SkillAdvanceLevel,
   XpPurchaseRecord,
 } from "./types.js";
@@ -35,10 +36,11 @@ function findSkillCost(
 /** Real cost to train each skill's first tier, only for skills currently unlocked for this character. */
 export function getUnlockedSkillTrainingCosts(
   career: string | undefined,
-  rank: string | undefined
+  rank: string | undefined,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): Map<string, number> {
   const costs = new Map<string, number>();
-  for (const entry of getUnlockedCareerAdvances(career, rank)) {
+  for (const entry of getUnlockedCareerAdvances(career, rank, alternateRanks)) {
     if (
       entry.advance.kind === "skill" &&
       entry.advance.skillId &&
@@ -61,13 +63,14 @@ export function getNextSkillTierAccess(
   career: string | undefined,
   rank: string | undefined,
   skillId: string,
-  currentLevel: SkillAdvanceLevel
+  currentLevel: SkillAdvanceLevel,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): SkillTierAccess {
   const nextIndex = tierIndex(currentLevel) + 1;
   if (nextIndex >= SKILL_TIERS.length) return { status: "maxed" };
   const nextTier = SKILL_TIERS[nextIndex];
 
-  const unlockedEntry = getUnlockedCareerAdvances(career, rank).find(
+  const unlockedEntry = getUnlockedCareerAdvances(career, rank, alternateRanks).find(
     (entry) =>
       entry.advance.kind === "skill" &&
       entry.advance.skillId === skillId &&
@@ -83,7 +86,7 @@ export function getNextSkillTierAccess(
   }
 
   const existsAnywhere =
-    findSkillCost(getAllCareerAdvances(career), skillId, nextTier) !== undefined;
+    findSkillCost(getAllCareerAdvances(career, alternateRanks), skillId, nextTier) !== undefined;
   return existsAnywhere
     ? { status: "locked", level: nextTier }
     : { status: "not-on-career", level: nextTier };

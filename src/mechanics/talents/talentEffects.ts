@@ -19,6 +19,10 @@ import {
   getDerivedCareerSkillIds,
   getDerivedCareerTalentGrants,
 } from "../career/careerStartingBenefits";
+import {
+  getEliteAdvanceSkillGrants,
+  getEliteAdvanceTalentGrants,
+} from "../eliteAdvances/eliteAdvanceEffects";
 
 export interface TalentModifierSource {
   name: string;
@@ -214,6 +218,10 @@ export interface TalentSkillEffects {
 
 export interface TalentSkillEffectContext {
   careerSkillIds: ReadonlySet<string>;
+  eliteAdvanceSkillGrants: ReadonlyMap<
+    string,
+    readonly ReturnType<typeof getEliteAdvanceSkillGrants>[number][]
+  >;
   activeTalentsById: ReadonlyMap<string, readonly TalentEntry[]>;
   activeTraits: readonly TalentEntry[];
 }
@@ -228,8 +236,15 @@ export function createTalentSkillEffectContext(
     entries.push(entry);
     activeTalentsById.set(entry.talentId, entries);
   }
+  const eliteAdvanceSkillGrants = new Map<string, ReturnType<typeof getEliteAdvanceSkillGrants>>();
+  for (const grant of getEliteAdvanceSkillGrants(talents)) {
+    const grants = eliteAdvanceSkillGrants.get(grant.skillId) ?? [];
+    grants.push(grant);
+    eliteAdvanceSkillGrants.set(grant.skillId, grants);
+  }
   return {
     careerSkillIds: new Set(getDerivedCareerSkillIds(career, talents.careerStartingChoices)),
+    eliteAdvanceSkillGrants,
     activeTalentsById,
     activeTraits: getActiveTraitEntries(talents, career),
   };
@@ -261,6 +276,18 @@ export function getTalentSkillEffects(
         type: "Career",
         amount: 0,
         detail: `counts ${skill.name} as trained`,
+      });
+    }
+  }
+
+  for (const grant of context.eliteAdvanceSkillGrants.get(skill.id) ?? []) {
+    effects.minimumLevel = grant.level;
+    if (skill.level === "untrained") {
+      effects.sources.push({
+        name: grant.origin.name,
+        type: "Elite Advance",
+        amount: 0,
+        detail: `counts ${skill.name} as ${grant.level}`,
       });
     }
   }
@@ -362,7 +389,7 @@ function virtualGrant(
   talentId: string,
   name: string,
   specialisation?: string,
-  type: "Talent" | "Trait" = "Talent"
+  type: "Talent" | "Trait" | "Elite Advance" = "Talent"
 ): TalentEntry {
   return {
     uid: `grant:${origin.uid}:${talentId}:${specialisation ?? ""}`,
@@ -419,6 +446,17 @@ export function getGrantedTalentEntries(
   }
   for (const grant of getTraitGrantedTalentSpecs(talents)) {
     grants.push(virtualGrant(grant.origin, grant.id, grant.name, grant.specialisation, "Trait"));
+  }
+  for (const grant of getEliteAdvanceTalentGrants(talents)) {
+    const reference = TALENT_LIST.find((talent) => talent.id === grant.referenceId);
+    grants.push({
+      uid: `grant:${grant.origin.uid}:${grant.referenceId}`,
+      talentId: grant.referenceId,
+      name: reference?.name ?? grant.referenceId,
+      grantedByTalentEntryUid: grant.origin.uid,
+      grantedByTalentName: grant.origin.name,
+      grantedByType: "Elite Advance",
+    });
   }
   for (const grant of getDerivedCareerTalentGrants(career, talents.careerStartingChoices)) {
     if (weaponTrainingIdFor(grant.talentId, grant.specialisation)) continue;

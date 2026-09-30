@@ -61,6 +61,24 @@ describe("getSpentXp", () => {
     expect(getSpentXp(makeCharacter())).toBe(0);
   });
 
+  it("includes purchased standalone Elite Advances", () => {
+    const data = createEmptyCharacterData({ campaignId: "c", recoveryCode: "r" });
+    const char = makeCharacter({
+      talentsAndTraits: {
+        ...data.talentsAndTraits,
+        eliteAdvances: [
+          {
+            uid: "encarta",
+            eliteAdvanceId: "encarta-maleficarum",
+            name: "Encarta Maleficarum",
+            xpPurchase: { cost: 500, purchasedAtRankId: "preacher" },
+          },
+        ],
+      },
+    });
+    expect(getSpentXp(char)).toBe(500);
+  });
+
   it("includes DM spending but not DM XP awards", () => {
     const char = makeCharacter({
       experience: {

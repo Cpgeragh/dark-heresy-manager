@@ -6,15 +6,15 @@ Repository paths and documentation links refer to the checked-out commit.
 
 ## Product capabilities
 
-| Area         | Current capability                                                                                                                                   |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Accounts     | Anonymous Firebase Authentication backed by permanent application accounts, Recovery Codes, and up to 10 connected devices                           |
-| Campaigns    | Game Master campaign administration, active and archived campaigns, and bounded membership                                                           |
-| Characters   | Twenty character-sheet sections, portrait storage in the character document, JSON export and import, ownership claims, and controlled player editing |
-| Sessions     | Private Game Master notes, member-safe summaries, attendance, XP awards, reversal, and repair tooling                                                |
-| Messaging    | One private thread per character with 100-message pages and a bounded Game Master inbox                                                              |
-| Custom items | Draft, publish, archive, restore, version, propagate, and remove workflows                                                                           |
-| Offline use  | Installable PWA shell and persistent multi-tab Firestore cache; callable mutations require a network connection                                      |
+| Area         | Current capability                                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accounts     | Anonymous Firebase Authentication backed by permanent application accounts, Recovery Codes, and up to 10 connected devices                               |
+| Campaigns    | Game Master campaign administration, active and archived campaigns, and bounded membership                                                               |
+| Characters   | Twenty-one character-sheet sections, portrait storage in the character document, JSON export and import, ownership claims, and controlled player editing |
+| Sessions     | Private Game Master notes, member-safe summaries, attendance, XP awards, reversal, and repair tooling                                                    |
+| Messaging    | One private thread per character with 100-message pages and a bounded Game Master inbox                                                                  |
+| Custom items | Draft, publish, archive, restore, version, propagate, and remove workflows                                                                               |
+| Offline use  | Installable PWA shell and persistent multi-tab Firestore cache; callable mutations require a network connection                                          |
 
 ## Technology
 
@@ -105,15 +105,16 @@ The complete command catalogue and contribution workflow are in [CONTRIBUTING.md
 
 ## Documentation
 
-| Document                                                                 | Use                                                                  |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| [Application architecture](docs/architecture.md)                         | Runtime boundaries, data ownership, limits, and deployment structure |
-| [Firestore security boundary](SECURITY_RULES.md)                         | Current client access rules and server-only paths                    |
-| [Data lifecycle policy](docs/data-lifecycle-policy.md)                   | Retention, deletion, recovery data, and exports                      |
-| [Backup policy](docs/backup-policy.md)                                   | Current backup schedule and restore boundary                         |
-| [Billing guard](docs/billing-kill-switch.md)                             | Budget notification, dry-run, deactivation, and recovery procedure   |
-| [Dependency security assessment](docs/dependency-security-assessment.md) | Dated runtime audit results and accepted transitive risk             |
-| [Performance verification](docs/final-performance-verification.md)       | Current performance regression standard                              |
-| [Manual test checklist](docs/manual-test-checklist.md)                   | Functional manual test coverage                                      |
-| [Accessibility checklist](docs/accessibility-test-checklist.md)          | Screen-reader, keyboard, and contrast coverage                       |
-| [Deployment readiness checklist](docs/deployment-readiness-checklist.md) | Staging and production release gate                                  |
+| Document                                                                         | Use                                                                        |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [Application architecture](docs/architecture.md)                                 | Runtime boundaries, data ownership, limits, and deployment structure       |
+| [Alternate Ranks and Elite Advances](docs/alternate-ranks-and-elite-advances.md) | Selection, availability, costs, persistence, grants, and removal behaviour |
+| [Firestore security boundary](SECURITY_RULES.md)                                 | Current client access rules and server-only paths                          |
+| [Data lifecycle policy](docs/data-lifecycle-policy.md)                           | Retention, deletion, recovery data, and exports                            |
+| [Backup policy](docs/backup-policy.md)                                           | Current backup schedule and restore boundary                               |
+| [Billing guard](docs/billing-kill-switch.md)                                     | Budget notification, dry-run, deactivation, and recovery procedure         |
+| [Dependency security assessment](docs/dependency-security-assessment.md)         | Dated runtime audit results and accepted transitive risk                   |
+| [Performance verification](docs/final-performance-verification.md)               | Current performance regression standard                                    |
+| [Manual test checklist](docs/manual-test-checklist.md)                           | Functional manual test coverage                                            |
+| [Accessibility checklist](docs/accessibility-test-checklist.md)                  | Screen-reader, keyboard, and contrast coverage                             |
+| [Deployment readiness checklist](docs/deployment-readiness-checklist.md)         | Staging and production release gate                                        |

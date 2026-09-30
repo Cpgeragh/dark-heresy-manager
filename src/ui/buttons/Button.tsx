@@ -8,6 +8,8 @@
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import {
   colourButtonNeutralOutline,
+  colourCareerBranchOutline,
+  colourCareerBranchOutlineMuted,
   colourCareerPathOutline,
   colourCareerPathOutlineMuted,
 } from "../styles/colourTokens";
@@ -19,6 +21,8 @@ export type ButtonVariant =
   | "primary"
   | "careerPath"
   | "careerPathMuted"
+  | "careerBranch"
+  | "careerBranchMuted"
   | "secondary"
   | "ghost"
   | "neutral"
@@ -52,6 +56,8 @@ const VARIANTS: Record<ButtonVariant, string> = {
     "border border-red-500 text-red-500 enabled:hover:bg-red-500/10 enabled:active:bg-red-500/20",
   careerPath: colourCareerPathOutline,
   careerPathMuted: colourCareerPathOutlineMuted,
+  careerBranch: colourCareerBranchOutline,
+  careerBranchMuted: colourCareerBranchOutlineMuted,
   secondary:
     "border border-transparent bg-slate-700 text-slate-300 enabled:hover:bg-slate-600 enabled:active:bg-slate-500",
   ghost:

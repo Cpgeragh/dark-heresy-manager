@@ -18,6 +18,8 @@ export type TalentBehaviour =
   | { kind: "psychic-purchase"; powerGroup: "minor" | "major" }
   | { kind: "managed-elsewhere" };
 
+export type FaithTalentGroup = "general" | "sign" | "mercy" | "wrath";
+
 export interface TalentData {
   id: string;
   name: string;
@@ -33,8 +35,8 @@ export interface TalentData {
   repeatable?: boolean; // true = can be taken more than once (e.g. Sound Constitution)
   description?: string;
   behaviour?: TalentBehaviour;
-  /** Faith Talent group — present only on BoM Faith Talents */
-  faithGroup?: "sign" | "mercy" | "wrath";
+  /** Marks a Faith Talent and provides the category shown on its chip. */
+  faithGroup?: FaithTalentGroup;
 }
 
 export const TALENT_LIST: readonly TalentData[] = [
@@ -644,6 +646,7 @@ export const TALENT_LIST: readonly TalentData[] = [
         "Middle Classes",
         "Military",
         "Nobility",
+        "Ordo Malleus",
         "The Insane",
         "Underworld",
         "Void Born",
@@ -924,7 +927,13 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.BoM,
     hasSpecialisation: false,
   },
-  { id: "pure-faith", name: "Pure Faith", source: SkillSource.BoM, hasSpecialisation: false },
+  {
+    id: "pure-faith",
+    name: "Pure Faith",
+    source: SkillSource.BoM,
+    hasSpecialisation: false,
+    faithGroup: "general",
+  },
   {
     id: "tests-of-faith",
     name: "Tests of Faith",
@@ -1303,6 +1312,22 @@ export const TALENT_LIST: readonly TalentData[] = [
     name: "Machinator Array",
     source: SkillSource.IH,
     hasSpecialisation: false,
+  },
+  {
+    id: "purge-the-unclean",
+    name: "Purge the Unclean",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+    prerequisites: "Pure Faith",
+    faithGroup: "general",
+  },
+  {
+    id: "blessed-radiance",
+    name: "Blessed Radiance",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+    prerequisites: "Purge the Unclean, Divine Ministration or Wrath of the Righteous",
+    faithGroup: "general",
   },
   {
     id: "the-reaping",

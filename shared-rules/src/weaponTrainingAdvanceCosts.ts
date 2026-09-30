@@ -4,6 +4,7 @@ import { TALENT_LIST } from "./talentData.js";
 import { WEAPON_TRAINING_GROUPS } from "./weaponTrainingData.js";
 import type {
   CharacterForWeaponTrainingCosts,
+  AlternateRankSelection,
   WeaponTrainingTalentId,
   XpPurchaseRecord,
 } from "./types.js";
@@ -26,11 +27,12 @@ function findWeaponTrainingMeta(
 export function getWeaponTrainingPurchase(
   career: string | undefined,
   rank: string | undefined,
-  id: WeaponTrainingTalentId
+  id: WeaponTrainingTalentId,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): XpPurchaseRecord | undefined {
   const meta = findWeaponTrainingMeta(id);
   if (!meta) return undefined;
-  const match = getUnlockedCareerAdvances(career, rank).find(
+  const match = getUnlockedCareerAdvances(career, rank, alternateRanks).find(
     (entry) =>
       entry.advance.kind === "talent" &&
       entry.advance.talentId === meta.talentId &&
@@ -44,20 +46,22 @@ export function getWeaponTrainingPurchase(
 export function getWeaponTrainingCost(
   career: string | undefined,
   rank: string | undefined,
-  id: WeaponTrainingTalentId
+  id: WeaponTrainingTalentId,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): number | undefined {
-  return getWeaponTrainingPurchase(career, rank, id)?.cost;
+  return getWeaponTrainingPurchase(career, rank, id, alternateRanks)?.cost;
 }
 
 /** Total XP currently spent on Weapon Training: the five fixed groups (real cost, or a DM's manual override) plus manually-costed Exotic weapons. */
 export function getWeaponTrainingSpent(character: CharacterForWeaponTrainingCosts): number {
   const { career, rank } = character.header;
+  const alternateRanks = character.experience?.alternateRanks ?? [];
   const { trained, manualCosts, xpPurchases, exoticWeapons } = character.weaponTraining;
   const fixedGroupsSpent = trained.reduce(
     (total, id) =>
       total +
       (xpPurchases?.[id]?.cost ??
-        getWeaponTrainingCost(career, rank, id) ??
+        getWeaponTrainingCost(career, rank, id, alternateRanks) ??
         manualCosts?.[id] ??
         0),
     0

@@ -1,6 +1,11 @@
 // src/mechanics/experience/talentAdvanceCosts.ts
 
-import type { Character, TalentEntry, XpPurchaseRecord } from "../../types/Character";
+import type {
+  AlternateRankSelection,
+  Character,
+  TalentEntry,
+  XpPurchaseRecord,
+} from "../../types/Character";
 import { getAllCareerAdvances, getUnlockedCareerAdvances } from "./careerAdvanceAccess";
 import { findCareerByName } from "../../data/reference/careerData";
 import { makeSourceRankPurchase } from "./purchaseAttribution";
@@ -28,9 +33,10 @@ export function getNextTalentPurchase(
   rank: string | undefined,
   talentId: string,
   specialisation: string | undefined,
-  ownedEntries: readonly TalentEntry[]
+  ownedEntries: readonly TalentEntry[],
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): XpPurchaseRecord | undefined {
-  const slots = getUnlockedCareerAdvances(career, rank)
+  const slots = getUnlockedCareerAdvances(career, rank, alternateRanks)
     .filter(
       (entry) =>
         isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation)
@@ -53,9 +59,11 @@ export function getNextTalentCost(
   rank: string | undefined,
   talentId: string,
   specialisation: string | undefined,
-  ownedEntries: readonly TalentEntry[]
+  ownedEntries: readonly TalentEntry[],
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): number | undefined {
-  return getNextTalentPurchase(career, rank, talentId, specialisation, ownedEntries)?.cost;
+  return getNextTalentPurchase(career, rank, talentId, specialisation, ownedEntries, alternateRanks)
+    ?.cost;
 }
 
 /** True if this talent has real career-table entries within reached ranks, but every one of those slots is already owned. */
@@ -64,9 +72,10 @@ export function isTalentMaxedAtCurrentRank(
   rank: string | undefined,
   talentId: string,
   specialisation: string | undefined,
-  ownedEntries: readonly TalentEntry[]
+  ownedEntries: readonly TalentEntry[],
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): boolean {
-  const unlockedSlotCount = getUnlockedCareerAdvances(career, rank)
+  const unlockedSlotCount = getUnlockedCareerAdvances(career, rank, alternateRanks)
     .filter(
       (entry) =>
         isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation)
@@ -82,10 +91,11 @@ export function hasAnyUnlockedTalentOption(
   career: string | undefined,
   rank: string | undefined,
   talentId: string,
-  ownedEntries: readonly TalentEntry[]
+  ownedEntries: readonly TalentEntry[],
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): boolean {
   const specialisations = new Set(
-    getUnlockedCareerAdvances(career, rank)
+    getUnlockedCareerAdvances(career, rank, alternateRanks)
       .filter(
         (entry) =>
           isTalentOrTraitAdvance(entry.advance) &&
@@ -94,7 +104,10 @@ export function hasAnyUnlockedTalentOption(
       .map((entry) => entry.advance.specialisation ?? "")
   );
   for (const spec of specialisations) {
-    if (getNextTalentCost(career, rank, talentId, spec || undefined, ownedEntries) !== undefined)
+    if (
+      getNextTalentCost(career, rank, talentId, spec || undefined, ownedEntries, alternateRanks) !==
+      undefined
+    )
       return true;
   }
   return false;
@@ -104,17 +117,18 @@ export function hasAnyUnlockedTalentOption(
 export function getTalentRankChips(
   career: string | undefined,
   talentId: string,
-  specialisation: string | undefined
+  specialisation: string | undefined,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): string[] {
   const careerData = findCareerByName(career);
   if (!careerData) return [];
   const rankNames = new Map(careerData.ranks.map((rank) => [rank.id, rank.name]));
   const seen = new Set<string>();
   const chips: string[] = [];
-  for (const entry of getAllCareerAdvances(career)) {
+  for (const entry of getAllCareerAdvances(career, alternateRanks)) {
     if (!isTalentOrTraitAdvance(entry.advance) || !matches(entry.advance, talentId, specialisation))
       continue;
-    const name = rankNames.get(entry.rankId);
+    const name = entry.rankName ?? rankNames.get(entry.rankId);
     if (name && !seen.has(name)) {
       seen.add(name);
       chips.push(name);
@@ -127,6 +141,7 @@ export function getTalentRankChips(
 export function getTalentsSpent(character: Character): number {
   const career = character.header.career;
   const rank = character.header.rank;
+  const alternateRanks = character.experience.alternateRanks ?? [];
   const counted: TalentEntry[] = [];
   let total = 0;
   for (const entry of [
@@ -139,7 +154,8 @@ export function getTalentsSpent(character: Character): number {
       rank,
       entry.talentId,
       entry.specialisation,
-      counted
+      counted,
+      alternateRanks
     );
     total += entry.xpPurchase?.cost ?? legacyRealCost ?? entry.manualCost ?? 0;
     counted.push(entry);

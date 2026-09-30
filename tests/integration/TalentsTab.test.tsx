@@ -141,6 +141,27 @@ const { MOCK_TALENT_LIST } = vi.hoisted(() => ({
       hasSpecialisation: false,
       faithGroup: "mercy",
     },
+    {
+      id: "general-faith-talent",
+      name: "General Faith Talent",
+      source: "IH",
+      hasSpecialisation: false,
+      faithGroup: "general",
+    },
+    {
+      id: "sign-faith-talent",
+      name: "Sign Faith Talent",
+      source: "BoM",
+      hasSpecialisation: false,
+      faithGroup: "sign",
+    },
+    {
+      id: "wrath-faith-talent",
+      name: "Wrath Faith Talent",
+      source: "BoM",
+      hasSpecialisation: false,
+      faithGroup: "wrath",
+    },
   ],
 }));
 
@@ -365,6 +386,25 @@ describe("TalentsTab", () => {
     await user.click(within(dialog).getByText("Faith Talent"));
     dialog = screen.getByRole("dialog", { name: "Add Faith Talent" });
     expect(within(dialog).queryByText("Faith Talent")).not.toBeInTheDocument();
+  });
+
+  it("shows Faith Talents together with their four groups as chips", () => {
+    renderTab({
+      talents: makeTalents({
+        talents: [
+          entry("general", "general-faith-talent", "General Faith Talent"),
+          entry("mercy", "faith-talent", "Faith Talent"),
+          entry("sign", "sign-faith-talent", "Sign Faith Talent"),
+          entry("wrath", "wrath-faith-talent", "Wrath Faith Talent"),
+        ],
+      }),
+    });
+
+    expect(screen.queryByText("None.")).not.toBeInTheDocument();
+    expect(screen.getAllByText("General")[0]).toHaveClass("text-slate-200");
+    expect(screen.getAllByText("Emperor's Mercy")[0]).toHaveClass("text-emerald-300");
+    expect(screen.getAllByText("Emperor's Sign")[0]).toHaveClass("text-violet-300");
+    expect(screen.getAllByText("Emperor's Wrath")[0]).toHaveClass("text-amber-300");
   });
 
   it("uses separated bordered cards with title, source, and prerequisites", async () => {

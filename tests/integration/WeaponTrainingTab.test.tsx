@@ -196,59 +196,34 @@ describe("WeaponTrainingTab", () => {
     expect(screen.getByLabelText("Remove Needle Pistol")).toBeDisabled();
   });
 
-  it("disables the exotic-weapon add trigger for a player with no unlocked slots", () => {
-    renderTab({ career: "Guardsman", rank: "Conscript" });
-    expect(screen.getByRole("button", { name: "Add Exotic Weapon" })).toBeDisabled();
+  it("does not show the custom exotic weapon button to a player", () => {
+    renderTab({ career: "Guardsman", rank: "Captain" });
+    expect(
+      screen.queryByRole("button", { name: "Add a custom exotic weapon" })
+    ).not.toBeInTheDocument();
   });
 
-  it("always shows the exotic-weapon add trigger for a DM, even with no unlocked slots", () => {
+  it("shows the custom exotic weapon button to a DM", () => {
     renderTab({ career: "Guardsman", rank: "Conscript", isDM: true });
-    expect(screen.getByRole("button", { name: "Add Exotic Weapon" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add a custom exotic weapon" })).toBeInTheDocument();
   });
 
-  it("lets a player add an exotic weapon directly, within an available slot", async () => {
-    const user = userEvent.setup();
-    const { onUpdate } = renderTab({ career: "Guardsman", rank: "Captain" });
-
-    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon" }));
-    await user.type(screen.getByPlaceholderText("e.g. Needle Pistol"), "Needle Pistol");
-    await user.type(screen.getByPlaceholderText("0"), "200");
-    await user.click(screen.getByRole("button", { name: "+ Add Exotic" }));
-
-    expect(onUpdate).toHaveBeenCalledTimes(1);
-    const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
-    expect(next.exoticWeapons).toEqual([
-      {
-        name: "Needle Pistol",
-        cost: 200,
-        xpPurchase: {
-          cost: 200,
-          careerId: "guardsman",
-          purchasedAtRankId: "captain",
-        },
-      },
-    ]);
-  });
-
-  it("gives a DM a choice between using a slot and adding a bonus, when a slot is available", async () => {
+  it("opens the exotic weapon form straight away for a DM, with no slot choice", async () => {
     const user = userEvent.setup();
     renderTab({ career: "Guardsman", rank: "Captain", isDM: true });
 
-    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon" }));
+    await user.click(screen.getByRole("button", { name: "Add a custom exotic weapon" }));
     expect(
-      screen.getByRole("button", { name: "Use an available training slot" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Add as a bonus (doesn't use a slot)" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Use an available training slot" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Weapon Name")).toBeInTheDocument();
   });
 
-  it("tags a DM's bonus exotic weapon as bonus, not counted against slots", async () => {
+  it("tags a DM's custom exotic weapon as bonus", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ career: "Guardsman", rank: "Captain", isDM: true });
 
-    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon" }));
-    await user.click(screen.getByRole("button", { name: "Add as a bonus (doesn't use a slot)" }));
+    await user.click(screen.getByRole("button", { name: "Add a custom exotic weapon" }));
     await user.type(screen.getByPlaceholderText("e.g. Needle Pistol"), "Web Pistol");
     await user.type(screen.getByPlaceholderText("0"), "0");
     await user.click(screen.getByRole("button", { name: "+ Add Exotic" }));
@@ -260,24 +235,9 @@ describe("WeaponTrainingTab", () => {
         name: "Web Pistol",
         cost: 0,
         bonus: true,
-        xpPurchase: {
-          cost: 0,
-          careerId: "guardsman",
-          purchasedAtRankId: "captain",
-        },
+        xpPurchase: { cost: 0, careerId: "guardsman", purchasedAtRankId: "captain" },
       },
     ]);
-  });
-
-  it("skips straight to the bonus form for a DM when no slots remain", async () => {
-    const user = userEvent.setup();
-    renderTab({ career: "Guardsman", rank: "Conscript", isDM: true });
-
-    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon" }));
-    expect(
-      screen.queryByRole("button", { name: "Use an available training slot" })
-    ).not.toBeInTheDocument();
-    expect(screen.getByText("Weapon Name")).toBeInTheDocument();
   });
 
   it("shows Talent-granted training as active, labelled, and not independently removable", () => {

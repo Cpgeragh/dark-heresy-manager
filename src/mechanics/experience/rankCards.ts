@@ -1,4 +1,5 @@
 import { WEAPON_TRAINING_GROUPS } from "../../data/reference/weaponTrainingData";
+import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
 import type {
   Character,
   CharacteristicAdvanceTier,
@@ -15,6 +16,7 @@ export type RankCardEntryKind =
   | "skill"
   | "talent"
   | "trait"
+  | "elite-advance"
   | "weapon-training"
   | "xp-spend";
 
@@ -93,12 +95,21 @@ export function buildRankCards(character: Character): RankCard[] {
   );
   if (!progression) return [];
 
+  const alternateRankNames = new Map(
+    (character.experience.alternateRanks ?? []).flatMap((selection) => {
+      const alternateRank = ALTERNATE_RANKS.find(
+        (candidate) => candidate.id === selection.alternateRankId
+      );
+      return alternateRank ? [[selection.replacedRankId, alternateRank.name] as const] : [];
+    })
+  );
+
   const cards = progression.reachedRanks.map((rank): RankCard => {
     const xpBand = getRankXpBand(rank.tier);
     if (!xpBand) throw new Error(`Missing XP band for Career rank ${rank.id}`);
     return {
       rankId: rank.id,
-      name: rank.name,
+      name: alternateRankNames.get(rank.id) ?? rank.name,
       tier: rank.tier,
       xpLevel: rank.xpLevel,
       xpBand,
@@ -168,6 +179,15 @@ export function buildRankCards(character: Character): RankCard[] {
         kind,
       });
     }
+  }
+
+  for (const entry of character.talentsAndTraits.eliteAdvances ?? []) {
+    addPurchase(entry.xpPurchase, {
+      id: `elite-advance:${entry.uid}`,
+      name: entry.name,
+      cost: entry.xpPurchase?.cost ?? 0,
+      kind: "elite-advance",
+    });
   }
 
   for (const id of character.weaponTraining.trained) {

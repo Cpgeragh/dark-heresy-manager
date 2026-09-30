@@ -86,6 +86,23 @@ describe("getNextSkillTierAccess", () => {
       status: "maxed",
     });
   });
+
+  it("uses a selected Alternate Rank Skill instead of the replaced normal table", () => {
+    expect(
+      getNextSkillTierAccess("Cleric", "Preacher", "forbidden-daemonology", "untrained", [
+        {
+          alternateRankId: "black-priest-of-maccabeus",
+          replacedRankId: "preacher",
+          takenAtTier: 4,
+        },
+      ])
+    ).toEqual({
+      status: "unlocked",
+      level: "trained",
+      cost: 100,
+      purchase: { cost: 100, careerId: "cleric", sourceRankId: "preacher" },
+    });
+  });
 });
 
 describe("getSkillsSpent", () => {
