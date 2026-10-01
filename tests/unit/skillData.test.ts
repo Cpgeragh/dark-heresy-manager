@@ -9,20 +9,24 @@ const descriptionFor = (name: string): string => {
 };
 
 describe("skill reference data", () => {
-  it("has one matching description for every default skill", () => {
+  it("keeps every supplied Skill description matched to its default Skill", () => {
     const names = DEFAULT_SKILLS.map((skill) => skill.name);
+    const describedNames = DEFAULT_SKILLS.filter((skill) => skill.source !== "IH").map(
+      (skill) => skill.name
+    );
     const descriptionNames = Object.keys(SKILL_DESCRIPTIONS);
 
-    expect(DEFAULT_SKILLS).toHaveLength(124);
-    expect(new Set(names).size).toBe(124);
+    expect(DEFAULT_SKILLS).toHaveLength(127);
+    expect(new Set(names).size).toBe(127);
     expect(descriptionNames).toHaveLength(124);
     expect(new Set(descriptionNames).size).toBe(124);
-    expect(descriptionNames.sort()).toEqual([...names].sort());
+    expect(descriptionNames.sort()).toEqual(describedNames.sort());
   });
 
-  it("contains 122 Core Rules skills and two Lathe Worlds skills", () => {
+  it("contains 122 Core Rules skills, two Lathe Worlds skills and three Inquisitor's Handbook skills", () => {
     expect(DEFAULT_SKILLS.filter((skill) => skill.source === "CR")).toHaveLength(122);
     expect(DEFAULT_SKILLS.filter((skill) => skill.source === "LW")).toHaveLength(2);
+    expect(DEFAULT_SKILLS.filter((skill) => skill.source === "IH")).toHaveLength(3);
   });
 
   it("uses Fellowship for Performer (Dancer)", () => {

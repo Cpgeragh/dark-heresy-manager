@@ -2,10 +2,10 @@ import { useRef } from "react";
 import { Button } from "../buttons/Button";
 import { uiPickerBackButton } from "../styles/buttonStyles";
 import { AssignedItemMetaFields, type AssignedItemMetaFieldsProps } from "./AssignedItemMetaFields";
-import { ArrowLeft } from "../icons/PickerArrows";
 import { PickerBody, PickerModal } from "./PickerModal";
 import { OptionPickerScreen } from "./OptionPickerScreen";
 import { EXTENDED_AVAILABILITY_OPTIONS } from "../../constants/availability";
+import { RequiredFieldsNote } from "../forms/CustomFormFooter";
 
 interface AssignedItemMetaScreenProps extends Omit<
   AssignedItemMetaFieldsProps,
@@ -15,6 +15,7 @@ interface AssignedItemMetaScreenProps extends Omit<
   confirmLabel: string;
   canConfirm: boolean;
   onBack: () => void;
+  onClose: () => void;
   onConfirm: () => void | Promise<void>;
   showRarityPicker: boolean;
   setGmRarity: (value: string) => void;
@@ -29,6 +30,7 @@ export function AssignedItemMetaScreen({
   confirmLabel,
   canConfirm,
   onBack,
+  onClose,
   onConfirm,
   showRarityPicker,
   setGmRarity,
@@ -58,10 +60,8 @@ export function AssignedItemMetaScreen({
       title={title}
       query=""
       onQueryChange={ignoreQueryChange}
-      onClose={onBack}
+      onClose={onClose}
       isEmpty={false}
-      closeLabel={<ArrowLeft />}
-      closeAriaLabel="Back"
       hideSearch
       maxWidth={maxWidth}
       scrollPositionRef={formScrollPositionRef}
@@ -71,6 +71,8 @@ export function AssignedItemMetaScreen({
           {...fieldProps}
           onOpenRarityPicker={() => setShowRarityPicker(true)}
         />
+
+        <RequiredFieldsNote />
 
         <div className="flex gap-2 pt-1">
           <button type="button" onClick={onBack} className={uiPickerBackButton}>

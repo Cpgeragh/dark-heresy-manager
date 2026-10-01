@@ -237,6 +237,7 @@ function SpecialAdvancePicker({
   const [showAll, setShowAll] = useState(false);
   const ownedIds = new Set(owned.map((entry) => entry.eliteAdvanceId));
   const filtered = [...(showAll ? ELITE_ADVANCES : advances)]
+    .filter((advance) => !advance.automaticGrantOnly)
     .filter((advance) => !editable || !ownedIds.has(advance.id))
     .filter((advance) =>
       advance.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
@@ -904,6 +905,14 @@ export function EliteAdvancesTab({
                 talentId: entry.eliteAdvanceId,
                 name: advance?.name ?? entry.name,
                 source: advance?.source,
+                ...(entry.grantedByAlternateRankId
+                  ? {
+                      grantedByTalentEntryUid: `alternate-rank:${entry.grantedByAlternateRankId}`,
+                      grantedByTalentName:
+                        entry.grantedByAlternateRankName ?? entry.grantedByAlternateRankId,
+                      grantedByType: "Alternate Rank" as const,
+                    }
+                  : {}),
               };
               return (
                 <EntryCard
@@ -913,7 +922,13 @@ export function EliteAdvancesTab({
                   onRemove={(uid) => void removeSpecial(uid)}
                   confirmDeletion
                   deletionNoun="Elite Advance"
-                  statusChip={advance ? `${advance.cost} XP` : undefined}
+                  statusChip={
+                    entry.grantedByAlternateRankId
+                      ? undefined
+                      : advance
+                        ? `${advance.cost} XP`
+                        : undefined
+                  }
                   infoContent={advance ? <EliteAdvanceDetails advance={advance} /> : undefined}
                 />
               );

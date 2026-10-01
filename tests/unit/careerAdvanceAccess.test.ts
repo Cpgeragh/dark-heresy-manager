@@ -102,4 +102,54 @@ describe("getUnlockedCareerAdvances", () => {
       )
     ).toBe(false);
   });
+
+  it("uses Bonded Emissary as an Adept or Tech-Priest replacement", () => {
+    const adept = getUnlockedCareerAdvances("Adept", "Inditor", [
+      {
+        alternateRankId: "bonded-emissary",
+        replacedRankId: "inditor",
+        takenAtTier: 4,
+      },
+    ]);
+    const techPriest = getUnlockedCareerAdvances("Tech-Priest", "Enginseer", [
+      {
+        alternateRankId: "bonded-emissary",
+        replacedRankId: "enginseer",
+        takenAtTier: 4,
+      },
+    ]);
+
+    for (const entries of [adept, techPriest]) {
+      expect(
+        entries.some(
+          (entry) =>
+            entry.alternateRankId === "bonded-emissary" &&
+            entry.advance.kind === "skill" &&
+            entry.advance.skillId === "scholastic-mercantile"
+        )
+      ).toBe(true);
+    }
+  });
+
+  it("uses the Feral Warrior table and retains both Sound Constitution slots", () => {
+    const unlocked = getUnlockedCareerAdvances("Guardsman", "Armsman", [
+      {
+        alternateRankId: "feral-warrior",
+        replacedRankId: "armsman",
+        takenAtTier: 3,
+      },
+    ]);
+    const replacedRankEntries = unlocked.filter((entry) => entry.rankId === "armsman");
+
+    expect(replacedRankEntries).toHaveLength(20);
+    expect(replacedRankEntries.every((entry) => entry.alternateRankId === "feral-warrior")).toBe(
+      true
+    );
+    expect(
+      replacedRankEntries.filter(
+        (entry) =>
+          entry.advance.kind === "talent" && entry.advance.talentId === "sound-constitution"
+      )
+    ).toHaveLength(2);
+  });
 });

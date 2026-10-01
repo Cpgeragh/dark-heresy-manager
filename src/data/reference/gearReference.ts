@@ -1780,6 +1780,26 @@ export const GEAR_REFERENCE: GearRef[] = [
     value: "—",
     availability: "Issued Only",
   },
+  {
+    id: "ih-legature",
+    name: "Legature",
+    source: SkillSource.IH,
+    description:
+      "A formal carta of inquiry stating the locale of investigation and the focus of concern. On presentation and corroboration of a Sigil of Inquiry, it grants the bearer the absolute right to question and examine whoever or whatever they wish.",
+    weight: "—",
+    value: "—",
+    availability: "—",
+  },
+  {
+    id: "ih-sigil-of-question",
+    name: "Sigil of Question",
+    source: SkillSource.IH,
+    description:
+      "A silver icon featuring the sign of a chalice engraved with the symbol of the Inquisition. It demonstrates the Legate Investigator’s remit and authority under the Ordos Calixis. It may be worn as a medallion, carried in a wallet or worn on a finger as a ring, and contains a code-key system for verification and secure data-access if needed.",
+    weight: "—",
+    value: "—",
+    availability: "—",
+  },
   // ── Inquisitor's Handbook — War Zone Explosive Materials ─────────────────
   {
     id: "ih-det-cord-and-det-tape",

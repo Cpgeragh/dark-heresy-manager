@@ -58,6 +58,10 @@ import {
   colourTextPrimary,
   colourValue,
 } from "../../ui/styles/colourTokens";
+import {
+  applyAlternateRankEliteAdvanceGrants,
+  applyAlternateRankGearGrants,
+} from "../../mechanics/experience/alternateRankGrants";
 
 interface ExperienceTabProps {
   character: Character;
@@ -320,7 +324,7 @@ function RankUpModal({
   ) =>
     ALTERNATE_RANKS.filter(
       (alternateRank) =>
-        alternateRank.requiredCareerId === progression.career.id &&
+        alternateRank.requiredCareerIds.includes(progression.career.id) &&
         rank !== undefined &&
         rank.tier >= alternateRank.minimumRank &&
         !(character.experience.alternateRanks ?? []).some(
@@ -370,10 +374,20 @@ function RankUpModal({
           ],
         }
       : rankUpExperience;
+    const nextGear = selectedAlternateRankId
+      ? applyAlternateRankGearGrants(character.gear ?? [], selectedAlternateRankId)
+      : character.gear;
+    const nextTalentsAndTraits = selectedAlternateRankId
+      ? applyAlternateRankEliteAdvanceGrants(character.talentsAndTraits, selectedAlternateRankId)
+      : character.talentsAndTraits;
     setSaving(true);
     const saved = await onConfirm({
       experience: nextExperience,
       header: applyCareerRankUp(character.header, nextExperience.spent, selectedRank.id),
+      ...(nextGear !== character.gear ? { gear: nextGear } : {}),
+      ...(nextTalentsAndTraits !== character.talentsAndTraits
+        ? { talentsAndTraits: nextTalentsAndTraits }
+        : {}),
     });
     setSaving(false);
     if (saved !== false) onClose();

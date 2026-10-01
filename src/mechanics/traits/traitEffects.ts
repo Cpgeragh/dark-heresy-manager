@@ -1,4 +1,6 @@
 import { HOMEWORLD_LIST, type HomeworldData } from "../../data/reference/homeworldData";
+import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
+import { findCareerByName } from "../../data/reference/careerData";
 import { TRAIT_LIST } from "../../data/reference/traitData";
 import type {
   Characteristics,
@@ -6,6 +8,7 @@ import type {
   SanctioningAcquisition,
   SkillAdvanceLevel,
   SkillEntry,
+  AlternateRankSelection,
   TalentEntry,
   TalentsAndTraitsBlock,
   WeaponTrainingTalentId,
@@ -75,9 +78,30 @@ function homeworldEntries(
 
 export function getDerivedTraitEntries(
   talents: TalentsAndTraitsBlock,
-  career?: string
+  career?: string,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): TalentEntry[] {
   const grants: TalentEntry[] = [];
+  const careerId = findCareerByName(career)?.id;
+  for (const selection of alternateRanks) {
+    const alternateRank = ALTERNATE_RANKS.find(
+      (rank) =>
+        rank.id === selection.alternateRankId &&
+        (!careerId || rank.requiredCareerIds.includes(careerId))
+    );
+    if (!alternateRank) continue;
+    for (const referenceId of alternateRank.grantedTraits ?? []) {
+      const reference = TRAIT_LIST.find((trait) => trait.id === referenceId);
+      grants.push({
+        uid: `alternate-rank:${selection.alternateRankId}:${referenceId}`,
+        talentId: referenceId,
+        name: reference?.name ?? referenceId,
+        grantedByTalentEntryUid: `alternate-rank:${selection.alternateRankId}`,
+        grantedByTalentName: alternateRank.name,
+        grantedByType: "Alternate Rank",
+      });
+    }
+  }
   for (const grant of getEliteAdvanceTraitGrants(talents)) {
     const reference = TRAIT_LIST.find((trait) => trait.id === grant.referenceId);
     grants.push({
@@ -181,9 +205,10 @@ export function getDerivedTraitEntries(
 
 export function getActiveTraitEntries(
   talents: TalentsAndTraitsBlock,
-  career?: string
+  career?: string,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): TalentEntry[] {
-  const derived = getDerivedTraitEntries(talents, career);
+  const derived = getDerivedTraitEntries(talents, career, alternateRanks);
   const derivedTalentIds = new Set(derived.map((entry) => entry.talentId));
   const manual = talents.traits.filter((entry) => {
     const trait = TRAIT_LIST.find((item) => item.id === entry.talentId);

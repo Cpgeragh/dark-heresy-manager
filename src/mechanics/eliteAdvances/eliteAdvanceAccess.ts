@@ -50,8 +50,10 @@ export function getAvailableNamedEliteAdvances(
   experience: ExperienceBlock
 ): readonly EliteAdvanceData[] {
   const selected = new Set((experience.alternateRanks ?? []).map((entry) => entry.alternateRankId));
-  return ELITE_ADVANCES.filter((advance) =>
-    (advance.alternateRankIds ?? []).some((alternateRankId) => selected.has(alternateRankId))
+  return ELITE_ADVANCES.filter(
+    (advance) =>
+      !advance.automaticGrantOnly &&
+      (advance.alternateRankIds ?? []).some((alternateRankId) => selected.has(alternateRankId))
   );
 }
 

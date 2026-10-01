@@ -1,7 +1,6 @@
 // tests/integration/ArcheotechPickerModal.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -116,11 +115,9 @@ describe("ArcheotechPickerModal", () => {
     ).toBe(210);
 
     const assignedDialog = screen.getByRole("dialog", { name: "GM-Assigned Values" });
-    const assignedBack = assignedDialog.querySelector<HTMLButtonElement>(
-      'button[aria-label="Back"]'
-    );
-    if (!assignedBack) throw new Error("No assigned-values Back button found");
-    await user.click(assignedBack);
+    expect(within(assignedDialog).getByRole("button", { name: "Close" })).toBeInTheDocument();
+    expect(within(assignedDialog).getAllByRole("button", { name: "Back" })).toHaveLength(1);
+    await user.click(within(assignedDialog).getByRole("button", { name: "Back" }));
     expect(
       screen
         .getByRole("dialog", { name: "Add Archeotech" })

@@ -111,6 +111,39 @@ describe("EliteAdvancesTab", () => {
     expect(within(dialog).getByText("Insanely Faithful")).toBeInTheDocument();
   });
 
+  it("shows an Alternate Rank Elite Advance as granted and not removable", () => {
+    const talents: TalentsAndTraitsBlock = {
+      ...EMPTY_TALENTS,
+      eliteAdvances: [
+        {
+          uid: "alternate-rank:malfian-bloodsworn:elite-advance:bloodsworn-charter",
+          eliteAdvanceId: "bloodsworn-charter",
+          name: "Bloodsworn Charter",
+          grantedByAlternateRankId: "malfian-bloodsworn",
+          grantedByAlternateRankName: "Malfian Bloodsworn",
+        },
+      ],
+    };
+
+    render(
+      <EliteAdvancesTab
+        talents={talents}
+        skills={[]}
+        experience={EXPERIENCE}
+        insanity={INSANITY}
+        editable
+        onUpdateCharacter={async () => true}
+      />
+    );
+
+    expect(screen.getByText("Bloodsworn Charter")).toBeInTheDocument();
+    expect(screen.getByText("Malfian Bloodsworn (Alternate Rank): Granted")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Delete Bloodsworn Charter" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("0 XP")).not.toBeInTheDocument();
+  });
+
   it("offers Special, Skill, and Talent purchase routes in one picker", async () => {
     const user = userEvent.setup();
     render(
@@ -131,6 +164,27 @@ describe("EliteAdvancesTab", () => {
     expect(within(picker).getByText("Talents")).toBeInTheDocument();
   });
 
+  it("does not offer automatic Alternate Rank grants through Special Show all", async () => {
+    const user = userEvent.setup();
+    render(
+      <EliteAdvancesTab
+        talents={EMPTY_TALENTS}
+        skills={[]}
+        experience={{ total: 0, spent: 0, ranks: [] }}
+        insanity={INSANITY}
+        editable={false}
+        onUpdateCharacter={async () => true}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "View Elite Advances" }));
+    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByRole("button", { name: "Show all" }));
+
+    expect(screen.getByText("Encarta Maleficarum")).toBeInTheDocument();
+    expect(screen.queryByText("Bloodsworn Charter")).not.toBeInTheDocument();
+  });
+
   it("shows the complete Talent catalogue through Show all", async () => {
     const user = userEvent.setup();
     render(
@@ -149,7 +203,11 @@ describe("EliteAdvancesTab", () => {
     await user.click(screen.getByRole("button", { name: "Show all" }));
 
     const picker = screen.getByRole("dialog", { name: "View Elite Advance Talents" });
-    expect(within(picker).getByText("Pure Faith")).toBeInTheDocument();
+    const pureFaith = within(picker)
+      .getAllByText("Pure Faith")
+      .map((element) => element.closest("button"))
+      .find((button) => button?.textContent?.trim().startsWith("Pure Faith"));
+    expect(pureFaith).toBeInTheDocument();
   });
 
   it("opens the normal acquisition form before saving an Elite Advance Talent", async () => {

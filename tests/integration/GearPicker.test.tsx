@@ -1,6 +1,6 @@
 // tests/integration/GearPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -35,7 +35,7 @@ describe("GearPicker", () => {
   it("contains the complete IH Gear set and excludes the cross-category entries", () => {
     const ihGear = GEAR_REFERENCE.filter((item) => item.source === SkillSource.IH);
 
-    expect(ihGear).toHaveLength(86);
+    expect(ihGear).toHaveLength(88);
     expect(ihGear).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -49,6 +49,16 @@ describe("GearPicker", () => {
           value: "1,000 Thrones",
           weight: "1.5 kg",
           availability: "Rare",
+        }),
+        expect.objectContaining({
+          id: "ih-legature",
+          name: "Legature",
+          availability: "—",
+        }),
+        expect.objectContaining({
+          id: "ih-sigil-of-question",
+          name: "Sigil of Question",
+          availability: "—",
         }),
       ])
     );
@@ -101,13 +111,43 @@ describe("GearPicker", () => {
     );
   });
 
-  it("returns to the list from the assigned-cost header and resets entered metadata", async () => {
+  it("requires the DM to assign both cost and rarity for the Legate Investigator items", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row("Sigil of Question"));
+
+    const addButton = screen.getByRole("button", { name: "Add to Inventory" });
+    const costInput = screen.getByLabelText(/Cost \(Thrones\)/);
+    const rarityPicker = screen.getByLabelText(/Rarity/);
+    expect(costInput).toBeRequired();
+    expect(rarityPicker).toHaveAttribute("aria-required", "true");
+    expect(screen.getByText("Required")).toBeInTheDocument();
+
+    await user.type(costInput, "0");
+    expect(addButton).toBeDisabled();
+
+    await user.click(rarityPicker);
+    await user.click(screen.getByRole("button", { name: "Rare" }));
+    await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Sigil of Question" }),
+      "0 Thrones",
+      "Rare"
+    );
+  });
+
+  it("uses a close button in the assigned-cost header and returns through the Back button", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
 
     await user.click(row(VARIABLE_GEAR_NAME));
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "75");
-    await user.click(screen.getAllByRole("button", { name: "Back" })[0]);
+    const assignedDialog = screen.getByRole("dialog", { name: "Assigned Cost" });
+    expect(within(assignedDialog).getByRole("button", { name: "Close" })).toBeInTheDocument();
+    expect(within(assignedDialog).getAllByRole("button", { name: "Back" })).toHaveLength(1);
+    await user.click(within(assignedDialog).getByRole("button", { name: "Back" }));
 
     expect(screen.getByPlaceholderText("Search gear…")).toBeInTheDocument();
     await user.click(row(VARIABLE_GEAR_NAME));

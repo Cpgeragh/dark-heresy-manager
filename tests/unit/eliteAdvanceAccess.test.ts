@@ -26,6 +26,23 @@ describe("Elite Advance access", () => {
     ]);
   });
 
+  it("does not offer an automatic Alternate Rank grant as a purchase", () => {
+    expect(
+      getAvailableNamedEliteAdvances({
+        total: 3_000,
+        spent: 3_000,
+        ranks: [],
+        alternateRanks: [
+          {
+            alternateRankId: "malfian-bloodsworn",
+            replacedRankId: "veteran",
+            takenAtTier: 5,
+          },
+        ],
+      })
+    ).toEqual([]);
+  });
+
   it("does not expose missed-rank advances until the following rank", () => {
     const result = getMissedRankEliteAdvanceOptions({
       career: "Cleric",

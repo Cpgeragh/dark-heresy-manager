@@ -184,6 +184,7 @@ export function ImplantPicker({
         confirmLabel="Continue"
         canConfirm={canConfirmCost}
         onBack={resetPicker}
+        onClose={onClose}
         onConfirm={confirmCost}
         maxWidth="max-w-md lg:max-w-lg"
       />

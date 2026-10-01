@@ -257,7 +257,10 @@ export function TraitsTab({
     ]
   );
 
-  const displayTraits = useMemo(() => getActiveTraitEntries(talents, career), [talents, career]);
+  const displayTraits = useMemo(
+    () => getActiveTraitEntries(talents, career, alternateRanks),
+    [alternateRanks, career, talents]
+  );
   const unnaturalEntries = displayTraits.filter(
     (entry) => entry.talentId === "unnatural-characteristic"
   );

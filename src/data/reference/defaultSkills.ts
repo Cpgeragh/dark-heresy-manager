@@ -368,6 +368,15 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
     source: "CR",
   },
   {
+    id: "ciphers-inquisition",
+    name: "Ciphers (Inquisition)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Ciphers",
+    advanced: true,
+    source: "IH",
+  },
+  {
     id: "ciphers-war-cant",
     name: "Ciphers (War Cant)",
     characteristic: "int",
@@ -584,6 +593,15 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
     advanced: true,
     source: "CR",
   },
+  {
+    id: "secret-tongue-xenos",
+    name: "Secret Tongue (Xenos, any one)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Secret Tongue",
+    advanced: true,
+    source: "IH",
+  },
 
   // ===== COMMON LORE =====
   {
@@ -767,6 +785,15 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
     category: "Scholastic Lore",
     advanced: true,
     source: "CR",
+  },
+  {
+    id: "scholastic-mercantile",
+    name: "Scholastic Lore (Mercantile)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Scholastic Lore",
+    advanced: true,
+    source: "IH",
   },
   {
     id: "scholastic-numerology",

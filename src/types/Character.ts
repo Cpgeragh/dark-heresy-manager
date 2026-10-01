@@ -362,7 +362,7 @@ export interface GearItem extends CustomLibraryLinkFields {
   source?: string;
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
-  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld";
+  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld" | "Alternate Rank";
 }
 
 /**
@@ -574,7 +574,7 @@ export interface TalentEntry extends CustomLibraryLinkFields {
   /** Display-only provenance for a grant calculated from another purchase; never saved as a purchase. */
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
-  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld" | "Elite Advance";
+  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld" | "Alternate Rank" | "Elite Advance";
   eliteAdvancePurchase?: EliteAdvancePurchase;
 }
 
@@ -591,6 +591,9 @@ export interface EliteAdvanceEntry {
   eliteAdvanceId: string;
   name: string;
   xpPurchase?: XpPurchaseRecord;
+  /** Automatic grant attached to an Alternate Rank rather than an XP purchase. */
+  grantedByAlternateRankId?: string;
+  grantedByAlternateRankName?: string;
   acquisition?: {
     insanityGained?: number;
     characteristicReductions?: Partial<Record<keyof Characteristics, number>>;

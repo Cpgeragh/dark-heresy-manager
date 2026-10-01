@@ -387,6 +387,16 @@ export const TRAIT_LIST: readonly TraitData[] = [
     hasSpecialisation: false,
   },
 
+  // ─── Inquisitor's Handbook — Alternate Rank Traits ─────────────────────────
+  {
+    id: "feared-and-loathed",
+    name: "Feared and Loathed",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+    description:
+      "Members of the Chaliced Commissariat act with a brutal autonomy thanks to the indulgence of Lord Sector Hax. Their elimination of seditious elements within PDF units and pitiless reputation means that members of PDF units or Imperial Guard units raised within Calixis respond with fear and deep-seated loathing to a member of the Chaliced Commissariat.\n\nAs a member of this organisation, you gain a +10 bonus on Inquiry and Intimidate Tests when used against members of the Imperial Guard or PDF. You take a −10 penalty, however, when Testing Charm or Command on the same groups.\n\nNote: This Trait depends as much on the uniform, manner and bearing as anything else, and if the character is otherwise dressed, unrecognised or disguised its effects do not apply.",
+  },
+
   // ─── Inquisitor's Handbook — Homeworld Traits ──────────────────────────────
   {
     id: "homeworld-fit-for-purpose",

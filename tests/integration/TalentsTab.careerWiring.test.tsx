@@ -70,10 +70,15 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
 
     await user.click(screen.getAllByRole("button", { name: "Add Faith Talent" })[0]);
     const dialog = within(screen.getByRole("dialog", { name: "Add Faith Talent" }));
-    const pureFaith = dialog.getByText("Pure Faith").closest("button");
+    const pureFaith = dialog
+      .getAllByText("Pure Faith")
+      .map((element) => element.closest("button"))
+      .find((button) => button?.textContent?.trim().startsWith("Pure Faith"));
     expect(pureFaith).toBeInTheDocument();
     expect(within(pureFaith!).getByText("300 XP")).toBeInTheDocument();
-    expect(within(pureFaith!).getByText("Black Priest of Maccabeus")).toBeInTheDocument();
+    const purgeTheUnclean = dialog.getByText("Purge the Unclean").closest("button");
+    expect(purgeTheUnclean).toBeInTheDocument();
+    expect(within(purgeTheUnclean!).getByText("300 XP")).toBeInTheDocument();
   });
 
   it("passes career and rank down into the Trait picker too", async () => {

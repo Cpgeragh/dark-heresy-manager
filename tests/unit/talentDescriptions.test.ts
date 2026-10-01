@@ -32,6 +32,17 @@ describe("Talent catalogue prerequisites", () => {
 });
 
 describe("Talent descriptions", () => {
+  it("records Beast Hunter's prerequisites and complete effect restrictions", () => {
+    expect(getTalent("beast-hunter").prerequisites).toBe("WS 35, BS 35");
+    const description = TALENT_DESCRIPTIONS["beast-hunter"];
+
+    expect(description).toContain("Critical Effect");
+    expect(description).toContain("Hulking or larger");
+    expect(description).toContain("increase your Damage by +3");
+    expect(description).toContain("artificial constructs");
+    expect(description).toContain("From Beyond trait");
+  });
+
   it("records the correct Chain Weapon Expert self-hit rule", () => {
     const description = TALENT_DESCRIPTIONS["chain-weapon-expert"];
 

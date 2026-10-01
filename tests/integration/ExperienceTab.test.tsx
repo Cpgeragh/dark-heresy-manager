@@ -372,7 +372,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     });
   });
 
-  it("places the Career path choice before its dependent Alternate Rank choice", async () => {
+  it("opens the Rank Type picker only after its Career path is chosen", async () => {
     const user = userEvent.setup();
     const current = makeCharacter();
     renderTab({
@@ -388,13 +388,10 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(dialog.queryByText("Rank type")).not.toBeInTheDocument();
 
     await user.click(dialog.getByRole("button", { name: "Exorcist" }));
-    expect(screen.queryByRole("dialog", { name: "Choose Rank Type" })).not.toBeInTheDocument();
-    const careerPathHeading = dialog.getByText("Choose the next Career path");
-    const rankTypeHeading = dialog.getByText("Rank type");
-    expect(
-      careerPathHeading.compareDocumentPosition(rankTypeHeading) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).not.toBe(0);
-    expect(dialog.getByRole("button", { name: "Black Priest of Maccabeus" })).toBeInTheDocument();
+    const rankTypePicker = within(screen.getByRole("dialog", { name: "Choose Rank Type" }));
+    expect(rankTypePicker.getByText("Exorcist")).toBeInTheDocument();
+    expect(rankTypePicker.getByText("Black Priest of Maccabeus")).toBeInTheDocument();
+    expect(rankTypePicker.getByText("Legate Investigator")).toBeInTheDocument();
   });
 
   it("records Black Priest as the replacement while retaining Preacher for progression", async () => {
@@ -409,8 +406,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const rankTypePicker = within(screen.getByRole("dialog", { name: "Choose Rank Type" }));
+    await user.click(rankTypePicker.getByText("Black Priest of Maccabeus"));
     const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
-    await user.click(dialog.getByRole("button", { name: "Black Priest of Maccabeus" }));
     await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
 
     expect(onUpdateCharacter).toHaveBeenCalledWith({
@@ -424,6 +422,101 @@ describe("ExperienceTab named Career Rank ledger", () => {
         ],
       }),
       header: expect.objectContaining({ rank: "Preacher" }),
+    });
+  });
+
+  it("adds both Legate Investigator items when that Alternate Rank is taken", async () => {
+    const user = userEvent.setup();
+    const current = makeCharacter();
+    const { onUpdateCharacter } = renderTab({
+      character: {
+        ...current,
+        header: {
+          ...current.header,
+          career: "Arbitrator",
+          rank: "Regulator",
+          careerPath: undefined,
+        },
+        gear: [{ id: "existing", name: "Chrono", source: "CR" }],
+        experience: { total: 2_000, spent: 2_000, ranks: [] },
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    await user.click(dialog.getByRole("button", { name: "Legate Investigator" }));
+    await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      experience: expect.objectContaining({
+        alternateRanks: [
+          {
+            alternateRankId: "legate-investigator",
+            replacedRankId: "investigator",
+            takenAtTier: 4,
+          },
+        ],
+      }),
+      gear: [
+        expect.objectContaining({ id: "existing", name: "Chrono" }),
+        expect.objectContaining({
+          name: "Legature",
+          grantedByTalentName: "Legate Investigator",
+          grantedByType: "Alternate Rank",
+        }),
+        expect.objectContaining({
+          name: "Sigil of Question",
+          grantedByTalentName: "Legate Investigator",
+          grantedByType: "Alternate Rank",
+        }),
+      ],
+      header: expect.objectContaining({ rank: "Investigator" }),
+    });
+  });
+
+  it("grants the Bloodsworn Charter when Malfian Bloodsworn is taken", async () => {
+    const user = userEvent.setup();
+    const current = makeCharacter();
+    const { onUpdateCharacter } = renderTab({
+      character: {
+        ...current,
+        header: {
+          ...current.header,
+          career: "Guardsman",
+          rank: "Sergeant",
+          careerPath: undefined,
+        },
+        experience: { total: 3_000, spent: 3_000, ranks: [] },
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    await user.click(dialog.getByRole("button", { name: "Veteran" }));
+    const rankTypePicker = within(screen.getByRole("dialog", { name: "Choose Rank Type" }));
+    await user.click(rankTypePicker.getByRole("button", { name: "Malfian Bloodsworn" }));
+    await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      experience: expect.objectContaining({
+        alternateRanks: [
+          {
+            alternateRankId: "malfian-bloodsworn",
+            replacedRankId: "veteran",
+            takenAtTier: 5,
+          },
+        ],
+      }),
+      talentsAndTraits: expect.objectContaining({
+        eliteAdvances: [
+          expect.objectContaining({
+            eliteAdvanceId: "bloodsworn-charter",
+            name: "Bloodsworn Charter",
+            grantedByAlternateRankId: "malfian-bloodsworn",
+          }),
+        ],
+      }),
+      header: expect.objectContaining({ rank: "Veteran" }),
     });
   });
 
@@ -617,7 +710,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     );
   });
 
-  it("shows a sole next Rank in the active red style without making it clickable", async () => {
+  it("opens the Rank Type picker when a sole next Rank has multiple alternatives", async () => {
     const user = userEvent.setup();
     const current = makeCharacter();
     renderTab({
@@ -633,7 +726,12 @@ describe("ExperienceTab named Career Rank ledger", () => {
     const nextRank = dialog.getByTestId("single-next-rank");
     expect(nextRank).toHaveTextContent("Armsman");
     expect(nextRank).toHaveClass("border-fuchsia-500", "text-fuchsia-300");
-    expect(dialog.queryByRole("button", { name: "Armsman" })).not.toBeInTheDocument();
+    await user.click(dialog.getByRole("button", { name: "Armsman" }));
+
+    const rankTypePicker = within(screen.getByRole("dialog", { name: "Choose Rank Type" }));
+    expect(rankTypePicker.getByText("Armsman")).toBeInTheDocument();
+    expect(rankTypePicker.getByText("Chaliced Commissariat Operative")).toBeInTheDocument();
+    expect(rankTypePicker.getByText("Feral Warrior")).toBeInTheDocument();
   });
 
   it("uses the emerald Career path colour for selected and unselected branches", async () => {

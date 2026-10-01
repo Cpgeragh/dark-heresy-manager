@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { sanitizeMoneyInput } from "../format/moneyFormat";
-import { ArrowRight } from "../icons/PickerArrows";
-import { editableInputClass, uiFormLabel, uiTextBody } from "../styles/editableStyles";
+import { editableInputClass, uiTextBody } from "../styles/editableStyles";
+import { RequiredFormLabel } from "../forms/RequiredFormLabel";
+import { PickerField } from "./PickerField";
 
 export interface AssignedItemMetaFieldsProps {
   itemName: string;
@@ -41,12 +42,12 @@ export function AssignedItemMetaFields({
 
       {requiresCost && (
         <div className="space-y-1">
-          <label htmlFor={costId} className={uiFormLabel}>
-            Cost (Thrones) <span className="text-red-400">*</span>
-          </label>
+          <RequiredFormLabel htmlFor={costId}>Cost (Thrones)</RequiredFormLabel>
           <input
             id={costId}
             type="text"
+            required
+            aria-invalid={gmCost.trim() !== "" && !costValid}
             inputMode="numeric"
             value={gmCost}
             onChange={(event) => setGmCost(sanitizeMoneyInput(event.target.value))}
@@ -60,26 +61,14 @@ export function AssignedItemMetaFields({
       )}
 
       {requiresRarity && (
-        <div className="space-y-1">
-          <label htmlFor={rarityId} className={uiFormLabel}>
-            Rarity <span className="text-red-400">*</span>
-          </label>
-          <button
-            id={rarityId}
-            type="button"
-            aria-haspopup="dialog"
-            onClick={onOpenRarityPicker}
-            className={
-              editableInputClass(true) +
-              " appearance-none text-left flex items-center justify-between"
-            }
-          >
-            <span className={gmRarity ? "" : "text-slate-500"}>
-              {gmRarity || "— Select availability —"}
-            </span>
-            <ArrowRight />
-          </button>
-        </div>
+        <PickerField
+          id={rarityId}
+          label="Rarity"
+          value={gmRarity}
+          placeholder="— Select availability —"
+          onClick={onOpenRarityPicker}
+          required
+        />
       )}
     </>
   );

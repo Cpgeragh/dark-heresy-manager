@@ -74,6 +74,7 @@ describe("Talent behaviour metadata", () => {
         "Middle Classes",
         "Military",
         "Nobility",
+        "Ordo Malleus",
         "The Insane",
         "Underworld",
         "Void Born",

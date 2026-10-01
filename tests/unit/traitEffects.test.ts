@@ -33,6 +33,26 @@ function trait(
 }
 
 describe("Trait cross-page effects", () => {
+  it("derives Feared and Loathed from the selected Alternate Rank", () => {
+    expect(
+      getDerivedTraitEntries(block(), "Guardsman", [
+        {
+          alternateRankId: "chaliced-commissariat-operative",
+          replacedRankId: "armsman",
+          takenAtTier: 3,
+        },
+      ])
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          talentId: "feared-and-loathed",
+          grantedByTalentName: "Chaliced Commissariat Operative",
+          grantedByType: "Alternate Rank",
+        }),
+      ])
+    );
+  });
+
   it("derives selected Homeworld, Talent-granted and Career Traits without saving duplicate entries", () => {
     const talents = block({
       homeworld: "hive-world",

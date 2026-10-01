@@ -54,4 +54,15 @@ describe("Trait catalogue", () => {
     expect(TRAIT_DESCRIPTIONS["unnatural-characteristic"]).toContain("degrees of success");
     expect(TRAIT_DESCRIPTIONS["mechanicus-implants"]).toContain("properly trained");
   });
+
+  it("records the supplied Feared and Loathed rules", () => {
+    expect(find("feared-and-loathed")).toEqual(
+      expect.objectContaining({
+        name: "Feared and Loathed",
+        source: "IH",
+        description: expect.stringContaining("+10 bonus on Inquiry and Intimidate Tests"),
+      })
+    );
+    expect(find("feared-and-loathed").description).toContain("−10 penalty");
+  });
 });

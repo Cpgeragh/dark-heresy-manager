@@ -127,6 +127,7 @@ export function ArcheotechPickerModal({
         confirmLabel="Add to Inventory"
         canConfirm={canConfirm}
         onBack={handleAssignedBack}
+        onClose={onClose}
         onConfirm={handleConfirm}
       />
     );

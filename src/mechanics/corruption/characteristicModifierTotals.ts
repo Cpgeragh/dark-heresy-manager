@@ -82,6 +82,7 @@ export interface CharacteristicModifierSource {
     | "Trait"
     | "Career"
     | "Homeworld"
+    | "Alternate Rank"
     | "Elite Advance";
   amount: number;
 }

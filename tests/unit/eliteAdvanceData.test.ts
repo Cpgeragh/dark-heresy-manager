@@ -8,6 +8,7 @@ const talentIds = new Set(TALENT_LIST.map((talent) => talent.id));
 
 describe("eliteAdvanceData", () => {
   const encarta = ELITE_ADVANCES.find((advance) => advance.id === "encarta-maleficarum");
+  const bloodswornCharter = ELITE_ADVANCES.find((advance) => advance.id === "bloodsworn-charter");
 
   it("stores Encarta Maleficarum independently from its alternate rank", () => {
     expect(encarta).toMatchObject({
@@ -21,6 +22,17 @@ describe("eliteAdvanceData", () => {
     });
     expect(encarta?.consequences).toHaveLength(3);
     expect(encarta?.effects).toHaveLength(2);
+  });
+
+  it("stores the Bloodsworn Charter as the granted Malfian Bloodsworn Elite Advance", () => {
+    expect(bloodswornCharter).toMatchObject({
+      name: "Bloodsworn Charter",
+      source: "IH",
+      cost: 0,
+      alternateRankIds: ["malfian-bloodsworn"],
+      automaticGrantOnly: true,
+    });
+    expect(bloodswornCharter?.effects).toHaveLength(1);
   });
 
   it("only grants skills and talents that exist", () => {
