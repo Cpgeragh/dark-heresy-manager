@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   getNextTalentCost,
+  getRemainingTalentSlots,
   getTalentRankChips,
   hasAnyUnlockedTalentOption,
   isTalentMaxedAtCurrentRank,
@@ -68,6 +69,37 @@ describe("getNextTalentCost", () => {
         ]
       )
     ).toBe(300);
+  });
+});
+
+describe("getRemainingTalentSlots", () => {
+  const owned = (count: number) => Array.from({ length: count }, () => entry("sound-constitution"));
+
+  it("counts every unbought slot at the one price available at Conscript", () => {
+    expect(
+      getRemainingTalentSlots("Guardsman", "Conscript", "sound-constitution", undefined, [])
+    ).toEqual([{ cost: 100, count: 3 }]);
+  });
+
+  it("takes owned copies off the cheapest slots first", () => {
+    expect(
+      getRemainingTalentSlots("Guardsman", "Conscript", "sound-constitution", undefined, owned(1))
+    ).toEqual([{ cost: 100, count: 2 }]);
+  });
+
+  it("groups the remaining slots by price across ranks, cheapest first", () => {
+    expect(
+      getRemainingTalentSlots("Guardsman", "Veteran", "sound-constitution", undefined, owned(5))
+    ).toEqual([
+      { cost: 100, count: 1 },
+      { cost: 200, count: 2 },
+    ]);
+  });
+
+  it("is empty once every unlocked slot is owned", () => {
+    expect(
+      getRemainingTalentSlots("Guardsman", "Veteran", "sound-constitution", undefined, owned(8))
+    ).toEqual([]);
   });
 });
 

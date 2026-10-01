@@ -38,7 +38,6 @@ interface AddSkillModalProps {
   /** Real training cost for whichever skills are unlocked for this character. When omitted, every skill shows with no restriction. */
   unlockedCosts?: Map<string, number>;
   isDM?: boolean;
-  minimumManualCost?: number;
 }
 
 type ListItem =
@@ -88,7 +87,6 @@ export function AddSkillModal({
   hideLevelChip = false,
   unlockedCosts,
   isDM = false,
-  minimumManualCost = 0,
 }: AddSkillModalProps) {
   recordComponentRender("AddSkillModal");
   const [search, setSearch] = useState("");
@@ -137,7 +135,7 @@ export function AddSkillModal({
 
   if (pendingManualSkill) {
     const cost = Number(manualCost);
-    const canConfirm = manualCost.trim() !== "" && cost >= minimumManualCost;
+    const canConfirm = manualCost.trim() !== "";
     return (
       <PickerModal
         title={`Train ${pendingManualSkill.name}`}
@@ -173,9 +171,6 @@ export function AddSkillModal({
             placeholder="0"
             className={editableInputClass(true) + " mt-0.5"}
           />
-          {minimumManualCost > 0 && (
-            <p className="mt-1 text-xs text-slate-400">Minimum {minimumManualCost} XP.</p>
-          )}
         </PickerBody>
       </PickerModal>
     );

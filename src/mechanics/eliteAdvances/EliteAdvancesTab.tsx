@@ -473,7 +473,7 @@ function SkillAdvancePicker({
         footer={
           <Button
             fullWidth
-            disabled={manualCost.trim() === "" || cost < 200}
+            disabled={manualCost.trim() === ""}
             onClick={() => {
               onBuy(manualSkill.skill.id, manualSkill.level, cost, {
                 source: "gm-approved",
@@ -495,10 +495,9 @@ function SkillAdvancePicker({
             inputMode="numeric"
             value={manualCost}
             onChange={(event) => setManualCost(sanitizeNonNegativeIntegerInput(event.target.value))}
-            placeholder="200"
+            placeholder="0"
             className={`${editableInputClass(true)} mt-1`}
           />
-          <p className={`text-xs ${uiTextPlaceholder}`}>Minimum 200 XP.</p>
         </PickerBody>
       </PickerModal>
     );
@@ -626,7 +625,6 @@ function TalentAdvancePicker({
         onClose={() => setShowAll(false)}
         career={career}
         rank={rank}
-        minimumManualCost={200}
         initialShowOverflow
         overflowBackCloses
         suspended={suspended}

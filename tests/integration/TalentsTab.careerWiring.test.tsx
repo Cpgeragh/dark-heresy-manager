@@ -29,7 +29,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Add Talent" });
     const card = within(dialog).getByText("Sound Constitution").closest("button");
-    expect(within(card!).getByText("100 XP")).toBeInTheDocument();
+    expect(within(card!).getByText("100 XP: 3 left")).toBeInTheDocument();
   });
 
   it("does not show any real cost when no career is passed at all", async () => {

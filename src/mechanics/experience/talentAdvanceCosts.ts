@@ -27,16 +27,14 @@ function isTalentOrTraitAdvance(advance: { kind: string }): boolean {
   return advance.kind === "talent" || advance.kind === "trait";
 }
 
-/** Exact Career-table slot consumed by the next real purchase. */
-export function getNextTalentPurchase(
+function getUnlockedTalentSlots(
   career: string | undefined,
   rank: string | undefined,
   talentId: string,
   specialisation: string | undefined,
-  ownedEntries: readonly TalentEntry[],
-  alternateRanks: readonly AlternateRankSelection[] = []
-): XpPurchaseRecord | undefined {
-  const slots = getUnlockedCareerAdvances(career, rank, alternateRanks)
+  alternateRanks: readonly AlternateRankSelection[]
+): { cost: number; rankId: string }[] {
+  return getUnlockedCareerAdvances(career, rank, alternateRanks)
     .filter(
       (entry) =>
         isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation)
@@ -48,9 +46,44 @@ export function getNextTalentPurchase(
       }))
     )
     .sort((a, b) => a.cost - b.cost);
+}
+
+/** Exact Career-table slot consumed by the next real purchase. */
+export function getNextTalentPurchase(
+  career: string | undefined,
+  rank: string | undefined,
+  talentId: string,
+  specialisation: string | undefined,
+  ownedEntries: readonly TalentEntry[],
+  alternateRanks: readonly AlternateRankSelection[] = []
+): XpPurchaseRecord | undefined {
+  const slots = getUnlockedTalentSlots(career, rank, talentId, specialisation, alternateRanks);
   const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
   const slot = slots[owned];
   return slot ? makeSourceRankPurchase(career, slot.rankId, slot.cost) : undefined;
+}
+
+/** The unbought slots for this talent, grouped by price and listed cheapest first. */
+export function getRemainingTalentSlots(
+  career: string | undefined,
+  rank: string | undefined,
+  talentId: string,
+  specialisation: string | undefined,
+  ownedEntries: readonly TalentEntry[],
+  alternateRanks: readonly AlternateRankSelection[] = []
+): { cost: number; count: number }[] {
+  const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
+  const counts = new Map<number, number>();
+  for (const slot of getUnlockedTalentSlots(
+    career,
+    rank,
+    talentId,
+    specialisation,
+    alternateRanks
+  ).slice(owned)) {
+    counts.set(slot.cost, (counts.get(slot.cost) ?? 0) + 1);
+  }
+  return [...counts.entries()].map(([cost, count]) => ({ cost, count }));
 }
 
 /** Real cost of the next copy of this talent, only if a currently-unlocked slot is still unbought. */

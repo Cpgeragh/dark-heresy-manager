@@ -240,4 +240,79 @@ describe("EliteAdvancesTab", () => {
     ).toBeInTheDocument();
     expect(onUpdateCharacter).not.toHaveBeenCalled();
   });
+
+  it("lets the DM buy a Show all Skill for 0 XP", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn(async () => true);
+    render(
+      <EliteAdvancesTab
+        talents={EMPTY_TALENTS}
+        skills={[]}
+        experience={{ total: 0, spent: 0, ranks: [] }}
+        insanity={INSANITY}
+        isDM
+        editable
+        onUpdateCharacter={onUpdateCharacter}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
+    await user.click(screen.getByText("Skills"));
+    await user.click(screen.getByRole("button", { name: "Show all" }));
+    await user.click(screen.getByText("Acrobatics"));
+
+    const costPicker = screen.getByRole("dialog", { name: "Buy Acrobatics" });
+    await user.type(within(costPicker).getByRole("textbox"), "0");
+    await user.click(within(costPicker).getByRole("button", { name: "Buy Acrobatics" }));
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skills: [
+          expect.objectContaining({
+            id: "acrobatics",
+            level: "trained",
+            xpPurchases: { trained: expect.objectContaining({ cost: 0 }) },
+          }),
+        ],
+      })
+    );
+  });
+
+  it("lets the DM buy a Show all Talent for 0 XP", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn(async () => true);
+    render(
+      <EliteAdvancesTab
+        talents={EMPTY_TALENTS}
+        skills={[]}
+        experience={{ total: 0, spent: 0, ranks: [] }}
+        insanity={INSANITY}
+        isDM
+        editable
+        onUpdateCharacter={onUpdateCharacter}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
+    await user.click(screen.getByText("Talents"));
+    await user.click(screen.getByRole("button", { name: "Show all" }));
+    await user.click(screen.getByText("Air of Authority"));
+
+    const costPicker = screen.getByRole("dialog", { name: "Buy Air of Authority" });
+    await user.type(within(costPicker).getByRole("textbox"), "0");
+    await user.click(within(costPicker).getByRole("button", { name: "Buy Air of Authority" }));
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({
+          talents: [
+            expect.objectContaining({
+              talentId: "air-of-authority",
+              xpPurchase: expect.objectContaining({ cost: 0 }),
+            }),
+          ],
+        }),
+      })
+    );
+  });
 });

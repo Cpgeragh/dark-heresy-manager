@@ -43,13 +43,13 @@ The server applies the same conditions when a player saves an Alternate Rank sel
 
 `getAvailableNamedEliteAdvances` and `getMissedRankEliteAdvanceOptions` in `src/mechanics/eliteAdvances/eliteAdvanceAccess.ts` own the automatic availability rules.
 
-| Purchase route                                                     | Normal picker availability                         |                            Cost | Buyer                                      |
-| ------------------------------------------------------------------ | -------------------------------------------------- | ------------------------------: | ------------------------------------------ |
-| Packaged Elite Advance granted by entering an Alternate Rank       | Added automatically during Rank Up                 |                            None | Not purchased                              |
-| Packaged Elite Advance linked to an Alternate Rank                 | After that Alternate Rank has been selected        |                    Printed cost | Player or GM with character editing access |
-| Skill or Talent from the normal rank replaced by an Alternate Rank | From the following Career rank onwards             |           Original cost + 50 XP | Player or GM with character editing access |
-| Skill from Show all                                                | Complete Skill catalogue                           | GM-entered cost, minimum 200 XP | GM only                                    |
-| Talent from Show all                                               | Complete Talent catalogue, including Faith Talents | GM-entered cost, minimum 200 XP | GM only                                    |
+| Purchase route                                                     | Normal picker availability                         |                        Cost | Buyer                                      |
+| ------------------------------------------------------------------ | -------------------------------------------------- | --------------------------: | ------------------------------------------ |
+| Packaged Elite Advance granted by entering an Alternate Rank       | Added automatically during Rank Up                 |                        None | Not purchased                              |
+| Packaged Elite Advance linked to an Alternate Rank                 | After that Alternate Rank has been selected        |                Printed cost | Player or GM with character editing access |
+| Skill or Talent from the normal rank replaced by an Alternate Rank | From the following Career rank onwards             |       Original cost + 50 XP | Player or GM with character editing access |
+| Skill from Show all                                                | Complete Skill catalogue                           | GM-entered cost, any amount | GM only                                    |
+| Talent from Show all                                               | Complete Talent catalogue, including Faith Talents | GM-entered cost, any amount | GM only                                    |
 
 The replaced normal rank does not produce missed-rank options while the character is still on that rank. Only Skills and Talents from the replaced rank are eligible for the missed-rank rule.
 

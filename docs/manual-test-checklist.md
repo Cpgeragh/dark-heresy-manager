@@ -1177,7 +1177,7 @@ Use a Cleric approaching Rank 4 and a separate Cleric who has already selected B
 - [ ] A Faith Talent bought through Elite Advances appears on Faith Talents with its source and exact cost; it does not remain as an Elite Advances card
 - [ ] Buying a Talent that requires an acquisition form through Show all opens the same form used by the normal Talents page and does not save before that form is completed
 - [ ] Show all is browse-only for a player and purchasable only by the GM
-- [ ] A GM-entered Show all Skill or Talent cost below 200 XP is rejected
+- [ ] A GM-entered Show all Skill or Talent cost of 0 XP is accepted and adds exactly 0 XP to spent XP
 - [ ] Lowering or removing a Skill tier removes the matching Elite Advance provenance and XP record
 
 **Watch for:** the replaced rank must not leak into the normal missed-rank list early. Direct Skill and Talent purchases belong on their normal pages, while only packaged advances remain on Elite Advances.

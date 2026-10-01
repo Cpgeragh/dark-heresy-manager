@@ -23,6 +23,7 @@ import { recordComponentRender } from "../../performance/performanceMetrics";
 import {
   getNextTalentCost,
   getNextTalentPurchase,
+  getRemainingTalentSlots,
   getTalentRankChips,
   hasAnyUnlockedTalentOption,
 } from "../experience/talentAdvanceCosts";
@@ -71,7 +72,6 @@ export function TalentPickerModal({
   onCustomAction,
   customActionLabel = "Custom",
   showAllLabel = "Show all",
-  minimumManualCost = 0,
   initialShowOverflow = false,
   overflowBackCloses = false,
   career,
@@ -93,7 +93,6 @@ export function TalentPickerModal({
   onCustomAction?: () => void;
   customActionLabel?: string;
   showAllLabel?: string;
-  minimumManualCost?: number;
   initialShowOverflow?: boolean;
   overflowBackCloses?: boolean;
   career?: string;
@@ -372,7 +371,7 @@ export function TalentPickerModal({
 
   if (pendingManualCost && canMakeManualPurchase) {
     const cost = Number(manualCostInput);
-    const canConfirm = manualCostInput.trim() !== "" && cost >= minimumManualCost;
+    const canConfirm = manualCostInput.trim() !== "";
     return (
       <PickerModal
         title={`Buy ${pendingManualCost.talent.name}`}
@@ -418,9 +417,6 @@ export function TalentPickerModal({
             placeholder="0"
             className={editableInputClass(true) + " mt-0.5"}
           />
-          {minimumManualCost > 0 && (
-            <p className={`mt-1 text-xs ${uiTextPlaceholder}`}>Minimum {minimumManualCost} XP.</p>
-          )}
         </PickerBody>
       </PickerModal>
     );
@@ -730,6 +726,11 @@ export function TalentPickerModal({
             career && !usesChoicePicker && !usesTextEntry
               ? getNextTalentCost(career, rank, item.id, undefined, entries, alternateRanks)
               : undefined;
+          const slotCounts =
+            career && !usesChoicePicker && !usesTextEntry
+              ? getRemainingTalentSlots(career, rank, item.id, undefined, entries, alternateRanks)
+              : [];
+          const slotsLeft = slotCounts.reduce((total, slot) => total + slot.count, 0);
           const rankChips =
             career && !usesChoicePicker && !usesTextEntry
               ? getTalentRankChips(career, item.id, undefined)
@@ -790,7 +791,13 @@ export function TalentPickerModal({
                       {ownedLabel}
                     </Chip>
                   )}
-                  {cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
+                  {slotsLeft > 1
+                    ? slotCounts.map((slot) => (
+                        <Chip key={slot.cost} className={colourValue}>
+                          {slot.cost} XP: {slot.count} left
+                        </Chip>
+                      ))
+                    : cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
                 </div>
                 {rankChips && rankChips.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
