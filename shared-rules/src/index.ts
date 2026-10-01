@@ -48,6 +48,7 @@ export {
   makeCurrentRankPurchase,
   type CurrentCareerRank,
 } from "./purchaseAttribution.js";
+export { getCurrentCareerRankData, getValidNextCareerRanks } from "./careerRankProgression.js";
 export {
   getUnlockedSkillTrainingCosts,
   getNextSkillTierAccess,

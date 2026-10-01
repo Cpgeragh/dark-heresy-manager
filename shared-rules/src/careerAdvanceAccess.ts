@@ -21,6 +21,7 @@ function asCareerAdvance(advance: AlternateRankAdvance): CareerAdvanceRef | unde
       level: advance.level,
       cost: advance.cost,
       prerequisites: advance.prerequisites,
+      repeatable: advance.repeatable,
     };
   }
   return {
@@ -39,7 +40,7 @@ function getSelectedAlternateTables(
   return selections.flatMap((selection) => {
     const alternateRank = ALTERNATE_RANKS.find(
       (candidate) =>
-        candidate.id === selection.alternateRankId && candidate.requiredCareerId === careerId
+        candidate.id === selection.alternateRankId && candidate.requiredCareerIds.includes(careerId)
     );
     if (!alternateRank) return [];
     return [

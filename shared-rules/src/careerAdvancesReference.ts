@@ -21,6 +21,7 @@ export interface CareerAdvanceRef {
   level?: "trained" | "+10" | "+20";
   cost: number;
   prerequisites?: string;
+  repeatable?: boolean;
   repeatableAtThisRank?: number;
 }
 

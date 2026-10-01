@@ -23,6 +23,7 @@ export interface EliteAdvanceData {
   }[];
   effects?: readonly string[];
   alternateRankIds?: readonly string[];
+  automaticGrantOnly?: boolean;
 }
 
 export const ELITE_ADVANCES: readonly EliteAdvanceData[] = [
@@ -52,5 +53,18 @@ export const ELITE_ADVANCES: readonly EliteAdvanceData[] = [
       "If an attempt to possess the character succeeds by fewer than three degrees of success, the possession is blocked and the character collapses in a catatonic state for 1d10 minutes.",
     ],
     alternateRankIds: ["black-priest-of-maccabeus"],
+  },
+  {
+    id: "bloodsworn-charter",
+    name: "Bloodsworn Charter",
+    source: SkillSource.IH,
+    cost: 0,
+    description:
+      "Upon successfully entering the Malfian Bloodsworn career path, the character gains a Bloodsworn Charter. The warrant enables its holder to bear arms in the hive where others would not, access legal records, enter private dwellings, and avoid interference from local enforcers and armsmen while pursuing their warrants. These powers do not extend to the holdings or persons of the Adepta or Malfi’s rulers.",
+    effects: [
+      "Grants the privileges and rights of a chartered Bloodsworn while operating within the charter’s lawful limits.",
+    ],
+    alternateRankIds: ["malfian-bloodsworn"],
+    automaticGrantOnly: true,
   },
 ];

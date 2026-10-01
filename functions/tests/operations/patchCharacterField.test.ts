@@ -582,4 +582,73 @@ describe("patchCharacterField", () => {
     ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
+
+  it("allows a player to take an alternate rank while ranking up to the rank it replaces", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        header: { career: "Cleric", rank: "Priest" },
+        experience: { total: 3000, spent: 1000, ranks: [] },
+      }),
+    });
+
+    const experience = {
+      total: 3000,
+      spent: 1000,
+      ranks: [],
+      alternateRanks: [
+        {
+          alternateRankId: "black-priest-of-maccabeus",
+          replacedRankId: "preacher",
+          takenAtTier: 4,
+        },
+      ],
+    };
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "experience", value: experience },
+      "player-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { experience });
+  });
+
+  it("rejects a player taking an alternate rank they are not ranking up to", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        header: { career: "Cleric", rank: "Novice" },
+        experience: { total: 3000, spent: 1000, ranks: [] },
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "experience",
+          value: {
+            total: 3000,
+            spent: 1000,
+            ranks: [],
+            alternateRanks: [
+              {
+                alternateRankId: "black-priest-of-maccabeus",
+                replacedRankId: "preacher",
+                takenAtTier: 4,
+              },
+            ],
+          },
+        },
+        "player-1"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
 });

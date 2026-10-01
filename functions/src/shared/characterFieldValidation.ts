@@ -9,9 +9,13 @@
 
 import { HttpsError } from "firebase-functions/v2/https";
 import {
+  ALTERNATE_RANKS,
   CHARACTERISTIC_ADVANCE_TIERS,
+  findCareerByName,
   getCharacteristicTierCosts,
+  getCurrentCareerRankData,
   getNextSkillTierAccess,
+  getValidNextCareerRanks,
   getWeaponTrainingPurchase,
   WEAPON_TRAINING_GROUPS,
   type AlternateRankSelection,
@@ -623,12 +627,90 @@ function assertValidWeaponTrainingTransition(
   }
 }
 
+function sameAlternateRank(a: unknown, b: unknown): boolean {
+  return (
+    isRecord(a) &&
+    isRecord(b) &&
+    a.alternateRankId === b.alternateRankId &&
+    a.replacedRankId === b.replacedRankId &&
+    a.takenAtTier === b.takenAtTier
+  );
+}
+
+/**
+ * Rejects an experience patch that adds an alternate rank selection a player could not have
+ * made on the Rank Up screen: the career must match, the rank being replaced must be one of
+ * the character's valid next ranks, and that rank must be at or above the alternate rank's
+ * minimum. The DM may set any. Selections already on the character and removals are not
+ * checked. XP, corruption and story requirements are not checked, matching the app.
+ */
+function assertValidExperienceTransition(
+  oldValue: unknown,
+  newValue: unknown,
+  character: Record<string, unknown>,
+  isDM: boolean
+): void {
+  if (isDM || !isRecord(newValue) || newValue.alternateRanks === undefined) return;
+  if (!Array.isArray(newValue.alternateRanks)) {
+    throw new HttpsError("invalid-argument", "Alternate ranks must be a list.");
+  }
+  const previous =
+    isRecord(oldValue) && Array.isArray(oldValue.alternateRanks) ? oldValue.alternateRanks : [];
+  const careerName = getCareerFromCharacter(character);
+  const career = findCareerByName(careerName);
+  const currentRank = getCurrentCareerRankData(careerName, getRankFromCharacter(character));
+  const header = character.header;
+  const storedPath =
+    isRecord(header) && typeof header.careerPath === "string" ? header.careerPath : undefined;
+  const validNextRanks =
+    career && currentRank ? getValidNextCareerRanks(career, currentRank, storedPath) : [];
+  const selectedIds = new Set<string>();
+
+  for (const selection of newValue.alternateRanks) {
+    if (
+      !isRecord(selection) ||
+      typeof selection.alternateRankId !== "string" ||
+      typeof selection.replacedRankId !== "string" ||
+      typeof selection.takenAtTier !== "number"
+    ) {
+      throw new HttpsError("invalid-argument", "Alternate ranks contain a malformed entry.");
+    }
+    if (selectedIds.has(selection.alternateRankId)) {
+      throw new HttpsError("invalid-argument", "An alternate rank can only be selected once.");
+    }
+    selectedIds.add(selection.alternateRankId);
+    if (previous.some((entry) => sameAlternateRank(entry, selection))) continue;
+
+    const alternateRank = ALTERNATE_RANKS.find((entry) => entry.id === selection.alternateRankId);
+    if (!alternateRank) {
+      throw new HttpsError("invalid-argument", "That alternate rank does not exist.");
+    }
+    if (!career || !alternateRank.requiredCareerIds.includes(career.id)) {
+      throw new HttpsError("invalid-argument", `${alternateRank.name} is not open to this career.`);
+    }
+    const replacedRank = validNextRanks.find((rank) => rank.id === selection.replacedRankId);
+    if (!replacedRank || replacedRank.tier !== selection.takenAtTier) {
+      throw new HttpsError(
+        "invalid-argument",
+        `${alternateRank.name} can only be taken when ranking up to a valid next rank.`
+      );
+    }
+    if (replacedRank.tier < alternateRank.minimumRank) {
+      throw new HttpsError(
+        "invalid-argument",
+        `${alternateRank.name} is not available until rank ${alternateRank.minimumRank}.`
+      );
+    }
+  }
+}
+
 const CHARACTER_FIELD_TRANSITION_VALIDATORS: Partial<
   Record<string, CharacterFieldTransitionValidator>
 > = {
   characteristics: assertValidCharacteristicsTransition,
   skills: assertValidSkillsTransition,
   weaponTraining: assertValidWeaponTrainingTransition,
+  experience: assertValidExperienceTransition,
 };
 
 /** A no-op for any field without a registered transition validator, deliberately

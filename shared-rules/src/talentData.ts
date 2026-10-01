@@ -1306,6 +1306,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     name: "Beast Hunter",
     source: SkillSource.IH,
     hasSpecialisation: false,
+    prerequisites: "WS 35, BS 35",
   },
   {
     id: "machinator-array",

@@ -700,3 +700,88 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
     expect(check(stored, patched, false)).not.toThrow();
   });
 });
+
+describe("assertValidCharacterFieldTransition: experience alternate ranks", () => {
+  const clericAtPriest = { header: { career: "Cleric", rank: "Priest" } };
+  const clericAtNovice = { header: { career: "Cleric", rank: "Novice" } };
+  const clericAtCleric = { header: { career: "Cleric", rank: "Cleric" } };
+  const guardsman = { header: { career: "Guardsman", rank: "Sergeant" } };
+  const base = { total: 3000, spent: 1000, ranks: [] };
+  const blackPriest = {
+    alternateRankId: "black-priest-of-maccabeus",
+    replacedRankId: "preacher",
+    takenAtTier: 4,
+  };
+  const withSelections = (alternateRanks: unknown[]) => ({ ...base, alternateRanks });
+  const check =
+    (oldValue: unknown, newValue: unknown, character: Record<string, unknown>, isDM: boolean) =>
+    () =>
+      assertValidCharacterFieldTransition("experience", oldValue, newValue, character, isDM);
+
+  it("accepts a player taking an alternate rank while ranking up to the rank it replaces", () => {
+    expect(check(base, withSelections([blackPriest]), clericAtPriest, false)).not.toThrow();
+  });
+
+  it("rejects a player taking an alternate rank that is not open to their career", () => {
+    expect(check(base, withSelections([blackPriest]), guardsman, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a player taking an alternate rank they are not ranking up to", () => {
+    expect(check(base, withSelections([blackPriest]), clericAtNovice, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects an alternate rank that does not exist", () => {
+    const unknown = { ...blackPriest, alternateRankId: "not-a-rank" };
+    expect(check(base, withSelections([unknown]), clericAtPriest, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a selection whose tier does not match the rank it replaces", () => {
+    const wrongTier = { ...blackPriest, takenAtTier: 3 };
+    expect(check(base, withSelections([wrongTier]), clericAtPriest, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects selecting the same alternate rank twice", () => {
+    expect(
+      check(
+        withSelections([blackPriest]),
+        withSelections([blackPriest, blackPriest]),
+        clericAtPriest,
+        false
+      )
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a malformed selection", () => {
+    const malformed = { alternateRankId: "black-priest-of-maccabeus" };
+    expect(check(base, withSelections([malformed]), clericAtPriest, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("allows the DM to set any alternate rank selection", () => {
+    expect(check(base, withSelections([blackPriest]), guardsman, true)).not.toThrow();
+  });
+
+  it("accepts a patch that leaves an existing selection alone after the character has moved on", () => {
+    const experience = withSelections([blackPriest]);
+    expect(check(experience, experience, clericAtCleric, false)).not.toThrow();
+  });
+
+  it("does not check a removal", () => {
+    expect(
+      check(withSelections([blackPriest]), withSelections([]), clericAtPriest, false)
+    ).not.toThrow();
+  });
+
+  it("does not block an experience patch that changes no alternate ranks", () => {
+    expect(check(base, { ...base, spent: 1500 }, guardsman, false)).not.toThrow();
+  });
+});
