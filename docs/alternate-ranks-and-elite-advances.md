@@ -37,6 +37,8 @@ The selected Alternate Rank table replaces the normal table at the shared career
 
 The app displays source prerequisites but does not enforce Corruption, origin, Characteristic, prerequisite Talent or GM-permission requirements. This matches the wider character sheet, where advancement prerequisites are informational rather than validation rules.
 
+The server applies the same conditions when a player saves an Alternate Rank selection through the experience field: the career matches, the replaced rank is one of the character's valid next ranks and meets the Alternate Rank's minimum rank, and the Alternate Rank appears only once. A selection already on the character is not checked again, and the DM can save any selection. The server does not check Corruption, origin, Characteristic, prerequisite Talent or GM-permission requirements, matching the app.
+
 ## Elite Advance availability and costs
 
 `getAvailableNamedEliteAdvances` and `getMissedRankEliteAdvanceOptions` in `src/mechanics/eliteAdvances/eliteAdvanceAccess.ts` own the automatic availability rules.
@@ -99,6 +101,7 @@ Removing or downgrading a directly purchased Skill or Talent uses its normal pag
 | Replacement picker wiring                     | `tests/integration/AlternateRankReplacement.test.tsx`, `tests/integration/TalentsTab.careerWiring.test.tsx`                                                                |
 | Experience display names                      | `tests/unit/rankCards.test.ts`, `tests/integration/ExperienceTab.test.tsx`                                                                                                 |
 | Server validation for replacement purchases   | `functions/tests/shared/characterFieldValidation.test.ts`                                                                                                                  |
+| Server validation for Alternate Rank choices  | `functions/tests/shared/characterFieldValidation.test.ts`, `functions/tests/operations/patchCharacterField.test.ts`                                                        |
 | Named and missed-rank availability            | `tests/unit/eliteAdvanceAccess.test.ts`                                                                                                                                    |
 | Packaged reference data                       | `tests/unit/eliteAdvanceData.test.ts`                                                                                                                                      |
 | Packaged grants and Characteristic effects    | `tests/unit/eliteAdvanceEffects.test.ts`                                                                                                                                   |

@@ -51,8 +51,11 @@ Arrows labelled `synchronous` stay within the browser call stack. Arrows labelle
 | Context and subscriptions | `src/context/`, `src/hooks/`                              | React state, query construction, listener cleanup, stale-callback protection, and request coordination |
 | Backend services          | `src/services/`                                           | Firestore reads and writes, callable invocations, transactions, batches, and persistence boundaries    |
 | Domain contracts          | `src/types/`, `src/constants/`, `src/data/`, `src/utils/` | Shared types, limits, canonical game data, validation, formatting, and pure calculations               |
+| Shared rules              | `shared-rules/`                                           | Career, talent, and weapon training data, plus the pure cost and rank rules shared with the Functions  |
 
 Generic modules must not import feature components. Feature modules may compose shared foundations, while category-specific forms, validation, and card composition remain with their domains.
+
+`shared-rules/` is a package with its own build that both `src/` and `functions/` depend on. Browser code imports the same modules through one-line re-export files at their `src/` paths, and the Functions import the package directly, so each cost and rank rule has one implementation.
 
 `src/firebase.ts` initializes Firebase Authentication, Cloud Firestore, and callable Functions. Portraits are validated and stored as character data; the client does not initialize Firebase Storage.
 
@@ -103,6 +106,15 @@ These values limit reads; they do not prove collection-size enforcement. `src/co
 ## Trust and persistence boundaries
 
 Firestore rules authorize every direct client read and write. `SECURITY_RULES.md` summarizes that contract. Operations with sensitive cross-document or server-authority requirements use callable functions under `functions/src/operations/`.
+
+Character field edits go through the `patchCharacterField` callable. Each field has a shape and size validator, and fields that carry XP-priced purchases also have a transition validator in `functions/src/shared/characterFieldValidation.ts`. A transition validator compares the proposed value with the stored character and the caller's role, using the same `shared-rules` cost and rank functions as the browser, including the character's selected Alternate Rank tables:
+
+- `characteristics`: each newly bought advance is recorded at the career table cost, and no advance past the fourth tier is accepted.
+- `skills`: each newly bought tier is recorded at the career table cost, a tier locked at the current rank is rejected, and a skill off the career table is priced only by the DM.
+- `weaponTraining`: each newly trained fixed group is recorded at the career table cost, a group off the table is priced only by the DM, and only the DM adds an exotic weapon.
+- `experience`: a player adds an Alternate Rank only when the career matches, the rank it replaces is one of the character's valid next ranks and meets the Alternate Rank's minimum rank, and it appears only once. The DM may set any.
+
+Decreases and removals are not checked, because only additions create free XP. Fields without a transition validator, and the remaining parts of `experience`, are checked for shape and size only.
 
 | Callable error code | Meaning |
 | --- | --- |

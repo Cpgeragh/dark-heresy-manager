@@ -368,11 +368,11 @@ below deliberately change several of those pages.
 
 ## 7. Weapon Training
 
-Weapon-group training pills across five fixed categories (Basic, Heavy, Melee, Pistol, Thrown), plus a slot-limited Exotic Weapon Training list. Every purchase spends real XP from the character's career/rank cost tables, the same way Characteristics, Skills, Talents, and Traits already do.
+Weapon-group training pills across five fixed categories (Basic, Heavy, Melee, Pistol, Thrown), plus an Exotic Weapon Training list that only the DM can add to. Every purchase spends real XP from the character's career/rank cost tables, the same way Characteristics, Skills, Talents, and Traits already do.
 
 ### How to test this page
 
-Use a character with a career/rank that has real cost data (e.g. Guardsman) and test as both the owning player and as DM: several paths here are DM-only. Record spent XP before starting, train a pill and add an exotic weapon, refresh, and confirm both the pill/chip state and the XP total persist. Then remove each and confirm XP falls back down by the exact amount it cost. Find at least one pill that's on the career's table but not yet unlocked at the current rank (or not on the table at all) to test the Locked path as both a player and a DM.
+Use a character with a career/rank that has real cost data (e.g. Guardsman) and test as both the owning player and as DM: several paths here are DM-only. Record spent XP before starting, train a pill and, as DM, add an exotic weapon, refresh, and confirm both the pill/chip state and the XP total persist. Then remove each and confirm XP falls back down by the exact amount it cost. Find at least one pill that's on the career's table but not yet unlocked at the current rank (or not on the table at all) to test the Locked path as both a player and a DM.
 
 **Fixed weapon groups:**
 
@@ -394,13 +394,11 @@ Use a character with a career/rank that has real cost data (e.g. Guardsman) and 
 - [ ] Tapping an owned exotic chip opens "Remove [name]?" with Remove/Cancel; confirming removes it and drops spent XP by that weapon's recorded cost
 - [ ] In read-only mode, owned exotic chips are disabled: no hover, no click
 - [ ] A weapon granted by a Talent (e.g. Sicarius Tutoring) shows the same solid-fill chip style but is always disabled and not independently removable
-- [ ] A blank, dashed-border trigger chip always sits at the end of the row: it's never hidden, only ever enabled or disabled
-- [ ] For a player with an available training slot, the trigger pulses; tapping it opens the add form directly (Weapon Name and XP Cost, both required before Add enables) and adding it consumes one slot
-- [ ] For a player with no available slot, the trigger has no pulse, no hover, and cannot be tapped
-- [ ] For a DM with an available slot, tapping the (still pulsing) trigger opens a choice screen: "Use an available training slot" or "Add as a bonus (doesn't use a slot)"
-- [ ] For a DM with no available slot, the trigger stays enabled (no pulse) and tapping it skips straight to the add form in bonus mode
-- [ ] Completing a bonus-mode addition does not count against the slot limit: confirm adding one doesn't reduce the count of slots still available afterwards
-- [ ] The number of available slots comes from the career/rank table's Exotic Weapon Training entries, the same source used for the fixed groups' costs, and updates live if Career or Rank changes
+- [ ] As DM, a dashed-border hammer button with a continuously moving outline sits at the end of the row and is labelled "Add a custom exotic weapon" for screen readers
+- [ ] A player never sees the hammer button, whatever the character's career and rank
+- [ ] As DM, tapping the hammer button opens the add form directly (Weapon Name and XP Cost, both required before Add enables), with no slot choice screen
+- [ ] Adding an exotic weapon as DM records the typed cost and increases spent XP by exactly that cost, whatever the career and rank
+- [ ] No slot limit applies: the DM can add any number of exotic weapons
 
 **Watch for:** the granted-exotic caption is still hardcoded to read "Granted by
 Sicarius Tutoring (Guardsman)" rather than naming whatever Talent/specialisation
