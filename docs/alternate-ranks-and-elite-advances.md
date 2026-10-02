@@ -21,6 +21,7 @@ This document defines the current Alternate Rank and Elite Advance behaviour. It
 | Career Talent and Trait purchase cost | `getNextTalentOrTraitPurchase` in `shared-rules/src/careerAdvanceAccess.ts`                   | None                                                               |
 | Skill purchase validation             | `assertValidSkillsTransition` in `functions/src/shared/characterFieldValidation.ts`           | None                                                               |
 | Talent and Trait purchase validation  | `assertValidTalentsAndTraitsTransition` in `functions/src/shared/characterFieldValidation.ts` | None                                                               |
+| Existing purchase price protection    | `assertExistingPurchasePricesUnchanged` in `functions/src/shared/characterFieldValidation.ts` | None                                                               |
 | Packaged advance XP                   | `getEliteAdvancesSpent` in `src/mechanics/experience/xpSpent.ts`                              | `talentsAndTraits.eliteAdvances[].xpPurchase`                      |
 
 Reference data is shared through the built `shared-rules` package. Character-specific selections, rolls and purchases remain in the character document.
@@ -70,6 +71,8 @@ The replaced normal rank does not produce missed-rank options while the characte
 `getMissedRankCareerAdvances` owns the shared original-cost-plus-50-XP calculation. `assertValidSkillsTransition` accepts a missed-rank Skill only when its stored Alternate Rank, replaced Rank and costs match that shared result. A Show all Skill uses `gm-approved` provenance and matching values in `manualCosts`, `xpPurchases` and `eliteAdvancePurchases`; the validator accepts that route only for the DM, including when normal Career progression still marks the Skill tier as locked.
 
 `getNextTalentOrTraitPurchase` owns the shared next-slot Career cost for both Talents and Traits. `assertValidTalentsAndTraitsTransition` accepts a new entry only through an unlocked Career slot, a valid missed-rank purchase, an advance unlocked by an owned package, or a matching DM-priced Show all purchase. The same validator checks each new packaged Elite Advance against `ELITE_ADVANCES`, including exact XP cost, Alternate Rank access and automatic grant provenance. Campaign custom Traits and the Reformed Skin entry created by Purity of Flesh remain valid free additions.
+
+`assertExistingPurchasePricesUnchanged` compares the stored and proposed cost fields for each retained purchase. Players with character editing access may remove purchases, but only the DM may reprice a retained Career, missed-rank, Show all or packaged purchase.
 
 ## Purchase destinations
 

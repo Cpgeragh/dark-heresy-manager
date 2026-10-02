@@ -117,6 +117,8 @@ Character field edits go through the `patchCharacterField` callable. Each field 
 
 `patchCharacterField` supplies transition validators with the complete proposed character, so one atomic update can validate a packaged Elite Advance and its unlocked Talent, or an Alternate Rank and its automatic packaged grant. Decreases and removals are not checked, because only additions create free XP. Fields without a transition validator, and the remaining parts of `experience`, are checked for shape and size only.
 
+`assertExistingPurchasePricesUnchanged` protects retained XP purchase prices in Characteristics, Skills, Talents, Traits, packaged Elite Advances and Weapon Training. A player with character editing access may remove a purchase for a refund, but cannot add, remove or alter any cost field on a purchase that remains owned. The DM may reprice a retained purchase.
+
 | Callable error code   | Meaning                                                         |
 | --------------------- | --------------------------------------------------------------- |
 | `unauthenticated`     | Firebase Authentication is missing or invalid                   |

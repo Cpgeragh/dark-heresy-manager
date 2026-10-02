@@ -433,6 +433,44 @@ describe("assertValidCharacterFieldTransition: characteristics", () => {
     ).not.toThrow();
   });
 
+  it("rejects a player changing the recorded cost of a retained advance", () => {
+    const oldValue = makeCharacteristics({
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 500 } } },
+    });
+    const newValue = makeCharacteristics({
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 0 } } },
+    });
+
+    expect(() =>
+      assertValidCharacterFieldTransition(
+        "characteristics",
+        oldValue,
+        newValue,
+        adeptCharacter,
+        false
+      )
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("allows the DM to change the recorded cost of a retained advance", () => {
+    const oldValue = makeCharacteristics({
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 500 } } },
+    });
+    const newValue = makeCharacteristics({
+      ws: { base: 30, advances: 1, advancePurchases: { simple: { cost: 0 } } },
+    });
+
+    expect(() =>
+      assertValidCharacterFieldTransition(
+        "characteristics",
+        oldValue,
+        newValue,
+        adeptCharacter,
+        true
+      )
+    ).not.toThrow();
+  });
+
   it("rejects advancing past the four real tiers", () => {
     const oldValue = makeCharacteristics({ ws: zeroWs });
     const newValue = makeCharacteristics({ ws: { base: 30, advances: 5 } });
@@ -738,6 +776,59 @@ describe("assertValidCharacterFieldTransition: skills", () => {
     expect(() =>
       assertValidCharacterFieldTransition("skills", oldValue, newValue, archivist, false)
     ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a player changing any recorded cost for a retained Skill tier", () => {
+    const oldValue = [
+      {
+        id: "drive-ground",
+        level: "trained",
+        manualCosts: { trained: 50 },
+        xpPurchases: { trained: { cost: 50 } },
+        eliteAdvancePurchases: {
+          trained: { source: "gm-approved", cost: 50, sourceName: "GM-approved Skill" },
+        },
+      },
+    ];
+    const newValue = [
+      {
+        ...oldValue[0],
+        manualCosts: { trained: 0 },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", oldValue, newValue, archivist, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("allows the DM to reprice every recorded cost for a retained Skill tier", () => {
+    const oldValue = [
+      {
+        id: "drive-ground",
+        level: "trained",
+        manualCosts: { trained: 50 },
+        xpPurchases: { trained: { cost: 50 } },
+        eliteAdvancePurchases: {
+          trained: { source: "gm-approved", cost: 50, sourceName: "GM-approved Skill" },
+        },
+      },
+    ];
+    const newValue = [
+      {
+        id: "drive-ground",
+        level: "trained",
+        manualCosts: { trained: 0 },
+        xpPurchases: { trained: { cost: 0 } },
+        eliteAdvancePurchases: {
+          trained: { source: "gm-approved", cost: 0, sourceName: "GM-approved Skill" },
+        },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", oldValue, newValue, archivist, true)
+    ).not.toThrow();
   });
 });
 
@@ -1071,6 +1162,58 @@ describe("assertValidCharacterFieldTransition: Talents and Traits", () => {
     );
   });
 
+  it("rejects a player changing the recorded cost of a retained Talent", () => {
+    const oldValue = { ...empty, talents: [talent("t1", "sound-constitution", 100)] };
+    const next = { ...empty, talents: [talent("t1", "sound-constitution", 0)] };
+
+    expect(check(oldValue, next, guardsman, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("allows the DM to change the recorded cost of a retained Talent", () => {
+    const oldValue = { ...empty, talents: [talent("t1", "sound-constitution", 100)] };
+    const next = { ...empty, talents: [talent("t1", "sound-constitution", 0)] };
+
+    expect(check(oldValue, next, guardsman, true)).not.toThrow();
+  });
+
+  it("rejects a player changing the recorded cost of a retained Trait", () => {
+    const oldValue = { ...empty, traits: [talent("tr1", "fear", 100)] };
+    const next = { ...empty, traits: [talent("tr1", "fear", 0)] };
+
+    expect(check(oldValue, next, guardsman, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a player changing the recorded cost of a retained packaged Elite Advance", () => {
+    const oldValue = {
+      ...empty,
+      eliteAdvances: [
+        {
+          uid: "e1",
+          eliteAdvanceId: "cult-of-the-red-redemption",
+          name: "The Cult of the Red Redemption",
+          xpPurchase: { cost: 150 },
+        },
+      ],
+    };
+    const next = {
+      ...oldValue,
+      eliteAdvances: [{ ...oldValue.eliteAdvances[0], xpPurchase: { cost: 0 } }],
+    };
+
+    expect(check(oldValue, next, guardsman, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("allows a player to remove a purchased Talent while editing is enabled", () => {
+    const oldValue = { ...empty, talents: [talent("t1", "sound-constitution", 100)] };
+    expect(check(oldValue, empty, guardsman, false)).not.toThrow();
+  });
+
   it("rejects a non-array Elite Advance collection", () => {
     const next = { ...empty, eliteAdvances: {} };
     const character = { ...guardsman, talentsAndTraits: next };
@@ -1281,6 +1424,23 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
     expect(check(trainLas(100), empty, false)).not.toThrow();
   });
 
+  it("rejects a player changing the recorded cost of retained Weapon Training", () => {
+    expect(check(trainLas(100), trainLas(0), false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("allows the DM to change the recorded cost of retained Weapon Training", () => {
+    expect(check(trainLas(100), trainLas(0), true)).not.toThrow();
+  });
+
+  it("rejects a player changing the mirrored manual cost of retained Weapon Training", () => {
+    const repriced = { ...trainBolt, manualCosts: { "basic-bolt": 0 } };
+    expect(check(trainBolt, repriced, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
   it("rejects a non-DM adding bonus Exotic Weapon Training", () => {
     expect(check(empty, { ...empty, exoticWeapons: [bonusNeedlePistol] }, false)).toThrow(
       expect.objectContaining({ code: "invalid-argument" })
@@ -1310,6 +1470,24 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
     };
     const patched = { ...trainLas(100), exoticWeapons: [legacyNeedlePistol] };
     expect(check(stored, patched, false)).not.toThrow();
+  });
+
+  it("rejects a player changing the recorded cost of retained Exotic Weapon Training", () => {
+    const repriced = {
+      ...empty,
+      exoticWeapons: [{ ...bonusNeedlePistol, cost: 0, xpPurchase: { cost: 0 } }],
+    };
+    expect(check({ ...empty, exoticWeapons: [bonusNeedlePistol] }, repriced, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("allows the DM to change the recorded cost of retained Exotic Weapon Training", () => {
+    const repriced = {
+      ...empty,
+      exoticWeapons: [{ ...bonusNeedlePistol, cost: 0, xpPurchase: { cost: 0 } }],
+    };
+    expect(check({ ...empty, exoticWeapons: [bonusNeedlePistol] }, repriced, true)).not.toThrow();
   });
 
   it("accepts a player's Mechanicus Secutor Exotic Training purchase", () => {

@@ -597,6 +597,59 @@ describe("patchCharacterField", () => {
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 
+  it("rejects an editable player changing an existing Skill purchase cost", async () => {
+    const storedSkills = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } },
+    ];
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        header: { career: "Adept", rank: "Archivist" },
+        skills: storedSkills,
+      }),
+    });
+    const skills = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 0 } } },
+    ];
+
+    await expect(
+      patchCharacterField(
+        { campaignId: "c1", characterId: "char-1", field: "skills", value: skills },
+        "player-1"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("allows the DM to change an existing Skill purchase cost", async () => {
+    const storedSkills = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } },
+    ];
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { career: "Adept", rank: "Archivist" },
+        skills: storedSkills,
+      }),
+    });
+    const skills = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 0 } } },
+    ];
+
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "skills", value: skills },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { skills });
+  });
+
   it("allows the DM to train a weapon group that isn't unlocked, at a DM-set cost", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({

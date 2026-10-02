@@ -1052,11 +1052,11 @@ function assertValidWeaponTrainingTransition(
   const previousExotics =
     isRecord(oldValue) && Array.isArray(oldValue.exoticWeapons) ? oldValue.exoticWeapons : [];
   for (const entry of previousExotics) {
-    const key = exoticWeaponKey(entry);
+    const key = isDM ? exoticWeaponIdentityKey(entry) : exoticWeaponKey(entry);
     if (key) unmatched.set(key, (unmatched.get(key) ?? 0) + 1);
   }
   for (const entry of newValue.exoticWeapons) {
-    const key = exoticWeaponKey(entry);
+    const key = isDM ? exoticWeaponIdentityKey(entry) : exoticWeaponKey(entry);
     const available = key ? (unmatched.get(key) ?? 0) : 0;
     if (key && available > 0) {
       unmatched.set(key, available - 1);
@@ -1126,6 +1126,248 @@ function sameAlternateRank(a: unknown, b: unknown): boolean {
     a.replacedRankId === b.replacedRankId &&
     a.takenAtTier === b.takenAtTier
   );
+}
+
+function getMappedNumber(
+  value: unknown,
+  collectionKey: string,
+  entryKey: string
+): number | undefined {
+  if (!isRecord(value)) return undefined;
+  const collection = value[collectionKey];
+  if (!isRecord(collection)) return undefined;
+  const entry = collection[entryKey];
+  return typeof entry === "number" ? entry : undefined;
+}
+
+function getMappedPurchaseCost(
+  value: unknown,
+  collectionKey: string,
+  entryKey: string
+): number | undefined {
+  if (!isRecord(value)) return undefined;
+  const collection = value[collectionKey];
+  if (!isRecord(collection)) return undefined;
+  const entry = collection[entryKey];
+  if (!isRecord(entry)) return undefined;
+  return typeof entry.cost === "number" ? entry.cost : undefined;
+}
+
+function getEntryPurchaseCost(value: unknown, purchaseKey: string): number | undefined {
+  if (!isRecord(value)) return undefined;
+  const purchase = value[purchaseKey];
+  if (!isRecord(purchase)) return undefined;
+  return typeof purchase.cost === "number" ? purchase.cost : undefined;
+}
+
+function getEntryNumber(value: unknown, key: string): number | undefined {
+  if (!isRecord(value)) return undefined;
+  return typeof value[key] === "number" ? value[key] : undefined;
+}
+
+function assertRecordedPriceUnchanged(
+  previousCost: number | undefined,
+  proposedCost: number | undefined,
+  label: string
+): void {
+  if (Object.is(previousCost, proposedCost)) return;
+  throw new HttpsError(
+    "invalid-argument",
+    `Only the DM can change the recorded XP cost for ${label}.`
+  );
+}
+
+function assertCharacteristicPricesUnchanged(oldValue: unknown, newValue: unknown): void {
+  for (const key of CHARACTERISTIC_KEYS) {
+    const retainedAdvances = Math.min(
+      getCharFieldAdvances(oldValue, key),
+      getCharFieldAdvances(newValue, key)
+    );
+    for (let index = 0; index < retainedAdvances; index += 1) {
+      const tier = CHARACTERISTIC_ADVANCE_TIERS[index];
+      if (!tier) continue;
+      assertRecordedPriceUnchanged(
+        getCharFieldPurchaseCost(oldValue, key, tier),
+        getCharFieldPurchaseCost(newValue, key, tier),
+        `Characteristic "${key}" tier "${tier}"`
+      );
+    }
+  }
+}
+
+function assertSkillPricesUnchanged(oldValue: unknown, newValue: unknown): void {
+  if (!Array.isArray(oldValue) || !Array.isArray(newValue)) return;
+  for (const oldEntry of oldValue) {
+    if (!isRecord(oldEntry) || typeof oldEntry.id !== "string") continue;
+    const newEntry = findSkillById(newValue, oldEntry.id);
+    if (!newEntry) continue;
+    const retainedTierIndex = Math.min(
+      skillTierIndex(oldEntry.level),
+      skillTierIndex(newEntry.level)
+    );
+    for (let index = 0; index <= retainedTierIndex; index += 1) {
+      const tier = SKILL_TIERS[index];
+      if (!tier) continue;
+      const label = `Skill "${oldEntry.id}" tier "${tier}"`;
+      assertRecordedPriceUnchanged(
+        getSkillPurchaseCost(oldEntry, tier),
+        getSkillPurchaseCost(newEntry, tier),
+        label
+      );
+      assertRecordedPriceUnchanged(
+        getSkillManualCost(oldEntry, tier),
+        getSkillManualCost(newEntry, tier),
+        label
+      );
+      assertRecordedPriceUnchanged(
+        getDirectCost(getSkillEliteAdvancePurchase(oldEntry, tier)),
+        getDirectCost(getSkillEliteAdvancePurchase(newEntry, tier)),
+        label
+      );
+    }
+  }
+}
+
+function getDirectCost(value: unknown): number | undefined {
+  return isRecord(value) && typeof value.cost === "number" ? value.cost : undefined;
+}
+
+function assertEntryPricesUnchanged(
+  oldEntries: unknown,
+  newEntries: unknown,
+  label: string,
+  includeManualCost: boolean
+): void {
+  if (!Array.isArray(oldEntries) || !Array.isArray(newEntries)) return;
+  for (const oldEntry of oldEntries) {
+    if (!isRecord(oldEntry) || typeof oldEntry.uid !== "string") continue;
+    const newEntry = newEntries.find((entry) => isRecord(entry) && entry.uid === oldEntry.uid);
+    if (!newEntry || !isRecord(newEntry)) continue;
+    const entryLabel = `${label} "${oldEntry.uid}"`;
+    assertRecordedPriceUnchanged(
+      getEntryPurchaseCost(oldEntry, "xpPurchase"),
+      getEntryPurchaseCost(newEntry, "xpPurchase"),
+      entryLabel
+    );
+    if (!includeManualCost) continue;
+    assertRecordedPriceUnchanged(
+      getEntryNumber(oldEntry, "manualCost"),
+      getEntryNumber(newEntry, "manualCost"),
+      entryLabel
+    );
+    assertRecordedPriceUnchanged(
+      getEntryPurchaseCost(oldEntry, "eliteAdvancePurchase"),
+      getEntryPurchaseCost(newEntry, "eliteAdvancePurchase"),
+      entryLabel
+    );
+  }
+}
+
+function assertTalentAndTraitPricesUnchanged(oldValue: unknown, newValue: unknown): void {
+  if (!isRecord(oldValue) || !isRecord(newValue)) return;
+  assertEntryPricesUnchanged(oldValue.talents, newValue.talents, "Talent", true);
+  assertEntryPricesUnchanged(oldValue.traits, newValue.traits, "Trait", true);
+  assertEntryPricesUnchanged(
+    oldValue.eliteAdvances,
+    newValue.eliteAdvances,
+    "Elite Advance",
+    false
+  );
+}
+
+function exoticWeaponIdentityKey(entry: unknown): string | undefined {
+  if (!isRecord(entry) || typeof entry.name !== "string") return undefined;
+  return `${entry.name.trim().toLocaleLowerCase("en-GB")}|${entry.bonus === true}`;
+}
+
+function exoticWeaponPriceKey(entry: unknown): string {
+  return [getEntryNumber(entry, "cost"), getEntryPurchaseCost(entry, "xpPurchase")]
+    .map((cost) => (cost === undefined ? "missing" : `number:${cost}`))
+    .join("|");
+}
+
+function assertExoticWeaponPricesUnchanged(oldEntries: unknown, newEntries: unknown): void {
+  if (!Array.isArray(oldEntries) || !Array.isArray(newEntries)) return;
+  const oldPricesByIdentity = new Map<string, Map<string, number>>();
+  for (const entry of oldEntries) {
+    const identity = exoticWeaponIdentityKey(entry);
+    if (!identity) continue;
+    const prices = oldPricesByIdentity.get(identity) ?? new Map<string, number>();
+    const priceKey = exoticWeaponPriceKey(entry);
+    prices.set(priceKey, (prices.get(priceKey) ?? 0) + 1);
+    oldPricesByIdentity.set(identity, prices);
+  }
+
+  const unmatchedNewByIdentity = new Map<string, number>();
+  for (const entry of newEntries) {
+    const identity = exoticWeaponIdentityKey(entry);
+    if (!identity) continue;
+    const oldPrices = oldPricesByIdentity.get(identity);
+    const priceKey = exoticWeaponPriceKey(entry);
+    const matchingOld = oldPrices?.get(priceKey) ?? 0;
+    if (matchingOld > 0) {
+      oldPrices?.set(priceKey, matchingOld - 1);
+      continue;
+    }
+    unmatchedNewByIdentity.set(identity, (unmatchedNewByIdentity.get(identity) ?? 0) + 1);
+  }
+
+  for (const [identity, unmatchedNew] of unmatchedNewByIdentity) {
+    const unmatchedOld = [...(oldPricesByIdentity.get(identity)?.values() ?? [])].reduce(
+      (total, count) => total + count,
+      0
+    );
+    if (Math.min(unmatchedOld, unmatchedNew) > 0) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Only the DM can change the recorded XP cost for Exotic Weapon Training."
+      );
+    }
+  }
+}
+
+function assertWeaponTrainingPricesUnchanged(oldValue: unknown, newValue: unknown): void {
+  if (!isRecord(oldValue) || !isRecord(newValue)) return;
+  const oldTrained = Array.isArray(oldValue.trained) ? oldValue.trained : [];
+  const newTrained = new Set(Array.isArray(newValue.trained) ? newValue.trained : []);
+  for (const id of oldTrained) {
+    if (typeof id !== "string" || !newTrained.has(id)) continue;
+    const label = `Weapon Training "${id}"`;
+    assertRecordedPriceUnchanged(
+      getWeaponTrainingRecordedCost(oldValue, id),
+      getWeaponTrainingRecordedCost(newValue, id),
+      label
+    );
+    assertRecordedPriceUnchanged(
+      getMappedNumber(oldValue, "manualCosts", id),
+      getMappedNumber(newValue, "manualCosts", id),
+      label
+    );
+    assertRecordedPriceUnchanged(
+      getMappedPurchaseCost(oldValue, "eliteAdvancePurchases", id),
+      getMappedPurchaseCost(newValue, "eliteAdvancePurchases", id),
+      label
+    );
+  }
+  assertExoticWeaponPricesUnchanged(oldValue.exoticWeapons, newValue.exoticWeapons);
+}
+
+function assertExistingPurchasePricesUnchanged(
+  field: string,
+  oldValue: unknown,
+  newValue: unknown,
+  isDM: boolean
+): void {
+  if (isDM) return;
+  if (field === "characteristics") {
+    assertCharacteristicPricesUnchanged(oldValue, newValue);
+  } else if (field === "skills") {
+    assertSkillPricesUnchanged(oldValue, newValue);
+  } else if (field === "talentsAndTraits") {
+    assertTalentAndTraitPricesUnchanged(oldValue, newValue);
+  } else if (field === "weaponTraining") {
+    assertWeaponTrainingPricesUnchanged(oldValue, newValue);
+  }
 }
 
 /**
@@ -1223,5 +1465,6 @@ export function assertValidCharacterFieldTransition(
 ): void {
   const validator = CHARACTER_FIELD_TRANSITION_VALIDATORS[field];
   if (!validator) return;
+  assertExistingPurchasePricesUnchanged(field, oldValue, newValue, isDM);
   validator(oldValue, newValue, character, isDM);
 }
