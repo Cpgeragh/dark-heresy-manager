@@ -8,7 +8,7 @@ import type {
 } from "../../types/Character";
 import { getAllCareerAdvances, getUnlockedCareerAdvances } from "./careerAdvanceAccess";
 import { findCareerByName } from "../../data/reference/careerData";
-import { makeSourceRankPurchase } from "./purchaseAttribution";
+import { getNextTalentOrTraitPurchase } from "shared-rules";
 
 function matches(
   advance: { talentId?: string; traitId?: string; specialisation?: string },
@@ -57,10 +57,14 @@ export function getNextTalentPurchase(
   ownedEntries: readonly TalentEntry[],
   alternateRanks: readonly AlternateRankSelection[] = []
 ): XpPurchaseRecord | undefined {
-  const slots = getUnlockedTalentSlots(career, rank, talentId, specialisation, alternateRanks);
-  const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
-  const slot = slots[owned];
-  return slot ? makeSourceRankPurchase(career, slot.rankId, slot.cost) : undefined;
+  return getNextTalentOrTraitPurchase(
+    career,
+    rank,
+    talentId,
+    specialisation,
+    ownedEntries,
+    alternateRanks
+  );
 }
 
 /** The unbought slots for this talent, grouped by price and listed cheapest first. */

@@ -471,6 +471,10 @@ describe("assertValidCharacterFieldTransition: skills", () => {
       ],
     },
   };
+  const blackPriestAtCleric = {
+    ...blackPriest,
+    header: { career: "Cleric", rank: "Cleric" },
+  };
 
   it("accepts training a skill that's on the career table at the real cost", () => {
     const newValue = [
@@ -571,6 +575,46 @@ describe("assertValidCharacterFieldTransition: skills", () => {
     ).not.toThrow();
   });
 
+  it("accepts the next Secret Tongue tier unlocked by the Red Redemption package", () => {
+    const character = {
+      header: { career: "Adept", rank: "Scribe" },
+      talentsAndTraits: {
+        eliteAdvances: [{ eliteAdvanceId: "cult-of-the-red-redemption" }],
+      },
+    };
+    const newValue = [
+      {
+        id: "secret-tongue-redemption",
+        level: "+10",
+        xpPurchases: { "+10": { cost: 100 } },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, character, false)
+    ).not.toThrow();
+  });
+
+  it("accepts Deceive at the cost unlocked by Nascent Psyker", () => {
+    const character = {
+      header: { career: "Adept", rank: "Scribe" },
+      talentsAndTraits: {
+        eliteAdvances: [{ eliteAdvanceId: "nascent-psyker" }],
+      },
+    };
+    const newValue = [
+      {
+        id: "deceive",
+        level: "trained",
+        xpPurchases: { trained: { cost: 100 } },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, character, false)
+    ).not.toThrow();
+  });
+
   it("does not treat the replaced normal Rank table as an ordinary player purchase", () => {
     const newValue = [
       {
@@ -583,6 +627,456 @@ describe("assertValidCharacterFieldTransition: skills", () => {
     expect(() =>
       assertValidCharacterFieldTransition("skills", [], newValue, blackPriest, false)
     ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("accepts a missed-rank Skill at its original cost plus 50 XP", () => {
+    const newValue = [
+      {
+        id: "disguise",
+        level: "trained",
+        xpPurchases: { trained: { cost: 350 } },
+        eliteAdvancePurchases: {
+          trained: {
+            source: "missed-rank",
+            cost: 350,
+            sourceName: "Missed Preacher Rank",
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+          },
+        },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, blackPriestAtCleric, false)
+    ).not.toThrow();
+  });
+
+  it("rejects a missed-rank Skill without the 50 XP surcharge", () => {
+    const newValue = [
+      {
+        id: "disguise",
+        level: "trained",
+        xpPurchases: { trained: { cost: 300 } },
+        eliteAdvancePurchases: {
+          trained: {
+            source: "missed-rank",
+            cost: 300,
+            sourceName: "Missed Preacher Rank",
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+          },
+        },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, blackPriestAtCleric, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a missed-rank Skill before the following Career tier", () => {
+    const newValue = [
+      {
+        id: "disguise",
+        level: "trained",
+        xpPurchases: { trained: { cost: 350 } },
+        eliteAdvancePurchases: {
+          trained: {
+            source: "missed-rank",
+            cost: 350,
+            sourceName: "Missed Preacher Rank",
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+          },
+        },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", [], newValue, blackPriest, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("accepts a DM-priced Show all Skill even when its Career tier is locked", () => {
+    const oldValue = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } },
+    ];
+    const newValue = [
+      {
+        id: "drive-ground",
+        level: "+10",
+        manualCosts: { "+10": 0 },
+        xpPurchases: { trained: { cost: 100 }, "+10": { cost: 0 } },
+        eliteAdvancePurchases: {
+          "+10": { source: "gm-approved", cost: 0, sourceName: "GM-approved Skill" },
+        },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", oldValue, newValue, archivist, true)
+    ).not.toThrow();
+  });
+
+  it("rejects a player using the DM-priced Show all Skill route", () => {
+    const oldValue = [
+      { id: "drive-ground", level: "trained", xpPurchases: { trained: { cost: 100 } } },
+    ];
+    const newValue = [
+      {
+        id: "drive-ground",
+        level: "+10",
+        manualCosts: { "+10": 0 },
+        xpPurchases: { trained: { cost: 100 }, "+10": { cost: 0 } },
+        eliteAdvancePurchases: {
+          "+10": { source: "gm-approved", cost: 0, sourceName: "GM-approved Skill" },
+        },
+      },
+    ];
+
+    expect(() =>
+      assertValidCharacterFieldTransition("skills", oldValue, newValue, archivist, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+});
+
+describe("assertValidCharacterFieldTransition: Talents and Traits", () => {
+  const empty = { homeworld: "", talents: [], traits: [], eliteAdvances: [] };
+  const guardsman = { header: { career: "Guardsman", rank: "Conscript" } };
+  const blackPriestAtCleric = {
+    header: { career: "Cleric", rank: "Cleric" },
+    experience: {
+      alternateRanks: [
+        {
+          alternateRankId: "black-priest-of-maccabeus",
+          replacedRankId: "preacher",
+          takenAtTier: 4,
+        },
+      ],
+    },
+  };
+
+  const talent = (
+    uid: string,
+    talentId: string,
+    cost?: number,
+    extra: Record<string, unknown> = {}
+  ) => ({
+    uid,
+    talentId,
+    name: talentId,
+    ...(cost === undefined ? {} : { xpPurchase: { cost } }),
+    ...extra,
+  });
+
+  const check =
+    (oldValue: unknown, newValue: unknown, character: Record<string, unknown>, isDM = false) =>
+    () =>
+      assertValidCharacterFieldTransition("talentsAndTraits", oldValue, newValue, character, isDM);
+
+  it("accepts a Talent bought from the unlocked Career table at its exact cost", () => {
+    const next = { ...empty, talents: [talent("t1", "sound-constitution", 100)] };
+    expect(check(empty, next, guardsman)).not.toThrow();
+  });
+
+  it("rejects a Career Talent bought at the wrong cost", () => {
+    const next = { ...empty, talents: [talent("t1", "sound-constitution", 1)] };
+    expect(check(empty, next, guardsman)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("accepts a Trait bought from the unlocked Career table at its exact cost", () => {
+    const character = { header: { career: "Adept", rank: "Sage Logister" } };
+    const next = {
+      ...empty,
+      traits: [
+        talent("tr1", "unnatural-characteristic", 500, {
+          specialisation: "Intelligence",
+        }),
+      ],
+    };
+    expect(check(empty, next, character)).not.toThrow();
+  });
+
+  it("rejects a free standard Trait that has no valid purchase route", () => {
+    const next = { ...empty, traits: [talent("tr1", "fear")] };
+    expect(check(empty, next, guardsman)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("accepts a campaign custom Trait without charging XP", () => {
+    const next = {
+      ...empty,
+      traits: [
+        talent("tr1", "custom-trait:custom-1", undefined, {
+          customLibraryId: "custom-1",
+          customLibraryVersionId: "version-1",
+        }),
+      ],
+    };
+    expect(check(empty, next, guardsman)).not.toThrow();
+  });
+
+  it("accepts a missed-rank Talent at its original cost plus 50 XP", () => {
+    const next = {
+      ...empty,
+      talents: [
+        talent("t1", "decadence", 150, {
+          eliteAdvancePurchase: {
+            source: "missed-rank",
+            cost: 150,
+            sourceName: "Missed Preacher Rank",
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+          },
+        }),
+      ],
+    };
+    expect(check(empty, next, blackPriestAtCleric)).not.toThrow();
+  });
+
+  it("rejects a missed-rank Talent without the 50 XP surcharge", () => {
+    const next = {
+      ...empty,
+      talents: [
+        talent("t1", "decadence", 100, {
+          eliteAdvancePurchase: {
+            source: "missed-rank",
+            cost: 100,
+            sourceName: "Missed Preacher Rank",
+            alternateRankId: "black-priest-of-maccabeus",
+            replacedRankId: "preacher",
+          },
+        }),
+      ],
+    };
+    expect(check(empty, next, blackPriestAtCleric)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("accepts a Talent unlocked by an owned Elite Advance package", () => {
+    const oldValue = {
+      ...empty,
+      eliteAdvances: [
+        {
+          uid: "e1",
+          eliteAdvanceId: "cult-of-the-red-redemption",
+          name: "The Cult of the Red Redemption",
+          xpPurchase: { cost: 150 },
+        },
+      ],
+    };
+    const next = {
+      ...oldValue,
+      talents: [
+        talent("t1", "berserk-charge", 100, {
+          eliteAdvancePurchase: {
+            source: "elite-package",
+            cost: 100,
+            sourceName: "The Cult of the Red Redemption",
+            eliteAdvanceId: "cult-of-the-red-redemption",
+          },
+        }),
+      ],
+    };
+    const character = { ...guardsman, talentsAndTraits: next };
+    expect(check(oldValue, next, character)).not.toThrow();
+  });
+
+  it("rejects a package Talent when the package is not owned", () => {
+    const next = {
+      ...empty,
+      talents: [
+        talent("t1", "berserk-charge", 100, {
+          eliteAdvancePurchase: {
+            source: "elite-package",
+            cost: 100,
+            sourceName: "The Cult of the Red Redemption",
+            eliteAdvanceId: "cult-of-the-red-redemption",
+          },
+        }),
+      ],
+    };
+    const character = { ...guardsman, talentsAndTraits: next };
+    expect(check(empty, next, character)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("accepts a DM-priced Show all Talent, including a locked Talent", () => {
+    const next = {
+      ...empty,
+      talents: [
+        talent("t1", "battle-rage", 0, {
+          manualCost: 0,
+          eliteAdvancePurchase: {
+            source: "gm-approved",
+            cost: 0,
+            sourceName: "GM-approved Talent",
+          },
+        }),
+      ],
+    };
+    expect(check(empty, next, guardsman, true)).not.toThrow();
+  });
+
+  it("accepts the regular Talent page's DM price without Elite Advance provenance", () => {
+    const next = {
+      ...empty,
+      talents: [talent("t1", "battle-rage", 25, { manualCost: 25 })],
+    };
+    expect(check(empty, next, guardsman, true)).not.toThrow();
+  });
+
+  it("accepts a DM-priced standard Trait", () => {
+    const next = {
+      ...empty,
+      traits: [talent("tr1", "fear", 50, { manualCost: 50 })],
+    };
+    expect(check(empty, next, guardsman, true)).not.toThrow();
+  });
+
+  it("accepts a DM-priced Show all Faith Talent", () => {
+    const next = {
+      ...empty,
+      talents: [
+        talent("t1", "pure-faith", 0, {
+          manualCost: 0,
+          eliteAdvancePurchase: {
+            source: "faith-talent",
+            cost: 0,
+            sourceName: "GM-approved Faith Talent",
+          },
+        }),
+      ],
+    };
+    expect(check(empty, next, guardsman, true)).not.toThrow();
+  });
+
+  it("rejects a player using the DM-priced Show all Talent route", () => {
+    const next = {
+      ...empty,
+      talents: [
+        talent("t1", "battle-rage", 0, {
+          manualCost: 0,
+          eliteAdvancePurchase: {
+            source: "gm-approved",
+            cost: 0,
+            sourceName: "GM-approved Talent",
+          },
+        }),
+      ],
+    };
+    expect(check(empty, next, guardsman)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("accepts the free Reformed Skin entry created with a Purity of Flesh purchase", () => {
+    const purity = talent("t1", "purity-of-flesh", 0, { manualCost: 0 });
+    const replacement = talent("t2", "reformed-skin", undefined, {
+      specialisation: "Bionic heart",
+      acquisition: {
+        reformedSkinPurityReplacement: true,
+        purityTalentEntryUid: "t1",
+      },
+    });
+    const next = { ...empty, talents: [purity, replacement] };
+    expect(check(empty, next, guardsman, true)).not.toThrow();
+  });
+
+  it("accepts an available standalone Elite Advance at its exact cost", () => {
+    const next = {
+      ...empty,
+      eliteAdvances: [
+        {
+          uid: "e1",
+          eliteAdvanceId: "nascent-psyker",
+          name: "Nascent Psyker",
+          xpPurchase: { cost: 0 },
+        },
+      ],
+    };
+    const character = { ...guardsman, talentsAndTraits: next };
+    expect(check(empty, next, character)).not.toThrow();
+  });
+
+  it("rejects a standalone Elite Advance at the wrong cost", () => {
+    const next = {
+      ...empty,
+      eliteAdvances: [
+        {
+          uid: "e1",
+          eliteAdvanceId: "cult-of-the-red-redemption",
+          name: "The Cult of the Red Redemption",
+          xpPurchase: { cost: 1 },
+        },
+      ],
+    };
+    const character = { ...guardsman, talentsAndTraits: next };
+    expect(check(empty, next, character)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("accepts an automatic Elite Advance granted by a selected Alternate Rank", () => {
+    const next = {
+      ...empty,
+      eliteAdvances: [
+        {
+          uid: "e1",
+          eliteAdvanceId: "bloodsworn-charter",
+          name: "Bloodsworn Charter",
+          grantedByAlternateRankId: "malfian-bloodsworn",
+          grantedByAlternateRankName: "Malfian Bloodsworn",
+        },
+      ],
+    };
+    const character = {
+      ...guardsman,
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "malfian-bloodsworn",
+            replacedRankId: "sergeant",
+            takenAtTier: 5,
+          },
+        ],
+      },
+      talentsAndTraits: next,
+    };
+    expect(check(empty, next, character)).not.toThrow();
+  });
+
+  it("rejects an automatic Elite Advance without its Alternate Rank", () => {
+    const next = {
+      ...empty,
+      eliteAdvances: [
+        {
+          uid: "e1",
+          eliteAdvanceId: "bloodsworn-charter",
+          name: "Bloodsworn Charter",
+          grantedByAlternateRankId: "malfian-bloodsworn",
+          grantedByAlternateRankName: "Malfian Bloodsworn",
+        },
+      ],
+    };
+    const character = { ...guardsman, talentsAndTraits: next };
+    expect(check(empty, next, character)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a non-array Elite Advance collection", () => {
+    const next = { ...empty, eliteAdvances: {} };
+    const character = { ...guardsman, talentsAndTraits: next };
+    expect(check(empty, next, character)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
   });
 });
 
@@ -600,7 +1094,13 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
     manualCosts: { "basic-bolt": 350 },
     xpPurchases: { "basic-bolt": { cost: 350 } },
   };
-  const needlePistol = { name: "Needle Pistol", cost: 200, xpPurchase: { cost: 200 } };
+  const legacyNeedlePistol = { name: "Needle Pistol", cost: 200, xpPurchase: { cost: 200 } };
+  const bonusNeedlePistol = {
+    name: "Needle Pistol",
+    cost: 200,
+    xpPurchase: { cost: 200 },
+    bonus: true,
+  };
   const check = (oldValue: unknown, newValue: unknown, isDM: boolean) => () =>
     assertValidCharacterFieldTransition("weaponTraining", oldValue, newValue, guardsman, isDM);
 
@@ -632,6 +1132,24 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
     ).not.toThrow();
   });
 
+  it("accepts Basic Weapon Training (Flame) unlocked by the Red Redemption package", () => {
+    const character = {
+      header: { career: "Adept", rank: "Scribe" },
+      talentsAndTraits: {
+        eliteAdvances: [{ eliteAdvanceId: "cult-of-the-red-redemption" }],
+      },
+    };
+    const trained = {
+      ...empty,
+      trained: ["basic-flame"],
+      xpPurchases: { "basic-flame": { cost: 200 } },
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", empty, trained, character, false)
+    ).not.toThrow();
+  });
+
   it("rejects training a career-table group at the wrong cost", () => {
     expect(check(empty, trainLas(1), false)).toThrow(
       expect.objectContaining({ code: "invalid-argument" })
@@ -652,6 +1170,94 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
 
   it("allows the DM to train a group that isn't unlocked, at a DM-set cost", () => {
     expect(check(empty, trainBolt, true)).not.toThrow();
+  });
+
+  it("rejects new Basic or Heavy training for a character with Knave of Pistols", () => {
+    const metallican = {
+      header: { career: "Assassin", rank: "Sell-Steel" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "metallican-gunslinger",
+            replacedRankId: "sell-steel",
+            takenAtTier: 1,
+          },
+        ],
+      },
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", empty, trainBolt, metallican, true)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("allows a character with Knave of Pistols to keep existing Basic training", () => {
+    const metallican = {
+      header: { career: "Assassin", rank: "Sell-Steel" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "metallican-gunslinger",
+            replacedRankId: "sell-steel",
+            takenAtTier: 1,
+          },
+        ],
+      },
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", trainBolt, trainBolt, metallican, false)
+    ).not.toThrow();
+  });
+
+  it("allows pistol-only Exotic Weapon Training for Knave of Pistols", () => {
+    const metallican = {
+      header: { career: "Assassin", rank: "Sell-Steel" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "metallican-gunslinger",
+            replacedRankId: "sell-steel",
+            takenAtTier: 1,
+          },
+        ],
+      },
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition(
+        "weaponTraining",
+        empty,
+        { ...empty, exoticWeapons: [bonusNeedlePistol] },
+        metallican,
+        true
+      )
+    ).not.toThrow();
+  });
+
+  it("rejects non-pistol Exotic Weapon Training for Knave of Pistols", () => {
+    const metallican = {
+      header: { career: "Assassin", rank: "Sell-Steel" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "metallican-gunslinger",
+            replacedRankId: "sell-steel",
+            takenAtTier: 1,
+          },
+        ],
+      },
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition(
+        "weaponTraining",
+        empty,
+        { ...empty, exoticWeapons: [{ name: "Graviton Gun", cost: 200 }] },
+        metallican,
+        true
+      )
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 
   it("rejects even the DM adding a locked group with no cost record", () => {
@@ -675,14 +1281,20 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
     expect(check(trainLas(100), empty, false)).not.toThrow();
   });
 
-  it("rejects a non-DM adding an exotic weapon, even with a cost", () => {
-    expect(check(empty, { ...empty, exoticWeapons: [needlePistol] }, false)).toThrow(
+  it("rejects a non-DM adding bonus Exotic Weapon Training", () => {
+    expect(check(empty, { ...empty, exoticWeapons: [bonusNeedlePistol] }, false)).toThrow(
       expect.objectContaining({ code: "invalid-argument" })
     );
   });
 
-  it("allows the DM to add an exotic weapon with a name and a cost", () => {
-    expect(check(empty, { ...empty, exoticWeapons: [needlePistol] }, true)).not.toThrow();
+  it("allows the DM to add bonus Exotic Weapon Training with a recorded cost", () => {
+    expect(check(empty, { ...empty, exoticWeapons: [bonusNeedlePistol] }, true)).not.toThrow();
+  });
+
+  it("requires a DM's off-Career Exotic Training to be marked as bonus training", () => {
+    expect(check(empty, { ...empty, exoticWeapons: [legacyNeedlePistol] }, true)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
   });
 
   it("rejects the DM adding an exotic weapon with no cost", () => {
@@ -696,8 +1308,117 @@ describe("assertValidCharacterFieldTransition: weaponTraining", () => {
       ...empty,
       exoticWeapons: [{ xpPurchase: { cost: 200 }, cost: 200, name: "Needle Pistol" }],
     };
-    const patched = { ...trainLas(100), exoticWeapons: [needlePistol] };
+    const patched = { ...trainLas(100), exoticWeapons: [legacyNeedlePistol] };
     expect(check(stored, patched, false)).not.toThrow();
+  });
+
+  it("accepts a player's Mechanicus Secutor Exotic Training purchase", () => {
+    const character = {
+      header: { career: "Tech-Priest", rank: "Enginseer" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "mechanicus-secutor",
+            replacedRankId: "enginseer",
+            takenAtTier: 4,
+          },
+        ],
+      },
+    };
+    const trained = {
+      ...empty,
+      exoticWeapons: [
+        {
+          name: "Breacher",
+          cost: 200,
+          xpPurchase: {
+            cost: 200,
+            careerId: "tech-priest",
+            sourceRankId: "enginseer",
+          },
+        },
+      ],
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", empty, trained, character, false)
+    ).not.toThrow();
+  });
+
+  it("accepts a player's normal Career Exotic Training purchase", () => {
+    const character = { header: { career: "Guardsman", rank: "Captain" } };
+    const trained = {
+      ...empty,
+      exoticWeapons: [
+        {
+          name: "Web Pistol",
+          cost: 200,
+          xpPurchase: { cost: 200, careerId: "guardsman", sourceRankId: "captain" },
+        },
+      ],
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", empty, trained, character, false)
+    ).not.toThrow();
+  });
+
+  it("rejects a player recording the wrong Exotic Training cost", () => {
+    const character = {
+      header: { career: "Tech-Priest", rank: "Enginseer" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "mechanicus-secutor",
+            replacedRankId: "enginseer",
+            takenAtTier: 4,
+          },
+        ],
+      },
+    };
+    const trained = {
+      ...empty,
+      exoticWeapons: [
+        {
+          name: "Breacher",
+          cost: 1,
+          xpPurchase: { cost: 1, careerId: "tech-priest", sourceRankId: "enginseer" },
+        },
+      ],
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", empty, trained, character, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a player forging an Exotic Training source rank", () => {
+    const character = {
+      header: { career: "Tech-Priest", rank: "Enginseer" },
+      experience: {
+        alternateRanks: [
+          {
+            alternateRankId: "mechanicus-secutor",
+            replacedRankId: "enginseer",
+            takenAtTier: 4,
+          },
+        ],
+      },
+    };
+    const trained = {
+      ...empty,
+      exoticWeapons: [
+        {
+          name: "Breacher",
+          cost: 200,
+          xpPurchase: { cost: 200, careerId: "tech-priest", sourceRankId: "technographer" },
+        },
+      ],
+    };
+
+    expect(() =>
+      assertValidCharacterFieldTransition("weaponTraining", empty, trained, character, false)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 });
 
@@ -705,6 +1426,11 @@ describe("assertValidCharacterFieldTransition: experience alternate ranks", () =
   const clericAtPriest = { header: { career: "Cleric", rank: "Priest" } };
   const clericAtNovice = { header: { career: "Cleric", rank: "Novice" } };
   const clericAtCleric = { header: { career: "Cleric", rank: "Cleric" } };
+  const assassinAtSellSteel = { header: { career: "Assassin", rank: "Sell-Steel" } };
+  const scumAtDreg = { header: { career: "Scum", rank: "Dreg" } };
+  const sororitasAtDialogous = {
+    header: { career: "Adepta Sororitas", rank: "Dialogous", careerPath: "Dialogous" },
+  };
   const guardsman = { header: { career: "Guardsman", rank: "Sergeant" } };
   const base = { total: 3000, spent: 1000, ranks: [] };
   const blackPriest = {
@@ -713,6 +1439,21 @@ describe("assertValidCharacterFieldTransition: experience alternate ranks", () =
     takenAtTier: 4,
   };
   const withSelections = (alternateRanks: unknown[]) => ({ ...base, alternateRanks });
+  const metallicanGunslinger = {
+    alternateRankId: "metallican-gunslinger",
+    replacedRankId: "sell-steel",
+    takenAtTier: 1,
+  };
+  const reclamator = {
+    alternateRankId: "reclamator",
+    replacedRankId: "dreg",
+    takenAtTier: 1,
+  };
+  const sisterOblatia = {
+    alternateRankId: "sister-oblatia",
+    replacedRankId: "sororitas-famula",
+    takenAtTier: 5,
+  };
   const check =
     (oldValue: unknown, newValue: unknown, character: Record<string, unknown>, isDM: boolean) =>
     () =>
@@ -720,6 +1461,26 @@ describe("assertValidCharacterFieldTransition: experience alternate ranks", () =
 
   it("accepts a player taking an alternate rank while ranking up to the rank it replaces", () => {
     expect(check(base, withSelections([blackPriest]), clericAtPriest, false)).not.toThrow();
+  });
+
+  it("accepts a character-creation Advance Scheme replacing the current Rank 1 table", () => {
+    expect(
+      check(base, withSelections([metallicanGunslinger]), assassinAtSellSteel, false)
+    ).not.toThrow();
+  });
+
+  it("accepts Reclamator as the Scum character-creation Advance Scheme", () => {
+    expect(check(base, withSelections([reclamator]), scumAtDreg, false)).not.toThrow();
+  });
+
+  it("accepts Sister Oblatia in place of an Adepta Sororitas Rank 5 table", () => {
+    expect(check(base, withSelections([sisterOblatia]), sororitasAtDialogous, false)).not.toThrow();
+  });
+
+  it("rejects a character-creation Advance Scheme after Rank 1", () => {
+    expect(check(base, withSelections([metallicanGunslinger]), guardsman, false)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
   });
 
   it("rejects a player taking an alternate rank that is not open to their career", () => {

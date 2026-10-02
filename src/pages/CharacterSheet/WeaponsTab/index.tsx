@@ -101,6 +101,7 @@ interface WeaponsTabProps {
   grenades: GrenadeItem[];
   editable: boolean;
   strengthBonus: number;
+  knaveOfPistols?: boolean;
   onUpdateRanged: (next: RangedWeapon[]) => void;
   onUpdateMelee: (next: MeleeWeapon[]) => void;
   onUpdateGrenades: (next: GrenadeItem[]) => void;
@@ -169,6 +170,7 @@ export function WeaponsTab({
   grenades,
   editable,
   strengthBonus,
+  knaveOfPistols = false,
   onUpdateRanged,
   onUpdateMelee,
   onUpdateGrenades,
@@ -381,6 +383,7 @@ export function WeaponsTab({
           referenceId: ref.id,
           name: ref.name,
           class: ref.class,
+          type: ref.type,
           range: ref.range,
           rof: ref.rof,
           damage: ref.damage,
@@ -533,6 +536,7 @@ export function WeaponsTab({
           referenceId: ref.id,
           name: ref.name,
           class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
+          type: ref.type,
           damage,
           pen: String(ref.pen),
           specialRules: ref.specialRules,
@@ -1213,6 +1217,7 @@ export function WeaponsTab({
               weapon={entry.weapon}
               editable={editable}
               strengthBonus={strengthBonus}
+              knaveOfPistols={knaveOfPistols}
               integrated
               allowUpgrades={false}
               forceExpanded
@@ -1239,6 +1244,7 @@ export function WeaponsTab({
             weapon={entry.weapon}
             editable={editable}
             strengthBonus={strengthBonus}
+            knaveOfPistols={knaveOfPistols}
             {...getWeaponLibraryProps(entry.weapon, "ranged")}
             onRemove={() => removeRanged(entry.index)}
             onAddUpgrade={(upgradeId) => addUpgradeToRanged(entry.weapon.id, upgradeId)}
@@ -1267,6 +1273,7 @@ export function WeaponsTab({
       editable,
       getWeaponLibraryProps,
       grenades,
+      knaveOfPistols,
       onUpdateGrenades,
       removeRanged,
       removeUpgradeFromRanged,
@@ -1686,6 +1693,7 @@ export function WeaponsTab({
           initialWeapon={{
             id: editingWeaponDefinition.weapon.id,
             ...stripWeaponKind(editingWeaponDefinition.libraryItem.data),
+            type: editingWeaponDefinition.weapon.type,
             ammoEntries: editingWeaponDefinition.weapon.ammoEntries,
             upgrades: editingWeaponDefinition.weapon.upgrades,
             quantity: editingWeaponDefinition.weapon.quantity,
@@ -1706,6 +1714,7 @@ export function WeaponsTab({
           initialWeapon={{
             id: editingWeaponDefinition.weapon.id,
             ...stripWeaponKind(editingWeaponDefinition.libraryItem.data),
+            type: editingWeaponDefinition.weapon.type,
             upgrades: editingWeaponDefinition.weapon.upgrades,
             quantity: editingWeaponDefinition.weapon.quantity,
             equipped: editingWeaponDefinition.weapon.equipped,

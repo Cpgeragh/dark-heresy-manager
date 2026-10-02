@@ -33,8 +33,9 @@ import {
 } from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 import { CUSTOM_AMMO_FAMILY_OPTIONS, type AmmoTrackingMode } from "./weaponHelpers";
+import { WEAPON_TYPES, type WeaponType } from "../../../data/reference/weaponClassification";
 
-const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const;
+const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown"] as const;
 const RELOAD_TYPE_OPTIONS = ["Half", "Full", "Round", "Special", "—"] as const;
 
 function stripMeters(value?: string): string {
@@ -84,6 +85,7 @@ export function CustomRangedForm({
   const parsedRof = parseRofInput(initialWeapon?.rof);
   const [name, setName] = useState(initialWeapon?.name ?? "");
   const [weaponClass, setWeaponClass] = useState(initialWeapon?.class ?? "");
+  const [weaponType, setWeaponType] = useState<"" | WeaponType>(initialWeapon?.type ?? "");
   const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>(
     initialWeapon?.craftsmanship ?? ""
   );
@@ -118,6 +120,7 @@ export function CustomRangedForm({
   const [description, setDescription] = useState(initialWeapon?.description ?? "");
   const [saving, setSaving] = useState(false);
   const [showClassPicker, setShowClassPicker] = useState(false);
+  const [showTypePicker, setShowTypePicker] = useState(false);
   const [showAmmoFamilyPicker, setShowAmmoFamilyPicker] = useState(false);
   const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
   const [showReloadTypePicker, setShowReloadTypePicker] = useState(false);
@@ -135,6 +138,7 @@ export function CustomRangedForm({
   const canAdd =
     Boolean(name.trim()) &&
     Boolean(weaponClass) &&
+    Boolean(weaponType) &&
     Boolean(craftsmanship) &&
     Boolean(origin) &&
     Boolean(rangeMeters) &&
@@ -159,6 +163,7 @@ export function CustomRangedForm({
         custom: true,
         name: name.trim(),
         class: weaponClass,
+        type: weaponType || undefined,
         craftsmanship,
         source: origin,
         range: `${rangeMeters}m`,
@@ -207,6 +212,20 @@ export function CustomRangedForm({
           setShowClassPicker(false);
         }}
         onClose={() => setShowClassPicker(false)}
+      />
+    );
+  }
+  if (showTypePicker) {
+    return (
+      <OptionPickerScreen
+        title="Weapon Type"
+        options={WEAPON_TYPES}
+        selected={weaponType}
+        onSelect={(value) => {
+          setWeaponType(value as WeaponType);
+          setShowTypePicker(false);
+        }}
+        onClose={() => setShowTypePicker(false)}
       />
     );
   }
@@ -320,7 +339,14 @@ export function CustomRangedForm({
             placeholder="Choose class"
             required
             onClick={() => setShowClassPicker(true)}
-            className="col-span-2"
+          />
+          <PickerField
+            id="custom-ranged-type"
+            label="Type"
+            value={weaponType}
+            placeholder="Choose type"
+            required
+            onClick={() => setShowTypePicker(true)}
           />
         </div>
       </CustomFormSection>

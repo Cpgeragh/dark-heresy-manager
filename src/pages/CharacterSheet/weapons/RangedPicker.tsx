@@ -6,6 +6,7 @@ import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
 } from "../../../data/reference/weaponReference";
+import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   uiCardTitle,
@@ -33,7 +34,12 @@ import { DamageTypeChip } from "./weaponShared";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { RangedCard } from "./RangedCard";
 import { uiExpandButton, uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
-import { weaponClassChip, ammoFamilyChip, rangedCraftsmanshipDescription } from "./weaponHelpers";
+import {
+  weaponClassChip,
+  weaponTypeChip,
+  ammoFamilyChip,
+  rangedCraftsmanshipDescription,
+} from "./weaponHelpers";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { InfoModal } from "../../../components/InfoModal";
 
@@ -73,6 +79,7 @@ function RangedWeaponCardPickerRow({
 
   if (!expanded) {
     const classChip = weaponClassChip(weaponReference.class);
+    const typeChip = weaponTypeChip(weaponReference.type);
     return (
       <div ref={rowRef} className={`${uiSectionShell} overflow-hidden`}>
         <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
@@ -101,11 +108,18 @@ function RangedWeaponCardPickerRow({
                 </span>
               )}
             </div>
-            {classChip && (
+            {(classChip || typeChip) && (
               <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                <Chip size="sm" className={classChip.active}>
-                  {classChip.label}
-                </Chip>
+                {classChip && (
+                  <Chip size="sm" className={classChip.active}>
+                    {classChip.label}
+                  </Chip>
+                )}
+                {typeChip && (
+                  <Chip size="sm" className={typeChip.className}>
+                    {typeChip.label}
+                  </Chip>
+                )}
               </div>
             )}
           </div>
@@ -134,6 +148,7 @@ function RangedWeaponCardPickerRow({
     referenceId: weaponReference.id,
     name: weaponReference.name,
     class: weaponReference.class,
+    type: weaponReference.type,
     range: weaponReference.range,
     rof: weaponReference.rof,
     damage: weaponReference.damage,
@@ -201,23 +216,26 @@ export function RangedPicker({
   const [selected, setSelected] = useState<RangedWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
   const [classFilter, setClassFilter] = useState<string | null>(null);
-  const [familyFilter, setFamilyFilter] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [ammoFilter, setAmmoFilter] = useState<string | null>(null);
   const [showClassFilterPicker, setShowClassFilterPicker] = useState(false);
-  const [showFamilyFilterPicker, setShowFamilyFilterPicker] = useState(false);
+  const [showTypeFilterPicker, setShowTypeFilterPicker] = useState(false);
+  const [showAmmoFilterPicker, setShowAmmoFilterPicker] = useState(false);
   const listScrollPositionRef = useRef(0);
   const normalisedQuery = query.toLowerCase();
-  const families = Array.from(
+  const ammoFamilies = Array.from(
     new Map(
       references
-        .map((r) => ammoFamilyChip(r.ammoType))
-        .filter((f): f is NonNullable<typeof f> => f !== undefined)
-        .map((f) => [f.label, f])
+        .map((reference) => ammoFamilyChip(reference.ammoType))
+        .filter((family): family is NonNullable<typeof family> => family !== undefined)
+        .map((family) => [family.label, family])
     ).values()
   );
   const filtered = references
     .filter((r) => r.name.toLowerCase().includes(normalisedQuery))
     .filter((r) => !classFilter || r.class.includes(classFilter))
-    .filter((r) => !familyFilter || ammoFamilyChip(r.ammoType)?.label === familyFilter)
+    .filter((r) => !typeFilter || r.type === typeFilter)
+    .filter((r) => !ammoFilter || ammoFamilyChip(r.ammoType)?.label === ammoFilter)
     .sort((a, b) => a.name.localeCompare(b.name));
   const filteredCustom = customItems
     .filter((item) => item.data.weaponKind === "ranged" && !item.data.integrated)
@@ -228,7 +246,11 @@ export function RangedPicker({
     })
     .filter((item) => {
       if (item.data.weaponKind !== "ranged") return false;
-      return !familyFilter || ammoFamilyChip(item.data.ammoType)?.label === familyFilter;
+      return !typeFilter || item.data.type === typeFilter;
+    })
+    .filter((item) => {
+      if (item.data.weaponKind !== "ranged") return false;
+      return !ammoFilter || ammoFamilyChip(item.data.ammoType)?.label === ammoFilter;
     })
     .sort((a, b) => a.name.localeCompare(b.name));
   const pickerEntries = [
@@ -250,7 +272,7 @@ export function RangedPicker({
     return (
       <OptionPickerScreen
         title="Class"
-        options={["All Classes", "Pistol", "Basic", "Heavy", "Thrown", "Exotic"]}
+        options={["All Classes", "Pistol", "Basic", "Heavy", "Thrown"]}
         selected={classFilter ?? "All Classes"}
         onSelect={(value) => {
           setClassFilter(value === "All Classes" ? null : value);
@@ -260,17 +282,31 @@ export function RangedPicker({
       />
     );
   }
-  if (showFamilyFilterPicker) {
+  if (showTypeFilterPicker) {
     return (
       <OptionPickerScreen
-        title="Ammo Type"
-        options={["All Types", ...families.map((f) => f.label)]}
-        selected={familyFilter ?? "All Types"}
+        title="Weapon Type"
+        options={["All Types", ...WEAPON_TYPES]}
+        selected={typeFilter ?? "All Types"}
         onSelect={(value) => {
-          setFamilyFilter(value === "All Types" ? null : value);
-          setShowFamilyFilterPicker(false);
+          setTypeFilter(value === "All Types" ? null : value);
+          setShowTypeFilterPicker(false);
         }}
-        onClose={() => setShowFamilyFilterPicker(false)}
+        onClose={() => setShowTypeFilterPicker(false)}
+      />
+    );
+  }
+  if (showAmmoFilterPicker) {
+    return (
+      <OptionPickerScreen
+        title="Ammunition"
+        options={["All Ammunition", ...ammoFamilies.map((family) => family.label)]}
+        selected={ammoFilter ?? "All Ammunition"}
+        onSelect={(value) => {
+          setAmmoFilter(value === "All Ammunition" ? null : value);
+          setShowAmmoFilterPicker(false);
+        }}
+        onClose={() => setShowAmmoFilterPicker(false)}
       />
     );
   }
@@ -341,7 +377,7 @@ export function RangedPicker({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
-        <div className="flex gap-2 w-full">
+        <div className="grid grid-cols-1 gap-2 w-full sm:grid-cols-3">
           <button
             type="button"
             onClick={() => setShowClassFilterPicker(true)}
@@ -352,10 +388,18 @@ export function RangedPicker({
           </button>
           <button
             type="button"
-            onClick={() => setShowFamilyFilterPicker(true)}
+            onClick={() => setShowTypeFilterPicker(true)}
             className={`flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
           >
-            <span>{familyFilter ?? "All Types"}</span>
+            <span>{typeFilter ?? "All Types"}</span>
+            <ArrowRight />
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAmmoFilterPicker(true)}
+            className={`rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
+          >
+            <span>{ammoFilter ?? "All Ammunition"}</span>
             <ArrowRight />
           </button>
         </div>
@@ -404,6 +448,14 @@ export function RangedPicker({
                 return c ? (
                   <Chip size="sm" className={c.active}>
                     {c.label}
+                  </Chip>
+                ) : null;
+              })()}
+              {(() => {
+                const t = weaponTypeChip(data.type);
+                return t ? (
+                  <Chip size="sm" className={t.className}>
+                    {t.label}
                   </Chip>
                 ) : null;
               })()}

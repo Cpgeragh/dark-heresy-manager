@@ -53,6 +53,26 @@ describe("Trait cross-page effects", () => {
     );
   });
 
+  it("derives Knave of Pistols from the character-creation Advance Scheme", () => {
+    expect(
+      getDerivedTraitEntries(block(), "Assassin", [
+        {
+          alternateRankId: "metallican-gunslinger",
+          replacedRankId: "sell-steel",
+          takenAtTier: 1,
+        },
+      ])
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          talentId: "knave-of-pistols",
+          grantedByTalentName: "Metallican Gunslinger",
+          grantedByType: "Alternate Rank",
+        }),
+      ])
+    );
+  });
+
   it("derives selected Homeworld, Talent-granted and Career Traits without saving duplicate entries", () => {
     const talents = block({
       homeworld: "hive-world",

@@ -16,6 +16,7 @@ const references: RangedWeaponRef[] = [
     name: "Lasgun",
     source: SkillSource.CR,
     class: "Basic",
+    type: "Las",
     range: "100m",
     rof: "S/-/3",
     damage: "1d10+3 E",
@@ -33,6 +34,7 @@ const references: RangedWeaponRef[] = [
     name: "Autopistol",
     source: SkillSource.CR,
     class: "Pistol",
+    type: "SP",
     range: "30m",
     rof: "S/2/-",
     damage: "1d10 I",
@@ -50,6 +52,7 @@ const references: RangedWeaponRef[] = [
     name: "Heavy Bolter",
     source: SkillSource.CR,
     class: "Heavy",
+    type: "Bolt",
     range: "150m",
     rof: "-/-/6",
     damage: "2d10+8 X",
@@ -84,6 +87,7 @@ function makeCustomItem(
       weaponKind: "ranged",
       name: "Custom Blaster",
       class: "Pistol",
+      type: "Plasma",
       range: "30m",
       rof: "S/2/-",
       damage: "1d10+2 E",
@@ -143,13 +147,23 @@ describe("RangedPicker", () => {
     expect(screen.queryByText("Heavy Bolter")).not.toBeInTheDocument();
   });
 
-  it("filters the list by ammo family", async () => {
+  it("filters the list by weapon type", async () => {
     const user = userEvent.setup();
     renderPicker();
     await user.click(screen.getByText("All Types"));
     await user.click(screen.getByText("Bolt"));
     expect(screen.getByText("Heavy Bolter")).toBeInTheDocument();
     expect(screen.queryByText("Lasgun")).not.toBeInTheDocument();
+    expect(screen.queryByText("Autopistol")).not.toBeInTheDocument();
+  });
+
+  it("retains the separate ammunition-family filter", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await user.click(screen.getByText("All Ammunition"));
+    await user.click(screen.getByText("Las"));
+    expect(screen.getByText("Lasgun")).toBeInTheDocument();
+    expect(screen.queryByText("Heavy Bolter")).not.toBeInTheDocument();
     expect(screen.queryByText("Autopistol")).not.toBeInTheDocument();
   });
 

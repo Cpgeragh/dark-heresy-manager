@@ -50,6 +50,7 @@ describe("CustomRangedForm", () => {
 
     await user.type(textboxAt(0), "Custom Blaster"); // Name
     await pick(user, "Choose class", "Pistol"); // Class
+    await pick(user, "Choose type", "Las"); // Weapon Type
     await user.click(screen.getByRole("button", { name: "Good" })); // Craftsmanship
     await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     await user.type(textboxAt(1), "40"); // Range
@@ -71,6 +72,7 @@ describe("CustomRangedForm", () => {
         custom: true,
         name: "Custom Blaster",
         class: "Pistol",
+        type: "Las",
         craftsmanship: "Good",
         source: "Custom",
         range: "40m",

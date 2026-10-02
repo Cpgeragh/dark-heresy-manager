@@ -1,4 +1,5 @@
 import { DEFAULT_SKILLS } from "../../data/reference/defaultSkills";
+import { ELITE_ADVANCES } from "../../data/reference/eliteAdvanceData";
 import type { TalentBehaviour, TalentData } from "../../data/reference/talentData";
 import type {
   PsychicBlock,
@@ -154,14 +155,36 @@ export function getLinkedTalentEntryUids(psychic: PsychicBlock): ReadonlySet<str
   );
 }
 
+function getPsychicTalentPurchases(
+  talents: TalentsAndTraitsBlock,
+  group: "minor" | "major"
+): TalentEntry[] {
+  const talentId = PSYCHIC_TALENT_ID_BY_GROUP[group];
+  const purchases = talents.talents.filter((entry) => entry.talentId === talentId);
+  if (group !== "minor") return purchases;
+
+  const packageGrants = (talents.eliteAdvances ?? []).flatMap((entry) => {
+    const reference = ELITE_ADVANCES.find((advance) => advance.id === entry.eliteAdvanceId);
+    return Array.from({ length: reference?.grantedMinorPsychicPowers ?? 0 }, (_, index) => ({
+      uid: `elite-advance:${entry.uid}:minor-psychic-power:${index}`,
+      talentId,
+      name: "Minor Psychic Power",
+      grantedByTalentEntryUid: entry.uid,
+      grantedByTalentName: reference?.name ?? entry.name,
+      grantedByType: "Elite Advance" as const,
+    }));
+  });
+
+  return [...purchases, ...packageGrants];
+}
+
 export function getAvailablePsychicTalentPurchases(
   talents: TalentsAndTraitsBlock,
   psychic: PsychicBlock,
   group: "minor" | "major"
 ): TalentEntry[] {
-  const talentId = PSYCHIC_TALENT_ID_BY_GROUP[group];
   const linked = getLinkedTalentEntryUids(psychic);
-  return talents.talents.filter((entry) => entry.talentId === talentId && !linked.has(entry.uid));
+  return getPsychicTalentPurchases(talents, group).filter((entry) => !linked.has(entry.uid));
 }
 
 export function linkPowerToTalentPurchase(
@@ -179,7 +202,9 @@ export function linkPowerToTalentPurchase(
       : null;
   if (!group) return psychic;
 
-  const purchase = talents.talents.find((entry) => entry.uid === talentEntryUid);
+  const purchase = getPsychicTalentPurchases(talents, group).find(
+    (entry) => entry.uid === talentEntryUid
+  );
   if (purchase?.talentId !== PSYCHIC_TALENT_ID_BY_GROUP[group]) return psychic;
 
   const field = group === "minor" ? "minorPowers" : "majorPowers";

@@ -412,6 +412,24 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
     advanced: true,
     source: "CR",
   },
+  {
+    id: "ciphers-myrmidon",
+    name: "Ciphers (Myrmidon)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Ciphers",
+    advanced: true,
+    source: "IH",
+  },
+  {
+    id: "ciphers-tenebrae-collegium",
+    name: "Ciphers (Tenebrae Collegium)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Ciphers",
+    advanced: true,
+    source: "IH",
+  },
 
   // ===== DRIVE =====
   {
@@ -462,6 +480,15 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
     source: "CR",
   },
   {
+    id: "pilot-jump-pack",
+    name: "Pilot (Jump Pack)",
+    characteristic: "ag",
+    level: "untrained",
+    category: "Pilot",
+    advanced: true,
+    source: "IH",
+  },
+  {
     id: "pilot-spacecraft",
     name: "Pilot (Spacecraft)",
     characteristic: "ag",
@@ -492,6 +519,15 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
   },
 
   // ===== SPEAK LANGUAGE =====
+  {
+    id: "speak-any",
+    name: "Speak Language (Any One)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Speak Language",
+    advanced: true,
+    source: "IH",
+  },
   {
     id: "speak-high-gothic",
     name: "Speak Language (High Gothic)",
@@ -583,6 +619,42 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
     category: "Secret Tongue",
     advanced: true,
     source: "CR",
+  },
+  {
+    id: "secret-tongue-moritat",
+    name: "Secret Tongue (Moritat)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Secret Tongue",
+    advanced: true,
+    source: "IH",
+  },
+  {
+    id: "secret-tongue-redemption",
+    name: "Secret Tongue (the Redemption)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Secret Tongue",
+    advanced: true,
+    source: "IH",
+  },
+  {
+    id: "secret-tongue-temple-calix",
+    name: "Secret Tongue (Temple Calix)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Secret Tongue",
+    advanced: true,
+    source: "IH",
+  },
+  {
+    id: "secret-tongue-tenebrae-collegium",
+    name: "Secret Tongue (Tenebrae Collegium)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Secret Tongue",
+    advanced: true,
+    source: "IH",
   },
   {
     id: "secret-tongue-tech",
@@ -877,6 +949,15 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
     category: "Forbidden Lore",
     advanced: true,
     source: "CR",
+  },
+  {
+    id: "forbidden-ordo-hereticus",
+    name: "Forbidden Lore (Ordo Hereticus)",
+    characteristic: "int",
+    level: "untrained",
+    category: "Forbidden Lore",
+    advanced: true,
+    source: "IH",
   },
   {
     id: "forbidden-archeotech",

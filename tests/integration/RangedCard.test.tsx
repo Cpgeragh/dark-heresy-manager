@@ -75,6 +75,21 @@ describe("RangedCard upgrades", () => {
   });
 });
 
+describe("RangedCard Knave of Pistols penalty", () => {
+  it("marks a non-pistol ranged weapon with the −10 Ballistic Skill penalty", () => {
+    renderCard({ knaveOfPistols: true });
+    expect(screen.getByText("Knave: BS −10")).toBeInTheDocument();
+  });
+
+  it("does not penalise a pistol", () => {
+    renderCard({
+      knaveOfPistols: true,
+      weapon: { ...baseWeapon, class: "Pistol" },
+    });
+    expect(screen.queryByText("Knave: BS −10")).not.toBeInTheDocument();
+  });
+});
+
 describe("RangedCard equip toggle", () => {
   it("calls onToggleEquip when the equip button is clicked", async () => {
     const user = userEvent.setup();

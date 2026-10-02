@@ -40,6 +40,8 @@ describe("CustomMeleeForm", () => {
     await user.type(textboxAt(0), "Custom Axe"); // Name
     await user.click(screen.getByText("Choose class")); // Class
     await user.click(screen.getByText("Melee"));
+    await user.click(screen.getByText("Choose type"));
+    await user.click(screen.getByText("Primitive"));
     await user.click(screen.getByRole("button", { name: "Good" })); // Craftsmanship
     await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     await user.type(textboxAt(3), "2"); // Pen
@@ -56,6 +58,7 @@ describe("CustomMeleeForm", () => {
         custom: true,
         name: "Custom Axe",
         class: "Melee",
+        type: "Primitive",
         craftsmanship: "Good",
         source: "Custom",
         damage: "1d10 R",
@@ -77,6 +80,8 @@ describe("CustomMeleeForm", () => {
     await user.type(textboxAt(0), "Custom Knife");
     await user.click(screen.getByText("Choose class"));
     await user.click(screen.getByText("Melee / Thrown"));
+    await user.click(screen.getByText("Choose type"));
+    await user.click(screen.getByText("Primitive"));
     await user.click(screen.getByRole("button", { name: "Common" }));
     await user.click(screen.getByRole("radio", { name: "Custom" }));
     await user.type(textboxAt(3), "0");

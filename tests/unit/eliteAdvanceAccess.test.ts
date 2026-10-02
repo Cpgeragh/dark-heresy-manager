@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getAvailableNamedEliteAdvances,
   getMissedRankEliteAdvanceOptions,
+  getPackageEliteAdvanceOptions,
 } from "../../src/mechanics/eliteAdvances/eliteAdvanceAccess";
 import type { ExperienceBlock } from "../../src/types/Character";
 
@@ -19,10 +20,14 @@ const experience: ExperienceBlock = {
 };
 
 describe("Elite Advance access", () => {
-  it("unlocks a named advance only after its Alternate Rank is selected", () => {
-    expect(getAvailableNamedEliteAdvances({ total: 0, spent: 0, ranks: [] })).toEqual([]);
+  it("offers general packages immediately and unlocks restricted advances through their Alternate Rank", () => {
+    expect(
+      getAvailableNamedEliteAdvances({ total: 0, spent: 0, ranks: [] }).map((entry) => entry.id)
+    ).toEqual(["nascent-psyker", "cult-of-the-red-redemption"]);
     expect(getAvailableNamedEliteAdvances(experience).map((entry) => entry.id)).toEqual([
       "encarta-maleficarum",
+      "nascent-psyker",
+      "cult-of-the-red-redemption",
     ]);
   });
 
@@ -40,7 +45,8 @@ describe("Elite Advance access", () => {
           },
         ],
       })
-    ).toEqual([]);
+      .map((entry) => entry.id)
+    ).toEqual(["nascent-psyker", "cult-of-the-red-redemption"]);
   });
 
   it("does not expose missed-rank advances until the following rank", () => {
@@ -69,5 +75,71 @@ describe("Elite Advance access", () => {
     expect(result.talents).toContainEqual(
       expect.objectContaining({ talentId: "pistol-training", specialisation: "Bolt", cost: 250 })
     );
+  });
+
+  it("unlocks the next Redemption skill tier and its cult Talent table", () => {
+    const talents = {
+      homeworld: "",
+      talents: [],
+      traits: [],
+      eliteAdvances: [
+        {
+          uid: "redemption",
+          eliteAdvanceId: "cult-of-the-red-redemption",
+          name: "The Cult of the Red Redemption",
+        },
+      ],
+    };
+    const result = getPackageEliteAdvanceOptions({
+      talents,
+      skills: [],
+      weaponTraining: { trained: [], exoticWeapons: [] },
+    });
+
+    expect(result.skills).toEqual([
+      expect.objectContaining({
+        skillId: "secret-tongue-redemption",
+        level: "+10",
+        cost: 100,
+      }),
+    ]);
+    expect(result.talents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ talentId: "hatred", specialisation: "Heretics", cost: 100 }),
+        expect.objectContaining({
+          talentId: "basic-weapon-training",
+          specialisation: "Flame",
+          weaponTrainingId: "basic-flame",
+          cost: 200,
+        }),
+        expect.objectContaining({ talentId: "battle-rage", cost: 300 }),
+      ])
+    );
+  });
+
+  it("unlocks the Nascent Psyker Skill table", () => {
+    const talents = {
+      homeworld: "",
+      talents: [],
+      traits: [],
+      eliteAdvances: [
+        {
+          uid: "nascent",
+          eliteAdvanceId: "nascent-psyker",
+          name: "Nascent Psyker",
+        },
+      ],
+    };
+    const result = getPackageEliteAdvanceOptions({
+      talents,
+      skills: [],
+      weaponTraining: { trained: [], exoticWeapons: [] },
+    });
+
+    expect(result.skills).toEqual([
+      expect.objectContaining({ skillId: "deceive", level: "trained", cost: 100 }),
+      expect.objectContaining({ skillId: "psyniscience", level: "trained", cost: 100 }),
+    ]);
+    expect(result.talents).toEqual([]);
   });
 });

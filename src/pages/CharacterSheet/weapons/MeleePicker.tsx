@@ -6,6 +6,7 @@ import {
   MELEE_WEAPON_REFERENCE,
   type MeleeWeaponRef,
 } from "../../../data/reference/weaponReference";
+import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { uiTextBody, uiTextMuted, uiItemName } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
@@ -19,12 +20,14 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { ArrowLeft } from "../../../ui/icons/PickerArrows";
+import { ArrowLeft, ArrowRight } from "../../../ui/icons/PickerArrows";
+import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip } from "./weaponShared";
 import { MeleeCard } from "./MeleeCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { meleeCraftsmanshipDescription } from "./weaponHelpers";
+import { meleeCraftsmanshipDescription, weaponTypeChip } from "./weaponHelpers";
+import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 
 function MeleeWeaponCardPickerRow({
   weaponReference,
@@ -42,6 +45,7 @@ function MeleeWeaponCardPickerRow({
     referenceId: weaponReference.id,
     name: weaponReference.name,
     class: weaponReference.class,
+    type: weaponReference.type,
     damage: weaponReference.damage,
     pen: String(weaponReference.pen),
     specialRules: weaponReference.specialRules,
@@ -99,14 +103,20 @@ export function MeleePicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<MeleeWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [showTypeFilterPicker, setShowTypeFilterPicker] = useState(false);
   const listScrollPositionRef = useRef(0);
   const normalisedQuery = query.toLowerCase();
   const filtered = references
     .filter((r) => r.name.toLowerCase().includes(normalisedQuery))
+    .filter((r) => !typeFilter || r.type === typeFilter)
     .sort((a, b) => a.name.localeCompare(b.name));
   const filteredCustom = customItems
     .filter((item) => item.data.weaponKind === "melee" && !item.data.integrated)
     .filter((item) => item.name.toLowerCase().includes(normalisedQuery))
+    .filter(
+      (item) => item.data.weaponKind === "melee" && (!typeFilter || item.data.type === typeFilter)
+    )
     .sort((a, b) => a.name.localeCompare(b.name));
   const pickerEntries = [
     ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
@@ -121,6 +131,21 @@ export function MeleePicker({
   function resetPicker() {
     setSelected(null);
     setCraftsmanship("Common");
+  }
+
+  if (showTypeFilterPicker) {
+    return (
+      <OptionPickerScreen
+        title="Weapon Type"
+        options={["All Types", ...WEAPON_TYPES]}
+        selected={typeFilter ?? "All Types"}
+        onSelect={(value) => {
+          setTypeFilter(value === "All Types" ? null : value);
+          setShowTypeFilterPicker(false);
+        }}
+        onClose={() => setShowTypeFilterPicker(false)}
+      />
+    );
   }
 
   if (selected) {
@@ -188,6 +213,16 @@ export function MeleePicker({
       suspended={suspended}
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
+      filterRow={
+        <button
+          type="button"
+          onClick={() => setShowTypeFilterPicker(true)}
+          className={`w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
+        >
+          <span>{typeFilter ?? "All Types"}</span>
+          <ArrowRight />
+        </button>
+      }
       footer={
         editable && showCustom ? (
           <PickerCustomAction onClick={onCustom}>+ Add custom weapon</PickerCustomAction>
@@ -225,6 +260,14 @@ export function MeleePicker({
               {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
+              {(() => {
+                const t = weaponTypeChip(data.type);
+                return t ? (
+                  <Chip size="sm" className={t.className}>
+                    {t.label}
+                  </Chip>
+                ) : null;
+              })()}
               <ItemMetaChips
                 weight={data.weight}
                 value={data.value}

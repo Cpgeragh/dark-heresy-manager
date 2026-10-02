@@ -1,6 +1,6 @@
 // tests/integration/WeaponTrainingTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -152,6 +152,46 @@ describe("WeaponTrainingTab", () => {
     });
   });
 
+  it("prevents a Metallican Gunslinger acquiring new Basic or Heavy training", () => {
+    renderTab({
+      career: "Assassin",
+      rank: "Sell-Steel",
+      isDM: true,
+      alternateRanks: [
+        {
+          alternateRankId: "metallican-gunslinger",
+          replacedRankId: "sell-steel",
+          takenAtTier: 1,
+        },
+      ],
+    });
+
+    expect(screen.getAllByRole("button", { name: /^Bolt/ })[0]).toBeDisabled();
+    expect(screen.getAllByRole("button", { name: /^Bolt/ })[1]).toBeDisabled();
+    expect(
+      screen.getAllByText("Knave of Pistols prevents acquiring new training in this group.")
+    ).toHaveLength(2);
+  });
+
+  it("allows a Metallican Gunslinger to remove Basic training they already had", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({
+      weaponTraining: makeBlock({ trained: ["basic-bolt"] }),
+      alternateRanks: [
+        {
+          alternateRankId: "metallican-gunslinger",
+          replacedRankId: "sell-steel",
+          takenAtTier: 1,
+        },
+      ],
+    });
+
+    await user.click(screen.getAllByRole("button", { name: /^Bolt/ })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ trained: [] }));
+  });
+
   it("shows exotic weapons as chips", () => {
     renderTab({
       weaponTraining: makeBlock({ exoticWeapons: [{ name: "Needle Pistol", cost: 200 }] }),
@@ -199,32 +239,119 @@ describe("WeaponTrainingTab", () => {
   it("does not show the custom exotic weapon button to a player", () => {
     renderTab({ career: "Guardsman", rank: "Captain" });
     expect(
-      screen.queryByRole("button", { name: "Add a custom exotic weapon" })
+      screen.queryByRole("button", { name: "Add Exotic Weapon Training" })
     ).not.toBeInTheDocument();
+  });
+
+  it("shows all five glowing Mechanicus Secutor Exotic Training pills", () => {
+    renderTab({
+      career: "Tech-Priest",
+      rank: "Enginseer",
+      alternateRanks: [
+        {
+          alternateRankId: "mechanicus-secutor",
+          replacedRankId: "enginseer",
+          takenAtTier: 4,
+        },
+      ],
+    });
+
+    for (const [name, cost] of [
+      ["Breacher", 200],
+      ["Shock Blaster", 200],
+      ["Graviton Gun", 300],
+      ["Needle Pistol", 300],
+      ["Rad-Cleanser", 300],
+    ] as const) {
+      const pill = screen.getByRole("button", { name: `${name}, ${cost} XP` });
+      expect(pill).toBeEnabled();
+      expect(pill).toHaveClass("animate-psy-pulse");
+      expect(pill).toHaveAttribute("aria-pressed", "false");
+    }
+  });
+
+  it("confirms and records a Mechanicus Secutor Exotic Training purchase", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({
+      career: "Tech-Priest",
+      rank: "Enginseer",
+      alternateRanks: [
+        {
+          alternateRankId: "mechanicus-secutor",
+          replacedRankId: "enginseer",
+          takenAtTier: 4,
+        },
+      ],
+    });
+
+    await user.click(screen.getByRole("button", { name: "Breacher, 200 XP" }));
+    expect(onUpdate).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Train Exotic Weapon Training (Breacher) for 200 XP?")
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Train" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        exoticWeapons: [
+          {
+            name: "Breacher",
+            cost: 200,
+            xpPurchase: {
+              cost: 200,
+              careerId: "tech-priest",
+              sourceRankId: "enginseer",
+            },
+          },
+        ],
+      })
+    );
+  });
+
+  it("does not offer an Exotic Training choice that is already owned", () => {
+    renderTab({
+      career: "Tech-Priest",
+      rank: "Enginseer",
+      weaponTraining: makeBlock({ exoticWeapons: [{ name: "Breacher", cost: 200 }] }),
+      alternateRanks: [
+        {
+          alternateRankId: "mechanicus-secutor",
+          replacedRankId: "enginseer",
+          takenAtTier: 4,
+        },
+      ],
+    });
+
+    expect(screen.getByLabelText("Remove Breacher")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Breacher, 200 XP" })).not.toBeInTheDocument();
   });
 
   it("shows the custom exotic weapon button to a DM", () => {
     renderTab({ career: "Guardsman", rank: "Conscript", isDM: true });
-    expect(screen.getByRole("button", { name: "Add a custom exotic weapon" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add Exotic Weapon Training" })).toBeInTheDocument();
   });
 
-  it("opens the exotic weapon form straight away for a DM, with no slot choice", async () => {
+  it("opens the exotic training picker for a DM, with no slot choice", async () => {
     const user = userEvent.setup();
     renderTab({ career: "Guardsman", rank: "Captain", isDM: true });
 
-    await user.click(screen.getByRole("button", { name: "Add a custom exotic weapon" }));
+    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon Training" }));
     expect(
       screen.queryByRole("button", { name: "Use an available training slot" })
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Weapon Name")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Exotic Weapon Training" })).toBeInTheDocument();
+    expect(screen.getByText("Needle Pistol")).toBeInTheDocument();
   });
 
   it("tags a DM's custom exotic weapon as bonus", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ career: "Guardsman", rank: "Captain", isDM: true });
 
-    await user.click(screen.getByRole("button", { name: "Add a custom exotic weapon" }));
-    await user.type(screen.getByPlaceholderText("e.g. Needle Pistol"), "Web Pistol");
+    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon Training" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Exotic Weapon Training" })).getByText("Web Pistol")
+    );
     await user.type(screen.getByPlaceholderText("0"), "0");
     await user.click(screen.getByRole("button", { name: "+ Add Exotic" }));
 
@@ -238,6 +365,27 @@ describe("WeaponTrainingTab", () => {
         xpPurchase: { cost: 0, careerId: "guardsman", purchasedAtRankId: "captain" },
       },
     ]);
+  });
+
+  it("only offers pistol-only Exotic Weapon Training to a Metallican Gunslinger", async () => {
+    const user = userEvent.setup();
+    renderTab({
+      isDM: true,
+      alternateRanks: [
+        {
+          alternateRankId: "metallican-gunslinger",
+          replacedRankId: "sell-steel",
+          takenAtTier: 1,
+        },
+      ],
+    });
+
+    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon Training" }));
+    expect(screen.getByText("Needle Pistol")).toBeInTheDocument();
+    expect(screen.getByText("Shock Blaster")).toBeInTheDocument();
+    expect(screen.queryByText("Needle Rifle")).not.toBeInTheDocument();
+    expect(screen.queryByText("Graviton Gun")).not.toBeInTheDocument();
+    expect(screen.queryByText("Integrated Ranged Weapon")).not.toBeInTheDocument();
   });
 
   it("shows Talent-granted training as active, labelled, and not independently removable", () => {

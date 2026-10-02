@@ -66,6 +66,7 @@ import {
   ammoFamilyChip,
   compatibleAmmoIdsWithIH,
   weaponClassChip,
+  weaponTypeChip,
   compatibleAmmoIdsForAmmoType,
   rangedCraftsmanshipDescription,
   type AmmoTrackingMode,
@@ -113,6 +114,7 @@ export function RangedCard({
   forceExpanded = false,
   integrated = false,
   pickerMode = false,
+  knaveOfPistols = false,
   expanded: controlledExpanded,
   onExpandedChange,
 }: {
@@ -137,6 +139,7 @@ export function RangedCard({
   forceExpanded?: boolean;
   integrated?: boolean;
   pickerMode?: boolean;
+  knaveOfPistols?: boolean;
   expanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
 } & CustomItemLibraryActionProps<"weapon">) {
@@ -288,6 +291,9 @@ export function RangedCard({
   const rulesText = (activeMeleeProfile?.specialRules ?? effective.specialRules ?? "").trim();
   const ruleNamesInLookup = getKnownSpecialRuleNames(rulesText);
   const activeAmmoFamily = isMeleeProfile ? undefined : ammoFamilyChip(resolvedAmmoType);
+  const activeWeaponType = weaponTypeChip(weaponRef?.type ?? weapon.type);
+  const hasKnaveBallisticPenalty =
+    knaveOfPistols && !(weaponRef?.class ?? weapon.class)?.toLocaleLowerCase().includes("pistol");
   const rulesDescription = weaponRef?.description ?? weapon.description;
   const hasQualities = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
   const hasQualityModal = ruleNamesInLookup.length > 0;
@@ -432,7 +438,7 @@ export function RangedCard({
               </Chip>
             )}
           </div>
-          {(weapon.class || weapon.concealedBionic) && (
+          {(weapon.class || activeWeaponType || weapon.concealedBionic) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {weapon.concealedBionic && (
                 <Chip size="sm" className={colourPink}>
@@ -452,6 +458,16 @@ export function RangedCard({
                   </Chip>
                 ) : null;
               })()}
+              {activeWeaponType && (
+                <Chip size="sm" className={activeWeaponType.className}>
+                  {activeWeaponType.label}
+                </Chip>
+              )}
+              {hasKnaveBallisticPenalty && (
+                <Chip size="sm" className="border-amber-500/60 bg-amber-950/50 text-amber-300">
+                  Knave: BS −10
+                </Chip>
+              )}
             </div>
           )}
         </div>

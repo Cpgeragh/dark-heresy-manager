@@ -1,7 +1,7 @@
 // shared-rules/src/weaponTrainingAdvanceCosts.ts
 
 import { TALENT_LIST } from "./talentData.js";
-import { WEAPON_TRAINING_GROUPS } from "./weaponTrainingData.js";
+import { WEAPON_TRAINING_GROUPS, isPistolOnlyExoticWeaponTraining } from "./weaponTrainingData.js";
 import type {
   CharacterForWeaponTrainingCosts,
   AlternateRankSelection,
@@ -10,6 +10,11 @@ import type {
 } from "./types.js";
 import { getUnlockedCareerAdvances } from "./careerAdvanceAccess.js";
 import { makeSourceRankPurchase } from "./purchaseAttribution.js";
+
+export interface ExoticWeaponTrainingPurchase {
+  name: string;
+  purchase: XpPurchaseRecord;
+}
 
 function findWeaponTrainingMeta(
   id: WeaponTrainingTalentId
@@ -52,7 +57,53 @@ export function getWeaponTrainingCost(
   return getWeaponTrainingPurchase(career, rank, id, alternateRanks)?.cost;
 }
 
-/** Total XP currently spent on Weapon Training: the five fixed groups (real cost, or a DM's manual override) plus manually-costed Exotic weapons. */
+/** Unlocked Exotic Weapon Training choices from the active Career tables. */
+export function getExoticWeaponTrainingPurchases(
+  career: string | undefined,
+  rank: string | undefined,
+  alternateRanks: readonly AlternateRankSelection[] = []
+): ExoticWeaponTrainingPurchase[] {
+  const pistolOnly = alternateRanks.some(
+    (selection) => selection.alternateRankId === "metallican-gunslinger"
+  );
+  const purchases = new Map<string, ExoticWeaponTrainingPurchase>();
+
+  for (const entry of getUnlockedCareerAdvances(career, rank, alternateRanks)) {
+    if (
+      entry.advance.kind !== "talent" ||
+      entry.advance.talentId !== "exotic-weapon-training" ||
+      !entry.advance.specialisation
+    ) {
+      continue;
+    }
+    const name = entry.advance.specialisation.trim();
+    if (pistolOnly && !isPistolOnlyExoticWeaponTraining(name)) continue;
+
+    const key = name.toLocaleLowerCase();
+    const purchase = makeSourceRankPurchase(career, entry.rankId, entry.advance.cost);
+    const current = purchases.get(key);
+    if (!current || purchase.cost < current.purchase.cost) {
+      purchases.set(key, { name, purchase });
+    }
+  }
+
+  return [...purchases.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Exact Career-table purchase for an unlocked Exotic Weapon Training specialisation. */
+export function getExoticWeaponTrainingPurchase(
+  career: string | undefined,
+  rank: string | undefined,
+  name: string,
+  alternateRanks: readonly AlternateRankSelection[] = []
+): XpPurchaseRecord | undefined {
+  const normalisedName = name.trim().toLocaleLowerCase();
+  return getExoticWeaponTrainingPurchases(career, rank, alternateRanks).find(
+    (entry) => entry.name.toLocaleLowerCase() === normalisedName
+  )?.purchase;
+}
+
+/** Total XP currently spent on Weapon Training, including Career and DM-priced Exotic purchases. */
 export function getWeaponTrainingSpent(character: CharacterForWeaponTrainingCosts): number {
   const { career, rank } = character.header;
   const alternateRanks = character.experience?.alternateRanks ?? [];

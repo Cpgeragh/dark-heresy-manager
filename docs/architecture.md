@@ -92,16 +92,16 @@ Settings is a modal owned by the application shell. Legacy path constants such a
 
 These values limit reads; they do not prove collection-size enforcement. `src/constants/productLimits.ts` declares product policy, while the enforcement layer differs by value.
 
-| Policy value | Declared value | Current enforcement |
-| --- | ---: | --- |
-| Campaign creation rate | 10 creations per rolling 24 hours | Protected `createCampaign` operation |
-| Campaigns per account | 100 campaigns | Protected `createCampaign` count check |
-| Campaign members | 100 account IDs | Firestore rule validates the stored member array |
-| Characters per campaign | 100 characters | Query window and declared policy; no collection-count write check |
-| Linked devices per account | 10 devices | Protected `linkDevice` count check |
-| Custom items per campaign | 200 items | Query window and declared policy; no collection-count write check |
-| Character import payload | 750,000 bytes | Client import validation |
-| Character document budget | 900,000 bytes | Application field and document validation |
+| Policy value               |                    Declared value | Current enforcement                                               |
+| -------------------------- | --------------------------------: | ----------------------------------------------------------------- |
+| Campaign creation rate     | 10 creations per rolling 24 hours | Protected `createCampaign` operation                              |
+| Campaigns per account      |                     100 campaigns | Protected `createCampaign` count check                            |
+| Campaign members           |                   100 account IDs | Firestore rule validates the stored member array                  |
+| Characters per campaign    |                    100 characters | Query window and declared policy; no collection-count write check |
+| Linked devices per account |                        10 devices | Protected `linkDevice` count check                                |
+| Custom items per campaign  |                         200 items | Query window and declared policy; no collection-count write check |
+| Character import payload   |                     750,000 bytes | Client import validation                                          |
+| Character document budget  |                     900,000 bytes | Application field and document validation                         |
 
 ## Trust and persistence boundaries
 
@@ -110,22 +110,23 @@ Firestore rules authorize every direct client read and write. `SECURITY_RULES.md
 Character field edits go through the `patchCharacterField` callable. Each field has a shape and size validator, and fields that carry XP-priced purchases also have a transition validator in `functions/src/shared/characterFieldValidation.ts`. A transition validator compares the proposed value with the stored character and the caller's role, using the same `shared-rules` cost and rank functions as the browser, including the character's selected Alternate Rank tables:
 
 - `characteristics`: each newly bought advance is recorded at the career table cost, and no advance past the fourth tier is accepted.
-- `skills`: each newly bought tier is recorded at the career table cost, a tier locked at the current rank is rejected, and a skill off the career table is priced only by the DM.
-- `weaponTraining`: each newly trained fixed group is recorded at the career table cost, a group off the table is priced only by the DM, and only the DM adds an exotic weapon.
+- `skills`: each newly bought tier uses its Career-table cost, `getMissedRankCareerAdvances` prices a replaced normal-Rank Skill at its original cost plus 50 XP from the following Career tier, and a `gm-approved` Show all purchase requires matching recorded costs and DM authority even when the Skill is otherwise locked.
+- `talentsAndTraits`: `assertValidTalentsAndTraitsTransition` checks new Career-table Talents and Traits against `getNextTalentOrTraitPurchase`, validates missed-rank and packaged Talent provenance, restricts manually priced Show all purchases to the DM, and validates purchased or automatically granted packaged Elite Advances. `isCustomTraitEntry` permits campaign custom Traits, while `isPurityReplacement` permits the free Reformed Skin entry created with a Purity of Flesh acquisition.
+- `weaponTraining`: each newly trained fixed group is recorded at the career table cost, a group off the table is priced only by the DM, each career-table Exotic specialisation uses its printed cost and source rank, and only the DM adds off-Career Exotic Training as bonus training.
 - `experience`: a player adds an Alternate Rank only when the career matches, the rank it replaces is one of the character's valid next ranks and meets the Alternate Rank's minimum rank, and it appears only once. The DM may set any.
 
-Decreases and removals are not checked, because only additions create free XP. Fields without a transition validator, and the remaining parts of `experience`, are checked for shape and size only.
+`patchCharacterField` supplies transition validators with the complete proposed character, so one atomic update can validate a packaged Elite Advance and its unlocked Talent, or an Alternate Rank and its automatic packaged grant. Decreases and removals are not checked, because only additions create free XP. Fields without a transition validator, and the remaining parts of `experience`, are checked for shape and size only.
 
-| Callable error code | Meaning |
-| --- | --- |
-| `unauthenticated` | Firebase Authentication is missing or invalid |
-| `permission-denied` | The effective account lacks authority |
-| `invalid-argument` | The request payload fails validation |
-| `not-found` | A required target no longer exists |
-| `already-exists` | The requested identity or transition already exists |
-| `resource-exhausted` | A rate, count, or bounded-operation limit is exceeded |
-| `failed-precondition` | Current stored state does not permit the operation |
-| `internal` | An unexpected failure was converted to the generic safe message |
+| Callable error code   | Meaning                                                         |
+| --------------------- | --------------------------------------------------------------- |
+| `unauthenticated`     | Firebase Authentication is missing or invalid                   |
+| `permission-denied`   | The effective account lacks authority                           |
+| `invalid-argument`    | The request payload fails validation                            |
+| `not-found`           | A required target no longer exists                              |
+| `already-exists`      | The requested identity or transition already exists             |
+| `resource-exhausted`  | A rate, count, or bounded-operation limit is exceeded           |
+| `failed-precondition` | Current stored state does not permit the operation              |
+| `internal`            | An unexpected failure was converted to the generic safe message |
 
 UI code must branch on error codes rather than private server details.
 
@@ -148,20 +149,20 @@ Account deletion is a separate bounded transaction. It refuses deletion while th
 
 Preconditions and failure behaviour are part of each operation's contract:
 
-| Operation            | Required precondition                                             | Failure behaviour                                                                 |
-| -------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Operation            | Required precondition                                                                                              | Failure behaviour                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | Campaign deletion    | Caller is the campaign DM; every character has a valid Recovery Code; preflight count is at most 100,000 documents | Preflight creates no descendant deletion; processing reauthorizes the caller and can resume |
-| Character deletion   | Caller is the campaign DM; the character has a valid Recovery Code; preflight count is at most 100,000 documents | Parent character remains until descendant cleanup completes |
-| Account deletion     | No owned campaigns and cleanup fits the bounded transaction       | Transaction performs no partial Firestore cleanup on rejection                    |
-| Ownership transition | Caller has operation-specific authority and current state matches | Transaction rejects races without a partial transition                            |
+| Character deletion   | Caller is the campaign DM; the character has a valid Recovery Code; preflight count is at most 100,000 documents   | Parent character remains until descendant cleanup completes                                 |
+| Account deletion     | No owned campaigns and cleanup fits the bounded transaction                                                        | Transaction performs no partial Firestore cleanup on rejection                              |
+| Ownership transition | Caller has operation-specific authority and current state matches                                                  | Transaction rejects races without a partial transition                                      |
 
 ## Cloud runtime
 
-| Functions workload | Region | Timeout | Maximum instances | Concurrency per instance |
-| --- | --- | ---: | ---: | ---: |
-| Ordinary protected callable | `europe-west2` | 30 seconds | 5 instances | 40 requests |
-| Heavy protected callable | `europe-west2` | 30 seconds | 2 instances | 5 requests |
-| Account deletion | `europe-west2` | 60 seconds | 5 instances | 40 requests |
+| Functions workload          | Region         |    Timeout | Maximum instances | Concurrency per instance |
+| --------------------------- | -------------- | ---------: | ----------------: | -----------------------: |
+| Ordinary protected callable | `europe-west2` | 30 seconds |       5 instances |              40 requests |
+| Heavy protected callable    | `europe-west2` | 30 seconds |       2 instances |               5 requests |
+| Account deletion            | `europe-west2` | 60 seconds |       5 instances |              40 requests |
 
 All three workloads target Node.js 22. Account deletion uses its dedicated runtime service account.
 

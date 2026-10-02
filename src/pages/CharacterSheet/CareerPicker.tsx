@@ -42,12 +42,28 @@ export function CareerInfoContent({
 
       <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{career.description}</p>
 
+      {career.requirements?.length && (
+        <InfoSection title="Requirements" content={career.requirements.join(" ")} />
+      )}
+
       {homeworldCareer && (
         <InfoSection title={homeworldCareer.name} content={homeworldCareer.description} />
       )}
 
+      <InfoSection title="Starting Skills" content={career.startingSkills} />
+      <InfoSection title="Starting Talents" content={career.startingTalents} />
+      <InfoSection title="Starting Gear" content={career.startingGear} />
+
       {career.startingPsychicPowers && (
         <InfoSection title="Starting Psychic Powers" content={career.startingPsychicPowers} />
+      )}
+
+      {career.startingWealth && (
+        <InfoSection title="Starting Wealth" content={career.startingWealth} />
+      )}
+
+      {career.monthlyIncome && (
+        <InfoSection title="Monthly Income" content={career.monthlyIncome} />
       )}
 
       {career.traits?.map((trait) => (

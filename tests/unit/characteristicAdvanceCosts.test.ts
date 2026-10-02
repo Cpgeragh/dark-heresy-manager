@@ -53,6 +53,25 @@ describe("getCharacteristicTierCosts", () => {
   it("returns four null entries for a characteristic that's confirmed unbuyable for a career", () => {
     expect(getCharacteristicTierCosts("Tech-Priest", "fel")).toEqual([null, null, null, null]);
   });
+
+  it("uses the Templar Calix Martial Prowess costs after that Alternate Rank is taken", () => {
+    const alternateRanks = [
+      {
+        alternateRankId: "templar-calix",
+        replacedRankId: "savant-militant",
+        takenAtTier: 4,
+      },
+    ];
+    expect(getCharacteristicTierCosts("Imperial Psyker", "ws", alternateRanks)).toEqual([
+      100, 250, 500, 750,
+    ]);
+    expect(getCharacteristicTierCosts("Imperial Psyker", "int", alternateRanks)).toEqual([
+      500, 750, 1000, 2500,
+    ]);
+    expect(getCharacteristicTierCosts("Imperial Psyker", "wp", alternateRanks)).toEqual([
+      100, 250, 500, 750,
+    ]);
+  });
 });
 
 describe("getCharacteristicAdvancesSpent", () => {

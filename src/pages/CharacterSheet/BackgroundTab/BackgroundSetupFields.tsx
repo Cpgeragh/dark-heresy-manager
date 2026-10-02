@@ -2,7 +2,9 @@ import { useCallback, useState } from "react";
 import type {
   CharacterHeader,
   CyberneticItem,
+  ExperienceBlock,
   GearItem,
+  InsanityBlock,
   TalentsAndTraitsBlock,
 } from "../../../types/Character";
 import { HOMEWORLD_LIST } from "../../../data/reference/homeworldData";
@@ -26,6 +28,8 @@ import { TraitAcquisitionModal } from "../../../mechanics/traits/TraitAcquisitio
 import { homeworldNeedsTraitAcquisition } from "../../../mechanics/traits/traitEffects";
 import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
 import { HomeworldTraitAcquisitionModal } from "../HomeworldTraitAcquisitionModal";
+import { ALTERNATE_RANKS } from "../../../data/reference/alternateRankData";
+import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 
 export interface BackgroundSetupFieldsProps {
   header: CharacterHeader;
@@ -37,6 +41,10 @@ export interface BackgroundSetupFieldsProps {
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
   gear?: GearItem[];
   onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  experience?: ExperienceBlock;
+  onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
+  insanity?: InsanityBlock;
+  onUpdateInsanity?: (next: InsanityBlock) => void | Promise<void>;
 }
 
 export function BackgroundSetupFields({
@@ -49,9 +57,15 @@ export function BackgroundSetupFields({
   onUpdateCybernetics,
   gear = [],
   onUpdateGear,
+  experience,
+  onUpdateExperience,
+  insanity,
+  onUpdateInsanity,
 }: BackgroundSetupFieldsProps) {
   const [showHomeworldPicker, setShowHomeworldPicker] = useState(false);
   const [showCareerPicker, setShowCareerPicker] = useState(false);
+  const [showAdvanceSchemePicker, setShowAdvanceSchemePicker] = useState(false);
+  const [pendingAdvanceSchemeId, setPendingAdvanceSchemeId] = useState<string | null>(null);
   const [pendingHomeworldId, setPendingHomeworldId] = useState<string | null>(null);
   const [pendingCareer, setPendingCareer] = useState<CareerData | null>(null);
   const [pendingStartingChoiceCareer, setPendingStartingChoiceCareer] = useState<CareerData | null>(
@@ -63,6 +77,84 @@ export function BackgroundSetupFields({
   const selectedRank = selectedCareer?.ranks.find(
     (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
   );
+  const startingAdvanceSchemes = selectedCareer
+    ? ALTERNATE_RANKS.filter(
+        (rank) =>
+          rank.availableAtCharacterCreation && rank.requiredCareerIds.includes(selectedCareer.id)
+      ).sort((left, right) => left.name.localeCompare(right.name, "en-GB"))
+    : [];
+  const selectedAdvanceSchemeSelection = selectedRank
+    ? (experience?.alternateRanks ?? []).find(
+        (selection) => selection.takenAtTier === 1 && selection.replacedRankId === selectedRank.id
+      )
+    : undefined;
+  const selectedAdvanceScheme = ALTERNATE_RANKS.find(
+    (rank) =>
+      rank.id === selectedAdvanceSchemeSelection?.alternateRankId &&
+      rank.availableAtCharacterCreation
+  );
+  const selectedAdvanceSchemeSource = selectedAdvanceScheme?.source ?? selectedCareer?.source;
+
+  const clearCharacterCreationAdvanceScheme = useCallback(() => {
+    if (!experience || !onUpdateExperience) return;
+    const nextAlternateRanks = (experience.alternateRanks ?? []).filter(
+      (selection) => selection.takenAtTier !== 1
+    );
+    if (nextAlternateRanks.length === (experience.alternateRanks ?? []).length) return;
+    void onUpdateExperience({ ...experience, alternateRanks: nextAlternateRanks });
+    const insanityGained = Number(
+      selectedAdvanceSchemeSelection?.grantSelections?.["insanity-gained"] ?? 0
+    );
+    if (insanity && onUpdateInsanity && insanityGained > 0) {
+      void onUpdateInsanity({
+        ...insanity,
+        points: Math.max(0, insanity.points - insanityGained),
+      });
+    }
+  }, [experience, insanity, onUpdateExperience, onUpdateInsanity, selectedAdvanceSchemeSelection]);
+
+  function commitAdvanceSchemeSelect(alternateRankId?: string, insanityGained?: number) {
+    if (!experience || !onUpdateExperience || !selectedRank) return;
+    const retained = (experience.alternateRanks ?? []).filter(
+      (selection) => selection.takenAtTier !== 1
+    );
+    void onUpdateExperience({
+      ...experience,
+      alternateRanks: alternateRankId
+        ? [
+            ...retained,
+            {
+              alternateRankId,
+              replacedRankId: selectedRank.id,
+              takenAtTier: 1,
+              ...(insanityGained
+                ? { grantSelections: { "insanity-gained": String(insanityGained) } }
+                : {}),
+            },
+          ]
+        : retained,
+    });
+    const previousInsanityGained = Number(
+      selectedAdvanceSchemeSelection?.grantSelections?.["insanity-gained"] ?? 0
+    );
+    if (insanity && onUpdateInsanity && previousInsanityGained !== (insanityGained ?? 0)) {
+      void onUpdateInsanity({
+        ...insanity,
+        points: Math.max(0, insanity.points - previousInsanityGained + (insanityGained ?? 0)),
+      });
+    }
+    setShowAdvanceSchemePicker(false);
+  }
+
+  function handleAdvanceSchemeSelect(alternateRankId?: string) {
+    const alternateRank = ALTERNATE_RANKS.find((rank) => rank.id === alternateRankId);
+    if (alternateRank?.insanityGain === "1d5") {
+      setShowAdvanceSchemePicker(false);
+      setPendingAdvanceSchemeId(alternateRank.id);
+      return;
+    }
+    commitAdvanceSchemeSelect(alternateRankId);
+  }
 
   const headerForCareer = useCallback(
     (career: CareerData): CharacterHeader => {
@@ -99,6 +191,7 @@ export function BackgroundSetupFields({
         ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
       });
       if (!currentCareerIsAllowed) {
+        clearCharacterCreationAdvanceScheme();
         onUpdateHeader({ ...header, career: "", rank: "", careerPath: undefined });
         if (onUpdateCybernetics) {
           void onUpdateCybernetics(
@@ -110,7 +203,15 @@ export function BackgroundSetupFields({
       }
       setShowHomeworldPicker(false);
     },
-    [cybernetics, header, onUpdateCybernetics, talents, onUpdateHeader, onUpdateTalents]
+    [
+      clearCharacterCreationAdvanceScheme,
+      cybernetics,
+      header,
+      onUpdateCybernetics,
+      talents,
+      onUpdateHeader,
+      onUpdateTalents,
+    ]
   );
 
   const handleCareerSelect = useCallback(
@@ -125,6 +226,7 @@ export function BackgroundSetupFields({
         setPendingStartingChoiceCareer(career);
         return;
       }
+      if (header.career !== career.name) clearCharacterCreationAdvanceScheme();
       onUpdateHeader(headerForCareer(career));
       onUpdateTalents({
         ...talents,
@@ -143,7 +245,16 @@ export function BackgroundSetupFields({
       }
       setShowCareerPicker(false);
     },
-    [cybernetics, headerForCareer, onUpdateCybernetics, onUpdateHeader, onUpdateTalents, talents]
+    [
+      clearCharacterCreationAdvanceScheme,
+      cybernetics,
+      header.career,
+      headerForCareer,
+      onUpdateCybernetics,
+      onUpdateHeader,
+      onUpdateTalents,
+      talents,
+    ]
   );
 
   const sanctioning = talents.careerTraitAcquisition?.sanctioning;
@@ -298,6 +409,36 @@ export function BackgroundSetupFields({
             )
           }
         />
+
+        {selectedRank?.tier === 1 && startingAdvanceSchemes.length > 0 && (
+          <BackgroundPickerField
+            label="Advance Scheme"
+            selected
+            value={
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <span className={`${uiItemName} truncate`}>
+                  {selectedAdvanceScheme?.name ?? selectedRank.name}
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Chip className={colourRank}>Rank 1</Chip>
+                  {selectedAdvanceSchemeSource && (
+                    <Chip
+                      className={`bg-slate-800/40 font-code ${sourceColour(
+                        selectedAdvanceSchemeSource
+                      )}`}
+                    >
+                      {selectedAdvanceSchemeSource}
+                    </Chip>
+                  )}
+                </div>
+              </div>
+            }
+            emptyText=""
+            showAction={editable}
+            disabled={!editable || !experience || !onUpdateExperience}
+            onClick={() => setShowAdvanceSchemePicker(true)}
+          />
+        )}
       </div>
 
       {showHomeworldPicker && (
@@ -315,6 +456,65 @@ export function BackgroundSetupFields({
           onSelect={handleCareerSelect}
           onClose={() => setShowCareerPicker(false)}
         />
+      )}
+
+      {showAdvanceSchemePicker && selectedRank && (
+        <PickerModal
+          title="Advance Scheme"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setShowAdvanceSchemePicker(false)}
+          isEmpty={false}
+          hideSearch
+        >
+          <PickerRow
+            selected={!selectedAdvanceScheme}
+            aria-pressed={!selectedAdvanceScheme}
+            onClick={() => handleAdvanceSchemeSelect()}
+          >
+            <span className={`${uiItemName} group-hover:text-white`}>{selectedRank.name}</span>
+          </PickerRow>
+          {startingAdvanceSchemes.map((rank) => (
+            <PickerRow
+              key={rank.id}
+              selected={selectedAdvanceScheme?.id === rank.id}
+              aria-pressed={selectedAdvanceScheme?.id === rank.id}
+              onClick={() => handleAdvanceSchemeSelect(rank.id)}
+            >
+              <span className={`${uiItemName} group-hover:text-white`}>{rank.name}</span>
+            </PickerRow>
+          ))}
+        </PickerModal>
+      )}
+
+      {pendingAdvanceSchemeId && (
+        <PickerModal
+          title="Insanity gained (1d5)"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setPendingAdvanceSchemeId(null)}
+          isEmpty={false}
+          hideSearch
+        >
+          <p className="px-3 py-2 text-sm text-slate-300 lg:text-base">
+            Roll 1d5 and select the result.
+          </p>
+          {[1, 2, 3, 4, 5].map((value) => (
+            <PickerRow
+              key={value}
+              selected={false}
+              aria-pressed={false}
+              onClick={() => {
+                commitAdvanceSchemeSelect(pendingAdvanceSchemeId, value);
+                setPendingAdvanceSchemeId(null);
+              }}
+            >
+              <span className={`${uiItemName} group-hover:text-white`}>
+                {value} Insanity {value === 1 ? "Point" : "Points"}
+              </span>
+            </PickerRow>
+          ))}
+        </PickerModal>
       )}
 
       {pendingHomeworldId && (
@@ -368,6 +568,9 @@ export function BackgroundSetupFields({
               cybernetics={cybernetics}
               gear={gear}
               onComplete={(result) => {
+                if (header.career !== pendingCareer.name) {
+                  clearCharacterCreationAdvanceScheme();
+                }
                 onUpdateHeader(headerForCareer(pendingCareer));
                 onUpdateTalents({
                   ...talents,
@@ -396,6 +599,9 @@ export function BackgroundSetupFields({
         <CareerStartingChoiceModal
           career={pendingStartingChoiceCareer}
           onComplete={(choices) => {
+            if (header.career !== pendingStartingChoiceCareer.name) {
+              clearCharacterCreationAdvanceScheme();
+            }
             onUpdateHeader(headerForCareer(pendingStartingChoiceCareer));
             onUpdateTalents({
               ...talents,

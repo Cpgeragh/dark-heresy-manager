@@ -94,7 +94,7 @@ describe("Talent behaviour metadata", () => {
     ],
     ["heightened-senses", ["Sight", "Sound", "Smell", "Taste", "Touch"]],
     ["mechadendrite-use", ["Gun", "Manipulator", "Medicae", "Optical", "Utility"]],
-    ["resistance", ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"]],
+    ["resistance", ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity", "Toxins"]],
     ["two-weapon-wielder", ["Melee", "Ballistic"]],
     ["discipline-focus", ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"]],
     ["psychic-supremacy", ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"]],
@@ -136,6 +136,7 @@ describe("Talent behaviour metadata", () => {
       "Xeno (specific)",
       "Psykers",
       "Heretics",
+      "Tech Heretics",
       "Mutants",
     ]);
   });
@@ -169,7 +170,7 @@ describe("Talent purchase calculations", () => {
     const entries = [purchase("r1", resistance.id, "fear")];
     expect(hasTalentChoice(entries, "Fear")).toBe(true);
     expect(getAvailableTalentChoices(resistance, entries)).not.toContain("Fear");
-    const all = ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"].map(
+    const all = ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity", "Toxins"].map(
       (choice, index) => purchase(`r${index}`, resistance.id, choice)
     );
     expect(isTalentAvailableInPicker(resistance, all)).toBe(false);
@@ -228,6 +229,37 @@ describe("Psychic Talent purchase links", () => {
     expect(linked.minorPowers[0].talentEntryUid).toBe("minor-1");
     expect(linkPowerToTalentPurchase(linked, talents, "p2", "minor-1")).toBe(linked);
     expect(linkPowerToTalentPurchase(psychic, talents, "p1", "major-1")).toBe(psychic);
+  });
+
+  it("exposes and consumes the permanent Minor Power granted by Nascent Psyker", () => {
+    const talents: TalentsAndTraitsBlock = {
+      ...block([]),
+      eliteAdvances: [
+        {
+          uid: "nascent-entry",
+          eliteAdvanceId: "nascent-psyker",
+          name: "Nascent Psyker",
+        },
+      ],
+    };
+    const grantUid = "elite-advance:nascent-entry:minor-psychic-power:0";
+    const psychic: PsychicBlock = {
+      ...emptyPsychic,
+      minorPowers: [{ id: "p1", name: "Random Minor Power", known: true }],
+    };
+
+    expect(getAvailablePsychicTalentPurchases(talents, psychic, "minor")).toEqual([
+      expect.objectContaining({
+        uid: grantUid,
+        talentId: "minor-psychic-power",
+        grantedByTalentName: "Nascent Psyker",
+        grantedByType: "Elite Advance",
+      }),
+    ]);
+    const linked = linkPowerToTalentPurchase(psychic, talents, "p1", grantUid);
+    expect(linked.minorPowers[0].talentEntryUid).toBe(grantUid);
+    expect(getAvailablePsychicTalentPurchases(talents, linked, "minor")).toEqual([]);
+    expect(getAvailablePsychicTalentPurchases(talents, psychic, "major")).toEqual([]);
   });
 });
 

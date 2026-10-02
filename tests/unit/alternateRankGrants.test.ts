@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   applyAlternateRankEliteAdvanceGrants,
   applyAlternateRankGearGrants,
+  applyAlternateRankMeleeWeaponGrant,
 } from "../../src/mechanics/experience/alternateRankGrants";
-import type { GearItem, TalentsAndTraitsBlock } from "../../src/types/Character";
+import type { GearItem, MeleeWeapon, TalentsAndTraitsBlock } from "../../src/types/Character";
 
 describe("applyAlternateRankGearGrants", () => {
   it("adds the Legature and Sigil of Question with Alternate Rank provenance", () => {
@@ -52,6 +53,35 @@ describe("applyAlternateRankGearGrants", () => {
   it("does not change Gear for an Alternate Rank without grants", () => {
     const gear: GearItem[] = [{ id: "existing", name: "Chrono" }];
     expect(applyAlternateRankGearGrants(gear, "feral-warrior")).toBe(gear);
+  });
+});
+
+describe("applyAlternateRankMeleeWeaponGrant", () => {
+  it("adds the selected Templar Calix force weapon from the reference catalogue", () => {
+    const existing: MeleeWeapon = { id: "knife", name: "Knife" };
+    const result = applyAlternateRankMeleeWeaponGrant(
+      [existing],
+      "templar-calix",
+      "force-weapon",
+      "ih-force-staff"
+    );
+
+    expect(result).toEqual([
+      existing,
+      expect.objectContaining({
+        id: "alternate-rank:templar-calix:melee-weapon:force-weapon",
+        referenceId: "ih-force-staff",
+        name: "Force Staff",
+        craftsmanship: "Common",
+      }),
+    ]);
+  });
+
+  it("rejects a weapon outside the Templar Calix choice", () => {
+    const weapons: MeleeWeapon[] = [{ id: "knife", name: "Knife" }];
+    expect(
+      applyAlternateRankMeleeWeaponGrant(weapons, "templar-calix", "force-weapon", "cr-knife")
+    ).toBe(weapons);
   });
 });
 

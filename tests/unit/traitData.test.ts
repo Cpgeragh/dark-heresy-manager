@@ -65,4 +65,38 @@ describe("Trait catalogue", () => {
     );
     expect(find("feared-and-loathed").description).toContain("−10 penalty");
   });
+
+  it("records the supplied Knave of Pistols restrictions", () => {
+    expect(find("knave-of-pistols")).toEqual(
+      expect.objectContaining({
+        name: "Knave of Pistols",
+        source: "IH",
+        description: expect.stringContaining(
+          "may not acquire new Basic or Heavy Weapon Training Talents"
+        ),
+      })
+    );
+    expect(find("knave-of-pistols").description).toContain("−10 penalty on Ballistic Skill Tests");
+  });
+
+  it("records True Believer and the complete Ludmillan Dictates", () => {
+    expect(find("true-believer")).toEqual(
+      expect.objectContaining({ name: "True Believer", source: "IH" })
+    );
+    expect(TRAIT_DESCRIPTIONS["true-believer"]).toContain("Willpower Test");
+    expect(TRAIT_DESCRIPTIONS["true-believer"]).toContain("Pain is a gift");
+  });
+
+  it("records the permanent and session-based Nascent Power rules", () => {
+    expect(find("nascent-power")).toEqual(
+      expect.objectContaining({
+        name: "Nascent Power",
+        source: "IH",
+        prerequisites: "No Psy Rating",
+      })
+    );
+    expect(TRAIT_DESCRIPTIONS["nascent-power"]).toContain("single random Minor Psychic Power");
+    expect(TRAIT_DESCRIPTIONS["nascent-power"]).toContain("1d10 minus your Willpower Bonus");
+    expect(TRAIT_DESCRIPTIONS["nascent-power"]).toContain("generate Psychic Phenomena");
+  });
 });

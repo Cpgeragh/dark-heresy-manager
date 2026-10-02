@@ -425,6 +425,71 @@ describe("ExperienceTab named Career Rank ledger", () => {
     });
   });
 
+  it("offers Templar Calix only on the Savant Militant path and grants the chosen force weapon", async () => {
+    const user = userEvent.setup();
+    const current = makeCharacter();
+    const { onUpdateCharacter } = renderTab({
+      character: {
+        ...current,
+        header: {
+          ...current.header,
+          career: "Imperial Psyker",
+          rank: "Aspirant",
+          careerPath: undefined,
+        },
+        meleeWeapons: [{ id: "knife", name: "Knife" }],
+        experience: { total: 2_000, spent: 2_000, ranks: [] },
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+
+    await user.click(dialog.getByRole("button", { name: "Scholar Materium" }));
+    expect(
+      dialog.queryByRole("button", { name: "Templar Calix of the Scholastia Psykana" })
+    ).not.toBeInTheDocument();
+
+    await user.click(dialog.getByRole("button", { name: "Savant Militant" }));
+    const rankTypeButton = dialog
+      .getAllByRole("button", { name: "Savant Militant" })
+      .find((button) => button.getAttribute("aria-haspopup") === "dialog");
+    expect(rankTypeButton).toBeDefined();
+    await user.click(rankTypeButton!);
+    const rankTypePicker = within(screen.getByRole("dialog", { name: "Choose Rank Type" }));
+    await user.click(
+      rankTypePicker.getByRole("button", { name: "Templar Calix of the Scholastia Psykana" })
+    );
+    expect(dialog.getByRole("button", { name: "Confirm Rank Up" })).toBeDisabled();
+    await user.click(dialog.getByRole("button", { name: "Force Staff" }));
+    await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      experience: expect.objectContaining({
+        alternateRanks: [
+          {
+            alternateRankId: "templar-calix",
+            replacedRankId: "savant-militant",
+            takenAtTier: 4,
+            grantSelections: { "force-weapon": "ih-force-staff" },
+          },
+        ],
+      }),
+      meleeWeapons: [
+        expect.objectContaining({ id: "knife", name: "Knife" }),
+        expect.objectContaining({
+          referenceId: "ih-force-staff",
+          name: "Force Staff",
+          craftsmanship: "Common",
+        }),
+      ],
+      header: expect.objectContaining({
+        rank: "Savant Militant",
+        careerPath: "Savant Militant",
+      }),
+    });
+  });
+
   it("adds both Legate Investigator items when that Alternate Rank is taken", async () => {
     const user = userEvent.setup();
     const current = makeCharacter();

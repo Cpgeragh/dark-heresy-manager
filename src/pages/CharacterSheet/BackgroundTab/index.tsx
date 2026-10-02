@@ -4,7 +4,9 @@ import { useCallback, useState } from "react";
 import type {
   CharacterHeader,
   CyberneticItem,
+  ExperienceBlock,
   GearItem,
+  InsanityBlock,
   TalentsAndTraitsBlock,
 } from "../../../types/Character";
 import { FormField } from "../../../components/FormField";
@@ -57,6 +59,10 @@ interface BackgroundTabProps {
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
   gear?: GearItem[];
   onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  experience?: ExperienceBlock;
+  onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
+  insanity?: InsanityBlock;
+  onUpdateInsanity?: (next: InsanityBlock) => void | Promise<void>;
 }
 
 type BackgroundSectionGroup = "appearance" | "background";
@@ -91,6 +97,10 @@ export function BackgroundTab({
   onUpdateCybernetics,
   gear = [],
   onUpdateGear,
+  experience,
+  onUpdateExperience,
+  insanity,
+  onUpdateInsanity,
 }: BackgroundTabProps) {
   const [showDivinationPicker, setShowDivinationPicker] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
@@ -445,6 +455,10 @@ export function BackgroundTab({
           onUpdateCybernetics={onUpdateCybernetics}
           gear={gear}
           onUpdateGear={onUpdateGear}
+          experience={experience}
+          onUpdateExperience={onUpdateExperience}
+          insanity={insanity}
+          onUpdateInsanity={onUpdateInsanity}
         />
 
         <div className="border-t border-slate-700/70" />

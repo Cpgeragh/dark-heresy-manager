@@ -396,6 +396,27 @@ export const TRAIT_LIST: readonly TraitData[] = [
     description:
       "Members of the Chaliced Commissariat act with a brutal autonomy thanks to the indulgence of Lord Sector Hax. Their elimination of seditious elements within PDF units and pitiless reputation means that members of PDF units or Imperial Guard units raised within Calixis respond with fear and deep-seated loathing to a member of the Chaliced Commissariat.\n\nAs a member of this organisation, you gain a +10 bonus on Inquiry and Intimidate Tests when used against members of the Imperial Guard or PDF. You take a −10 penalty, however, when Testing Charm or Command on the same groups.\n\nNote: This Trait depends as much on the uniform, manner and bearing as anything else, and if the character is otherwise dressed, unrecognised or disguised its effects do not apply.",
   },
+  {
+    id: "knave-of-pistols",
+    name: "Knave of Pistols",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+    description:
+      "Metallican Gunslingers are notoriously proud of their skill with pistols and eschew all other ranged weapons. With this Trait, you may not acquire new Basic or Heavy Weapon Training Talents and may only take Exotic Weapon Training for pistols. If you already have training in ranged weapons that are not pistols, you may still use these Talents, but you take a −10 penalty on Ballistic Skill Tests.",
+  },
+  {
+    id: "true-believer",
+    name: "True Believer",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+  },
+  {
+    id: "nascent-power",
+    name: "Nascent Power",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+    prerequisites: "No Psy Rating",
+  },
 
   // ─── Inquisitor's Handbook — Homeworld Traits ──────────────────────────────
   {

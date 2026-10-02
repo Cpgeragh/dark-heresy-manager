@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
+  getExoticWeaponTrainingPurchase,
+  getExoticWeaponTrainingPurchases,
   getWeaponTrainingCost,
   getWeaponTrainingSpent,
 } from "../../src/mechanics/experience/weaponTrainingAdvanceCosts";
@@ -49,6 +51,68 @@ describe("getWeaponTrainingCost", () => {
         },
       ])
     ).toBe(200);
+  });
+});
+
+describe("getExoticWeaponTrainingPurchases", () => {
+  const secutor = [
+    {
+      alternateRankId: "mechanicus-secutor",
+      replacedRankId: "enginseer",
+      takenAtTier: 4,
+    },
+  ];
+
+  it("returns all five Mechanicus Secutor choices with their printed costs", () => {
+    expect(getExoticWeaponTrainingPurchases("Tech-Priest", "Enginseer", secutor)).toEqual([
+      {
+        name: "Breacher",
+        purchase: { cost: 200, careerId: "tech-priest", sourceRankId: "enginseer" },
+      },
+      {
+        name: "Graviton Gun",
+        purchase: { cost: 300, careerId: "tech-priest", sourceRankId: "enginseer" },
+      },
+      {
+        name: "Needle Pistol",
+        purchase: { cost: 300, careerId: "tech-priest", sourceRankId: "enginseer" },
+      },
+      {
+        name: "Rad-Cleanser",
+        purchase: { cost: 300, careerId: "tech-priest", sourceRankId: "enginseer" },
+      },
+      {
+        name: "Shock Blaster",
+        purchase: { cost: 200, careerId: "tech-priest", sourceRankId: "enginseer" },
+      },
+    ]);
+  });
+
+  it("returns the exact source-rank purchase for one specialisation", () => {
+    expect(
+      getExoticWeaponTrainingPurchase("Tech-Priest", "Enginseer", "rad-cleanser", secutor)
+    ).toEqual({ cost: 300, careerId: "tech-priest", sourceRankId: "enginseer" });
+  });
+
+  it("keeps only pistol-compatible choices for a Metallican Gunslinger", () => {
+    const metallican = [
+      {
+        alternateRankId: "metallican-gunslinger",
+        replacedRankId: "sell-steel",
+        takenAtTier: 1,
+      },
+    ];
+
+    expect(getExoticWeaponTrainingPurchases("Assassin", "Assassin", metallican)).toEqual([
+      {
+        name: "Needle Pistol",
+        purchase: { cost: 200, careerId: "assassin", sourceRankId: "secluse" },
+      },
+      {
+        name: "Web Pistol",
+        purchase: { cost: 200, careerId: "assassin", sourceRankId: "secluse" },
+      },
+    ]);
   });
 });
 

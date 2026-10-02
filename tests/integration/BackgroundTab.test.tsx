@@ -96,6 +96,38 @@ describe("BackgroundTab", () => {
     );
   });
 
+  it("offers Adepta Sororitas to an allowed origin and assigns Novice", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab({
+      talents: { homeworld: "feral-world", talents: [], traits: [] },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Select Career" }));
+    await user.click(screen.getByText("Adepta Sororitas"));
+
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ career: "Adepta Sororitas", rank: "Novice" })
+    );
+  });
+
+  it("shows the Adepta Sororitas requirements and complete starting package", async () => {
+    const user = userEvent.setup();
+    renderTab({ talents: { homeworld: "feral-world", talents: [], traits: [] } });
+
+    await user.click(screen.getByRole("button", { name: "Select Career" }));
+    await user.click(
+      screen.getByRole("button", { name: "Show information about Adepta Sororitas" })
+    );
+
+    const modal = screen.getByRole("dialog", { name: "Adepta Sororitas" });
+    expect(within(modal).getByText("Requirements")).toBeInTheDocument();
+    expect(within(modal).getByText("Starting Skills")).toBeInTheDocument();
+    expect(within(modal).getByText("Starting Talents")).toBeInTheDocument();
+    expect(within(modal).getByText("Starting Gear")).toBeInTheDocument();
+    expect(within(modal).getByText("70+2d10 Thrones")).toBeInTheDocument();
+    expect(within(modal).getByText("Supine Class")).toBeInTheDocument();
+  });
+
   it("pauses on a career with starting choices, then commits once they're resolved", async () => {
     const user = userEvent.setup();
     const { onUpdateHeader, onUpdateTalents } = renderTab({
@@ -135,6 +167,111 @@ describe("BackgroundTab", () => {
     expect(screen.getAllByText("Conscript").length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Change Rank" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Select Rank" })).not.toBeInTheDocument();
+  });
+
+  it("selects a Rank 1 Alternate Rank as the character-creation Advance Scheme", async () => {
+    const user = userEvent.setup();
+    const onUpdateExperience = vi.fn();
+    renderTab({
+      header: {
+        characterName: "Brother Corvus",
+        career: "Assassin",
+        rank: "Sell-Steel",
+      },
+      talents: { homeworld: "hive-world", talents: [], traits: [] },
+      experience: { total: 0, spent: 0, ranks: [] },
+      onUpdateExperience,
+    });
+
+    expect(screen.getAllByText("Sell-Steel")).toHaveLength(2);
+    await user.click(screen.getByRole("button", { name: "Change Advance Scheme" }));
+    const picker = within(screen.getByRole("dialog", { name: "Advance Scheme" }));
+    await user.click(picker.getByRole("button", { name: "Metallican Gunslinger" }));
+
+    expect(onUpdateExperience).toHaveBeenCalledWith({
+      total: 0,
+      spent: 0,
+      ranks: [],
+      alternateRanks: [
+        {
+          alternateRankId: "metallican-gunslinger",
+          replacedRankId: "sell-steel",
+          takenAtTier: 1,
+        },
+      ],
+    });
+  });
+
+  it("records the Warden advance scheme and its required 1d5 Insanity result", async () => {
+    const user = userEvent.setup();
+    const onUpdateExperience = vi.fn();
+    const onUpdateInsanity = vi.fn();
+    renderTab({
+      header: {
+        characterName: "Kae Drusil",
+        career: "Arbitrator",
+        rank: "Trooper",
+      },
+      talents: { homeworld: "hive-world", talents: [], traits: [] },
+      experience: { total: 0, spent: 0, ranks: [] },
+      onUpdateExperience,
+      insanity: { points: 2, disorders: [] },
+      onUpdateInsanity,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Change Advance Scheme" }));
+    const picker = within(screen.getByRole("dialog", { name: "Advance Scheme" }));
+    await user.click(picker.getByRole("button", { name: "Warden of the Divisio Immoralis" }));
+
+    const acquisition = within(screen.getByRole("dialog", { name: "Insanity gained (1d5)" }));
+    await user.click(acquisition.getByRole("button", { name: "3 Insanity Points" }));
+
+    expect(onUpdateExperience).toHaveBeenCalledWith({
+      total: 0,
+      spent: 0,
+      ranks: [],
+      alternateRanks: [
+        {
+          alternateRankId: "warden-divisio-immoralis",
+          replacedRankId: "trooper",
+          takenAtTier: 1,
+          grantSelections: { "insanity-gained": "3" },
+        },
+      ],
+    });
+    expect(onUpdateInsanity).toHaveBeenCalledWith({ points: 5, disorders: [] });
+  });
+
+  it("offers Reclamator as the Scum character-creation Advance Scheme", async () => {
+    const user = userEvent.setup();
+    const onUpdateExperience = vi.fn();
+    renderTab({
+      header: {
+        characterName: "Obadiah Plex",
+        career: "Scum",
+        rank: "Dreg",
+      },
+      talents: { homeworld: "hive-world", talents: [], traits: [] },
+      experience: { total: 0, spent: 0, ranks: [] },
+      onUpdateExperience,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Change Advance Scheme" }));
+    const picker = within(screen.getByRole("dialog", { name: "Advance Scheme" }));
+    await user.click(picker.getByRole("button", { name: "Reclamator" }));
+
+    expect(onUpdateExperience).toHaveBeenCalledWith({
+      total: 0,
+      spent: 0,
+      ranks: [],
+      alternateRanks: [
+        {
+          alternateRankId: "reclamator",
+          replacedRankId: "dreg",
+          takenAtTier: 1,
+        },
+      ],
+    });
   });
 
   it("assigns a new Career's starting Rank and clears the old Career path", async () => {

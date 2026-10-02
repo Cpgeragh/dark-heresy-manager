@@ -3,13 +3,22 @@
 import { findCareerByName } from "./careerData.js";
 import { CAREER_ADVANCES, type CareerAdvanceRef } from "./careerAdvancesReference.js";
 import { ALTERNATE_RANKS, type AlternateRankAdvance } from "./alternateRankData.js";
-import type { AlternateRankSelection } from "./types.js";
+import { makeSourceRankPurchase } from "./purchaseAttribution.js";
+import type { AlternateRankSelection, TalentEntryForCost, XpPurchaseRecord } from "./types.js";
 
 export interface AccessibleCareerAdvance {
   rankId: string;
   rankName?: string;
   alternateRankId?: string;
   advance: CareerAdvanceRef;
+}
+
+export interface MissedRankCareerAdvance {
+  alternateRankId: string;
+  replacedRankId: string;
+  advanceIndex: number;
+  advance: CareerAdvanceRef;
+  purchaseCost: number;
 }
 
 function asCareerAdvance(advance: AlternateRankAdvance): CareerAdvanceRef | undefined {
@@ -104,4 +113,95 @@ export function getUnlockedCareerAdvances(
   return getAllCareerAdvances(career, alternateRanks).filter((entry) =>
     unlockedRankIds.has(entry.rankId)
   );
+}
+
+function matchesTalentOrTraitAdvance(
+  advance: CareerAdvanceRef,
+  id: string,
+  specialisation?: string
+): boolean {
+  if (advance.talentId !== id && advance.traitId !== id) return false;
+  const advanceSpecialisation = (advance.specialisation ?? "").toLocaleLowerCase("en-GB");
+  const givenSpecialisation = (specialisation ?? "").toLocaleLowerCase("en-GB");
+  if (advanceSpecialisation === givenSpecialisation) return true;
+  const colonIndex = givenSpecialisation.indexOf(":");
+  return (
+    colonIndex !== -1 && givenSpecialisation.slice(0, colonIndex).trim() === advanceSpecialisation
+  );
+}
+
+/** Exact unlocked Career-table slot consumed by the next Talent or Trait purchase. */
+export function getNextTalentOrTraitPurchase(
+  career: string | undefined,
+  rank: string | undefined,
+  id: string,
+  specialisation: string | undefined,
+  ownedEntries: readonly TalentEntryForCost[],
+  alternateRanks: readonly AlternateRankSelection[] = []
+): XpPurchaseRecord | undefined {
+  const slots = getUnlockedCareerAdvances(career, rank, alternateRanks)
+    .filter(
+      ({ advance }) =>
+        (advance.kind === "talent" || advance.kind === "trait") &&
+        matchesTalentOrTraitAdvance(advance, id, specialisation)
+    )
+    .flatMap(({ rankId, advance }) =>
+      Array.from({ length: advance.repeatableAtThisRank ?? 1 }, () => ({
+        cost: advance.cost,
+        rankId,
+      }))
+    )
+    .sort((left, right) => left.cost - right.cost);
+  const owned = ownedEntries.filter((entry) =>
+    matchesTalentOrTraitAdvance(
+      { kind: "talent", talentId: entry.talentId, specialisation: entry.specialisation, cost: 0 },
+      id,
+      specialisation
+    )
+  ).length;
+  const slot = slots[owned];
+  return slot ? makeSourceRankPurchase(career, slot.rankId, slot.cost) : undefined;
+}
+
+/** Advances from replaced normal Rank tables once the following Career tier is reached. */
+export function getMissedRankCareerAdvances(
+  career: string | undefined,
+  rank: string | undefined,
+  selections: readonly AlternateRankSelection[] = []
+): MissedRankCareerAdvance[] {
+  const careerData = findCareerByName(career);
+  if (!careerData) return [];
+  const currentRank = careerData.ranks.find((entry) => entry.name === rank);
+  const advancesData = CAREER_ADVANCES.find((entry) => entry.careerId === careerData.id);
+  if (!currentRank || !advancesData) return [];
+
+  return selections.flatMap((selection) => {
+    const alternateRank = ALTERNATE_RANKS.find(
+      (entry) =>
+        entry.id === selection.alternateRankId &&
+        entry.requiredCareerIds.includes(careerData.id) &&
+        selection.takenAtTier >= entry.minimumRank
+    );
+    const replacedRank = careerData.ranks.find((entry) => entry.id === selection.replacedRankId);
+    const table = advancesData.rankTables.find(
+      (entry) => entry.rankId === selection.replacedRankId
+    );
+    if (
+      !alternateRank ||
+      !replacedRank ||
+      replacedRank.tier !== selection.takenAtTier ||
+      currentRank.tier <= selection.takenAtTier ||
+      !table
+    ) {
+      return [];
+    }
+
+    return table.advances.map((advance, advanceIndex) => ({
+      alternateRankId: selection.alternateRankId,
+      replacedRankId: selection.replacedRankId,
+      advanceIndex,
+      advance,
+      purchaseCost: advance.cost + 50,
+    }));
+  });
 }

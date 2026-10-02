@@ -61,7 +61,9 @@ import {
 import {
   applyAlternateRankEliteAdvanceGrants,
   applyAlternateRankGearGrants,
+  applyAlternateRankMeleeWeaponGrant,
 } from "../../mechanics/experience/alternateRankGrants";
+import { MELEE_WEAPON_REFERENCE } from "../../data/reference/weaponReference";
 
 interface ExperienceTabProps {
   character: Character;
@@ -324,15 +326,19 @@ function RankUpModal({
   ) =>
     ALTERNATE_RANKS.filter(
       (alternateRank) =>
+        !alternateRank.availableAtCharacterCreation &&
         alternateRank.requiredCareerIds.includes(progression.career.id) &&
         rank !== undefined &&
         rank.tier >= alternateRank.minimumRank &&
+        (!alternateRank.requiredCareerPaths?.length ||
+          alternateRank.requiredCareerPaths.some((path) => rank.paths?.includes(path))) &&
         !(character.experience.alternateRanks ?? []).some(
           (selection) => selection.alternateRankId === alternateRank.id
         )
     ).sort((left, right) => left.name.localeCompare(right.name));
   const [selectedRankId, setSelectedRankId] = useState(initialRank?.id ?? "");
   const [selectedAlternateRankId, setSelectedAlternateRankId] = useState("");
+  const [selectedMeleeWeaponReferenceId, setSelectedMeleeWeaponReferenceId] = useState("");
   const [rankTypePickerOpen, setRankTypePickerOpen] = useState(
     () => getAvailableAlternateRanks(initialRank).length >= 2
   );
@@ -344,6 +350,7 @@ function RankUpModal({
   const selectedAlternateRank = availableAlternateRanks.find(
     (alternateRank) => alternateRank.id === selectedAlternateRankId
   );
+  const selectedMeleeWeaponChoice = selectedAlternateRank?.grantedMeleeWeaponChoice;
   const selectedRankTypeName = selectedAlternateRank?.name ?? selectedRank?.name;
   const remaining = rankUpExperience.total - rankUpExperience.spent;
   const appliedRankUpCosts = (rankUpExperience.transactions ?? []).filter(
@@ -359,8 +366,17 @@ function RankUpModal({
     .filter(Boolean)
     .join("; ");
 
+  const selectAlternateRank = (alternateRankId: string) => {
+    setSelectedAlternateRankId(alternateRankId);
+    setSelectedMeleeWeaponReferenceId("");
+  };
+
   const confirm = async () => {
     if (!selectedRank) return;
+    const grantSelections =
+      selectedMeleeWeaponChoice && selectedMeleeWeaponReferenceId
+        ? { [selectedMeleeWeaponChoice.id]: selectedMeleeWeaponReferenceId }
+        : undefined;
     const nextExperience = selectedAlternateRankId
       ? {
           ...rankUpExperience,
@@ -370,6 +386,7 @@ function RankUpModal({
               alternateRankId: selectedAlternateRankId,
               replacedRankId: selectedRank.id,
               takenAtTier: selectedRank.tier,
+              ...(grantSelections ? { grantSelections } : {}),
             },
           ],
         }
@@ -380,6 +397,15 @@ function RankUpModal({
     const nextTalentsAndTraits = selectedAlternateRankId
       ? applyAlternateRankEliteAdvanceGrants(character.talentsAndTraits, selectedAlternateRankId)
       : character.talentsAndTraits;
+    const nextMeleeWeapons =
+      selectedAlternateRankId && selectedMeleeWeaponChoice && selectedMeleeWeaponReferenceId
+        ? applyAlternateRankMeleeWeaponGrant(
+            character.meleeWeapons,
+            selectedAlternateRankId,
+            selectedMeleeWeaponChoice.id,
+            selectedMeleeWeaponReferenceId
+          )
+        : character.meleeWeapons;
     setSaving(true);
     const saved = await onConfirm({
       experience: nextExperience,
@@ -388,6 +414,7 @@ function RankUpModal({
       ...(nextTalentsAndTraits !== character.talentsAndTraits
         ? { talentsAndTraits: nextTalentsAndTraits }
         : {}),
+      ...(nextMeleeWeapons !== character.meleeWeapons ? { meleeWeapons: nextMeleeWeapons } : {}),
     });
     setSaving(false);
     if (saved !== false) onClose();
@@ -439,7 +466,7 @@ function RankUpModal({
                     variant={selectedRankId === rank.id ? "careerBranch" : "careerBranchMuted"}
                     onClick={() => {
                       setSelectedRankId(rank.id);
-                      setSelectedAlternateRankId("");
+                      selectAlternateRank("");
                       setRankTypePickerOpen(getAvailableAlternateRanks(rank).length >= 2);
                     }}
                     aria-pressed={selectedRankId === rank.id}
@@ -457,7 +484,7 @@ function RankUpModal({
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Button
                   variant={selectedAlternateRankId === "" ? "careerPath" : "careerPathMuted"}
-                  onClick={() => setSelectedAlternateRankId("")}
+                  onClick={() => selectAlternateRank("")}
                   aria-pressed={selectedAlternateRankId === ""}
                 >
                   {selectedRank?.name ?? "Normal Career Rank"}
@@ -470,7 +497,7 @@ function RankUpModal({
                         ? "careerPath"
                         : "careerPathMuted"
                     }
-                    onClick={() => setSelectedAlternateRankId(alternateRank.id)}
+                    onClick={() => selectAlternateRank(alternateRank.id)}
                     aria-pressed={selectedAlternateRankId === alternateRank.id}
                   >
                     {alternateRank.name}
@@ -491,6 +518,34 @@ function RankUpModal({
               >
                 {selectedRankTypeName}
               </Button>
+            </div>
+          )}
+
+          {selectedMeleeWeaponChoice && (
+            <div className="space-y-2">
+              <div className={uiTextLabel}>Choose {selectedMeleeWeaponChoice.label}</div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {selectedMeleeWeaponChoice.referenceIds.map((referenceId) => {
+                  const weapon = MELEE_WEAPON_REFERENCE.find(
+                    (reference) => reference.id === referenceId
+                  );
+                  if (!weapon) return null;
+                  return (
+                    <Button
+                      key={referenceId}
+                      variant={
+                        selectedMeleeWeaponReferenceId === referenceId
+                          ? "careerPath"
+                          : "careerPathMuted"
+                      }
+                      onClick={() => setSelectedMeleeWeaponReferenceId(referenceId)}
+                      aria-pressed={selectedMeleeWeaponReferenceId === referenceId}
+                    >
+                      {weapon.name}
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
@@ -545,7 +600,10 @@ function RankUpModal({
             </Button>
             <Button
               onClick={confirm}
-              disabled={!selectedRank}
+              disabled={
+                !selectedRank ||
+                (selectedMeleeWeaponChoice !== undefined && !selectedMeleeWeaponReferenceId)
+              }
               loading={saving}
               loadingLabel="Saving"
             >
@@ -569,7 +627,7 @@ function RankUpModal({
             selected={selectedAlternateRankId === ""}
             aria-pressed={selectedAlternateRankId === ""}
             onClick={() => {
-              setSelectedAlternateRankId("");
+              selectAlternateRank("");
               setRankTypePickerOpen(false);
             }}
           >
@@ -581,7 +639,7 @@ function RankUpModal({
               selected={selectedAlternateRankId === alternateRank.id}
               aria-pressed={selectedAlternateRankId === alternateRank.id}
               onClick={() => {
-                setSelectedAlternateRankId(alternateRank.id);
+                selectAlternateRank(alternateRank.id);
                 setRankTypePickerOpen(false);
               }}
             >

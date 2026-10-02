@@ -7,6 +7,8 @@ import type {
 } from "./types.js";
 import { findCareerByName } from "./careerData.js";
 import { CAREER_ADVANCES, type CharacteristicKey } from "./careerAdvancesReference.js";
+import { ALTERNATE_RANKS } from "./alternateRankData.js";
+import type { AlternateRankSelection } from "./types.js";
 
 export const CHARACTERISTIC_ADVANCE_TIERS = [
   "simple",
@@ -24,8 +26,16 @@ export const CHARACTERISTIC_ADVANCE_TIERS = [
  */
 export function getCharacteristicTierCosts(
   career: string | undefined,
-  statKey: CharacteristicKey
+  statKey: CharacteristicKey,
+  alternateRanks: readonly AlternateRankSelection[] = []
 ): (number | null | undefined)[] {
+  const override = [...alternateRanks]
+    .reverse()
+    .map((selection) => ALTERNATE_RANKS.find((rank) => rank.id === selection.alternateRankId))
+    .find((rank) => rank?.characteristicAdvanceOverrides?.[statKey])
+    ?.characteristicAdvanceOverrides?.[statKey];
+  if (override) return CHARACTERISTIC_ADVANCE_TIERS.map((tier) => override[tier]);
+
   const careerData = findCareerByName(career);
   const advances = careerData && CAREER_ADVANCES.find((c) => c.careerId === careerData.id);
   const costs = advances?.characteristicAdvances[statKey];
@@ -37,7 +47,11 @@ export function getCharacteristicTierCosts(
 export function getCharacteristicAdvancesSpent(character: CharacterForCharacteristicCosts): number {
   const statKeys = Object.keys(character.characteristics) as (keyof Characteristics)[];
   return statKeys.reduce((total, statKey) => {
-    const tierCosts = getCharacteristicTierCosts(character.header.career, statKey);
+    const tierCosts = getCharacteristicTierCosts(
+      character.header.career,
+      statKey,
+      character.experience?.alternateRanks
+    );
     const advances = character.characteristics[statKey].advances;
     const purchases = character.characteristics[statKey].advancePurchases;
     let spent = 0;

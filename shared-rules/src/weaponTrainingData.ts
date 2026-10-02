@@ -12,6 +12,30 @@ export interface WeaponTrainingGroup {
   items: readonly WeaponTrainingItem[];
 }
 
+/**
+ * Exotic Weapon Training specialisations whose referenced weapons are pistols only.
+ * Knave of Pistols may acquire these specialisations, but not mixed-class training such as
+ * Integrated Ranged Weapon.
+ */
+export const PISTOL_ONLY_EXOTIC_WEAPON_TRAINING = [
+  "Galvian",
+  "Hypo Pistol",
+  "Needle Pistol",
+  "Shock Blaster",
+  "Shuriken Pistol",
+  "Slugga",
+  "Web Pistol",
+  "Widower",
+] as const;
+
+const pistolOnlyExoticTrainingNames = new Set<string>(
+  PISTOL_ONLY_EXOTIC_WEAPON_TRAINING.map((name) => name.toLocaleLowerCase())
+);
+
+export function isPistolOnlyExoticWeaponTraining(name: string): boolean {
+  return pistolOnlyExoticTrainingNames.has(name.trim().toLocaleLowerCase());
+}
+
 export const WEAPON_TRAINING_GROUPS: readonly WeaponTrainingGroup[] = [
   {
     label: "Basic Weapon Training",

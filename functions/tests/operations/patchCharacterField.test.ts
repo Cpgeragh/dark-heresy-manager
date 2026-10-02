@@ -67,7 +67,12 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "notes",
+          value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }],
+        },
         "dm-1"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
@@ -79,7 +84,12 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "notes",
+          value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }],
+        },
         "dm-1"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
@@ -263,6 +273,57 @@ describe("patchCharacterField", () => {
     });
   });
 
+  it("validates Talent purchases against an Elite Advance added in the same patch", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    const oldTalents = { homeworld: "", talents: [], traits: [], eliteAdvances: [] };
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { career: "Guardsman", rank: "Conscript" },
+        talentsAndTraits: oldTalents,
+      }),
+    });
+    const talentsAndTraits = {
+      ...oldTalents,
+      talents: [
+        {
+          uid: "talent-1",
+          talentId: "berserk-charge",
+          name: "Berserk Charge",
+          xpPurchase: { cost: 100 },
+          eliteAdvancePurchase: {
+            source: "elite-package",
+            cost: 100,
+            sourceName: "The Cult of the Red Redemption",
+            eliteAdvanceId: "cult-of-the-red-redemption",
+          },
+        },
+      ],
+      eliteAdvances: [
+        {
+          uid: "advance-1",
+          eliteAdvanceId: "cult-of-the-red-redemption",
+          name: "The Cult of the Red Redemption",
+          xpPurchase: { cost: 150 },
+        },
+      ],
+    };
+
+    await patchCharacterField(
+      {
+        campaignId: "c1",
+        characterId: "char-1",
+        field: "talentsAndTraits",
+        value: talentsAndTraits,
+      },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { talentsAndTraits });
+  });
+
   it("rejects the whole multi-field patch when one field is invalid, writing nothing", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
 
@@ -368,7 +429,12 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "notes",
+          value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }],
+        },
         "player-1"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
@@ -384,7 +450,12 @@ describe("patchCharacterField", () => {
 
     await expect(
       patchCharacterField(
-        { campaignId: "c1", characterId: "char-1", field: "notes", value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }] },
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "notes",
+          value: [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }],
+        },
         "someone-else"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
@@ -604,6 +675,38 @@ describe("patchCharacterField", () => {
           alternateRankId: "black-priest-of-maccabeus",
           replacedRankId: "preacher",
           takenAtTier: 4,
+        },
+      ],
+    };
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "experience", value: experience },
+      "player-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { experience });
+  });
+
+  it("allows a player to select a character-creation Advance Scheme at Rank 1", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        header: { career: "Assassin", rank: "Sell-Steel" },
+        experience: { total: 0, spent: 0, ranks: [] },
+      }),
+    });
+
+    const experience = {
+      total: 0,
+      spent: 0,
+      ranks: [],
+      alternateRanks: [
+        {
+          alternateRankId: "metallican-gunslinger",
+          replacedRankId: "sell-steel",
+          takenAtTier: 1,
         },
       ],
     };

@@ -34,10 +34,12 @@ import {
   colourFuchsia,
   colourLime,
   colourOrange,
+  colourRose,
   colourSky,
   colourTealLight,
   colourViolet,
 } from "../../../ui/styles/colourTokens";
+import type { WeaponType } from "../../../data/reference/weaponClassification";
 
 // ─── Integrated Weapon Classification ─────────────────────────────────────
 
@@ -523,6 +525,27 @@ export function weaponClassChip(
     active: slateFallbackStyle,
     inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50",
   };
+}
+
+const WEAPON_TYPE_STYLES: Record<WeaponType, string> = {
+  Bolt: colourAmberFaint,
+  Chain: colourOrange,
+  Exotic: colourFuchsia,
+  Flame: colourOrange,
+  Las: colourRose,
+  Launcher: colourLime,
+  Melta: colourViolet,
+  Plasma: colourSky,
+  Power: colourViolet,
+  Primitive: slateFallbackStyle,
+  Shock: colourCyan,
+  SP: colourTealLight,
+};
+
+export function weaponTypeChip(
+  type?: WeaponType
+): { label: string; className: string } | undefined {
+  return type ? { label: type, className: WEAPON_TYPE_STYLES[type] } : undefined;
 }
 
 export function ammoFamilyChip(

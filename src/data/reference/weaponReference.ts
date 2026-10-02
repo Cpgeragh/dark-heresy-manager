@@ -3,6 +3,7 @@
 // Feeds into the reference-lookup UI on the Weapons tab.
 
 import { SkillSource } from "../../types/SkillSource";
+import { classifyWeaponReference, type WeaponClass, type WeaponType } from "./weaponClassification";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -30,7 +31,10 @@ export interface RangedWeaponRef {
   id: string;
   name: string;
   source: SkillSource;
-  class: string;
+  class: WeaponClass;
+  type: WeaponType;
+  /** Specialisation used by Exotic Weapon Training when type is Exotic. */
+  exoticTraining?: string;
   range: string;
   rof: string;
   damage: string;
@@ -79,7 +83,10 @@ export interface MeleeWeaponRef {
   id: string;
   name: string;
   source: SkillSource;
-  class: string;
+  class: WeaponClass;
+  type: WeaponType;
+  /** Specialisation used by Exotic Weapon Training when type is Exotic. */
+  exoticTraining?: string;
   damage: string;
   pen: number | string;
   specialRules: string;
@@ -120,7 +127,11 @@ export interface MeleeWeaponRef {
 
 // ─── Ranged Weapons ──────────────────────────────────────────────────────────
 
-export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
+type RawRangedWeaponRef = Omit<RangedWeaponRef, "class" | "type" | "exoticTraining"> & {
+  class: string;
+};
+
+const RAW_RANGED_WEAPON_REFERENCE: RawRangedWeaponRef[] = [
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   // Las
@@ -3820,9 +3831,20 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
   },
 ];
 
+export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = RAW_RANGED_WEAPON_REFERENCE.map(
+  (weapon) => ({
+    ...weapon,
+    ...classifyWeaponReference(weapon.id, weapon.name, weapon.class),
+  })
+);
+
 // ─── Melee Weapons ───────────────────────────────────────────────────────────
 
-export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
+type RawMeleeWeaponRef = Omit<MeleeWeaponRef, "class" | "type" | "exoticTraining"> & {
+  class: string;
+};
+
+const RAW_MELEE_WEAPON_REFERENCE: RawMeleeWeaponRef[] = [
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   // Primitive
@@ -5470,6 +5492,13 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     availability: "Very Rare",
   },
 ];
+
+export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = RAW_MELEE_WEAPON_REFERENCE.map(
+  (weapon) => ({
+    ...weapon,
+    ...classifyWeaponReference(weapon.id, weapon.name, weapon.class),
+  })
+);
 
 // ─── Grenades ────────────────────────────────────────────────────────────────
 // Range for all thrown grenades is SBx3 (Strength Bonus × 3 metres).

@@ -78,8 +78,15 @@ export async function patchCharacterField(
       const characterData = characterSnapshot.data() ?? {};
       await assertCanEditCharacter(db, callerUid, dmId, characterData);
       const isDM = callerUid === dmId;
+      const prospectiveCharacter = { ...characterData, ...patch };
       for (const [field, value] of Object.entries(patch)) {
-        assertValidCharacterFieldTransition(field, characterData[field], value, characterData, isDM);
+        assertValidCharacterFieldTransition(
+          field,
+          characterData[field],
+          value,
+          prospectiveCharacter,
+          isDM
+        );
       }
       const updatesSummary = Object.keys(patch).some(isSummaryRelevantField);
       let livePlayerName: string | null = null;

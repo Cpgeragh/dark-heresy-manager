@@ -49,11 +49,14 @@ export interface CareerData {
   quote: string;
   attribution: string;
   description: string;
+  requirements?: readonly string[];
   startingSkills: string;
   startingTalents: string;
   startingSkillGrants?: readonly CareerStartingSkillGrant[];
   startingTalentGrants?: readonly CareerStartingTalentGrant[];
   startingGear: string;
+  startingWealth?: string;
+  monthlyIncome?: string;
   startingRank: string;
   startingPsychicPowers?: string;
   homeworldRolls: {
@@ -79,6 +82,75 @@ const rank = (
 ): CareerRankData => ({ id, name, tier, xpLevel, paths });
 
 export const CAREER_LIST: readonly CareerData[] = [
+  {
+    id: "adepta-sororitas",
+    name: "Adepta Sororitas",
+    source: SkillSource.IH,
+    quote: "With Faith and Fire.",
+    attribution: "First Maxim of the Sororitas.",
+    description:
+      "Adepta Sororitas are courageous, pious, self-sacrificing, chaste and faithful. They are fanatics, bound by harsh and restrictive religious oaths and ingrained zealotry. A Sororitas character’s identity dictates many of her actions and responses, making this Career best suited to experienced players.",
+    requirements: [
+      "The GM’s permission is required.",
+      "Sororitas characters are female without exception.",
+      "The character cannot begin play with mutations or Corruption Points.",
+      "The character must originate from a Feral World, Imperial World, the Schola Progenium, or a Noble Born origin.",
+    ],
+    startingSkills:
+      "Common Lore (Imperial Creed) (Int), Literacy (Int), Performer (Singer) (Fel), Speak Language (Low Gothic) (Int), and Trade (Copyist) (Int).",
+    startingTalents:
+      "Basic Weapon Training (Primitive), Melee Weapon Training (Primitive), Pistol Training (Las), and Pure Faith.",
+    startingSkillGrants: [
+      { options: [{ skillId: "common-imperial-creed" }] },
+      { options: [{ skillId: "literacy" }] },
+      { options: [{ skillId: "performer-singer" }] },
+      { options: [{ skillId: "speak-low-gothic" }] },
+      { options: [{ skillId: "trade-copyist" }] },
+    ],
+    startingTalentGrants: [
+      { options: [{ talentId: "basic-weapon-training", specialisation: "Primitive" }] },
+      { options: [{ talentId: "melee-weapon-training", specialisation: "Primitive" }] },
+      { options: [{ talentId: "pistol-training", specialisation: "Las" }] },
+      { options: [{ talentId: "pure-faith" }] },
+    ],
+    startingGear:
+      "Club or flail or staff, las pistol and charge pack, carapace chest plate and mesh cowl or feudal plate, aquila necklace, chaplet Ecclesiasticus (a devotional icon-amulet), vestments (Good Quality Clothing), 4 candles, writing kit, copy of the Rule of the Sororitas, and Ring of Suffrage (counts as a charm).",
+    startingWealth: "70+2d10 Thrones",
+    monthlyIncome: "Supine Class",
+    startingRank: "Novice",
+    homeworldRolls: {},
+    traits: [
+      {
+        name: "The Power of Faith",
+        description:
+          "The purity, will and faith of an Adepta Sororitas sister is a tangible and real thing, capable of shielding her from the psyker’s power or the Daemon’s wrath and enabling miraculous deeds. Her faith manifests through specialised Faith Talents that allow Fate Points to be used in unique ways.",
+      },
+    ],
+    ranks: [
+      rank("sororitas-novice", "Novice", 1, "0–499"),
+      rank("sororitas-cantus", "Cantus", 2, "500–999"),
+      rank("sororitas-constantia", "Constantia", 3, "1,000–1,999"),
+      rank("sororitas-dialogous", "Dialogous", 4, "2,000–2,999", ["Dialogous"]),
+      rank("sororitas-hospitaller", "Hospitaller", 4, "2,000–2,999", ["Hospitaller"]),
+      rank("sororitas-militant", "Militant", 4, "2,000–2,999", ["Militant"]),
+      rank("sororitas-famula", "Famula", 5, "3,000–5,999", ["Dialogous"]),
+      rank("sororitas-curia", "Curia", 5, "3,000–5,999", ["Hospitaller"]),
+      rank("sororitas-elohiem", "Elohiem", 5, "3,000–5,999", ["Militant"]),
+      rank("sororitas-nunciate", "Nunciate", 6, "6,000–7,999", ["Dialogous"]),
+      rank("sororitas-almoness", "Almoness", 6, "6,000–7,999", ["Hospitaller"]),
+      rank("sororitas-celestian", "Celestian", 6, "6,000–7,999", ["Militant"]),
+      rank("sororitas-superior", "Superior", 7, "8,000–9,999", [
+        "Dialogous",
+        "Hospitaller",
+        "Militant",
+      ]),
+      rank("sororitas-legatine", "Legatine", 8, "10,000–14,999", [
+        "Dialogous",
+        "Hospitaller",
+        "Militant",
+      ]),
+    ],
+  },
   {
     id: "adept",
     name: "Adept",

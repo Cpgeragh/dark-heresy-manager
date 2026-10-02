@@ -84,6 +84,11 @@ export const HOMEWORLD_LIST: readonly HomeworldData[] = [
     ],
     careers: [
       {
+        name: "Feral World Sororitas",
+        careerName: "Adepta Sororitas",
+        description: "A Sororitas character may hail from a Feral World with the GM’s permission.",
+      },
+      {
         name: "Assassin",
         description:
           "Feral world Assassins are usually plucked from their home world at a young age by Death Cults or Assassinorum schools. They soon begin a savage training regime which thins out the unworthy. Learning the art of the kill, they become fierce and merciless Assassins, much in demand on many worlds. Inured to pain and accustomed to death, they are deadly in the extreme.",
@@ -218,6 +223,12 @@ export const HOMEWORLD_LIST: readonly HomeworldData[] = [
       },
     ],
     careers: [
+      {
+        name: "Imperial World Sororitas",
+        careerName: "Adepta Sororitas",
+        description:
+          "A Sororitas character may hail from an Imperial World with the GM’s permission.",
+      },
       {
         name: "Adept",
         description:
@@ -481,6 +492,7 @@ export const HOMEWORLD_LIST: readonly HomeworldData[] = [
       },
       {
         name: "Schola Progenium Sororitas",
+        careerName: "Adepta Sororitas",
         description:
           "“Female progena make up the overwhelming majority of the Adeptus Sororitas. The Schola’s spiritual, physical and mental training are the perfect prelude to noviceship in one of the Orders.”",
       },
@@ -525,6 +537,11 @@ export const HOMEWORLD_LIST: readonly HomeworldData[] = [
       },
     ],
     careers: [
+      {
+        name: "Noble Born Sororitas",
+        careerName: "Adepta Sororitas",
+        description: "A Sororitas character may be Noble Born with the GM’s permission.",
+      },
       {
         name: "Noble Born Adepts",
         careerName: "Adept",

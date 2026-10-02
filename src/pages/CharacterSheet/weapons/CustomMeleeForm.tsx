@@ -28,6 +28,7 @@ import {
   splitWeaponQualities,
 } from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
+import { WEAPON_TYPES, type WeaponType } from "../../../data/reference/weaponClassification";
 
 const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;
 
@@ -50,6 +51,7 @@ export function CustomMeleeForm({
   const parsedDamage = parseWeaponDamage(initialWeapon?.damage, "R");
   const [name, setName] = useState(initialWeapon?.name ?? "");
   const [weaponClass, setWeaponClass] = useState(initialWeapon?.class ?? "");
+  const [weaponType, setWeaponType] = useState<"" | WeaponType>(initialWeapon?.type ?? "");
   const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>(
     initialWeapon?.craftsmanship ?? ""
   );
@@ -73,6 +75,7 @@ export function CustomMeleeForm({
   const [description, setDescription] = useState(initialWeapon?.description ?? "");
   const [saving, setSaving] = useState(false);
   const [showClassPicker, setShowClassPicker] = useState(false);
+  const [showTypePicker, setShowTypePicker] = useState(false);
   const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
   const qualityPicker = useWeaponQualityPicker(selectedQualities, setSelectedQualities);
@@ -80,6 +83,7 @@ export function CustomMeleeForm({
   const canAdd =
     Boolean(name.trim()) &&
     Boolean(weaponClass) &&
+    Boolean(weaponType) &&
     Boolean(craftsmanship) &&
     Boolean(origin) &&
     isValidDiceInput(damageBase) &&
@@ -98,6 +102,7 @@ export function CustomMeleeForm({
         custom: true,
         name: name.trim(),
         class: weaponClass,
+        type: weaponType || undefined,
         craftsmanship,
         source: origin,
         damage: formatDamageInput(damageBase, damagePlus, damageType),
@@ -140,6 +145,20 @@ export function CustomMeleeForm({
           setShowClassPicker(false);
         }}
         onClose={() => setShowClassPicker(false)}
+      />
+    );
+  }
+  if (showTypePicker) {
+    return (
+      <OptionPickerScreen
+        title="Weapon Type"
+        options={WEAPON_TYPES}
+        selected={weaponType}
+        onSelect={(value) => {
+          setWeaponType(value as WeaponType);
+          setShowTypePicker(false);
+        }}
+        onClose={() => setShowTypePicker(false)}
       />
     );
   }
@@ -203,7 +222,14 @@ export function CustomMeleeForm({
             placeholder="Choose class"
             required
             onClick={() => setShowClassPicker(true)}
-            className="col-span-2"
+          />
+          <PickerField
+            id="custom-melee-type"
+            label="Type"
+            value={weaponType}
+            placeholder="Choose type"
+            required
+            onClick={() => setShowTypePicker(true)}
           />
         </div>
       </CustomFormSection>

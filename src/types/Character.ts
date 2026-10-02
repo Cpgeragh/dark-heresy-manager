@@ -3,6 +3,7 @@
 import type { Timestamp } from "firebase/firestore";
 import { SkillSource } from "./SkillSource";
 import type { CustomItemOrigin } from "../constants/customItems";
+import type { WeaponType } from "../data/reference/weaponClassification";
 
 /**
  * CHARACTERISTICS
@@ -198,6 +199,7 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
   referenceId?: string; // set when created from RANGED_WEAPON_REFERENCE
   name: string;
   class?: string;
+  type?: WeaponType;
   damage?: string;
   pen?: string;
   range?: string;
@@ -230,6 +232,7 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   referenceId?: string; // set when created from MELEE_WEAPON_REFERENCE
   name: string;
   class?: string;
+  type?: WeaponType;
   damage?: string;
   pen?: string;
   specialRules?: string;
@@ -579,9 +582,10 @@ export interface TalentEntry extends CustomLibraryLinkFields {
 }
 
 export interface EliteAdvancePurchase {
-  source: "missed-rank" | "gm-approved" | "faith-talent";
+  source: "missed-rank" | "gm-approved" | "faith-talent" | "elite-package";
   cost: number;
   sourceName: string;
+  eliteAdvanceId?: string;
   alternateRankId?: string;
   replacedRankId?: string;
 }
@@ -604,6 +608,7 @@ export interface AlternateRankSelection {
   alternateRankId: string;
   replacedRankId: string;
   takenAtTier: number;
+  grantSelections?: Record<string, string>;
 }
 
 export interface TalentsAndTraitsBlock {
@@ -660,14 +665,16 @@ export interface WeaponTrainingBlock {
   manualCosts?: Partial<Record<WeaponTrainingTalentId, number>>;
   /** Exact paid cost and rank attribution for each purchased fixed group. */
   xpPurchases?: Partial<Record<WeaponTrainingTalentId, XpPurchaseRecord>>;
+  /** Package or GM Elite Advance provenance for each purchased fixed group. */
+  eliteAdvancePurchases?: Partial<Record<WeaponTrainingTalentId, EliteAdvancePurchase>>;
 }
 
 export interface WeaponTrainingExoticEntry {
   name: string;
   cost: number;
-  /** Exotic training is manually priced, so it is attributed to the current rank. */
+  /** Exact paid cost and either Career-table source rank or current-rank attribution. */
   xpPurchase?: XpPurchaseRecord;
-  /** True if a DM granted this as a bonus, outside the character's unlocked slot count. */
+  /** True when the DM added this outside the character's Career tables. */
   bonus?: boolean;
 }
 

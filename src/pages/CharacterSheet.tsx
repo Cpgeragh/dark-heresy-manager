@@ -725,6 +725,7 @@ export default function CharacterSheet({
                   talents={character.talentsAndTraits}
                   career={character.header.career}
                   rank={character.header.rank}
+                  alternateRanks={character.experience.alternateRanks}
                   updateCharacteristic={updateCharacteristic}
                 />
               )}
@@ -831,6 +832,9 @@ export default function CharacterSheet({
                   grenades={character.grenades ?? EMPTY_GRENADES}
                   editable={allowedToEdit}
                   strengthBonus={getCharBonus("s")}
+                  knaveOfPistols={character.experience.alternateRanks?.some(
+                    (selection) => selection.alternateRankId === "metallican-gunslinger"
+                  )}
                   onUpdateRanged={handleUpdateRangedWeapons}
                   onUpdateMelee={handleUpdateMeleeWeapons}
                   onUpdateGrenades={handleUpdateGrenades}
@@ -966,6 +970,10 @@ export default function CharacterSheet({
                   onUpdateCybernetics={handleUpdateCybernetics}
                   gear={character.gear ?? EMPTY_GEAR}
                   onUpdateGear={handleUpdateGear}
+                  experience={character.experience}
+                  onUpdateExperience={handleUpdateExperience}
+                  insanity={character.insanity}
+                  onUpdateInsanity={handleUpdateInsanity}
                 />
               )}
 

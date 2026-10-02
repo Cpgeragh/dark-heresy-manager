@@ -1,7 +1,7 @@
 // src/pages/CharacterSheet/CharacteristicsTab.tsx
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { CharField } from "../../types/Character";
+import type { AlternateRankSelection, CharField } from "../../types/Character";
 import type {
   Characteristics,
   CorruptionBlock,
@@ -170,6 +170,7 @@ interface CharacteristicsTabProps {
   talents?: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
+  alternateRanks?: readonly AlternateRankSelection[];
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }
 
@@ -184,6 +185,7 @@ export function CharacteristicsTab({
   talents,
   career,
   rank,
+  alternateRanks = [],
   updateCharacteristic,
 }: CharacteristicsTabProps) {
   recordComponentRender("CharacteristicsTab");
@@ -368,7 +370,7 @@ export function CharacteristicsTab({
     (statKey: keyof Characteristics, next: CharField) => {
       const current = getCharField(statKey);
       const purchases = { ...current.advancePurchases };
-      const tierCosts = getCharacteristicTierCosts(career, statKey);
+      const tierCosts = getCharacteristicTierCosts(career, statKey, alternateRanks);
 
       if (next.advances > current.advances) {
         for (let index = current.advances; index < next.advances; index += 1) {
@@ -389,7 +391,7 @@ export function CharacteristicsTab({
         Object.keys(purchases).length > 0 ? { ...next, advancePurchases: purchases } : next
       );
     },
-    [career, getCharField, rank, updateCharacteristic]
+    [alternateRanks, career, getCharField, rank, updateCharacteristic]
   );
 
   return (
@@ -539,7 +541,7 @@ export function CharacteristicsTab({
                 editable={false}
                 adjustment={modifierTotals[prevStat] ?? 0}
                 sources={modifierSources[prevStat] ?? []}
-                tierCosts={getCharacteristicTierCosts(career, prevStat)}
+                tierCosts={getCharacteristicTierCosts(career, prevStat, alternateRanks)}
                 getCharField={getCharField}
                 updateCharacteristic={updateCharacteristicWithPurchase}
               />
@@ -555,7 +557,7 @@ export function CharacteristicsTab({
                 editable={editable}
                 adjustment={modifierTotals[activeStat] ?? 0}
                 sources={modifierSources[activeStat] ?? []}
-                tierCosts={getCharacteristicTierCosts(career, activeStat)}
+                tierCosts={getCharacteristicTierCosts(career, activeStat, alternateRanks)}
                 getCharField={getCharField}
                 updateCharacteristic={updateCharacteristicWithPurchase}
               />
@@ -572,7 +574,7 @@ export function CharacteristicsTab({
                 editable={false}
                 adjustment={modifierTotals[nextStat] ?? 0}
                 sources={modifierSources[nextStat] ?? []}
-                tierCosts={getCharacteristicTierCosts(career, nextStat)}
+                tierCosts={getCharacteristicTierCosts(career, nextStat, alternateRanks)}
                 getCharField={getCharField}
                 updateCharacteristic={updateCharacteristicWithPurchase}
               />
@@ -589,7 +591,7 @@ export function CharacteristicsTab({
               editable={editable}
               adjustment={modifierTotals[key] ?? 0}
               sources={modifierSources[key] ?? []}
-              tierCosts={getCharacteristicTierCosts(career, key)}
+              tierCosts={getCharacteristicTierCosts(career, key, alternateRanks)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristicWithPurchase}
             />

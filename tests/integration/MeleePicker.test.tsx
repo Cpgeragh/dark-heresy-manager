@@ -15,6 +15,7 @@ const references: MeleeWeaponRef[] = [
     name: "Sword",
     source: SkillSource.CR,
     class: "Melee",
+    type: "Primitive",
     damage: "1d10+2 R",
     pen: 0,
     specialRules: "Balanced",
@@ -27,6 +28,7 @@ const references: MeleeWeaponRef[] = [
     name: "Axe",
     source: SkillSource.CR,
     class: "Melee",
+    type: "Primitive",
     damage: "1d10+3 R",
     pen: 0,
     specialRules: "—",
@@ -56,6 +58,7 @@ function makeCustomItem(
       weaponKind: "melee",
       name: "Custom Cleaver",
       class: "Melee",
+      type: "Primitive",
       damage: "1d10+4 R",
       pen: "2",
       weight: "4 kg",
@@ -97,6 +100,17 @@ describe("MeleePicker", () => {
     await user.type(screen.getByPlaceholderText("Search weapons…"), "Sw");
     expect(screen.getByText("Sword")).toBeInTheDocument();
     expect(screen.queryByText("Axe")).not.toBeInTheDocument();
+  });
+
+  it("filters the list by weapon type", async () => {
+    const user = userEvent.setup();
+    renderPicker({
+      references: [references[0], { ...references[1], type: "Power" }],
+    });
+    await user.click(screen.getByText("All Types"));
+    await user.click(screen.getByText("Power"));
+    expect(screen.getByText("Axe")).toBeInTheDocument();
+    expect(screen.queryByText("Sword")).not.toBeInTheDocument();
   });
 
   it("shows the craftsmanship screen after selecting a weapon", async () => {

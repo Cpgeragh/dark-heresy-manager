@@ -7,13 +7,13 @@ interface ExoticCustomWeaponButtonProps {
   onClick: () => void;
 }
 
-/** DM-only trigger for granting an off-career exotic weapon with a manually typed name and cost. */
+/** DM-only trigger for granting an off-career Exotic Weapon Training specialisation. */
 export function ExoticCustomWeaponButton({ onClick }: ExoticCustomWeaponButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label="Add a custom exotic weapon"
+      aria-label="Add Exotic Weapon Training"
       className={`relative ${uiIconButtonCustom} !border-transparent`}
     >
       <svg

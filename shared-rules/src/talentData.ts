@@ -396,6 +396,7 @@ export const TALENT_LIST: readonly TalentData[] = [
         { label: "Xeno (specific)", detailLabel: "Xeno", displayPrefix: "Xeno" },
         { label: "Psykers", value: "Psykers" },
         { label: "Heretics", value: "Heretics" },
+        { label: "Tech Heretics", value: "Tech Heretics" },
         { label: "Mutants", value: "Mutants" },
       ],
     },
@@ -748,7 +749,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     repeatable: true,
     behaviour: {
       kind: "fixed-repeatable",
-      options: ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"],
+      options: ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity", "Toxins"],
     },
   },
   {

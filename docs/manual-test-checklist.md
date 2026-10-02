@@ -236,7 +236,7 @@ below deliberately change several of those pages.
 - [ ] **Good Reputation** offers exactly: Administratum, Ecclesiarchy, Imperial Guard, Imperial Navy, Inquisition, and Underworld
 - [ ] **Heightened Senses** offers exactly: Sight, Sound, Smell, Taste, and Touch
 - [ ] **Mechadendrite Use** offers exactly: Gun, Manipulator, Medicae, Optical, and Utility
-- [ ] **Resistance** offers exactly: Cold, Fear, Heat, Poisons, and Psychic Powers
+- [ ] **Resistance** offers exactly: Cold, Fear, Heat, Poisons, Psychic Powers, Insanity, and Toxins
 - [ ] **Two-Weapon Wielder** offers exactly: Melee and Ballistic
 - [ ] **Talented** uses the current Skills reference catalogue rather than an unrelated hand-written list
 - [ ] Buy one choice: the Talent displays as one normal named card, for example `Resistance (Fear)`, while its choice picker remains open if another valid option exists
@@ -368,11 +368,11 @@ below deliberately change several of those pages.
 
 ## 7. Weapon Training
 
-Weapon-group training pills across five fixed categories (Basic, Heavy, Melee, Pistol, Thrown), plus an Exotic Weapon Training list that only the DM can add to. Every purchase spends real XP from the character's career/rank cost tables, the same way Characteristics, Skills, Talents, and Traits already do.
+Weapon-group training pills cover five fixed categories: Basic, Heavy, Melee, Pistol and Thrown. The Exotic Weapon Training section also offers specialisations unlocked by the character's active Career tables. The DM can add off-Career Exotic Training as bonus training. Purchases use the same career and rank XP accounting as Characteristics, Skills, Talents and Traits.
 
 ### How to test this page
 
-Use a character with a career/rank that has real cost data (e.g. Guardsman) and test as both the owning player and as DM: several paths here are DM-only. Record spent XP before starting, train a pill and, as DM, add an exotic weapon, refresh, and confirm both the pill/chip state and the XP total persist. Then remove each and confirm XP falls back down by the exact amount it cost. Find at least one pill that's on the career's table but not yet unlocked at the current rank (or not on the table at all) to test the Locked path as both a player and a DM.
+Use a character with Career and Rank cost data, such as a Guardsman, and test as both the owning player and the DM. Record spent XP before starting, train a fixed pill, purchase an available Exotic pill and add a DM bonus specialisation. Refresh and confirm that the pill or chip state and XP total persist. Remove each purchase and confirm that XP falls by its recorded cost. Use a Mechanicus Secutor at Enginseer for the five Secutor choices. Find at least one fixed pill that is on the Career table but not yet unlocked to test the Locked path as both a player and the DM.
 
 **Fixed weapon groups:**
 
@@ -390,13 +390,19 @@ Use a character with a career/rank that has real cost data (e.g. Guardsman) and 
 
 **Exotic Weapon Training:**
 
+- [ ] An unlocked career-table specialisation pulses with the fuchsia glow and shows its printed XP cost to assistive technology
+- [ ] Tapping an unlocked specialisation opens "Train Exotic Weapon Training ([name]) for [cost] XP?" with Train and Cancel actions
+- [ ] Confirming Train makes the specialisation an owned solid-fill chip, records the source Career rank and increases spent XP by the printed cost
+- [ ] A Mechanicus Secutor at Enginseer is offered Breacher for 200 XP, Shock Blaster for 200 XP, Graviton Gun for 300 XP, Needle Pistol for 300 XP and Rad-Cleanser for 300 XP
+- [ ] A Metallican Gunslinger is offered only pistol-compatible career-table Exotic Training
+- [ ] An owned or Talent-granted specialisation is not also shown as an available purchase
 - [ ] Owned exotic weapons show as solid-fill chips with just the weapon name: no cost shown on the chip itself
 - [ ] Tapping an owned exotic chip opens "Remove [name]?" with Remove/Cancel; confirming removes it and drops spent XP by that weapon's recorded cost
 - [ ] In read-only mode, owned exotic chips are disabled: no hover, no click
 - [ ] A weapon granted by a Talent (e.g. Sicarius Tutoring) shows the same solid-fill chip style but is always disabled and not independently removable
-- [ ] As DM, a dashed-border hammer button with a continuously moving outline sits at the end of the row and is labelled "Add a custom exotic weapon" for screen readers
+- [ ] As DM, a dashed-border hammer button with a continuously moving outline sits at the end of the row and is labelled "Add Exotic Weapon Training" for screen readers
 - [ ] A player never sees the hammer button, whatever the character's career and rank
-- [ ] As DM, tapping the hammer button opens the add form directly (Weapon Name and XP Cost, both required before Add enables), with no slot choice screen
+- [ ] As DM, tapping the hammer button opens the Exotic Training specialisation picker, followed by the XP Cost form, with no slot choice screen
 - [ ] Adding an exotic weapon as DM records the typed cost and increases spent XP by exactly that cost, whatever the career and rank
 - [ ] No slot limit applies: the DM can add any number of exotic weapons
 

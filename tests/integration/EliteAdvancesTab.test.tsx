@@ -79,6 +79,143 @@ describe("EliteAdvancesTab", () => {
     expect(screen.getByText("Encarta Maleficarum")).toBeInTheDocument();
   });
 
+  it("purchases the Cult of the Red Redemption as a general package", async () => {
+    const user = userEvent.setup();
+    render(<EditableHarness />);
+
+    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
+    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByText("The Cult of the Red Redemption"));
+    const purchase = screen.getByRole("dialog", {
+      name: "Buy The Cult of the Red Redemption",
+    });
+    await user.click(within(purchase).getByRole("button", { name: "Buy for 150 XP" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.getByText("The Cult of the Red Redemption")).toBeInTheDocument();
+  });
+
+  it("purchases Nascent Psyker for 0 XP and displays its permanent power grant", async () => {
+    const user = userEvent.setup();
+    render(<EditableHarness />);
+
+    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
+    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByText("Nascent Psyker"));
+    const purchase = screen.getByRole("dialog", { name: "Buy Nascent Psyker" });
+    expect(within(purchase).getByText("1 random permanent Minor Psychic Power")).toBeInTheDocument();
+    await user.click(within(purchase).getByRole("button", { name: "Buy for 0 XP" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.getByText("Nascent Psyker")).toBeInTheDocument();
+  });
+
+  it("removes the Minor Power linked to a deleted Nascent Psyker package", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn(async () => true);
+    render(
+      <EliteAdvancesTab
+        talents={{
+          ...EMPTY_TALENTS,
+          eliteAdvances: [
+            { uid: "nascent-entry", eliteAdvanceId: "nascent-psyker", name: "Nascent Psyker" },
+          ],
+        }}
+        skills={[]}
+        experience={{ total: 0, spent: 0, ranks: [] }}
+        insanity={INSANITY}
+        psychic={{
+          psyRating: 0,
+          minorPowers: [
+            {
+              id: "minor-power",
+              name: "Random Minor Power",
+              known: true,
+              talentEntryUid: "elite-advance:nascent-entry:minor-psychic-power:0",
+            },
+            { id: "unrelated", name: "Unrelated Power", known: true },
+          ],
+          majorPowers: [],
+        }}
+        editable
+        onUpdateCharacter={onUpdateCharacter}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete Nascent Psyker" }));
+    const confirmation = screen.getByRole("dialog", { name: "Delete Elite Advance" });
+    await user.click(within(confirmation).getByRole("button", { name: "Delete" }));
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        talentsAndTraits: expect.objectContaining({ eliteAdvances: [] }),
+        psychic: expect.objectContaining({
+          minorPowers: [expect.objectContaining({ id: "unrelated" })],
+        }),
+      })
+    );
+  });
+
+  it("offers Redemption package advances and buys Flame as real Weapon Training", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn(async () => true);
+    const talents: TalentsAndTraitsBlock = {
+      ...EMPTY_TALENTS,
+      eliteAdvances: [
+        {
+          uid: "redemption",
+          eliteAdvanceId: "cult-of-the-red-redemption",
+          name: "The Cult of the Red Redemption",
+        },
+      ],
+    };
+    render(
+      <EliteAdvancesTab
+        talents={talents}
+        skills={[]}
+        experience={{ total: 0, spent: 0, ranks: [] }}
+        insanity={INSANITY}
+        weaponTraining={{ trained: [], exoticWeapons: [] }}
+        career="Adept"
+        rank="Scribe"
+        editable
+        onUpdateCharacter={onUpdateCharacter}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
+    await user.click(screen.getByText("Skills"));
+    const skillsPicker = screen.getByRole("dialog", { name: "Add Elite Advance Skill" });
+    expect(within(skillsPicker).getAllByText("Secret Tongue (the Redemption)")).not.toHaveLength(0);
+    expect(within(skillsPicker).getByText("+10")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByText("Talents"));
+    const talentsPicker = screen.getByRole("dialog", { name: "Add Elite Advance Talent" });
+    const flameTraining = within(talentsPicker)
+      .getAllByText("Basic Weapon Training (Flame)")
+      .map((element) => element.closest("button"))
+      .find(Boolean);
+    expect(flameTraining).toBeInTheDocument();
+    await user.click(flameTraining!);
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        weaponTraining: expect.objectContaining({
+          trained: ["basic-flame"],
+          xpPurchases: { "basic-flame": expect.objectContaining({ cost: 200 }) },
+          eliteAdvancePurchases: {
+            "basic-flame": expect.objectContaining({
+              source: "elite-package",
+              eliteAdvanceId: "cult-of-the-red-redemption",
+            }),
+          },
+        }),
+      })
+    );
+  });
+
   it("shows the complete supplied rules from a purchased card", async () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {

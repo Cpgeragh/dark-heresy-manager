@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   getAllCareerAdvances,
+  getMissedRankCareerAdvances,
   getUnlockedCareerAdvances,
 } from "../../src/mechanics/experience/careerAdvanceAccess";
 
@@ -151,5 +152,34 @@ describe("getUnlockedCareerAdvances", () => {
           entry.advance.kind === "talent" && entry.advance.talentId === "sound-constitution"
       )
     ).toHaveLength(2);
+  });
+});
+
+describe("getMissedRankCareerAdvances", () => {
+  const blackPriest = [
+    {
+      alternateRankId: "black-priest-of-maccabeus",
+      replacedRankId: "preacher",
+      takenAtTier: 4,
+    },
+  ];
+
+  it("does not expose the replaced table until the following Career tier", () => {
+    expect(getMissedRankCareerAdvances("Cleric", "Preacher", blackPriest)).toEqual([]);
+  });
+
+  it("returns the replaced table with the 50 XP missed-rank surcharge", () => {
+    expect(getMissedRankCareerAdvances("Cleric", "Cleric", blackPriest)).toContainEqual(
+      expect.objectContaining({
+        alternateRankId: "black-priest-of-maccabeus",
+        replacedRankId: "preacher",
+        purchaseCost: 350,
+        advance: expect.objectContaining({
+          kind: "skill",
+          skillId: "disguise",
+          cost: 300,
+        }),
+      })
+    );
   });
 });

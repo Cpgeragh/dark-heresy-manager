@@ -18,6 +18,7 @@ export interface AlternateRankSelection {
   alternateRankId: string;
   replacedRankId: string;
   takenAtTier: number;
+  grantSelections?: Record<string, string>;
 }
 
 export interface CharField {
@@ -42,6 +43,7 @@ export interface Characteristics {
 export interface CharacterForCharacteristicCosts {
   characteristics: Characteristics;
   header: { career?: string };
+  experience?: { alternateRanks?: AlternateRankSelection[] };
 }
 
 export type SkillAdvanceLevel = "untrained" | "trained" | "+10" | "+20";
@@ -91,6 +93,25 @@ export type WeaponTrainingTalentId =
 /** The minimal shape of a character this package's skill-cost logic reads. */
 export interface CharacterForSkillCosts {
   skills: SkillEntryForCost[];
+}
+
+/** The minimal stored Talent or Trait shape used to count consumed Career-table slots. */
+export interface TalentEntryForCost {
+  talentId: string;
+  specialisation?: string;
+  manualCost?: number;
+  xpPurchase?: XpPurchaseRecord;
+  grantedByTalentEntryUid?: string;
+}
+
+/** The minimal character shape used to total Talent and Trait XP. */
+export interface CharacterForTalentCosts {
+  header: { career?: string; rank?: string };
+  experience?: { alternateRanks?: AlternateRankSelection[] };
+  talentsAndTraits: {
+    talents: TalentEntryForCost[];
+    traits: TalentEntryForCost[];
+  };
 }
 
 export interface WeaponTrainingExoticEntryForCost {

@@ -52,6 +52,7 @@ import {
   meleeCraftsmanshipDescription,
   meleeDamageForCraftsmanship,
   removeSpecialRule,
+  weaponTypeChip,
 } from "./weaponHelpers";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
 import { AmmoEntryRow } from "./AmmoEntryRow";
@@ -230,6 +231,7 @@ export function MeleeCard({
           ? "No additional weapon effect."
           : undefined;
   const classChips = meleeClassChips(weapon.class);
+  const activeWeaponType = weaponTypeChip(weaponRef?.type ?? weapon.type);
   const isThrown =
     weapon.class?.toLowerCase().includes("thrown") ||
     weaponRef?.class.toLowerCase().includes("thrown");
@@ -320,7 +322,7 @@ export function MeleeCard({
               </Chip>
             )}
           </div>
-          {(classChips.length > 0 || weapon.concealedBionic) && (
+          {(classChips.length > 0 || activeWeaponType || weapon.concealedBionic) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {weapon.concealedBionic && (
                 <Chip size="sm" className={colourPink}>
@@ -337,6 +339,11 @@ export function MeleeCard({
                   {chip.label}
                 </Chip>
               ))}
+              {activeWeaponType && (
+                <Chip size="sm" className={activeWeaponType.className}>
+                  {activeWeaponType.label}
+                </Chip>
+              )}
             </div>
           )}
         </div>

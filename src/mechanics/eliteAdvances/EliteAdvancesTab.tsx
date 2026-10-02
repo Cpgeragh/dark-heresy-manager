@@ -6,6 +6,7 @@ import { ELITE_ADVANCES, type EliteAdvanceData } from "../../data/reference/elit
 import { DEFAULT_SKILLS } from "../../data/reference/defaultSkills";
 import { TALENT_LIST, type TalentData } from "../../data/reference/talentData";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
+import { TRAIT_LIST } from "../../data/reference/traitData";
 import type {
   ArcheotechItem,
   Character,
@@ -51,6 +52,7 @@ import { useTalentAcquisitionFlow } from "../talents/useTalentAcquisitionFlow";
 import {
   getAvailableNamedEliteAdvances,
   getMissedRankEliteAdvanceOptions,
+  getPackageEliteAdvanceOptions,
   type MissedRankSkillOption,
   type MissedRankTalentOption,
 } from "./eliteAdvanceAccess";
@@ -86,6 +88,24 @@ function getSkillName(skillId: string): string {
 
 function getTalentName(talentId: string): string {
   return TALENT_LIST.find((talent) => talent.id === talentId)?.name ?? talentId;
+}
+
+function getTraitName(traitId: string): string {
+  return TRAIT_LIST.find((trait) => trait.id === traitId)?.name ?? traitId;
+}
+
+function getUnlockedAdvanceName(
+  advance: NonNullable<EliteAdvanceData["unlockedAdvances"]>[number]
+): string {
+  if (advance.kind === "skill" && advance.skillId) {
+    const name = getSkillName(advance.skillId);
+    return advance.level && advance.level !== "trained" ? `${name} ${advance.level}` : name;
+  }
+  if (advance.kind === "talent" && advance.talentId) {
+    const name = getTalentName(advance.talentId);
+    return advance.specialisation ? `${name} (${advance.specialisation})` : name;
+  }
+  return "Unknown Advance";
 }
 
 function getAlternateRankNames(advance: EliteAdvanceData): string[] {
@@ -127,6 +147,40 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
           <ul className="mt-1 list-disc space-y-1 pl-5">
             {advance.grantedTalents.map((talentId) => (
               <li key={talentId}>{getTalentName(talentId)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {advance.grantedTraits && advance.grantedTraits.length > 0 && (
+        <div>
+          <p className={uiTextLabel}>Granted traits</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5">
+            {advance.grantedTraits.map((traitId) => (
+              <li key={traitId}>{getTraitName(traitId)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {(advance.grantedMinorPsychicPowers ?? 0) > 0 && (
+        <div>
+          <p className={uiTextLabel}>Granted psychic powers</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5">
+            <li>
+              {advance.grantedMinorPsychicPowers} random permanent Minor Psychic Power
+              {advance.grantedMinorPsychicPowers === 1 ? "" : "s"}
+            </li>
+          </ul>
+        </div>
+      )}
+      {advance.unlockedAdvances && advance.unlockedAdvances.length > 0 && (
+        <div>
+          <p className={uiTextLabel}>Unlocked advances</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5">
+            {advance.unlockedAdvances.map((unlocked, index) => (
+              <li key={`${unlocked.kind}-${unlocked.skillId ?? unlocked.talentId}-${index}`}>
+                {getUnlockedAdvanceName(unlocked)} — {unlocked.cost} XP
+                {unlocked.prerequisites ? `; prerequisite: ${unlocked.prerequisites}` : ""}
+              </li>
             ))}
           </ul>
         </div>
@@ -396,7 +450,7 @@ function SpecialAdvancePurchaseModal({
       }
     >
       <PickerBody>
-        <p className={uiTextBody}>{advance.description}</p>
+        <EliteAdvanceDetails advance={advance} />
         {needsInsanity && rollInput("Insanity gained (1d5)", insanity, setInsanity)}
         {needsToughness &&
           rollInput("Permanent Toughness reduction (1d5)", toughness, setToughness)}
@@ -544,13 +598,25 @@ function SkillAdvancePicker({
                   return;
                 }
                 if (!option) return;
-                onBuy(skill.id, level, option.cost, {
-                  source: "missed-rank",
-                  cost: option.cost,
-                  sourceName: `Missed ${replacedRank?.name ?? option.replacedRankId} Rank`,
-                  alternateRankId: option.alternateRankId,
-                  replacedRankId: option.replacedRankId,
-                });
+                onBuy(
+                  skill.id,
+                  level,
+                  option.cost,
+                  option.eliteAdvanceId
+                    ? {
+                        source: "elite-package",
+                        cost: option.cost,
+                        sourceName: option.eliteAdvanceName ?? option.eliteAdvanceId,
+                        eliteAdvanceId: option.eliteAdvanceId,
+                      }
+                    : {
+                        source: "missed-rank",
+                        cost: option.cost,
+                        sourceName: `Missed ${replacedRank?.name ?? option.replacedRankId} Rank`,
+                        alternateRankId: option.alternateRankId,
+                        replacedRankId: option.replacedRankId,
+                      }
+                );
               }}
             >
               <div className="min-w-0 flex-1 space-y-1.5">
@@ -566,6 +632,18 @@ function SkillAdvancePicker({
                     </Chip>
                   )}
                 </div>
+                {option?.eliteAdvanceId && (
+                  <p className="text-xs lg:text-sm">
+                    <span className={uiTextLabel}>Unlocked by: </span>
+                    {option.eliteAdvanceName ?? option.eliteAdvanceId}
+                  </p>
+                )}
+                {option?.prerequisites && (
+                  <p className="text-xs lg:text-sm">
+                    <span className={uiTextLabel}>Prerequisites: </span>
+                    {option.prerequisites}
+                  </p>
+                )}
               </div>
             </PickerRow>
           );
@@ -654,9 +732,9 @@ function TalentAdvancePicker({
     >
       <div className="space-y-3 p-3 lg:p-4">
         {filtered.map(({ option, talent }) => {
-          const replacedRank = careerData?.ranks.find(
-            (entry) => entry.id === option.replacedRankId
-          );
+          const replacedRank = option.replacedRankId
+            ? careerData?.ranks.find((entry) => entry.id === option.replacedRankId)
+            : undefined;
           return (
             <PickerRow
               key={option.key}
@@ -699,10 +777,23 @@ function TalentAdvancePicker({
                     {option.cost} XP
                   </Chip>
                 </div>
-                <p className="text-xs lg:text-sm">
-                  <span className={uiTextLabel}>Missed rank: </span>
-                  {replacedRank?.name ?? option.replacedRankId}
-                </p>
+                {option.eliteAdvanceId ? (
+                  <p className="text-xs lg:text-sm">
+                    <span className={uiTextLabel}>Unlocked by: </span>
+                    {option.eliteAdvanceName ?? option.eliteAdvanceId}
+                  </p>
+                ) : (
+                  <p className="text-xs lg:text-sm">
+                    <span className={uiTextLabel}>Missed rank: </span>
+                    {replacedRank?.name ?? option.replacedRankId}
+                  </p>
+                )}
+                {option.prerequisites && (
+                  <p className="text-xs lg:text-sm">
+                    <span className={uiTextLabel}>Prerequisites: </span>
+                    {option.prerequisites}
+                  </p>
+                )}
               </div>
             </PickerRow>
           );
@@ -746,6 +837,9 @@ export function EliteAdvancesTab({
     skills,
     talents: talents.talents,
   });
+  const packageOptions = getPackageEliteAdvanceOptions({ talents, skills, weaponTraining });
+  const availableSkills = [...missed.skills, ...packageOptions.skills];
+  const availableTalents = [...missed.talents, ...packageOptions.talents];
   const {
     addTalent: addTalentThroughAcquisition,
     acquisitionPending,
@@ -826,21 +920,53 @@ export function EliteAdvancesTab({
   };
 
   const purchaseFixedTalent = (option: MissedRankTalentOption) => {
+    if (option.weaponTrainingId) {
+      const id = option.weaponTrainingId;
+      const eliteAdvancePurchase: EliteAdvancePurchase = {
+        source: "elite-package",
+        cost: option.cost,
+        sourceName: option.eliteAdvanceName ?? option.eliteAdvanceId ?? "Elite Advance Package",
+        eliteAdvanceId: option.eliteAdvanceId,
+      };
+      void onUpdateCharacter({
+        weaponTraining: {
+          ...weaponTraining,
+          trained: [...weaponTraining.trained, id],
+          xpPurchases: {
+            ...weaponTraining.xpPurchases,
+            [id]: makeCurrentRankPurchase(career, rank, option.cost),
+          },
+          eliteAdvancePurchases: {
+            ...weaponTraining.eliteAdvancePurchases,
+            [id]: eliteAdvancePurchase,
+          },
+        },
+      });
+      return;
+    }
     const reference = TALENT_LIST.find((talent) => talent.id === option.talentId);
     if (!reference) return;
-    const replacedRank = findCareerByName(career)?.ranks.find(
-      (entry) => entry.id === option.replacedRankId
-    );
+    const replacedRank = option.replacedRankId
+      ? findCareerByName(career)?.ranks.find((entry) => entry.id === option.replacedRankId)
+      : undefined;
+    const eliteAdvancePurchase: EliteAdvancePurchase = option.eliteAdvanceId
+      ? {
+          source: "elite-package",
+          cost: option.cost,
+          sourceName: option.eliteAdvanceName ?? option.eliteAdvanceId,
+          eliteAdvanceId: option.eliteAdvanceId,
+        }
+      : {
+          source: "missed-rank",
+          cost: option.cost,
+          sourceName: `Missed ${replacedRank?.name ?? option.replacedRankId} Rank`,
+          alternateRankId: option.alternateRankId,
+          replacedRankId: option.replacedRankId,
+        };
     const entry: TalentEntry = {
       ...makeTalentEntry(reference, option.specialisation),
       xpPurchase: makeCurrentRankPurchase(career, rank, option.cost),
-      eliteAdvancePurchase: {
-        source: "missed-rank",
-        cost: option.cost,
-        sourceName: `Missed ${replacedRank?.name ?? option.replacedRankId} Rank`,
-        alternateRankId: option.alternateRankId,
-        replacedRankId: option.replacedRankId,
-      },
+      eliteAdvancePurchase,
     };
     addTalentThroughAcquisition(entry);
   };
@@ -861,11 +987,22 @@ export function EliteAdvancesTab({
   const removeSpecial = async (uid: string) => {
     const removed = entries.find((entry) => entry.uid === uid);
     if (!removed) return;
+    const psychicGrantPrefix = `elite-advance:${removed.uid}:minor-psychic-power:`;
     await onUpdateCharacter({
       talentsAndTraits: {
         ...talents,
         eliteAdvances: entries.filter((entry) => entry.uid !== uid),
       },
+      ...(psychic
+        ? {
+            psychic: {
+              ...psychic,
+              minorPowers: psychic.minorPowers.filter(
+                (power) => !power.talentEntryUid?.startsWith(psychicGrantPrefix)
+              ),
+            },
+          }
+        : {}),
       ...(removed.acquisition?.insanityGained
         ? {
             insanity: {
@@ -960,7 +1097,7 @@ export function EliteAdvancesTab({
       )}
       {showPicker && pickerKind === "skill" && (
         <SkillAdvancePicker
-          options={missed.skills}
+          options={availableSkills}
           skills={skills}
           career={career}
           editable={editable}
@@ -971,7 +1108,7 @@ export function EliteAdvancesTab({
       )}
       {showPicker && pickerKind === "talent" && (
         <TalentAdvancePicker
-          options={missed.talents}
+          options={availableTalents}
           talents={talents}
           career={career}
           rank={rank}

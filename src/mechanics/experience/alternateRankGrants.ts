@@ -1,7 +1,8 @@
 import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
 import { ELITE_ADVANCES } from "../../data/reference/eliteAdvanceData";
 import { GEAR_REFERENCE } from "../../data/reference/gearReference";
-import type { GearItem, TalentsAndTraitsBlock } from "../../types/Character";
+import { MELEE_WEAPON_REFERENCE } from "../../data/reference/weaponReference";
+import type { GearItem, MeleeWeapon, TalentsAndTraitsBlock } from "../../types/Character";
 
 function grantOriginId(alternateRankId: string): string {
   return `alternate-rank:${alternateRankId}`;
@@ -33,6 +34,44 @@ export function applyAlternateRankGearGrants(
         grantedByType: "Alternate Rank",
       };
     }),
+  ];
+}
+
+export function applyAlternateRankMeleeWeaponGrant(
+  weapons: readonly MeleeWeapon[],
+  alternateRankId: string,
+  choiceId: string,
+  referenceId: string
+): MeleeWeapon[] | readonly MeleeWeapon[] {
+  const alternateRank = ALTERNATE_RANKS.find((rank) => rank.id === alternateRankId);
+  const choice = alternateRank?.grantedMeleeWeaponChoice;
+  if (!choice || choice.id !== choiceId || !choice.referenceIds.includes(referenceId)) {
+    return weapons;
+  }
+  const reference = MELEE_WEAPON_REFERENCE.find((weapon) => weapon.id === referenceId);
+  if (!reference) return weapons;
+
+  const originId = grantOriginId(alternateRankId);
+  const grantId = `${originId}:melee-weapon:${choice.id}`;
+  return [
+    ...weapons.filter((weapon) => weapon.id !== grantId),
+    {
+      id: grantId,
+      referenceId: reference.id,
+      name: reference.name,
+      class: reference.class,
+      type: reference.type,
+      damage: reference.damage,
+      pen: String(reference.pen),
+      specialRules: reference.specialRules,
+      weight: reference.weight,
+      value: reference.value,
+      availability: reference.availability,
+      source: reference.source,
+      description: reference.description,
+      craftsmanship: "Common",
+      upgrades: [],
+    },
   ];
 }
 

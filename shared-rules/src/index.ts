@@ -18,7 +18,15 @@ export {
   type AlternateRankTalentAdvance,
   type AlternateRankEliteAdvance,
 } from "./alternateRankData.js";
-export { ELITE_ADVANCES, type EliteAdvanceData } from "./eliteAdvanceData.js";
+export {
+  ELITE_ADVANCES,
+  getEliteAdvanceGrantedSkillLevel,
+  getEliteAdvanceSkillCost,
+  getEliteAdvanceWeaponTrainingCost,
+  getEliteAdvanceWeaponTrainingId,
+  type EliteAdvanceData,
+  type EliteAdvanceUnlockedAdvance,
+} from "./eliteAdvanceData.js";
 export { SkillSource } from "./skillSource.js";
 export { FAITH_TALENT_RULES, type FaithTalentRulesData } from "./faithTalentData.js";
 export {
@@ -29,18 +37,26 @@ export {
 } from "./talentData.js";
 export {
   WEAPON_TRAINING_GROUPS,
+  PISTOL_ONLY_EXOTIC_WEAPON_TRAINING,
+  isPistolOnlyExoticWeaponTraining,
   type WeaponTrainingItem,
   type WeaponTrainingGroup,
 } from "./weaponTrainingData.js";
 export {
+  getExoticWeaponTrainingPurchase,
+  getExoticWeaponTrainingPurchases,
   getWeaponTrainingPurchase,
   getWeaponTrainingCost,
   getWeaponTrainingSpent,
+  type ExoticWeaponTrainingPurchase,
 } from "./weaponTrainingAdvanceCosts.js";
 export {
   getAllCareerAdvances,
+  getMissedRankCareerAdvances,
+  getNextTalentOrTraitPurchase,
   getUnlockedCareerAdvances,
   type AccessibleCareerAdvance,
+  type MissedRankCareerAdvance,
 } from "./careerAdvanceAccess.js";
 export {
   getCurrentCareerRank,
@@ -64,6 +80,8 @@ export type {
   SkillAdvanceLevel,
   SkillEntryForCost,
   CharacterForSkillCosts,
+  TalentEntryForCost,
+  CharacterForTalentCosts,
   WeaponTrainingTalentId,
   CharacterForWeaponTrainingCosts,
   AlternateRankSelection,

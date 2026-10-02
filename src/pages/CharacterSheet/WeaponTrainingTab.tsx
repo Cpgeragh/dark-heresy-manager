@@ -9,7 +9,14 @@ import type {
   WeaponTrainingTalentId,
   XpPurchaseRecord,
 } from "../../types/Character";
-import { WEAPON_TRAINING_GROUPS } from "../../data/reference/weaponTrainingData";
+import {
+  WEAPON_TRAINING_GROUPS,
+  isPistolOnlyExoticWeaponTraining,
+} from "../../data/reference/weaponTrainingData";
+import {
+  MELEE_WEAPON_REFERENCE,
+  RANGED_WEAPON_REFERENCE,
+} from "../../data/reference/weaponReference";
 import { Button } from "../../ui/buttons/Button";
 import { editableInputClass, uiFormLabel, uiTextBody } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
@@ -20,8 +27,21 @@ import {
   getGrantedExoticWeapons,
   getGrantedWeaponTrainingIds,
 } from "../../mechanics/talents/talentEffects";
-import { EXOTIC_TRAINING_ACTIVE_STYLE } from "./exoticWeaponTrainingStyles";
+import {
+  EXOTIC_TRAINING_ACTIVE_STYLE,
+  EXOTIC_TRAINING_INACTIVE_STYLE,
+} from "./exoticWeaponTrainingStyles";
 import { ExoticCustomWeaponButton } from "./ExoticCustomWeaponButton";
+import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
+
+const EXOTIC_WEAPON_TRAINING_OPTIONS = Array.from(
+  new Set(
+    [...RANGED_WEAPON_REFERENCE, ...MELEE_WEAPON_REFERENCE]
+      .filter((weapon) => weapon.type === "Exotic")
+      .map((weapon) => weapon.exoticTraining)
+      .filter((name): name is string => Boolean(name))
+  )
+).sort((a, b) => a.localeCompare(b));
 
 const WEAPON_TRAINING_GROUP_RGB: Record<string, string> = {
   "Basic Weapon Training": "45,212,191", // teal-400
@@ -47,6 +67,8 @@ const WEAPON_TRAINING_GROUP_INACTIVE_STYLE: Record<string, string> = {
   "Thrown Weapon Training": "border-amber-700/50 bg-amber-950/15 text-amber-400/50",
 };
 
+const EXOTIC_WEAPON_TRAINING_RGB = "232,121,249";
+
 /** CSS custom properties driving the shared `animate-psy-pulse` keyframe (see tailwind.config.cjs). */
 function weaponTrainingPulseVars(rgb: string): CSSProperties {
   return {
@@ -54,7 +76,11 @@ function weaponTrainingPulseVars(rgb: string): CSSProperties {
     "--glow-hi": `0 0 2px rgba(255,255,255,1), 0 0 6px rgba(${rgb},1), 0 0 22px rgba(${rgb},0.9)`,
   } as CSSProperties;
 }
-import { getWeaponTrainingPurchase } from "../../mechanics/experience/weaponTrainingAdvanceCosts";
+import {
+  getExoticWeaponTrainingPurchases,
+  getWeaponTrainingPurchase,
+  type ExoticWeaponTrainingPurchase,
+} from "../../mechanics/experience/weaponTrainingAdvanceCosts";
 import { makeCurrentRankPurchase } from "../../mechanics/experience/purchaseAttribution";
 
 interface WeaponTrainingTabProps {
@@ -94,25 +120,45 @@ export function WeaponTrainingTab({
     index: number;
     name: string;
   } | null>(null);
+  const [pendingExoticPurchase, setPendingExoticPurchase] =
+    useState<ExoticWeaponTrainingPurchase | null>(null);
 
-  const [exoticFormMode, setExoticFormMode] = useState<"slot" | "bonus" | null>(null);
+  const [showExoticPicker, setShowExoticPicker] = useState(false);
+  const [showExoticForm, setShowExoticForm] = useState(false);
   const [newExoticName, setNewExoticName] = useState("");
   const [newExoticCost, setNewExoticCost] = useState("");
 
   const grantedTraining = talents ? getGrantedWeaponTrainingIds(talents, career) : [];
   const grantedExotics = talents ? getGrantedExoticWeapons(talents) : [];
+  const hasKnaveOfPistols = alternateRanks.some(
+    (selection) => selection.alternateRankId === "metallican-gunslinger"
+  );
+  const ownedExoticNames = new Set(
+    [...weaponTraining.exoticWeapons.map((entry) => entry.name), ...grantedExotics].map((name) =>
+      name.trim().toLocaleLowerCase()
+    )
+  );
+  const careerExoticPurchases = getExoticWeaponTrainingPurchases(
+    career,
+    rank,
+    alternateRanks
+  ).filter((entry) => !ownedExoticNames.has(entry.name.toLocaleLowerCase()));
 
   const handleRemoveTraining = useCallback(
     (id: WeaponTrainingTalentId) => {
       const xpPurchases = { ...weaponTraining.xpPurchases };
       const manualCosts = { ...weaponTraining.manualCosts };
+      const eliteAdvancePurchases = { ...weaponTraining.eliteAdvancePurchases };
       delete xpPurchases[id];
       delete manualCosts[id];
+      delete eliteAdvancePurchases[id];
       onUpdate({
         ...weaponTraining,
         trained: weaponTraining.trained.filter((t) => t !== id),
         xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
         manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
+        eliteAdvancePurchases:
+          Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
       });
     },
     [weaponTraining, onUpdate]
@@ -166,31 +212,32 @@ export function WeaponTrainingTab({
     onUpdate,
   ]);
 
-  const openExoticForm = useCallback((mode: "slot" | "bonus") => {
-    setExoticFormMode(mode);
-  }, []);
-
-  const canConfirmExotic = newExoticName.trim() !== "" && newExoticCost.trim() !== "";
+  const availableExoticOptions = hasKnaveOfPistols
+    ? EXOTIC_WEAPON_TRAINING_OPTIONS.filter(isPistolOnlyExoticWeaponTraining)
+    : EXOTIC_WEAPON_TRAINING_OPTIONS;
+  const canConfirmExotic =
+    newExoticName.trim() !== "" &&
+    newExoticCost.trim() !== "" &&
+    (!hasKnaveOfPistols || isPistolOnlyExoticWeaponTraining(newExoticName));
 
   const closeExoticForm = useCallback(() => {
-    setExoticFormMode(null);
+    setShowExoticForm(false);
     setNewExoticName("");
     setNewExoticCost("");
   }, []);
 
   const confirmAddExotic = useCallback(() => {
-    if (!canConfirmExotic || !exoticFormMode) return;
+    if (!canConfirmExotic) return;
     const entry: WeaponTrainingExoticEntry = {
       name: newExoticName.trim(),
       cost: Number(newExoticCost),
       xpPurchase: makeCurrentRankPurchase(career, rank, Number(newExoticCost)),
-      ...(exoticFormMode === "bonus" ? { bonus: true } : {}),
+      bonus: true,
     };
     onUpdate({ ...weaponTraining, exoticWeapons: [...weaponTraining.exoticWeapons, entry] });
     closeExoticForm();
   }, [
     canConfirmExotic,
-    exoticFormMode,
     newExoticName,
     newExoticCost,
     weaponTraining,
@@ -216,6 +263,17 @@ export function WeaponTrainingTab({
     setPendingRemoveExotic(null);
   }, [pendingRemoveExotic, handleRemoveExotic]);
 
+  const confirmExoticPurchase = useCallback(() => {
+    if (!pendingExoticPurchase) return;
+    const entry: WeaponTrainingExoticEntry = {
+      name: pendingExoticPurchase.name,
+      cost: pendingExoticPurchase.purchase.cost,
+      xpPurchase: pendingExoticPurchase.purchase,
+    };
+    onUpdate({ ...weaponTraining, exoticWeapons: [...weaponTraining.exoticWeapons, entry] });
+    setPendingExoticPurchase(null);
+  }, [pendingExoticPurchase, weaponTraining, onUpdate]);
+
   return (
     <div className="space-y-6 text-center">
       {WEAPON_TRAINING_GROUPS.map((group) => (
@@ -232,9 +290,14 @@ export function WeaponTrainingTab({
                 : getWeaponTrainingPurchase(career, rank, trainingId, alternateRanks);
               const cost = purchase?.cost;
               const pulsing = !active && purchase !== undefined;
+              const restrictedByKnaveOfPistols =
+                hasKnaveOfPistols &&
+                !active &&
+                (trainingId.startsWith("basic-") || trainingId.startsWith("heavy-"));
               const clickable =
                 editable &&
                 !granted &&
+                !restrictedByKnaveOfPistols &&
                 (active || purchase !== undefined || canConfirmManualCostPurchase(isDM));
 
               const handleClick = () => {
@@ -285,6 +348,13 @@ export function WeaponTrainingTab({
                 .join(", ")}
             </p>
           )}
+          {hasKnaveOfPistols &&
+            (group.label === "Basic Weapon Training" ||
+              group.label === "Heavy Weapon Training") && (
+              <p className="mt-1 text-xs text-amber-300">
+                Knave of Pistols prevents acquiring new training in this group.
+              </p>
+            )}
         </div>
       ))}
 
@@ -316,7 +386,23 @@ export function WeaponTrainingTab({
               {weapon}
             </button>
           ))}
-          {isDM && <ExoticCustomWeaponButton onClick={() => openExoticForm("bonus")} />}
+          {careerExoticPurchases.map((entry) => (
+            <button
+              key={`available:${entry.name}`}
+              type="button"
+              disabled={!editable}
+              onClick={() => setPendingExoticPurchase(entry)}
+              aria-pressed="false"
+              aria-label={`${entry.name}, ${entry.purchase.cost} XP`}
+              style={weaponTrainingPulseVars(EXOTIC_WEAPON_TRAINING_RGB)}
+              className={`animate-psy-pulse px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${EXOTIC_TRAINING_INACTIVE_STYLE} ${
+                editable ? "hover:bg-slate-800" : "cursor-not-allowed"
+              }`}
+            >
+              {entry.name}
+            </button>
+          ))}
+          {isDM && <ExoticCustomWeaponButton onClick={() => setShowExoticPicker(true)} />}
         </div>
         {grantedExotics.length > 0 && (
           <p className="mt-1 text-xs text-amber-300">Granted by Sicarius Tutoring (Guardsman)</p>
@@ -450,7 +536,50 @@ export function WeaponTrainingTab({
         </PickerModal>
       )}
 
-      {exoticFormMode && (
+      {pendingExoticPurchase && (
+        <PickerModal
+          title="Train Exotic Weapon"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setPendingExoticPurchase(null)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="primary" onClick={confirmExoticPurchase}>
+                Train
+              </Button>
+              <Button variant="neutral" onClick={() => setPendingExoticPurchase(null)}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Train Exotic Weapon Training ({pendingExoticPurchase.name}) for{" "}
+              {pendingExoticPurchase.purchase.cost} XP?
+            </p>
+          </PickerBody>
+        </PickerModal>
+      )}
+
+      {showExoticPicker && (
+        <OptionPickerScreen
+          title="Exotic Weapon Training"
+          options={availableExoticOptions}
+          selected={newExoticName}
+          onSelect={(value) => {
+            setNewExoticName(value);
+            setShowExoticPicker(false);
+            setShowExoticForm(true);
+          }}
+          onClose={() => setShowExoticPicker(false)}
+        />
+      )}
+
+      {showExoticForm && (
         <PickerModal
           title="Add Exotic Weapon"
           closeLabel={<ArrowLeft />}
@@ -469,14 +598,12 @@ export function WeaponTrainingTab({
         >
           <PickerBody>
             <label className={uiFormLabel}>Weapon Name</label>
-            <input
-              autoFocus
-              type="text"
-              value={newExoticName}
-              onChange={(event) => setNewExoticName(event.target.value)}
-              placeholder="e.g. Needle Pistol"
-              className={editableInputClass(true) + " mt-0.5"}
-            />
+            <p className={`text-sm lg:text-base ${uiTextBody}`}>{newExoticName}</p>
+            {hasKnaveOfPistols && (
+              <p className="text-xs text-amber-300">
+                Knave of Pistols limits this list to pistol-only specialisations.
+              </p>
+            )}
             <label className={uiFormLabel}>XP Cost</label>
             <input
               type="text"

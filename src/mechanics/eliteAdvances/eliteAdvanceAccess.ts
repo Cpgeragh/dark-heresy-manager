@@ -1,13 +1,18 @@
-import { CAREER_ADVANCES } from "../../data/reference/careerAdvancesReference";
-import { findCareerByName } from "../../data/reference/careerData";
-import { ELITE_ADVANCES, type EliteAdvanceData } from "../../data/reference/eliteAdvanceData";
-import { getCurrentCareerRankData } from "../experience/careerRankProgression";
+import {
+  ELITE_ADVANCES,
+  getEliteAdvanceGrantedSkillLevel,
+  getEliteAdvanceWeaponTrainingId,
+  type EliteAdvanceData,
+} from "../../data/reference/eliteAdvanceData";
+import { getMissedRankCareerAdvances } from "../experience/careerAdvanceAccess";
 import type {
-  AlternateRankSelection,
   ExperienceBlock,
   SkillAdvanceLevel,
   SkillEntry,
   TalentEntry,
+  TalentsAndTraitsBlock,
+  WeaponTrainingBlock,
+  WeaponTrainingTalentId,
 } from "../../types/Character";
 
 export interface MissedRankSkillOption {
@@ -15,8 +20,11 @@ export interface MissedRankSkillOption {
   skillId: string;
   level: Exclude<SkillAdvanceLevel, "untrained">;
   cost: number;
-  alternateRankId: string;
-  replacedRankId: string;
+  prerequisites?: string;
+  alternateRankId?: string;
+  replacedRankId?: string;
+  eliteAdvanceId?: string;
+  eliteAdvanceName?: string;
 }
 
 export interface MissedRankTalentOption {
@@ -24,8 +32,12 @@ export interface MissedRankTalentOption {
   talentId: string;
   specialisation?: string;
   cost: number;
-  alternateRankId: string;
-  replacedRankId: string;
+  prerequisites?: string;
+  alternateRankId?: string;
+  replacedRankId?: string;
+  eliteAdvanceId?: string;
+  eliteAdvanceName?: string;
+  weaponTrainingId?: WeaponTrainingTalentId;
 }
 
 const SKILL_LEVELS: readonly SkillAdvanceLevel[] = ["untrained", "trained", "+10", "+20"];
@@ -53,18 +65,83 @@ export function getAvailableNamedEliteAdvances(
   return ELITE_ADVANCES.filter(
     (advance) =>
       !advance.automaticGrantOnly &&
-      (advance.alternateRankIds ?? []).some((alternateRankId) => selected.has(alternateRankId))
+      ((advance.alternateRankIds?.length ?? 0) === 0 ||
+        (advance.alternateRankIds ?? []).some((alternateRankId) => selected.has(alternateRankId)))
   );
 }
 
-function eligibleMissedRanks(
-  career: string | undefined,
-  rank: string | undefined,
-  selections: readonly AlternateRankSelection[]
-): readonly AlternateRankSelection[] {
-  const currentRank = getCurrentCareerRankData(career, rank);
-  if (!currentRank) return [];
-  return selections.filter((selection) => currentRank.tier > selection.takenAtTier);
+function nextSkillLevel(
+  level: SkillAdvanceLevel
+): Exclude<SkillAdvanceLevel, "untrained"> | undefined {
+  if (level === "untrained") return "trained";
+  if (level === "trained") return "+10";
+  if (level === "+10") return "+20";
+  return undefined;
+}
+
+export function getPackageEliteAdvanceOptions({
+  talents,
+  skills,
+  weaponTraining,
+}: {
+  talents: TalentsAndTraitsBlock;
+  skills: readonly SkillEntry[];
+  weaponTraining: WeaponTrainingBlock;
+}): { skills: MissedRankSkillOption[]; talents: MissedRankTalentOption[] } {
+  const eliteAdvanceIds = (talents.eliteAdvances ?? []).map((entry) => entry.eliteAdvanceId);
+  const references = ELITE_ADVANCES.filter((advance) => eliteAdvanceIds.includes(advance.id));
+  const skillOptions: MissedRankSkillOption[] = [];
+  const talentOptions: MissedRankTalentOption[] = [];
+
+  for (const reference of references) {
+    (reference.unlockedAdvances ?? []).forEach((advance, index) => {
+      if (advance.kind === "skill" && advance.skillId && advance.level) {
+        const savedLevel =
+          skills.find((skill) => skill.id === advance.skillId)?.level ?? "untrained";
+        const grantedLevel = getEliteAdvanceGrantedSkillLevel(eliteAdvanceIds, advance.skillId);
+        const effectiveLevel =
+          SKILL_LEVELS.indexOf(grantedLevel ?? "untrained") > SKILL_LEVELS.indexOf(savedLevel)
+            ? (grantedLevel ?? "untrained")
+            : savedLevel;
+        if (nextSkillLevel(effectiveLevel) !== advance.level) return;
+        skillOptions.push({
+          key: `${reference.id}:skill:${index}`,
+          skillId: advance.skillId,
+          level: advance.level,
+          cost: advance.cost,
+          prerequisites: advance.prerequisites,
+          eliteAdvanceId: reference.id,
+          eliteAdvanceName: reference.name,
+        });
+      }
+
+      if (advance.kind === "talent" && advance.talentId) {
+        const weaponTrainingId = getEliteAdvanceWeaponTrainingId(advance);
+        if (weaponTrainingId && weaponTraining.trained.includes(weaponTrainingId)) return;
+        if (!weaponTrainingId) {
+          const ownedDirectly = talents.talents.some((entry) =>
+            sameTalent(entry, advance.talentId!, advance.specialisation)
+          );
+          const ownedAsGrant =
+            !advance.specialisation &&
+            references.some((entry) => entry.grantedTalents?.includes(advance.talentId!));
+          if (ownedDirectly || ownedAsGrant) return;
+        }
+        talentOptions.push({
+          key: `${reference.id}:talent:${index}`,
+          talentId: advance.talentId,
+          specialisation: advance.specialisation,
+          cost: advance.cost,
+          prerequisites: advance.prerequisites,
+          eliteAdvanceId: reference.id,
+          eliteAdvanceName: reference.name,
+          ...(weaponTrainingId ? { weaponTrainingId } : {}),
+        });
+      }
+    });
+  }
+
+  return { skills: skillOptions, talents: talentOptions };
 }
 
 export function getMissedRankEliteAdvanceOptions({
@@ -83,56 +160,49 @@ export function getMissedRankEliteAdvanceOptions({
   skills: MissedRankSkillOption[];
   talents: MissedRankTalentOption[];
 } {
-  const careerData = findCareerByName(career);
-  const advancesData = CAREER_ADVANCES.find((entry) => entry.careerId === careerData?.id);
-  if (!careerData || !advancesData) return { skills: [], talents: [] };
-
   const skillOptions: MissedRankSkillOption[] = [];
   const talentOptions: MissedRankTalentOption[] = [];
-  const selections = eligibleMissedRanks(career, rank, experience.alternateRanks ?? []);
+  const missedAdvances = getMissedRankCareerAdvances(career, rank, experience.alternateRanks ?? []);
 
-  for (const selection of selections) {
-    const table = advancesData.rankTables.find(
-      (entry) => entry.rankId === selection.replacedRankId
-    );
-    if (!table) continue;
-
-    table.advances.forEach((advance, index) => {
-      if (advance.kind === "skill" && advance.skillId) {
-        const level = advance.level ?? "trained";
-        if (
-          hasSkillLevel(
-            skills.find((skill) => skill.id === advance.skillId),
-            level
-          )
+  for (const option of missedAdvances) {
+    const { advance, advanceIndex, alternateRankId, replacedRankId, purchaseCost } = option;
+    if (advance.kind === "skill" && advance.skillId) {
+      const level = advance.level ?? "trained";
+      if (
+        hasSkillLevel(
+          skills.find((skill) => skill.id === advance.skillId),
+          level
         )
-          return;
-        skillOptions.push({
-          key: `${selection.alternateRankId}:${selection.replacedRankId}:skill:${index}`,
-          skillId: advance.skillId,
-          level,
-          cost: advance.cost + 50,
-          alternateRankId: selection.alternateRankId,
-          replacedRankId: selection.replacedRankId,
-        });
+      ) {
+        continue;
       }
+      skillOptions.push({
+        key: `${alternateRankId}:${replacedRankId}:skill:${advanceIndex}`,
+        skillId: advance.skillId,
+        level,
+        cost: purchaseCost,
+        alternateRankId,
+        replacedRankId,
+      });
+    }
 
-      if (advance.kind === "talent" && advance.talentId) {
-        const ownedCount = talents.filter((entry) =>
-          sameTalent(entry, advance.talentId!, advance.specialisation)
-        ).length;
-        const availableCopies = advance.repeatableAtThisRank ?? 1;
-        if (ownedCount >= availableCopies) return;
-        talentOptions.push({
-          key: `${selection.alternateRankId}:${selection.replacedRankId}:talent:${index}`,
-          talentId: advance.talentId,
-          specialisation: advance.specialisation,
-          cost: advance.cost + 50,
-          alternateRankId: selection.alternateRankId,
-          replacedRankId: selection.replacedRankId,
-        });
+    if (advance.kind === "talent" && advance.talentId) {
+      const ownedCount = talents.filter((entry) =>
+        sameTalent(entry, advance.talentId!, advance.specialisation)
+      ).length;
+      const availableCopies = advance.repeatableAtThisRank ?? 1;
+      if (ownedCount >= availableCopies) {
+        continue;
       }
-    });
+      talentOptions.push({
+        key: `${alternateRankId}:${replacedRankId}:talent:${advanceIndex}`,
+        talentId: advance.talentId,
+        specialisation: advance.specialisation,
+        cost: purchaseCost,
+        alternateRankId,
+        replacedRankId,
+      });
+    }
   }
 
   return { skills: skillOptions, talents: talentOptions };

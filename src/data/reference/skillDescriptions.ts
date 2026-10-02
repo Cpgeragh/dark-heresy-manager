@@ -91,6 +91,8 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
     "Understand shorthand codes used by specific groups — hand signals or inscribed symbols conveying warnings, targets and protection. No Test for basic messages; Tests may be needed for complicated or damaged signs. Full Action to give or inscribe; Free Action to read. | Occult: mystical gestures to focus the mind during incantation, identify fellow sorcerers and supplicate or castigate Daemons.",
   "Ciphers (Underworld)":
     "Understand shorthand codes used by specific groups — hand signals or inscribed symbols conveying warnings, targets and protection. No Test for basic messages; Tests may be needed for complicated or damaged signs. Full Action to give or inscribe; Free Action to read. | Underworld: convoluted systems of hand gestures, clothing styles, signs and chicanery used by criminal fraternities.",
+  "Ciphers (Tenebrae Collegium)":
+    "Understand the shorthand codes, symbols and signals used by the Tenebrae Collegium. No Test is needed for basic messages; Tests may be required for complicated or damaged signs. Full Action to give or inscribe; Free Action to read.",
 
   // ===== DRIVE =====
   "Drive (Ground Vehicle)":
@@ -105,6 +107,8 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
     "Fly atmospheric craft to full spacecraft; normal conditions need no Test. Tests called for in storms, excessive speed or dangerous manoeuvres; Opposed Tests during chases. Typically a Half Action. | Civilian Craft: civilian atmospheric aircraft and light shuttles.",
   "Pilot (Military Craft)":
     "Fly atmospheric craft to full spacecraft; normal conditions need no Test. Tests called for in storms, excessive speed or dangerous manoeuvres; Opposed Tests during chases. Typically a Half Action. | Military Craft: military aircraft and combat flyers.",
+  "Pilot (Jump Pack)":
+    "Control a jump pack in flight; normal movement needs no Test. Tests may be required in dangerous conditions, for difficult landings or for complex aerial manoeuvres. Typically a Half Action.",
   "Pilot (Spacecraft)":
     "Fly atmospheric craft to full spacecraft; normal conditions need no Test. Tests called for in storms, excessive speed or dangerous manoeuvres; Opposed Tests during chases. Typically a Half Action. | Spacecraft: spacecraft and void-capable vessels.",
 
@@ -115,6 +119,8 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
     "Chart courses, estimate travel times and avoid getting lost using maps, technical readouts and landmarks. One successful Test per day typically keeps you on track, though unusual conditions may require additional Tests. Navigation normally takes several hours; finding your position takes one minute or less. | Stellar: navigate in space between planets using star charts and cartomantic rituals.",
 
   // ===== SPEAK LANGUAGE =====
+  "Speak Language (Any One)":
+    "Choose one language when this advance is purchased. Communicate using that tongue; no Test is needed under normal circumstances when everyone involved knows the language. Free Action.",
   "Speak Language (High Gothic)":
     "Communicate using a common tongue; no Test needed under normal circumstances if all speakers know the language. Free Action. | High Gothic: the language of nobility, law and Ecclesiarchy liturgy.",
   "Speak Language (Hive Dialect)":
@@ -137,6 +143,12 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
     "Speak an obscure language known only to a specific profession or organisation — codes and signifiers imparting deeper meaning within another tongue. No Test if all speakers know it; Tests may be needed in noisy or chaotic conditions. Free Action. | Gutter: a pidgin version of Low Gothic spoken by the lowest levels of Imperial society.",
   "Secret Tongue (Military)":
     "Speak an obscure language known only to a specific profession or organisation — codes and signifiers imparting deeper meaning within another tongue. No Test if all speakers know it; Tests may be needed in noisy or chaotic conditions. Free Action. | Military: coded phrases, jargon, references to ancient battles and a surprising number of terms for death.",
+  "Secret Tongue (the Redemption)":
+    "Speak the obscure cant, code phrases and ritual language used by members of the Redemption. No Test is needed when all speakers know it; Tests may be required in noisy or chaotic conditions. Free Action.",
+  "Secret Tongue (Temple Calix)":
+    "Speak the obscure codes, battle cant and ritual phrases used by the Templars Calix of the Scholastia Psykana. No Test is needed when all speakers know it; Tests may be required in noisy or chaotic conditions. Free Action.",
+  "Secret Tongue (Tenebrae Collegium)":
+    "Speak the obscure cant, code phrases and layered metaphors used by the Tenebrae Collegium. No Test is needed when all speakers know it; Tests may be required in noisy or chaotic conditions. Free Action.",
   "Secret Tongue (Tech)":
     "Speak an obscure language known only to a specific profession or organisation — codes and signifiers imparting deeper meaning within another tongue. No Test if all speakers know it; Tests may be needed in noisy or chaotic conditions. Free Action. | Tech: the Lingua Technis of the Adeptus Mechanicus, comprising jargon, binary and in some cases sub/ultrasonic sound waves.",
 
@@ -203,6 +215,8 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
     "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Heresy: unpleasant appreciation for those acts and practices deemed heretical by the Imperium.",
   "Forbidden Lore (Inquisition)":
     "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Inquisition: a general understanding (often based on hearsay and rumour) of that most terrible and secret of organisations.",
+  "Forbidden Lore (Ordo Hereticus)":
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Ordo Hereticus: specialised knowledge of the Ordo Hereticus, its practices and its war against heresy, mutation and witchcraft.",
   "Forbidden Lore (Archeotech)":
     "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Archeotech: knowledge of the great tech devices of ancient times and clues to their function and purpose.",
   "Forbidden Lore (Mutants)":
