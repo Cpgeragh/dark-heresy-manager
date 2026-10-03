@@ -1,14 +1,7 @@
 // src/services/sessionService.ts
 // Firestore operations for campaign session documents.
 
-import {
-  collection,
-  doc,
-  increment,
-  runTransaction,
-  serverTimestamp,
-  writeBatch,
-} from "firebase/firestore";
+import { collection, doc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
@@ -21,6 +14,7 @@ import {
 } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
 import { measurePerformanceMutation } from "../performance/performanceMetrics";
+import { createLocalId } from "../utils/createLocalId";
 
 interface SessionData {
   date: Date;
@@ -31,13 +25,17 @@ interface SessionData {
 }
 
 const SESSION_XP_FIXED_DOCUMENTS = 2;
+const SESSION_XP_DOCUMENTS_PER_ATTENDEE = 3;
 export const SESSION_XP_FAN_OUT_LIMIT = Math.min(
   PRODUCT_LIMITS.sessionAttendees,
-  PRODUCT_LIMITS.bulkOperationDocuments - SESSION_XP_FIXED_DOCUMENTS
+  Math.floor(
+    (PRODUCT_LIMITS.bulkOperationDocuments - SESSION_XP_FIXED_DOCUMENTS) /
+      SESSION_XP_DOCUMENTS_PER_ATTENDEE
+  )
 );
 
 export function getSessionXpAffectedDocumentCount(attendeeCount: number): number {
-  return attendeeCount + SESSION_XP_FIXED_DOCUMENTS;
+  return attendeeCount * SESSION_XP_DOCUMENTS_PER_ATTENDEE + SESSION_XP_FIXED_DOCUMENTS;
 }
 
 export type SessionUpdateData = Partial<
@@ -48,6 +46,14 @@ const callRepairSessionSummaries = httpsCallable<{ campaignId: string }, { repai
   functions,
   "repairSessionSummaries"
 );
+const callApplySessionXp = httpsCallable<
+  { campaignId: string; sessionId: string; operationId: string },
+  void
+>(functions, "applySessionXp");
+const callDeleteSession = httpsCallable<
+  { campaignId: string; sessionId: string; reverseXp: boolean; operationId: string },
+  void
+>(functions, "deleteSession");
 
 /** Rebuilds every safe session summary through the protected DM-only operation. */
 export async function repairSessionSummaries(campaignId: string): Promise<number> {
@@ -224,51 +230,11 @@ export async function deleteSession(
   assertBoolean(reverseXp, "Reverse-XP flag");
   await measurePerformanceMutation("session:delete", () =>
     runSingleFlight("session:delete", [campaignId, sessionId], async () => {
-      const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
-      const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionId);
-
-      if (!reverseXp) {
-        const batch = writeBatch(db);
-        batch.delete(sessionRef);
-        batch.delete(summaryRef);
-        await batch.commit();
-        return;
-      }
-
-      await runTransaction(db, async (transaction) => {
-        const sessionSnap = await transaction.get(sessionRef);
-        if (sessionSnap.exists()) {
-          const session = sessionSnap.data() as SessionDocument;
-          if (session.xpApplied === true) {
-            if (!Array.isArray(session.attendees)) {
-              throw new Error("Stored session attendees are invalid; XP reversal was stopped.");
-            }
-            if (session.attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
-              throw new Error(
-                `XP reversal has more than ${SESSION_XP_FAN_OUT_LIMIT} attendees and was stopped before any write.`
-              );
-            }
-            if (new Set(session.attendees).size !== session.attendees.length) {
-              throw new Error(
-                "Stored session attendees contain duplicates; XP reversal was stopped."
-              );
-            }
-            session.attendees.forEach((characterId) =>
-              assertFirestoreDocumentId(characterId, "Stored session attendee ID")
-            );
-            assertBulkOperationCount(
-              getSessionXpAffectedDocumentCount(session.attendees.length),
-              "Session XP reversal"
-            );
-            for (const characterId of session.attendees) {
-              transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
-                "experience.total": increment(-session.xpAwarded),
-              });
-            }
-          }
-        }
-        transaction.delete(sessionRef);
-        transaction.delete(summaryRef);
+      await callDeleteSession({
+        campaignId,
+        sessionId,
+        reverseXp,
+        operationId: createLocalId("delete-session"),
       });
     })
   );
@@ -311,27 +277,10 @@ export async function applySessionXp(
 
   await measurePerformanceMutation("session:apply-xp", () =>
     runSingleFlight("session:apply-xp", [campaignId, sessionId], async () => {
-      const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
-
-      await runTransaction(db, async (transaction) => {
-        const sessionSnap = await transaction.get(sessionRef);
-        if (!sessionSnap.exists()) {
-          throw new Error("Session does not exist.");
-        }
-        if (sessionSnap.data().xpApplied === true) {
-          throw new Error("XP has already been applied for this session.");
-        }
-
-        transaction.update(sessionRef, { xpApplied: true });
-        transaction.update(doc(db, "campaigns", campaignId, "sessionSummaries", sessionId), {
-          xpApplied: true,
-        });
-
-        for (const characterId of attendeeIds) {
-          transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
-            "experience.total": increment(xpAmount),
-          });
-        }
+      await callApplySessionXp({
+        campaignId,
+        sessionId,
+        operationId: createLocalId("apply-session-xp"),
       });
     })
   );

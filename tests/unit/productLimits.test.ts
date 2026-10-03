@@ -21,6 +21,9 @@ describe("hard product limits", () => {
       threadSummaryPreviewCharacters: 500,
       messagesPerPage: 100,
       claimHistoryEntriesPerPage: 50,
+      xpHistoryEntriesPerPage: 100,
+      characterXpTotal: 10_000_000,
+      xpHistoryReasonCharacters: 4_000,
       sessionSummaryCharacters: 4_000,
       sessionDmNotesCharacters: 4_000,
       sessionXpAward: 100_000,
@@ -59,6 +62,7 @@ describe("hard product limits", () => {
     expect(FIRESTORE_QUERY_LIMITS.archivedCampaigns).toBe(PRODUCT_LIMITS.campaignsPerAccount);
     expect(FIRESTORE_QUERY_LIMITS.messagesPerThread).toBe(PRODUCT_LIMITS.messagesPerPage);
     expect(FIRESTORE_QUERY_LIMITS.claimLogEntries).toBe(PRODUCT_LIMITS.claimHistoryEntriesPerPage);
+    expect(FIRESTORE_QUERY_LIMITS.xpHistoryEntries).toBe(PRODUCT_LIMITS.xpHistoryEntriesPerPage);
     expect(FIRESTORE_QUERY_LIMITS.customItemsPerQuery).toBe(PRODUCT_LIMITS.customItemsPerCampaign);
   });
 });

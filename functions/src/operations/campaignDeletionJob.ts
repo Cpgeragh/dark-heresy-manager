@@ -41,6 +41,7 @@ const RECOVERY_CODE_PATTERN = /^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 type Phase =
   | "characterClaimLogs"
+  | "characterXpHistory"
   | "characterXpProposals"
   | "characterRecoveryIndex"
   | "characterSummaries"
@@ -55,6 +56,7 @@ type Phase =
 
 const PHASE_ORDER: readonly Phase[] = [
   "characterClaimLogs",
+  "characterXpHistory",
   "characterXpProposals",
   "characterRecoveryIndex",
   "characterSummaries",
@@ -118,8 +120,9 @@ export async function startCampaignDeletionJob(
     }
   }
 
-  const [claimLogCounts, xpProposalCounts, recoverySnapshots] = await Promise.all([
+  const [claimLogCounts, xpHistoryCounts, xpProposalCounts, recoverySnapshots] = await Promise.all([
     Promise.all(characters.map((c) => c.ref.collection("claimLog").count().get())),
+    Promise.all(characters.map((c) => c.ref.collection("xpHistory").count().get())),
     Promise.all(characters.map((c) => c.ref.collection("xpProposals").count().get())),
     Promise.all(
       characters.map((c) =>
@@ -153,6 +156,7 @@ export async function startCampaignDeletionJob(
   const totalCount =
     characters.length +
     sum(claimLogCounts) +
+    sum(xpHistoryCounts) +
     sum(xpProposalCounts) +
     recoverySnapshots.filter((s) => s.exists).length +
     characterSummariesCount.data().count +
@@ -347,6 +351,13 @@ async function processPhase(
         "claimLog",
         checkpoint,
         "characterClaimLogs"
+      );
+    case "characterXpHistory":
+      return sweepNestedPhase(
+        campaignRef.collection("characters"),
+        "xpHistory",
+        checkpoint,
+        "characterXpHistory"
       );
     case "characterXpProposals":
       return sweepNestedPhase(

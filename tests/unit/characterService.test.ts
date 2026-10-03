@@ -10,6 +10,7 @@ const {
   mockCallRevealRecoveryCode,
   mockCallReleaseCharacter,
   mockCallPatchCharacterField,
+  mockCallAdjustCharacterXp,
   mockCallAdjustCharacterNumber,
   mockCallReconcileCharacterSpentXp,
   mockCallRevokeRecoveryCode,
@@ -46,6 +47,7 @@ const {
     mockCallRevealRecoveryCode: vi.fn(),
     mockCallReleaseCharacter: vi.fn(),
     mockCallPatchCharacterField: vi.fn(),
+    mockCallAdjustCharacterXp: vi.fn(),
     mockCallAdjustCharacterNumber: vi.fn(),
     mockCallReconcileCharacterSpentXp: vi.fn(),
     mockCallRevokeRecoveryCode: vi.fn(),
@@ -101,6 +103,7 @@ vi.mock("firebase/functions", () => ({
     if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
     if (name === "revokeRecoveryCode") return mockCallRevokeRecoveryCode;
     if (name === "patchCharacterField") return mockCallPatchCharacterField;
+    if (name === "adjustCharacterXp") return mockCallAdjustCharacterXp;
     if (name === "adjustCharacterNumber") return mockCallAdjustCharacterNumber;
     if (name === "reconcileCharacterSpentXp") return mockCallReconcileCharacterSpentXp;
     if (name === "startCharacterDeletionJob") return mockCallStartCharacterDeletionJob;
@@ -125,6 +128,7 @@ vi.mock("../../src/firebase/converters", () => ({
 }));
 
 import {
+  adjustCharacterXp,
   claimCharacter,
   computeCharacterSummary,
   createNewCharacter,
@@ -719,6 +723,32 @@ describe("patchCharacterField", () => {
       value: [{ id: "n1", title: "T", text: "x", updatedAt: "now" }],
       operationId: expect.any(String),
     });
+  });
+});
+
+describe("adjustCharacterXp", () => {
+  it("calls the protected ledger operation with signed XP and a trimmed reason", async () => {
+    mockCallAdjustCharacterXp.mockResolvedValue({ data: undefined });
+
+    await adjustCharacterXp("camp-1", "char-1", -100, "  Correction  ");
+
+    expect(mockCallAdjustCharacterXp).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+      amountXp: -100,
+      reason: "Correction",
+      operationId: expect.any(String),
+    });
+  });
+
+  it("rejects zero XP and blank reasons before calling the server", async () => {
+    await expect(adjustCharacterXp("camp-1", "char-1", 0, "Correction")).rejects.toThrow(
+      "non-zero whole number"
+    );
+    await expect(adjustCharacterXp("camp-1", "char-1", 100, " ")).rejects.toThrow(
+      "reason is required"
+    );
+    expect(mockCallAdjustCharacterXp).not.toHaveBeenCalled();
   });
 });
 

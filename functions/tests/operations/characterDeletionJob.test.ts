@@ -35,6 +35,7 @@ const {
   mockBatchDelete,
   mockBatchCommit,
   claimLog,
+  xpHistory,
   xpProposals,
   messages,
 } = vi.hoisted(() => {
@@ -51,6 +52,7 @@ const {
   }
 
   const claimLog = makeCollectionMock();
+  const xpHistory = makeCollectionMock();
   const xpProposals = makeCollectionMock();
   const messages = makeCollectionMock();
 
@@ -74,6 +76,7 @@ const {
     delete: mockCharacterDelete,
     collection: vi.fn((name: string) => {
       if (name === "claimLog") return claimLog.ref;
+      if (name === "xpHistory") return xpHistory.ref;
       if (name === "xpProposals") return xpProposals.ref;
       throw new Error(`Unexpected character subcollection: ${name}`);
     }),
@@ -127,6 +130,7 @@ const {
     mockBatchDelete,
     mockBatchCommit,
     claimLog,
+    xpHistory,
     xpProposals,
     messages,
   };
@@ -246,6 +250,7 @@ describe("startCharacterDeletionJob", () => {
       data: () => ({ recoveryCode: RECOVERY_CODE }),
     });
     claimLog.countGet.mockResolvedValue({ data: () => ({ count: 3 }) });
+    xpHistory.countGet.mockResolvedValue({ data: () => ({ count: 4 }) });
     xpProposals.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     messages.countGet.mockResolvedValue({ data: () => ({ count: 250 }) });
     mockThreadGet.mockResolvedValue({ exists: true });
@@ -260,12 +265,12 @@ describe("startCharacterDeletionJob", () => {
       "secret"
     );
 
-    expect(result).toEqual({ jobId: "job-1", totalCount: 257 });
+    expect(result).toEqual({ jobId: "job-1", totalCount: 261 });
     expect(mockCreateBulkJob).toHaveBeenCalledWith(
       "character-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID, recoveryIndexId: RECOVERY_INDEX_ID },
-      257,
+      261,
       "idem-key"
     );
   });
@@ -277,6 +282,7 @@ describe("startCharacterDeletionJob", () => {
       data: () => ({ recoveryCode: RECOVERY_CODE }),
     });
     claimLog.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
+    xpHistory.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     xpProposals.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     messages.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
     mockThreadGet.mockResolvedValue({ exists: false });
@@ -364,7 +370,7 @@ describe("processCharacterDeletionChunk", () => {
     expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
-      JSON.stringify({ phase: "xpProposals", cursor: null }),
+      JSON.stringify({ phase: "xpHistory", cursor: null }),
       2
     );
   });

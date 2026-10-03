@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useCharacterMutations } from "../../src/hooks/useCharacterMutations";
 import {
+  adjustCharacterXp as adjustCharacterXpService,
   patchCharacterField as patchCharacterFieldService,
   patchCharacterFields as patchCharacterFieldsService,
   patchCharacterCollectionField as patchCharacterCollectionFieldService,
@@ -10,6 +11,7 @@ import {
 import type { Character } from "../../src/types/Character";
 
 vi.mock("../../src/services/characterService", () => ({
+  adjustCharacterXp: vi.fn(),
   forceAssignCharacter: vi.fn(),
   forceReleaseCharacter: vi.fn(),
   patchCharacterField: vi.fn(),
@@ -27,6 +29,7 @@ vi.mock("../../src/components/Toast", () => ({
 }));
 
 const mockPatchCharacterField = vi.mocked(patchCharacterFieldService);
+const mockAdjustCharacterXp = vi.mocked(adjustCharacterXpService);
 const mockPatchCharacterFields = vi.mocked(patchCharacterFieldsService);
 const mockPatchCharacterCollectionField = vi.mocked(patchCharacterCollectionFieldService);
 
@@ -302,5 +305,48 @@ describe("useCharacterMutations: patchCollectionField", () => {
       before,
       after
     );
+  });
+});
+
+describe("useCharacterMutations: adjustXp", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("routes a signed XP adjustment through the ledger service", async () => {
+    mockAdjustCharacterXp.mockResolvedValue(undefined);
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+      })
+    );
+
+    let saved = false;
+    await act(async () => {
+      saved = await result.current.adjustXp(-100, "Corrected award");
+    });
+    expect(saved).toBe(true);
+    expect(mockAdjustCharacterXp).toHaveBeenCalledWith("camp-1", "char-1", -100, "Corrected award");
+  });
+
+  it("does nothing while character editing is disabled", async () => {
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: false,
+      })
+    );
+
+    let saved = true;
+    await act(async () => {
+      saved = await result.current.adjustXp(100, "Award");
+    });
+    expect(saved).toBe(false);
+    expect(mockAdjustCharacterXp).not.toHaveBeenCalled();
   });
 });

@@ -64,6 +64,24 @@ export type CharacterDocument = Character;
  */
 export type ClaimLogDocument = ClaimLog;
 
+export type XpHistorySource =
+  | "opening-balance"
+  | "manual-adjustment"
+  | "session-award"
+  | "session-reversal";
+
+export interface XpHistoryDocument {
+  amountXp: number;
+  balanceXp: number;
+  reason: string;
+  source: XpHistorySource;
+  actorUid: string;
+  actorName?: string;
+  actorRole: "dm" | "player";
+  createdAt: Timestamp | Date | FieldValue;
+  sessionId?: string;
+}
+
 /**
  * Helper type for character list items (partial data for lists)
  */

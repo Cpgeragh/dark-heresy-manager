@@ -664,6 +664,19 @@ service cloud.firestore {
             if dmOwnsCampaign() &&
                !existsAfter(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId));
         }
+
+        match /xpHistory/{entryId} {
+
+          function canReadXpHistory() {
+            let character = get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId));
+            return character != null &&
+              (dmOwnsCampaign() || playerOwnsOrLinked(character.data.userId));
+          }
+
+          allow get: if canReadXpHistory();
+          allow list: if canReadXpHistory() && boundedQuery(100);
+          allow create, update, delete: if false;
+        }
       }
     }
 
@@ -808,11 +821,28 @@ service cloud.firestore {
                (!('xpApplied' in data) || data.xpApplied is bool);
       }
 
+      function validSessionXpBoundary() {
+        let hadAppliedField = 'xpApplied' in resource.data;
+        let hasAppliedField = 'xpApplied' in request.resource.data;
+        let wasApplied = hadAppliedField && resource.data.xpApplied == true;
+        let remainsSame = hadAppliedField == hasAppliedField &&
+          (!hadAppliedField || request.resource.data.xpApplied == resource.data.xpApplied);
+        return remainsSame &&
+          (!wasApplied ||
+            (request.resource.data.xpAwarded == resource.data.xpAwarded &&
+             request.resource.data.attendees == resource.data.attendees));
+      }
+
       // Full session records contain private DM notes and are DM-only.
       allow get: if dmOwnsCampaign();
       allow list: if dmOwnsCampaign() && boundedQuery(200);
-      allow create, update: if dmOwnsCampaign() && validSessionData(request.resource.data);
-      allow delete: if dmOwnsCampaign();
+      allow create: if dmOwnsCampaign() &&
+        validSessionData(request.resource.data) &&
+        (!('xpApplied' in request.resource.data) || request.resource.data.xpApplied == false);
+      allow update: if dmOwnsCampaign() &&
+        validSessionData(request.resource.data) &&
+        validSessionXpBoundary();
+      allow delete: if false;
     }
 
     // Member-facing session history deliberately excludes private DM notes.
@@ -846,13 +876,31 @@ service cloud.firestore {
                (!('xpApplied' in data) || data.xpApplied is bool);
       }
 
+      function validSessionXpBoundary() {
+        let hadAppliedField = 'xpApplied' in resource.data;
+        let hasAppliedField = 'xpApplied' in request.resource.data;
+        let wasApplied = hadAppliedField && resource.data.xpApplied == true;
+        let remainsSame = hadAppliedField == hasAppliedField &&
+          (!hadAppliedField || request.resource.data.xpApplied == resource.data.xpApplied);
+        return remainsSame &&
+          (!wasApplied ||
+            (request.resource.data.xpAwarded == resource.data.xpAwarded &&
+             request.resource.data.attendees == resource.data.attendees));
+      }
+
       allow get:
         if dmOwnsCampaign() || campaignMemberOrLinked(campaignId);
       allow list:
         if (dmOwnsCampaign() || campaignMemberOrLinked(campaignId)) && boundedQuery(200);
-      allow create, update:
-        if dmOwnsCampaign() && validSessionSummaryData(request.resource.data);
-      allow delete: if dmOwnsCampaign();
+      allow create:
+        if dmOwnsCampaign() &&
+           validSessionSummaryData(request.resource.data) &&
+           (!('xpApplied' in request.resource.data) || request.resource.data.xpApplied == false);
+      allow update:
+        if dmOwnsCampaign() &&
+           validSessionSummaryData(request.resource.data) &&
+           validSessionXpBoundary();
+      allow delete: if false;
     }
 
     // ============================

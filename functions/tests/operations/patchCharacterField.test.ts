@@ -739,6 +739,31 @@ describe("patchCharacterField", () => {
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { experience });
   });
 
+  it("rejects a direct Total XP change from the DM", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 1_000, spent: 400, ranks: [] },
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "experience",
+          value: { total: 1_100, spent: 400, ranks: [] },
+        },
+        "dm-1"
+      )
+    ).rejects.toThrow("Total XP can only be changed through an XP adjustment.");
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
   it("allows a player to select a character-creation Advance Scheme at Rank 1", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({

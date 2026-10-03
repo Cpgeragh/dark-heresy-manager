@@ -5,6 +5,7 @@ import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../types/Character";
 import { stripUndefined } from "../utils/stripUndefined";
 import {
+  adjustCharacterXp,
   forceAssignCharacter,
   forceReleaseCharacter,
   patchCharacterField,
@@ -141,6 +142,25 @@ export function useCharacterMutations({
       await patchFieldsWithResult(partial);
     },
     [patchFieldsWithResult]
+  );
+
+  const adjustXp = useCallback(
+    async (amountXp: number, reason: string): Promise<boolean> => {
+      if (!allowedToEdit || !hasCharacter) return false;
+      setPendingUpdateCount((count) => count + 1);
+      try {
+        await adjustCharacterXp(campaignId, characterId, amountXp, reason);
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to adjust XP";
+        toast.error(`XP adjustment failed: ${message}`);
+        console.error("Failed to adjust XP:", err);
+        return false;
+      } finally {
+        setPendingUpdateCount((count) => Math.max(0, count - 1));
+      }
+    },
+    [allowedToEdit, hasCharacter, campaignId, characterId, toast]
   );
 
   const patchCollectionField = useCallback(
@@ -285,6 +305,7 @@ export function useCharacterMutations({
     patchFieldWithResult,
     patchFieldsWithResult,
     patchCollectionField,
+    adjustXp,
     updateCharacteristic,
     releaseCharacter,
     dmForceRelease,

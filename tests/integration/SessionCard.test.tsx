@@ -122,7 +122,7 @@ describe("SessionCard delete confirmation", () => {
     expect(screen.getByText("This will affect 2 documents.")).toBeInTheDocument();
 
     await user.click(screen.getByRole("checkbox"));
-    expect(screen.getByText("This will affect 4 documents.")).toBeInTheDocument();
+    expect(screen.getByText("This will affect 8 documents.")).toBeInTheDocument();
   });
 
   it("calls onDelete(false) when confirmed without checking the reversal box", async () => {

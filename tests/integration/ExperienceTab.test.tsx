@@ -7,6 +7,12 @@ import { ExperienceTab } from "../../src/pages/CharacterSheet/ExperienceTab";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
 
+const mockUseXpHistory = vi.hoisted(() =>
+  vi.fn(() => ({ entries: [], loading: false, error: null }))
+);
+
+vi.mock("../../src/hooks/useXpHistory", () => ({ useXpHistory: mockUseXpHistory }));
+
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const data = createEmptyCharacterData({ campaignId: "campaign", recoveryCode: "recovery" });
   const character: Character = {
@@ -76,18 +82,21 @@ function makeCharacter(overrides: Partial<Character> = {}): Character {
 
 function renderTab(props: Partial<React.ComponentProps<typeof ExperienceTab>> = {}) {
   const onUpdate = vi.fn().mockResolvedValue(true);
+  const onAdjustXp = vi.fn().mockResolvedValue(true);
   const onUpdateCharacter = vi.fn().mockResolvedValue(true);
   render(
     <ExperienceTab
+      campaignId="campaign"
       character={makeCharacter()}
       isDM
       editable
       onUpdate={onUpdate}
+      onAdjustXp={onAdjustXp}
       onUpdateCharacter={onUpdateCharacter}
       {...props}
     />
   );
-  return { onUpdate, onUpdateCharacter };
+  return { onUpdate, onAdjustXp, onUpdateCharacter };
 }
 
 describe("ExperienceTab named Career Rank ledger", () => {
@@ -108,6 +117,34 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(screen.getByText("1000")).toBeInTheDocument();
     expect(screen.getByText("550")).toBeInTheDocument();
     expect(screen.getByText("450")).toBeInTheDocument();
+  });
+
+  it("shows the read-only XP history beneath the summary", () => {
+    mockUseXpHistory.mockReturnValueOnce({
+      entries: [
+        {
+          id: "entry-1",
+          amountXp: 200,
+          balanceXp: 1_200,
+          reason: "Recovered the relic",
+          source: "session-award",
+          actorUid: "dm-1",
+          actorName: "Morgan",
+          actorRole: "dm",
+          createdAt: new Date("2026-10-01T18:30:00.000Z"),
+        },
+      ],
+      loading: false,
+      error: null,
+    } as never);
+
+    renderTab();
+
+    const history = screen.getByText("XP History").closest("section")!;
+    expect(within(history).getByText("+200 XP")).toBeInTheDocument();
+    expect(within(history).getByText("Recovered the relic")).toBeInTheDocument();
+    expect(within(history).getByText(/Morgan/)).toBeInTheDocument();
+    expect(within(history).getByText("1200 XP")).toBeInTheDocument();
   });
 
   it("renders every reached named rank and marks the current card", () => {
@@ -186,20 +223,24 @@ describe("ExperienceTab named Career Rank ledger", () => {
     });
     const { rerender } = render(
       <ExperienceTab
+        campaignId="campaign"
         character={veteranCharacter}
         isDM
         editable
         onUpdate={onUpdate}
+        onAdjustXp={vi.fn().mockResolvedValue(true)}
         onUpdateCharacter={onUpdateCharacter}
       />
     );
 
     rerender(
       <ExperienceTab
+        campaignId="campaign"
         character={scoutCharacter}
         isDM
         editable
         onUpdate={onUpdate}
+        onAdjustXp={vi.fn().mockResolvedValue(true)}
         onUpdateCharacter={onUpdateCharacter}
       />
     );
@@ -274,50 +315,24 @@ describe("ExperienceTab named Career Rank ledger", () => {
 
   it("lets the DM add XP without changing Spent XP", async () => {
     const user = userEvent.setup();
-    const { onUpdate } = renderTab();
+    const { onAdjustXp } = renderTab();
     await user.click(screen.getByRole("button", { name: "Add XP" }));
     const dialog = within(screen.getByRole("dialog", { name: "Add XP" }));
     await user.type(dialog.getByRole("textbox", { name: "Add XP amount" }), "200");
     await user.type(dialog.getByRole("textbox", { name: "Add XP reason" }), "Session award");
     await user.click(dialog.getByRole("button", { name: "Confirm Add XP" }));
-    expect(onUpdate).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        total: 1_200,
-        spent: 550,
-        transactions: [
-          expect.objectContaining({
-            type: "add",
-            amount: 200,
-            reason: "Session award",
-            rankId: "scout",
-          }),
-        ],
-      })
-    );
+    expect(onAdjustXp).toHaveBeenLastCalledWith(200, "Session award");
   });
 
   it("lets the DM remove accidentally awarded XP from Total", async () => {
     const user = userEvent.setup();
-    const { onUpdate } = renderTab();
+    const { onAdjustXp } = renderTab();
     await user.click(screen.getByRole("button", { name: "Remove XP" }));
     const dialog = within(screen.getByRole("dialog", { name: "Remove XP" }));
     await user.type(dialog.getByRole("textbox", { name: "Remove XP amount" }), "100");
     await user.type(dialog.getByRole("textbox", { name: "Remove XP reason" }), "Accidental award");
     await user.click(dialog.getByRole("button", { name: "Confirm Remove XP" }));
-    expect(onUpdate).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        total: 900,
-        spent: 550,
-        transactions: [
-          expect.objectContaining({
-            type: "remove",
-            amount: 100,
-            reason: "Accidental award",
-            rankId: "scout",
-          }),
-        ],
-      })
-    );
+    expect(onAdjustXp).toHaveBeenLastCalledWith(-100, "Accidental award");
   });
 
   it("blocks Rank Up until the next Spent XP threshold", () => {
@@ -844,17 +859,17 @@ describe("ExperienceTab named Career Rank ledger", () => {
     );
   });
 
-  it("lets an editable player add XP but keeps DM-only XP actions hidden", async () => {
+  it("lets an editable player add and remove XP but keeps Rank Up hidden", async () => {
     const user = userEvent.setup();
-    const { onUpdate } = renderTab({ isDM: false });
+    const { onAdjustXp } = renderTab({ isDM: false });
     expect(screen.queryByText("Read-only")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Add XP" }));
     const dialog = within(screen.getByRole("dialog", { name: "Add XP" }));
     await user.type(dialog.getByRole("textbox", { name: "Add XP amount" }), "200");
     await user.type(dialog.getByRole("textbox", { name: "Add XP reason" }), "Session award");
     await user.click(dialog.getByRole("button", { name: "Confirm Add XP" }));
-    expect(onUpdate).toHaveBeenCalled();
-    expect(screen.queryByRole("button", { name: "Remove XP" })).not.toBeInTheDocument();
+    expect(onAdjustXp).toHaveBeenCalledWith(200, "Session award");
+    expect(screen.getByRole("button", { name: "Remove XP" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Rank Up" })).not.toBeInTheDocument();
     expect(screen.getByRole("article", { name: "Scout Rank Card" })).toBeInTheDocument();
   });

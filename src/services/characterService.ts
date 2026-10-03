@@ -242,10 +242,7 @@ const callRevealRecoveryCode = httpsCallable<
 >(functions, "revealRecoveryCode");
 
 /** Reveals a character's own Recovery Code through the server, on demand. */
-export async function revealRecoveryCode(
-  campaignId: string,
-  characterId: string
-): Promise<string> {
+export async function revealRecoveryCode(campaignId: string, characterId: string): Promise<string> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
   return runSingleFlight("character:reveal-recovery-code", [campaignId, characterId], async () => {
@@ -409,6 +406,47 @@ const callPatchCharacterField = httpsCallable<
   { campaignId: string; characterId: string; field: string; value: unknown; operationId: string },
   void
 >(functions, "patchCharacterField");
+
+const callAdjustCharacterXp = httpsCallable<
+  {
+    campaignId: string;
+    characterId: string;
+    amountXp: number;
+    reason: string;
+    operationId: string;
+  },
+  void
+>(functions, "adjustCharacterXp");
+
+/** Records an XP adjustment and updates Total XP through the protected ledger operation. */
+export async function adjustCharacterXp(
+  campaignId: string,
+  characterId: string,
+  amountXp: number,
+  reason: string
+): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  if (!Number.isSafeInteger(amountXp) || amountXp === 0) {
+    throw new Error("The XP adjustment must be a non-zero whole number.");
+  }
+  const cleanReason = reason.trim();
+  if (!cleanReason) throw new Error("An XP adjustment reason is required.");
+  if (cleanReason.length > PRODUCT_LIMITS.xpHistoryReasonCharacters) {
+    throw new Error(
+      `An XP adjustment reason cannot exceed ${PRODUCT_LIMITS.xpHistoryReasonCharacters} characters.`
+    );
+  }
+  await measurePerformanceMutation("character:adjust-xp", () =>
+    callAdjustCharacterXp({
+      campaignId,
+      characterId,
+      amountXp,
+      reason: cleanReason,
+      operationId: createLocalId("adjust-character-xp"),
+    }).then(() => undefined)
+  );
+}
 
 /** Patches a single character field via the protected server-side operation. */
 export async function patchCharacterField(

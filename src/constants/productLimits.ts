@@ -24,6 +24,10 @@ export const PRODUCT_LIMITS = {
   threadSummaryPreviewCharacters: 500,
   messagesPerPage: 100,
   claimHistoryEntriesPerPage: 50,
+  xpHistoryEntriesPerPage: 100,
+
+  characterXpTotal: 10_000_000,
+  xpHistoryReasonCharacters: 4_000,
 
   sessionSummaryCharacters: 4_000,
   sessionDmNotesCharacters: 4_000,

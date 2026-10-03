@@ -1637,6 +1637,18 @@ describe("assertValidCharacterFieldTransition: experience alternate ranks", () =
     () =>
       assertValidCharacterFieldTransition("experience", oldValue, newValue, character, isDM);
 
+  it("rejects direct Total XP changes for players and DMs", () => {
+    const oldValue = { total: 1_000, spent: 400, ranks: [] };
+    const newValue = { ...oldValue, total: 1_100 };
+
+    expect(check(oldValue, newValue, clericAtCleric, false)).toThrow(
+      "Total XP can only be changed through an XP adjustment."
+    );
+    expect(check(oldValue, newValue, clericAtCleric, true)).toThrow(
+      "Total XP can only be changed through an XP adjustment."
+    );
+  });
+
   it("accepts a player taking an alternate rank while ranking up to the rank it replaces", () => {
     expect(check(base, withSelections([blackPriest]), clericAtPriest, false)).not.toThrow();
   });

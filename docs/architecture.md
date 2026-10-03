@@ -88,11 +88,12 @@ Settings is a modal owned by the application shell. Legacy path constants such a
 | Thread summaries                  |                         100 |
 | Current or requested message page |                         100 |
 | Claim history page                |                          50 |
+| XP history page                   |                         100 |
 | Custom-item query                 |                         200 |
 
 These values limit reads; they do not prove collection-size enforcement. `src/constants/productLimits.ts` declares product policy, while the enforcement layer differs by value.
 
-| Policy value               |                    Declared value | Current enforcement                                               |
+| Policy value               |         Declared limit with units | Current enforcement                                               |
 | -------------------------- | --------------------------------: | ----------------------------------------------------------------- |
 | Campaign creation rate     | 10 creations per rolling 24 hours | Protected `createCampaign` operation                              |
 | Campaigns per account      |                     100 campaigns | Protected `createCampaign` count check                            |
@@ -102,10 +103,12 @@ These values limit reads; they do not prove collection-size enforcement. `src/co
 | Custom items per campaign  |                         200 items | Query window and declared policy; no collection-count write check |
 | Character import payload   |                     750,000 bytes | Client import validation                                          |
 | Character document budget  |                     900,000 bytes | Application field and document validation                         |
+| Character Total XP         |                     10,000,000 XP | `adjustCharacterXp` and session XP operation validation           |
+| XP history reason          |                  4,000 characters | `adjustCharacterXp` operation validation                          |
 
 ## Trust and persistence boundaries
 
-Firestore rules authorize every direct client read and write. `SECURITY_RULES.md` summarizes that contract. Operations with sensitive cross-document or server-authority requirements use callable functions under `functions/src/operations/`.
+Firestore rules authorise every direct client read and write. `SECURITY_RULES.md` summarises that contract. Operations with sensitive cross-document or server-authority requirements use callable functions under `functions/src/operations/`.
 
 Character field edits go through the `patchCharacterField` callable. Each field has a shape and size validator, and fields that carry XP-priced purchases also have a transition validator in `functions/src/shared/characterFieldValidation.ts`. A transition validator compares the proposed value with the stored character and the caller's role, using the same `shared-rules` cost and rank functions as the browser, including the character's selected Alternate Rank tables:
 
@@ -113,11 +116,26 @@ Character field edits go through the `patchCharacterField` callable. Each field 
 - `skills`: each newly bought tier uses its Career-table cost, `getMissedRankCareerAdvances` prices a replaced normal-Rank Skill at its original cost plus 50 XP from the following Career tier, and a `gm-approved` Show all purchase requires matching recorded costs and DM authority even when the Skill is otherwise locked.
 - `talentsAndTraits`: `assertValidTalentsAndTraitsTransition` checks new Career-table Talents and Traits against `getNextTalentOrTraitPurchase`, validates missed-rank and packaged Talent provenance, restricts manually priced Show all purchases to the DM, and validates purchased or automatically granted packaged Elite Advances. `isCustomTraitEntry` permits campaign custom Traits, while `isPurityReplacement` permits the free Reformed Skin entry created with a Purity of Flesh acquisition.
 - `weaponTraining`: each newly trained fixed group is recorded at the career table cost, a group off the table is priced only by the DM, each career-table Exotic specialisation uses its printed cost and source rank, and only the DM adds off-Career Exotic Training as bonus training.
-- `experience`: a player adds an Alternate Rank only when the career matches, the rank it replaces is one of the character's valid next ranks and meets the Alternate Rank's minimum rank, and it appears only once. The DM may set any.
+- `experience`: a player adds an Alternate Rank only when the career matches, the rank it replaces is one of the character's valid next ranks and meets the Alternate Rank's minimum rank, and it appears only once. The DM may set any Alternate Rank selection. `assertValidExperienceTransition` rejects direct changes to Total XP for every caller.
 
-`patchCharacterField` supplies transition validators with the complete proposed character, so one atomic update can validate a packaged Elite Advance and its unlocked Talent, or an Alternate Rank and its automatic packaged grant. Decreases and removals are not checked, because only additions create free XP. Fields without a transition validator, and the remaining parts of `experience`, are checked for shape and size only.
+`patchCharacterField` supplies transition validators with the complete proposed character, so one atomic update can validate a packaged Elite Advance and its unlocked Talent, or an Alternate Rank and its automatic packaged grant. Decreases and removals are not checked, because only additions create free XP. Fields without a transition validator are checked for shape and size only.
 
 `assertExistingPurchasePricesUnchanged` protects retained XP purchase prices in Characteristics, Skills, Talents, Traits, packaged Elite Advances and Weapon Training. A player with character editing access may remove a purchase for a refund, but cannot add, remove or alter any cost field on a purchase that remains owned. The DM may reprice a retained purchase.
+
+### XP history
+
+Total XP is a server-maintained aggregate. The Experience page displays its read-only history beneath the Total, Spent and Remaining XP summary.
+
+| Behaviour                              | Owning component                                                       | Persistence boundary                                                                                                                           |
+| -------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Manual positive or negative adjustment | `adjustCharacterXp` in `functions/src/operations/adjustCharacterXp.ts` | Updates `experience.total` and appends `/campaigns/{campaignId}/characters/{characterId}/xpHistory/{entryId}` in one transaction               |
+| Existing-character baseline            | `stageOpeningBalance` in `functions/src/shared/xpHistory.ts`           | Creates the immutable `opening-balance` entry before the first adjustment                                                                      |
+| Session award                          | `applySessionXp` in `functions/src/operations/sessionXp.ts`            | Uses the stored session attendees and XP amount, updates every attendee total, writes history and marks the session applied in one transaction |
+| Session deletion with reversal         | `deleteSession` in `functions/src/operations/sessionXp.ts`             | Writes a negative history entry, updates every attendee total and deletes the session records in one transaction                               |
+| History subscription                   | `useXpHistory` in `src/hooks/useXpHistory.ts`                          | Reads at most 100 newest entries ordered by creation time                                                                                      |
+| History presentation                   | `ExperienceTab` in `src/pages/CharacterSheet/ExperienceTab.tsx`        | Shows amount in XP, resulting balance in XP, reason, actor and local date and time                                                             |
+
+An editable owning player and an actively editing DM may record a manual adjustment. The resulting Total XP must remain at or above Spent XP and may not exceed 10,000,000 XP. History entries are server-written and cannot be edited or deleted directly. A correction is a new positive or negative entry.
 
 | Callable error code   | Meaning                                                         |
 | --------------------- | --------------------------------------------------------------- |
@@ -138,14 +156,14 @@ Text-field persistence is debounced by 600 milliseconds. Quantity deltas are coa
 
 Campaign and character deletion use protected resumable jobs:
 
-1. The protected preflight authorizes the caller, counts affected documents, and stores a job without deleting descendants.
+1. The protected preflight authorises the caller, counts affected documents, and stores a job without deleting descendants.
 2. The client displays the stored count.
 3. The user confirms processing in the UI.
 4. The client requests bounded chunks until completion.
 
 Parent documents are removed last so interrupted work can resume without leaving descendants detached from an existing parent.
 
-The confirmation is a client workflow boundary, not a server-validated count token. Processing reauthorizes the caller but does not perform a fresh count comparison at confirmation time.
+The confirmation is a client workflow boundary, not a server-validated count token. Processing reauthorises the caller but does not perform a fresh count comparison at confirmation time.
 
 Account deletion is a separate bounded transaction. It refuses deletion while the account owns campaigns and refuses a write set above its transaction ceiling.
 
@@ -153,7 +171,7 @@ Preconditions and failure behaviour are part of each operation's contract:
 
 | Operation            | Required precondition                                                                                              | Failure behaviour                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| Campaign deletion    | Caller is the campaign DM; every character has a valid Recovery Code; preflight count is at most 100,000 documents | Preflight creates no descendant deletion; processing reauthorizes the caller and can resume |
+| Campaign deletion    | Caller is the campaign DM; every character has a valid Recovery Code; preflight count is at most 100,000 documents | Preflight creates no descendant deletion; processing reauthorises the caller and can resume |
 | Character deletion   | Caller is the campaign DM; the character has a valid Recovery Code; preflight count is at most 100,000 documents   | Parent character remains until descendant cleanup completes                                 |
 | Account deletion     | No owned campaigns and cleanup fits the bounded transaction                                                        | Transaction performs no partial Firestore cleanup on rejection                              |
 | Ownership transition | Caller has operation-specific authority and current state matches                                                  | Transaction rejects races without a partial transition                                      |

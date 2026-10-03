@@ -17,5 +17,6 @@ export const FIRESTORE_QUERY_LIMITS = {
   threadSummariesPerCampaign: 100,
   messagesPerThread: PRODUCT_LIMITS.messagesPerPage,
   claimLogEntries: PRODUCT_LIMITS.claimHistoryEntriesPerPage,
+  xpHistoryEntries: PRODUCT_LIMITS.xpHistoryEntriesPerPage,
   customItemsPerQuery: PRODUCT_LIMITS.customItemsPerCampaign,
 } as const;

@@ -6,7 +6,7 @@
 // src/utils/firestoreBatchDelete.ts) with a chunked, checkpointed job that
 // can finish a deletion of any size.
 //
-// Mirrors the client's dependent-document set exactly: claimLog, xpProposals,
+// Mirrors the client's dependent-document set exactly: claimLog, xpHistory, xpProposals,
 // the character's thread and its messages, the recoveryIndex entry, then the
 // character document itself, deleted last so nothing is ever left pointing
 // at a character that no longer exists. Unlike the client, the Recovery Code
@@ -33,6 +33,7 @@ const CHUNK_SIZE = 400;
 
 type Phase =
   | "claimLog"
+  | "xpHistory"
   | "xpProposals"
   | "messages"
   | "thread"
@@ -41,6 +42,7 @@ type Phase =
   | "character";
 const PHASE_ORDER: readonly Phase[] = [
   "claimLog",
+  "xpHistory",
   "xpProposals",
   "messages",
   "thread",
@@ -107,6 +109,7 @@ export async function startCharacterDeletionJob(
 
   const [
     claimLogCount,
+    xpHistoryCount,
     xpProposalsCount,
     messagesCount,
     threadSnapshot,
@@ -114,6 +117,7 @@ export async function startCharacterDeletionJob(
     summarySnapshot,
   ] = await Promise.all([
     characterRef.collection("claimLog").count().get(),
+    characterRef.collection("xpHistory").count().get(),
     characterRef.collection("xpProposals").count().get(),
     threadRef.collection("messages").count().get(),
     threadRef.get(),
@@ -123,6 +127,7 @@ export async function startCharacterDeletionJob(
 
   const totalCount =
     claimLogCount.data().count +
+    xpHistoryCount.data().count +
     xpProposalsCount.data().count +
     messagesCount.data().count +
     (threadSnapshot.exists ? 1 : 0) +
@@ -180,6 +185,7 @@ async function processPhase(
 
   switch (checkpoint.phase) {
     case "claimLog":
+    case "xpHistory":
     case "xpProposals":
     case "messages": {
       const collectionRef =

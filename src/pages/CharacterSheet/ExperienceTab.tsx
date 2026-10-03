@@ -13,7 +13,6 @@ import {
 } from "../../mechanics/experience/careerRankProgression";
 import {
   applyCareerRankUp,
-  applyXpTransaction,
   clearRankUpXpCost,
   setRankUpXpCost,
 } from "../../mechanics/experience/xpTransactions";
@@ -53,6 +52,7 @@ import {
   colourAmberPlain,
   colourCareerPathOutline,
   colourEmerald,
+  colourEmeraldPlain,
   colourRank,
   colourSkyPlain,
   colourTextPrimary,
@@ -64,12 +64,16 @@ import {
   applyAlternateRankMeleeWeaponGrant,
 } from "../../mechanics/experience/alternateRankGrants";
 import { MELEE_WEAPON_REFERENCE } from "../../data/reference/weaponReference";
+import { useXpHistory } from "../../hooks/useXpHistory";
+import { xpHistoryDate } from "../../utils/xpHistory";
 
 interface ExperienceTabProps {
+  campaignId: string;
   character: Character;
   isDM: boolean;
   editable: boolean;
   onUpdate: (next: ExperienceBlock) => Promise<boolean>;
+  onAdjustXp: (amountXp: number, reason: string) => Promise<boolean>;
   onUpdateCharacter: (partial: Record<string, unknown>) => Promise<boolean>;
 }
 
@@ -133,12 +137,14 @@ function XpTransactionModal({
   experience,
   rankId,
   onApply,
+  onAdjustXp,
   onClose,
 }: {
   action: XpAction;
   experience: ExperienceBlock;
   rankId: string;
   onApply: (next: ExperienceBlock) => void | Promise<boolean>;
+  onAdjustXp?: (amountXp: number, reason: string) => Promise<boolean>;
   onClose: () => void;
 }) {
   const [saving, setSaving] = useState(false);
@@ -192,7 +198,7 @@ function XpTransactionModal({
   );
 
   const submit = async () => {
-    if (!validAmount) return;
+    if (!validAmount || (!isSpend && !onAdjustXp)) return;
     const transaction = {
       id: crypto.randomUUID(),
       amount,
@@ -200,11 +206,9 @@ function XpTransactionModal({
       rankId,
     };
     setSaving(true);
-    const saved = await onApply(
-      isSpend
-        ? setRankUpXpCost(experience, transaction)
-        : applyXpTransaction(experience, { ...transaction, type: action })
-    );
+    const saved = isSpend
+      ? await onApply(setRankUpXpCost(experience, transaction))
+      : await onAdjustXp!(isRemove ? -amount : amount, reason);
     setSaving(false);
     if (saved !== false) onClose();
   };
@@ -855,14 +859,21 @@ function RankDetailsSwitcher({ card }: { card: RankCard }) {
 }
 
 export function ExperienceTab({
+  campaignId,
   character,
   isDM,
   editable,
   onUpdate,
+  onAdjustXp,
   onUpdateCharacter,
 }: ExperienceTabProps) {
   recordComponentRender("ExperienceTab");
   const { experience } = character;
+  const {
+    entries: xpHistory,
+    loading: xpHistoryLoading,
+    error: xpHistoryError,
+  } = useXpHistory(campaignId, character.id);
   const remaining = experience.total - experience.spent;
   const rankCards = buildRankCards(character);
   const progression = getCareerRankProgression(
@@ -884,8 +895,9 @@ export function ExperienceTab({
       ? rankExpansion.expandedRankIds
       : new Set(currentRankCardId ? [currentRankCardId] : []);
   const canAddXp = editable;
-  const canManageXp = isDM && editable;
-  const canUseXpAction = xpAction === "add" ? canAddXp : canManageXp;
+  const canRemoveXp = editable;
+  const canManageRank = isDM && editable;
+  const canUseXpAction = xpAction === "spend" ? canManageRank : editable;
   const orderedRankCards = [...rankCards].sort(
     (left, right) => Number(right.isCurrent) - Number(left.isCurrent) || right.tier - left.tier
   );
@@ -942,6 +954,49 @@ export function ExperienceTab({
         </div>
       </section>
 
+      <section className="space-y-3">
+        <SectionHeader>XP History</SectionHeader>
+        <div className={`${uiSection} space-y-2`}>
+          {xpHistoryLoading ? (
+            <p className={uiTextPlaceholder}>Loading XP history…</p>
+          ) : xpHistoryError ? (
+            <p className="text-sm text-red-300 lg:text-base">XP history could not be loaded.</p>
+          ) : xpHistory.length === 0 ? (
+            <p className={uiTextPlaceholder}>No XP adjustments have been recorded yet.</p>
+          ) : (
+            xpHistory.map((entry) => {
+              const date = xpHistoryDate(entry.createdAt);
+              const actor = entry.actorName ?? (entry.actorRole === "dm" ? "DM" : "Player");
+              return (
+                <article
+                  key={entry.id}
+                  className="grid gap-2 rounded-lg border border-slate-700 bg-slate-950/30 p-3 sm:grid-cols-[auto_1fr_auto] sm:items-center"
+                >
+                  <div
+                    className={`font-code text-lg font-semibold ${
+                      entry.amountXp < 0 ? colourAmberPlain : colourEmeraldPlain
+                    }`}
+                  >
+                    {entry.amountXp > 0 ? "+" : ""}
+                    {entry.amountXp} XP
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm text-slate-100 lg:text-base">{entry.reason}</div>
+                    <div className="mt-0.5 text-xs text-slate-400 lg:text-sm">
+                      {actor}
+                      {date ? ` · ${date.toLocaleString("en-IE")}` : ""}
+                    </div>
+                  </div>
+                  <div className="text-xs text-slate-400 sm:text-right lg:text-sm">
+                    Balance <span className="font-code text-slate-200">{entry.balanceXp} XP</span>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+      </section>
+
       {progression && (
         <section className="space-y-3">
           <SectionHeader>Rank Progression</SectionHeader>
@@ -980,13 +1035,13 @@ export function ExperienceTab({
             {canAddXp && (
               <div
                 className={`grid gap-2 border-t border-slate-700 pt-4 ${
-                  canManageXp ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-1"
+                  canManageRank ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2"
                 }`}
               >
                 <Button variant="successOutline" onClick={() => setXpAction("add")}>
                   Add XP
                 </Button>
-                {canManageXp && (
+                {canRemoveXp && (
                   <Button
                     variant="warningOutline"
                     onClick={() => setXpAction("remove")}
@@ -995,7 +1050,7 @@ export function ExperienceTab({
                     Remove XP
                   </Button>
                 )}
-                {canManageXp && progression.nextBand && (
+                {canManageRank && progression.nextBand && (
                   <Button
                     className="col-span-2 sm:col-span-1"
                     onClick={() => setRankUpOpen(true)}
@@ -1083,11 +1138,12 @@ export function ExperienceTab({
           experience={experience}
           rankId={progression.currentRank.id}
           onApply={onUpdate}
+          onAdjustXp={onAdjustXp}
           onClose={() => setXpAction(null)}
         />
       )}
 
-      {canManageXp && rankUpOpen && progression && (
+      {canManageRank && rankUpOpen && progression && (
         <RankUpModal
           character={character}
           progression={progression}

@@ -44,6 +44,16 @@ import {
   type AdjustCharacterNumberInput,
 } from "./operations/adjustCharacterNumber.js";
 import {
+  adjustCharacterXp as runAdjustCharacterXp,
+  type AdjustCharacterXpInput,
+} from "./operations/adjustCharacterXp.js";
+import {
+  applySessionXp as runApplySessionXp,
+  deleteSession as runDeleteSession,
+  type ApplySessionXpInput,
+  type DeleteSessionInput,
+} from "./operations/sessionXp.js";
+import {
   reconcileCharacterSpentXp as runReconcileCharacterSpentXp,
   type ReconcileCharacterSpentXpInput,
 } from "./operations/reconcileCharacterSpentXp.js";
@@ -871,6 +881,73 @@ export const adjustCharacterNumber = onCall<AdjustCharacterNumberInput>(
     });
   }
 );
+
+export const adjustCharacterXp = onCall<AdjustCharacterXpInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<AdjustCharacterXpInput, void>({
+      request,
+      operation: "adjust-character-xp",
+      allowedFields: ["campaignId", "characterId", "amountXp", "reason", "operationId"],
+      requiredFields: ["campaignId", "characterId", "amountXp", "reason", "operationId"],
+      fieldShapes: {
+        campaignId: "string",
+        characterId: "string",
+        reason: "string",
+        operationId: "string",
+      },
+      payloadBounds: { maxBytes: 20_000, maxStringCharacters: 4_000 },
+      rateLimits: [
+        { key: `adjust-character-xp:${callerUid}`, limit: 100, windowMs: 60 * 60 * 1000 },
+      ],
+      idempotencyKey: buildOperationIdempotencyKey(
+        "adjust-character-xp",
+        callerUid,
+        (request.data as AdjustCharacterXpInput | undefined)?.operationId
+      ),
+      handler: ({ uid, data, idempotency }) => runAdjustCharacterXp(data, uid, idempotency),
+    });
+  }
+);
+
+export const applySessionXp = onCall<ApplySessionXpInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<ApplySessionXpInput, void>({
+    request,
+    operation: "apply-session-xp",
+    allowedFields: ["campaignId", "sessionId", "operationId"],
+    requiredFields: ["campaignId", "sessionId", "operationId"],
+    fieldShapes: { campaignId: "string", sessionId: "string", operationId: "string" },
+    payloadBounds: { maxBytes: 2_000, maxStringCharacters: 200 },
+    rateLimits: [{ key: `apply-session-xp:${callerUid}`, limit: 100, windowMs: 60 * 60 * 1000 }],
+    idempotencyKey: buildOperationIdempotencyKey(
+      "apply-session-xp",
+      callerUid,
+      (request.data as ApplySessionXpInput | undefined)?.operationId
+    ),
+    handler: ({ uid, data, idempotency }) => runApplySessionXp(data, uid, idempotency),
+  });
+});
+
+export const deleteSession = onCall<DeleteSessionInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<DeleteSessionInput, void>({
+    request,
+    operation: "delete-session",
+    allowedFields: ["campaignId", "sessionId", "reverseXp", "operationId"],
+    requiredFields: ["campaignId", "sessionId", "reverseXp", "operationId"],
+    fieldShapes: { campaignId: "string", sessionId: "string", operationId: "string" },
+    payloadBounds: { maxBytes: 2_000, maxStringCharacters: 200 },
+    rateLimits: [{ key: `delete-session:${callerUid}`, limit: 100, windowMs: 60 * 60 * 1000 }],
+    idempotencyKey: buildOperationIdempotencyKey(
+      "delete-session",
+      callerUid,
+      (request.data as DeleteSessionInput | undefined)?.operationId
+    ),
+    handler: ({ uid, data, idempotency }) => runDeleteSession(data, uid, idempotency),
+  });
+});
 
 export const reconcileCharacterSpentXp = onCall<ReconcileCharacterSpentXpInput>(
   { timeoutSeconds: 30 },

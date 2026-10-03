@@ -1384,6 +1384,12 @@ function assertValidExperienceTransition(
   character: Record<string, unknown>,
   isDM: boolean
 ): void {
+  if (isRecord(oldValue) && isRecord(newValue) && oldValue.total !== newValue.total) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Total XP can only be changed through an XP adjustment."
+    );
+  }
   if (isDM || !isRecord(newValue) || newValue.alternateRanks === undefined) return;
   if (!Array.isArray(newValue.alternateRanks)) {
     throw new HttpsError("invalid-argument", "Alternate ranks must be a list.");

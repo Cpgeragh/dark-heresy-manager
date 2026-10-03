@@ -58,6 +58,7 @@ const {
   const mockBatch = vi.fn(() => mockBatchObj);
 
   const claimLogChild = makeCollectionMock();
+  const xpHistoryChild = makeCollectionMock();
   const xpProposalsChild = makeCollectionMock();
   const messagesChild = makeCollectionMock();
   const versionsChild = makeCollectionMock();
@@ -66,6 +67,7 @@ const {
   (characters.docMock as ReturnType<typeof vi.fn>).mockImplementation(() => ({
     collection: (name: string) => {
       if (name === "claimLog") return claimLogChild.ref;
+      if (name === "xpHistory") return xpHistoryChild.ref;
       if (name === "xpProposals") return xpProposalsChild.ref;
       throw new Error(`Unexpected character subcollection: ${name}`);
     },
@@ -149,6 +151,7 @@ const {
     sessionSummaries,
     characterSummaries,
     claimLogChild,
+    xpHistoryChild,
     xpProposalsChild,
     messagesChild,
     versionsChild,
@@ -202,6 +205,7 @@ function makeCharacterDoc(
   id: string,
   recoveryCode: string,
   claimLogCount: number,
+  xpHistoryCount: number,
   xpCount: number
 ) {
   return {
@@ -212,6 +216,12 @@ function makeCharacterDoc(
           return {
             count: () => ({
               get: () => Promise.resolve({ data: () => ({ count: claimLogCount }) }),
+            }),
+          };
+        if (name === "xpHistory")
+          return {
+            count: () => ({
+              get: () => Promise.resolve({ data: () => ({ count: xpHistoryCount }) }),
             }),
           };
         if (name === "xpProposals")
@@ -250,7 +260,7 @@ describe("startCampaignDeletionJob", () => {
   it("rejects when a character has no usable Recovery Code", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     characters.pageGet.mockResolvedValue({
-      docs: [makeCharacterDoc("char-1", "not-a-code", 0, 0)],
+      docs: [makeCharacterDoc("char-1", "not-a-code", 0, 0, 0)],
     });
 
     await expect(
@@ -262,8 +272,8 @@ describe("startCampaignDeletionJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     characters.pageGet.mockResolvedValue({
       docs: [
-        makeCharacterDoc("char-1", "DH-AAAA-1111", 2, 1),
-        makeCharacterDoc("char-2", "DH-BBBB-2222", 0, 0),
+        makeCharacterDoc("char-1", "DH-AAAA-1111", 2, 3, 1),
+        makeCharacterDoc("char-2", "DH-BBBB-2222", 0, 0, 0),
       ],
     });
     threads.pageGet.mockResolvedValue({
@@ -303,16 +313,16 @@ describe("startCampaignDeletionJob", () => {
       "secret"
     );
 
-    // 2 characters + (2+1 claimLog/xp for char-1) + (0+0 for char-2)
+    // 2 characters + (2+3+1 claimLog/history/proposals for char-1) + 0 for char-2
     // + 1 recoveryIndex entry (only char-1's exists) + 2 characterSummaries
     // + 1 thread + 5 messages + 1 customItem + 3 versions + 4 sessions
-    // + 4 member-safe session summaries + 1 campaign = 27
-    expect(result).toEqual({ jobId: "job-1", totalCount: 27 });
+    // + 4 member-safe session summaries + 1 campaign = 30
+    expect(result).toEqual({ jobId: "job-1", totalCount: 30 });
     expect(mockCreateBulkJob).toHaveBeenCalledWith(
       "campaign-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID },
-      27,
+      30,
       "idem-key"
     );
   });
@@ -470,7 +480,7 @@ describe("processCampaignDeletionChunk", () => {
     expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
-      JSON.stringify({ phase: "characterXpProposals", parentCursor: null, cursor: null }),
+      JSON.stringify({ phase: "characterXpHistory", parentCursor: null, cursor: null }),
       0
     );
   });
@@ -486,7 +496,7 @@ describe("processCampaignDeletionChunk", () => {
     expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
-      JSON.stringify({ phase: "characterXpProposals", parentCursor: null, cursor: null }),
+      JSON.stringify({ phase: "characterXpHistory", parentCursor: null, cursor: null }),
       0
     );
   });

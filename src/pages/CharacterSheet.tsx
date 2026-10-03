@@ -176,6 +176,7 @@ export default function CharacterSheet({
     patchFieldWithResult,
     patchFieldsWithResult,
     patchCollectionField,
+    adjustXp,
     releaseCharacter,
     dmForceRelease,
     dmForceAssign,
@@ -940,10 +941,12 @@ export default function CharacterSheet({
 
               {activeTab === "xp" && (
                 <ExperienceTab
+                  campaignId={character.campaignId}
                   character={character}
                   isDM={isDM}
                   editable={allowedToEdit}
                   onUpdate={handleUpdateExperience}
+                  onAdjustXp={adjustXp}
                   onUpdateCharacter={patchFieldsWithResult}
                 />
               )}

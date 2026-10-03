@@ -266,15 +266,13 @@ describe("Firestore Rules: Sessions", () => {
     ).rejects.toThrow();
   });
 
-  it("DM can delete a session", async () => {
+  it("keeps session deletion behind the protected operation", async () => {
     const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
     const dmDb = dbAs(env, "dm-1");
-    await expect(
-      dmDb.collection("campaigns/c1/sessions").doc("s1").delete()
-    ).resolves.toBeUndefined();
+    await expect(dmDb.collection("campaigns/c1/sessions").doc("s1").delete()).rejects.toThrow();
   });
 
   it("non-DM player cannot delete a session", async () => {
@@ -284,5 +282,43 @@ describe("Firestore Rules: Sessions", () => {
 
     const playerDb = dbAs(env, "player-1");
     await expect(playerDb.collection("campaigns/c1/sessions").doc("s1").delete()).rejects.toThrow();
+  });
+
+  it("keeps XP application state behind the protected operation", async () => {
+    const env = await getTestEnv();
+    await createCampaign(env, "c1", "dm-1");
+    await createSession(env, "c1", "s1", {
+      xpAwarded: 200,
+      attendees: ["char-1"],
+      xpApplied: false,
+    });
+    await createSessionSummary(env, "c1", "s1", {
+      xpAwarded: 200,
+      attendees: ["char-1"],
+      xpApplied: false,
+    });
+
+    const dmDb = dbAs(env, "dm-1");
+    await expect(
+      dmDb.collection("campaigns/c1/sessions").doc("s1").update({ xpApplied: true })
+    ).rejects.toThrow();
+    await expect(
+      dmDb.collection("campaigns/c1/sessionSummaries").doc("s1").update({ xpApplied: true })
+    ).rejects.toThrow();
+  });
+
+  it("locks the awarded XP and attendees after server application", async () => {
+    const env = await getTestEnv();
+    await createCampaign(env, "c1", "dm-1");
+    await createSession(env, "c1", "s1", {
+      xpAwarded: 200,
+      attendees: ["char-1"],
+      xpApplied: true,
+    });
+
+    const session = dbAs(env, "dm-1").collection("campaigns/c1/sessions").doc("s1");
+    await expect(session.update({ summary: "Corrected recap" })).resolves.toBeUndefined();
+    await expect(session.update({ xpAwarded: 300 })).rejects.toThrow();
+    await expect(session.update({ attendees: ["char-2"] })).rejects.toThrow();
   });
 });
