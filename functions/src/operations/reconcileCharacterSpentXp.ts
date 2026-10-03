@@ -1,25 +1,19 @@
 // functions/src/operations/reconcileCharacterSpentXp.ts
 //
-// Corrects the derived experience.spent total from a client-supplied
-// recomputation (src/features/experience/xpSpent.ts's getSpentXp, pure
-// arithmetic over already-owned purchases). This operation validates the
-// value's structure but does not re-evaluate its game-rule correctness. It
-// reads the character inside its own transaction and merges only
-// experience.spent, leaving experience.total/.ranks/.transactions untouched
-// so a concurrent XP award or Rank Up cannot be clobbered by a stale
-// reconciliation.
+// Corrects the derived experience.spent total from the character's stored
+// purchases. It reads the character inside its own transaction and merges
+// only experience.spent, so concurrent XP awards and Rank Up changes are not
+// overwritten by stale client state.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { assertCanEditCharacter } from "../shared/characterAuthorization.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
-
-const MAX_EXPERIENCE = 10_000_000;
+import { assertCharacterXpBudget } from "../shared/spentXp.js";
 
 export interface ReconcileCharacterSpentXpInput {
   campaignId: string;
   characterId: string;
-  spent: number;
   operationId?: string;
 }
 
@@ -28,13 +22,6 @@ export async function reconcileCharacterSpentXp(
   callerUid: string,
   idempotency: IdempotencyExecution<{ updated: boolean }> | null = null
 ): Promise<{ updated: boolean }> {
-  if (!Number.isInteger(input.spent) || input.spent < 0 || input.spent > MAX_EXPERIENCE) {
-    throw new HttpsError(
-      "invalid-argument",
-      `spent must be a whole number between 0 and ${MAX_EXPERIENCE}.`
-    );
-  }
-
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
   const characterRef = campaignRef.collection("characters").doc(input.characterId);
@@ -57,10 +44,11 @@ export async function reconcileCharacterSpentXp(
       await assertCanEditCharacter(db, callerUid, dmId, characterData);
 
       const experience = (characterData.experience ?? {}) as Record<string, unknown>;
-      if (experience.spent === input.spent) {
+      const spentXp = assertCharacterXpBudget(characterData);
+      if (experience.spent === spentXp) {
         return { updated: false };
       }
-      transaction.update(characterRef, { "experience.spent": input.spent });
+      transaction.update(characterRef, { "experience.spent": spentXp });
       return { updated: true };
     },
     { maxAttempts: 5 }

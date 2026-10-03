@@ -1,5 +1,4 @@
-// functions/tests/operations/reconcileCharacterSpentXp.test.ts
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { reconcileCharacterSpentXp } from "../../src/operations/reconcileCharacterSpentXp";
 
 const mockCampaignGet = vi.fn();
@@ -14,8 +13,7 @@ const mockCharactersCollection = { doc: vi.fn(() => mockCharacterRef) };
 const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 const mockUserLinkGet = vi.fn();
-const mockUserLinkDoc = vi.fn(() => ({ get: mockUserLinkGet }));
-const mockUserLinksCollection = { doc: mockUserLinkDoc };
+const mockUserLinksCollection = { doc: vi.fn(() => ({ get: mockUserLinkGet })) };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
@@ -30,39 +28,34 @@ vi.mock("firebase-admin/firestore", () => ({
   }),
 }));
 
+function storedCharacter(purchaseXp: number, storedSpentXp: number, totalXp = 500) {
+  return {
+    userId: "player-1",
+    isEditableByPlayer: false,
+    experience: {
+      total: totalXp,
+      spent: storedSpentXp,
+      ranks: [
+        {
+          rank: 1,
+          advances: [{ id: "advance-1", name: "Advances", cost: purchaseXp }],
+        },
+      ],
+    },
+  };
+}
+
 describe("reconcileCharacterSpentXp", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUserLinkGet.mockResolvedValue({ exists: false });
   });
 
-  it("rejects a non-integer spent value before touching Firestore", async () => {
-    await expect(
-      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1", spent: 1.5 }, "dm-1")
-    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
-    expect(mockCampaignGet).not.toHaveBeenCalled();
-  });
-
-  it("rejects a negative spent value", async () => {
-    await expect(
-      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1", spent: -1 }, "dm-1")
-    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
-  });
-
-  it("rejects a spent value over the maximum", async () => {
-    await expect(
-      reconcileCharacterSpentXp(
-        { campaignId: "c1", characterId: "char-1", spent: 10_000_001 },
-        "dm-1"
-      )
-    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
-  });
-
   it("rejects when the campaign does not exist", async () => {
     mockCampaignGet.mockResolvedValue({ exists: false });
 
     await expect(
-      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1", spent: 100 }, "dm-1")
+      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1" }, "dm-1")
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -71,23 +64,19 @@ describe("reconcileCharacterSpentXp", () => {
     mockTransactionGet.mockResolvedValue({ exists: false });
 
     await expect(
-      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1", spent: 100 }, "dm-1")
+      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1" }, "dm-1")
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
-  it("allows the DM to correct a stale spent total", async () => {
+  it("calculates and corrects stale Spent XP for the DM", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({
-        userId: "player-1",
-        isEditableByPlayer: false,
-        experience: { total: 500, spent: 50 },
-      }),
+      data: () => storedCharacter(100, 50),
     });
 
     const result = await reconcileCharacterSpentXp(
-      { campaignId: "c1", characterId: "char-1", spent: 100 },
+      { campaignId: "c1", characterId: "char-1" },
       "dm-1"
     );
 
@@ -97,55 +86,40 @@ describe("reconcileCharacterSpentXp", () => {
     });
   });
 
-  it("allows the owning player to correct their own character when editable", async () => {
+  it("allows the editable owning player to request recalculation", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({
-        userId: "player-1",
-        isEditableByPlayer: true,
-        experience: { total: 500, spent: 50 },
-      }),
+      data: () => ({ ...storedCharacter(100, 50), isEditableByPlayer: true }),
     });
 
-    const result = await reconcileCharacterSpentXp(
-      { campaignId: "c1", characterId: "char-1", spent: 100 },
-      "player-1"
-    );
-
-    expect(result).toEqual({ updated: true });
+    await expect(
+      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1" }, "player-1")
+    ).resolves.toEqual({ updated: true });
   });
 
   it("rejects a non-editable player", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({
-        userId: "player-1",
-        isEditableByPlayer: false,
-        experience: { total: 500, spent: 50 },
-      }),
+      data: () => storedCharacter(100, 50),
     });
 
     await expect(
-      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1", spent: 100 }, "player-1")
+      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1" }, "player-1")
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 
-  it("does not write when the spent value is already correct", async () => {
+  it("does not write when the calculated value is already stored", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({
-        userId: "player-1",
-        isEditableByPlayer: false,
-        experience: { total: 500, spent: 100 },
-      }),
+      data: () => storedCharacter(100, 100),
     });
 
     const result = await reconcileCharacterSpentXp(
-      { campaignId: "c1", characterId: "char-1", spent: 100 },
+      { campaignId: "c1", characterId: "char-1" },
       "dm-1"
     );
 
@@ -153,28 +127,16 @@ describe("reconcileCharacterSpentXp", () => {
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 
-  it("never touches experience.total or other fields, only experience.spent", async () => {
+  it("rejects reconciliation when recorded purchases exceed Total XP", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({
-        userId: "player-1",
-        isEditableByPlayer: false,
-        experience: { total: 500, spent: 50, ranks: [{ rankId: "conscript" }] },
-      }),
+      data: () => storedCharacter(600, 50, 500),
     });
 
-    await reconcileCharacterSpentXp(
-      { campaignId: "c1", characterId: "char-1", spent: 100 },
-      "dm-1"
-    );
-
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
-      "experience.spent": 100,
-    });
-    expect(mockTransactionUpdate).not.toHaveBeenCalledWith(
-      mockCharacterRef,
-      expect.objectContaining({ experience: expect.anything() })
-    );
+    await expect(
+      reconcileCharacterSpentXp({ campaignId: "c1", characterId: "char-1" }, "dm-1")
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 });

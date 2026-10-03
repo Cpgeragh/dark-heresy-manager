@@ -9,6 +9,7 @@ import {
   stageOpeningBalance,
   stageXpHistoryEntry,
 } from "../shared/xpHistory.js";
+import { calculateCharacterSpentXp } from "../shared/spentXp.js";
 
 const SESSION_ATTENDEES_MAX = 100;
 const SESSION_XP_AWARD_MAX = 100_000;
@@ -92,6 +93,7 @@ export async function applySessionXp(
     characterRefs.forEach((characterRef, index) => {
       const characterData = characterSnapshots[index].data() ?? {};
       const { experience, totalXp } = readExperience(characterData);
+      const spentXp = calculateCharacterSpentXp(characterData);
       const balanceXp = totalXp + xpAwarded;
       if (balanceXp > CHARACTER_XP_TOTAL_MAX) {
         throw new HttpsError(
@@ -119,7 +121,9 @@ export async function applySessionXp(
         },
         actor
       );
-      transaction.update(characterRef, { experience: { ...experience, total: balanceXp } });
+      transaction.update(characterRef, {
+        experience: { ...experience, total: balanceXp, spent: spentXp },
+      });
     });
     transaction.update(sessionRef, { xpApplied: true });
     transaction.update(summaryRef, { xpApplied: true });
@@ -166,9 +170,13 @@ export async function deleteSession(
       characterRefs.forEach((characterRef, index) => {
         const characterData = characterSnapshots[index].data() ?? {};
         const { experience, totalXp } = readExperience(characterData);
+        const spentXp = calculateCharacterSpentXp(characterData);
         const balanceXp = totalXp - xpAwarded;
-        if (balanceXp < 0) {
-          throw new HttpsError("failed-precondition", "Session XP cannot be reversed below 0 XP.");
+        if (balanceXp < spentXp) {
+          throw new HttpsError(
+            "failed-precondition",
+            "Session XP cannot be reversed below Spent XP."
+          );
         }
         const history = characterRef.collection("xpHistory");
         stageOpeningBalance(
@@ -190,7 +198,9 @@ export async function deleteSession(
           },
           actor
         );
-        transaction.update(characterRef, { experience: { ...experience, total: balanceXp } });
+        transaction.update(characterRef, {
+          experience: { ...experience, total: balanceXp, spent: spentXp },
+        });
       });
     }
     transaction.delete(sessionRef);

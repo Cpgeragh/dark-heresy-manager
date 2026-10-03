@@ -35,7 +35,7 @@ describe("XP transactions", () => {
     });
   });
 
-  it("adds manual spending to Spent without changing Total", () => {
+  it("records manual spending without directly changing Spent XP", () => {
     expect(
       applyXpTransaction(experience, {
         id: "spend-1",
@@ -46,7 +46,7 @@ describe("XP transactions", () => {
       })
     ).toEqual({
       total: 700,
-      spent: 650,
+      spent: 500,
       ranks: [],
       transactions: [
         {
@@ -131,7 +131,7 @@ describe("XP transactions", () => {
       })
     ).toEqual({
       total: 700,
-      spent: 650,
+      spent: 500,
       ranks: [],
       transactions: [
         {

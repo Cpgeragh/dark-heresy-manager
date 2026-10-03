@@ -71,6 +71,8 @@ export {
   getSkillsSpent,
   type SkillTierAccess,
 } from "./skillAdvanceCosts.js";
+export { getTalentsSpent } from "./talentAdvanceCosts.js";
+export { getSpentXp, type CharacterForSpentXp } from "./xpSpent.js";
 export type {
   CharacteristicAdvanceTier,
   Characteristics,

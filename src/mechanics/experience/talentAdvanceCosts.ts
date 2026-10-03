@@ -1,11 +1,6 @@
 // src/mechanics/experience/talentAdvanceCosts.ts
 
-import type {
-  AlternateRankSelection,
-  Character,
-  TalentEntry,
-  XpPurchaseRecord,
-} from "../../types/Character";
+import type { AlternateRankSelection, TalentEntry, XpPurchaseRecord } from "../../types/Character";
 import { getAllCareerAdvances, getUnlockedCareerAdvances } from "./careerAdvanceAccess";
 import { findCareerByName } from "../../data/reference/careerData";
 import { getNextTalentOrTraitPurchase } from "shared-rules";
@@ -174,28 +169,4 @@ export function getTalentRankChips(
   return chips;
 }
 
-/** Total XP currently spent on Talents and Traits: real cost first, falling back to a manually-entered one. Granted entries are free by construction. */
-export function getTalentsSpent(character: Character): number {
-  const career = character.header.career;
-  const rank = character.header.rank;
-  const alternateRanks = character.experience.alternateRanks ?? [];
-  const counted: TalentEntry[] = [];
-  let total = 0;
-  for (const entry of [
-    ...character.talentsAndTraits.talents,
-    ...character.talentsAndTraits.traits,
-  ]) {
-    if (entry.grantedByTalentEntryUid) continue;
-    const legacyRealCost = getNextTalentCost(
-      career,
-      rank,
-      entry.talentId,
-      entry.specialisation,
-      counted,
-      alternateRanks
-    );
-    total += entry.xpPurchase?.cost ?? legacyRealCost ?? entry.manualCost ?? 0;
-    counted.push(entry);
-  }
-  return total;
-}
+export { getTalentsSpent } from "shared-rules";

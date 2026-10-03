@@ -756,7 +756,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(dialog.queryByText("Draft cost")).not.toBeInTheDocument();
   });
 
-  it("clears an XP cost persisted by the older Rank Up flow when cancelled", async () => {
+  it("clears an older Rank Up cost without directly changing Spent XP", async () => {
     const user = userEvent.setup();
     const current = makeCharacter();
     const { onUpdate } = renderTab({
@@ -786,7 +786,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     await user.click(dialog.getByRole("button", { name: "Cancel" }));
 
     expect(onUpdate).toHaveBeenLastCalledWith(
-      expect.objectContaining({ spent: 1_000, transactions: undefined })
+      expect.objectContaining({ spent: 1_100, transactions: undefined })
     );
   });
 

@@ -79,7 +79,11 @@ function storedSession(xpApplied: boolean) {
 function storedCharacter() {
   return {
     userId: "player-1",
-    experience: { total: 1_000, spent: 400, ranks: [] },
+    experience: {
+      total: 1_000,
+      spent: 400,
+      ranks: [{ rank: 1, advances: [{ id: "advance-1", name: "Advances", cost: 400 }] }],
+    },
   };
 }
 
@@ -114,7 +118,13 @@ describe("session XP operations", () => {
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "characters", id: "character-1" }),
-      { experience: { total: 1_200, spent: 400, ranks: [] } }
+      {
+        experience: {
+          total: 1_200,
+          spent: 400,
+          ranks: [{ rank: 1, advances: [{ id: "advance-1", name: "Advances", cost: 400 }] }],
+        },
+      }
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "sessions", id: "session-1" }),
@@ -159,6 +169,30 @@ describe("session XP operations", () => {
     expect(transactionDelete).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "sessionSummaries", id: "session-1" })
     );
+  });
+
+  it("rejects the whole session reversal when it would reduce Total XP below Spent XP", async () => {
+    transactionGet.mockImplementation(async (target: { kind: string }) => {
+      if (target.kind === "sessions") return { exists: true, data: () => storedSession(true) };
+      if (target.kind === "characters") {
+        return {
+          exists: true,
+          data: () => ({
+            ...storedCharacter(),
+            experience: { ...storedCharacter().experience, total: 500 },
+          }),
+        };
+      }
+      if (target.kind === "xpHistory") return { exists: true, data: () => ({}) };
+      throw new Error(`Unexpected transaction read: ${target.kind}`);
+    });
+
+    await expect(
+      deleteSession({ campaignId: "campaign-1", sessionId: "session-1", reverseXp: true }, "dm-1")
+    ).rejects.toThrow("cannot be reversed below Spent XP");
+    expect(transactionSet).not.toHaveBeenCalled();
+    expect(transactionUpdate).not.toHaveBeenCalled();
+    expect(transactionDelete).not.toHaveBeenCalled();
   });
 
   it("does not touch character XP when deletion is not set to reverse it", async () => {

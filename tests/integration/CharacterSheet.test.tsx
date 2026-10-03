@@ -520,7 +520,7 @@ describe("CharacterSheet XP reconciliation", () => {
     renderSheet();
 
     await waitFor(() =>
-      expect(reconcileCharacterSpentXpMock).toHaveBeenCalledWith("campaign-1", "char-1", 999)
+      expect(reconcileCharacterSpentXpMock).toHaveBeenCalledWith("campaign-1", "char-1")
     );
   });
 

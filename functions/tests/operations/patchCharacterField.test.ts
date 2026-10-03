@@ -99,7 +99,11 @@ describe("patchCharacterField", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: false }),
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 10_000, spent: 0, ranks: [] },
+      }),
     });
 
     const notes = [{ id: "n1", title: "Note", text: "hi", updatedAt: "2026-01-01T00:00:00.000Z" }];
@@ -226,7 +230,11 @@ describe("patchCharacterField", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: false }),
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 10_000, spent: 0, ranks: [] },
+      }),
     });
 
     const characteristics = {
@@ -253,7 +261,11 @@ describe("patchCharacterField", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
-      data: () => ({ userId: "player-1", isEditableByPlayer: false }),
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 10_000, spent: 0, ranks: [] },
+      }),
     });
 
     const talentsAndTraits = { talents: [], traits: [] };
@@ -283,6 +295,7 @@ describe("patchCharacterField", () => {
         isEditableByPlayer: false,
         header: { career: "Guardsman", rank: "Conscript" },
         talentsAndTraits: oldTalents,
+        experience: { total: 10_000, spent: 0, ranks: [] },
       }),
     });
     const talentsAndTraits = {
@@ -321,7 +334,10 @@ describe("patchCharacterField", () => {
       "dm-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { talentsAndTraits });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      talentsAndTraits,
+      "experience.spent": 250,
+    });
   });
 
   it("rejects the whole multi-field patch when one field is invalid, writing nothing", async () => {
@@ -492,6 +508,7 @@ describe("patchCharacterField", () => {
         isEditableByPlayer: false,
         header: { career: "Adept" },
         characteristics: { ws: { base: 30, advances: 0 }, ...OTHER_CHARACTERISTICS },
+        experience: { total: 10_000, spent: 0, ranks: [] },
       }),
     });
 
@@ -504,7 +521,10 @@ describe("patchCharacterField", () => {
       "dm-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { characteristics });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      characteristics,
+      "experience.spent": 500,
+    });
   });
 
   it("rejects a characteristics advance recorded at a cheaper cost than the career table says", async () => {
@@ -545,6 +565,7 @@ describe("patchCharacterField", () => {
         isEditableByPlayer: false,
         header: { career: "Adept", rank: "Archivist" },
         skills: [],
+        experience: { total: 10_000, spent: 0, ranks: [] },
       }),
     });
 
@@ -561,7 +582,10 @@ describe("patchCharacterField", () => {
       "dm-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { skills });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      skills,
+      "experience.spent": 50,
+    });
   });
 
   it("rejects a player training a skill that isn't on the career table, even with a cost attached", async () => {
@@ -609,6 +633,7 @@ describe("patchCharacterField", () => {
         isEditableByPlayer: true,
         header: { career: "Adept", rank: "Archivist" },
         skills: storedSkills,
+        experience: { total: 10_000, spent: 100, ranks: [] },
       }),
     });
     const skills = [
@@ -636,6 +661,7 @@ describe("patchCharacterField", () => {
         isEditableByPlayer: false,
         header: { career: "Adept", rank: "Archivist" },
         skills: storedSkills,
+        experience: { total: 10_000, spent: 100, ranks: [] },
       }),
     });
     const skills = [
@@ -647,7 +673,10 @@ describe("patchCharacterField", () => {
       "dm-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { skills });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      skills,
+      "experience.spent": 0,
+    });
   });
 
   it("allows the DM to train a weapon group that isn't unlocked, at a DM-set cost", async () => {
@@ -659,6 +688,7 @@ describe("patchCharacterField", () => {
         isEditableByPlayer: false,
         header: { career: "Guardsman", rank: "Conscript" },
         weaponTraining: { trained: [], exoticWeapons: [] },
+        experience: { total: 10_000, spent: 0, ranks: [] },
       }),
     });
 
@@ -673,7 +703,10 @@ describe("patchCharacterField", () => {
       "dm-1"
     );
 
-    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { weaponTraining });
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
+      weaponTraining,
+      "experience.spent": 350,
+    });
   });
 
   it("rejects a player training a weapon group that isn't unlocked, even with a cost attached", async () => {
@@ -715,14 +748,18 @@ describe("patchCharacterField", () => {
         userId: "player-1",
         isEditableByPlayer: true,
         header: { career: "Cleric", rank: "Priest" },
-        experience: { total: 3000, spent: 1000, ranks: [] },
+        experience: {
+          total: 3000,
+          spent: 1000,
+          ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Advances", cost: 1000 }] }],
+        },
       }),
     });
 
     const experience = {
       total: 3000,
       spent: 1000,
-      ranks: [],
+      ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Advances", cost: 1000 }] }],
       alternateRanks: [
         {
           alternateRankId: "black-priest-of-maccabeus",
@@ -761,6 +798,66 @@ describe("patchCharacterField", () => {
         "dm-1"
       )
     ).rejects.toThrow("Total XP can only be changed through an XP adjustment.");
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a direct Spent XP change from the DM", async () => {
+    const ranks = [{ rank: 1, advances: [{ id: "advance-1", name: "Advances", cost: 400 }] }];
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        experience: { total: 1_000, spent: 400, ranks },
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "experience",
+          value: { total: 1_000, spent: 0, ranks },
+        },
+        "dm-1"
+      )
+    ).rejects.toThrow("Spent XP is calculated by the server");
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects the whole purchase when calculated Spent XP would exceed Total XP", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { career: "Adept", rank: "Archivist" },
+        skills: [],
+        experience: { total: 40, spent: 0, ranks: [] },
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "skills",
+          value: [
+            {
+              id: "not-a-real-skill",
+              level: "trained",
+              manualCosts: { trained: 50 },
+              xpPurchases: { trained: { cost: 50 } },
+            },
+          ],
+        },
+        "dm-1"
+      )
+    ).rejects.toThrow("increase Spent XP above Total XP");
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 

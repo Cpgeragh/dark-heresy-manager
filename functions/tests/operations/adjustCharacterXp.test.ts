@@ -72,7 +72,16 @@ describe("adjustCharacterXp", () => {
             data: () => ({
               userId: "player-1",
               isEditableByPlayer: true,
-              experience: { total: 1_000, spent: 400, ranks: [] },
+              experience: {
+                total: 1_000,
+                spent: 400,
+                ranks: [
+                  {
+                    rank: 1,
+                    advances: [{ id: "advance-1", name: "Advances", cost: 400 }],
+                  },
+                ],
+              },
             }),
           }
         : { exists: false, data: () => undefined }
@@ -101,7 +110,11 @@ describe("adjustCharacterXp", () => {
       })
     );
     expect(transactionUpdate).toHaveBeenCalledWith(characterRef, {
-      experience: { total: 1_200, spent: 400, ranks: [] },
+      experience: {
+        total: 1_200,
+        spent: 400,
+        ranks: [{ rank: 1, advances: [{ id: "advance-1", name: "Advances", cost: 400 }] }],
+      },
     });
   });
 
@@ -113,7 +126,16 @@ describe("adjustCharacterXp", () => {
             data: () => ({
               userId: "player-1",
               isEditableByPlayer: true,
-              experience: { total: 1_000, spent: 400, ranks: [] },
+              experience: {
+                total: 1_000,
+                spent: 400,
+                ranks: [
+                  {
+                    rank: 1,
+                    advances: [{ id: "advance-1", name: "Advances", cost: 400 }],
+                  },
+                ],
+              },
             }),
           }
         : { exists: true, data: () => ({}) }
@@ -125,6 +147,36 @@ describe("adjustCharacterXp", () => {
   });
 
   it("rejects a reduction below Spent XP without writing", async () => {
+    await expect(adjustCharacterXp({ ...input, amountXp: -700 }, "dm-1")).rejects.toThrow(
+      "cannot reduce Total XP below Spent XP"
+    );
+    expect(transactionSet).not.toHaveBeenCalled();
+    expect(transactionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("uses calculated purchases instead of a stale stored Spent XP value", async () => {
+    transactionGet.mockImplementation(async (target: { kind: string }) =>
+      target.kind === "character"
+        ? {
+            exists: true,
+            data: () => ({
+              userId: "player-1",
+              isEditableByPlayer: true,
+              experience: {
+                total: 1_000,
+                spent: 0,
+                ranks: [
+                  {
+                    rank: 1,
+                    advances: [{ id: "advance-1", name: "Advances", cost: 400 }],
+                  },
+                ],
+              },
+            }),
+          }
+        : { exists: false, data: () => undefined }
+    );
+
     await expect(adjustCharacterXp({ ...input, amountXp: -700 }, "dm-1")).rejects.toThrow(
       "cannot reduce Total XP below Spent XP"
     );

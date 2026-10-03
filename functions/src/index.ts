@@ -956,8 +956,8 @@ export const reconcileCharacterSpentXp = onCall<ReconcileCharacterSpentXpInput>(
     return protectedCallable<ReconcileCharacterSpentXpInput, { updated: boolean }>({
       request,
       operation: "reconcile-character-spent-xp",
-      allowedFields: ["campaignId", "characterId", "spent", "operationId"],
-      requiredFields: ["campaignId", "characterId", "spent"],
+      allowedFields: ["campaignId", "characterId", "operationId"],
+      requiredFields: ["campaignId", "characterId"],
       fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
       rateLimits: [
         { key: `reconcile-character-spent-xp:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },

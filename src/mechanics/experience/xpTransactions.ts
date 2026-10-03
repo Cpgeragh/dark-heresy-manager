@@ -45,7 +45,6 @@ export function applyXpTransaction(
         : transaction.type === "remove"
           ? experience.total - transaction.amount
           : experience.total,
-    spent: transaction.type === "spend" ? experience.spent + transaction.amount : experience.spent,
     transactions: [...(experience.transactions ?? []), persisted],
   };
 }
@@ -79,7 +78,6 @@ export function setRankUpXpCost(
 
   return {
     ...experience,
-    spent: spentWithoutExistingCost + cost.amount,
     transactions: [
       ...(experience.transactions ?? []).filter(
         (transaction) => transaction.type !== "spend" || transaction.rankId !== cost.rankId
@@ -96,14 +94,12 @@ export function clearRankUpXpCost(experience: ExperienceBlock, rankId: string): 
   );
   if (existingCosts.length === 0) return experience;
 
-  const existingTotal = existingCosts.reduce((total, transaction) => total + transaction.amount, 0);
   const transactions = (experience.transactions ?? []).filter(
     (transaction) => transaction.type !== "spend" || transaction.rankId !== rankId
   );
 
   return {
     ...experience,
-    spent: Math.max(0, experience.spent - existingTotal),
     transactions: transactions.length > 0 ? transactions : undefined,
   };
 }

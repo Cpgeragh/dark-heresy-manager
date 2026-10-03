@@ -1732,7 +1732,9 @@ describe("assertValidCharacterFieldTransition: experience alternate ranks", () =
     ).not.toThrow();
   });
 
-  it("does not block an experience patch that changes no alternate ranks", () => {
-    expect(check(base, { ...base, spent: 1500 }, guardsman, false)).not.toThrow();
+  it("rejects a direct Spent XP change", () => {
+    expect(check(base, { ...base, spent: 1500 }, guardsman, false)).toThrow(
+      "Spent XP is calculated by the server"
+    );
   });
 });

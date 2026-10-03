@@ -11,6 +11,7 @@ import {
   stageOpeningBalance,
   stageXpHistoryEntry,
 } from "../shared/xpHistory.js";
+import { calculateCharacterSpentXp } from "../shared/spentXp.js";
 
 export interface AdjustCharacterXpInput {
   campaignId: string;
@@ -48,7 +49,8 @@ export async function adjustCharacterXp(
       if (!characterSnapshot.exists) throw new HttpsError("not-found", "Character not found.");
       const characterData = characterSnapshot.data() ?? {};
       await assertCanEditCharacter(db, callerUid, dmId, characterData);
-      const { experience, totalXp, spentXp } = readExperience(characterData);
+      const { experience, totalXp } = readExperience(characterData);
+      const spentXp = calculateCharacterSpentXp(characterData);
       const balanceXp = totalXp + input.amountXp;
       if (balanceXp < spentXp) {
         throw new HttpsError(
@@ -75,7 +77,9 @@ export async function adjustCharacterXp(
         },
         actor
       );
-      transaction.update(characterRef, { experience: { ...experience, total: balanceXp } });
+      transaction.update(characterRef, {
+        experience: { ...experience, total: balanceXp, spent: spentXp },
+      });
     },
     { maxAttempts: 5 }
   );

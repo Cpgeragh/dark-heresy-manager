@@ -284,11 +284,9 @@ export default function CharacterSheet({
     if (!character || !allowedToEdit) return;
     const computedSpent = getSpentXp(character);
     if (character.experience.spent === computedSpent) return;
-    void reconcileCharacterSpentXp(character.campaignId, character.id, computedSpent).catch(
-      (error) => {
-        console.error("Failed to reconcile XP spent:", error);
-      }
-    );
+    void reconcileCharacterSpentXp(character.campaignId, character.id).catch((error) => {
+      console.error("Failed to reconcile XP spent:", error);
+    });
   }, [character, allowedToEdit]);
 
   useEffect(() => {

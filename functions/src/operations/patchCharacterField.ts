@@ -15,6 +15,7 @@ import {
 } from "../shared/characterFieldValidation.js";
 import { computeCharacterSummary, isSummaryRelevantField } from "../shared/characterSummary.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
+import { assertCharacterXpBudget } from "../shared/spentXp.js";
 
 export interface PatchCharacterFieldInput {
   campaignId: string;
@@ -23,6 +24,18 @@ export interface PatchCharacterFieldInput {
   value?: unknown;
   fields?: Record<string, unknown>;
   operationId?: string;
+}
+
+const XP_BEARING_FIELDS = new Set([
+  "characteristics",
+  "skills",
+  "talentsAndTraits",
+  "weaponTraining",
+  "experience",
+]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizePatch(input: PatchCharacterFieldInput): Record<string, unknown> {
@@ -88,6 +101,22 @@ export async function patchCharacterField(
           isDM
         );
       }
+      const updatesXp = Object.keys(patch).some((field) => XP_BEARING_FIELDS.has(field));
+      let persistedPatch: Record<string, unknown> = patch;
+      if (updatesXp) {
+        const spentXp = assertCharacterXpBudget(prospectiveCharacter);
+        if (isRecord(patch.experience)) {
+          persistedPatch = {
+            ...patch,
+            experience: { ...patch.experience, spent: spentXp },
+          };
+        } else if (
+          !isRecord(characterData.experience) ||
+          characterData.experience.spent !== spentXp
+        ) {
+          persistedPatch = { ...patch, "experience.spent": spentXp };
+        }
+      }
       const updatesSummary = Object.keys(patch).some(isSummaryRelevantField);
       let livePlayerName: string | null = null;
       if (updatesSummary && typeof characterData.userId === "string") {
@@ -97,7 +126,7 @@ export async function patchCharacterField(
         const firstName = ownerProfile.data()?.firstName;
         livePlayerName = typeof firstName === "string" ? firstName.trim() || null : null;
       }
-      transaction.update(characterRef, patch);
+      transaction.update(characterRef, persistedPatch);
       if (updatesSummary) {
         const merged = { ...characterData, ...patch };
         const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);

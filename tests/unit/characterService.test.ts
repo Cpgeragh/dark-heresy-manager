@@ -364,15 +364,14 @@ describe("forceAssignCharacter", () => {
 });
 
 describe("reconcileCharacterSpentXp", () => {
-  it("calls the Function with the recomputed spent value and returns whether it updated", async () => {
+  it("asks the Function to recalculate Spent XP and returns whether it updated", async () => {
     mockCallReconcileCharacterSpentXp.mockResolvedValue({ data: { updated: true } });
 
-    await expect(reconcileCharacterSpentXp("camp-1", "char-1", 100)).resolves.toBe(true);
+    await expect(reconcileCharacterSpentXp("camp-1", "char-1")).resolves.toBe(true);
 
     expect(mockCallReconcileCharacterSpentXp).toHaveBeenCalledWith({
       campaignId: "camp-1",
       characterId: "char-1",
-      spent: 100,
       operationId: expect.any(String),
     });
   });
@@ -380,7 +379,7 @@ describe("reconcileCharacterSpentXp", () => {
   it("returns false when the server reports nothing changed", async () => {
     mockCallReconcileCharacterSpentXp.mockResolvedValue({ data: { updated: false } });
 
-    await expect(reconcileCharacterSpentXp("camp-1", "char-1", 100)).resolves.toBe(false);
+    await expect(reconcileCharacterSpentXp("camp-1", "char-1")).resolves.toBe(false);
   });
 
   it("starts only one Function call for duplicate in-flight reconciliations", async () => {
@@ -390,8 +389,8 @@ describe("reconcileCharacterSpentXp", () => {
     });
     mockCallReconcileCharacterSpentXp.mockReturnValueOnce(pending);
 
-    const first = reconcileCharacterSpentXp("camp-1", "char-1", 100);
-    const duplicate = reconcileCharacterSpentXp("camp-1", "char-1", 100);
+    const first = reconcileCharacterSpentXp("camp-1", "char-1");
+    const duplicate = reconcileCharacterSpentXp("camp-1", "char-1");
     await Promise.resolve();
 
     expect(mockCallReconcileCharacterSpentXp).toHaveBeenCalledOnce();

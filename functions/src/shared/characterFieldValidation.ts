@@ -1390,6 +1390,12 @@ function assertValidExperienceTransition(
       "Total XP can only be changed through an XP adjustment."
     );
   }
+  if (isRecord(oldValue) && isRecord(newValue) && oldValue.spent !== newValue.spent) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Spent XP is calculated by the server and cannot be changed directly."
+    );
+  }
   if (isDM || !isRecord(newValue) || newValue.alternateRanks === undefined) return;
   if (!Array.isArray(newValue.alternateRanks)) {
     throw new HttpsError("invalid-argument", "Alternate ranks must be a list.");

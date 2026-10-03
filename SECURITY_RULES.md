@@ -37,6 +37,8 @@ Recovery lookups, rotation, revocation, linking, and account lifecycle operation
 
 The collection-group character query is restricted to the effective owner's characters and a maximum requested limit of 1,000 documents.
 
+`patchCharacterField` in `functions/src/operations/patchCharacterField.ts` owns XP-bearing character changes. It uses `getSpentXp` from `shared-rules/src/xpSpent.ts` to store `experience.spent` with the accepted purchase and rejects the complete patch when calculated Spent XP would exceed Total XP. `reconcileCharacterSpentXp` accepts no client-provided XP amount and repairs only `experience.spent` from the character's stored purchases. Direct changes to Total XP or Spent XP through the generic patch route are denied.
+
 ## Custom-item library
 
 Published custom items and versions are readable by authenticated users. Draft or archived records are visible only to the campaign DM and the effective creator. Item queries are limited to 200 documents and version queries to 100 documents.

@@ -25,7 +25,11 @@ describe("Functions: reconcileCharacterSpentXp", () => {
       campaignId: campaignRef.id,
       userId: null,
       isEditableByPlayer: false,
-      experience: { total: 500, spent: 50, ranks: [{ rankId: "conscript" }] },
+      experience: {
+        total: 500,
+        spent: 50,
+        ranks: [{ rank: 1, advances: [{ id: "advance-1", name: "Advances", cost: 150 }] }],
+      },
     });
 
     const reconcileCharacterSpentXp = httpsCallable(
@@ -35,7 +39,6 @@ describe("Functions: reconcileCharacterSpentXp", () => {
     const { data } = await reconcileCharacterSpentXp({
       campaignId: campaignRef.id,
       characterId: characterRef.id,
-      spent: 150,
     });
 
     expect(data).toEqual({ updated: true });
@@ -43,7 +46,7 @@ describe("Functions: reconcileCharacterSpentXp", () => {
     expect(snapshot.data()?.experience).toEqual({
       total: 500,
       spent: 150,
-      ranks: [{ rankId: "conscript" }],
+      ranks: [{ rank: 1, advances: [{ id: "advance-1", name: "Advances", cost: 150 }] }],
     });
   }, 15000);
 
@@ -56,7 +59,11 @@ describe("Functions: reconcileCharacterSpentXp", () => {
       campaignId: campaignRef.id,
       userId: null,
       isEditableByPlayer: false,
-      experience: { total: 500, spent: 150 },
+      experience: {
+        total: 500,
+        spent: 150,
+        ranks: [{ rank: 1, advances: [{ id: "advance-1", name: "Advances", cost: 150 }] }],
+      },
     });
 
     const reconcileCharacterSpentXp = httpsCallable(
@@ -66,7 +73,6 @@ describe("Functions: reconcileCharacterSpentXp", () => {
     const { data } = await reconcileCharacterSpentXp({
       campaignId: campaignRef.id,
       characterId: characterRef.id,
-      spent: 150,
     });
 
     expect(data).toEqual({ updated: false });
@@ -94,12 +100,11 @@ describe("Functions: reconcileCharacterSpentXp", () => {
       reconcileCharacterSpentXp({
         campaignId: campaignRef.id,
         characterId: characterRef.id,
-        spent: 100,
       })
     ).rejects.toMatchObject({ code: "functions/permission-denied" });
   }, 15000);
 
-  it("rejects an invalid spent value", async () => {
+  it("rejects a client-supplied Spent XP value", async () => {
     const dmUid = await signInTestUser();
     const campaignRef = adminDb.collection("campaigns").doc();
     const characterRef = campaignRef.collection("characters").doc();

@@ -185,37 +185,26 @@ export async function updateCharacter(
 }
 
 const callReconcileCharacterSpentXp = httpsCallable<
-  { campaignId: string; characterId: string; spent: number; operationId: string },
+  { campaignId: string; characterId: string; operationId: string },
   { updated: boolean }
 >(functions, "reconcileCharacterSpentXp");
 
-/**
- * Repairs the derived XP-spent total via the protected server-side operation.
- * The caller supplies the freshly-recomputed value (src/mechanics/experience/
- * xpSpent.ts's getSpentXp); the server merges only experience.spent from a
- * fresh read, so concurrent XP changes are never overwritten.
- */
+/** Repairs the derived XP-spent total from the purchases stored by the server. */
 export async function reconcileCharacterSpentXp(
   campaignId: string,
-  characterId: string,
-  spent: number
+  characterId: string
 ): Promise<boolean> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
 
-  return runSingleFlight(
-    "character:reconcile-spent-xp",
-    [campaignId, characterId, spent],
-    async () => {
-      const { data } = await callReconcileCharacterSpentXp({
-        campaignId,
-        characterId,
-        spent,
-        operationId: createLocalId("reconcile-character-spent-xp"),
-      });
-      return data.updated;
-    }
-  );
+  return runSingleFlight("character:reconcile-spent-xp", [campaignId, characterId], async () => {
+    const { data } = await callReconcileCharacterSpentXp({
+      campaignId,
+      characterId,
+      operationId: createLocalId("reconcile-character-spent-xp"),
+    });
+    return data.updated;
+  });
 }
 
 const callClaimCharacter = httpsCallable<
