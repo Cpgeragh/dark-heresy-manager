@@ -4,11 +4,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { CareerStartingChoiceModal } from "../../src/pages/CharacterSheet/CareerStartingChoiceModal";
-import { CAREER_LIST } from "../../src/data/reference/careerData";
+import { CAREER_LIST } from "shared-rules";
 
 // Real career with genuine "or" starting choices (2 skill grants, 3 talent
 // grants, each with 2 options) — not fabricated, read directly from
-// src/data/reference/careerData.ts.
+// shared-rules/src/careerData.ts.
 const ADEPT = CAREER_LIST.find((c) => c.id === "adept")!;
 
 describe("CareerStartingChoiceModal", () => {

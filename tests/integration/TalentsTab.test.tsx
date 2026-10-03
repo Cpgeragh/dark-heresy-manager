@@ -165,7 +165,10 @@ const { MOCK_TALENT_LIST } = vi.hoisted(() => ({
   ],
 }));
 
-vi.mock("../../src/data/reference/talentData", () => ({ TALENT_LIST: MOCK_TALENT_LIST }));
+vi.mock("shared-rules", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("shared-rules")>();
+  return { ...actual, TALENT_LIST: MOCK_TALENT_LIST };
+});
 
 import { TalentsTab } from "../../src/mechanics/talents/TalentsTab";
 import type { PsychicBlock, TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";

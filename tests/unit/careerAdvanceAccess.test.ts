@@ -3,7 +3,7 @@ import {
   getAllCareerAdvances,
   getMissedRankCareerAdvances,
   getUnlockedCareerAdvances,
-} from "../../src/mechanics/experience/careerAdvanceAccess";
+} from "shared-rules";
 
 describe("getAllCareerAdvances", () => {
   it("returns every rank's advances for Guardsman, including ranks far beyond any starting point", () => {

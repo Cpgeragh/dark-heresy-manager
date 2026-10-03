@@ -3,9 +3,8 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-vi.mock("../../src/data/reference/alternateRankData", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../../src/data/reference/alternateRankData")>();
+vi.mock("shared-rules", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("shared-rules")>();
   const template = actual.ALTERNATE_RANKS[0];
   return {
     ...actual,

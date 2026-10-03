@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_SKILLS } from "../../src/data/reference/defaultSkills";
-import { ELITE_ADVANCES } from "../../src/data/reference/eliteAdvanceData";
-import { TALENT_LIST } from "../../src/data/reference/talentData";
+import { ELITE_ADVANCES, TALENT_LIST } from "shared-rules";
 import { TRAIT_LIST } from "../../src/data/reference/traitData";
 
 const skillIds = new Set(DEFAULT_SKILLS.map((skill) => skill.id));
@@ -94,7 +93,9 @@ describe("eliteAdvanceData", () => {
           expect(skillIds.has(unlocked.skillId), `${advance.id}: ${unlocked.skillId}`).toBe(true);
         }
         if (unlocked.talentId) {
-          expect(talentIds.has(unlocked.talentId), `${advance.id}: ${unlocked.talentId}`).toBe(true);
+          expect(talentIds.has(unlocked.talentId), `${advance.id}: ${unlocked.talentId}`).toBe(
+            true
+          );
         }
       }
     }

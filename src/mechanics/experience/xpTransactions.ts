@@ -1,5 +1,5 @@
 import type { CharacterHeader, ExperienceBlock, XpTransaction } from "../../types/Character";
-import { getCareerRankProgression } from "./careerRankProgression";
+import { getCareerRankProgression } from "shared-rules";
 
 export interface NewXpTransaction {
   id: string;

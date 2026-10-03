@@ -12,7 +12,7 @@ import type {
   TalentsAndTraitsBlock,
   TalentEntry,
 } from "../../types/Character";
-import { TALENT_LIST, type TalentData } from "../../data/reference/talentData";
+import { TALENT_LIST, type TalentData } from "shared-rules";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { uiSection, uiTextPlaceholder } from "../../ui/styles/editableStyles";

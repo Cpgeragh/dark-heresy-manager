@@ -1,7 +1,6 @@
 import { useState } from "react";
-import type { CareerData } from "../../data/reference/careerData";
+import { TALENT_LIST, type CareerData } from "shared-rules";
 import { DEFAULT_SKILLS } from "../../data/reference/defaultSkills";
-import { TALENT_LIST } from "../../data/reference/talentData";
 import type { CareerStartingChoices } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";

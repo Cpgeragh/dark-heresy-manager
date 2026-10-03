@@ -1,5 +1,4 @@
-import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
-import { ELITE_ADVANCES } from "../../data/reference/eliteAdvanceData";
+import { ALTERNATE_RANKS, ELITE_ADVANCES } from "shared-rules";
 import { GEAR_REFERENCE } from "../../data/reference/gearReference";
 import { MELEE_WEAPON_REFERENCE } from "../../data/reference/weaponReference";
 import type { GearItem, MeleeWeapon, TalentsAndTraitsBlock } from "../../types/Character";

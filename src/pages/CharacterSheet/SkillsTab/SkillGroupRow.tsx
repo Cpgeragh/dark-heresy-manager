@@ -7,7 +7,7 @@ import {
   getSkillGroupCharacteristics,
   type SkillWithComputed,
 } from "./skillsConstants";
-import type { SkillTierAccess } from "../../../mechanics/experience/skillAdvanceCosts";
+import type { SkillTierAccess } from "shared-rules";
 import { charColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { SkillRow } from "./SkillRow";

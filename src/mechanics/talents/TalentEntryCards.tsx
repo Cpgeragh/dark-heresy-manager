@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import type { TalentEntry } from "../../types/Character";
-import { TALENT_LIST } from "../../data/reference/talentData";
+import { TALENT_LIST } from "shared-rules";
 import { TRAIT_LIST } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {

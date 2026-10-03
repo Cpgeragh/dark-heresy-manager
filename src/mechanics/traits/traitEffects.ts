@@ -1,6 +1,5 @@
 import { HOMEWORLD_LIST, type HomeworldData } from "../../data/reference/homeworldData";
-import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
-import { findCareerByName } from "../../data/reference/careerData";
+import { ALTERNATE_RANKS, findCareerByName } from "shared-rules";
 import { TRAIT_LIST } from "../../data/reference/traitData";
 import type {
   Characteristics,

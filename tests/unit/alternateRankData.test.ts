@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ALTERNATE_RANKS } from "../../src/data/reference/alternateRankData";
+import { ALTERNATE_RANKS, ELITE_ADVANCES, TALENT_LIST } from "shared-rules";
 import { DEFAULT_SKILLS } from "../../src/data/reference/defaultSkills";
-import { ELITE_ADVANCES } from "../../src/data/reference/eliteAdvanceData";
-import { TALENT_LIST } from "../../src/data/reference/talentData";
 import { TRAIT_LIST } from "../../src/data/reference/traitData";
 
 const skillIds = new Set(DEFAULT_SKILLS.map((skill) => skill.id));

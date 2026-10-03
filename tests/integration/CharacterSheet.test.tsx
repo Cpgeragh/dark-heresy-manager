@@ -48,9 +48,13 @@ const getSpentXpMock = vi.fn();
 const reconcileCharacterSpentXpMock = vi.fn();
 const registerRecoveryCodeMock = vi.fn();
 const revokeRecoveryCodeMock = vi.fn();
-vi.mock("../../src/mechanics/experience/xpSpent", () => ({
-  getSpentXp: (...args: unknown[]) => getSpentXpMock(...args),
-}));
+vi.mock("shared-rules", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("shared-rules")>();
+  return {
+    ...actual,
+    getSpentXp: (...args: unknown[]) => getSpentXpMock(...args),
+  };
+});
 vi.mock("../../src/services/characterService", () => ({
   reconcileCharacterSpentXp: (...args: unknown[]) => reconcileCharacterSpentXpMock(...args),
   registerRecoveryCode: (...args: unknown[]) => registerRecoveryCodeMock(...args),

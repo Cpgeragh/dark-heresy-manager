@@ -8,7 +8,7 @@ import type {
   TalentsAndTraitsBlock,
 } from "../../../types/Character";
 import { HOMEWORLD_LIST } from "../../../data/reference/homeworldData";
-import { findCareerByName, type CareerData } from "../../../data/reference/careerData";
+import { ALTERNATE_RANKS, findCareerByName, type CareerData } from "shared-rules";
 import { SANCTIONING_RESULTS } from "../../../mechanics/traits/sanctioningReference";
 import { TRAIT_LIST } from "../../../data/reference/traitData";
 import {
@@ -28,7 +28,6 @@ import { TraitAcquisitionModal } from "../../../mechanics/traits/TraitAcquisitio
 import { homeworldNeedsTraitAcquisition } from "../../../mechanics/traits/traitEffects";
 import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
 import { HomeworldTraitAcquisitionModal } from "../HomeworldTraitAcquisitionModal";
-import { ALTERNATE_RANKS } from "../../../data/reference/alternateRankData";
 import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 
 export interface BackgroundSetupFieldsProps {

@@ -1,5 +1,3 @@
-// src/mechanics/experience/careerAdvanceAccess.ts
-
 import { findCareerByName } from "./careerData.js";
 import { CAREER_ADVANCES, type CareerAdvanceRef } from "./careerAdvancesReference.js";
 import { ALTERNATE_RANKS, type AlternateRankAdvance } from "./alternateRankData.js";

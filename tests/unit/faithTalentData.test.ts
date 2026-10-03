@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FAITH_TALENT_RULES } from "../../src/data/reference/faithTalentData";
-import { TALENT_LIST } from "../../src/data/reference/talentData";
+import { FAITH_TALENT_RULES, TALENT_LIST } from "shared-rules";
 import { TALENT_DESCRIPTIONS } from "../../src/data/reference/talentDescriptions";
 
 function talent(id: string) {

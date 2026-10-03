@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
-import {
-  getNextTalentPurchase,
-  getTalentsSpent,
-} from "../../src/mechanics/experience/talentAdvanceCosts";
+import { getNextTalentPurchase } from "../../src/mechanics/experience/talentAdvanceCosts";
+import { getTalentsSpent } from "shared-rules";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, TalentEntry } from "../../src/types/Character";
 

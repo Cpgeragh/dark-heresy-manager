@@ -1,4 +1,3 @@
-// src/data/reference/careerAdvancesReference.ts
 // Per-career XP costs: Characteristic Advances and per-rank Skill/Talent advance
 // tables, transcribed from each career's own chapter. rankId values match the
 // CareerRankData ids already in careerData.ts.

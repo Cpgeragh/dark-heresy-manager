@@ -24,7 +24,7 @@ import {
 } from "../../ui/styles/editableStyles";
 import { SKILL_DESCRIPTIONS } from "../../data/reference/skillDescriptions";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
-import { TALENT_LIST } from "../../data/reference/talentData";
+import { TALENT_LIST } from "shared-rules";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { GEAR_REFERENCE } from "../../data/reference/gearReference";
 

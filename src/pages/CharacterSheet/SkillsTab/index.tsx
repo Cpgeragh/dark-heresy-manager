@@ -18,8 +18,8 @@ import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import {
   getNextSkillTierAccess,
   getUnlockedSkillTrainingCosts,
-} from "../../../mechanics/experience/skillAdvanceCosts";
-import { makeCurrentRankPurchase } from "../../../mechanics/experience/purchaseAttribution";
+  makeCurrentRankPurchase,
+} from "shared-rules";
 import { buildSkillCatalogue, getSkillDefinition } from "../../../utils/skillUtils";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";

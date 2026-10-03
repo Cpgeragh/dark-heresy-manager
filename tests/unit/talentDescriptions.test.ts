@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TALENT_LIST } from "../../src/data/reference/talentData";
+import { TALENT_LIST } from "shared-rules";
 import { TALENT_DESCRIPTIONS } from "../../src/data/reference/talentDescriptions";
 
 const getTalent = (id: string) => {

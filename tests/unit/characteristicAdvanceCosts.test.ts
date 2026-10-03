@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  getCharacteristicTierCosts,
-  getCharacteristicAdvancesSpent,
-} from "../../src/mechanics/experience/characteristicAdvanceCosts";
+import { getCharacteristicTierCosts, getCharacteristicAdvancesSpent } from "shared-rules";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, Characteristics } from "../../src/types/Character";
 

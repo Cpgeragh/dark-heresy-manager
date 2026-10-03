@@ -8,9 +8,10 @@ import {
   type RankCardEntryKind,
 } from "../../mechanics/experience/rankCards";
 import {
+  ALTERNATE_RANKS,
   getCareerRankProgression,
   type CareerRankProgression,
-} from "../../mechanics/experience/careerRankProgression";
+} from "shared-rules";
 import {
   applyCareerRankUp,
   clearRankUpXpCost,
@@ -29,7 +30,6 @@ import {
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/chips/Chip";
-import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
 import { Button } from "../../ui/buttons/Button";
 import { ModalShell } from "../../ui/modals/ModalShell";
 import { ModalHeader } from "../../ui/modals/ModalHeader";

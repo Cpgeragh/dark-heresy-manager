@@ -8,7 +8,12 @@ export {
   getCharacteristicTierCosts,
   getCharacteristicAdvancesSpent,
 } from "./characteristicAdvanceCosts.js";
-export { findCareerByName, CAREER_LIST } from "./careerData.js";
+export {
+  findCareerByName,
+  CAREER_LIST,
+  type CareerData,
+  type CareerRankData,
+} from "./careerData.js";
 export { CAREER_ADVANCES, type CharacteristicKey } from "./careerAdvancesReference.js";
 export {
   ALTERNATE_RANKS,
@@ -64,7 +69,16 @@ export {
   makeCurrentRankPurchase,
   type CurrentCareerRank,
 } from "./purchaseAttribution.js";
-export { getCurrentCareerRankData, getValidNextCareerRanks } from "./careerRankProgression.js";
+export {
+  getCareerRankProgression,
+  getCurrentCareerRankData,
+  getRankXpBand,
+  getReachedCareerRanks,
+  getValidNextCareerRanks,
+  resolveCareerPath,
+  type CareerRankProgression,
+  type RankXpBand,
+} from "./careerRankProgression.js";
 export {
   getUnlockedSkillTrainingCosts,
   getNextSkillTierAccess,

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { HOMEWORLD_LIST } from "../../data/reference/homeworldData";
-import { TALENT_LIST } from "../../data/reference/talentData";
+import { TALENT_LIST } from "shared-rules";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import { PSYCHIC_DISCIPLINES } from "../../data/reference/psychicReference";
 import { resolveMeleeWeaponReference } from "../../data/reference/weaponReference";

@@ -53,7 +53,7 @@ import type {
 
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
-import { getSpentXp } from "../mechanics/experience/xpSpent";
+import { getSpentXp } from "shared-rules";
 import {
   reconcileCharacterSpentXp,
   registerRecoveryCode,

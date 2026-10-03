@@ -3,7 +3,7 @@ import {
   getUnlockedSkillTrainingCosts,
   getNextSkillTierAccess,
   getSkillsSpent,
-} from "../../src/mechanics/experience/skillAdvanceCosts";
+} from "shared-rules";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, SkillEntry } from "../../src/types/Character";
 

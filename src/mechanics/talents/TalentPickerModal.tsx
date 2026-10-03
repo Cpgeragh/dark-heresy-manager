@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import type { AlternateRankSelection, TalentEntry } from "../../types/Character";
-import type { TalentData } from "../../data/reference/talentData";
+import { makeCurrentRankPurchase, type TalentData } from "shared-rules";
 import type { TraitData } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
@@ -27,7 +27,6 @@ import {
   getTalentRankChips,
   hasAnyUnlockedTalentOption,
 } from "../experience/talentAdvanceCosts";
-import { makeCurrentRankPurchase } from "../experience/purchaseAttribution";
 import type { CampaignCustomItem } from "../../types/CustomItems";
 import {
   PickerBody,

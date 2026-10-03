@@ -4,7 +4,7 @@ import {
   MELEE_WEAPON_REFERENCE,
   RANGED_WEAPON_REFERENCE,
 } from "../../src/data/reference/weaponReference";
-import { PISTOL_ONLY_EXOTIC_WEAPON_TRAINING } from "../../src/data/reference/weaponTrainingData";
+import { PISTOL_ONLY_EXOTIC_WEAPON_TRAINING } from "shared-rules";
 
 describe("weapon reference classification", () => {
   const references = [...RANGED_WEAPON_REFERENCE, ...MELEE_WEAPON_REFERENCE];

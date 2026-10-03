@@ -1,10 +1,15 @@
 import { useMemo, useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
-import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
-import { findCareerByName } from "../../data/reference/careerData";
-import { ELITE_ADVANCES, type EliteAdvanceData } from "../../data/reference/eliteAdvanceData";
+import {
+  ALTERNATE_RANKS,
+  ELITE_ADVANCES,
+  findCareerByName,
+  makeCurrentRankPurchase,
+  TALENT_LIST,
+  type EliteAdvanceData,
+  type TalentData,
+} from "shared-rules";
 import { DEFAULT_SKILLS } from "../../data/reference/defaultSkills";
-import { TALENT_LIST, type TalentData } from "../../data/reference/talentData";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_LIST } from "../../data/reference/traitData";
 import type {
@@ -44,7 +49,6 @@ import {
 } from "../../ui/styles/editableStyles";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
-import { makeCurrentRankPurchase } from "../experience/purchaseAttribution";
 import { EntryCard } from "../talents/TalentEntryCards";
 import { TalentPickerModal } from "../talents/TalentPickerModal";
 import { makeTalentEntry } from "../talents/talentUtils";

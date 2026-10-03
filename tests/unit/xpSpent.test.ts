@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getSpentXp } from "../../src/mechanics/experience/xpSpent";
+import { getSpentXp } from "shared-rules";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
 

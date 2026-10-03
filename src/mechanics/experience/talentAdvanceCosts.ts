@@ -1,9 +1,12 @@
 // src/mechanics/experience/talentAdvanceCosts.ts
 
 import type { AlternateRankSelection, TalentEntry, XpPurchaseRecord } from "../../types/Character";
-import { getAllCareerAdvances, getUnlockedCareerAdvances } from "./careerAdvanceAccess";
-import { findCareerByName } from "../../data/reference/careerData";
-import { getNextTalentOrTraitPurchase } from "shared-rules";
+import {
+  findCareerByName,
+  getAllCareerAdvances,
+  getNextTalentOrTraitPurchase,
+  getUnlockedCareerAdvances,
+} from "shared-rules";
 
 function matches(
   advance: { talentId?: string; traitId?: string; specialisation?: string },
@@ -168,5 +171,3 @@ export function getTalentRankChips(
   }
   return chips;
 }
-
-export { getTalentsSpent } from "shared-rules";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
-import { CAREER_LIST, type CareerData, type CareerRankData } from "../../data/reference/careerData";
+import { CAREER_LIST, type CareerData, type CareerRankData } from "shared-rules";
 import type { HomeworldData } from "../../data/reference/homeworldData";
 import { Chip } from "../../ui/chips/Chip";
 import {

@@ -1,4 +1,4 @@
-import type { FaithTalentGroup, TalentData } from "../../data/reference/talentData";
+import type { FaithTalentGroup, TalentData } from "shared-rules";
 
 export const FAITH_TALENT_GROUP_LABELS: Record<FaithTalentGroup, string> = {
   general: "General",

@@ -1,6 +1,6 @@
 // src/mechanics/career/careerStartingBenefits.ts
 
-import { CAREER_LIST } from "../../data/reference/careerData";
+import { CAREER_LIST } from "shared-rules";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import type { CareerStartingChoices, CyberneticItem } from "../../types/Character";
 

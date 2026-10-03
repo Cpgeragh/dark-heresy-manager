@@ -1,6 +1,5 @@
 import { DEFAULT_SKILLS } from "../../data/reference/defaultSkills";
-import { ELITE_ADVANCES } from "../../data/reference/eliteAdvanceData";
-import type { TalentBehaviour, TalentData } from "../../data/reference/talentData";
+import { ELITE_ADVANCES, type TalentBehaviour, type TalentData } from "shared-rules";
 import type {
   PsychicBlock,
   PsychicPower,

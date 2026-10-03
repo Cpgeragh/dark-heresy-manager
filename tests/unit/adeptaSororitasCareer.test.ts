@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CAREER_ADVANCES } from "../../src/data/reference/careerAdvancesReference";
-import { CAREER_LIST } from "../../src/data/reference/careerData";
+import { CAREER_ADVANCES, CAREER_LIST, getCareerRankProgression } from "shared-rules";
 import { HOMEWORLD_LIST } from "../../src/data/reference/homeworldData";
-import { getCareerRankProgression } from "../../src/mechanics/experience/careerRankProgression";
 
 describe("Adepta Sororitas career", () => {
   const career = CAREER_LIST.find((entry) => entry.id === "adepta-sororitas");

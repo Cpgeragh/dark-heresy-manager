@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
 import { TalentPickerModal, type AnyListItem } from "../../src/mechanics/talents/TalentPickerModal";
-import { TALENT_LIST } from "../../src/data/reference/talentData";
+import { TALENT_LIST } from "shared-rules";
 import type { TalentEntry } from "../../src/types/Character";
 
 // Real Guardsman Conscript data (careerAdvancesReference.ts): Sound Constitution,

@@ -1,5 +1,11 @@
-import { WEAPON_TRAINING_GROUPS } from "../../data/reference/weaponTrainingData";
-import { ALTERNATE_RANKS } from "../../data/reference/alternateRankData";
+import {
+  ALTERNATE_RANKS,
+  CHARACTERISTIC_ADVANCE_TIERS,
+  getCareerRankProgression,
+  getRankXpBand,
+  WEAPON_TRAINING_GROUPS,
+  type RankXpBand,
+} from "shared-rules";
 import type {
   Character,
   CharacteristicAdvanceTier,
@@ -8,8 +14,6 @@ import type {
   WeaponTrainingTalentId,
   XpPurchaseRecord,
 } from "../../types/Character";
-import { CHARACTERISTIC_ADVANCE_TIERS } from "./characteristicAdvanceCosts";
-import { getCareerRankProgression, getRankXpBand, type RankXpBand } from "./careerRankProgression";
 
 export type RankCardEntryKind =
   | "characteristic"

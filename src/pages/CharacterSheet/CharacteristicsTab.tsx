@@ -25,8 +25,8 @@ import { calculateCharacteristicTotal } from "../../utils/stats";
 import {
   CHARACTERISTIC_ADVANCE_TIERS,
   getCharacteristicTierCosts,
-} from "../../mechanics/experience/characteristicAdvanceCosts";
-import { makeCurrentRankPurchase } from "../../mechanics/experience/purchaseAttribution";
+  makeCurrentRankPurchase,
+} from "shared-rules";
 import {
   uiSection,
   uiCell,

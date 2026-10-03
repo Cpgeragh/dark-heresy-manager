@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
-import type { SkillTierAccess } from "../../../mechanics/experience/skillAdvanceCosts";
+import type { SkillTierAccess } from "shared-rules";
 import { charColour, sourceColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { StatChip } from "../../../ui/chips/StatChip";

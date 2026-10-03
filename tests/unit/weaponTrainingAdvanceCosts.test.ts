@@ -4,7 +4,7 @@ import {
   getExoticWeaponTrainingPurchases,
   getWeaponTrainingCost,
   getWeaponTrainingSpent,
-} from "../../src/mechanics/experience/weaponTrainingAdvanceCosts";
+} from "shared-rules";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, WeaponTrainingTalentId } from "../../src/types/Character";
 

@@ -50,12 +50,19 @@ Arrows labelled `synchronous` stay within the browser call stack. Arrows labelle
 | Shared UI                 | `src/ui/`                                                 | Reusable visual, interaction, and accessibility contracts                                              |
 | Context and subscriptions | `src/context/`, `src/hooks/`                              | React state, query construction, listener cleanup, stale-callback protection, and request coordination |
 | Backend services          | `src/services/`                                           | Firestore reads and writes, callable invocations, transactions, batches, and persistence boundaries    |
-| Domain contracts          | `src/types/`, `src/constants/`, `src/data/`, `src/utils/` | Shared types, limits, canonical game data, validation, formatting, and pure calculations               |
-| Shared rules              | `shared-rules/`                                           | Career, talent, and weapon training data, plus the pure cost and rank rules shared with the Functions  |
+| Domain contracts          | `src/types/`, `src/constants/`, `src/data/`, `src/utils/` | Browser contracts, limits, browser-only reference data, validation and formatting                      |
+| Shared rules              | `shared-rules/`                                           | Career, talent and weapon training data, plus pure purchase, cost, rank and Spent XP rules             |
 
 Generic modules must not import feature components. Feature modules may compose shared foundations, while category-specific forms, validation, and card composition remain with their domains.
 
-`shared-rules/` is a package with its own build that both `src/` and `functions/` depend on. Browser code imports the same modules through one-line re-export files at their `src/` paths, and the Functions import the package directly, so each cost and rank rule has one implementation.
+`shared-rules/` is a package with its own build that both `src/` and `functions/` depend on. `shared-rules/src/index.ts` defines the public API, and both consumers import it as `shared-rules`; neither consumer imports compiled `dist` modules directly. This makes removed or renamed shared exports fail during compilation instead of remaining available through compatibility shims.
+
+| Experience component             | Owning location                                  | Responsibility                                                                                         |
+| -------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Shared Career and purchase rules | `shared-rules/src/`                              | Career progression, Career-table access, purchase attribution, purchase costs and Spent XP calculation |
+| Rank card preparation            | `src/mechanics/experience/rankCards.ts`          | Converts character purchases into browser presentation records                                         |
+| Rank Up request preparation      | `src/mechanics/experience/xpTransactions.ts`     | Prepares Rank Up choices and spending transactions without authoritatively changing Spent XP           |
+| Talent picker calculations       | `src/mechanics/experience/talentAdvanceCosts.ts` | Produces browser-specific Talent slot, chip and picker information from shared Career rules            |
 
 `src/firebase.ts` initializes Firebase Authentication, Cloud Firestore, and callable Functions. Portraits are validated and stored as character data; the client does not initialize Firebase Storage.
 

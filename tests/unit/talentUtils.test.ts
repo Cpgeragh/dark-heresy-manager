@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_SKILLS } from "../../src/data/reference/defaultSkills";
-import { TALENT_LIST } from "../../src/data/reference/talentData";
+import { TALENT_LIST } from "shared-rules";
 import {
   getAvailablePsychicTalentPurchases,
   getAvailableTalentChoices,

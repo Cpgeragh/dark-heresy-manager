@@ -1,6 +1,5 @@
 import { HOMEWORLD_LIST } from "../../data/reference/homeworldData";
-import { TALENT_LIST } from "../../data/reference/talentData";
-import { WEAPON_TRAINING_GROUPS } from "../../data/reference/weaponTrainingData";
+import { TALENT_LIST, WEAPON_TRAINING_GROUPS } from "shared-rules";
 import type {
   Characteristics,
   SkillAdvanceLevel,

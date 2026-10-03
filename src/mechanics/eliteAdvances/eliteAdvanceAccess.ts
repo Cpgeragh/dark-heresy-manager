@@ -1,10 +1,10 @@
 import {
   ELITE_ADVANCES,
+  getMissedRankCareerAdvances,
   getEliteAdvanceGrantedSkillLevel,
   getEliteAdvanceWeaponTrainingId,
   type EliteAdvanceData,
-} from "../../data/reference/eliteAdvanceData";
-import { getMissedRankCareerAdvances } from "../experience/careerAdvanceAccess";
+} from "shared-rules";
 import type {
   ExperienceBlock,
   SkillAdvanceLevel,

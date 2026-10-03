@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { CAREER_LIST, findCareerByName } from "../../src/data/reference/careerData";
 import {
+  CAREER_LIST,
+  findCareerByName,
   getCareerRankProgression,
   getRankXpBand,
   getReachedCareerRanks,
-} from "../../src/mechanics/experience/careerRankProgression";
+} from "shared-rules";
 
 describe("career rank progression", () => {
   it("uses numeric XP bands rather than formatted display strings", () => {

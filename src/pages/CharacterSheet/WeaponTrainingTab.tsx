@@ -10,9 +10,13 @@ import type {
   XpPurchaseRecord,
 } from "../../types/Character";
 import {
+  getExoticWeaponTrainingPurchases,
+  getWeaponTrainingPurchase,
+  makeCurrentRankPurchase,
   WEAPON_TRAINING_GROUPS,
   isPistolOnlyExoticWeaponTraining,
-} from "../../data/reference/weaponTrainingData";
+  type ExoticWeaponTrainingPurchase,
+} from "shared-rules";
 import {
   MELEE_WEAPON_REFERENCE,
   RANGED_WEAPON_REFERENCE,
@@ -76,13 +80,6 @@ function weaponTrainingPulseVars(rgb: string): CSSProperties {
     "--glow-hi": `0 0 2px rgba(255,255,255,1), 0 0 6px rgba(${rgb},1), 0 0 22px rgba(${rgb},0.9)`,
   } as CSSProperties;
 }
-import {
-  getExoticWeaponTrainingPurchases,
-  getWeaponTrainingPurchase,
-  type ExoticWeaponTrainingPurchase,
-} from "../../mechanics/experience/weaponTrainingAdvanceCosts";
-import { makeCurrentRankPurchase } from "../../mechanics/experience/purchaseAttribution";
-
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
   editable: boolean;

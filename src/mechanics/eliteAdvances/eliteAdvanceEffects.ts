@@ -1,4 +1,4 @@
-import { ELITE_ADVANCES } from "../../data/reference/eliteAdvanceData";
+import { ELITE_ADVANCES } from "shared-rules";
 import type {
   Characteristics,
   SkillAdvanceLevel,
