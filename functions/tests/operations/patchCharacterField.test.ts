@@ -827,6 +827,70 @@ describe("patchCharacterField", () => {
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 
+  it("rejects a player lowering a legacy rank advance cost", async () => {
+    const oldExperience = {
+      total: 1_000,
+      spent: 400,
+      ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Legacy advance", cost: 400 }] }],
+    };
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        experience: oldExperience,
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "experience",
+          value: {
+            ...oldExperience,
+            ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Legacy advance", cost: 0 }] }],
+          },
+        },
+        "player-1"
+      )
+    ).rejects.toThrow("Only the DM can change the legacy rank advance ledger.");
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a player deleting an XP spending transaction", async () => {
+    const oldExperience = {
+      total: 1_000,
+      spent: 400,
+      ranks: [],
+      transactions: [{ id: "rank-cost", type: "spend", amount: 400, rankId: "sergeant" }],
+    };
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: "player-1",
+        isEditableByPlayer: true,
+        experience: oldExperience,
+      }),
+    });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "experience",
+          value: { ...oldExperience, transactions: [] },
+        },
+        "player-1"
+      )
+    ).rejects.toThrow("Only the DM can change XP spending transactions.");
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
   it("rejects the whole purchase when calculated Spent XP would exceed Total XP", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({

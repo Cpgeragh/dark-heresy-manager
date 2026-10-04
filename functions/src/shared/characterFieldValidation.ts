@@ -1370,6 +1370,44 @@ function assertExistingPurchasePricesUnchanged(
   }
 }
 
+function sameStoredValue(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return (
+      Array.isArray(left) &&
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((entry, index) => sameStoredValue(entry, right[index]))
+    );
+  }
+  if (!isRecord(left) || !isRecord(right)) return false;
+  const leftKeys = Object.keys(left).filter((key) => left[key] !== undefined);
+  const rightKeys = Object.keys(right).filter((key) => right[key] !== undefined);
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every((key) => Object.hasOwn(right, key) && sameStoredValue(left[key], right[key]))
+  );
+}
+
+function assertPlayerExperienceLedgerUnchanged(oldValue: unknown, newValue: unknown): void {
+  const oldRanks = isRecord(oldValue) && Array.isArray(oldValue.ranks) ? oldValue.ranks : [];
+  const newRanks = isRecord(newValue) && Array.isArray(newValue.ranks) ? newValue.ranks : [];
+  if (!sameStoredValue(oldRanks, newRanks)) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Only the DM can change the legacy rank advance ledger."
+    );
+  }
+
+  const oldTransactions =
+    isRecord(oldValue) && Array.isArray(oldValue.transactions) ? oldValue.transactions : [];
+  const newTransactions =
+    isRecord(newValue) && Array.isArray(newValue.transactions) ? newValue.transactions : [];
+  if (!sameStoredValue(oldTransactions, newTransactions)) {
+    throw new HttpsError("invalid-argument", "Only the DM can change XP spending transactions.");
+  }
+}
+
 /**
  * Rejects an experience patch that adds an alternate rank selection a player could not have
  * made in the app: the career must match, a character-creation Advance Scheme must replace
@@ -1396,6 +1434,7 @@ function assertValidExperienceTransition(
       "Spent XP is calculated by the server and cannot be changed directly."
     );
   }
+  if (!isDM) assertPlayerExperienceLedgerUnchanged(oldValue, newValue);
   if (isDM || !isRecord(newValue) || newValue.alternateRanks === undefined) return;
   if (!Array.isArray(newValue.alternateRanks)) {
     throw new HttpsError("invalid-argument", "Alternate ranks must be a list.");

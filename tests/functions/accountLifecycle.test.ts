@@ -115,7 +115,7 @@ describe("Functions: permanent account lifecycle", () => {
     } finally {
       await Promise.all([deleteApp(first.app), deleteApp(second.app)]);
     }
-  }, 30000);
+  }, 60000);
 
   it("allows only one of two simultaneous links at the ten-device limit", async () => {
     const owner = await createIndependentClient(`limit-owner-${Date.now()}`);

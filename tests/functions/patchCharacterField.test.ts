@@ -29,7 +29,12 @@ describe("Functions: patchCharacterField", () => {
     });
 
     const notes = [
-      { id: "n1", title: "Note", text: "The DM's own note.", updatedAt: "2026-01-01T00:00:00.000Z" },
+      {
+        id: "n1",
+        title: "Note",
+        text: "The DM's own note.",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
     ];
     const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
     await patchCharacterField({
@@ -180,6 +185,7 @@ describe("Functions: patchCharacterField", () => {
       userId: null,
       isEditableByPlayer: false,
       header: { characterName: "Brother Corvus" },
+      experience: { total: 10_000, spent: 0, ranks: [] },
     });
 
     const characteristics = {
@@ -250,10 +256,19 @@ describe("Functions: patchCharacterField", () => {
       isEditableByPlayer: false,
       talentsAndTraits: { talents: [], traits: [] },
       psychic: { psyRating: 0, disciplines: [] },
+      experience: { total: 10_000, spent: 0, ranks: [] },
     });
 
     const talentsAndTraits = {
-      talents: [{ uid: "t1", talentId: "sanctioned-psyker", name: "Sanctioned Psyker" }],
+      talents: [
+        {
+          uid: "t1",
+          talentId: "sanctioned-psyker",
+          name: "Sanctioned Psyker",
+          manualCost: 0,
+          xpPurchase: { cost: 0 },
+        },
+      ],
       traits: [],
     };
     const psychic = { psyRating: 1, disciplines: ["divination"] };
@@ -321,6 +336,7 @@ describe("Functions: patchCharacterField", () => {
         campaignId: campaignRef.id,
         userId: null,
         isEditableByPlayer: false,
+        experience: { total: 10_000, spent: 0, ranks: [] },
       });
 
       const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
@@ -371,6 +387,7 @@ describe("Functions: patchCharacterField", () => {
         campaignId: campaignRef.id,
         userId: null,
         isEditableByPlayer: false,
+        experience: { total: 10_000, spent: 0, ranks: [] },
       });
 
       const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
@@ -471,10 +488,83 @@ describe("Functions: patchCharacterField", () => {
         characterId: characterRef.id,
         field: "notes",
         value: [
-          { id: "n1", title: "Note", text: "Should be rejected.", updatedAt: "2026-01-01T00:00:00.000Z" },
+          {
+            id: "n1",
+            title: "Note",
+            text: "Should be rejected.",
+            updatedAt: "2026-01-01T00:00:00.000Z",
+          },
         ],
       })
     ).rejects.toMatchObject({ code: "functions/permission-denied" });
+  }, 15000);
+
+  it("rejects an editable player lowering a legacy rank advance cost", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+
+    const playerUid = await signInTestUser();
+    const experience = {
+      total: 1_000,
+      spent: 400,
+      ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Legacy advance", cost: 400 }] }],
+    };
+    await characterRef.set({
+      campaignId: campaignRef.id,
+      userId: playerUid,
+      isEditableByPlayer: true,
+      experience,
+    });
+
+    const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+    await expect(
+      patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field: "experience",
+        value: {
+          ...experience,
+          ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Legacy advance", cost: 0 }] }],
+        },
+      })
+    ).rejects.toMatchObject({ code: "functions/invalid-argument" });
+
+    expect((await characterRef.get()).data()?.experience).toEqual(experience);
+  }, 15000);
+
+  it("rejects an editable player deleting an XP spending transaction", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+
+    const playerUid = await signInTestUser();
+    const experience = {
+      total: 1_000,
+      spent: 400,
+      ranks: [],
+      transactions: [{ id: "rank-cost", type: "spend", amount: 400, rankId: "sergeant" }],
+    };
+    await characterRef.set({
+      campaignId: campaignRef.id,
+      userId: playerUid,
+      isEditableByPlayer: true,
+      experience,
+    });
+
+    const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+    await expect(
+      patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field: "experience",
+        value: { ...experience, transactions: [] },
+      })
+    ).rejects.toMatchObject({ code: "functions/invalid-argument" });
+
+    expect((await characterRef.get()).data()?.experience).toEqual(experience);
   }, 15000);
 
   it("rejects a field with no registered validator", async () => {

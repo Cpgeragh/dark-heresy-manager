@@ -37,7 +37,7 @@ Recovery lookups, rotation, revocation, linking, and account lifecycle operation
 
 The collection-group character query is restricted to the effective owner's characters and a maximum requested limit of 1,000 documents.
 
-`patchCharacterField` in `functions/src/operations/patchCharacterField.ts` owns XP-bearing character changes. It uses `getSpentXp` from `shared-rules/src/xpSpent.ts` to store `experience.spent` with the accepted purchase and rejects the complete patch when calculated Spent XP would exceed Total XP. `reconcileCharacterSpentXp` accepts no client-provided XP amount and repairs only `experience.spent` from the character's stored purchases. Direct changes to Total XP or Spent XP through the generic patch route are denied.
+`patchCharacterField` in `functions/src/operations/patchCharacterField.ts` owns XP-bearing character changes. It uses `getSpentXp` from `shared-rules/src/xpSpent.ts` to store `experience.spent` with the accepted purchase and rejects the complete patch when calculated Spent XP would exceed Total XP. `assertPlayerExperienceLedgerUnchanged` prevents a player from adding, removing or changing legacy Rank advances or XP spending transactions; only the campaign DM may manage those records. Current Career purchases use their dedicated validated fields. `reconcileCharacterSpentXp` accepts no client-provided XP amount and repairs only `experience.spent` from the character's stored purchases. Direct changes to Total XP or Spent XP through the generic patch route are denied.
 
 ## Custom-item library
 

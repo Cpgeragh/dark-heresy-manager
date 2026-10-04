@@ -1649,6 +1649,60 @@ describe("assertValidCharacterFieldTransition: experience alternate ranks", () =
     );
   });
 
+  it("rejects a player changing or removing legacy rank advances", () => {
+    const rankAdvance = { id: "legacy", name: "Legacy advance", cost: 400 };
+    const oldValue = { ...base, ranks: [{ rank: 1, advances: [rankAdvance] }] };
+
+    expect(
+      check(
+        oldValue,
+        { ...oldValue, ranks: [{ rank: 1, advances: [{ ...rankAdvance, cost: 0 }] }] },
+        guardsman,
+        false
+      )
+    ).toThrow("Only the DM can change the legacy rank advance ledger.");
+    expect(check(oldValue, { ...oldValue, ranks: [] }, guardsman, false)).toThrow(
+      "Only the DM can change the legacy rank advance ledger."
+    );
+  });
+
+  it("rejects a player changing or removing XP spending transactions", () => {
+    const transaction = {
+      id: "rank-cost",
+      type: "spend",
+      amount: 400,
+      rankId: "sergeant",
+    };
+    const oldValue = { ...base, transactions: [transaction] };
+
+    expect(
+      check(
+        oldValue,
+        { ...oldValue, transactions: [{ ...transaction, amount: 0 }] },
+        guardsman,
+        false
+      )
+    ).toThrow("Only the DM can change XP spending transactions.");
+    expect(check(oldValue, { ...oldValue, transactions: [] }, guardsman, false)).toThrow(
+      "Only the DM can change XP spending transactions."
+    );
+  });
+
+  it("allows the DM to change legacy rank advances and XP spending transactions", () => {
+    const oldValue = {
+      ...base,
+      ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Legacy advance", cost: 400 }] }],
+      transactions: [{ id: "rank-cost", type: "spend", amount: 400, rankId: "sergeant" }],
+    };
+    const newValue = {
+      ...oldValue,
+      ranks: [{ rank: 1, advances: [{ id: "legacy", name: "Legacy advance", cost: 300 }] }],
+      transactions: [{ id: "rank-cost", type: "spend", amount: 300, rankId: "sergeant" }],
+    };
+
+    expect(check(oldValue, newValue, guardsman, true)).not.toThrow();
+  });
+
   it("accepts a player taking an alternate rank while ranking up to the rank it replaces", () => {
     expect(check(base, withSelections([blackPriest]), clericAtPriest, false)).not.toThrow();
   });
