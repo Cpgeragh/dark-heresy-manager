@@ -1,28 +1,26 @@
 // functions/src/shared/recoveryCode.ts
 //
-// Server-side Recovery Code generation and HMAC hashing. The
-// generation format (prefix, segment lengths, alphabet) deliberately
-// mirrors src/utils/recoveryCode.ts and src/constants/ui.ts exactly. The
-// two projects are independent (functions/ can't import from src/), so if
-// that format ever changes, this needs updating to match.
+// Server-side Recovery Code generation and HMAC hashing. The code format
+// comes from shared-rules, the same source the browser uses.
 
 import { randomInt, createHmac, createHash } from "node:crypto";
-
-const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const PREFIX = "DH";
-const SEGMENT_LENGTH = 4;
-const SEGMENTS = 2;
+import {
+  RECOVERY_CODE_ALPHABET,
+  RECOVERY_CODE_PREFIX,
+  RECOVERY_CODE_SEGMENT_LENGTH,
+  RECOVERY_CODE_SEGMENTS,
+} from "shared-rules";
 
 export function generateRecoveryCode(): string {
   const segments: string[] = [];
-  for (let s = 0; s < SEGMENTS; s++) {
+  for (let s = 0; s < RECOVERY_CODE_SEGMENTS; s++) {
     let segment = "";
-    for (let i = 0; i < SEGMENT_LENGTH; i++) {
-      segment += ALPHABET[randomInt(ALPHABET.length)];
+    for (let i = 0; i < RECOVERY_CODE_SEGMENT_LENGTH; i++) {
+      segment += RECOVERY_CODE_ALPHABET[randomInt(RECOVERY_CODE_ALPHABET.length)];
     }
     segments.push(segment);
   }
-  return `${PREFIX}-${segments.join("-")}`;
+  return `${RECOVERY_CODE_PREFIX}-${segments.join("-")}`;
 }
 
 export function hashRecoveryCode(code: string, secret: string): string {

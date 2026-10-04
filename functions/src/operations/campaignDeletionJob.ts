@@ -23,6 +23,7 @@ import {
   type Firestore,
 } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { isRecoveryCodeFormat } from "shared-rules";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
@@ -37,7 +38,6 @@ import {
 import type { IdempotencyExecution } from "../shared/idempotency.js";
 
 const CHUNK_SIZE = 400;
-const RECOVERY_CODE_PATTERN = /^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 type Phase =
   | "characterClaimLogs"
@@ -112,7 +112,7 @@ export async function startCampaignDeletionJob(
 
   for (const character of characters) {
     const code = character.data().recoveryCode;
-    if (typeof code !== "string" || !RECOVERY_CODE_PATTERN.test(code)) {
+    if (!isRecoveryCodeFormat(code)) {
       throw new HttpsError(
         "failed-precondition",
         "At least one character has no usable Recovery Code, so its Recovery Index cannot be removed safely."

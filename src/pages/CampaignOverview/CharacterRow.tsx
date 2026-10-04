@@ -16,7 +16,7 @@ import { LoadingDots } from "../../ui/LoadingDots";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
 import { ModalShell } from "../../ui/modals/ModalShell";
-import type { ClaimLogAction } from "../../utils/claimLog";
+import type { ClaimLogAction } from "shared-rules";
 import { PortraitUpload } from "../../components/PortraitUpload";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 

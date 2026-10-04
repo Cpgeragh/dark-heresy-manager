@@ -10,7 +10,7 @@ import {
   RECOVERY_CODE_PREFIX,
   RECOVERY_CODE_SEGMENT_LENGTH,
   RECOVERY_CODE_SEGMENTS,
-} from "../../constants/ui";
+} from "shared-rules";
 import { formatRecoveryCodeInputChange } from "../../utils/recoveryCode";
 import { validateRecoveryCode } from "../../utils/validation";
 import { editableInputClass, uiSectionHeader } from "../styles/editableStyles";

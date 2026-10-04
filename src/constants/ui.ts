@@ -21,16 +21,3 @@ export const COPY_FEEDBACK_DURATION = 2000;
 
 export const TOAST_ANIMATION_DURATION = 300;
 export const SEARCH_DEBOUNCE_DELAY = 300;
-
-// ============================================
-// RECOVERY CODES
-// ============================================
-
-export const RECOVERY_CODE_SEGMENT_LENGTH = 4;
-export const RECOVERY_CODE_SEGMENTS = 2;
-export const RECOVERY_CODE_PREFIX = "DH";
-
-/**
- * Alphabet for recovery-code segments: full uppercase alphanumeric set.
- */
-export const RECOVERY_CODE_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";

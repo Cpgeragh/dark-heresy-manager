@@ -11,6 +11,7 @@
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { isRecoveryCodeFormat } from "shared-rules";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
@@ -20,7 +21,6 @@ import {
 } from "../shared/recoveryCodeHistory.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
-const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
 
 export interface RevokeRecoveryCodeInput {
   campaignId: string;
@@ -56,7 +56,7 @@ export async function revokeRecoveryCode(
       }
 
       const currentCode = characterSnapshot.data()?.recoveryCode as string | undefined;
-      if (currentCode && CODE_FORMAT.test(currentCode)) {
+      if (isRecoveryCodeFormat(currentCode)) {
         const hash = hashRecoveryCode(currentCode, hmacSecret);
         transaction.delete(db.collection(RECOVERY_INDEX_COLLECTION).doc(hash));
         transaction.set(

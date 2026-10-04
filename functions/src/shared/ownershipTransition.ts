@@ -16,7 +16,8 @@
 
 import { FieldValue } from "firebase-admin/firestore";
 import type { Transaction, DocumentReference } from "firebase-admin/firestore";
-import { buildClaimLogPayload, type ClaimLogAction } from "./claimLog.js";
+import type { ClaimLogAction } from "shared-rules";
+import { buildClaimLogPayload } from "./claimLog.js";
 import { rotateRecoveryCodeInTransaction } from "./recoveryCodeRotation.js";
 
 export async function applyOwnershipTransition(

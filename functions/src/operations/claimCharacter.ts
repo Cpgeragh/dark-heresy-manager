@@ -11,6 +11,7 @@
 
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { isRecoveryCodeFormat } from "shared-rules";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import { buildClaimLogPayload } from "../shared/claimLog.js";
 import { rotateRecoveryCodeInTransaction } from "../shared/recoveryCodeRotation.js";
@@ -18,7 +19,6 @@ import { runOperationTransaction, type IdempotencyExecution } from "../shared/id
 import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
-const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
 
 export interface ClaimCharacterInput {
   code: string;
@@ -35,7 +35,7 @@ export async function claimCharacter(
   hmacSecret: string,
   idempotency: IdempotencyExecution<ClaimCharacterResult> | null = null
 ): Promise<ClaimCharacterResult> {
-  if (!CODE_FORMAT.test(input.code)) {
+  if (!isRecoveryCodeFormat(input.code)) {
     throw new HttpsError("not-found", "Recovery Code not found.");
   }
 

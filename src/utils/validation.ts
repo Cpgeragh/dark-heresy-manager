@@ -7,6 +7,7 @@ import {
   CHARACTERISTIC_ADVANCE_INCREMENT,
 } from "../constants/gameRules";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
+import { isRecoveryCodeFormat } from "shared-rules";
 
 /**
  * Validation result with error message
@@ -214,7 +215,7 @@ export function validateRecoveryCode(code: string): ValidationResult {
     return { isValid: false, error: "Recovery code is required" };
   }
 
-  if (!/^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(trimmed)) {
+  if (!isRecoveryCodeFormat(trimmed)) {
     return {
       isValid: false,
       error: "Invalid recovery code",

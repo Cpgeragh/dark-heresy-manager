@@ -6,45 +6,10 @@ import {
   getAllCareerAdvances,
   getNextTalentOrTraitPurchase,
   getUnlockedCareerAdvances,
+  getUnlockedTalentOrTraitSlots,
+  isTalentOrTraitAdvance,
+  matchesTalentOrTraitAdvance,
 } from "shared-rules";
-
-function matches(
-  advance: { talentId?: string; traitId?: string; specialisation?: string },
-  id: string,
-  specialisation?: string
-): boolean {
-  if (advance.talentId !== id && advance.traitId !== id) return false;
-  const advanceSpec = (advance.specialisation ?? "").toLocaleLowerCase();
-  const givenSpec = (specialisation ?? "").toLocaleLowerCase();
-  if (advanceSpec === givenSpec) return true;
-  const colonIndex = givenSpec.indexOf(":");
-  return colonIndex !== -1 && givenSpec.slice(0, colonIndex).trim() === advanceSpec;
-}
-
-function isTalentOrTraitAdvance(advance: { kind: string }): boolean {
-  return advance.kind === "talent" || advance.kind === "trait";
-}
-
-function getUnlockedTalentSlots(
-  career: string | undefined,
-  rank: string | undefined,
-  talentId: string,
-  specialisation: string | undefined,
-  alternateRanks: readonly AlternateRankSelection[]
-): { cost: number; rankId: string }[] {
-  return getUnlockedCareerAdvances(career, rank, alternateRanks)
-    .filter(
-      (entry) =>
-        isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation)
-    )
-    .flatMap((entry) =>
-      Array.from({ length: entry.advance.repeatableAtThisRank ?? 1 }, () => ({
-        cost: entry.advance.cost,
-        rankId: entry.rankId,
-      }))
-    )
-    .sort((a, b) => a.cost - b.cost);
-}
 
 /** Exact Career-table slot consumed by the next real purchase. */
 export function getNextTalentPurchase(
@@ -74,9 +39,11 @@ export function getRemainingTalentSlots(
   ownedEntries: readonly TalentEntry[],
   alternateRanks: readonly AlternateRankSelection[] = []
 ): { cost: number; count: number }[] {
-  const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
+  const owned = ownedEntries.filter((entry) =>
+    matchesTalentOrTraitAdvance(entry, talentId, specialisation)
+  ).length;
   const counts = new Map<number, number>();
-  for (const slot of getUnlockedTalentSlots(
+  for (const slot of getUnlockedTalentOrTraitSlots(
     career,
     rank,
     talentId,
@@ -110,14 +77,17 @@ export function isTalentMaxedAtCurrentRank(
   ownedEntries: readonly TalentEntry[],
   alternateRanks: readonly AlternateRankSelection[] = []
 ): boolean {
-  const unlockedSlotCount = getUnlockedCareerAdvances(career, rank, alternateRanks)
-    .filter(
-      (entry) =>
-        isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation)
-    )
-    .reduce((total, entry) => total + (entry.advance.repeatableAtThisRank ?? 1), 0);
+  const unlockedSlotCount = getUnlockedTalentOrTraitSlots(
+    career,
+    rank,
+    talentId,
+    specialisation,
+    alternateRanks
+  ).length;
   if (unlockedSlotCount === 0) return false;
-  const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
+  const owned = ownedEntries.filter((entry) =>
+    matchesTalentOrTraitAdvance(entry, talentId, specialisation)
+  ).length;
   return owned >= unlockedSlotCount;
 }
 
@@ -161,7 +131,10 @@ export function getTalentRankChips(
   const seen = new Set<string>();
   const chips: string[] = [];
   for (const entry of getAllCareerAdvances(career, alternateRanks)) {
-    if (!isTalentOrTraitAdvance(entry.advance) || !matches(entry.advance, talentId, specialisation))
+    if (
+      !isTalentOrTraitAdvance(entry.advance) ||
+      !matchesTalentOrTraitAdvance(entry.advance, talentId, specialisation)
+    )
       continue;
     const name = entry.rankName ?? rankNames.get(entry.rankId);
     if (name && !seen.has(name)) {

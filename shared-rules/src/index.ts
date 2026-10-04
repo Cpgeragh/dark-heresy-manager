@@ -60,6 +60,9 @@ export {
   getMissedRankCareerAdvances,
   getNextTalentOrTraitPurchase,
   getUnlockedCareerAdvances,
+  getUnlockedTalentOrTraitSlots,
+  isTalentOrTraitAdvance,
+  matchesTalentOrTraitAdvance,
   type AccessibleCareerAdvance,
   type MissedRankCareerAdvance,
 } from "./careerAdvanceAccess.js";
@@ -87,6 +90,14 @@ export {
 } from "./skillAdvanceCosts.js";
 export { getTalentsSpent } from "./talentAdvanceCosts.js";
 export { getSpentXp, type CharacterForSpentXp } from "./xpSpent.js";
+export { CLAIM_LOG_ACTIONS, type ClaimLogAction } from "./claimLog.js";
+export {
+  RECOVERY_CODE_ALPHABET,
+  RECOVERY_CODE_PREFIX,
+  RECOVERY_CODE_SEGMENT_LENGTH,
+  RECOVERY_CODE_SEGMENTS,
+  isRecoveryCodeFormat,
+} from "./recoveryCodeFormat.js";
 export type {
   CharacteristicAdvanceTier,
   Characteristics,

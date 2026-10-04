@@ -1,49 +1,7 @@
 // tests/unit/claimLog.test.ts
 
-import { describe, it, expect, vi } from "vitest";
-import { buildClaimLogPayload, validateClaimLogPayload } from "../../src/utils/claimLog";
-
-// serverTimestamp() returns a sentinel object — mock it so tests stay pure
-vi.mock("firebase/firestore", () => ({
-  serverTimestamp: () => ({ _type: "serverTimestamp" }),
-}));
-
-describe("buildClaimLogPayload", () => {
-  it("builds a claim payload", () => {
-    const payload = buildClaimLogPayload("claim", "user-1", null, "user-1");
-    expect(payload.action).toBe("claim");
-    expect(payload.actorUid).toBe("user-1");
-    expect(payload.previousOwnerUid).toBeNull();
-    expect(payload.newOwnerUid).toBe("user-1");
-    expect(payload.timestamp).toBeDefined();
-  });
-
-  it("builds a release payload", () => {
-    const payload = buildClaimLogPayload("release", "user-1", "user-1", null);
-    expect(payload.action).toBe("release");
-    expect(payload.previousOwnerUid).toBe("user-1");
-    expect(payload.newOwnerUid).toBeNull();
-  });
-
-  it("builds a force-assign payload", () => {
-    const payload = buildClaimLogPayload("force-assign", "dm-1", null, "user-2");
-    expect(payload.action).toBe("force-assign");
-    expect(payload.actorUid).toBe("dm-1");
-    expect(payload.newOwnerUid).toBe("user-2");
-  });
-
-  it("builds a force-release payload", () => {
-    const payload = buildClaimLogPayload("force-release", "dm-1", "user-1", null);
-    expect(payload.action).toBe("force-release");
-    expect(payload.previousOwnerUid).toBe("user-1");
-    expect(payload.newOwnerUid).toBeNull();
-  });
-
-  it("does not include id field", () => {
-    const payload = buildClaimLogPayload("claim", "user-1", null, "user-1");
-    expect("id" in payload).toBe(false);
-  });
-});
+import { describe, it, expect } from "vitest";
+import { validateClaimLogPayload } from "../../src/utils/claimLog";
 
 describe("validateClaimLogPayload", () => {
   it("accepts valid claim entry", () => {

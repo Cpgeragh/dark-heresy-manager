@@ -6,6 +6,7 @@
 // preview can't be used to read data beyond what the UI shows.
 
 import { getFirestore } from "firebase-admin/firestore";
+import { isRecoveryCodeFormat } from "shared-rules";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
 
@@ -30,14 +31,12 @@ export type LookupRecoveryCodeResult =
   | { status: "not-found" }
   | { status: "missing-data" };
 
-const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
-
 export async function lookupRecoveryCode(
   code: string,
   callerUid: string,
   hmacSecret: string
 ): Promise<LookupRecoveryCodeResult> {
-  if (!CODE_FORMAT.test(code)) {
+  if (!isRecoveryCodeFormat(code)) {
     return { status: "not-found" };
   }
 

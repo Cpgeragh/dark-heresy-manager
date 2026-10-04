@@ -113,8 +113,12 @@ export function getUnlockedCareerAdvances(
   );
 }
 
-function matchesTalentOrTraitAdvance(
-  advance: CareerAdvanceRef,
+export function isTalentOrTraitAdvance(advance: { kind: string }): boolean {
+  return advance.kind === "talent" || advance.kind === "trait";
+}
+
+export function matchesTalentOrTraitAdvance(
+  advance: { talentId?: string; traitId?: string; specialisation?: string },
   id: string,
   specialisation?: string
 ): boolean {
@@ -128,6 +132,28 @@ function matchesTalentOrTraitAdvance(
   );
 }
 
+/** Unlocked Career-table slots for one Talent or Trait, cheapest first. */
+export function getUnlockedTalentOrTraitSlots(
+  career: string | undefined,
+  rank: string | undefined,
+  id: string,
+  specialisation: string | undefined,
+  alternateRanks: readonly AlternateRankSelection[] = []
+): { cost: number; rankId: string }[] {
+  return getUnlockedCareerAdvances(career, rank, alternateRanks)
+    .filter(
+      ({ advance }) =>
+        isTalentOrTraitAdvance(advance) && matchesTalentOrTraitAdvance(advance, id, specialisation)
+    )
+    .flatMap(({ rankId, advance }) =>
+      Array.from({ length: advance.repeatableAtThisRank ?? 1 }, () => ({
+        cost: advance.cost,
+        rankId,
+      }))
+    )
+    .sort((left, right) => left.cost - right.cost);
+}
+
 /** Exact unlocked Career-table slot consumed by the next Talent or Trait purchase. */
 export function getNextTalentOrTraitPurchase(
   career: string | undefined,
@@ -137,25 +163,9 @@ export function getNextTalentOrTraitPurchase(
   ownedEntries: readonly TalentEntryForCost[],
   alternateRanks: readonly AlternateRankSelection[] = []
 ): XpPurchaseRecord | undefined {
-  const slots = getUnlockedCareerAdvances(career, rank, alternateRanks)
-    .filter(
-      ({ advance }) =>
-        (advance.kind === "talent" || advance.kind === "trait") &&
-        matchesTalentOrTraitAdvance(advance, id, specialisation)
-    )
-    .flatMap(({ rankId, advance }) =>
-      Array.from({ length: advance.repeatableAtThisRank ?? 1 }, () => ({
-        cost: advance.cost,
-        rankId,
-      }))
-    )
-    .sort((left, right) => left.cost - right.cost);
+  const slots = getUnlockedTalentOrTraitSlots(career, rank, id, specialisation, alternateRanks);
   const owned = ownedEntries.filter((entry) =>
-    matchesTalentOrTraitAdvance(
-      { kind: "talent", talentId: entry.talentId, specialisation: entry.specialisation, cost: 0 },
-      id,
-      specialisation
-    )
+    matchesTalentOrTraitAdvance(entry, id, specialisation)
   ).length;
   const slot = slots[owned];
   return slot ? makeSourceRankPurchase(career, slot.rankId, slot.cost) : undefined;

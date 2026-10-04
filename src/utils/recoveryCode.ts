@@ -6,7 +6,7 @@ import {
   RECOVERY_CODE_PREFIX,
   RECOVERY_CODE_SEGMENT_LENGTH,
   RECOVERY_CODE_SEGMENTS,
-} from "../constants/ui";
+} from "shared-rules";
 
 /**
  * Generate a recovery code in format: DH-XXXX-YYYY
