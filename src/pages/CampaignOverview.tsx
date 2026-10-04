@@ -357,7 +357,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           {isDM && showSessionForm && (
             <SessionForm
               campaignId={campaignId}
-              characters={summaries}
+              characters={sessionCharacters}
               onClose={() => setShowSessionForm(false)}
             />
           )}

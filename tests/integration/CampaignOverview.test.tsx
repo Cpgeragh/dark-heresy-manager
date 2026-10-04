@@ -108,9 +108,18 @@ vi.mock("../../src/pages/CampaignOverview/PartyRosterTile", () => ({
 }));
 
 vi.mock("../../src/pages/CampaignOverview/SessionForm", () => ({
-  SessionForm: ({ onClose }: { onClose: () => void }) => (
+  SessionForm: ({
+    characters,
+    onClose,
+  }: {
+    characters: { id: string; characterName: string }[];
+    onClose: () => void;
+  }) => (
     <div>
       Mock SessionForm
+      {characters.map((entry) => (
+        <span key={entry.id}>Session attendee: {entry.characterName}</span>
+      ))}
       <button onClick={onClose}>Mock Close Session Form</button>
     </div>
   ),
@@ -251,7 +260,11 @@ describe("CampaignOverview", () => {
   });
 
   it("shows a loading state while the party roster is still loading, for a player", () => {
-    useCampaignCharacterSummariesMock.mockReturnValue({ summaries: [], loading: true, error: null });
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [],
+      loading: true,
+      error: null,
+    });
     renderPage("player-1");
     expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
   });
@@ -357,6 +370,24 @@ describe("CampaignOverview", () => {
     expect(screen.getByText("Mock Delete Session")).toBeInTheDocument();
     expect(screen.getByText("Mock Save Session")).toBeInTheDocument();
     expect(screen.getByText("Mock Apply XP")).toBeInTheDocument();
+  });
+
+  it("offers the DM every campaign character as a session attendee, claimed or not", async () => {
+    const user = userEvent.setup();
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [
+        { id: "c1", campaignId: "campaign-1", characterName: "Vex", userId: "player-1" },
+        { id: "c2", campaignId: "campaign-1", characterName: "Thrun", userId: null },
+      ],
+      loading: false,
+      error: null,
+    });
+    renderPage("dm-1");
+
+    await user.click(screen.getByRole("button", { name: "New Session" }));
+
+    expect(screen.getByText("Session attendee: Vex")).toBeInTheDocument();
+    expect(screen.getByText("Session attendee: Thrun")).toBeInTheDocument();
   });
 
   it("clears the kebab content for a non-DM and sets it for the DM", () => {
