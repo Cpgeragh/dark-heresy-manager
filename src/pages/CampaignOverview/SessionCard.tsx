@@ -249,7 +249,12 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                 XP Applied ✓
               </span>
             ) : (
-              <Button size="sm" onClick={handleApplyXp} loading={applyingXp} loadingLabel="Applying">
+              <Button
+                size="sm"
+                onClick={handleApplyXp}
+                loading={applyingXp}
+                loadingLabel="Applying"
+              >
                 Apply XP
               </Button>
             ))}
@@ -262,10 +267,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             onDelete &&
             (session.xpApplied === true ? (
               confirmingDelete ? (
-                <div
-                  className="flex flex-col items-start gap-1.5"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <div className="flex flex-col items-start gap-1.5">
                   <span className="text-xs lg:text-sm text-red-400">
                     This session's XP was already applied. Deleting it won't remove that XP unless
                     checked below.

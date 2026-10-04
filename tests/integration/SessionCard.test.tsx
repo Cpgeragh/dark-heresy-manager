@@ -125,6 +125,26 @@ describe("SessionCard delete confirmation", () => {
     expect(screen.getByText("This will affect 8 documents.")).toBeInTheDocument();
   });
 
+  it("shows the reversal checkbox as ticked after it is clicked, and unticked after a second click", async () => {
+    const user = userEvent.setup();
+    const session = { ...baseSession, xpApplied: true };
+    renderWithToast(
+      <SessionCard
+        session={session}
+        characters={characters}
+        isDM={true}
+        onDelete={vi.fn().mockResolvedValue(undefined)}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("checkbox"));
+    expect(screen.getByRole("checkbox")).toBeChecked();
+
+    await user.click(screen.getByRole("checkbox"));
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
+  });
+
   it("calls onDelete(false) when confirmed without checking the reversal box", async () => {
     const user = userEvent.setup();
     const onDelete = vi.fn().mockResolvedValue(undefined);
