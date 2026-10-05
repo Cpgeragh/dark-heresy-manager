@@ -7,6 +7,7 @@ import { useCharacterData } from "../../hooks/useCharacterData";
 import { useCharacterPermissions } from "../../hooks/useCharacterPermissions";
 import { useCharacterMutations } from "../../hooks/useCharacterMutations";
 import { useCharacterHelpers } from "../../hooks/useCharacterHelpers";
+import { useOptimisticOverlay } from "../../hooks/useOptimisticOverlay";
 
 interface UseCharacterSheetProps {
   campaignIdParam: string | undefined;
@@ -43,13 +44,15 @@ export function useCharacterSheet({
   // DATA LOADING
   // ================================================================
   const {
-    character,
+    character: serverCharacter,
     loading: characterLoading,
     error: characterError,
   } = useCharacterData({
     campaignId: path?.campaignId,
     characterId: path?.characterId,
   });
+  const { value: character, apply, confirm, revert } = useOptimisticOverlay(serverCharacter);
+  const overlay = useMemo(() => ({ apply, confirm, revert }), [apply, confirm, revert]);
 
   // ================================================================
   // PERMISSIONS
@@ -69,6 +72,7 @@ export function useCharacterSheet({
     characterId: path?.characterId ?? "",
     character,
     allowedToEdit,
+    overlay,
   });
 
   // ================================================================

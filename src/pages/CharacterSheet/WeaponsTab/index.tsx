@@ -4,6 +4,7 @@
 
 import { useState, useCallback, Fragment, useMemo } from "react";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -102,14 +103,14 @@ interface WeaponsTabProps {
   editable: boolean;
   strengthBonus: number;
   knaveOfPistols?: boolean;
-  onUpdateRanged: (next: RangedWeapon[]) => void;
-  onUpdateMelee: (next: MeleeWeapon[]) => void;
-  onUpdateGrenades: (next: GrenadeItem[]) => void;
+  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void;
+  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void;
+  onUpdateGrenades: (next: GrenadeItem[], options?: PatchOptions) => void;
   cybernetics?: CyberneticItem[];
   shields?: ShieldItem[];
-  onUpdateShields?: (next: ShieldItem[]) => void;
+  onUpdateShields?: (next: ShieldItem[], options?: PatchOptions) => void;
   archeotech?: ArcheotechItem[];
-  onUpdateArcheotech?: (next: ArcheotechItem[]) => void;
+  onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void;
 }
 
 type EditingWeaponDefinition =
@@ -960,7 +961,10 @@ export function WeaponsTab({
   const toggleEquipRanged = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
+      onUpdateRanged(
+        rangedWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)),
+        { optimistic: true }
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -968,7 +972,10 @@ export function WeaponsTab({
   const toggleEquipMelee = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateMelee(meleeWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
+      onUpdateMelee(
+        meleeWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)),
+        { optimistic: true }
+      );
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -977,7 +984,8 @@ export function WeaponsTab({
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
       onUpdateArcheotech(
-        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a))
+        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)),
+        { optimistic: true }
       );
     },
     [editable, archeotech, onUpdateArcheotech]
@@ -986,7 +994,10 @@ export function WeaponsTab({
   const toggleEquipGrenade = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateGrenades(grenades.map((g) => (g.id === id ? { ...g, equipped: !g.equipped } : g)));
+      onUpdateGrenades(
+        grenades.map((g) => (g.id === id ? { ...g, equipped: !g.equipped } : g)),
+        { optimistic: true }
+      );
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -995,7 +1006,8 @@ export function WeaponsTab({
     (id: string) => {
       if (!editable || !onUpdateShields) return;
       onUpdateShields(
-        (shields ?? []).map((s) => (s.id === id ? { ...s, equipped: !s.equipped } : s))
+        (shields ?? []).map((s) => (s.id === id ? { ...s, equipped: !s.equipped } : s)),
+        { optimistic: true }
       );
     },
     [editable, shields, onUpdateShields]

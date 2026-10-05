@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useCharacterSheet } from "../../src/pages/CharacterSheet/useCharacterSheet";
 import type { Character } from "../../src/types/Character";
 
@@ -189,5 +189,51 @@ describe("useCharacterSheet", () => {
     );
     expect(useCharacterMutationsMock).toHaveBeenCalledWith(expect.objectContaining({ character }));
     expect(useCharacterHelpersMock).toHaveBeenCalledWith({ character });
+  });
+});
+
+describe("useCharacterSheet: optimistic changes", () => {
+  it("returns the character with a pending change on top, and the real one again after a revert", () => {
+    const serverCharacter = { id: "char-1", gear: [] } as unknown as Character;
+    useCharacterDataMock.mockReturnValue({
+      character: serverCharacter,
+      loading: false,
+      error: null,
+    });
+
+    const { result } = renderSheetHook();
+    const { overlay } = useCharacterMutationsMock.mock.calls.at(-1)?.[0] as {
+      overlay: {
+        apply: (field: string, value: unknown) => number;
+        revert: (field: string, version: number) => void;
+      };
+    };
+
+    let version = 0;
+    act(() => {
+      version = overlay.apply("gear", [{ id: "g1" }]);
+    });
+    expect((result.current.character as unknown as { gear: unknown[] }).gear).toEqual([
+      { id: "g1" },
+    ]);
+
+    act(() => {
+      overlay.revert("gear", version);
+    });
+    expect(result.current.character).toBe(serverCharacter);
+  });
+
+  it("passes the overlaid character on to the permission and mutation hooks", () => {
+    const serverCharacter = { id: "char-1", gear: [] } as unknown as Character;
+    useCharacterDataMock.mockReturnValue({
+      character: serverCharacter,
+      loading: false,
+      error: null,
+    });
+
+    renderSheetHook();
+
+    expect(useCharacterMutationsMock.mock.calls.at(-1)?.[0].character).toBe(serverCharacter);
+    expect(useCharacterPermissionsMock.mock.calls.at(-1)?.[0].character).toBe(serverCharacter);
   });
 });

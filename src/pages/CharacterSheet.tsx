@@ -65,6 +65,7 @@ import { LoadingState } from "../ui/LoadingState";
 import { ROUTES } from "../constants/routes";
 import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
+import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import { TitleToolbar } from "../ui/TitleToolbar";
 import {
   CampaignCustomItemsScope,
@@ -437,14 +438,24 @@ export default function CharacterSheet({
   );
 
   const handleUpdateRangedWeapons = useCallback(
-    (next: RangedWeapon[]) =>
-      patchCollectionField("rangedWeapons", character?.rangedWeapons ?? EMPTY_RANGED_WEAPONS, next),
+    (next: RangedWeapon[], options?: PatchOptions) =>
+      patchCollectionField(
+        "rangedWeapons",
+        character?.rangedWeapons ?? EMPTY_RANGED_WEAPONS,
+        next,
+        options
+      ),
     [character?.rangedWeapons, patchCollectionField]
   );
 
   const handleUpdateMeleeWeapons = useCallback(
-    (next: MeleeWeapon[]) =>
-      patchCollectionField("meleeWeapons", character?.meleeWeapons ?? EMPTY_MELEE_WEAPONS, next),
+    (next: MeleeWeapon[], options?: PatchOptions) =>
+      patchCollectionField(
+        "meleeWeapons",
+        character?.meleeWeapons ?? EMPTY_MELEE_WEAPONS,
+        next,
+        options
+      ),
     [character?.meleeWeapons, patchCollectionField]
   );
 
@@ -481,13 +492,13 @@ export default function CharacterSheet({
   );
 
   const handleUpdateGrenades = useCallback(
-    (next: GrenadeItem[]) =>
-      patchCollectionField("grenades", character?.grenades ?? EMPTY_GRENADES, next),
+    (next: GrenadeItem[], options?: PatchOptions) =>
+      patchCollectionField("grenades", character?.grenades ?? EMPTY_GRENADES, next, options),
     [character?.grenades, patchCollectionField]
   );
 
   const handleUpdateShields = useCallback(
-    (next: ShieldItem[]) => patchField("shields", next),
+    (next: ShieldItem[], options?: PatchOptions) => patchField("shields", next, options),
     [patchField]
   );
 
@@ -507,7 +518,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdateArcheotech = useCallback(
-    (next: ArcheotechItem[]) => patchField("archeotech", next),
+    (next: ArcheotechItem[], options?: PatchOptions) => patchField("archeotech", next, options),
     [patchField]
   );
 

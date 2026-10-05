@@ -334,7 +334,9 @@ describe("WeaponsTab remove / equip-toggle", () => {
     const { noop } = renderTab();
     const equipButtons = screen.getAllByRole("button", { name: "Equip" });
     await user.click(equipButtons[0]);
-    expect(noop).toHaveBeenCalledWith([expect.objectContaining({ id: "r1", equipped: true })]);
+    expect(noop).toHaveBeenCalledWith([expect.objectContaining({ id: "r1", equipped: true })], {
+      optimistic: true,
+    });
   });
 
   it("toggles equip on a Melee weapon", async () => {
@@ -342,7 +344,9 @@ describe("WeaponsTab remove / equip-toggle", () => {
     const { noop } = renderTab();
     const equipButtons = screen.getAllByRole("button", { name: "Equip" });
     await user.click(equipButtons[1]);
-    expect(noop).toHaveBeenCalledWith([expect.objectContaining({ id: "m1", equipped: true })]);
+    expect(noop).toHaveBeenCalledWith([expect.objectContaining({ id: "m1", equipped: true })], {
+      optimistic: true,
+    });
   });
 });
 

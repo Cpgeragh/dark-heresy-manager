@@ -45,6 +45,7 @@ const browserUnitTests = [
   "tests/unit/useCharacterSheet.test.ts",
   "tests/unit/useFirestoreSubscription.test.tsx",
   "tests/unit/useMediaQuery.test.ts",
+  "tests/unit/useOptimisticOverlay.test.tsx",
   "tests/unit/useRecoveryLookup.test.ts",
   "tests/unit/weaponSnapshotHelpers.test.ts",
 ];

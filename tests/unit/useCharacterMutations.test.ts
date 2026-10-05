@@ -350,3 +350,115 @@ describe("useCharacterMutations: adjustXp", () => {
     expect(mockAdjustCharacterXp).not.toHaveBeenCalled();
   });
 });
+
+describe("useCharacterMutations: optimistic updates", () => {
+  function makeOverlay() {
+    return { apply: vi.fn(() => 7), confirm: vi.fn(), revert: vi.fn() };
+  }
+
+  function renderMutations(overlay: ReturnType<typeof makeOverlay>) {
+    return renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+        overlay,
+      })
+    );
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("applies the value before saving and confirms it once the save succeeds", async () => {
+    mockPatchCharacterField.mockResolvedValue(undefined);
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    await act(() => result.current.patchField("shields", [], { optimistic: true }));
+
+    expect(overlay.apply).toHaveBeenCalledWith("shields", []);
+    expect(overlay.apply.mock.invocationCallOrder[0]).toBeLessThan(
+      mockPatchCharacterField.mock.invocationCallOrder[0]
+    );
+    expect(overlay.confirm).toHaveBeenCalledWith("shields", 7);
+    expect(overlay.revert).not.toHaveBeenCalled();
+  });
+
+  it("reverts the value and shows the error when the save fails", async () => {
+    mockPatchCharacterField.mockRejectedValue(new Error("permission-denied"));
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    await act(() => result.current.patchField("shields", [], { optimistic: true }));
+
+    expect(overlay.revert).toHaveBeenCalledWith("shields", 7);
+    expect(overlay.confirm).not.toHaveBeenCalled();
+    expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("permission-denied"));
+  });
+
+  it("leaves the overlay alone when the call is not optimistic", async () => {
+    mockPatchCharacterField.mockResolvedValue(undefined);
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    await act(() => result.current.patchField("shields", []));
+
+    expect(overlay.apply).not.toHaveBeenCalled();
+    expect(overlay.confirm).not.toHaveBeenCalled();
+  });
+
+  it("does not apply anything when editing is not allowed", async () => {
+    const overlay = makeOverlay();
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: false,
+        overlay,
+      })
+    );
+
+    await act(() => result.current.patchField("shields", [], { optimistic: true }));
+
+    expect(overlay.apply).not.toHaveBeenCalled();
+    expect(mockPatchCharacterField).not.toHaveBeenCalled();
+  });
+
+  it("applies and confirms a collection change", async () => {
+    mockPatchCharacterCollectionField.mockResolvedValue(undefined);
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+    const after = [{ id: "w1", equipped: true }];
+
+    await act(() =>
+      result.current.patchCollectionField("rangedWeapons", [], after, { optimistic: true })
+    );
+
+    expect(overlay.apply).toHaveBeenCalledWith("rangedWeapons", after);
+    expect(mockPatchCharacterCollectionField).toHaveBeenCalledWith(
+      "camp-1",
+      "char-1",
+      "rangedWeapons",
+      [],
+      after
+    );
+    expect(overlay.confirm).toHaveBeenCalledWith("rangedWeapons", 7);
+  });
+
+  it("reverts a collection change and shows the error when the save fails", async () => {
+    mockPatchCharacterCollectionField.mockRejectedValue(new Error("not editable"));
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    await act(() =>
+      result.current.patchCollectionField("meleeWeapons", [], [{ id: "m1" }], { optimistic: true })
+    );
+
+    expect(overlay.revert).toHaveBeenCalledWith("meleeWeapons", 7);
+    expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("not editable"));
+  });
+});

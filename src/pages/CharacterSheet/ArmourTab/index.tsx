@@ -46,6 +46,7 @@ import {
   toCustomArmourData,
 } from "./armourSnapshotHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -59,7 +60,7 @@ interface ArmourTabProps {
   onUpdate: (next: WornArmourPiece[]) => void | Promise<void>;
   cybernetics?: CyberneticItem[];
   archeotech?: ArcheotechItem[];
-  onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
+  onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<void>;
   traits?: TalentEntry[];
   talents?: TalentsAndTraitsBlock;
   career?: string;
@@ -404,7 +405,8 @@ export function ArmourTab({
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
       onUpdateArcheotech(
-        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a))
+        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)),
+        { optimistic: true }
       );
     },
     [editable, archeotech, onUpdateArcheotech]

@@ -15,12 +15,14 @@ import {
   updateCharacter,
 } from "../services/characterService";
 import { useToast } from "../components/Toast";
+import type { OptimisticOverlayControls, PatchOptions } from "./useOptimisticOverlay";
 
 interface UseCharacterMutationsProps {
   campaignId: string;
   characterId: string;
   character: Character | null;
   allowedToEdit: boolean;
+  overlay?: OptimisticOverlayControls;
 }
 
 export function useCharacterMutations({
@@ -28,6 +30,7 @@ export function useCharacterMutations({
   characterId,
   character,
   allowedToEdit,
+  overlay,
 }: UseCharacterMutationsProps) {
   const [pendingUpdateCount, setPendingUpdateCount] = useState(0);
   const [isReleasing, setIsReleasing] = useState(false);
@@ -92,14 +95,22 @@ export function useCharacterMutations({
     | "experience";
 
   const patchFieldWithResult = useCallback(
-    async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<boolean> => {
+    async <K extends PatchableCharacterField>(
+      field: K,
+      value: Character[K],
+      options?: PatchOptions
+    ): Promise<boolean> => {
       if (!allowedToEdit || !hasCharacter) return false;
 
+      const sent = stripUndefined(value);
+      const version = options?.optimistic ? overlay?.apply(field, sent) : undefined;
       setPendingUpdateCount((count) => count + 1);
       try {
-        await patchCharacterField(campaignId, characterId, field, stripUndefined(value));
+        await patchCharacterField(campaignId, characterId, field, sent);
+        if (version !== undefined) overlay?.confirm(field, version);
         return true;
       } catch (err) {
+        if (version !== undefined) overlay?.revert(field, version);
         const message = err instanceof Error ? err.message : "Failed to update field";
         toast.error(`Update failed: ${message}`);
         console.error("Failed to update field:", err);
@@ -108,12 +119,16 @@ export function useCharacterMutations({
         setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
     },
-    [allowedToEdit, hasCharacter, campaignId, characterId, toast]
+    [allowedToEdit, hasCharacter, campaignId, characterId, toast, overlay]
   );
 
   const patchField = useCallback(
-    async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {
-      await patchFieldWithResult(field, value);
+    async <K extends PatchableCharacterField>(
+      field: K,
+      value: Character[K],
+      options?: PatchOptions
+    ): Promise<void> => {
+      await patchFieldWithResult(field, value, options);
     },
     [patchFieldWithResult]
   );
@@ -167,13 +182,17 @@ export function useCharacterMutations({
     async (
       field: "consumables" | "drugs" | "grenades" | "rangedWeapons" | "meleeWeapons" | "armour",
       before: unknown[],
-      after: unknown[]
+      after: unknown[],
+      options?: PatchOptions
     ): Promise<void> => {
       if (!allowedToEdit || !hasCharacter) return;
+      const version = options?.optimistic ? overlay?.apply(field, after) : undefined;
       setPendingUpdateCount((count) => count + 1);
       try {
         await patchCharacterCollectionField(campaignId, characterId, field, before, after);
+        if (version !== undefined) overlay?.confirm(field, version);
       } catch (err) {
+        if (version !== undefined) overlay?.revert(field, version);
         const message = err instanceof Error ? err.message : "Failed to update quantity";
         toast.error(`Update failed: ${message}`);
         console.error("Failed to update character quantity:", err);
@@ -181,7 +200,7 @@ export function useCharacterMutations({
         setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
     },
-    [allowedToEdit, hasCharacter, campaignId, characterId, toast]
+    [allowedToEdit, hasCharacter, campaignId, characterId, toast, overlay]
   );
 
   // ================================================================

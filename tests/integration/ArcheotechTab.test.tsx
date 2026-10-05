@@ -188,7 +188,7 @@ describe("ArcheotechTab", () => {
     expect(onUpdate).toHaveBeenCalledWith([]);
   });
 
-  it("shows a spinner on the equip toggle while the change is being saved", async () => {
+  it("asks for an optimistic update when the equip toggle is pressed, without a spinner", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -209,9 +209,11 @@ describe("ArcheotechTab", () => {
     const equipButton = screen.getAllByRole("button", { name: "Equip" })[0];
     await user.click(equipButton);
 
-    expect(equipButton).toHaveAttribute("aria-busy", "true");
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "a1", equipped: true })], {
+      optimistic: true,
+    });
+    expect(equipButton).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
-    expect(equipButton).not.toHaveAttribute("aria-busy");
   });
 });

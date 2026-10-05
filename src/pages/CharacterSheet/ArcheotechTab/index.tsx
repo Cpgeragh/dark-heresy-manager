@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import type { ArcheotechRef } from "../../../data/reference/archeotechReference";
 import type { CampaignCustomItem, CustomArcheotechData } from "../../../types/CustomItems";
 import { ArcheotechPickerModal } from "./ArcheotechPickerModal";
@@ -33,7 +34,7 @@ interface ArcheotechTabProps {
   isDM: boolean;
   archeotech: ArcheotechItem[];
   editable: boolean;
-  onUpdate: (next: ArcheotechItem[]) => void | Promise<void>;
+  onUpdate: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<void>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -227,7 +228,10 @@ export function ArcheotechTab({
   const toggleEquip = useCallback(
     (id: string) => {
       if (!editable) return;
-      return onUpdate(archeotech.map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)));
+      onUpdate(
+        archeotech.map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)),
+        { optimistic: true }
+      );
     },
     [editable, archeotech, onUpdate]
   );

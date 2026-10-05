@@ -59,6 +59,7 @@ import {
   meleeDamageForCraftsmanship,
 } from "../weapons/weaponHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,10 +75,10 @@ interface CyberneticsTabProps {
   strengthBonus?: number;
   editable: boolean;
   onUpdate: (next: CyberneticItem[]) => void | Promise<void>;
-  onUpdateRanged: (next: RangedWeapon[]) => void | Promise<void>;
-  onUpdateMelee: (next: MeleeWeapon[]) => void | Promise<void>;
+  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void | Promise<void>;
   archeotech?: ArcheotechItem[];
-  onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
+  onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<void>;
   career?: string;
 }
 
@@ -493,7 +494,8 @@ export function CyberneticsTab({
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
       onUpdateArcheotech(
-        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a))
+        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)),
+        { optimistic: true }
       );
     },
     [editable, archeotech, onUpdateArcheotech]
@@ -685,7 +687,10 @@ export function CyberneticsTab({
   const toggleEquipIntegratedRanged = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
+      onUpdateRanged(
+        rangedWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)),
+        { optimistic: true }
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -693,7 +698,10 @@ export function CyberneticsTab({
   const toggleEquipIntegratedMelee = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateMelee(meleeWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
+      onUpdateMelee(
+        meleeWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)),
+        { optimistic: true }
+      );
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
