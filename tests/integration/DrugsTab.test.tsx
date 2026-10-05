@@ -125,9 +125,10 @@ describe("DrugsTab", () => {
     await user.click(screen.getByRole("button", { name: "Add drug" }));
     await user.click(screen.getByText(DRUG_NAME));
 
-    expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ name: DRUG_NAME, quantity: 1 }),
-    ]);
+    expect(onUpdate).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: DRUG_NAME, quantity: 1 })],
+      { optimistic: true }
+    );
   });
 
   it("creates a custom drug, updates the character, and returns to the picker", async () => {
@@ -169,10 +170,10 @@ describe("DrugsTab", () => {
     // simultaneously, CSS-hidden per breakpoint), so target the first real match.
     await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
 
-    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
 
-  it("shows a spinner on a drug row while the add is being saved", async () => {
+  it("does not show a spinner on a drug row for an optimistic add", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -187,14 +188,16 @@ describe("DrugsTab", () => {
     await user.click(screen.getByText(DRUG_NAME));
 
     const row = screen.getByText(DRUG_NAME).closest("button");
-    expect(row).toHaveAttribute("aria-busy", "true");
-    expect(row).toBeDisabled();
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: DRUG_NAME })], {
+      optimistic: true,
+    });
+    expect(row).not.toHaveAttribute("aria-busy");
+    expect(row).not.toBeDisabled();
 
     await act(async () => finish());
-    expect(row).not.toHaveAttribute("aria-busy");
   }, 15000);
 
-  it("shows a spinner on Remove while a drug removal is being saved", async () => {
+  it("does not show a spinner on Remove for an optimistic drug removal", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -208,12 +211,9 @@ describe("DrugsTab", () => {
 
     await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
 
-    expect(screen.getAllByRole("button", { name: "Remove" })[0]).toHaveAttribute(
-      "aria-busy",
-      "true"
-    );
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(screen.getAllByRole("button", { name: "Remove" })[0]).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
-    expect(screen.getAllByRole("button", { name: "Remove" })[0]).not.toHaveAttribute("aria-busy");
   });
 });

@@ -12,6 +12,7 @@ import { SectionHeader } from "../../ui/SectionHeader";
 import { StatChip } from "../../ui/chips/StatChip";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { usePendingClick } from "../../ui/usePendingClick";
+import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import { uiExpandButton, uiPickerPressFeedback } from "../../ui/styles/buttonStyles";
 import {
   uiInfoModalWrapper,
@@ -372,7 +373,7 @@ export function CompanionsTab({
 }: {
   companions: CompanionItem[];
   editable: boolean;
-  onUpdate: (next: CompanionItem[]) => void | Promise<void>;
+  onUpdate: (next: CompanionItem[], options?: PatchOptions) => void | Promise<void>;
 }) {
   const [showPicker, setShowPicker] = useState(false);
 
@@ -396,7 +397,12 @@ export function CompanionsTab({
               key={companion.id}
               companion={companion}
               editable={editable}
-              onRemove={() => onUpdate(companions.filter((entry) => entry.id !== companion.id))}
+              onRemove={() => {
+                onUpdate(
+                  companions.filter((entry) => entry.id !== companion.id),
+                  { optimistic: true }
+                );
+              }}
             />
           ))}
         </div>
@@ -406,17 +412,20 @@ export function CompanionsTab({
         <CompanionPicker
           editable={editable}
           currentIds={companions.map((companion) => companion.referenceId)}
-          onSelect={(companionReference) =>
-            onUpdate([
-              ...companions,
-              {
-                id: crypto.randomUUID(),
-                referenceId: companionReference.id,
-                name: companionReference.name,
-                source: companionReference.source,
-              },
-            ])
-          }
+          onSelect={(companionReference) => {
+            onUpdate(
+              [
+                ...companions,
+                {
+                  id: crypto.randomUUID(),
+                  referenceId: companionReference.id,
+                  name: companionReference.name,
+                  source: companionReference.source,
+                },
+              ],
+              { optimistic: true }
+            );
+          }}
           onClose={() => setShowPicker(false)}
         />
       )}

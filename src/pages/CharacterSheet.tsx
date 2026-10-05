@@ -476,7 +476,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdateCompanions = useCallback(
-    (next: CompanionItem[]) => patchField("companions", next),
+    (next: CompanionItem[], options?: PatchOptions) => patchField("companions", next, options),
     [patchField]
   );
 
@@ -492,7 +492,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateDrugs = useCallback(
-    (next: DrugItem[]) => patchCollectionField("drugs", character?.drugs ?? EMPTY_DRUGS, next),
+    (next: DrugItem[], options?: PatchOptions) =>
+      patchCollectionField("drugs", character?.drugs ?? EMPTY_DRUGS, next, options),
     [character?.drugs, patchCollectionField]
   );
 
@@ -513,7 +514,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdateNotes = useCallback(
-    (value: NoteEntry[]) => patchField("notes", value),
+    (value: NoteEntry[], options?: PatchOptions) => patchField("notes", value, options),
     [patchField]
   );
 

@@ -128,8 +128,29 @@ describe("ArcheotechTab", () => {
     await user.click(screen.getByRole("button", { name: "Add item" }));
     await user.click(screen.getAllByText(GRENADE_NAME)[0]);
 
+    expect(onUpdate).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: GRENADE_NAME, type: "Grenade" })],
+      { optimistic: true }
+    );
+  });
+
+  it("keeps an item with a GM-assigned cost on a visible save, not an optimistic one", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getAllByText("Cameleoline Grid")[0]);
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "5000");
+    await user.click(screen.getByLabelText(/Rarity/));
+    await user.click(screen.getByRole("button", { name: "Rare" }));
+    await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
+
     expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ name: GRENADE_NAME, type: "Grenade" }),
+      expect.objectContaining({
+        name: "Cameleoline Grid",
+        value: "5,000 Thrones",
+        availability: "Rare",
+      }),
     ]);
   });
 
@@ -185,7 +206,7 @@ describe("ArcheotechTab", () => {
     // simultaneously, CSS-hidden per breakpoint), so target the first real match.
     await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
 
-    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
 
   it("asks for an optimistic update when the equip toggle is pressed, without a spinner", async () => {

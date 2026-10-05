@@ -12,12 +12,15 @@ describe("CompanionsTab", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add companion" }));
     fireEvent.click(screen.getByRole("button", { name: "Select Adeptus Arbites Cyber-Mastiff" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({
-        referenceId: "ih-adeptus-arbites-cyber-mastiff",
-        name: "Adeptus Arbites Cyber-Mastiff",
-      }),
-    ]);
+    expect(onUpdate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          referenceId: "ih-adeptus-arbites-cyber-mastiff",
+          name: "Adeptus Arbites Cyber-Mastiff",
+        }),
+      ],
+      { optimistic: true }
+    );
   });
 
   it("renders the complete Cyber-Mastiff profile", () => {
@@ -53,7 +56,7 @@ describe("CompanionsTab", () => {
     expect(screen.getByText("4/8/12/24")).toBeInTheDocument();
   });
 
-  it("shows a spinner on the picker card while adding a companion is being saved", async () => {
+  it("does not show a spinner on the picker card for an optimistic add", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -70,14 +73,17 @@ describe("CompanionsTab", () => {
     });
     await user.click(selectButton);
 
-    expect(selectButton).toHaveAttribute("aria-busy", "true");
-    expect(selectButton).toBeDisabled();
+    expect(onUpdate).toHaveBeenCalledWith(
+      [expect.objectContaining({ referenceId: "ih-adeptus-arbites-cyber-mastiff" })],
+      { optimistic: true }
+    );
+    expect(selectButton).not.toHaveAttribute("aria-busy");
+    expect(selectButton).not.toBeDisabled();
 
     await act(async () => finish());
-    expect(selectButton).not.toHaveAttribute("aria-busy");
   });
 
-  it("shows a spinner on Remove while a companion removal is being saved", async () => {
+  it("does not show a spinner on Remove for an optimistic companion removal", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -106,9 +112,9 @@ describe("CompanionsTab", () => {
     });
     await user.click(removeButton);
 
-    expect(removeButton).toHaveAttribute("aria-busy", "true");
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(removeButton).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
-    expect(removeButton).not.toHaveAttribute("aria-busy");
   });
 });

@@ -19,11 +19,12 @@ import {
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
 import { createLocalId } from "../../utils/createLocalId";
+import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 
 interface NotesTabProps {
   notes: NoteEntry[];
   editable: boolean;
-  onSave: (value: NoteEntry[]) => void | Promise<void>;
+  onSave: (value: NoteEntry[], options?: PatchOptions) => void | Promise<void>;
 }
 
 function formatDate(iso: string): string {
@@ -98,9 +99,12 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
     closeAll();
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     if (!deleteArmed) return;
-    await onSave(entries.filter((entry) => entry.id !== deleteArmed.id));
+    onSave(
+      entries.filter((entry) => entry.id !== deleteArmed.id),
+      { optimistic: true }
+    );
     setDeleteArmed(null);
   }
 

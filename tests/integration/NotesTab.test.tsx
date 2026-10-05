@@ -179,7 +179,7 @@ describe("NotesTab editing and deleting", () => {
     expect(screen.getByText("No notes yet.")).toBeInTheDocument();
   });
 
-  it("shows a spinner on Delete while the removal is being saved", async () => {
+  it("closes the delete dialog straight away and asks for an optimistic save", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onSave = vi.fn(
@@ -193,10 +193,9 @@ describe("NotesTab editing and deleting", () => {
     await user.click(screen.getByRole("button", { name: "Remove" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(screen.getByRole("button", { name: "Delete" })).toHaveAttribute("aria-busy", "true");
-    expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
+    expect(onSave).toHaveBeenCalledWith([], { optimistic: true });
+    expect(screen.queryByRole("dialog", { name: "Delete Note" })).not.toBeInTheDocument();
 
     await act(async () => finish());
-    expect(screen.queryByRole("dialog", { name: "Delete Note" })).not.toBeInTheDocument();
   });
 });

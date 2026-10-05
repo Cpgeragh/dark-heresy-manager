@@ -21,6 +21,7 @@ import {
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 
 interface DrugsTabProps {
   campaignId: string;
@@ -30,7 +31,7 @@ interface DrugsTabProps {
   isDM: boolean;
   drugs: DrugItem[];
   editable: boolean;
-  onUpdate: (next: DrugItem[]) => void | Promise<void>;
+  onUpdate: (next: DrugItem[], options?: PatchOptions) => void | Promise<void>;
 }
 
 interface EditingDrugDefinition {
@@ -90,19 +91,22 @@ export function DrugsTab({
   const addDrug = useCallback(
     (ref: DrugRef) => {
       if (!editable) return;
-      return onUpdate([
-        ...drugs,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          quantity: 1,
-          weight: ref.weight ?? "0 kg",
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-        },
-      ]);
+      onUpdate(
+        [
+          ...drugs,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            quantity: 1,
+            weight: ref.weight ?? "0 kg",
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, drugs, onUpdate]
   );
@@ -208,7 +212,10 @@ export function DrugsTab({
   const removeDrug = useCallback(
     (id: string) => {
       if (!editable) return;
-      return onUpdate(drugs.filter((d) => d.id !== id));
+      onUpdate(
+        drugs.filter((d) => d.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, drugs, onUpdate]
   );
