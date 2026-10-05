@@ -3,7 +3,13 @@ import { describe, it, expect, afterAll } from "vitest";
 import { httpsCallable } from "firebase/functions";
 import { initializeApp as initializeAdminApp, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { getTestFunctions, signInTestUser, teardownTestFunctions } from "./setup";
+import { deleteApp } from "firebase/app";
+import {
+  createIndependentClient,
+  getTestFunctions,
+  signInTestUser,
+  teardownTestFunctions,
+} from "./setup";
 
 process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
 if (!getApps().length) {
@@ -566,6 +572,50 @@ describe("Functions: patchCharacterField", () => {
 
     expect((await characterRef.get()).data()?.experience).toEqual(experience);
   }, 15000);
+
+  it("lets a device linked to the DM account save a DM-priced Show all skill", async () => {
+    const dmUid = await signInTestUser();
+    const device = await createIndependentClient(`linked-dm-device-${Date.now()}`);
+    try {
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await adminDb.collection("userLinks").doc(device.uid).set({ primaryUid: dmUid });
+      await characterRef.set({
+        campaignId: campaignRef.id,
+        userId: null,
+        isEditableByPlayer: false,
+        experience: { total: 1000, spent: 0, ranks: [] },
+        skills: [],
+      });
+
+      const skills = [
+        {
+          id: "awareness",
+          name: "Awareness",
+          level: "trained",
+          xpPurchases: { trained: { cost: 100 } },
+          manualCosts: { trained: 100 },
+          eliteAdvancePurchases: {
+            trained: { source: "gm-approved", cost: 100, sourceName: "GM-approved Skill" },
+          },
+        },
+      ];
+      const patchCharacterField = httpsCallable(device.functions, "patchCharacterField");
+      await patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field: "skills",
+        value: skills,
+      });
+
+      const stored = (await characterRef.get()).data();
+      expect(stored?.skills).toEqual(skills);
+      expect(stored?.experience.spent).toBe(100);
+    } finally {
+      await deleteApp(device.app);
+    }
+  }, 20000);
 
   it("rejects a field with no registered validator", async () => {
     const dmUid = await signInTestUser();

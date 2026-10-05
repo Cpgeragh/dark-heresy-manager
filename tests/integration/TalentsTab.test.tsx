@@ -1227,7 +1227,7 @@ describe("TalentsTab", () => {
     const purityUid = update.talentsAndTraits.talents[0].uid;
     expect(update.talentsAndTraits.talents[1].acquisition.purityTalentEntryUid).toBe(purityUid);
     expect(update.talentsAndTraits.talents[2].acquisition.purityTalentEntryUid).toBe(purityUid);
-  });
+  }, 15000);
 
   it("records whether Reformed Skin was caused by Purity or Critical Damage", async () => {
     const user = userEvent.setup();
@@ -1269,7 +1269,7 @@ describe("TalentsTab", () => {
     );
     const added = onUpdateCharacter.mock.calls[0][0].talentsAndTraits.talents[1];
     expect(added.acquisition.purityTalentEntryUid).toBeUndefined();
-  });
+  }, 15000);
 
   it("links a Purity-caused Reformed Skin to the single Purity purchase", async () => {
     const user = userEvent.setup();

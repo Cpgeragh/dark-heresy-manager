@@ -115,6 +115,42 @@ describe("patchCharacterField", () => {
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { notes });
   });
 
+  it("treats a device linked to the DM account as the DM for a DM-priced Show all skill", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockUserLinkGet.mockResolvedValue({ exists: true, data: () => ({ primaryUid: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        userId: null,
+        isEditableByPlayer: false,
+        experience: { total: 1000, spent: 0, ranks: [] },
+        skills: [],
+      }),
+    });
+
+    const skills = [
+      {
+        id: "awareness",
+        name: "Awareness",
+        level: "trained",
+        xpPurchases: { trained: { cost: 100 } },
+        manualCosts: { trained: 100 },
+        eliteAdvancePurchases: {
+          trained: { source: "gm-approved", cost: 100, sourceName: "GM-approved Skill" },
+        },
+      },
+    ];
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "skills", value: skills },
+      "device-2"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      mockCharacterRef,
+      expect.objectContaining({ skills })
+    );
+  });
+
   it("allows the DM to patch the header", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({

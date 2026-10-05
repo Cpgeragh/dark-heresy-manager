@@ -9,6 +9,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { assertCanEditCharacter } from "../shared/characterAuthorization.js";
+import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import {
   assertValidCharacterFieldValue,
   assertValidCharacterFieldTransition,
@@ -90,7 +91,7 @@ export async function patchCharacterField(
       }
       const characterData = characterSnapshot.data() ?? {};
       await assertCanEditCharacter(db, callerUid, dmId, characterData);
-      const isDM = callerUid === dmId;
+      const isDM = await callerIsPrimaryOrLinked(db, callerUid, dmId);
       const prospectiveCharacter = { ...characterData, ...patch };
       for (const [field, value] of Object.entries(patch)) {
         assertValidCharacterFieldTransition(

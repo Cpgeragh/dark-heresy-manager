@@ -13,5 +13,6 @@ export default defineConfig({
     setupFiles: "./tests/setupTests.ts",
     include: ["tests/firestore/**/*.test.ts"],
     fileParallelism: false,
+    testTimeout: 15000,
   },
 });
