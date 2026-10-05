@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
-import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
+import { COUNTER_PATCH_OPTIONS, type PatchOptions } from "../../hooks/useOptimisticOverlay";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type {
   InsanityBlock,
@@ -202,7 +202,11 @@ export function InsanityPanel({
   );
 
   const handlePointsChange = useCallback(
-    (points: number) => onUpdate({ ...value, points: Math.max(0, points - recordedAdjustment) }),
+    (points: number) =>
+      onUpdate(
+        { ...value, points: Math.max(0, points - recordedAdjustment) },
+        COUNTER_PATCH_OPTIONS
+      ),
     [value, onUpdate, recordedAdjustment]
   );
 

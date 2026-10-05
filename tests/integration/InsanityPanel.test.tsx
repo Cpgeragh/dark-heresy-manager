@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { InsanityPanel } from "../../src/mechanics/insanity/InsanityPanel";
+import { COUNTER_PATCH_OPTIONS } from "../../src/hooks/useOptimisticOverlay";
 import type { InsanityBlock } from "../../src/types/Character";
 
 function InsanityWiring({
@@ -440,13 +441,16 @@ describe("InsanityPanel optimistic saves", () => {
     });
   });
 
-  it("does not ask for an optimistic save when the points change", async () => {
+  it("groups the points change into an instant counter save", async () => {
     const user = userEvent.setup();
     const onUpdate = renderPanel({ points: 9, disorders: [] });
 
     await user.click(screen.getByRole("button", { name: "Increase" }));
 
-    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ points: 10 }));
+    expect(onUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ points: 10 }),
+      COUNTER_PATCH_OPTIONS
+    );
   });
 });
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CHARACTER_NUMBER_COALESCE_MS } from "../constants/saveTiming";
 import { isDeepEqual } from "../utils/isDeepEqual";
 
 export const OPTIMISTIC_SETTLE_MS = 10_000;
@@ -19,7 +20,13 @@ export interface OptimisticOverlayControls {
 
 export interface PatchOptions {
   optimistic?: boolean;
+  coalesceMs?: number;
 }
+
+export const COUNTER_PATCH_OPTIONS: PatchOptions = {
+  optimistic: true,
+  coalesceMs: CHARACTER_NUMBER_COALESCE_MS,
+};
 
 function withoutField(entries: OverlayEntries, field: string): OverlayEntries {
   const next = { ...entries };

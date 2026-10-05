@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { CorruptionPanel } from "../../src/mechanics/corruption/CorruptionPanel";
+import { COUNTER_PATCH_OPTIONS } from "../../src/hooks/useOptimisticOverlay";
 import { CORRUPTION_MALIGNANCIES } from "../../src/mechanics/corruption/corruptionReference";
 import { getRoll1d10Modifiers } from "../../src/mechanics/corruption/rollModifierValues";
 import type { CorruptionBlock } from "../../src/types/Character";
@@ -193,7 +194,7 @@ describe("CorruptionPanel optimistic saves", () => {
     );
   });
 
-  it("does not ask for an optimistic save when the points change", async () => {
+  it("groups the points change into an instant counter save", async () => {
     const user = userEvent.setup();
     const onUpdate = vi.fn();
     render(
@@ -207,7 +208,10 @@ describe("CorruptionPanel optimistic saves", () => {
 
     await user.click(screen.getByRole("button", { name: "Increase" }));
 
-    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ points: 11 }));
+    expect(onUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ points: 11 }),
+      COUNTER_PATCH_OPTIONS
+    );
   });
 });
 

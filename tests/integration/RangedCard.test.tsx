@@ -230,15 +230,13 @@ describe("RangedCard ammo optimistic saves", () => {
     );
   });
 
-  it("does not ask for an optimistic save when a round count changes", async () => {
+  it("asks for an optimistic save when a round count changes", async () => {
     const user = userEvent.setup();
     const { onUpdateAmmoEntries } = renderCard({ weapon: { ...baseWeapon, ammoEntries: entries } });
 
     await user.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]);
 
     await waitFor(() => expect(onUpdateAmmoEntries).toHaveBeenCalled());
-    for (const call of onUpdateAmmoEntries.mock.calls) {
-      expect(call[1]).toBeUndefined();
-    }
+    expect(onUpdateAmmoEntries).toHaveBeenLastCalledWith(expect.any(Array), { optimistic: true });
   });
 });

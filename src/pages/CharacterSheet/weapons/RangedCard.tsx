@@ -383,7 +383,10 @@ export function RangedCard({
   }
 
   function handleUpdateEntry(entryId: string, patch: Partial<WeaponAmmoEntry>) {
-    onUpdateAmmoEntries(ammoEntries.map((e) => (e.id === entryId ? { ...e, ...patch } : e)));
+    onUpdateAmmoEntries(
+      ammoEntries.map((e) => (e.id === entryId ? { ...e, ...patch } : e)),
+      { optimistic: true }
+    );
   }
 
   function handleSelectMagazineAmmo(slotId: string, name: string, referenceId?: string) {
@@ -404,7 +407,8 @@ export function RangedCard({
           ? { ...slot, rounds: Math.max(0, Math.min(magazineCapacity, rounds)) }
           : slot
       ),
-      activeMagazineSlot?.id
+      activeMagazineSlot?.id,
+      { optimistic: true }
     );
   }
 

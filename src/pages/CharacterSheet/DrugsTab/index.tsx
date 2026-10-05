@@ -114,7 +114,10 @@ export function DrugsTab({
   const updateQty = useCallback(
     (id: string, quantity: number) => {
       if (!editable) return;
-      onUpdate(drugs.map((d) => (d.id === id ? { ...d, quantity } : d)));
+      onUpdate(
+        drugs.map((d) => (d.id === id ? { ...d, quantity } : d)),
+        { optimistic: true }
+      );
     },
     [editable, drugs, onUpdate]
   );

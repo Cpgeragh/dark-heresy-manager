@@ -190,6 +190,46 @@ describe("WeaponsTab upgrades", () => {
   });
 });
 
+describe("WeaponsTab quantities", () => {
+  it("asks for an optimistic save when a ranged weapon quantity changes", async () => {
+    const user = userEvent.setup();
+    const onUpdateRanged = vi.fn();
+    renderTab({
+      rangedWeapons: [
+        { id: "t1", name: "Throwing Star", class: "Thrown", custom: true, quantity: 2 },
+      ],
+      meleeWeapons: [],
+      onUpdateRanged,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Expand Throwing Star details" }));
+    await user.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]);
+
+    expect(onUpdateRanged).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "t1", quantity: 3 })],
+      { optimistic: true }
+    );
+  });
+
+  it("asks for an optimistic save when a melee weapon quantity changes", async () => {
+    const user = userEvent.setup();
+    const onUpdateMelee = vi.fn();
+    renderTab({
+      rangedWeapons: [],
+      meleeWeapons: [{ ...melee, class: "Melee / Thrown", quantity: 2 }],
+      onUpdateMelee,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Expand Chainsword details" }));
+    await user.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]);
+
+    expect(onUpdateMelee).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "m1", quantity: 3 })],
+      { optimistic: true }
+    );
+  });
+});
+
 describe("WeaponsTab", () => {
   it("does not rebuild owned weapon cards when a picker opens and closes", async () => {
     const user = userEvent.setup();

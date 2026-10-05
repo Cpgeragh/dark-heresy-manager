@@ -399,7 +399,10 @@ export function ArmourTab({
   const updateSpareCells = useCallback(
     (id: string, value: number) => {
       if (!editable) return;
-      onUpdate(armour.map((p) => (p.id === id ? { ...p, spareCells: value } : p)));
+      onUpdate(
+        armour.map((p) => (p.id === id ? { ...p, spareCells: value } : p)),
+        { optimistic: true }
+      );
     },
     [editable, armour, onUpdate]
   );

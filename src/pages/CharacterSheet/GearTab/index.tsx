@@ -217,7 +217,10 @@ export function GearTab({
   const updateConsumableQty = useCallback(
     (id: string, qty: number) => {
       if (!editable) return;
-      onUpdateConsumables(consumables.map((c) => (c.id === id ? { ...c, quantity: qty } : c)));
+      onUpdateConsumables(
+        consumables.map((c) => (c.id === id ? { ...c, quantity: qty } : c)),
+        { optimistic: true }
+      );
     },
     [editable, consumables, onUpdateConsumables]
   );

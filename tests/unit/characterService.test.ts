@@ -831,6 +831,57 @@ describe("patchCharacterCollectionField", () => {
     }
   });
 
+  it("sends a pending number change before an optimistic whole-list save", async () => {
+    vi.useFakeTimers();
+    try {
+      mockCallAdjustCharacterNumber.mockResolvedValue({ data: undefined });
+      mockCallPatchCharacterField.mockResolvedValue({ data: undefined });
+      const before = [{ id: "drug-1", name: "Stimm", quantity: 2 }];
+      const tapped = [{ id: "drug-1", name: "Stimm", quantity: 3 }];
+      const renamed = [{ id: "drug-1", name: "Improved Stimm", quantity: 3 }];
+
+      const tap = patchCharacterCollectionField("camp-1", "char-1", "drugs", before, tapped);
+      const save = patchCharacterCollectionField("camp-1", "char-1", "drugs", tapped, renamed, {
+        flushPendingNumbers: true,
+      });
+      await Promise.all([tap, save]);
+
+      expect(mockCallAdjustCharacterNumber).toHaveBeenCalledOnce();
+      expect(mockCallAdjustCharacterNumber).toHaveBeenCalledWith(
+        expect.objectContaining({ itemId: "drug-1", property: "quantity", delta: 1 })
+      );
+      expect(mockCallPatchCharacterField).toHaveBeenCalledOnce();
+      expect(mockCallAdjustCharacterNumber.mock.invocationCallOrder[0]).toBeLessThan(
+        mockCallPatchCharacterField.mock.invocationCallOrder[0]
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("leaves a pending number change queued for an ordinary whole-list save", async () => {
+    vi.useFakeTimers();
+    try {
+      mockCallAdjustCharacterNumber.mockResolvedValue({ data: undefined });
+      mockCallPatchCharacterField.mockResolvedValue({ data: undefined });
+      const before = [{ id: "drug-1", name: "Stimm", quantity: 2 }];
+      const tapped = [{ id: "drug-1", name: "Stimm", quantity: 3 }];
+      const renamed = [{ id: "drug-1", name: "Improved Stimm", quantity: 2 }];
+
+      const tap = patchCharacterCollectionField("camp-1", "char-1", "drugs", before, tapped);
+      await patchCharacterCollectionField("camp-1", "char-1", "drugs", before, renamed);
+
+      expect(mockCallPatchCharacterField).toHaveBeenCalledOnce();
+      expect(mockCallAdjustCharacterNumber).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(CHARACTER_NUMBER_COALESCE_MS);
+      await tap;
+      expect(mockCallAdjustCharacterNumber).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("cancels equal opposite queued deltas without issuing a write", async () => {
     vi.useFakeTimers();
     try {

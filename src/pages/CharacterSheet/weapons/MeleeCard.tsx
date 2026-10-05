@@ -289,7 +289,8 @@ export function MeleeCard({
   function handleUpdatePistolAmmo(entryId: string, patch: Partial<WeaponAmmoEntry>) {
     updatePistolAmmo(
       pistolAmmoEntries.map((entry) => (entry.id === entryId ? { ...entry, ...patch } : entry)),
-      loadedPistolAmmoEntry?.id
+      loadedPistolAmmoEntry?.id,
+      { optimistic: true }
     );
   }
 

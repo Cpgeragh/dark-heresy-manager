@@ -261,6 +261,28 @@ describe("ArmourTab", () => {
     });
   });
 
+  it("asks for an optimistic update when the spare cell count of a force field changes", () => {
+    const { onUpdate } = renderTab({
+      armour: [
+        piece({
+          id: "f1",
+          name: "Refractor Field",
+          referenceId: "ih-refractor-field",
+          locations: [],
+          ap: 0,
+          isForceField: true,
+          spareCells: 1,
+        }),
+      ],
+    });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Increase" })[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "f1", spareCells: 2 })], {
+      optimistic: true,
+    });
+  });
+
   it("asks for an optimistic update when Archeotech armour is removed", () => {
     const onUpdateArcheotech = vi.fn();
     renderTab({

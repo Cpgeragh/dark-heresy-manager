@@ -1,0 +1,1 @@
+export const CHARACTER_NUMBER_COALESCE_MS = 300;

@@ -406,11 +406,14 @@ export default function CharacterSheet({
   );
 
   const handleUpdateWounds = useCallback(
-    (next: WoundsBlock) => patchField("wounds", next),
+    (next: WoundsBlock, options?: PatchOptions) => patchField("wounds", next, options),
     [patchField]
   );
 
-  const handleUpdateFate = useCallback((next: FateBlock) => patchField("fate", next), [patchField]);
+  const handleUpdateFate = useCallback(
+    (next: FateBlock, options?: PatchOptions) => patchField("fate", next, options),
+    [patchField]
+  );
 
   const handleUpdateInsanity = useCallback(
     (next: InsanityBlock, options?: PatchOptions) => patchField("insanity", next, options),

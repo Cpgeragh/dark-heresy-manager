@@ -1,6 +1,6 @@
 // src/hooks/useCharacterMutations.ts
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../types/Character";
 import { stripUndefined } from "../utils/stripUndefined";
@@ -16,6 +16,13 @@ import {
 } from "../services/characterService";
 import { useToast } from "../components/Toast";
 import type { OptimisticOverlayControls, PatchOptions } from "./useOptimisticOverlay";
+
+interface PendingCoalescedPatch {
+  timer: ReturnType<typeof setTimeout>;
+  sent: unknown;
+  version: number | undefined;
+  waiting: ((saved: boolean) => void)[];
+}
 
 interface UseCharacterMutationsProps {
   campaignId: string;
@@ -94,16 +101,10 @@ export function useCharacterMutations({
     | "movement"
     | "experience";
 
-  const patchFieldWithResult = useCallback(
-    async <K extends PatchableCharacterField>(
-      field: K,
-      value: Character[K],
-      options?: PatchOptions
-    ): Promise<boolean> => {
-      if (!allowedToEdit || !hasCharacter) return false;
+  const pendingCoalesced = useRef(new Map<string, PendingCoalescedPatch>());
 
-      const sent = stripUndefined(value);
-      const version = options?.optimistic ? overlay?.apply(field, sent) : undefined;
+  const sendPatch = useCallback(
+    async (field: string, sent: unknown, version: number | undefined): Promise<boolean> => {
       setPendingUpdateCount((count) => count + 1);
       try {
         await patchCharacterField(campaignId, characterId, field, sent);
@@ -119,7 +120,69 @@ export function useCharacterMutations({
         setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
     },
-    [allowedToEdit, hasCharacter, campaignId, characterId, toast, overlay]
+    [campaignId, characterId, toast, overlay]
+  );
+
+  const flushCoalesced = useCallback(
+    async (field: string): Promise<void> => {
+      const entry = pendingCoalesced.current.get(field);
+      if (!entry) return;
+      pendingCoalesced.current.delete(field);
+      const saved = await sendPatch(field, entry.sent, entry.version);
+      entry.waiting.forEach((resolve) => resolve(saved));
+    },
+    [sendPatch]
+  );
+
+  const flushCoalescedRef = useRef(flushCoalesced);
+  useEffect(() => {
+    flushCoalescedRef.current = flushCoalesced;
+  });
+
+  useEffect(() => {
+    const pending = pendingCoalesced.current;
+    return () => {
+      for (const [field, entry] of pending) {
+        clearTimeout(entry.timer);
+        void flushCoalescedRef.current(field);
+      }
+    };
+  }, []);
+
+  const patchFieldWithResult = useCallback(
+    async <K extends PatchableCharacterField>(
+      field: K,
+      value: Character[K],
+      options?: PatchOptions
+    ): Promise<boolean> => {
+      if (!allowedToEdit || !hasCharacter) return false;
+
+      const sent = stripUndefined(value);
+      const version = options?.optimistic ? overlay?.apply(field, sent) : undefined;
+      const pending = pendingCoalesced.current.get(field);
+
+      if (options?.coalesceMs !== undefined) {
+        const delay = options.coalesceMs;
+        return new Promise<boolean>((resolve) => {
+          if (pending) clearTimeout(pending.timer);
+          pendingCoalesced.current.set(field, {
+            sent,
+            version,
+            waiting: [...(pending?.waiting ?? []), resolve],
+            timer: setTimeout(() => void flushCoalesced(field), delay),
+          });
+        });
+      }
+
+      if (pending) {
+        clearTimeout(pending.timer);
+        pendingCoalesced.current.delete(field);
+      }
+      const saved = await sendPatch(field, sent, version);
+      pending?.waiting.forEach((resolve) => resolve(saved));
+      return saved;
+    },
+    [allowedToEdit, hasCharacter, overlay, flushCoalesced, sendPatch]
   );
 
   const patchField = useCallback(
@@ -189,7 +252,9 @@ export function useCharacterMutations({
       const version = options?.optimistic ? overlay?.apply(field, after) : undefined;
       setPendingUpdateCount((count) => count + 1);
       try {
-        await patchCharacterCollectionField(campaignId, characterId, field, before, after);
+        await patchCharacterCollectionField(campaignId, characterId, field, before, after, {
+          flushPendingNumbers: options?.optimistic === true,
+        });
         if (version !== undefined) overlay?.confirm(field, version);
       } catch (err) {
         if (version !== undefined) overlay?.revert(field, version);

@@ -371,7 +371,10 @@ export function WeaponsTab({
   const updateGrenadeQty = useCallback(
     (id: string, quantity: number) => {
       if (!editable) return;
-      onUpdateGrenades(grenades.map((g) => (g.id === id ? { ...g, quantity } : g)));
+      onUpdateGrenades(
+        grenades.map((g) => (g.id === id ? { ...g, quantity } : g)),
+        { optimistic: true }
+      );
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -537,7 +540,10 @@ export function WeaponsTab({
   const updateRangedQuantity = useCallback(
     (weaponId: string, quantity: number) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w)));
+      onUpdateRanged(
+        rangedWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w)),
+        { optimistic: true }
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -889,7 +895,10 @@ export function WeaponsTab({
   const updateMeleeQuantity = useCallback(
     (weaponId: string, quantity: number) => {
       if (!editable) return;
-      onUpdateMelee(meleeWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w)));
+      onUpdateMelee(
+        meleeWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w)),
+        { optimistic: true }
+      );
     },
     [editable, meleeWeapons, onUpdateMelee]
   );

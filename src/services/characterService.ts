@@ -26,6 +26,7 @@ import type { CharacterSummaryWithId } from "../types/Firestore";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
+import { CHARACTER_NUMBER_COALESCE_MS } from "../constants/saveTiming";
 import { validateCharacterName } from "../utils/validation";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../firestore/singleFlight";
@@ -480,7 +481,7 @@ const callAdjustCharacterNumber = httpsCallable<
   void
 >(functions, "adjustCharacterNumber");
 
-export const CHARACTER_NUMBER_COALESCE_MS = 300;
+export { CHARACTER_NUMBER_COALESCE_MS };
 
 type Difference = { path: (string | number)[]; before: unknown; after: unknown };
 
@@ -694,12 +695,32 @@ async function flushCharacterNumberMutation(key: string): Promise<void> {
   }
 }
 
+async function flushPendingCharacterNumberMutations(
+  campaignId: string,
+  characterId: string,
+  field: CharacterNumberLocator["field"]
+): Promise<void> {
+  const keys: string[] = [];
+  for (const [key, pending] of pendingCharacterNumberMutations) {
+    if (
+      pending.campaignId === campaignId &&
+      pending.characterId === characterId &&
+      pending.mutation.field === field
+    ) {
+      clearTimeout(pending.timer);
+      keys.push(key);
+    }
+  }
+  await Promise.all(keys.map((key) => flushCharacterNumberMutation(key)));
+}
+
 export async function patchCharacterCollectionField(
   campaignId: string,
   characterId: string,
   field: CharacterNumberLocator["field"],
   before: unknown[],
-  after: unknown[]
+  after: unknown[],
+  options?: { flushPendingNumbers?: boolean }
 ): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
@@ -707,6 +728,9 @@ export async function patchCharacterCollectionField(
   if (mutation) {
     await queueCharacterNumberMutation(campaignId, characterId, mutation);
     return;
+  }
+  if (options?.flushPendingNumbers) {
+    await flushPendingCharacterNumberMutations(campaignId, characterId, field);
   }
   await patchCharacterField(campaignId, characterId, field, after);
 }

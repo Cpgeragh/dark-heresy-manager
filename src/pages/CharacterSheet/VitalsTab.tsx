@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { Stepper } from "../../components/Stepper";
 import { InfoModal } from "../../components/InfoModal";
+import { COUNTER_PATCH_OPTIONS, type PatchOptions } from "../../hooks/useOptimisticOverlay";
 import type {
   Character,
   WoundsBlock,
@@ -29,8 +30,8 @@ interface VitalsTabProps {
   character: Character;
   editable: boolean;
   toughnessBonus: number;
-  onUpdateWounds: (next: WoundsBlock) => void;
-  onUpdateFate: (next: FateBlock) => void;
+  onUpdateWounds: (next: WoundsBlock, options?: PatchOptions) => void;
+  onUpdateFate: (next: FateBlock, options?: PatchOptions) => void;
   talents?: TalentsAndTraitsBlock;
 }
 
@@ -64,15 +65,15 @@ export function VitalsTab({
   const [fateTotalDraft, setFateTotalDraft] = useState<string | null>(null);
 
   const handleCurrentWoundsChange = useCallback(
-    (v: number) => onUpdateWounds({ ...wounds, current: v }),
+    (v: number) => onUpdateWounds({ ...wounds, current: v }, COUNTER_PATCH_OPTIONS),
     [wounds, onUpdateWounds]
   );
   const handleCriticalDamageChange = useCallback(
-    (v: number) => onUpdateWounds({ ...wounds, criticalDamage: v }),
+    (v: number) => onUpdateWounds({ ...wounds, criticalDamage: v }, COUNTER_PATCH_OPTIONS),
     [wounds, onUpdateWounds]
   );
   const handleFatigueChange = useCallback(
-    (v: number) => onUpdateWounds({ ...wounds, fatigue: v }),
+    (v: number) => onUpdateWounds({ ...wounds, fatigue: v }, COUNTER_PATCH_OPTIONS),
     [wounds, onUpdateWounds]
   );
   const handleWoundsTotalChange = useCallback(
@@ -92,7 +93,7 @@ export function VitalsTab({
   );
 
   const handleCurrentFateChange = useCallback(
-    (v: number) => onUpdateFate({ ...fate, current: v }),
+    (v: number) => onUpdateFate({ ...fate, current: v }, COUNTER_PATCH_OPTIONS),
     [fate, onUpdateFate]
   );
   const handleFateTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {

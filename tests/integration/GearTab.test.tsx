@@ -482,4 +482,18 @@ describe("GearTab", () => {
 
     await act(async () => finish());
   });
+
+  it("asks for an optimistic save when a consumable quantity changes", async () => {
+    const user = userEvent.setup();
+    const onUpdateConsumables = vi.fn();
+    const item: ConsumableItem = { id: "c1", name: "Stimm", referenceId: "stimm", quantity: 2 };
+    renderTab({ consumables: [item], onUpdateConsumables });
+
+    await user.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]);
+
+    expect(onUpdateConsumables).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "c1", quantity: 3 })],
+      { optimistic: true }
+    );
+  });
 });

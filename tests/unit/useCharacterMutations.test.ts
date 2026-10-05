@@ -1,5 +1,5 @@
 // tests/unit/useCharacterMutations.test.ts
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useCharacterMutations } from "../../src/hooks/useCharacterMutations";
 import {
@@ -303,7 +303,8 @@ describe("useCharacterMutations: patchCollectionField", () => {
       "char-1",
       "drugs",
       before,
-      after
+      after,
+      { flushPendingNumbers: false }
     );
   });
 });
@@ -444,7 +445,8 @@ describe("useCharacterMutations: optimistic updates", () => {
       "char-1",
       "rangedWeapons",
       [],
-      after
+      after,
+      { flushPendingNumbers: true }
     );
     expect(overlay.confirm).toHaveBeenCalledWith("rangedWeapons", 7);
   });
@@ -460,5 +462,170 @@ describe("useCharacterMutations: optimistic updates", () => {
 
     expect(overlay.revert).toHaveBeenCalledWith("meleeWeapons", 7);
     expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("not editable"));
+  });
+});
+
+describe("useCharacterMutations: grouped counter saves", () => {
+  const counterOptions = { optimistic: true, coalesceMs: 300 };
+
+  function makeOverlay() {
+    let version = 0;
+    return { apply: vi.fn(() => ++version), confirm: vi.fn(), revert: vi.fn() };
+  }
+
+  function renderMutations(overlay: ReturnType<typeof makeOverlay>) {
+    return renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+        overlay,
+      })
+    );
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("shows each change at once and sends one save with the latest value after the pause", async () => {
+    mockPatchCharacterField.mockResolvedValue(undefined);
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    let first!: Promise<void>;
+    let second!: Promise<void>;
+    act(() => {
+      first = result.current.patchField(
+        "wounds",
+        { total: 20, current: 5 } as never,
+        counterOptions
+      );
+      second = result.current.patchField(
+        "wounds",
+        { total: 20, current: 6 } as never,
+        counterOptions
+      );
+    });
+
+    expect(overlay.apply).toHaveBeenCalledTimes(2);
+    expect(mockPatchCharacterField).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+      await Promise.all([first, second]);
+    });
+
+    expect(mockPatchCharacterField).toHaveBeenCalledOnce();
+    expect(mockPatchCharacterField).toHaveBeenCalledWith("camp-1", "char-1", "wounds", {
+      total: 20,
+      current: 6,
+    });
+    expect(overlay.confirm).toHaveBeenCalledWith("wounds", 2);
+  });
+
+  it("sends an ordinary save for the same field at once and drops the pending counter save", async () => {
+    mockPatchCharacterField.mockResolvedValue(undefined);
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    let counter!: Promise<void>;
+    let ordinary!: Promise<void>;
+    act(() => {
+      counter = result.current.patchField(
+        "corruption",
+        { points: 5, malignancies: [] },
+        counterOptions
+      );
+      ordinary = result.current.patchField(
+        "corruption",
+        { points: 5, malignancies: [{ id: "m1", name: "Witch-mark" }] },
+        { optimistic: true }
+      );
+    });
+
+    await act(async () => {
+      await Promise.all([counter, ordinary]);
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(mockPatchCharacterField).toHaveBeenCalledOnce();
+    expect(mockPatchCharacterField).toHaveBeenCalledWith(
+      "camp-1",
+      "char-1",
+      "corruption",
+      expect.objectContaining({ malignancies: [expect.objectContaining({ id: "m1" })] })
+    );
+  });
+
+  it("reverts once and shows one error when the grouped save fails", async () => {
+    mockPatchCharacterField.mockRejectedValue(new Error("not editable"));
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    let first!: Promise<void>;
+    let second!: Promise<void>;
+    act(() => {
+      first = result.current.patchField("fate", { total: 3, current: 1 }, counterOptions);
+      second = result.current.patchField("fate", { total: 3, current: 0 }, counterOptions);
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+      await Promise.all([first, second]);
+    });
+
+    expect(overlay.revert).toHaveBeenCalledOnce();
+    expect(overlay.revert).toHaveBeenCalledWith("fate", 2);
+    expect(mockToastError).toHaveBeenCalledOnce();
+  });
+
+  it("keeps separate pending saves for different fields", async () => {
+    mockPatchCharacterField.mockResolvedValue(undefined);
+    const overlay = makeOverlay();
+    const { result } = renderMutations(overlay);
+
+    let wounds!: Promise<void>;
+    let fate!: Promise<void>;
+    act(() => {
+      wounds = result.current.patchField(
+        "wounds",
+        { total: 20, current: 4 } as never,
+        counterOptions
+      );
+      fate = result.current.patchField("fate", { total: 3, current: 1 }, counterOptions);
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+      await Promise.all([wounds, fate]);
+    });
+
+    expect(mockPatchCharacterField).toHaveBeenCalledTimes(2);
+  });
+
+  it("sends a pending counter save straight away when the sheet is left", async () => {
+    mockPatchCharacterField.mockResolvedValue(undefined);
+    const overlay = makeOverlay();
+    const { result, unmount } = renderMutations(overlay);
+
+    act(() => {
+      void result.current.patchField("fate", { total: 3, current: 2 }, counterOptions);
+    });
+    expect(mockPatchCharacterField).not.toHaveBeenCalled();
+
+    unmount();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(mockPatchCharacterField).toHaveBeenCalledWith("camp-1", "char-1", "fate", {
+      total: 3,
+      current: 2,
+    });
   });
 });

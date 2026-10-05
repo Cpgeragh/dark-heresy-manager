@@ -217,6 +217,18 @@ describe("DrugsTab", () => {
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
 
+  it("asks for an optimistic save when a drug quantity changes", async () => {
+    const user = userEvent.setup();
+    const drug: DrugItem = { id: "d1", name: "Obscura", referenceId: "obscura", quantity: 1 };
+    const { onUpdate } = renderTab({ drugs: [drug] });
+
+    await user.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "d1", quantity: 2 })], {
+      optimistic: true,
+    });
+  });
+
   it("does not show a spinner on a drug row for an optimistic add", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;

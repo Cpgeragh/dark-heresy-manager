@@ -864,7 +864,8 @@ export function CyberneticsTab({
                 onUpdateRanged(
                   rangedWeapons.map((current) =>
                     current.id === weapon.id ? { ...current, quantity } : current
-                  )
+                  ),
+                  { optimistic: true }
                 )
               }
             />
@@ -890,7 +891,8 @@ export function CyberneticsTab({
                 onUpdateMelee(
                   meleeWeapons.map((current) =>
                     current.id === weapon.id ? { ...current, quantity } : current
-                  )
+                  ),
+                  { optimistic: true }
                 )
               }
             />

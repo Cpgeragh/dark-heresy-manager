@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { VitalsTab } from "../../src/pages/CharacterSheet/VitalsTab";
+import { COUNTER_PATCH_OPTIONS } from "../../src/hooks/useOptimisticOverlay";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, WoundsBlock, FateBlock } from "../../src/types/Character";
 
@@ -47,7 +48,10 @@ describe("VitalsTab", () => {
     const woundsSection = screen.getByText("Current Wounds").parentElement!;
     await user.click(within(woundsSection).getByRole("button", { name: "Increase" }));
 
-    expect(onUpdateWounds).toHaveBeenCalledWith(expect.objectContaining({ current: 10 }));
+    expect(onUpdateWounds).toHaveBeenCalledWith(
+      expect.objectContaining({ current: 10 }),
+      COUNTER_PATCH_OPTIONS
+    );
   });
 
   it("caps Current Fate at Total Fate", async () => {
@@ -57,7 +61,37 @@ describe("VitalsTab", () => {
     const fateSection = screen.getByText("Current").parentElement!;
     await user.click(within(fateSection).getByRole("button", { name: "Increase" }));
 
-    expect(onUpdateFate).toHaveBeenCalledWith(expect.objectContaining({ current: 3 }));
+    expect(onUpdateFate).toHaveBeenCalledWith(
+      expect.objectContaining({ current: 3 }),
+      COUNTER_PATCH_OPTIONS
+    );
+  });
+
+  it("groups Critical Damage and Fatigue changes into an instant counter save", async () => {
+    const user = userEvent.setup();
+    const { onUpdateWounds } = renderTab();
+
+    const criticalSection = screen.getByText("Critical Damage").parentElement!.parentElement!;
+    await user.click(within(criticalSection).getByRole("button", { name: "Increase" }));
+    expect(onUpdateWounds).toHaveBeenLastCalledWith(
+      expect.objectContaining({ criticalDamage: 1 }),
+      COUNTER_PATCH_OPTIONS
+    );
+
+    const fatigueSection = screen.getByText("Fatigue").parentElement!.parentElement!;
+    await user.click(within(fatigueSection).getByRole("button", { name: "Increase" }));
+    expect(onUpdateWounds).toHaveBeenLastCalledWith(
+      expect.objectContaining({ fatigue: 1 }),
+      COUNTER_PATCH_OPTIONS
+    );
+  });
+
+  it("does not group a typed Total Wounds change", () => {
+    const { onUpdateWounds } = renderTab();
+
+    fireEvent.change(screen.getAllByRole("textbox")[0], { target: { value: "25" } });
+
+    expect(onUpdateWounds).toHaveBeenLastCalledWith(expect.objectContaining({ total: 25 }));
   });
 
   it("shows an Unconscious label once Fatigue exceeds Toughness Bonus", () => {
