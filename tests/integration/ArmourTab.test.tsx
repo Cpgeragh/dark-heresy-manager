@@ -23,6 +23,26 @@ function piece(over: Partial<WornArmourPiece> = {}): WornArmourPiece {
   return { id: "a1", name: "Flak Jacket", locations: ["body"], ap: 3, worn: true, ...over };
 }
 
+function libraryArmour(name: string) {
+  return {
+    id: "lib-armour",
+    campaignId: "test-campaign",
+    category: "armour",
+    status: "published",
+    name,
+    creator: { userId: "u1" },
+    latestVersionId: "v1",
+    latestVersionNumber: 1,
+    publishedVersionId: "v1",
+    draftVersionId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: { userId: "u1" },
+    updatedBy: { userId: "u1" },
+    data: { armourKind: "worn", name, locations: ["body"], ap: 2 },
+  };
+}
+
 function renderTab(props: Partial<React.ComponentProps<typeof ArmourTab>> = {}) {
   const onUpdate = vi.fn();
   render(
@@ -129,6 +149,30 @@ describe("ArmourTab", () => {
     expect(screen.getByText("No force field equipped.")).toBeInTheDocument();
   });
 
+  it("adds an existing library armour piece optimistically", () => {
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [libraryArmour("Custom Coat")] as never,
+      loading: false,
+      error: null,
+    });
+    const { onUpdate } = renderTab({ armour: [] });
+
+    fireEvent.click(screen.getByRole("button", { name: "+ Equip" }));
+    fireEvent.click(screen.getByText("Custom Coat"));
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          name: "Custom Coat",
+          worn: true,
+          customLibraryId: "lib-armour",
+          customLibraryVersionId: "v1",
+        }),
+      ],
+      { optimistic: true }
+    );
+  });
+
   it("fits Hexagramatic Wards to compatible armour", () => {
     const armour = [
       piece({
@@ -146,5 +190,76 @@ describe("ArmourTab", () => {
     expect(onUpdate).toHaveBeenCalledWith([
       expect.objectContaining({ upgrades: ["ih-hexagramatic-wards"] }),
     ]);
+  });
+
+  it("asks for an optimistic update when a worn piece is stowed", () => {
+    const { onUpdate } = renderTab();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Stow" })[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "a1", worn: false })], {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic update when a stowed piece is worn", () => {
+    const { onUpdate } = renderTab({ armour: [piece({ worn: false })] });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Wear" })[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "a1", worn: true })], {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic update when a piece is removed", () => {
+    const { onUpdate } = renderTab();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+  });
+
+  it("asks for an optimistic update when a force field is deactivated", () => {
+    const { onUpdate } = renderTab({
+      armour: [
+        piece({
+          id: "f1",
+          name: "Refraction Field",
+          locations: [],
+          ap: 0,
+          isForceField: true,
+          protectionRating: 30,
+        }),
+      ],
+    });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Deactivate" })[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "f1", worn: false })], {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic update when Archeotech armour is removed", () => {
+    const onUpdateArcheotech = vi.fn();
+    renderTab({
+      armour: [],
+      archeotech: [
+        {
+          id: "x1",
+          name: "Ork Mega Armour",
+          type: "Armour",
+          ap: 10,
+          locations: ["head", "body"],
+          equipped: true,
+        },
+      ],
+      onUpdateArcheotech,
+    });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+
+    expect(onUpdateArcheotech).toHaveBeenCalledWith([], { optimistic: true });
   });
 });

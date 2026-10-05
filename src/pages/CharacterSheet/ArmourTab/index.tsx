@@ -57,7 +57,7 @@ interface ArmourTabProps {
   armour: WornArmourPiece[];
   toughnessBonus: number;
   editable: boolean;
-  onUpdate: (next: WornArmourPiece[]) => void | Promise<void>;
+  onUpdate: (next: WornArmourPiece[], options?: PatchOptions) => void | Promise<void>;
   cybernetics?: CyberneticItem[];
   archeotech?: ArcheotechItem[];
   onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<void>;
@@ -159,15 +159,18 @@ export function ArmourTab({
   );
 
   const addPiece = useCallback(
-    async (piece: WornArmourPiece) => {
+    (piece: WornArmourPiece) => {
       if (!editable) return;
       const nextPiece = piece.isForceField
         ? piece
         : { ...piece, craftsmanship: piece.craftsmanship ?? ("Common" as const) };
-      await onUpdate([
-        ...armour,
-        { ...nextPiece, worn: piece.isForceField ? piece.worn : pickerMode === "worn" },
-      ]);
+      onUpdate(
+        [
+          ...armour,
+          { ...nextPiece, worn: piece.isForceField ? piece.worn : pickerMode === "worn" },
+        ],
+        { optimistic: true }
+      );
       setShowCustomForm(false);
     },
     [editable, armour, onUpdate, pickerMode]
@@ -247,7 +250,7 @@ export function ArmourTab({
   );
 
   const addArmourFromLibrary = useCallback(
-    async (libraryItem: CampaignCustomItem<"armour">, wornState = pickerMode === "worn") => {
+    (libraryItem: CampaignCustomItem<"armour">, wornState = pickerMode === "worn") => {
       if (!editable) return;
       if (libraryItem.data.armourKind !== "worn") return;
 
@@ -261,16 +264,19 @@ export function ArmourTab({
         return;
       }
 
-      await onUpdate([
-        ...armour,
-        buildArmourSnapshot(
-          crypto.randomUUID(),
-          wornState,
-          libraryItem.data,
-          libraryItem.id,
-          versionId
-        ),
-      ]);
+      onUpdate(
+        [
+          ...armour,
+          buildArmourSnapshot(
+            crypto.randomUUID(),
+            wornState,
+            libraryItem.data,
+            libraryItem.id,
+            versionId
+          ),
+        ],
+        { optimistic: true }
+      );
     },
     [armour, editable, onUpdate, pickerMode, toast]
   );
@@ -323,7 +329,10 @@ export function ArmourTab({
   const toggleWorn = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(armour.map((p) => (p.id === id ? { ...p, worn: !p.worn } : p)));
+      onUpdate(
+        armour.map((p) => (p.id === id ? { ...p, worn: !p.worn } : p)),
+        { optimistic: true }
+      );
     },
     [editable, armour, onUpdate]
   );
@@ -331,7 +340,10 @@ export function ArmourTab({
   const removePiece = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(armour.filter((p) => p.id !== id));
+      onUpdate(
+        armour.filter((p) => p.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, armour, onUpdate]
   );
@@ -375,7 +387,8 @@ export function ArmourTab({
           if (!p.isForceField) return p;
           if (activating) return { ...p, worn: p.id === id };
           return p.id === id ? { ...p, worn: false } : p;
-        })
+        }),
+        { optimistic: true }
       );
     },
     [editable, armour, onUpdate]
@@ -415,7 +428,10 @@ export function ArmourTab({
   const removeArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
+      onUpdateArcheotech(
+        (archeotech ?? []).filter((a) => a.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, archeotech, onUpdateArcheotech]
   );

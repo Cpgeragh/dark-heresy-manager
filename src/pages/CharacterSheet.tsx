@@ -460,8 +460,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateArmour = useCallback(
-    (next: WornArmourPiece[]) =>
-      patchCollectionField("armour", character?.armour ?? EMPTY_ARMOUR, next),
+    (next: WornArmourPiece[], options?: PatchOptions) =>
+      patchCollectionField("armour", character?.armour ?? EMPTY_ARMOUR, next, options),
     [character?.armour, patchCollectionField]
   );
 
