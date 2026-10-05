@@ -276,7 +276,7 @@ export function GearTab({
   );
 
   const addConsumableFromLibrary = useCallback(
-    async (libraryItem: CampaignCustomItem<"consumable">) => {
+    (libraryItem: CampaignCustomItem<"consumable">) => {
       if (!editable) return;
 
       const versionId =
@@ -289,16 +289,19 @@ export function GearTab({
         return;
       }
 
-      await onUpdateConsumables([
-        ...consumables,
-        buildConsumableSnapshot(
-          crypto.randomUUID(),
-          1,
-          libraryItem.data,
-          libraryItem.id,
-          versionId
-        ),
-      ]);
+      onUpdateConsumables(
+        [
+          ...consumables,
+          buildConsumableSnapshot(
+            crypto.randomUUID(),
+            1,
+            libraryItem.data,
+            libraryItem.id,
+            versionId
+          ),
+        ],
+        { optimistic: true }
+      );
     },
     [consumables, editable, onUpdateConsumables, toast]
   );
@@ -406,7 +409,7 @@ export function GearTab({
   );
 
   const addCustomFromLibrary = useCallback(
-    async (libraryItem: CampaignCustomItem<"gear">) => {
+    (libraryItem: CampaignCustomItem<"gear">) => {
       if (!editable) return;
 
       const versionId =
@@ -419,10 +422,13 @@ export function GearTab({
         return;
       }
 
-      await onUpdate([
-        ...gear,
-        buildGearSnapshot(crypto.randomUUID(), libraryItem.data, libraryItem.id, versionId),
-      ]);
+      onUpdate(
+        [
+          ...gear,
+          buildGearSnapshot(crypto.randomUUID(), libraryItem.data, libraryItem.id, versionId),
+        ],
+        { optimistic: true }
+      );
     },
     [editable, gear, onUpdate, toast]
   );

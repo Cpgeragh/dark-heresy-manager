@@ -152,7 +152,7 @@ export function DrugsTab({
   );
 
   const addDrugFromLibrary = useCallback(
-    async (libraryItem: CampaignCustomItem<"drug">) => {
+    (libraryItem: CampaignCustomItem<"drug">) => {
       if (!editable) return;
 
       const versionId =
@@ -165,10 +165,13 @@ export function DrugsTab({
         return;
       }
 
-      await onUpdate([
-        ...drugs,
-        buildDrugSnapshot(crypto.randomUUID(), 1, libraryItem.data, libraryItem.id, versionId),
-      ]);
+      onUpdate(
+        [
+          ...drugs,
+          buildDrugSnapshot(crypto.randomUUID(), 1, libraryItem.data, libraryItem.id, versionId),
+        ],
+        { optimistic: true }
+      );
     },
     [drugs, editable, onUpdate, toast]
   );

@@ -582,33 +582,39 @@ export function CyberneticsTab({
 
       const id = crypto.randomUUID();
       if (libraryItem.data.weaponKind === "ranged") {
-        onUpdateRanged([
-          ...rangedWeapons,
-          {
-            ...buildRangedWeaponSnapshot(
-              id,
-              { integrated: true },
-              libraryItem.data,
-              libraryItem.id,
-              versionId
-            ),
-            integrated: true,
-          },
-        ]);
+        onUpdateRanged(
+          [
+            ...rangedWeapons,
+            {
+              ...buildRangedWeaponSnapshot(
+                id,
+                { integrated: true },
+                libraryItem.data,
+                libraryItem.id,
+                versionId
+              ),
+              integrated: true,
+            },
+          ],
+          { optimistic: true }
+        );
       } else if (libraryItem.data.weaponKind === "melee") {
-        onUpdateMelee([
-          ...meleeWeapons,
-          {
-            ...buildMeleeWeaponSnapshot(
-              id,
-              { integrated: true },
-              libraryItem.data,
-              libraryItem.id,
-              versionId
-            ),
-            integrated: true,
-          },
-        ]);
+        onUpdateMelee(
+          [
+            ...meleeWeapons,
+            {
+              ...buildMeleeWeaponSnapshot(
+                id,
+                { integrated: true },
+                libraryItem.data,
+                libraryItem.id,
+                versionId
+              ),
+              integrated: true,
+            },
+          ],
+          { optimistic: true }
+        );
       }
     },
     [editable, meleeWeapons, onUpdateMelee, onUpdateRanged, rangedWeapons, toast]

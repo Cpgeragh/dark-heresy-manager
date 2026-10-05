@@ -57,6 +57,26 @@ import type { ArcheotechItem } from "../../src/types/Character";
 // own test file already uses.
 const GRENADE_NAME = "Belecane-Pattern Stasis Grenade";
 
+function libraryItem(name: string) {
+  return {
+    id: "lib-archeotech",
+    campaignId: "campaign-1",
+    category: "archeotech",
+    status: "published",
+    name,
+    creator: { userId: "u1" },
+    latestVersionId: "v1",
+    latestVersionNumber: 1,
+    publishedVersionId: "v1",
+    draftVersionId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: { userId: "u1" },
+    updatedBy: { userId: "u1" },
+    data: { name, type: "Gear" },
+  };
+}
+
 function renderTab(props: Partial<React.ComponentProps<typeof ArcheotechTab>> = {}) {
   const onUpdate = vi.fn();
   render(
@@ -152,6 +172,30 @@ describe("ArcheotechTab", () => {
         availability: "Rare",
       }),
     ]);
+  });
+
+  it("adds an existing library archeotech item optimistically", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [libraryItem("Custom Relic")] as never,
+      loading: false,
+      error: null,
+    });
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getAllByText("Custom Relic")[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          name: "Custom Relic",
+          customLibraryId: "lib-archeotech",
+          customLibraryVersionId: "v1",
+        }),
+      ],
+      { optimistic: true }
+    );
   });
 
   it("creates a custom archeotech item, updates the character, and returns to the picker", async () => {

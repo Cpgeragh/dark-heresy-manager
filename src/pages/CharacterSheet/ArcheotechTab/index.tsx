@@ -150,7 +150,7 @@ export function ArcheotechTab({
   );
 
   const addArcheotechFromLibrary = useCallback(
-    async (libraryItem: CampaignCustomItem<"archeotech">) => {
+    (libraryItem: CampaignCustomItem<"archeotech">) => {
       if (!editable) return;
 
       const versionId =
@@ -163,16 +163,19 @@ export function ArcheotechTab({
         return;
       }
 
-      await onUpdate([
-        ...archeotech,
-        buildArcheotechSnapshot(
-          crypto.randomUUID(),
-          undefined,
-          libraryItem.data,
-          libraryItem.id,
-          versionId
-        ),
-      ]);
+      onUpdate(
+        [
+          ...archeotech,
+          buildArcheotechSnapshot(
+            crypto.randomUUID(),
+            undefined,
+            libraryItem.data,
+            libraryItem.id,
+            versionId
+          ),
+        ],
+        { optimistic: true }
+      );
     },
     [archeotech, editable, onUpdate, toast]
   );

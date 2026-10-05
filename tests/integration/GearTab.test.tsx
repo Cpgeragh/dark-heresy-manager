@@ -79,6 +79,26 @@ const GEAR_NAME = "Backpack";
 const CONSUMABLE_NAME = "Belly-Churn";
 const VARIABLE_GEAR_NAME = "Charm";
 
+function libraryItem(category: string, name: string, data: Record<string, unknown> = {}) {
+  return {
+    id: `lib-${category}`,
+    campaignId: "campaign-1",
+    category,
+    status: "published",
+    name,
+    creator: { userId: "u1" },
+    latestVersionId: "v1",
+    latestVersionNumber: 1,
+    publishedVersionId: "v1",
+    draftVersionId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: { userId: "u1" },
+    updatedBy: { userId: "u1" },
+    data: { name, ...data },
+  };
+}
+
 function renderTab(props: Partial<React.ComponentProps<typeof GearTab>> = {}) {
   const onUpdate = vi.fn();
   const onUpdateConsumables = vi.fn();
@@ -249,6 +269,54 @@ describe("GearTab", () => {
 
     expect(onUpdateConsumables).toHaveBeenCalledWith(
       [expect.objectContaining({ name: CONSUMABLE_NAME, quantity: 1 })],
+      { optimistic: true }
+    );
+  }, 15000);
+
+  it("adds an existing library gear item optimistically", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [libraryItem("gear", "Custom Rope")] as never,
+      loading: false,
+      error: null,
+    });
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByText("Custom Rope"));
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          name: "Custom Rope",
+          customLibraryId: "lib-gear",
+          customLibraryVersionId: "v1",
+        }),
+      ],
+      { optimistic: true }
+    );
+  }, 15000);
+
+  it("adds an existing library consumable optimistically", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [libraryItem("consumable", "Custom Tonic")] as never,
+      loading: false,
+      error: null,
+    });
+    const { onUpdateConsumables } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByText("Custom Tonic"));
+
+    expect(onUpdateConsumables).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          name: "Custom Tonic",
+          customLibraryId: "lib-consumable",
+          customLibraryVersionId: "v1",
+        }),
+      ],
       { optimistic: true }
     );
   }, 15000);

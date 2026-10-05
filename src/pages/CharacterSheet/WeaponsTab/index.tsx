@@ -602,43 +602,52 @@ export function WeaponsTab({
       }
 
       if (libraryItem.data.weaponKind === "ranged") {
-        onUpdateRanged([
-          ...rangedWeapons,
-          buildRangedWeaponSnapshot(
-            crypto.randomUUID(),
-            {},
-            libraryItem.data,
-            libraryItem.id,
-            versionId
-          ),
-        ]);
+        onUpdateRanged(
+          [
+            ...rangedWeapons,
+            buildRangedWeaponSnapshot(
+              crypto.randomUUID(),
+              {},
+              libraryItem.data,
+              libraryItem.id,
+              versionId
+            ),
+          ],
+          { optimistic: true }
+        );
         return;
       }
 
       if (libraryItem.data.weaponKind === "grenade") {
-        onUpdateGrenades([
-          ...grenades,
-          buildGrenadeSnapshot(
+        onUpdateGrenades(
+          [
+            ...grenades,
+            buildGrenadeSnapshot(
+              crypto.randomUUID(),
+              {},
+              libraryItem.data,
+              libraryItem.id,
+              versionId
+            ),
+          ],
+          { optimistic: true }
+        );
+        return;
+      }
+
+      onUpdateMelee(
+        [
+          ...meleeWeapons,
+          buildMeleeWeaponSnapshot(
             crypto.randomUUID(),
             {},
             libraryItem.data,
             libraryItem.id,
             versionId
           ),
-        ]);
-        return;
-      }
-
-      onUpdateMelee([
-        ...meleeWeapons,
-        buildMeleeWeaponSnapshot(
-          crypto.randomUUID(),
-          {},
-          libraryItem.data,
-          libraryItem.id,
-          versionId
-        ),
-      ]);
+        ],
+        { optimistic: true }
+      );
     },
     [
       editable,
@@ -668,10 +677,13 @@ export function WeaponsTab({
 
       if (libraryItem.data.armourKind !== "shield") return;
 
-      onUpdateShields([
-        ...(shields ?? []),
-        buildShieldSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
-      ]);
+      onUpdateShields(
+        [
+          ...(shields ?? []),
+          buildShieldSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
+        ],
+        { optimistic: true }
+      );
     },
     [editable, onUpdateShields, shields, toast]
   );

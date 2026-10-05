@@ -50,6 +50,26 @@ import type { DrugItem } from "../../src/types/Character";
 // Real reference drug, already used by DrugPicker's own test file.
 const DRUG_NAME = "Dryas";
 
+function libraryItem(name: string) {
+  return {
+    id: "lib-drug",
+    campaignId: "campaign-1",
+    category: "drug",
+    status: "published",
+    name,
+    creator: { userId: "u1" },
+    latestVersionId: "v1",
+    latestVersionNumber: 1,
+    publishedVersionId: "v1",
+    draftVersionId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: { userId: "u1" },
+    updatedBy: { userId: "u1" },
+    data: { name },
+  };
+}
+
 function renderTab(props: Partial<React.ComponentProps<typeof DrugsTab>> = {}) {
   const onUpdate = vi.fn();
   render(
@@ -127,6 +147,30 @@ describe("DrugsTab", () => {
 
     expect(onUpdate).toHaveBeenCalledWith(
       [expect.objectContaining({ name: DRUG_NAME, quantity: 1 })],
+      { optimistic: true }
+    );
+  });
+
+  it("adds an existing library drug optimistically", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [libraryItem("Custom Stimm")] as never,
+      loading: false,
+      error: null,
+    });
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByText("Custom Stimm"));
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          name: "Custom Stimm",
+          customLibraryId: "lib-drug",
+          customLibraryVersionId: "v1",
+        }),
+      ],
       { optimistic: true }
     );
   });

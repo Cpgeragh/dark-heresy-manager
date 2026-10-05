@@ -386,6 +386,33 @@ describe("WeaponsTab custom-item library actions", () => {
     customLibraryVersionId: "v1",
   };
 
+  it("adds an existing library ranged weapon optimistically", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [makeLibraryItem()],
+      loading: false,
+      error: null,
+    });
+    const { noop } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add ranged weapon" }));
+    await user.click(screen.getByText("Custom Lasgun"));
+
+    expect(noop).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({ id: "r1" }),
+        expect.objectContaining({
+          name: "Custom Lasgun",
+          customLibraryId: "lib1",
+          customLibraryVersionId: "v1",
+        }),
+      ],
+      { optimistic: true }
+    );
+
+    useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: false, error: null });
+  });
+
   it("calls publishCustomItem when a DM clicks Publish on a draft library weapon", async () => {
     const user = userEvent.setup();
     useCampaignCustomItemsMock.mockReturnValue({
