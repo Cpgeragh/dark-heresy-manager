@@ -37,6 +37,7 @@ import {
   toCustomGearData,
 } from "./gearSnapshotHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,8 +50,8 @@ interface GearTabProps {
   gear: GearItem[];
   consumables: ConsumableItem[];
   editable: boolean;
-  onUpdate: (next: GearItem[]) => void | Promise<void>;
-  onUpdateConsumables: (next: ConsumableItem[]) => void | Promise<void>;
+  onUpdate: (next: GearItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateConsumables: (next: ConsumableItem[], options?: PatchOptions) => void | Promise<void>;
 }
 
 type GearSection = "items" | "consumables";
@@ -192,20 +193,23 @@ export function GearTab({
   const addConsumableFromRef = useCallback(
     (ref: ConsumableRef) => {
       if (!editable) return;
-      return onUpdateConsumables([
-        ...consumables,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          quantity: 1,
-          description: ref.description,
-          weight: ref.weight,
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-        },
-      ]);
+      onUpdateConsumables(
+        [
+          ...consumables,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            quantity: 1,
+            description: ref.description,
+            weight: ref.weight,
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, consumables, onUpdateConsumables]
   );
@@ -221,7 +225,10 @@ export function GearTab({
   const removeConsumable = useCallback(
     (id: string) => {
       if (!editable) return;
-      return onUpdateConsumables(consumables.filter((c) => c.id !== id));
+      onUpdateConsumables(
+        consumables.filter((c) => c.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, consumables, onUpdateConsumables]
   );
@@ -346,7 +353,7 @@ export function GearTab({
   const addFromRef = useCallback(
     (ref: GearRef, gmValue?: string, gmRarity?: string) => {
       if (!editable) return;
-      return onUpdate([
+      const next = [
         ...gear,
         {
           id: crypto.randomUUID(),
@@ -358,7 +365,12 @@ export function GearTab({
           availability: gmRarity ?? ref.availability,
           source: ref.source,
         },
-      ]);
+      ];
+      if (gmValue === undefined) {
+        onUpdate(next, { optimistic: true });
+        return;
+      }
+      return onUpdate(next);
     },
     [editable, gear, onUpdate]
   );
@@ -448,7 +460,10 @@ export function GearTab({
   const removeItem = useCallback(
     (id: string) => {
       if (!editable) return;
-      return onUpdate(gear.filter((g) => g.id !== id));
+      onUpdate(
+        gear.filter((g) => g.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, gear, onUpdate]
   );

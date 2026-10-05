@@ -77,6 +77,7 @@ import type { GearItem, ConsumableItem } from "../../src/types/Character";
 // both have a fixed cost, so clicking calls onSelect directly with no GM-input sub-step.
 const GEAR_NAME = "Backpack";
 const CONSUMABLE_NAME = "Belly-Churn";
+const VARIABLE_GEAR_NAME = "Charm";
 
 function renderTab(props: Partial<React.ComponentProps<typeof GearTab>> = {}) {
   const onUpdate = vi.fn();
@@ -220,7 +221,23 @@ describe("GearTab", () => {
     await user.click(screen.getByRole("button", { name: "Add item" }));
     await user.click(screen.getByText(GEAR_NAME));
 
-    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })]);
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })], {
+      optimistic: true,
+    });
+  }, 15000);
+
+  it("keeps an item with an assigned cost on a visible save, not an optimistic one", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByText(VARIABLE_GEAR_NAME));
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "500");
+    await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
+
+    expect(onUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({ name: VARIABLE_GEAR_NAME, value: "500 Thrones" }),
+    ]);
   }, 15000);
 
   it("adds a real consumable from the reference picker", async () => {
@@ -230,9 +247,10 @@ describe("GearTab", () => {
     await user.click(screen.getByRole("button", { name: "Add consumable" }));
     await user.click(screen.getByText(CONSUMABLE_NAME));
 
-    expect(onUpdateConsumables).toHaveBeenCalledWith([
-      expect.objectContaining({ name: CONSUMABLE_NAME, quantity: 1 }),
-    ]);
+    expect(onUpdateConsumables).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: CONSUMABLE_NAME, quantity: 1 })],
+      { optimistic: true }
+    );
   }, 15000);
 
   it("creates a custom gear item, updates the character, and returns to the picker", async () => {
@@ -290,7 +308,7 @@ describe("GearTab", () => {
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
 
   it("removes an existing consumable", async () => {
@@ -305,10 +323,10 @@ describe("GearTab", () => {
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdateConsumables).toHaveBeenCalledWith([]);
+    expect(onUpdateConsumables).toHaveBeenCalledWith([], { optimistic: true });
   });
 
-  it("shows a spinner on a gear row while the add is being saved", async () => {
+  it("does not show a spinner on a gear row for an optimistic add", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -323,14 +341,16 @@ describe("GearTab", () => {
     await user.click(screen.getByText(GEAR_NAME));
 
     const row = screen.getByText(GEAR_NAME).closest("button");
-    expect(row).toHaveAttribute("aria-busy", "true");
-    expect(row).toBeDisabled();
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })], {
+      optimistic: true,
+    });
+    expect(row).not.toHaveAttribute("aria-busy");
+    expect(row).not.toBeDisabled();
 
     await act(async () => finish());
-    expect(row).not.toHaveAttribute("aria-busy");
   }, 15000);
 
-  it("shows a spinner on a consumable row while the add is being saved", async () => {
+  it("does not show a spinner on a consumable row for an optimistic add", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdateConsumables = vi.fn(
@@ -345,14 +365,17 @@ describe("GearTab", () => {
     await user.click(screen.getByText(CONSUMABLE_NAME));
 
     const row = screen.getByText(CONSUMABLE_NAME).closest("button");
-    expect(row).toHaveAttribute("aria-busy", "true");
-    expect(row).toBeDisabled();
+    expect(onUpdateConsumables).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: CONSUMABLE_NAME })],
+      { optimistic: true }
+    );
+    expect(row).not.toHaveAttribute("aria-busy");
+    expect(row).not.toBeDisabled();
 
     await act(async () => finish());
-    expect(row).not.toHaveAttribute("aria-busy");
   }, 15000);
 
-  it("shows a spinner on Remove while a gear removal is being saved", async () => {
+  it("does not show a spinner on Remove for an optimistic gear removal", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -366,13 +389,13 @@ describe("GearTab", () => {
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute("aria-busy", "true");
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
-    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
   });
 
-  it("shows a spinner on Remove while a consumable removal is being saved", async () => {
+  it("does not show a spinner on Remove for an optimistic consumable removal", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdateConsumables = vi.fn(
@@ -386,9 +409,9 @@ describe("GearTab", () => {
 
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute("aria-busy", "true");
+    expect(onUpdateConsumables).toHaveBeenCalledWith([], { optimistic: true });
+    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
-    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
   });
 });

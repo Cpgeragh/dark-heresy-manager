@@ -471,7 +471,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdateGear = useCallback(
-    (next: GearItem[]) => patchField("gear", next),
+    (next: GearItem[], options?: PatchOptions) => patchField("gear", next, options),
     [patchField]
   );
 
@@ -481,8 +481,13 @@ export default function CharacterSheet({
   );
 
   const handleUpdateConsumables = useCallback(
-    (next: ConsumableItem[]) =>
-      patchCollectionField("consumables", character?.consumables ?? EMPTY_CONSUMABLES, next),
+    (next: ConsumableItem[], options?: PatchOptions) =>
+      patchCollectionField(
+        "consumables",
+        character?.consumables ?? EMPTY_CONSUMABLES,
+        next,
+        options
+      ),
     [character?.consumables, patchCollectionField]
   );
 
