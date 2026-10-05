@@ -18,6 +18,7 @@ import {
   getEliteAdvanceGrantedSkillLevel,
   getEliteAdvanceSkillCost,
   getEliteAdvanceWeaponTrainingCost,
+  getAlternateRankTitles,
   getExoticWeaponTrainingPurchase,
   getMissedRankCareerAdvances,
   getNextTalentOrTraitPurchase,
@@ -1118,6 +1119,24 @@ function assertValidWeaponTrainingTransition(
   }
 }
 
+function assertValidTitleChoices(selection: Record<string, unknown>): void {
+  const choices = selection.titleChoices;
+  if (choices === undefined) return;
+  if (!isRecord(choices)) {
+    throw new HttpsError("invalid-argument", "Rank title choices must be a map.");
+  }
+  for (const [tierKey, title] of Object.entries(choices)) {
+    const tier = Number(tierKey);
+    const allowed =
+      Number.isInteger(tier) && tier >= (selection.takenAtTier as number)
+        ? getAlternateRankTitles(selection.alternateRankId as string, tier)
+        : [];
+    if (typeof title !== "string" || !allowed.includes(title)) {
+      throw new HttpsError("invalid-argument", "That rank title is not available.");
+    }
+  }
+}
+
 function sameAlternateRank(a: unknown, b: unknown): boolean {
   return (
     isRecord(a) &&
@@ -1464,6 +1483,7 @@ function assertValidExperienceTransition(
       throw new HttpsError("invalid-argument", "An alternate rank can only be selected once.");
     }
     selectedIds.add(selection.alternateRankId);
+    assertValidTitleChoices(selection);
     if (previous.some((entry) => sameAlternateRank(entry, selection))) continue;
 
     const alternateRank = ALTERNATE_RANKS.find((entry) => entry.id === selection.alternateRankId);

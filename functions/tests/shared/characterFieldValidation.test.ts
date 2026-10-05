@@ -1786,6 +1786,78 @@ describe("assertValidCharacterFieldTransition: experience alternate ranks", () =
     ).not.toThrow();
   });
 
+  describe("rank title choices", () => {
+    const techPriestAtRank5 = { header: { career: "Tech-Priest", rank: "Tech-Priest" } };
+    const secutor = {
+      alternateRankId: "mechanicus-secutor",
+      replacedRankId: "enginseer",
+      takenAtTier: 4,
+    };
+    const withTitles = (titleChoices: unknown) => withSelections([{ ...secutor, titleChoices }]);
+    const secutorBase = withSelections([secutor]);
+
+    it("accepts a player choosing the alternate title for a later rank", () => {
+      expect(
+        check(secutorBase, withTitles({ "5": "Myrmidon" }), techPriestAtRank5, false)
+      ).not.toThrow();
+    });
+
+    it("accepts either alternate name at rank 7", () => {
+      expect(
+        check(secutorBase, withTitles({ "7": "Tribune" }), techPriestAtRank5, false)
+      ).not.toThrow();
+      expect(
+        check(secutorBase, withTitles({ "7": "Magnus" }), techPriestAtRank5, false)
+      ).not.toThrow();
+    });
+
+    it("accepts a choice at the rank where the alternate rank was taken", () => {
+      expect(
+        check(secutorBase, withTitles({ "4": "Secutor" }), techPriestAtRank5, false)
+      ).not.toThrow();
+    });
+
+    it("rejects a title that does not belong to that rank", () => {
+      expect(check(secutorBase, withTitles({ "5": "Magnus" }), techPriestAtRank5, false)).toThrow(
+        "That rank title is not available."
+      );
+    });
+
+    it("rejects a choice for a rank below the one where the alternate rank was taken", () => {
+      expect(check(secutorBase, withTitles({ "3": "Secutor" }), techPriestAtRank5, false)).toThrow(
+        "That rank title is not available."
+      );
+    });
+
+    it("rejects a choice for an alternate rank with no titles", () => {
+      const withBlackPriestTitle = withSelections([
+        { ...blackPriest, titleChoices: { "5": "Cleric" } },
+      ]);
+      expect(check(base, withBlackPriestTitle, clericAtPriest, false)).toThrow(
+        "That rank title is not available."
+      );
+    });
+
+    it("rejects title choices that are not a map", () => {
+      expect(check(secutorBase, withTitles(["Myrmidon"]), techPriestAtRank5, false)).toThrow(
+        "Rank title choices must be a map."
+      );
+    });
+
+    it("checks title choices on a selection that already exists", () => {
+      const existing = withTitles({ "5": "Myrmidon" });
+      expect(check(existing, withTitles({ "5": "Centurius" }), techPriestAtRank5, false)).toThrow(
+        "That rank title is not available."
+      );
+    });
+
+    it("does not check title choices for the DM", () => {
+      expect(
+        check(secutorBase, withTitles({ "5": "Magnus" }), techPriestAtRank5, true)
+      ).not.toThrow();
+    });
+  });
+
   it("rejects a direct Spent XP change", () => {
     expect(check(base, { ...base, spent: 1500 }, guardsman, false)).toThrow(
       "Spent XP is calculated by the server"

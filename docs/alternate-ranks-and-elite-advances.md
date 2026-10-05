@@ -4,25 +4,26 @@ This document defines the current Alternate Rank and Elite Advance behaviour. It
 
 ## Ownership and persistence
 
-| Concern                               | Owner                                                                                         | Persisted field                                                    |
-| ------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Alternate Rank reference data         | `ALTERNATE_RANKS` in `shared-rules/src/alternateRankData.ts`                                  | None                                                               |
-| Packaged Elite Advance reference data | `ELITE_ADVANCES` in `shared-rules/src/eliteAdvanceData.ts`                                    | None                                                               |
-| Selected Alternate Ranks              | `RankUpModal` in `src/pages/CharacterSheet/ExperienceTab.tsx`                                 | `experience.alternateRanks`                                        |
-| Granted packaged advances             | `applyAlternateRankEliteAdvanceGrants` in `src/mechanics/experience/alternateRankGrants.ts`   | `talentsAndTraits.eliteAdvances`                                   |
-| Purchased packaged advances           | `EliteAdvancesTab` in `src/mechanics/eliteAdvances/EliteAdvancesTab.tsx`                      | `talentsAndTraits.eliteAdvances`                                   |
-| Skills bought as Elite Advances       | `purchaseSkill` in `EliteAdvancesTab`                                                         | `skills[].xpPurchases` and `skills[].eliteAdvancePurchases`        |
-| Talents bought as Elite Advances      | `purchaseFixedTalent` and `purchaseManualTalent` in `EliteAdvancesTab`                        | `talentsAndTraits.talents[].xpPurchase` and `eliteAdvancePurchase` |
-| Weapon Training bought from a package | `purchaseFixedTalent` in `EliteAdvancesTab`                                                   | `weaponTraining.xpPurchases` and `eliteAdvancePurchases`           |
-| Career-table Exotic Training choices  | `getExoticWeaponTrainingPurchases` in `shared-rules/src/weaponTrainingAdvanceCosts.ts`        | None                                                               |
-| Career-table Exotic Training purchase | `confirmExoticPurchase` in `src/pages/CharacterSheet/WeaponTrainingTab.tsx`                   | `weaponTraining.exoticWeapons[]` and its `xpPurchase`              |
-| Exotic Training server validation     | `assertValidWeaponTrainingTransition` in `functions/src/shared/characterFieldValidation.ts`   | None                                                               |
-| Missed-rank advance access            | `getMissedRankCareerAdvances` in `shared-rules/src/careerAdvanceAccess.ts`                    | None                                                               |
-| Career Talent and Trait purchase cost | `getNextTalentOrTraitPurchase` in `shared-rules/src/careerAdvanceAccess.ts`                   | None                                                               |
-| Skill purchase validation             | `assertValidSkillsTransition` in `functions/src/shared/characterFieldValidation.ts`           | None                                                               |
-| Talent and Trait purchase validation  | `assertValidTalentsAndTraitsTransition` in `functions/src/shared/characterFieldValidation.ts` | None                                                               |
-| Existing purchase price protection    | `assertExistingPurchasePricesUnchanged` in `functions/src/shared/characterFieldValidation.ts` | None                                                               |
-| Packaged advance XP                   | `getEliteAdvancesSpent` in `src/mechanics/experience/xpSpent.ts`                              | `talentsAndTraits.eliteAdvances[].xpPurchase`                      |
+| Concern                               | Owner                                                                                                   | Persisted field                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Alternate Rank reference data         | `ALTERNATE_RANKS` in `shared-rules/src/alternateRankData.ts`                                            | None                                                               |
+| Packaged Elite Advance reference data | `ELITE_ADVANCES` in `shared-rules/src/eliteAdvanceData.ts`                                              | None                                                               |
+| Selected Alternate Ranks              | `RankUpModal` in `src/pages/CharacterSheet/ExperienceTab.tsx`                                           | `experience.alternateRanks`                                        |
+| Alternate Rank titles                 | `rankTitles` in `ALTERNATE_RANKS` and `getRankDisplayName` in `shared-rules/src/alternateRankTitles.ts` | `experience.alternateRanks[].titleChoices`                         |
+| Granted packaged advances             | `applyAlternateRankEliteAdvanceGrants` in `src/mechanics/experience/alternateRankGrants.ts`             | `talentsAndTraits.eliteAdvances`                                   |
+| Purchased packaged advances           | `EliteAdvancesTab` in `src/mechanics/eliteAdvances/EliteAdvancesTab.tsx`                                | `talentsAndTraits.eliteAdvances`                                   |
+| Skills bought as Elite Advances       | `purchaseSkill` in `EliteAdvancesTab`                                                                   | `skills[].xpPurchases` and `skills[].eliteAdvancePurchases`        |
+| Talents bought as Elite Advances      | `purchaseFixedTalent` and `purchaseManualTalent` in `EliteAdvancesTab`                                  | `talentsAndTraits.talents[].xpPurchase` and `eliteAdvancePurchase` |
+| Weapon Training bought from a package | `purchaseFixedTalent` in `EliteAdvancesTab`                                                             | `weaponTraining.xpPurchases` and `eliteAdvancePurchases`           |
+| Career-table Exotic Training choices  | `getExoticWeaponTrainingPurchases` in `shared-rules/src/weaponTrainingAdvanceCosts.ts`                  | None                                                               |
+| Career-table Exotic Training purchase | `confirmExoticPurchase` in `src/pages/CharacterSheet/WeaponTrainingTab.tsx`                             | `weaponTraining.exoticWeapons[]` and its `xpPurchase`              |
+| Exotic Training server validation     | `assertValidWeaponTrainingTransition` in `functions/src/shared/characterFieldValidation.ts`             | None                                                               |
+| Missed-rank advance access            | `getMissedRankCareerAdvances` in `shared-rules/src/careerAdvanceAccess.ts`                              | None                                                               |
+| Career Talent and Trait purchase cost | `getNextTalentOrTraitPurchase` in `shared-rules/src/careerAdvanceAccess.ts`                             | None                                                               |
+| Skill purchase validation             | `assertValidSkillsTransition` in `functions/src/shared/characterFieldValidation.ts`                     | None                                                               |
+| Talent and Trait purchase validation  | `assertValidTalentsAndTraitsTransition` in `functions/src/shared/characterFieldValidation.ts`           | None                                                               |
+| Existing purchase price protection    | `assertExistingPurchasePricesUnchanged` in `functions/src/shared/characterFieldValidation.ts`           | None                                                               |
+| Packaged advance XP                   | `getEliteAdvancesSpent` in `src/mechanics/experience/xpSpent.ts`                                        | `talentsAndTraits.eliteAdvances[].xpPurchase`                      |
 
 Reference data is shared through the built `shared-rules` package. Character-specific selections, rolls and purchases remain in the character document.
 
@@ -36,7 +37,7 @@ Reference data is shared through the built `shared-rules` package. Character-spe
 
 An Alternate Rank marked as a character-creation Advance Scheme is excluded from Rank Up. When its required base Career is selected at Rank 1, the Background page provides an Advance Scheme picker containing the normal starting Rank and each available character-creation Alternate Rank. Selecting one records it as replacing the normal Rank 1 table. The base Career still supplies its normal starting Skills and Talents.
 
-Selecting an Alternate Rank stores its identifier, the identifier of the normal rank it replaced and the tier at which it was taken. The character header still advances to the underlying normal rank so ordinary Career progression can continue. Displayed Experience Rank names use the selected Alternate Rank name for the replaced Rank.
+Selecting an Alternate Rank stores its identifier, the identifier of the normal rank it replaced and the tier at which it was taken. The character header still advances to the underlying normal rank so ordinary Career progression can continue. Displayed Experience Rank names use the selected Alternate Rank name for the replaced Rank, or its Rank title where the Alternate Rank defines titles.
 
 Any packaged Elite Advance granted by entering the Alternate Rank is saved in the same Rank Up update. It has no XP purchase record, appears as granted on the Elite Advances page and cannot be removed independently from its Alternate Rank.
 
@@ -51,6 +52,21 @@ The selected Alternate Rank table replaces the normal table at the shared career
 The app displays source prerequisites but does not enforce Corruption, origin, Characteristic, prerequisite Talent or GM-permission requirements. This matches the wider character sheet, where advancement prerequisites are informational rather than validation rules.
 
 The server applies the same conditions when a player saves an Alternate Rank selection through the experience field: the career matches, the replaced rank is one of the character's valid next ranks and meets the Alternate Rank's minimum rank, and the Alternate Rank appears only once. A selection already on the character is not checked again, and the DM can save any selection. The server does not check Corruption, origin, Characteristic, prerequisite Talent or GM-permission requirements, matching the app.
+
+## Alternate Rank titles
+
+Mechanicus Secutor and Templar Calix define one title for each Rank from 4 to 8 in `rankTitles`. Mechanicus Secutor defines two titles at Rank 7, Tribune and Magnus, and either path may use either one. An Alternate Rank without `rankTitles` keeps its own name on the Rank it replaces.
+
+| Rank                                         | Displayed name                                                                | Owner                                                             |
+| -------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Rank where the Alternate Rank is taken       | The first title, or the stored choice where that Rank has two titles          | `getRankDisplayName` in `alternateRankTitles.ts`                  |
+| Later Rank                                   | The normal Career name, or the stored title once one is chosen                | `getRankDisplayName` in `alternateRankTitles.ts`                  |
+| Rank Up confirmation and Rank Card selection | Buttons for the normal Career name and each title, with the normal name first | `RankTitleChoice` in `src/pages/CharacterSheet/ExperienceTab.tsx` |
+| Rank Card selection availability             | Shown to a player or DM with character editing access                         | `ExperienceTab`                                                   |
+
+The title choice is stored per Rank number in `experience.alternateRanks[].titleChoices`. A missing entry means the normal Career name, except at the Rank where the Alternate Rank is taken, where it means the first title. Titles change only the displayed Rank name. Advance tables, costs, purchase attribution and the header Rank are unchanged.
+
+The server checks the stored choices when a player saves the experience field. A choice is accepted only for the Rank where the Alternate Rank was taken or a later Rank, and only when the title appears in that Alternate Rank's list for that Rank. This check applies to selections already on the character as well as new ones. The DM can save any choice. The check is `assertValidTitleChoices` in `functions/src/shared/characterFieldValidation.ts`.
 
 ## Elite Advance availability and costs
 
@@ -129,6 +145,8 @@ Removing or downgrading a directly purchased Skill or Talent uses its normal pag
 | Exotic Training server validation             | `functions/tests/shared/characterFieldValidation.test.ts`                                                                                                                  |
 | Replacement picker wiring                     | `tests/integration/AlternateRankReplacement.test.tsx`, `tests/integration/TalentsTab.careerWiring.test.tsx`                                                                |
 | Experience display names                      | `tests/unit/rankCards.test.ts`, `tests/integration/ExperienceTab.test.tsx`                                                                                                 |
+| Rank title data and display names             | `tests/unit/alternateRankData.test.ts`, `tests/unit/alternateRankTitles.test.ts`                                                                                           |
+| Rank title server validation                  | `functions/tests/shared/characterFieldValidation.test.ts`                                                                                                                  |
 | Server validation for replacement purchases   | `functions/tests/shared/characterFieldValidation.test.ts`                                                                                                                  |
 | Talent, Trait and packaged advance validation | `functions/tests/shared/characterFieldValidation.test.ts`, `functions/tests/operations/patchCharacterField.test.ts`                                                        |
 | Server validation for Alternate Rank choices  | `functions/tests/shared/characterFieldValidation.test.ts`, `functions/tests/operations/patchCharacterField.test.ts`                                                        |

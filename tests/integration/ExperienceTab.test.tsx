@@ -891,3 +891,132 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
   });
 });
+
+describe("ExperienceTab alternate rank titles", () => {
+  const secutor = {
+    alternateRankId: "mechanicus-secutor",
+    replacedRankId: "enginseer",
+    takenAtTier: 4,
+  };
+
+  function makeTechPriest(rank: string, titleChoices?: Record<string, string>): Character {
+    const current = makeCharacter();
+    return {
+      ...current,
+      header: { ...current.header, career: "Tech-Priest", rank, careerPath: undefined },
+      experience: {
+        total: 3_000,
+        spent: 3_000,
+        ranks: [],
+        alternateRanks: [{ ...secutor, ...(titleChoices ? { titleChoices } : {}) }],
+      },
+    };
+  }
+
+  it("names the rank card where Secutor was taken after its title", () => {
+    renderTab({ character: makeTechPriest("Enginseer") });
+    expect(screen.getByRole("article", { name: "Secutor Rank Card" })).toBeInTheDocument();
+    expect(screen.queryByText("Rank title")).not.toBeInTheDocument();
+  });
+
+  it("offers the alternate title when ranking up and keeps the career name by default", async () => {
+    const user = userEvent.setup();
+    const { onUpdateCharacter } = renderTab({ character: makeTechPriest("Enginseer") });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    const titleChoice = within(dialog.getByText("Rank title").parentElement as HTMLElement);
+    expect(titleChoice.getByRole("button", { name: "Tech-Priest" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(titleChoice.getByRole("button", { name: "Myrmidon" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+
+    await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      experience: expect.objectContaining({ alternateRanks: [secutor] }),
+      header: expect.objectContaining({ rank: "Tech-Priest" }),
+    });
+  });
+
+  it("saves the alternate title chosen while ranking up", async () => {
+    const user = userEvent.setup();
+    const { onUpdateCharacter } = renderTab({ character: makeTechPriest("Enginseer") });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    const titleChoice = within(dialog.getByText("Rank title").parentElement as HTMLElement);
+    await user.click(titleChoice.getByRole("button", { name: "Myrmidon" }));
+    await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
+
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      experience: expect.objectContaining({
+        alternateRanks: [{ ...secutor, titleChoices: { "5": "Myrmidon" } }],
+      }),
+      header: expect.objectContaining({ rank: "Tech-Priest" }),
+    });
+  });
+
+  it("offers no title choice when the alternate rank is taken at its first rank", async () => {
+    const user = userEvent.setup();
+    const current = makeCharacter();
+    renderTab({
+      character: {
+        ...current,
+        header: {
+          ...current.header,
+          career: "Tech-Priest",
+          rank: "Electro-Priest",
+          careerPath: undefined,
+        },
+        experience: { total: 2_000, spent: 2_000, ranks: [] },
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const rankTypePicker = within(screen.getByRole("dialog", { name: "Choose Rank Type" }));
+    await user.click(rankTypePicker.getByText("Mechanicus Secutor"));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    expect(dialog.queryByText("Rank title")).not.toBeInTheDocument();
+  });
+
+  it("changes the title from the rank card and can switch back to the career name", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({ character: makeTechPriest("Tech-Priest") });
+
+    const card = within(screen.getByRole("article", { name: "Tech-Priest Rank Card" }));
+    const titleChoice = within(card.getByText("Rank title").parentElement as HTMLElement);
+    await user.click(titleChoice.getByRole("button", { name: "Myrmidon" }));
+    expect(onUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        alternateRanks: [{ ...secutor, titleChoices: { "5": "Myrmidon" } }],
+      })
+    );
+  });
+
+  it("shows the chosen title on the card and removes it when the career name is chosen", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({
+      character: makeTechPriest("Tech-Priest", { "5": "Myrmidon" }),
+    });
+
+    const card = within(screen.getByRole("article", { name: "Myrmidon Rank Card" }));
+    const titleChoice = within(card.getByText("Rank title").parentElement as HTMLElement);
+    expect(titleChoice.getByRole("button", { name: "Myrmidon" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    await user.click(titleChoice.getByRole("button", { name: "Tech-Priest" }));
+    expect(onUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ alternateRanks: [{ ...secutor, titleChoices: {} }] })
+    );
+  });
+
+  it("hides the title choice while editing is disabled", () => {
+    renderTab({ character: makeTechPriest("Tech-Priest"), editable: false });
+    expect(screen.queryByText("Rank title")).not.toBeInTheDocument();
+  });
+});

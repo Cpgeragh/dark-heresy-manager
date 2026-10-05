@@ -48,6 +48,11 @@ export interface AlternateRankMeleeWeaponChoice {
   referenceIds: readonly string[];
 }
 
+export interface AlternateRankTitle {
+  tier: number;
+  names: readonly string[];
+}
+
 export interface AlternateRankData {
   id: string;
   name: string;
@@ -58,6 +63,7 @@ export interface AlternateRankData {
   requiredCareerIds: readonly string[];
   minimumRank: number;
   minimumXp: number;
+  rankTitles?: readonly AlternateRankTitle[];
   requiredCareerPaths?: readonly string[];
   requirements: {
     maximumCorruption?: number;
@@ -1285,6 +1291,13 @@ export const ALTERNATE_RANKS: readonly AlternateRankData[] = [
     requiredCareerIds: ["tech-priest"],
     minimumRank: 4,
     minimumXp: 2_000,
+    rankTitles: [
+      { tier: 4, names: ["Secutor"] },
+      { tier: 5, names: ["Myrmidon"] },
+      { tier: 6, names: ["Centurius"] },
+      { tier: 7, names: ["Tribune", "Magnus"] },
+      { tier: 8, names: ["Magos Militant"] },
+    ],
     requirements: {
       otherRequirements: ["WS 35", "BS 35", "WP 35", "Any four Weapon Training talents"],
     },
@@ -2348,6 +2361,13 @@ export const ALTERNATE_RANKS: readonly AlternateRankData[] = [
     requiredCareerPaths: ["Savant Militant"],
     minimumRank: 4,
     minimumXp: 2_000,
+    rankTitles: [
+      { tier: 4, names: ["Templar Tertius"] },
+      { tier: 5, names: ["Templar Secundus"] },
+      { tier: 6, names: ["Templar Primus"] },
+      { tier: 7, names: ["Templar Ordinator"] },
+      { tier: 8, names: ["Master Templar Calix"] },
+    ],
     requirements: {
       maximumInsanity: 10,
       maximumCorruption: 10,

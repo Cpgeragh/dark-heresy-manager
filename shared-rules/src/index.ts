@@ -22,7 +22,9 @@ export {
   type AlternateRankSkillAdvance,
   type AlternateRankTalentAdvance,
   type AlternateRankEliteAdvance,
+  type AlternateRankTitle,
 } from "./alternateRankData.js";
+export { getAlternateRankTitles, getRankDisplayName } from "./alternateRankTitles.js";
 export {
   ELITE_ADVANCES,
   getEliteAdvanceGrantedSkillLevel,

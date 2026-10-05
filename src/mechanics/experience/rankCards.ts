@@ -1,7 +1,8 @@
 import {
-  ALTERNATE_RANKS,
   CHARACTERISTIC_ADVANCE_TIERS,
+  getAlternateRankTitles,
   getCareerRankProgression,
+  getRankDisplayName,
   getRankXpBand,
   WEAPON_TRAINING_GROUPS,
   type RankXpBand,
@@ -31,9 +32,17 @@ export interface RankCardEntry {
   kind: RankCardEntryKind;
 }
 
+export interface RankCardTitleChoice {
+  alternateRankId: string;
+  options: readonly string[];
+  includesCareerName: boolean;
+}
+
 export interface RankCard {
   rankId: string;
   name: string;
+  careerRankName: string;
+  titleChoice?: RankCardTitleChoice;
   tier: number;
   xpLevel: string;
   xpBand: RankXpBand;
@@ -99,21 +108,34 @@ export function buildRankCards(character: Character): RankCard[] {
   );
   if (!progression) return [];
 
-  const alternateRankNames = new Map(
-    (character.experience.alternateRanks ?? []).flatMap((selection) => {
-      const alternateRank = ALTERNATE_RANKS.find(
-        (candidate) => candidate.id === selection.alternateRankId
-      );
-      return alternateRank ? [[selection.replacedRankId, alternateRank.name] as const] : [];
-    })
-  );
+  const alternateRanks = character.experience.alternateRanks ?? [];
+
+  const getTitleChoice = (rank: { id: string; tier: number }): RankCardTitleChoice | undefined => {
+    const replacing = alternateRanks.find((selection) => selection.replacedRankId === rank.id);
+    if (replacing) {
+      const options = getAlternateRankTitles(replacing.alternateRankId, rank.tier);
+      return options.length > 1
+        ? { alternateRankId: replacing.alternateRankId, options, includesCareerName: false }
+        : undefined;
+    }
+    for (const selection of alternateRanks) {
+      if (selection.takenAtTier >= rank.tier) continue;
+      const options = getAlternateRankTitles(selection.alternateRankId, rank.tier);
+      if (options.length > 0) {
+        return { alternateRankId: selection.alternateRankId, options, includesCareerName: true };
+      }
+    }
+    return undefined;
+  };
 
   const cards = progression.reachedRanks.map((rank): RankCard => {
     const xpBand = getRankXpBand(rank.tier);
     if (!xpBand) throw new Error(`Missing XP band for Career rank ${rank.id}`);
     return {
       rankId: rank.id,
-      name: alternateRankNames.get(rank.id) ?? rank.name,
+      name: getRankDisplayName(alternateRanks, rank),
+      careerRankName: rank.name,
+      titleChoice: getTitleChoice(rank),
       tier: rank.tier,
       xpLevel: rank.xpLevel,
       xpBand,

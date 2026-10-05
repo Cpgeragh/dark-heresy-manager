@@ -19,6 +19,7 @@ export interface AlternateRankSelection {
   replacedRankId: string;
   takenAtTier: number;
   grantSelections?: Record<string, string>;
+  titleChoices?: Record<string, string>;
 }
 
 export interface CharField {

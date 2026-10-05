@@ -671,6 +671,24 @@ describe("alternateRankData", () => {
     });
   });
 
+  it("records the Mechanicus Secutor and Templar Calix rank titles for ranks 4 to 8", () => {
+    const secutor = ALTERNATE_RANKS.find((rank) => rank.id === "mechanicus-secutor");
+    expect(secutor?.rankTitles).toEqual([
+      { tier: 4, names: ["Secutor"] },
+      { tier: 5, names: ["Myrmidon"] },
+      { tier: 6, names: ["Centurius"] },
+      { tier: 7, names: ["Tribune", "Magnus"] },
+      { tier: 8, names: ["Magos Militant"] },
+    ]);
+    expect(templarCalix?.rankTitles).toEqual([
+      { tier: 4, names: ["Templar Tertius"] },
+      { tier: 5, names: ["Templar Secundus"] },
+      { tier: 6, names: ["Templar Primus"] },
+      { tier: 7, names: ["Templar Ordinator"] },
+      { tier: 8, names: ["Master Templar Calix"] },
+    ]);
+  });
+
   it("records the Tyrantine Shadow Agent requirements", () => {
     expect(tyrantineShadowAgent).toMatchObject({
       requiredCareerIds: [

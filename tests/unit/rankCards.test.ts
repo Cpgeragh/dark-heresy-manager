@@ -205,5 +205,64 @@ describe("buildRankCards", () => {
     const preacher = buildRankCards(character).find((card) => card.rankId === "preacher");
     expect(preacher?.name).toBe("Black Priest of Maccabeus");
     expect(preacher?.isCurrent).toBe(true);
+    expect(preacher?.titleChoice).toBeUndefined();
+  });
+
+  describe("alternate rank titles", () => {
+    const makeTechPriest = (rank: string, titleChoices?: Record<string, string>): Character => {
+      const character = makeCharacter();
+      character.header = {
+        ...character.header,
+        career: "Tech-Priest",
+        rank,
+        careerPath: undefined,
+      };
+      character.experience.alternateRanks = [
+        {
+          alternateRankId: "mechanicus-secutor",
+          replacedRankId: "enginseer",
+          takenAtTier: 4,
+          ...(titleChoices ? { titleChoices } : {}),
+        },
+      ];
+      return character;
+    };
+
+    it("shows the Secutor title on the rank card where it was taken", () => {
+      const enginseer = buildRankCards(makeTechPriest("Enginseer")).find(
+        (card) => card.rankId === "enginseer"
+      );
+      expect(enginseer?.name).toBe("Secutor");
+      expect(enginseer?.careerRankName).toBe("Enginseer");
+      expect(enginseer?.titleChoice).toBeUndefined();
+    });
+
+    it("keeps the career name at a later rank and offers the title as a choice", () => {
+      const rank5 = buildRankCards(makeTechPriest("Tech-Priest")).find(
+        (card) => card.rankId === "tech-priest"
+      );
+      expect(rank5?.name).toBe("Tech-Priest");
+      expect(rank5?.titleChoice).toEqual({
+        alternateRankId: "mechanicus-secutor",
+        options: ["Myrmidon"],
+        includesCareerName: true,
+      });
+    });
+
+    it("shows a chosen title at a later rank", () => {
+      const rank5 = buildRankCards(makeTechPriest("Tech-Priest", { "5": "Myrmidon" })).find(
+        (card) => card.rankId === "tech-priest"
+      );
+      expect(rank5?.name).toBe("Myrmidon");
+      expect(rank5?.careerRankName).toBe("Tech-Priest");
+    });
+
+    it("does not change purchase attribution", () => {
+      const plain = buildRankCards(makeTechPriest("Tech-Priest"));
+      const titled = buildRankCards(makeTechPriest("Tech-Priest", { "5": "Myrmidon" }));
+      expect(titled.map((card) => [card.rankId, card.spentTotal])).toEqual(
+        plain.map((card) => [card.rankId, card.spentTotal])
+      );
+    });
   });
 });

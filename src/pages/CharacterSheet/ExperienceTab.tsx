@@ -9,7 +9,9 @@ import {
 } from "../../mechanics/experience/rankCards";
 import {
   ALTERNATE_RANKS,
+  getAlternateRankTitles,
   getCareerRankProgression,
+  getRankDisplayName,
   type CareerRankProgression,
 } from "shared-rules";
 import {
@@ -305,6 +307,40 @@ function XpTransactionModal({
   );
 }
 
+function RankTitleChoice({
+  careerName,
+  options,
+  value,
+  onChange,
+}: {
+  careerName?: string;
+  options: readonly string[];
+  value: string;
+  onChange: (title: string) => void | Promise<unknown>;
+}) {
+  const choices = [
+    ...(careerName === undefined ? [] : [{ title: "", label: careerName }]),
+    ...options.map((title) => ({ title, label: title })),
+  ];
+  return (
+    <div className="space-y-2">
+      <div className={uiTextLabel}>Rank title</div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {choices.map(({ title, label }) => (
+          <Button
+            key={title || "career-name"}
+            variant={value === title ? "careerPath" : "careerPathMuted"}
+            onClick={() => onChange(title)}
+            aria-pressed={value === title}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RankUpModal({
   character,
   progression,
@@ -318,12 +354,6 @@ function RankUpModal({
   onConfirm: (partial: Record<string, unknown>) => Promise<boolean>;
   onClose: () => void;
 }) {
-  const currentAlternateRank = (character.experience.alternateRanks ?? [])
-    .filter((selection) => selection.replacedRankId === progression.currentRank.id)
-    .map((selection) =>
-      ALTERNATE_RANKS.find((alternateRank) => alternateRank.id === selection.alternateRankId)
-    )
-    .find((alternateRank) => alternateRank !== undefined);
   const initialRank = progression.nextRanks.length === 1 ? progression.nextRanks[0] : undefined;
   const getAvailableAlternateRanks = (
     rank: CareerRankProgression["nextRanks"][number] | undefined
@@ -343,6 +373,7 @@ function RankUpModal({
   const [selectedRankId, setSelectedRankId] = useState(initialRank?.id ?? "");
   const [selectedAlternateRankId, setSelectedAlternateRankId] = useState("");
   const [selectedMeleeWeaponReferenceId, setSelectedMeleeWeaponReferenceId] = useState("");
+  const [selectedTitle, setSelectedTitle] = useState("");
   const [rankTypePickerOpen, setRankTypePickerOpen] = useState(
     () => getAvailableAlternateRanks(initialRank).length >= 2
   );
@@ -356,6 +387,23 @@ function RankUpModal({
   );
   const selectedMeleeWeaponChoice = selectedAlternateRank?.grantedMeleeWeaponChoice;
   const selectedRankTypeName = selectedAlternateRank?.name ?? selectedRank?.name;
+  const titleChoice = (() => {
+    if (!selectedRank) return undefined;
+    if (selectedAlternateRank) {
+      const options = getAlternateRankTitles(selectedAlternateRank.id, selectedRank.tier);
+      return options.length > 1
+        ? { alternateRankId: selectedAlternateRank.id, options, includesCareerName: false }
+        : undefined;
+    }
+    for (const selection of character.experience.alternateRanks ?? []) {
+      if (selection.takenAtTier >= selectedRank.tier) continue;
+      const options = getAlternateRankTitles(selection.alternateRankId, selectedRank.tier);
+      if (options.length > 0) {
+        return { alternateRankId: selection.alternateRankId, options, includesCareerName: true };
+      }
+    }
+    return undefined;
+  })();
   const remaining = rankUpExperience.total - rankUpExperience.spent;
   const appliedRankUpCosts = (rankUpExperience.transactions ?? []).filter(
     (transaction) =>
@@ -373,6 +421,7 @@ function RankUpModal({
   const selectAlternateRank = (alternateRankId: string) => {
     setSelectedAlternateRankId(alternateRankId);
     setSelectedMeleeWeaponReferenceId("");
+    setSelectedTitle("");
   };
 
   const confirm = async () => {
@@ -395,6 +444,23 @@ function RankUpModal({
           ],
         }
       : rankUpExperience;
+    const titledExperience =
+      selectedTitle && titleChoice
+        ? {
+            ...nextExperience,
+            alternateRanks: (nextExperience.alternateRanks ?? []).map((selection) =>
+              selection.alternateRankId === titleChoice.alternateRankId
+                ? {
+                    ...selection,
+                    titleChoices: {
+                      ...selection.titleChoices,
+                      [String(selectedRank.tier)]: selectedTitle,
+                    },
+                  }
+                : selection
+            ),
+          }
+        : nextExperience;
     const nextGear = selectedAlternateRankId
       ? applyAlternateRankGearGrants(character.gear ?? [], selectedAlternateRankId)
       : character.gear;
@@ -412,8 +478,8 @@ function RankUpModal({
         : character.meleeWeapons;
     setSaving(true);
     const saved = await onConfirm({
-      experience: nextExperience,
-      header: applyCareerRankUp(character.header, nextExperience.spent, selectedRank.id),
+      experience: titledExperience,
+      header: applyCareerRankUp(character.header, titledExperience.spent, selectedRank.id),
       ...(nextGear !== character.gear ? { gear: nextGear } : {}),
       ...(nextTalentsAndTraits !== character.talentsAndTraits
         ? { talentsAndTraits: nextTalentsAndTraits }
@@ -448,7 +514,10 @@ function RankUpModal({
           <div>
             <div className={uiTextLabel}>Current Rank</div>
             <div className="mt-1 text-lg text-slate-100 lg:text-xl">
-              {currentAlternateRank?.name ?? progression.currentRank.name}
+              {getRankDisplayName(
+                character.experience.alternateRanks ?? [],
+                progression.currentRank
+              )}
             </div>
           </div>
 
@@ -523,6 +592,17 @@ function RankUpModal({
                 {selectedRankTypeName}
               </Button>
             </div>
+          )}
+
+          {titleChoice && (
+            <RankTitleChoice
+              careerName={titleChoice.includesCareerName ? selectedRank?.name : undefined}
+              options={titleChoice.options}
+              value={
+                selectedTitle || (titleChoice.includesCareerName ? "" : titleChoice.options[0])
+              }
+              onChange={setSelectedTitle}
+            />
           )}
 
           {selectedMeleeWeaponChoice && (
@@ -902,6 +982,21 @@ export function ExperienceTab({
     (left, right) => Number(right.isCurrent) - Number(left.isCurrent) || right.tier - left.tier
   );
 
+  const changeRankTitle = (card: RankCard, title: string) => {
+    const choice = card.titleChoice;
+    if (!choice) return;
+    return onUpdate({
+      ...experience,
+      alternateRanks: (experience.alternateRanks ?? []).map((selection) => {
+        if (selection.alternateRankId !== choice.alternateRankId) return selection;
+        const titleChoices = { ...selection.titleChoices };
+        if (title) titleChoices[String(card.tier)] = title;
+        else delete titleChoices[String(card.tier)];
+        return { ...selection, titleChoices };
+      }),
+    });
+  };
+
   const toggleRankCard = (rankId: string) => {
     setRankExpansion((current) => {
       const next = new Set(
@@ -1121,7 +1216,23 @@ export function ExperienceTab({
                   </header>
 
                   {expanded && (
-                    <div id={detailsId} className="mt-4">
+                    <div id={detailsId} className="mt-4 space-y-4">
+                      {editable && card.titleChoice && (
+                        <RankTitleChoice
+                          careerName={
+                            card.titleChoice.includesCareerName ? card.careerRankName : undefined
+                          }
+                          options={card.titleChoice.options}
+                          value={
+                            card.titleChoice.options.includes(card.name)
+                              ? card.name
+                              : card.titleChoice.includesCareerName
+                                ? ""
+                                : card.titleChoice.options[0]
+                          }
+                          onChange={(title) => changeRankTitle(card, title)}
+                        />
+                      )}
                       <RankDetailsSwitcher card={card} />
                     </div>
                   )}
