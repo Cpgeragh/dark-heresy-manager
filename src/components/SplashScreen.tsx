@@ -1,4 +1,5 @@
 import { LoadingDots } from "../ui/LoadingDots";
+import { colourAmberPlain } from "../ui/styles/colourTokens";
 
 interface SplashScreenProps {
   label: string;
@@ -51,7 +52,7 @@ export function SplashScreen({ label }: SplashScreenProps) {
         {showLabel && (
           <span
             className={`text-[0.6rem] tracking-widest uppercase leading-none whitespace-nowrap ${
-              isUpdating ? "text-amber-300" : "text-slate-500"
+              isUpdating ? colourAmberPlain : "text-slate-500"
             }`}
           >
             {isUpdating ? (

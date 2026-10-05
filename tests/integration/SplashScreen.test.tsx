@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { SplashScreen } from "../../src/components/SplashScreen";
+import { colourAmberPlain } from "../../src/ui/styles/colourTokens";
 
 describe("SplashScreen", () => {
   it("always shows the app name", () => {
@@ -23,7 +24,7 @@ describe("SplashScreen", () => {
 
   it("shows updates in the app's plain amber with animated dots", () => {
     const { container } = render(<SplashScreen label="Updating…" />);
-    const label = container.querySelector(".text-amber-300");
+    const label = container.querySelector(`.${colourAmberPlain}`);
 
     expect(label).toHaveTextContent("Updating...");
     expect(label?.querySelector('[aria-hidden="true"]')?.children).toHaveLength(3);

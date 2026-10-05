@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { PWA_JUST_UPGRADED_KEY } from "../../src/pwaStartup";
+import { colourAmberPlain } from "../../src/ui/styles/colourTokens";
 
 const indexHtml = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
 const labelScript = readFileSync(resolve(process.cwd(), "public/splash-label.js"), "utf8");
@@ -41,7 +42,7 @@ describe("static splash in index.html", () => {
 
     const label = document.getElementById("splash-label");
     expect(label).toHaveTextContent("Updating...");
-    expect(label).toHaveClass("text-amber-300");
+    expect(label).toHaveClass(colourAmberPlain);
     expect(label?.querySelectorAll("span")).toHaveLength(3);
   });
 
