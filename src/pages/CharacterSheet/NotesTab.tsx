@@ -78,7 +78,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       text: text.trim(),
       updatedAt: now,
     };
-    onSave([...entries, newEntry]);
+    onSave([...entries, newEntry], { optimistic: true });
     closeAll();
   }
 
@@ -94,7 +94,8 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
               updatedAt: new Date().toISOString(),
             }
           : entry
-      )
+      ),
+      { optimistic: true }
     );
     closeAll();
   }

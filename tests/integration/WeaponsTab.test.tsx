@@ -93,6 +93,103 @@ beforeEach(() => {
   useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: false, error: null });
 });
 
+describe("WeaponsTab upgrades", () => {
+  const customRanged: RangedWeapon = {
+    id: "w1",
+    name: "Custom Lasgun",
+    class: "Basic",
+    damage: "1d10+3 E",
+    range: "100m",
+    clip: "60",
+    pen: "0",
+    rld: "Full",
+    ammoType: "Las",
+    custom: true,
+  };
+  const customMelee: MeleeWeapon = {
+    id: "w2",
+    name: "Custom Chainsword",
+    class: "Melee",
+    damage: "1d10+3 R",
+    pen: "2",
+    custom: true,
+  };
+
+  function addButtonNear(labelText: string): HTMLElement {
+    const button = screen.getByText(labelText).parentElement!.querySelector("button");
+    if (!button) throw new Error(`No button found near label: ${labelText}`);
+    return button;
+  }
+
+  it("asks for an optimistic save when an upgrade is added to a ranged weapon", async () => {
+    const user = userEvent.setup();
+    const onUpdateRanged = vi.fn();
+    renderTab({ rangedWeapons: [customRanged], meleeWeapons: [], onUpdateRanged });
+
+    await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
+    await user.click(addButtonNear("Upgrades"));
+    await user.click(screen.getByText("Compact"));
+
+    expect(onUpdateRanged).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "w1", upgrades: ["cr-compact"] })],
+      { optimistic: true }
+    );
+  });
+
+  it("asks for an optimistic save when an upgrade is removed from a ranged weapon", async () => {
+    const user = userEvent.setup();
+    const onUpdateRanged = vi.fn();
+    renderTab({
+      rangedWeapons: [{ ...customRanged, upgrades: ["cr-compact"] }],
+      meleeWeapons: [],
+      onUpdateRanged,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
+    const compactLabel = screen.getAllByText("Compact")[0];
+    await user.click(compactLabel.parentElement!.querySelector("button")!);
+
+    expect(onUpdateRanged).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "w1", upgrades: [] })],
+      { optimistic: true }
+    );
+  });
+
+  it("asks for an optimistic save when an upgrade is added to a melee weapon", async () => {
+    const user = userEvent.setup();
+    const onUpdateMelee = vi.fn();
+    renderTab({ rangedWeapons: [], meleeWeapons: [customMelee], onUpdateMelee });
+
+    await user.click(screen.getByRole("button", { name: "Expand Custom Chainsword details" }));
+    await user.click(screen.getByRole("button", { name: "Add upgrade" }));
+    await user.click(screen.getByText("Mono"));
+
+    expect(onUpdateMelee).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "w2", upgrades: ["cr-mono"] })],
+      { optimistic: true }
+    );
+  });
+
+  it("asks for an optimistic save when an upgrade is removed from a melee weapon", async () => {
+    const user = userEvent.setup();
+    const onUpdateMelee = vi.fn();
+    renderTab({
+      rangedWeapons: [],
+      meleeWeapons: [{ ...customMelee, upgrades: ["cr-mono"] }],
+      onUpdateMelee,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Expand Custom Chainsword details" }));
+    const monoLabel = screen.getAllByText("Mono")[0];
+    await user.click(monoLabel.parentElement!.querySelector("button")!);
+
+    expect(onUpdateMelee).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "w2", upgrades: [] })],
+      { optimistic: true }
+    );
+  });
+});
+
 describe("WeaponsTab", () => {
   it("does not rebuild owned weapon cards when a picker opens and closes", async () => {
     const user = userEvent.setup();

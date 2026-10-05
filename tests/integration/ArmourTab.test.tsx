@@ -187,9 +187,29 @@ describe("ArmourTab", () => {
     fireEvent.click(within(upgradeHeader).getByRole("button", { name: "Add upgrade" }));
     fireEvent.click(screen.getByText("Hexagramatic Wards"));
 
-    expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ upgrades: ["ih-hexagramatic-wards"] }),
-    ]);
+    expect(onUpdate).toHaveBeenCalledWith(
+      [expect.objectContaining({ upgrades: ["ih-hexagramatic-wards"] })],
+      { optimistic: true }
+    );
+  });
+
+  it("asks for an optimistic update when an upgrade is removed from armour", () => {
+    const armour = [
+      piece({
+        referenceId: "cr-power-armour",
+        name: "Power Armour",
+        locations: ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"],
+        upgrades: ["ih-hexagramatic-wards"],
+      }),
+    ];
+    const { onUpdate } = renderTab({ armour });
+
+    const wardsLabel = screen.getAllByText("Hexagramatic Wards")[0];
+    fireEvent.click(wardsLabel.parentElement!.querySelector("button")!);
+
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ upgrades: [] })], {
+      optimistic: true,
+    });
   });
 
   it("asks for an optimistic update when a worn piece is stowed", () => {

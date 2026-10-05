@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
+import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type {
   CorruptionBlock,
@@ -55,7 +56,7 @@ import {
 interface CorruptionPanelProps {
   corruption?: CorruptionBlock;
   editable: boolean;
-  onUpdate: (next: CorruptionBlock) => void;
+  onUpdate: (next: CorruptionBlock, options?: PatchOptions) => void;
   sectionClassName: string;
 }
 
@@ -355,77 +356,98 @@ export function CorruptionPanel({
 
   const handleAddMalignancy = useCallback(
     (entry: CorruptionMalignancyEntry) =>
-      onUpdate({
-        ...value,
-        malignancies: [...structuredMalignancies, entry],
-        malignancyNotes: legacyMalignancies.trim() ? legacyMalignancies : value.malignancyNotes,
-      }),
+      onUpdate(
+        {
+          ...value,
+          malignancies: [...structuredMalignancies, entry],
+          malignancyNotes: legacyMalignancies.trim() ? legacyMalignancies : value.malignancyNotes,
+        },
+        { optimistic: true }
+      ),
     [value, structuredMalignancies, legacyMalignancies, onUpdate]
   );
 
   const handleRemoveMalignancy = useCallback(
     (id: string) =>
-      onUpdate({
-        ...value,
-        malignancies: structuredMalignancies.filter((entry) => entry.id !== id),
-      }),
+      onUpdate(
+        {
+          ...value,
+          malignancies: structuredMalignancies.filter((entry) => entry.id !== id),
+        },
+        { optimistic: true }
+      ),
     [value, structuredMalignancies, onUpdate]
   );
 
   const handleUpdateMalignancyRolls = useCallback(
     (id: string, rolledModifiers: Record<string, number>) =>
-      onUpdate({
-        ...value,
-        malignancies: structuredMalignancies.map((entry) =>
-          entry.id === id ? { ...entry, rolledModifiers } : entry
-        ),
-      }),
+      onUpdate(
+        {
+          ...value,
+          malignancies: structuredMalignancies.map((entry) =>
+            entry.id === id ? { ...entry, rolledModifiers } : entry
+          ),
+        },
+        { optimistic: true }
+      ),
     [value, structuredMalignancies, onUpdate]
   );
 
   const handleAddMinorMutation = useCallback(
     (entry: CorruptionMutationEntry) =>
-      onUpdate({ ...value, minorMutations: [...minorMutations, entry] }),
+      onUpdate({ ...value, minorMutations: [...minorMutations, entry] }, { optimistic: true }),
     [value, minorMutations, onUpdate]
   );
 
   const handleRemoveMinorMutation = useCallback(
     (id: string) =>
-      onUpdate({ ...value, minorMutations: minorMutations.filter((entry) => entry.id !== id) }),
+      onUpdate(
+        { ...value, minorMutations: minorMutations.filter((entry) => entry.id !== id) },
+        { optimistic: true }
+      ),
     [value, minorMutations, onUpdate]
   );
 
   const handleUpdateMinorMutationRolls = useCallback(
     (id: string, rolledModifiers: Record<string, number>) =>
-      onUpdate({
-        ...value,
-        minorMutations: minorMutations.map((entry) =>
-          entry.id === id ? { ...entry, rolledModifiers } : entry
-        ),
-      }),
+      onUpdate(
+        {
+          ...value,
+          minorMutations: minorMutations.map((entry) =>
+            entry.id === id ? { ...entry, rolledModifiers } : entry
+          ),
+        },
+        { optimistic: true }
+      ),
     [value, minorMutations, onUpdate]
   );
 
   const handleAddMajorMutation = useCallback(
     (entry: CorruptionMutationEntry) =>
-      onUpdate({ ...value, majorMutations: [...majorMutations, entry] }),
+      onUpdate({ ...value, majorMutations: [...majorMutations, entry] }, { optimistic: true }),
     [value, majorMutations, onUpdate]
   );
 
   const handleRemoveMajorMutation = useCallback(
     (id: string) =>
-      onUpdate({ ...value, majorMutations: majorMutations.filter((entry) => entry.id !== id) }),
+      onUpdate(
+        { ...value, majorMutations: majorMutations.filter((entry) => entry.id !== id) },
+        { optimistic: true }
+      ),
     [value, majorMutations, onUpdate]
   );
 
   const handleUpdateMajorMutationRolls = useCallback(
     (id: string, rolledModifiers: Record<string, number>) =>
-      onUpdate({
-        ...value,
-        majorMutations: majorMutations.map((entry) =>
-          entry.id === id ? { ...entry, rolledModifiers } : entry
-        ),
-      }),
+      onUpdate(
+        {
+          ...value,
+          majorMutations: majorMutations.map((entry) =>
+            entry.id === id ? { ...entry, rolledModifiers } : entry
+          ),
+        },
+        { optimistic: true }
+      ),
     [value, majorMutations, onUpdate]
   );
 

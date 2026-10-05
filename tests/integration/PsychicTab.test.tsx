@@ -283,8 +283,38 @@ describe("PsychicTab", () => {
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         minorPowers: [expect.objectContaining({ name: "Fake Minor Power", isMinor: true })],
-      })
+      }),
+      { optimistic: true }
     );
+  });
+
+  it("moves on from a purchased pick without waiting for the save to finish", async () => {
+    const user = userEvent.setup();
+    const talents: TalentsAndTraitsBlock = {
+      ...emptyTalents,
+      talents: [
+        { uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" },
+      ],
+    };
+    renderTab({ talents, onUpdate: vi.fn(() => new Promise<void>(() => undefined)) });
+
+    await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
+    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
+    await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
+
+    expect(screen.queryByRole("dialog", { name: "Add Psychic Power" })).not.toBeInTheDocument();
+  });
+
+  it("keeps both powers when two are picked in quick succession", async () => {
+    const user = userEvent.setup();
+    render(<StatefulPsychicTab />);
+    await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
+    await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
+    await user.click(await screen.findByRole("button", { name: "Select Second Fake Minor Power" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Add Psychic Power" });
+    expect(within(dialog).queryByText("Fake Minor Power")).not.toBeInTheDocument();
+    expect(within(dialog).queryByText("Second Fake Minor Power")).not.toBeInTheDocument();
   });
 
   it("keeps the Psychic picker open and removes an added finite power", async () => {
@@ -392,7 +422,8 @@ describe("PsychicTab", () => {
             customLibraryVersionId: "lib-version-1",
           }),
         ],
-      })
+      }),
+      { optimistic: true }
     );
   });
 
@@ -597,7 +628,8 @@ describe("PsychicTab", () => {
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         minorPowers: [expect.objectContaining({ talentEntryUid: "minor-purchase-1" })],
-      })
+      }),
+      { optimistic: true }
     );
   });
 
@@ -752,7 +784,8 @@ describe("PsychicTab", () => {
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         majorPowers: [expect.objectContaining({ talentEntryUid: "major-purchase-1" })],
-      })
+      }),
+      { optimistic: true }
     );
   });
 
@@ -779,7 +812,9 @@ describe("PsychicTab", () => {
     const { onUpdate } = renderTab({ talents, psychic });
     await user.click(screen.getAllByRole("button", { name: "Delete Linked Minor" })[0]);
     await user.click(screen.getByRole("button", { name: "Delete" }));
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorPowers: [] }));
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorPowers: [] }), {
+      optimistic: true,
+    });
     expect(talents.talents).toHaveLength(1);
   });
 
@@ -817,7 +852,8 @@ describe("PsychicTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Delete Fake Minor Power" }).at(-1)!);
     await user.click(screen.getAllByRole("button", { name: "Delete" }).at(-1)!);
     expect(linkedRender.onUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ minorPowers: [] })
+      expect.objectContaining({ minorPowers: [] }),
+      { optimistic: true }
     );
   });
 
@@ -883,7 +919,8 @@ describe("PsychicTab", () => {
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         majorPowers: [expect.objectContaining({ psyRatingTalentEntryUid: "psy-rating-purchase" })],
-      })
+      }),
+      { optimistic: true }
     );
   });
 });

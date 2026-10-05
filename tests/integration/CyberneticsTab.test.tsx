@@ -387,18 +387,24 @@ describe("CyberneticsTab", () => {
     await user.click(screen.getByText("Mock Select Concealed Weapon Bionic"));
     await user.click(screen.getByText("Mock Complete Concealed Install"));
 
-    expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({
-        name: "Concealed Weapon Bionic",
-        concealedWeapon: { armId: "arm-1", weaponId: "ranged-1", weaponType: "ranged" },
-      }),
-    ]);
-    expect(onUpdateRanged).toHaveBeenCalledWith([
-      expect.objectContaining({
-        id: "ranged-1",
-        concealedBionic: { cyberneticId: expect.any(String), craftsmanship: "Common" },
-      }),
-    ]);
+    expect(onUpdate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          name: "Concealed Weapon Bionic",
+          concealedWeapon: { armId: "arm-1", weaponId: "ranged-1", weaponType: "ranged" },
+        }),
+      ],
+      { optimistic: true }
+    );
+    expect(onUpdateRanged).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          id: "ranged-1",
+          concealedBionic: { cyberneticId: expect.any(String), craftsmanship: "Common" },
+        }),
+      ],
+      { optimistic: true }
+    );
   });
 
   it("cycles an implant's quality", async () => {
@@ -409,7 +415,9 @@ describe("CyberneticsTab", () => {
     // The row renders twice (mobile-column copy + desktop-grid copy).
     await user.click(screen.getAllByText("Cycle Auto-Quill")[0]);
 
-    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "c1" })]);
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "c1" })], {
+      optimistic: true,
+    });
   });
 
   it("cycling a concealed-weapon implant's quality also updates the linked weapon", async () => {
@@ -432,12 +440,15 @@ describe("CyberneticsTab", () => {
 
     await user.click(screen.getAllByText("Cycle Concealed Weapon Bionic")[0]);
 
-    expect(onUpdateRanged).toHaveBeenCalledWith([
-      expect.objectContaining({
-        id: "ranged-1",
-        concealedBionic: expect.objectContaining({ cyberneticId: "c1" }),
-      }),
-    ]);
+    expect(onUpdateRanged).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          id: "ranged-1",
+          concealedBionic: expect.objectContaining({ cyberneticId: "c1" }),
+        }),
+      ],
+      { optimistic: true }
+    );
   });
 
   it("installs a custom cybernetic from the campaign library", async () => {
@@ -449,9 +460,10 @@ describe("CyberneticsTab", () => {
     await user.click(screen.getByText("Mock Select Library Implant"));
     await user.click(screen.getByText("Mock Submit Custom Implant"));
 
-    expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ customLibraryId: "custom-lib-1", customLibraryVersionId: "v1" }),
-    ]);
+    expect(onUpdate).toHaveBeenCalledWith(
+      [expect.objectContaining({ customLibraryId: "custom-lib-1", customLibraryVersionId: "v1" })],
+      { optimistic: true }
+    );
   });
 
   it("creates a brand-new custom implant", async () => {

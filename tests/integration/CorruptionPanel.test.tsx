@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { CorruptionPanel } from "../../src/mechanics/corruption/CorruptionPanel";
+import { CORRUPTION_MALIGNANCIES } from "../../src/mechanics/corruption/corruptionReference";
+import { getRoll1d10Modifiers } from "../../src/mechanics/corruption/rollModifierValues";
 import type { CorruptionBlock } from "../../src/types/Character";
 
 function CorruptionWiring({
@@ -97,6 +99,115 @@ describe("CorruptionPanel picker wiring", () => {
     await user.click(findButtonNear("Major Mutations", "Add Major Mutation"));
 
     expect(screen.getByRole("dialog", { name: "Add Major Mutation" })).toBeInTheDocument();
+  });
+});
+
+describe("CorruptionPanel optimistic saves", () => {
+  const malignancy = { id: "m1", name: "Witch-mark", effect: "Custom effect.", custom: true };
+  const mutation = { id: "mm1", name: "Extra eye", effect: "Custom effect.", custom: true };
+
+  it("asks for an optimistic save when a malignancy is removed", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    render(
+      <CorruptionPanel
+        corruption={{ points: 20, malignancies: [malignancy] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ malignancies: [] }), {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic save when a minor mutation is removed", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    render(
+      <CorruptionPanel
+        corruption={{ points: 20, malignancies: [], minorMutations: [mutation] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorMutations: [] }), {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic save when a major mutation is removed", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    render(
+      <CorruptionPanel
+        corruption={{ points: 20, malignancies: [], majorMutations: [mutation] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(screen.getByRole("tab", { name: "Major Mutations" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ majorMutations: [] }), {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic save when a malignancy without rolls is added", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    const reference = CORRUPTION_MALIGNANCIES.find(
+      (entry) => getRoll1d10Modifiers(entry.modifiers).length === 0
+    )!;
+    render(
+      <CorruptionPanel
+        corruption={{ points: 0, malignancies: [] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(findButtonNear("Malignancies", "Add Malignancy"));
+    await user.click(screen.getByText(reference.name));
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        malignancies: [expect.objectContaining({ referenceId: reference.id })],
+      }),
+      { optimistic: true }
+    );
+  });
+
+  it("does not ask for an optimistic save when the points change", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    render(
+      <CorruptionPanel
+        corruption={{ points: 10, malignancies: [] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Increase" }));
+
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ points: 11 }));
   });
 });
 

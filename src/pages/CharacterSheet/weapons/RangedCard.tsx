@@ -2,6 +2,7 @@
 // RangedCard: see RangedPicker.tsx and CustomRangedForm.tsx for the weapon picker and custom-weapon form.
 
 import { useState } from "react";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import type {
   RangedWeapon,
   WeaponAmmoEntry,
@@ -124,9 +125,13 @@ export function RangedCard({
   onRemove: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
-  onUpdateAmmoEntries: (entries: WeaponAmmoEntry[]) => void;
+  onUpdateAmmoEntries: (entries: WeaponAmmoEntry[], options?: PatchOptions) => void;
   onUpdateLoadedAmmoByProfile?: (profile: string, entryId: string) => void;
-  onUpdateMagazineSlots?: (slots: WeaponMagazineSlot[], activeSlotId?: string) => void;
+  onUpdateMagazineSlots?: (
+    slots: WeaponMagazineSlot[],
+    activeSlotId?: string,
+    options?: PatchOptions
+  ) => void;
   onUpdateQuantity: (qty: number) => void;
   grenades?: GrenadeItem[];
   onUpdateGrenades?: (next: GrenadeItem[]) => void;
@@ -330,18 +335,21 @@ export function RangedCard({
     const entryAmmoTracking: AmmoTrackingMode =
       isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? "clip" : ammoTracking;
     const usesUnitTracking = entryAmmoTracking === "clip" && usesUnitAmmoTracking(ammoRef);
-    onUpdateAmmoEntries([
-      ...ammoEntries,
-      {
-        id: crypto.randomUUID(),
-        referenceId,
-        name,
-        profile: isMultiProfileWeapon ? activeProfileKey : undefined,
-        clips: usesUnitTracking || isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? 1 : 0,
-        rounds: 0,
-        loaded: isFirst,
-      },
-    ]);
+    onUpdateAmmoEntries(
+      [
+        ...ammoEntries,
+        {
+          id: crypto.randomUUID(),
+          referenceId,
+          name,
+          profile: isMultiProfileWeapon ? activeProfileKey : undefined,
+          clips: usesUnitTracking || isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? 1 : 0,
+          rounds: 0,
+          loaded: isFirst,
+        },
+      ],
+      { optimistic: true }
+    );
   }
 
   function handleRemoveAmmo(entryId: string) {
@@ -360,7 +368,7 @@ export function RangedCard({
       const replacementIndex = next.findIndex((entry) => entry.id === replacement.id);
       next[replacementIndex] = { ...replacement, loaded: true };
     }
-    onUpdateAmmoEntries(next);
+    onUpdateAmmoEntries(next, { optimistic: true });
   }
 
   function handleSetLoaded(entryId: string) {
@@ -368,7 +376,10 @@ export function RangedCard({
       onUpdateLoadedAmmoByProfile(activeProfileKey, entryId);
       return;
     }
-    onUpdateAmmoEntries(ammoEntries.map((e) => ({ ...e, loaded: e.id === entryId })));
+    onUpdateAmmoEntries(
+      ammoEntries.map((e) => ({ ...e, loaded: e.id === entryId })),
+      { optimistic: true }
+    );
   }
 
   function handleUpdateEntry(entryId: string, patch: Partial<WeaponAmmoEntry>) {
@@ -379,11 +390,11 @@ export function RangedCard({
     const next = magazineSlots.map((slot) =>
       slot.id === slotId ? { ...slot, name, referenceId, rounds: magazineCapacity } : slot
     );
-    onUpdateMagazineSlots?.(next, weapon.activeMagazineSlotId ?? slotId);
+    onUpdateMagazineSlots?.(next, weapon.activeMagazineSlotId ?? slotId, { optimistic: true });
   }
 
   function handleSelectActiveMagazine(slotId: string) {
-    onUpdateMagazineSlots?.(magazineSlots, slotId);
+    onUpdateMagazineSlots?.(magazineSlots, slotId, { optimistic: true });
   }
 
   function handleUpdateMagazineRounds(slotId: string, rounds: number) {

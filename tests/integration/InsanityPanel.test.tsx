@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -379,6 +379,74 @@ describe("InsanityPanel delete confirmation", () => {
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
     expect(screen.queryByText("Withdrawn and Quiet", { selector: "span" })).not.toBeInTheDocument();
+  });
+});
+
+describe("InsanityPanel optimistic saves", () => {
+  const disorder = {
+    id: "d1",
+    referenceId: "phobia-fear-of-the-dead",
+    type: "Phobia" as const,
+    name: "Fear of the Dead",
+    severity: "Minor" as const,
+  };
+
+  function renderPanel(insanity: InsanityBlock) {
+    const onUpdate = vi.fn();
+    render(<InsanityPanel insanity={insanity} editable onUpdate={onUpdate} sectionClassName="" />);
+    return onUpdate;
+  }
+
+  it("asks for an optimistic save when a disorder is removed", async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderPanel({ points: 20, disorders: [disorder] });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ disorders: [] }), {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic save when a disorder is escalated", async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderPanel({ points: 20, disorders: [disorder] });
+
+    await user.click(screen.getAllByRole("button", { name: "Escalate to Severe" })[0]);
+    await user.click(screen.getByRole("button", { name: "Escalate" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ disorders: [expect.objectContaining({ severity: "Severe" })] }),
+      { optimistic: true }
+    );
+  });
+
+  it("asks for an optimistic save when a trauma is removed", async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderPanel({
+      points: 0,
+      disorders: [],
+      currentTrauma: [
+        { id: "t1", referenceId: "01-40", roll: "01-40", name: "Withdrawn and Quiet" },
+      ],
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ currentTrauma: [] }), {
+      optimistic: true,
+    });
+  });
+
+  it("does not ask for an optimistic save when the points change", async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderPanel({ points: 9, disorders: [] });
+
+    await user.click(screen.getByRole("button", { name: "Increase" }));
+
+    expect(onUpdate).toHaveBeenLastCalledWith(expect.objectContaining({ points: 10 }));
   });
 });
 

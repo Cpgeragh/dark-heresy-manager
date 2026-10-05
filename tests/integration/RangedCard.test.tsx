@@ -1,6 +1,6 @@
 // tests/integration/RangedCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -158,13 +158,16 @@ describe("RangedCard ammo picker", () => {
     await user.click(addButtonNear("Ammo"));
     expect(screen.getByText("Add Ammo Type")).toBeInTheDocument();
     await user.click(screen.getByText("Charge Pack (Pistol)"));
-    expect(onUpdateAmmoEntries).toHaveBeenCalledWith([
-      expect.objectContaining({
-        referenceId: "cr-charge-pack-pistol",
-        name: "Charge Pack (Pistol)",
-        loaded: true,
-      }),
-    ]);
+    expect(onUpdateAmmoEntries).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          referenceId: "cr-charge-pack-pistol",
+          name: "Charge Pack (Pistol)",
+          loaded: true,
+        }),
+      ],
+      { optimistic: true }
+    );
   });
 
   it("adds a custom/unlisted ammo type", async () => {
@@ -173,8 +176,69 @@ describe("RangedCard ammo picker", () => {
     await user.click(addButtonNear("Ammo"));
     await user.type(screen.getByPlaceholderText("Ammo name…"), "Homemade Slugs");
     await user.click(screen.getByRole("button", { name: "Add" }));
-    expect(onUpdateAmmoEntries).toHaveBeenCalledWith([
-      expect.objectContaining({ name: "Homemade Slugs", referenceId: undefined, loaded: true }),
-    ]);
+    expect(onUpdateAmmoEntries).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: "Homemade Slugs", referenceId: undefined, loaded: true })],
+      { optimistic: true }
+    );
+  });
+});
+
+describe("RangedCard ammo optimistic saves", () => {
+  const entries = [
+    {
+      id: "e1",
+      referenceId: "cr-charge-pack-pistol",
+      name: "Charge Pack (Pistol)",
+      clips: 1,
+      rounds: 0,
+      loaded: true,
+    },
+    {
+      id: "e2",
+      referenceId: "cr-charge-pack-basic",
+      name: "Charge Pack (Basic)",
+      clips: 0,
+      rounds: 5,
+      loaded: false,
+    },
+  ];
+
+  it("asks for an optimistic save when an ammo type is removed", async () => {
+    const user = userEvent.setup();
+    const { onUpdateAmmoEntries } = renderCard({ weapon: { ...baseWeapon, ammoEntries: entries } });
+
+    const removeButtons = screen.getAllByRole("button", { name: "Remove" });
+    await user.click(removeButtons[removeButtons.length - 1]);
+
+    expect(onUpdateAmmoEntries).toHaveBeenCalledWith([expect.objectContaining({ id: "e1" })], {
+      optimistic: true,
+    });
+  });
+
+  it("asks for an optimistic save when a different ammo type is marked as loaded", async () => {
+    const user = userEvent.setup();
+    const { onUpdateAmmoEntries } = renderCard({ weapon: { ...baseWeapon, ammoEntries: entries } });
+
+    await user.click(screen.getByRole("button", { name: "Mark Charge Pack (Basic) as loaded" }));
+
+    expect(onUpdateAmmoEntries).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({ id: "e1", loaded: false }),
+        expect.objectContaining({ id: "e2", loaded: true }),
+      ],
+      { optimistic: true }
+    );
+  });
+
+  it("does not ask for an optimistic save when a round count changes", async () => {
+    const user = userEvent.setup();
+    const { onUpdateAmmoEntries } = renderCard({ weapon: { ...baseWeapon, ammoEntries: entries } });
+
+    await user.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]);
+
+    await waitFor(() => expect(onUpdateAmmoEntries).toHaveBeenCalled());
+    for (const call of onUpdateAmmoEntries.mock.calls) {
+      expect(call[1]).toBeUndefined();
+    }
   });
 });

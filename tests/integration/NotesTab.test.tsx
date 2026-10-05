@@ -48,6 +48,40 @@ describe("NotesTab adding notes", () => {
   });
 });
 
+describe("NotesTab optimistic add", () => {
+  it("closes the add form straight away and asks for an optimistic save", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onSave = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<NotesTab notes={[]} editable onSave={onSave} />);
+
+    await user.click(screen.getByRole("button", { name: "Add Note" }));
+    await user.type(screen.getByPlaceholderText("e.g. Session 12, Inquisitor Varn…"), "General");
+    await user.type(
+      screen.getByPlaceholderText("What do you want to remember…"),
+      "Some reminders."
+    );
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Add Note" })).getByRole("button", {
+        name: "Add Note",
+      })
+    );
+
+    expect(onSave).toHaveBeenCalledWith(
+      [expect.objectContaining({ title: "General", text: "Some reminders." })],
+      { optimistic: true }
+    );
+    expect(screen.queryByRole("dialog", { name: "Add Note" })).not.toBeInTheDocument();
+
+    await act(async () => finish());
+  });
+});
+
 describe("NotesTab search", () => {
   function twoEntries(): NoteEntry[] {
     return [
@@ -177,6 +211,32 @@ describe("NotesTab editing and deleting", () => {
     await user.click(screen.getByRole("button", { name: "Delete" }));
     expect(screen.queryByText("Session 12")).not.toBeInTheDocument();
     expect(screen.getByText("No notes yet.")).toBeInTheDocument();
+  });
+
+  it("closes the edit form straight away and asks for an optimistic save", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onSave = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<NotesTab notes={oneEntry()} editable onSave={onSave} />);
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const titleInput = screen.getByPlaceholderText("e.g. Session 12, Inquisitor Varn…");
+    await user.clear(titleInput);
+    await user.type(titleInput, "Session 12 (updated)");
+    await user.click(screen.getByRole("button", { name: "Save Note" }));
+
+    expect(onSave).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "n1", title: "Session 12 (updated)" })],
+      { optimistic: true }
+    );
+    expect(screen.queryByRole("dialog", { name: "Edit Note" })).not.toBeInTheDocument();
+
+    await act(async () => finish());
   });
 
   it("closes the delete dialog straight away and asks for an optimistic save", async () => {

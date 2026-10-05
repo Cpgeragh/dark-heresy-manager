@@ -356,7 +356,8 @@ export function ArmourTab({
           piece.id === pieceId
             ? { ...piece, upgrades: [...(piece.upgrades ?? []), upgradeId] }
             : piece
-        )
+        ),
+        { optimistic: true }
       );
     },
     [armour, editable, onUpdate]
@@ -370,7 +371,8 @@ export function ArmourTab({
           piece.id === pieceId
             ? { ...piece, upgrades: (piece.upgrades ?? []).filter((id) => id !== upgradeId) }
             : piece
-        )
+        ),
+        { optimistic: true }
       );
     },
     [armour, editable, onUpdate]

@@ -40,7 +40,8 @@ describe("BackgroundTab", () => {
 
       expect(onUpdateHeader).toHaveBeenCalledOnce();
       expect(onUpdateHeader).toHaveBeenCalledWith(
-        expect.objectContaining({ playerName: "Cormac Vale" })
+        expect.objectContaining({ playerName: "Cormac Vale" }),
+        { optimistic: true }
       );
     } finally {
       vi.useRealTimers();
@@ -350,7 +351,8 @@ describe("BackgroundTab", () => {
     await user.click(screen.getByText("“Trust in your fear.”"));
 
     expect(onUpdateHeader).toHaveBeenCalledWith(
-      expect.objectContaining({ divination: "Trust in your fear." })
+      expect.objectContaining({ divination: "Trust in your fear." }),
+      { optimistic: true }
     );
   });
 
@@ -468,7 +470,9 @@ describe("BackgroundTab", () => {
     const { onUpdateHeader } = renderTab();
     await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
     await user.click(screen.getByText("Tan"));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ skin: "Tan" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ skin: "Tan" }), {
+      optimistic: true,
+    });
   });
 
   it("selects a hair option", async () => {
@@ -476,7 +480,9 @@ describe("BackgroundTab", () => {
     const { onUpdateHeader } = renderTab();
     await user.click(screen.getAllByRole("button", { name: "Select Hair" })[0]);
     await user.click(screen.getByText("Auburn"));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ hair: "Auburn" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ hair: "Auburn" }), {
+      optimistic: true,
+    });
   });
 
   it("selects an eyes option", async () => {
@@ -484,7 +490,9 @@ describe("BackgroundTab", () => {
     const { onUpdateHeader } = renderTab();
     await user.click(screen.getAllByRole("button", { name: "Select Eyes" })[0]);
     await user.click(screen.getByText("Violet"));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ eyes: "Violet" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ eyes: "Violet" }), {
+      optimistic: true,
+    });
   });
 
   it("adds a quirk", async () => {
@@ -492,7 +500,9 @@ describe("BackgroundTab", () => {
     const { onUpdateHeader } = renderTab();
     await user.click(screen.getAllByRole("button", { name: "Add Quirk" })[0]);
     await user.click(screen.getByText("Bald"));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Bald"] }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Bald"] }), {
+      optimistic: true,
+    });
   });
 
   it("keeps the quirk picker open after adding one, so multiple can be added", async () => {
@@ -517,7 +527,9 @@ describe("BackgroundTab", () => {
       header: { characterName: "Brother Corvus", quirks: ["Bald", "Hairy"] },
     });
     await user.click(screen.getAllByRole("button", { name: "Remove Bald" })[0]);
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Hairy"] }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Hairy"] }), {
+      optimistic: true,
+    });
   });
 
   it("accepts a valid whole-number age and rejects zero", async () => {
@@ -600,7 +612,9 @@ describe("BackgroundTab", () => {
     const { onUpdateHeader } = renderTab();
     await user.click(screen.getAllByRole("button", { name: "Select Gender" })[0]);
     await user.click(screen.getByRole("button", { name: "Female" }));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Female" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Female" }), {
+      optimistic: true,
+    });
   });
 
   it("selects Other as a standalone value when left blank", async () => {
@@ -609,7 +623,9 @@ describe("BackgroundTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Select Gender" })[0]);
     await user.click(screen.getByRole("button", { name: "Other" }));
     await user.click(screen.getByRole("button", { name: "Use This" }));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Other" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Other" }), {
+      optimistic: true,
+    });
   });
 
   it("lets a custom name be typed for Other", async () => {
@@ -619,7 +635,9 @@ describe("BackgroundTab", () => {
     await user.click(screen.getByRole("button", { name: "Other" }));
     fireEvent.change(screen.getByLabelText("Rename"), { target: { value: "Non-binary" } });
     await user.click(screen.getByRole("button", { name: "Use This" }));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Non-binary" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Non-binary" }), {
+      optimistic: true,
+    });
   });
 
   it("pre-fills the custom name when re-editing an existing custom gender", async () => {
@@ -655,7 +673,8 @@ describe("BackgroundTab", () => {
     fireEvent.change(screen.getByLabelText("Colour"), { target: { value: "Blue" } });
     await user.click(screen.getByRole("button", { name: "Use This" }));
     expect(onUpdateHeader).toHaveBeenCalledWith(
-      expect.objectContaining({ skin: "Stained (Blue)" })
+      expect.objectContaining({ skin: "Stained (Blue)" }),
+      { optimistic: true }
     );
   });
 
@@ -665,6 +684,9 @@ describe("BackgroundTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
     await user.click(screen.getByText("Stained (any)"));
     await user.click(screen.getByRole("button", { name: "Use This" }));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ skin: "Stained (any)" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ skin: "Stained (any)" }),
+      { optimistic: true }
+    );
   });
 });

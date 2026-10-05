@@ -1,7 +1,8 @@
 // src/pages/CharacterSheet/PsychicTab/index.tsx
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import type { PsychicBlock, PsychicPower, TalentsAndTraitsBlock } from "../../../types/Character";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import {
   PSYCHIC_DISCIPLINES,
@@ -60,7 +61,7 @@ interface PsychicTabProps {
   talents: TalentsAndTraitsBlock;
   psyRating: number;
   editable: boolean;
-  onUpdate: (next: PsychicBlock) => void | Promise<void>;
+  onUpdate: (next: PsychicBlock, options?: PatchOptions) => void | Promise<void>;
 }
 
 type PickerTarget = "minor" | "major" | null;
@@ -153,8 +154,6 @@ export function PsychicTab({
     string | undefined
   >();
   const [psyRatingModeTarget, setPsyRatingModeTarget] = useState<PickerTarget>(null);
-  const [powerSelectionBusy, setPowerSelectionBusy] = useState(false);
-  const powerSelectionBusyRef = useRef(false);
   const [customTarget, setCustomTarget] = useState<PickerTarget>(null);
   const [editingCustomPower, setEditingCustomPower] = useState<EditingCustomPower>(null);
   const [activePowerGroup, setActivePowerGroup] = useState<PowerGroup>(() =>
@@ -248,10 +247,13 @@ export function PsychicTab({
   const removeMinorPower = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate({
-        ...psychic,
-        minorPowers: psychic.minorPowers.filter((p) => p.id !== id),
-      });
+      onUpdate(
+        {
+          ...psychic,
+          minorPowers: psychic.minorPowers.filter((p) => p.id !== id),
+        },
+        { optimistic: true }
+      );
     },
     [editable, psychic, onUpdate]
   );
@@ -259,20 +261,21 @@ export function PsychicTab({
   const removeMajorPower = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate({
-        ...psychic,
-        majorPowers: psychic.majorPowers.filter((p) => p.id !== id),
-      });
+      onUpdate(
+        {
+          ...psychic,
+          majorPowers: psychic.majorPowers.filter((p) => p.id !== id),
+        },
+        { optimistic: true }
+      );
     },
     [editable, psychic, onUpdate]
   );
 
   /** Add a power from the reference picker */
   const fromReference = useCallback(
-    async (ref: PsychicPowerRef) => {
-      if (!editable || powerSelectionBusyRef.current) return;
-      powerSelectionBusyRef.current = true;
-      setPowerSelectionBusy(true);
+    (ref: PsychicPowerRef) => {
+      if (!editable) return;
       const newPower: PsychicPower = {
         id: crypto.randomUUID(),
         name: ref.name,
@@ -291,23 +294,18 @@ export function PsychicTab({
           : {}),
       };
       const type = ref.discipline === "Minor" ? "minorPowers" : "majorPowers";
-      try {
-        await onUpdate({
+      onUpdate(
+        {
           ...psychic,
           [type]: [...psychic[type], newPower],
-        });
-        advancePurchasedPowerMode(
-          type === "minorPowers" ? "minor" : "major",
-          pendingTalentEntryUid
-        );
-        advancePsyRatingGrantMode(
-          type === "minorPowers" ? "minor" : "major",
-          pendingPsyRatingTalentEntryUid
-        );
-      } finally {
-        powerSelectionBusyRef.current = false;
-        setPowerSelectionBusy(false);
-      }
+        },
+        { optimistic: true }
+      );
+      advancePurchasedPowerMode(type === "minorPowers" ? "minor" : "major", pendingTalentEntryUid);
+      advancePsyRatingGrantMode(
+        type === "minorPowers" ? "minor" : "major",
+        pendingPsyRatingTalentEntryUid
+      );
     },
     [
       editable,
@@ -322,8 +320,8 @@ export function PsychicTab({
 
   /** Add a power selected from the campaign's custom item library */
   const fromCustomLibrary = useCallback(
-    async (libraryItem: CampaignCustomItem<"power">) => {
-      if (!editable || powerSelectionBusyRef.current) return;
+    (libraryItem: CampaignCustomItem<"power">) => {
+      if (!editable) return;
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
@@ -332,8 +330,6 @@ export function PsychicTab({
         toast.error("This custom power has no usable version.");
         return;
       }
-      powerSelectionBusyRef.current = true;
-      setPowerSelectionBusy(true);
       const type = libraryItem.data.isMinor ? "minorPowers" : "majorPowers";
       const newPower: PsychicPower = {
         id: crypto.randomUUID(),
@@ -346,23 +342,18 @@ export function PsychicTab({
           ? { psyRatingTalentEntryUid: pendingPsyRatingTalentEntryUid }
           : {}),
       };
-      try {
-        await onUpdate({
+      onUpdate(
+        {
           ...psychic,
           [type]: [...psychic[type], newPower],
-        });
-        advancePurchasedPowerMode(
-          type === "minorPowers" ? "minor" : "major",
-          pendingTalentEntryUid
-        );
-        advancePsyRatingGrantMode(
-          type === "minorPowers" ? "minor" : "major",
-          pendingPsyRatingTalentEntryUid
-        );
-      } finally {
-        powerSelectionBusyRef.current = false;
-        setPowerSelectionBusy(false);
-      }
+        },
+        { optimistic: true }
+      );
+      advancePurchasedPowerMode(type === "minorPowers" ? "minor" : "major", pendingTalentEntryUid);
+      advancePsyRatingGrantMode(
+        type === "minorPowers" ? "minor" : "major",
+        pendingPsyRatingTalentEntryUid
+      );
     },
     [
       editable,
@@ -519,7 +510,7 @@ export function PsychicTab({
       const purchase = available[0];
       if (!purchase) return;
       const next = linkPowerToTalentPurchase(psychic, talents, power.id, purchase.uid);
-      if (next !== psychic) onUpdate(next);
+      if (next !== psychic) onUpdate(next, { optimistic: true });
     },
     [editable, availableMinorPurchases, availableMajorPurchases, psychic, talents, onUpdate]
   );
@@ -537,7 +528,7 @@ export function PsychicTab({
       );
       if (!grant) return;
       const next = linkPowerToPsyRatingGrant(psychic, talents, power.id, grant.entry.uid);
-      if (next !== psychic) onUpdate(next);
+      if (next !== psychic) onUpdate(next, { optimistic: true });
     },
     [
       editable,
@@ -877,7 +868,6 @@ export function PsychicTab({
             (purchaseModeTarget === pickerTarget && !pendingTalentEntryUid) ||
             (psyRatingModeTarget === pickerTarget && !pendingPsyRatingTalentEntryUid)
           }
-          selectionBusy={powerSelectionBusy}
           onSelect={fromReference}
           onSelectCustomItem={fromCustomLibrary}
           onCustom={() => {

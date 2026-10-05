@@ -1,5 +1,6 @@
 // src/pages/CharacterSheet/InsanityTab.tsx
 
+import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import type { InsanityBlock, TalentsAndTraitsBlock } from "../../types/Character";
 import { uiSection } from "../../ui/styles/editableStyles";
 import { InsanityPanel } from "../../mechanics/insanity/InsanityPanel";
@@ -8,7 +9,7 @@ import { recordComponentRender } from "../../performance/performanceMetrics";
 interface InsanityTabProps {
   insanity: InsanityBlock;
   editable: boolean;
-  onUpdate: (next: InsanityBlock) => void;
+  onUpdate: (next: InsanityBlock, options?: PatchOptions) => void;
   talents?: TalentsAndTraitsBlock;
   career?: string;
 }

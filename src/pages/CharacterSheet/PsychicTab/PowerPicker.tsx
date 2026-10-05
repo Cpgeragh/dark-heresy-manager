@@ -55,7 +55,6 @@ export function PowerPicker({
   suspended = false,
   requiredDiscipline,
   selectionLocked = false,
-  selectionBusy = false,
 }: {
   excludeMinor?: boolean;
   minorOnly?: boolean;
@@ -70,7 +69,6 @@ export function PowerPicker({
   suspended?: boolean;
   requiredDiscipline?: string;
   selectionLocked?: boolean;
-  selectionBusy?: boolean;
 }) {
   recordComponentRender("PowerPicker");
   const [query, setQuery] = useState("");
@@ -181,7 +179,7 @@ export function PowerPicker({
         </div>
       }
       footer={
-        editable && !selectionLocked && !selectionBusy ? (
+        editable && !selectionLocked ? (
           <PickerCustomAction onClick={onCustom}>
             {minorOnly ? "Custom Minor Power" : "Custom Major Power"}
           </PickerCustomAction>
@@ -198,9 +196,7 @@ export function PowerPicker({
               pickerMode
               onRemove={() => undefined}
               onSelect={
-                editable && !selectionLocked && !selectionBusy
-                  ? () => onSelectCustomItem(entry.item)
-                  : undefined
+                editable && !selectionLocked ? () => onSelectCustomItem(entry.item) : undefined
               }
               selectLabel={`Select ${entry.item.name}`}
             />
@@ -211,11 +207,7 @@ export function PowerPicker({
               editable={false}
               pickerMode
               onRemove={() => undefined}
-              onSelect={
-                editable && !selectionLocked && !selectionBusy
-                  ? () => onSelect(entry.ref)
-                  : undefined
-              }
+              onSelect={editable && !selectionLocked ? () => onSelect(entry.ref) : undefined}
               selectLabel={`Select ${entry.ref.name}`}
             />
           )

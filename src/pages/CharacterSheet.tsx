@@ -401,7 +401,7 @@ export default function CharacterSheet({
   // ================================================================
 
   const handleUpdateHeader = useCallback(
-    (next: CharacterHeader) => patchField("header", next),
+    (next: CharacterHeader, options?: PatchOptions) => patchField("header", next, options),
     [patchField]
   );
 
@@ -413,12 +413,12 @@ export default function CharacterSheet({
   const handleUpdateFate = useCallback((next: FateBlock) => patchField("fate", next), [patchField]);
 
   const handleUpdateInsanity = useCallback(
-    (next: InsanityBlock) => patchField("insanity", next),
+    (next: InsanityBlock, options?: PatchOptions) => patchField("insanity", next, options),
     [patchField]
   );
 
   const handleUpdateCorruption = useCallback(
-    (next: CorruptionBlock) => patchField("corruption", next),
+    (next: CorruptionBlock, options?: PatchOptions) => patchField("corruption", next, options),
     [patchField]
   );
 
@@ -466,7 +466,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdatePsychic = useCallback(
-    (next: PsychicBlock) => patchField("psychic", next),
+    (next: PsychicBlock, options?: PatchOptions) => patchField("psychic", next, options),
     [patchField]
   );
 

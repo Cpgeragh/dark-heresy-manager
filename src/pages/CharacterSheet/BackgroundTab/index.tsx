@@ -1,6 +1,7 @@
 // src/pages/CharacterSheet/BackgroundTab/index.tsx
 
 import { useCallback, useState } from "react";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import type {
   CharacterHeader,
   CyberneticItem,
@@ -53,7 +54,7 @@ interface BackgroundTabProps {
   playerName: string | null;
   hasLivePlayerName: boolean;
   playerNameProfileUnresolved: boolean;
-  onUpdateHeader: (next: CharacterHeader) => void;
+  onUpdateHeader: (next: CharacterHeader, options?: PatchOptions) => void;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
@@ -141,8 +142,14 @@ export function BackgroundTab({
 
   // ── Header field helpers ───────────────────────────────────────────────────
   const updateHeaderField = useCallback(
-    <K extends keyof CharacterHeader>(key: K, value: CharacterHeader[K]) => {
-      onUpdateHeader({ ...header, [key]: value });
+    <K extends keyof CharacterHeader>(
+      key: K,
+      value: CharacterHeader[K],
+      options?: PatchOptions
+    ) => {
+      const next = { ...header, [key]: value };
+      if (options) onUpdateHeader(next, options);
+      else onUpdateHeader(next);
     },
     [header, onUpdateHeader]
   );
@@ -152,7 +159,7 @@ export function BackgroundTab({
     [updateHeaderField]
   );
   const handlePlayerName = useCallback(
-    (v: string) => updateHeaderField("playerName", v),
+    (v: string) => updateHeaderField("playerName", v, { optimistic: true }),
     [updateHeaderField]
   );
   const handleDescription = useCallback(
@@ -162,7 +169,7 @@ export function BackgroundTab({
 
   const handleDivinationSelect = useCallback(
     (divination: DivinationData) => {
-      updateHeaderField("divination", divination.result);
+      updateHeaderField("divination", divination.result, { optimistic: true });
       setShowDivinationPicker(false);
     },
     [updateHeaderField]
@@ -217,7 +224,8 @@ export function BackgroundTab({
     (quirk: string) => {
       updateHeaderField(
         "quirks",
-        (header.quirks ?? []).filter((q) => q !== quirk)
+        (header.quirks ?? []).filter((q) => q !== quirk),
+        { optimistic: true }
       );
     },
     [header.quirks, updateHeaderField]
@@ -577,7 +585,7 @@ export function BackgroundTab({
         <GenderPicker
           selected={header.gender}
           onSelect={(value) => {
-            updateHeaderField("gender", value);
+            updateHeaderField("gender", value, { optimistic: true });
             setShowGenderPicker(false);
           }}
           onClose={() => setShowGenderPicker(false)}
@@ -590,7 +598,7 @@ export function BackgroundTab({
           options={SKIN_OPTIONS}
           selected={header.skin}
           onSelect={(value) => {
-            updateHeaderField("skin", value);
+            updateHeaderField("skin", value, { optimistic: true });
             setShowSkinPicker(false);
           }}
           onClose={() => setShowSkinPicker(false)}
@@ -603,7 +611,7 @@ export function BackgroundTab({
           options={HAIR_OPTIONS}
           selected={header.hair}
           onSelect={(value) => {
-            updateHeaderField("hair", value);
+            updateHeaderField("hair", value, { optimistic: true });
             setShowHairPicker(false);
           }}
           onClose={() => setShowHairPicker(false)}
@@ -616,7 +624,7 @@ export function BackgroundTab({
           options={EYE_OPTIONS}
           selected={header.eyes}
           onSelect={(value) => {
-            updateHeaderField("eyes", value);
+            updateHeaderField("eyes", value, { optimistic: true });
             setShowEyesPicker(false);
           }}
           onClose={() => setShowEyesPicker(false)}
@@ -627,7 +635,7 @@ export function BackgroundTab({
         <QuirkPicker
           existing={header.quirks ?? []}
           onSelect={(quirk) => {
-            updateHeaderField("quirks", [...(header.quirks ?? []), quirk]);
+            updateHeaderField("quirks", [...(header.quirks ?? []), quirk], { optimistic: true });
           }}
           onClose={() => setShowQuirkPicker(false)}
         />

@@ -237,26 +237,30 @@ export function CyberneticsTab({
       if (!editable || !installingConcealedWeapon) return;
       const { ref, craftsmanship } = installingConcealedWeapon;
       const cyberneticId = crypto.randomUUID();
-      onUpdate([
-        ...cybernetics,
-        {
-          id: cyberneticId,
-          referenceId: ref.id,
-          name: ref.name,
-          craftsmanship,
-          value: craftsmanshipValue(ref, craftsmanship),
-          availability: craftsmanshipAvailability(ref, craftsmanship),
-          source: ref.source,
-          concealedWeapon: { armId, weaponId: weapon.id, weaponType: weapon.type },
-        },
-      ]);
+      onUpdate(
+        [
+          ...cybernetics,
+          {
+            id: cyberneticId,
+            referenceId: ref.id,
+            name: ref.name,
+            craftsmanship,
+            value: craftsmanshipValue(ref, craftsmanship),
+            availability: craftsmanshipAvailability(ref, craftsmanship),
+            source: ref.source,
+            concealedWeapon: { armId, weaponId: weapon.id, weaponType: weapon.type },
+          },
+        ],
+        { optimistic: true }
+      );
       if (weapon.type === "ranged") {
         onUpdateRanged(
           rangedWeapons.map((item) =>
             item.id === weapon.id
               ? { ...item, concealedBionic: { cyberneticId, craftsmanship } }
               : item
-          )
+          ),
+          { optimistic: true }
         );
       } else {
         onUpdateMelee(
@@ -264,7 +268,8 @@ export function CyberneticsTab({
             item.id === weapon.id
               ? { ...item, concealedBionic: { cyberneticId, craftsmanship } }
               : item
-          )
+          ),
+          { optimistic: true }
         );
       }
       setInstallingConcealedWeapon(null);
@@ -295,7 +300,8 @@ export function CyberneticsTab({
               item.id === current.concealedWeapon?.weaponId && item.concealedBionic
                 ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
                 : item
-            )
+            ),
+            { optimistic: true }
           );
         } else {
           onUpdateMelee(
@@ -303,7 +309,8 @@ export function CyberneticsTab({
               item.id === current.concealedWeapon?.weaponId && item.concealedBionic
                 ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
                 : item
-            )
+            ),
+            { optimistic: true }
           );
         }
       }
@@ -326,7 +333,8 @@ export function CyberneticsTab({
               ? { availability: craftsmanshipAvailability(ref, craftsmanship) }
               : {}),
           };
-        })
+        }),
+        { optimistic: true }
       );
     },
     [editable, cybernetics, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
@@ -374,7 +382,7 @@ export function CyberneticsTab({
   );
 
   const finishInstallCyberneticFromLibrary = useCallback(
-    async (item: CyberneticItem) => {
+    (item: CyberneticItem) => {
       if (!editable || !installingCustomCybernetic) return;
 
       const libraryItem = installingCustomCybernetic;
@@ -388,16 +396,19 @@ export function CyberneticsTab({
         return;
       }
 
-      await onUpdate([
-        ...cybernetics,
-        buildCyberneticSnapshot(
-          item.id,
-          item.bodyLocation,
-          libraryItem.data,
-          libraryItem.id,
-          versionId
-        ),
-      ]);
+      onUpdate(
+        [
+          ...cybernetics,
+          buildCyberneticSnapshot(
+            item.id,
+            item.bodyLocation,
+            libraryItem.data,
+            libraryItem.id,
+            versionId
+          ),
+        ],
+        { optimistic: true }
+      );
       setInstallingCustomCybernetic(null);
       setShowPicker(true);
     },
@@ -841,11 +852,12 @@ export function CyberneticsTab({
               onRemove={() => removeIntegratedRanged(weapon.id)}
               onAddUpgrade={() => {}}
               onRemoveUpgrade={() => {}}
-              onUpdateAmmoEntries={(entries) =>
+              onUpdateAmmoEntries={(entries, options) =>
                 onUpdateRanged(
                   rangedWeapons.map((current) =>
                     current.id === weapon.id ? { ...current, ammoEntries: entries } : current
-                  )
+                  ),
+                  options
                 )
               }
               onUpdateQuantity={(quantity) =>

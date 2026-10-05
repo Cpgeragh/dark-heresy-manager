@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
+import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type {
   InsanityBlock,
@@ -44,7 +45,7 @@ import {
 interface InsanityPanelProps {
   insanity?: InsanityBlock;
   editable: boolean;
-  onUpdate: (next: InsanityBlock) => void;
+  onUpdate: (next: InsanityBlock, options?: PatchOptions) => void;
   sectionClassName: string;
   talents?: TalentsAndTraitsBlock;
   career?: string;
@@ -217,46 +218,58 @@ export function InsanityPanel({
 
   const handleAddDisorder = useCallback(
     (entry: InsanityDisorderEntry) =>
-      onUpdate({
-        ...value,
-        disorders: [...structuredDisorders, entry],
-        disorderNotes: legacyDisorders.trim() ? legacyDisorders : value.disorderNotes,
-      }),
+      onUpdate(
+        {
+          ...value,
+          disorders: [...structuredDisorders, entry],
+          disorderNotes: legacyDisorders.trim() ? legacyDisorders : value.disorderNotes,
+        },
+        { optimistic: true }
+      ),
     [value, structuredDisorders, legacyDisorders, onUpdate]
   );
 
   const handleRemoveDisorder = useCallback(
     (id: string) =>
-      onUpdate({
-        ...value,
-        disorders: structuredDisorders.filter((entry) => entry.id !== id),
-      }),
+      onUpdate(
+        {
+          ...value,
+          disorders: structuredDisorders.filter((entry) => entry.id !== id),
+        },
+        { optimistic: true }
+      ),
     [value, structuredDisorders, onUpdate]
   );
 
   const handleEscalateDisorder = useCallback(
     (id: string, severity: InsanityDisorderSeverity) =>
-      onUpdate({
-        ...value,
-        disorders: structuredDisorders.map((entry) =>
-          entry.id === id ? { ...entry, severity } : entry
-        ),
-      }),
+      onUpdate(
+        {
+          ...value,
+          disorders: structuredDisorders.map((entry) =>
+            entry.id === id ? { ...entry, severity } : entry
+          ),
+        },
+        { optimistic: true }
+      ),
     [value, structuredDisorders, onUpdate]
   );
 
   const handleAddTrauma = useCallback(
     (entry: InsanityTraumaEntry) =>
-      onUpdate({ ...value, currentTrauma: [...structuredTrauma, entry] }),
+      onUpdate({ ...value, currentTrauma: [...structuredTrauma, entry] }, { optimistic: true }),
     [value, structuredTrauma, onUpdate]
   );
 
   const handleRemoveTrauma = useCallback(
     (id: string) =>
-      onUpdate({
-        ...value,
-        currentTrauma: structuredTrauma.filter((entry) => entry.id !== id),
-      }),
+      onUpdate(
+        {
+          ...value,
+          currentTrauma: structuredTrauma.filter((entry) => entry.id !== id),
+        },
+        { optimistic: true }
+      ),
     [value, structuredTrauma, onUpdate]
   );
 

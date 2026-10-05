@@ -2,6 +2,7 @@
 // MeleeCard: see MeleePicker.tsx and CustomMeleeForm.tsx for the weapon picker and custom-weapon form.
 
 import { useState, useEffect } from "react";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import type { MeleeWeapon, WeaponAmmoEntry } from "../../../types/Character";
 import { resolveMeleeWeaponReference } from "../../../data/reference/weaponReference";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
@@ -102,7 +103,11 @@ export function MeleeCard({
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
   onUpdateQuantity: (qty: number) => void;
-  onUpdateAlternateRangedAmmoEntries?: (entries: WeaponAmmoEntry[], loadedAmmoId?: string) => void;
+  onUpdateAlternateRangedAmmoEntries?: (
+    entries: WeaponAmmoEntry[],
+    loadedAmmoId?: string,
+    options?: PatchOptions
+  ) => void;
   allowUpgrades?: boolean;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
@@ -236,8 +241,12 @@ export function MeleeCard({
     weapon.class?.toLowerCase().includes("thrown") ||
     weaponRef?.class.toLowerCase().includes("thrown");
 
-  function updatePistolAmmo(entries: WeaponAmmoEntry[], loadedAmmoId?: string) {
-    onUpdateAlternateRangedAmmoEntries?.(entries, loadedAmmoId);
+  function updatePistolAmmo(
+    entries: WeaponAmmoEntry[],
+    loadedAmmoId?: string,
+    options?: PatchOptions
+  ) {
+    onUpdateAlternateRangedAmmoEntries?.(entries, loadedAmmoId, options);
   }
 
   function handleAddPistolAmmo(name: string, referenceId?: string) {
@@ -254,14 +263,16 @@ export function MeleeCard({
     };
     updatePistolAmmo(
       [...pistolAmmoEntries, entry],
-      entry.loaded ? entry.id : weapon.loadedAlternateRangedAmmoId
+      entry.loaded ? entry.id : weapon.loadedAlternateRangedAmmoId,
+      { optimistic: true }
     );
   }
 
   function handleSetLoadedPistolAmmo(entryId: string) {
     updatePistolAmmo(
       pistolAmmoEntries.map((entry) => ({ ...entry, loaded: entry.id === entryId })),
-      entryId
+      entryId,
+      { optimistic: true }
     );
   }
 
@@ -270,7 +281,8 @@ export function MeleeCard({
     const nextLoaded = next.find((entry) => entry.loaded) ?? next[0];
     updatePistolAmmo(
       next.map((entry) => ({ ...entry, loaded: entry.id === nextLoaded?.id })),
-      nextLoaded?.id
+      nextLoaded?.id,
+      { optimistic: true }
     );
   }
 

@@ -61,6 +61,56 @@ describe("MeleeCard upgrades", () => {
   });
 });
 
+describe("MeleeCard pistol ammo optimistic saves", () => {
+  const pistolSword: MeleeWeapon = {
+    id: "w2",
+    name: "Chimera Pistol Sword",
+    referenceId: "ih-chimera-pistol-sword",
+    class: "Melee (Primitive)",
+    damage: "1d10+1 R",
+    pen: "2",
+    alternateRangedAmmoEntries: [
+      { id: "e1", name: "Charge Pack (Pistol)", clips: 1, rounds: 0, loaded: true },
+      { id: "e2", name: "Homemade Slugs", clips: 0, rounds: 5, loaded: false },
+    ],
+  };
+
+  async function openPistolProfile(onUpdateAlternateRangedAmmoEntries = vi.fn()) {
+    const user = userEvent.setup();
+    renderCard({ weapon: pistolSword, onUpdateAlternateRangedAmmoEntries });
+    await user.click(screen.getByRole("button", { name: "Pistol" }));
+    return { user, onUpdateAlternateRangedAmmoEntries };
+  }
+
+  it("asks for an optimistic save when a different ammo type is marked as loaded", async () => {
+    const { user, onUpdateAlternateRangedAmmoEntries } = await openPistolProfile();
+
+    await user.click(screen.getByRole("button", { name: "Mark Homemade Slugs as loaded" }));
+
+    expect(onUpdateAlternateRangedAmmoEntries).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({ id: "e1", loaded: false }),
+        expect.objectContaining({ id: "e2", loaded: true }),
+      ],
+      "e2",
+      { optimistic: true }
+    );
+  });
+
+  it("asks for an optimistic save when an ammo type is removed", async () => {
+    const { user, onUpdateAlternateRangedAmmoEntries } = await openPistolProfile();
+
+    const removeButtons = screen.getAllByRole("button", { name: "Remove" });
+    await user.click(removeButtons[removeButtons.length - 1]);
+
+    expect(onUpdateAlternateRangedAmmoEntries).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "e1" })],
+      "e1",
+      { optimistic: true }
+    );
+  });
+});
+
 describe("MeleeCard equip toggle", () => {
   it("calls onToggleEquip when the equip button is clicked", async () => {
     const user = userEvent.setup();
