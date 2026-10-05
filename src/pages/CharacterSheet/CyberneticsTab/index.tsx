@@ -74,7 +74,7 @@ interface CyberneticsTabProps {
   meleeWeapons: MeleeWeapon[];
   strengthBonus?: number;
   editable: boolean;
-  onUpdate: (next: CyberneticItem[]) => void | Promise<void>;
+  onUpdate: (next: CyberneticItem[], options?: PatchOptions) => void | Promise<void>;
   onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void | Promise<void>;
   onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void | Promise<void>;
   archeotech?: ArcheotechItem[];
@@ -208,23 +208,26 @@ export function CyberneticsTab({
         setInstallingConcealedWeapon({ ref, craftsmanship: craftsmanship ?? "Common" });
         return;
       }
-      onUpdate([
-        ...cybernetics,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          ...(craftsmanship ? { craftsmanship } : {}),
-          ...(craftsmanship
-            ? { value: gmValue ?? craftsmanshipValue(ref, craftsmanship) }
-            : gmValue !== undefined
-              ? { value: gmValue }
-              : {}),
-          availability: gmRarity ?? ref.availability,
-          source: ref.source,
-          ...(bodyLocation ? { bodyLocation } : {}),
-        },
-      ]);
+      onUpdate(
+        [
+          ...cybernetics,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            ...(craftsmanship ? { craftsmanship } : {}),
+            ...(craftsmanship
+              ? { value: gmValue ?? craftsmanshipValue(ref, craftsmanship) }
+              : gmValue !== undefined
+                ? { value: gmValue }
+                : {}),
+            availability: gmRarity ?? ref.availability,
+            source: ref.source,
+            ...(bodyLocation ? { bodyLocation } : {}),
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, cybernetics, onUpdate]
   );
@@ -452,14 +455,19 @@ export function CyberneticsTab({
       onUpdateRanged(
         rangedWeapons.map((item) =>
           item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
-        )
+        ),
+        { optimistic: true }
       );
       onUpdateMelee(
         meleeWeapons.map((item) =>
           item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
-        )
+        ),
+        { optimistic: true }
       );
-      onUpdate(cybernetics.filter((c) => c.id !== id));
+      onUpdate(
+        cybernetics.filter((c) => c.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, cybernetics, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
   );
@@ -504,7 +512,10 @@ export function CyberneticsTab({
   const removeArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
+      onUpdateArcheotech(
+        (archeotech ?? []).filter((a) => a.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, archeotech, onUpdateArcheotech]
   );
@@ -513,30 +524,33 @@ export function CyberneticsTab({
     (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship = "Common") => {
       if (!editable) return;
       const specialRules = rangedRulesForCraftsmanship(ref.specialRules, craftsmanship);
-      onUpdateRanged([
-        ...rangedWeapons,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          class: ref.class,
-          type: ref.type,
-          range: ref.range,
-          rof: ref.rof,
-          damage: ref.damage,
-          pen: String(ref.pen),
-          clip: String(ref.clip),
-          rld: ref.reload,
-          specialRules,
-          weight: ref.weight,
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-          craftsmanship,
-          ammoTracking: ref.ammoTracking,
-          integrated: true,
-        },
-      ]);
+      onUpdateRanged(
+        [
+          ...rangedWeapons,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            class: ref.class,
+            type: ref.type,
+            range: ref.range,
+            rof: ref.rof,
+            damage: ref.damage,
+            pen: String(ref.pen),
+            clip: String(ref.clip),
+            rld: ref.reload,
+            specialRules,
+            weight: ref.weight,
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+            craftsmanship,
+            ammoTracking: ref.ammoTracking,
+            integrated: true,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -545,25 +559,28 @@ export function CyberneticsTab({
     (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship = "Common") => {
       if (!editable) return;
       const damage = meleeDamageForCraftsmanship(ref.damage, craftsmanship);
-      onUpdateMelee([
-        ...meleeWeapons,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
-          type: ref.type,
-          damage,
-          pen: String(ref.pen),
-          specialRules: ref.specialRules,
-          weight: ref.weight,
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-          craftsmanship,
-          integrated: true,
-        },
-      ]);
+      onUpdateMelee(
+        [
+          ...meleeWeapons,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
+            type: ref.type,
+            damage,
+            pen: String(ref.pen),
+            specialRules: ref.specialRules,
+            weight: ref.weight,
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+            craftsmanship,
+            integrated: true,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -677,7 +694,10 @@ export function CyberneticsTab({
   const removeIntegratedRanged = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.filter((w) => w.id !== id));
+      onUpdateRanged(
+        rangedWeapons.filter((w) => w.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -685,7 +705,10 @@ export function CyberneticsTab({
   const removeIntegratedMelee = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateMelee(meleeWeapons.filter((w) => w.id !== id));
+      onUpdateMelee(
+        meleeWeapons.filter((w) => w.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, meleeWeapons, onUpdateMelee]
   );

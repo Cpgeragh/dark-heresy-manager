@@ -509,7 +509,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdateCybernetics = useCallback(
-    (next: CyberneticItem[]) => patchField("cybernetics", next),
+    (next: CyberneticItem[], options?: PatchOptions) => patchField("cybernetics", next, options),
     [patchField]
   );
 

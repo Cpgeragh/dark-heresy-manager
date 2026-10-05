@@ -300,24 +300,27 @@ export function WeaponsTab({
   const addFromGrenadeRef = useCallback(
     (ref: GrenadeRef) => {
       if (!editable) return;
-      onUpdateGrenades([
-        ...grenades,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          quantity: 1,
-          type: ref.type,
-          class: ref.class,
-          damage: ref.damage,
-          pen: ref.pen,
-          specialRules: ref.specialRules,
-          weight: ref.weight,
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-        },
-      ]);
+      onUpdateGrenades(
+        [
+          ...grenades,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            quantity: 1,
+            type: ref.type,
+            class: ref.class,
+            damage: ref.damage,
+            pen: ref.pen,
+            specialRules: ref.specialRules,
+            weight: ref.weight,
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -357,7 +360,10 @@ export function WeaponsTab({
   const removeGrenade = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateGrenades(grenades.filter((g) => g.id !== id));
+      onUpdateGrenades(
+        grenades.filter((g) => g.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -377,30 +383,33 @@ export function WeaponsTab({
       if (!editable) return;
       const isThrown = ref.class.toLowerCase().includes("thrown");
       const specialRules = rangedRulesForCraftsmanship(ref.specialRules, craftsmanship);
-      onUpdateRanged([
-        ...rangedWeapons,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          class: ref.class,
-          type: ref.type,
-          range: ref.range,
-          rof: ref.rof,
-          damage: ref.damage,
-          pen: String(ref.pen),
-          clip: String(ref.clip),
-          rld: ref.reload,
-          specialRules,
-          weight: ref.weight,
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-          craftsmanship,
-          ammoTracking: ref.ammoTracking,
-          quantity: isThrown ? 1 : undefined,
-        },
-      ]);
+      onUpdateRanged(
+        [
+          ...rangedWeapons,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            class: ref.class,
+            type: ref.type,
+            range: ref.range,
+            rof: ref.rof,
+            damage: ref.damage,
+            pen: String(ref.pen),
+            clip: String(ref.clip),
+            rld: ref.reload,
+            specialRules,
+            weight: ref.weight,
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+            craftsmanship,
+            ammoTracking: ref.ammoTracking,
+            quantity: isThrown ? 1 : undefined,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -443,7 +452,7 @@ export function WeaponsTab({
       if (!editable) return;
       const next = [...rangedWeapons];
       next.splice(index, 1);
-      onUpdateRanged(next);
+      onUpdateRanged(next, { optimistic: true });
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -530,26 +539,29 @@ export function WeaponsTab({
       if (!editable) return;
       const isThrown = ref.class.toLowerCase().includes("thrown");
       const damage = meleeDamageForCraftsmanship(ref.damage, craftsmanship);
-      onUpdateMelee([
-        ...meleeWeapons,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
-          type: ref.type,
-          damage,
-          pen: String(ref.pen),
-          specialRules: ref.specialRules,
-          strengthBonusMultiplier: ref.strengthBonusMultiplier,
-          weight: ref.weight,
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-          craftsmanship,
-          quantity: isThrown ? 1 : undefined,
-        },
-      ]);
+      onUpdateMelee(
+        [
+          ...meleeWeapons,
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
+            type: ref.type,
+            damage,
+            pen: String(ref.pen),
+            specialRules: ref.specialRules,
+            strengthBonusMultiplier: ref.strengthBonusMultiplier,
+            weight: ref.weight,
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+            craftsmanship,
+            quantity: isThrown ? 1 : undefined,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -826,7 +838,7 @@ export function WeaponsTab({
       if (!editable) return;
       const next = [...meleeWeapons];
       next.splice(index, 1);
-      onUpdateMelee(next);
+      onUpdateMelee(next, { optimistic: true });
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -898,24 +910,27 @@ export function WeaponsTab({
   const addFromShieldRef = useCallback(
     (ref: ShieldRef) => {
       if (!editable || !onUpdateShields) return;
-      onUpdateShields([
-        ...(shields ?? []),
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          ap: ref.ap,
-          locations: ref.locations,
-          damage: ref.damage,
-          pen: String(ref.pen),
-          specialRules: ref.specialRules,
-          notes: ref.notes,
-          weight: ref.weight,
-          value: ref.value,
-          availability: ref.availability,
-          source: ref.source,
-        },
-      ]);
+      onUpdateShields(
+        [
+          ...(shields ?? []),
+          {
+            id: crypto.randomUUID(),
+            referenceId: ref.id,
+            name: ref.name,
+            ap: ref.ap,
+            locations: ref.locations,
+            damage: ref.damage,
+            pen: String(ref.pen),
+            specialRules: ref.specialRules,
+            notes: ref.notes,
+            weight: ref.weight,
+            value: ref.value,
+            availability: ref.availability,
+            source: ref.source,
+          },
+        ],
+        { optimistic: true }
+      );
     },
     [editable, shields, onUpdateShields]
   );
@@ -955,7 +970,10 @@ export function WeaponsTab({
   const removeShield = useCallback(
     (id: string) => {
       if (!editable || !onUpdateShields) return;
-      onUpdateShields((shields ?? []).filter((s) => s.id !== id));
+      onUpdateShields(
+        (shields ?? []).filter((s) => s.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, shields, onUpdateShields]
   );
@@ -963,7 +981,10 @@ export function WeaponsTab({
   const removeArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
+      onUpdateArcheotech(
+        (archeotech ?? []).filter((a) => a.id !== id),
+        { optimistic: true }
+      );
     },
     [editable, archeotech, onUpdateArcheotech]
   );

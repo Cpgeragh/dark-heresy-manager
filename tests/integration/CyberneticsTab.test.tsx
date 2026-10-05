@@ -348,13 +348,16 @@ describe("CyberneticsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "+ Install" })[1]);
     await user.click(screen.getByText("Mock Select Plain Implant"));
 
-    expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({
-        referenceId: "auto-quill",
-        name: "Auto-Quill",
-        craftsmanship: "Common",
-      }),
-    ]);
+    expect(onUpdate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          referenceId: "auto-quill",
+          name: "Auto-Quill",
+          craftsmanship: "Common",
+        }),
+      ],
+      { optimistic: true }
+    );
   });
 
   it("opens the concealed-weapon installer instead of adding directly", async () => {
@@ -489,7 +492,7 @@ describe("CyberneticsTab", () => {
 
     await user.click(screen.getAllByText("Remove Auto-Quill")[0]);
 
-    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
 
   it("adds an integrated ranged weapon from reference", async () => {
@@ -500,9 +503,16 @@ describe("CyberneticsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
     await user.click(screen.getByText("Mock Select Integrated Ranged"));
 
-    expect(onUpdateRanged).toHaveBeenCalledWith([
-      expect.objectContaining({ referenceId: "las-pistol", name: "Las Pistol", integrated: true }),
-    ]);
+    expect(onUpdateRanged).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          referenceId: "las-pistol",
+          name: "Las Pistol",
+          integrated: true,
+        }),
+      ],
+      { optimistic: true }
+    );
   });
 
   it("creates a custom integrated ranged weapon", async () => {

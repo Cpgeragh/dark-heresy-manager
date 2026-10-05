@@ -261,7 +261,10 @@ describe("WeaponsTab add from reference", () => {
     await user.click(screen.getByRole("button", { name: "Select Lasgun" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
     expect(noop).toHaveBeenCalledWith(
-      expect.arrayContaining([expect.objectContaining({ name: "Lasgun", craftsmanship: "Common" })])
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Lasgun", craftsmanship: "Common" }),
+      ]),
+      { optimistic: true }
     );
   }, 15_000);
 
@@ -279,7 +282,8 @@ describe("WeaponsTab add from reference", () => {
           craftsmanship: "Poor",
           specialRules: expect.stringContaining("Unreliable"),
         }),
-      ])
+      ]),
+      { optimistic: true }
     );
   }, 15_000);
 
@@ -293,7 +297,8 @@ describe("WeaponsTab add from reference", () => {
     expect(noop).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ name: "Chainsword", craftsmanship: "Best" }),
-      ])
+      ]),
+      { optimistic: true }
     );
     const addedWeapon = noop.mock.calls[0][0][0];
     expect(addedWeapon.damage).not.toBe(""); // sanity: damage was computed, not left blank
@@ -305,7 +310,8 @@ describe("WeaponsTab add from reference", () => {
     await user.click(addButtonIn("Explosives"));
     await user.click(row("Frag Grenade"));
     expect(noop).toHaveBeenCalledWith(
-      expect.arrayContaining([expect.objectContaining({ name: "Frag Grenade" })])
+      expect.arrayContaining([expect.objectContaining({ name: "Frag Grenade" })]),
+      { optimistic: true }
     );
   }, 15_000);
 
@@ -315,7 +321,8 @@ describe("WeaponsTab add from reference", () => {
     await user.click(addButtonIn("Shields"));
     await user.click(row("Enforcer Riot Shield"));
     expect(noop).toHaveBeenCalledWith(
-      expect.arrayContaining([expect.objectContaining({ name: "Enforcer Riot Shield" })])
+      expect.arrayContaining([expect.objectContaining({ name: "Enforcer Riot Shield" })]),
+      { optimistic: true }
     );
   });
 });
@@ -326,7 +333,7 @@ describe("WeaponsTab remove / equip-toggle", () => {
     const { noop } = renderTab();
     await user.click(screen.getByRole("button", { name: "Expand Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
-    expect(noop).toHaveBeenCalledWith([]);
+    expect(noop).toHaveBeenCalledWith([], { optimistic: true });
   });
 
   it("toggles equip on a Ranged weapon", async () => {
