@@ -283,6 +283,7 @@ export function BackgroundTab({
                 }}
                 placeholder="e.g. 25"
                 className={editableInputClass(editable) + " font-code"}
+                autoComplete="off"
               />
             ) : (
               <button
@@ -319,6 +320,7 @@ export function BackgroundTab({
                 }}
                 placeholder="e.g. 1.90"
                 className={editableInputClass(editable) + " font-code"}
+                autoComplete="off"
               />
               <span className="text-xs lg:text-sm text-slate-400">m</span>
             </div>
@@ -339,6 +341,7 @@ export function BackgroundTab({
                 }}
                 placeholder="e.g. 65"
                 className={editableInputClass(editable) + " font-code"}
+                autoComplete="off"
               />
               <span className="text-xs lg:text-sm text-slate-400">kg</span>
             </div>

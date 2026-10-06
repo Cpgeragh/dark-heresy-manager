@@ -119,6 +119,7 @@ export function InsanityTraumaPicker({
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the trauma..."
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>
@@ -142,6 +143,7 @@ export function InsanityTraumaPicker({
               placeholder="What this trauma does..."
               rows={4}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>

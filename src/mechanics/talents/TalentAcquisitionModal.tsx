@@ -690,6 +690,7 @@ export function TalentAcquisitionModal({
             value={primaryChoice}
             onChange={(event) => setPrimaryChoice(event.target.value)}
             placeholder="Exotic weapon name…"
+            autoComplete="off"
           />
         )}
 
@@ -788,6 +789,7 @@ export function TalentAcquisitionModal({
                     }))
                   }
                   placeholder="Replacement limb, organ, or system…"
+                  autoComplete="off"
                 />
               </div>
             ))}
@@ -863,6 +865,7 @@ export function TalentAcquisitionModal({
                         }))
                       }
                       placeholder={`Replacement ${disorder.severity} disorder…`}
+                      autoComplete="off"
                     />
                   )}
                 </div>

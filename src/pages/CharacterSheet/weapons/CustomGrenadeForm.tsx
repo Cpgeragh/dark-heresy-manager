@@ -224,6 +224,7 @@ export function CustomGrenadeForm({
               value={name}
               onChange={(event) => setName(event.target.value)}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -245,6 +246,7 @@ export function CustomGrenadeForm({
               onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))}
               placeholder="1+"
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>
@@ -287,6 +289,7 @@ export function CustomGrenadeForm({
                 value={damageBase}
                 onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <input
                 aria-label="Damage bonus"
@@ -298,6 +301,7 @@ export function CustomGrenadeForm({
                   setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))
                 }
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <PickerField
                 id="custom-grenade-damage-type"
@@ -320,6 +324,7 @@ export function CustomGrenadeForm({
             value={pen}
             onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
             className={editableInputClass(true) + " mt-0.5"}
+            autoComplete="off"
           />
         </div>
       </CustomFormSection>
@@ -336,6 +341,7 @@ export function CustomGrenadeForm({
               value={weight}
               onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -348,6 +354,7 @@ export function CustomGrenadeForm({
               value={value}
               onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -385,6 +392,7 @@ export function CustomGrenadeForm({
               onChange={(event) => setDescription(event.target.value)}
               rows={3}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>

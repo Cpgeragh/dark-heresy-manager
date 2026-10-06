@@ -128,6 +128,7 @@ export function ConfirmInline({
             autoFocus
             disabled={effectiveBusy}
             className="px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-700 border border-slate-500 rounded text-xs lg:text-sm text-slate-100 w-24 lg:w-32 font-code placeholder:text-slate-600 disabled:opacity-50"
+            autoComplete="off"
           />
           <Button
             variant={confirmVariant}

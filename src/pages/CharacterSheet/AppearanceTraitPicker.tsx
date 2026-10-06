@@ -78,6 +78,7 @@ export function AppearanceTraitPicker({
               onChange={(e) => setQualifier(e.target.value)}
               placeholder="e.g. Blue"
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </PickerBody>

@@ -69,6 +69,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           onBlur={commit}
           onKeyDown={handleKeyDown}
           className={`${sizeStyles.input} font-code text-slate-100 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500`}
+          autoComplete="off"
         />
       ) : (
         <span

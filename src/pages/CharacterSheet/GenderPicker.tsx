@@ -65,6 +65,7 @@ export function GenderPicker({
               onChange={(e) => setCustomName(e.target.value)}
               placeholder="Leave blank to use 'Other'"
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </PickerBody>

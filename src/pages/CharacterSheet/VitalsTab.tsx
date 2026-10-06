@@ -161,6 +161,7 @@ export function VitalsTab({
                     onFocus={(e) => e.target.select()}
                     placeholder="1+"
                     aria-label="Total wounds"
+                    autoComplete="off"
                   />
                 ) : (
                   <div className={uiCellValue}>{effectiveWoundsTotal}</div>
@@ -316,6 +317,7 @@ export function VitalsTab({
                     onFocus={(e) => e.target.select()}
                     placeholder="0+"
                     aria-label="Total fate points"
+                    autoComplete="off"
                   />
                 ) : (
                   <div className={uiCellValue}>{effectiveFateTotal}</div>

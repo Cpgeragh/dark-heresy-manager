@@ -33,6 +33,7 @@ export function RollModifierFields({
           onChange={(event) => onRollChange(modifier.characteristic, event.target.value)}
           placeholder="Enter rolled value..."
           className={editableInputClass(true) + " mt-0.5"}
+          autoComplete="off"
         />
       </div>
     );

@@ -332,7 +332,7 @@ export default function Settings({
                   id="settings-first-name"
                   type="text"
                   aria-label="First Name"
-                  autoComplete="given-name"
+                  autoComplete="off"
                   autoCapitalize="words"
                   value={nameDraft}
                   onChange={(e) => setNameDraft(formatFirstNameInput(e.target.value))}
@@ -505,7 +505,9 @@ export default function Settings({
                           : "Link date unavailable"}
                       </p>
                       {device.isCurrentDevice && (
-                        <p className={`mt-1 text-xs lg:text-sm ${colourSkyPlain}`}>Current device</p>
+                        <p className={`mt-1 text-xs lg:text-sm ${colourSkyPlain}`}>
+                          Current device
+                        </p>
                       )}
                     </div>
                     <div className="flex shrink-0 gap-2">
@@ -767,6 +769,7 @@ export default function Settings({
                   disabled={deletingAccount}
                   placeholder="DELETE"
                   className={editableInputClass(true)}
+                  autoComplete="off"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <Button

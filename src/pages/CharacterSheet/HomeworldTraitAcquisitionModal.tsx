@@ -141,6 +141,7 @@ export function HomeworldTraitAcquisitionModal({
                 }
                 placeholder="3–7"
                 className={`${editableInputClass(true)} mt-0.5`}
+                autoComplete="off"
               />
             </div>
           )}

@@ -12,6 +12,8 @@ For every section, test once as the DM and once as an owning player wherever bot
 
 While you're on any page, it's worth trying a blank, negative, or huge value in one number field and a long or unusual string in one text field: that alone catches most broken-input bugs without needing to repeat it on every field on every page.
 
+On an Android phone signed in to a Google account with a saved password, address and payment card, tap each input named in an **Autofill** item and look above the keyboard before typing. No row of key, card or address icons appears. An input that shows one needs a `name` attribute in addition to `autoComplete="off"`.
+
 ## 1. Vitals
 
 Wounds and Fate Points: the combat-status header block.
@@ -27,6 +29,7 @@ Use an editable character with Total Wounds above 5, Current Wounds in the middl
 - [ ] Fatigue turns red and shows "Unconscious" exactly when it exceeds Toughness Bonus, not at or below it
 - [ ] Fate Total accepts 0, rejects negative
 - [ ] Fate Current stepper capped at Fate Total, turns red at exactly 0
+- [ ] **Autofill, Android:** Total Wounds, Total Fate Points and the typed number inside each Current Wounds, Critical Damage, Fatigue and Current Fate counter each show no autofill suggestion row above the keyboard (`VitalsTab.tsx`, `Stepper.tsx`)
 
 **Watch for:** changing Toughness on the Characteristics page should move
 where Fatigue turns red here: the threshold is read live, not cached.
@@ -54,6 +57,7 @@ Start at 0 and set Points to one below, exactly on, and one above every document
 - [ ] Once added, a custom disorder/trauma shows its Origin as a source chip on the entry
 - [ ] Custom Disorder/Trauma form's "\* Required" hint stays visible even after every field is filled in, not just while incomplete
 - [ ] On phone: swiping between Temporary Trauma and Disorders tabs works both directions
+- [ ] **Autofill, Android:** the Insanity Points number, the picker search boxes, the custom Disorder and Trauma Name and Rules Text fields, and Disorder Notes or Legacy Disorder Notes each show no autofill suggestion row above the keyboard (`Stepper.tsx`, `PickerModal.tsx`, `InsanityDisorderPicker.tsx`, `InsanityTraumaPicker.tsx`, `InsanityEntryLists.tsx`)
 
 **Watch for:** a character with old free-text disorder notes (from before the
 structured picker existed) should still show that text, not silently lose it
@@ -79,6 +83,7 @@ Use the same boundary method as Insanity: one below, on, and one above every thr
 - [ ] Once added, a custom malignancy/mutation shows its Origin as a source chip on the entry
 - [ ] Custom Malignancy/Mutation form's "\* Required" hint stays visible even after every field is filled in, not just while incomplete
 - [ ] Removing a Malignancy, Minor Mutation, or Major Mutation arms a confirm step ("Delete [name] from this character?" with Delete/Cancel) instead of deleting on the first tap
+- [ ] **Autofill, Android:** the Corruption Points number, the picker search boxes, the custom Malignancy and Mutation Name and Rules Text fields, the rolled value field in Edit Rolls, and Malignancy Notes or Legacy Malignancy Notes each show no autofill suggestion row above the keyboard (`Stepper.tsx`, `PickerModal.tsx`, `CorruptionMalignancyPicker.tsx`, `MutationPicker.tsx`, `RollModifierFields.tsx`, `CorruptionPanel.tsx`)
 
 **Watch for:** this is the one page that writes to another page: a rolled
 characteristic modifier here should appear as an adjustment badge on the
@@ -105,6 +110,7 @@ Record all nine starting values. For each characteristic, set a simple Base valu
 - [ ] Movement's info icon holds the rules paragraph, the AB formula, and (only when a movement-affecting trait is active) a "Modifiers" list of what's contributing: none of this shows as plain text on the page itself, only inside the modal
 - [ ] With multiple movement-affecting traits active at once (e.g. Size + Quadruped + Unnatural Speed), the multiplying/halving traits (Amorphous, Crawler, Quadruped) apply to the base Agility Bonus first, then Size's flat adjustment, then Unnatural Speed doubles the result last: confirm the displayed Half/Full/Charge/Run numbers reflect that order
 - [ ] Movement's "Modifiers" list is alphabetical regardless of which order the traits were acquired in
+- [ ] **Autofill, Android:** the Base value field on each characteristic card shows no autofill suggestion row above the keyboard (`CharacteristicField.tsx`)
 
 **Watch for:** the adjustment badge and its information popup are driven by recorded modifier sources. Corruption entries and packaged Elite Advances must remain separate named sources.
 
@@ -185,6 +191,7 @@ appear on the main page.
 - [ ] Downgrade that Skill from **+10**: the paid upgrade and its Rank-card entry disappear, while the source-derived Trained Skill remains without a Delete action
 - [ ] Change Career away from Guardsman to a career with no starting-benefit data yet: the granted Skill reverts to Untrained
 - [ ] Re-pick Guardsman after changing away: the choice screen appears again; picking differently this time updates which Skill is granted
+- [ ] **Autofill, Android:** the Skills picker search box, the XP Cost field on the manual cost screen and the manual upgrade cost field on an owned Skill each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `AddSkillModal.tsx`, `SkillRow.tsx`)
 
 ## 6. Talents
 
@@ -365,6 +372,7 @@ below deliberately change several of those pages.
 - [ ] On the same Guardsman starting-choice screen used for Skills, resolve the two Talent "or" choices: the picked Talents (e.g. Pistol Training) show as owned Talent cards without spending XP
 - [ ] Melee Weapon Training (Primitive) and Basic Weapon Training (Las), the two fixed Guardsman Talent grants, appear automatically with no choice needed
 - [ ] A granted Pistol/Basic/Melee Weapon Training talent does **not** get its own card here: check Weapon Training instead, its button there is already active and locked, matching how Skill at Arms already works
+- [ ] **Autofill, Android:** the Talent picker search box, the XP Cost field on a Show all purchase, the specialisation and choice value fields, the Exotic weapon name field, the replacement limb, organ or system field and the replacement disorder field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `TalentPickerModal.tsx`, `TalentAcquisitionModal.tsx`)
 
 ## 7. Weapon Training
 
@@ -405,6 +413,7 @@ Use a character with Career and Rank cost data, such as a Guardsman, and test as
 - [ ] As DM, tapping the hammer button opens the Exotic Training specialisation picker, followed by the XP Cost form, with no slot choice screen
 - [ ] Adding an exotic weapon as DM records the typed cost and increases spent XP by exactly that cost, whatever the career and rank
 - [ ] No slot limit applies: the DM can add any number of exotic weapons
+- [ ] **Autofill, Android:** the two XP Cost fields each show no autofill suggestion row above the keyboard (`WeaponTrainingTab.tsx`)
 
 **Watch for:** the granted-exotic caption is still hardcoded to read "Granted by
 Sicarius Tutoring (Guardsman)" rather than naming whatever Talent/specialisation
@@ -454,6 +463,7 @@ cross-checking permanent effects and their named sources.
 - [ ] Custom trait creation: Name, Rules Text, and Origin (Custom/2nd Ed) are all required before Add enables; the saved rules text and Origin both actually appear on the character's own card afterwards, not just in the library definition
 - [ ] Custom trait creation and publishing: see §21, Custom Item Library
 - [ ] Custom trait creation's and every Trait acquisition screen's (Soul-bound, Sanctioning, Blank Slate, etc.) "\* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] **Autofill, Android:** the Trait picker search box, the custom Trait Name and Rules Text fields, the Soul-bound entity, roll and mutation fields, and the Sanctioning roll and age fields each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomTraitForm.tsx`, `TraitAcquisitionModal.tsx`)
 
 ## 9. Weapons
 
@@ -504,6 +514,7 @@ Use a disposable character and create a small labelled test inventory: one norma
 - [ ] Reload entered as an amount + type (e.g. "2 Full") parses and re-displays correctly, and the special-case values ("Full", "Special", "—") all work
 - [ ] Custom weapon/grenade/shield creation and publishing: see §21, Custom Item Library
 - [ ] Custom weapon/grenade/shield forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] **Autofill, Android:** the picker search boxes, every field in the custom Ranged, Melee, Grenade and Shield forms, the ammo name field, the upgrade Value field and every typed quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomRangedForm.tsx`, `CustomMeleeForm.tsx`, `CustomGrenadeForm.tsx`, `CustomShieldForm.tsx`, `AmmoPicker.tsx`, `weaponShared.tsx`, `QuantityControl.tsx`)
 
 **Watch for:** weapons with a fixed number of internal magazine slots (e.g.
 Panoptic, Spectre): confirm each magazine tracks its own rounds
@@ -526,6 +537,7 @@ Add the five named armour fixtures and inspect their picker summaries before add
 - [ ] Craftsmanship (Poor/Common/Good/Best) is chosen at the moment you add a piece, both for worn armour and Force Fields: confirm the default is Common and cycling afterwards updates AP/weight/value where the rules say it should
 - [ ] Custom armour and custom Force Field creation and publishing: see §21
 - [ ] Custom armour and Force Field forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] **Autofill, Android:** the picker search boxes and the Name, Protection Rating, AP, Weight, Cost and Rules fields on the custom armour and Force Field form each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomPieceForm.tsx`)
 
 ## 11. Cybernetics
 
@@ -552,6 +564,7 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 - [ ] Pick one of the six from that picker: it asks only for a cost, not a rarity (rarity's already fixed), and skips the craftsmanship-quality step entirely, installing directly once the cost is confirmed
 - [ ] For an existing implant that's missing **both** cost and rarity (e.g. Landrian Revealer), the row still reads "Cost and availability assigned on add" and the assign screen still asks for both
 - [ ] For Karrikian Lock-Arm specifically (no real quality data, but does need a body location): confirm it still goes through the location step and still ends up forced to Common craftsmanship, this one's deliberately unchanged
+- [ ] **Autofill, Android:** the Cybernetics picker search box, the Name, Cost and Rules fields on the custom implant form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomImplantForm.tsx`, `AssignedItemMetaFields.tsx`)
 
 ## 12. Psychic Powers
 
@@ -646,6 +659,7 @@ Psychic Power, and Psy Rating selections without spending them.
 - [ ] Edit the custom power: the form is pre-filled and saving updates that character power rather than creating a duplicate
 - [ ] Standard reference powers have no Edit control; Custom and 2nd Ed powers have the permitted definition controls
 - [ ] As DM, publish a draft, select the published power from the campaign library on another eligible character, update all copies, and archive it; existing character copies remain readable while the archived definition disappears from add pickers
+- [ ] **Autofill, Android:** the power picker search box and the Power name, numeric and Rules text fields on the custom power form each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomPowerForm.tsx`)
 
 ## 13. Gear
 
@@ -662,6 +676,7 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 - [ ] Lumenmould specifically (no fixed listed price) shows the same note and prompt
 - [ ] Custom gear and custom consumable creation and publishing: see §21, Custom Item Library
 - [ ] Custom gear/consumable forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] **Autofill, Android:** the Gear and Consumable picker search boxes, the Name, Quantity, Weight, Cost and Rules fields on the custom gear and consumable forms, the GM-assigned Cost (Thrones) field and each typed consumable quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `AssignedItemMetaFields.tsx`, `QuantityControl.tsx`)
 
 ## 14. Companions
 
@@ -695,6 +710,7 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 - [ ] Custom drug creation: Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing: see §21, Custom Item Library
 - [ ] Custom drug form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] **Autofill, Android:** the Drug picker search box, the Name, Quantity, Weight, Cost and Rules fields on the custom drug form and each typed quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `QuantityControl.tsx`)
 
 ## 16. Experience
 
@@ -724,6 +740,7 @@ Use two profiles: the owning player and the DM. Begin on a character with enough
 - [ ] At the final Career rank, no further Rank Up action appears; Add XP remains available in Edit mode and the DM can still Remove XP
 - [ ] In player Edit mode, the player sees Add XP but never Remove XP or Rank Up; in View mode no XP or Rank actions are interactive for either role
 - [ ] Refresh after several purchases, DM transactions, and a branch Rank Up: totals, transaction attribution, current Rank, and Career path all persist unchanged
+- [ ] **Autofill, Android:** the Amount and Reason fields in the Add XP, Remove XP and Spend XP forms each show no autofill suggestion row above the keyboard (`ExperienceTab.tsx`)
 
 **Watch for:** there is no player-submitted proposal or DM-approval workflow
 on this page: XP changes are either real purchases or direct DM actions. If
@@ -751,6 +768,7 @@ Start on a character with old-style plain-text notes (a legacy fixture, `notes` 
 - [ ] Search box (shown only once at least one note exists) filters by both title and note text, case-insensitive, live as you type
 - [ ] A search with no matches shows "No notes match your search.", distinct from the true empty state's "No notes yet."
 - [ ] Read-only mode: the search box still works and cards still open for reading, but there's no Add button and no Edit/Remove on any card
+- [ ] **Autofill, Android:** the search box, the Title field and the Note field each show no autofill suggestion row above the keyboard (`NotesTab.tsx`)
 
 ## 18. Background
 
@@ -804,6 +822,7 @@ Trait rules that explicitly change Skill use are applied automatically.
 - [ ] Picking a career with no starting-benefit data yet (any career besides Guardsman/Adept, or Imperial Psyker which has its own separate Sanctioning screen) commits immediately with no extra screen, unchanged from before
 - [ ] Cancel out of the starting-choice screen: no career gets committed and the Career picker reopens
 - [ ] After confirming Guardsman's choices, switch to Adept, then back to Guardsman: the choice screen appears fresh each time and doesn't carry over the previous career's picks
+- [ ] **Autofill, Android:** Character Name, Player Name, Age, Height, Weight, Description and Background Notes, the Quirks and other picker search boxes, the colour or kind field in the Skin, Hair and Eyes follow-up, the custom Gender name field and the Mind Cleansed starting insanity field each show no autofill suggestion row above the keyboard (`BackgroundTab/index.tsx`, `FormField.tsx`, `PickerModal.tsx`, `AppearanceTraitPicker.tsx`, `GenderPicker.tsx`, `HomeworldTraitAcquisitionModal.tsx`)
 
 ## 19. Archeotech
 
@@ -818,6 +837,7 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 - [ ] A plain (non-armour, non-weapon) Archeotech item behaves like a normal gear-style entry
 - [ ] Custom archeotech creation and publishing: see §21, Custom Item Library
 - [ ] Custom archeotech form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] **Autofill, Android:** the Archeotech picker search box, every field in the custom Archeotech form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomArcheotechForm.tsx`, `AssignedItemMetaFields.tsx`)
 
 ## 20. Admin (DM only)
 
@@ -910,6 +930,7 @@ Use a new disposable browser profile for each path: new account, connect existin
 - [ ] Try the recovery code from an unfinished new-account setup on another device: connection is rejected until the creating device completes onboarding
 - [ ] After onboarding completes once, closing and reopening the app never shows onboarding again; if an onboarded account is missing its required profile, the app fails closed with an account-profile loading error and never asks the user to recreate the name
 - [ ] Connect a fresh device to an account that already has a saved first name: the control stays on "Opening account…" until the shared profile is live, then the dashboard opens directly
+- [ ] **Autofill, Android:** First Name and Device Name on Create Your Account, and the recovery code and Device Name fields on Connect Existing Account, each show no autofill suggestion row above the keyboard, and First Name offers no saved name suggestion (`Onboarding.tsx`, `IdentityRecoveryForm.tsx`, `RecoveryCodeInput.tsx`)
 
 ## 25. Dashboard
 
@@ -954,6 +975,7 @@ Use a DM with active and archived campaigns, a player who belongs to multiple ca
 - [ ] Open the Dashboard with a malformed `?code=` value: no lookup request is sent, a specific invalid-link warning appears instead of a generic unexpected error, and closing the modal cleans the address
 - [ ] Recovery backup banner appears only under its intended account/device conditions; copying the code works, and rotating the code replaces any stale code shown by the banner
 - [ ] Entering an exact valid character recovery code still resolves normally; automated rule tests separately confirm that listing or querying the recovery index is denied
+- [ ] **Autofill, Android:** Campaign Name and Inquisitor Name in Create Campaign, the inline Edit Campaign name and Inquisitor name fields, the typed DELETE box and the Claim a character code field each show no autofill suggestion row above the keyboard (`Dashboard.tsx`, `RecoveryCodeInput.tsx`)
 
 ## 26. Campaign Overview
 
@@ -986,6 +1008,7 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] Confirm that delete with the checkbox left unchecked: session is removed, every attendee's Remaining XP is unchanged
 - [ ] Confirm that delete with the checkbox checked: session is removed **and** every attendee's XP total drops by the session's XP amount
 - [ ] Cancel out of that confirm after checking the box, then reopen it: the checkbox starts unchecked again rather than remembering the discarded state
+- [ ] **Autofill, Android:** the character search box, the new Character Name field, and Date, XP Awarded, Summary and DM Notes on both the new session form and an edited session each show no autofill suggestion row above the keyboard (`CampaignOverview.tsx`, `SessionForm.tsx`, `SessionCard.tsx`)
 
 ## 27. Messages
 
@@ -1010,6 +1033,7 @@ Open the same character thread as player and DM in separate profiles. Start empt
 - [ ] Empty/whitespace-only messages cannot be sent, and message entry stops at 2,000 characters
 - [ ] Close the player Messages drawer, send a message from the DM, then reopen it: the new message appears when reopened and the closed drawer has not shown stale loading/error content
 - [ ] In a thread with more than 200 messages, opening the thread shows the latest 100 in chronological order; each explicit Load older messages press prepends at most 100 earlier messages with no gaps or duplicates, does not jump back to the bottom, and new arrivals still auto-scroll normally
+- [ ] **Autofill, Android:** the message box in the drawer and in the DM inbox, and the typed DELETE box for Clear chat, each show no autofill suggestion row above the keyboard (`MessageInput.tsx`, `DMInbox.tsx`)
 
 ## 28. Settings & Device Linking
 
@@ -1033,6 +1057,7 @@ Use one disposable account and several fresh browser profiles. Every browser is 
 - [ ] Unlink the final connected device: a second warning explains that the recovery code is required to regain access; cancelling leaves the connection intact and confirming returns this device to Create Your Account without deleting the account
 - [ ] Delete Account is available from every connected device, releases claimed characters, disconnects all devices, revokes recovery, and remains blocked until every owned campaign is deleted or transferred
 - [ ] Recovery backup banner and Settings always show the same current recovery code after reveal or rotation; an old code disappears from all visible surfaces and fails on a fresh device
+- [ ] **Autofill, Android:** First Name, the Device Name add and rename fields and the typed DELETE box for Delete Account each show no autofill suggestion row above the keyboard, and First Name offers no saved name suggestion (`Settings.tsx`)
 
 ## 29. Cross-cutting permission boundaries
 
@@ -1188,6 +1213,7 @@ Use a Cleric approaching Rank 4 and a separate Cleric who has already selected B
 - [ ] Show all is browse-only for a player and purchasable only by the GM
 - [ ] A GM-entered Show all Skill or Talent cost of 0 XP is accepted and adds exactly 0 XP to spent XP
 - [ ] Lowering or removing a Skill tier removes the matching Elite Advance provenance and XP record
+- [ ] **Autofill, Android:** the three 1 to 5 value fields on the Encarta Maleficarum form and the XP Cost field on a Show all purchase each show no autofill suggestion row above the keyboard (`EliteAdvancesTab.tsx`)
 
 **Watch for:** the replaced rank must not leak into the normal missed-rank list early. Direct Skill and Talent purchases belong on their normal pages, while only packaged advances remain on Elite Advances.
 

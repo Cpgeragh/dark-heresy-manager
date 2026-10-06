@@ -417,6 +417,7 @@ function SpecialAdvancePurchaseModal({
         onChange={(event) => setValue(event.target.value)}
         placeholder="1–5"
         className={`${editableInputClass(true)} mt-1`}
+        autoComplete="off"
       />
     </label>
   );
@@ -555,6 +556,7 @@ function SkillAdvancePicker({
             onChange={(event) => setManualCost(sanitizeNonNegativeIntegerInput(event.target.value))}
             placeholder="0"
             className={`${editableInputClass(true)} mt-1`}
+            autoComplete="off"
           />
         </PickerBody>
       </PickerModal>

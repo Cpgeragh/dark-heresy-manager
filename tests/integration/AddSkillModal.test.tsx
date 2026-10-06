@@ -48,7 +48,7 @@ describe("AddSkillModal skill row", () => {
     const user = userEvent.setup();
     setup();
 
-    await user.type(screen.getByRole("textbox"), " Awareness ");
+    await user.type(screen.getByRole("searchbox"), " Awareness ");
 
     expect(screen.getAllByRole("button", { name: /Awareness/ }).length).toBeGreaterThan(0);
     expect(screen.queryByText("No skills found.")).not.toBeInTheDocument();
@@ -57,7 +57,7 @@ describe("AddSkillModal skill row", () => {
   it("clears search when the picker closes", async () => {
     const user = userEvent.setup();
     const { onClose } = setup();
-    const search = screen.getByRole("textbox");
+    const search = screen.getByRole("searchbox");
 
     await user.type(search, "Aware");
     await user.click(screen.getByRole("button", { name: "Close" }));

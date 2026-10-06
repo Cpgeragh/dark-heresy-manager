@@ -155,6 +155,7 @@ export function CustomImplantForm({
               onChange={(event) => setName(event.target.value)}
               placeholder="Cybernetic name..."
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <fieldset aria-required="true" className="col-span-2">
@@ -202,6 +203,7 @@ export function CustomImplantForm({
               value={value}
               onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -238,6 +240,7 @@ export function CustomImplantForm({
               placeholder="Implant rules, effects, drawbacks..."
               rows={3}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>

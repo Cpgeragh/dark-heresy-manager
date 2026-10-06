@@ -167,6 +167,7 @@ export function CustomPowerForm({
             placeholder="Power name..."
             className={editableInputClass(true)}
             autoFocus
+            autoComplete="off"
           />
           {nameExists && (
             <p className="text-xs lg:text-sm text-red-300">
@@ -218,6 +219,7 @@ export function CustomPowerForm({
               onChange={(e) => handlePositiveIntegerChange(e.target.value, setThreshold)}
               placeholder="e.g. 8"
               className={editableInputClass(true) + " font-code"}
+              autoComplete="off"
             />
           </div>
 
@@ -284,6 +286,7 @@ export function CustomPowerForm({
                 }
                 placeholder={rangeMode === "km-radius" ? "e.g. 1.5" : "e.g. 10"}
                 className={editableInputClass(true) + " w-28 font-code"}
+                autoComplete="off"
               />
               <span className="text-xs lg:text-sm text-slate-400">
                 {rangeMode === "km-radius" ? "km radius" : "metres"}
@@ -329,6 +332,7 @@ export function CustomPowerForm({
             placeholder="Rules text, notes, overbleed..."
             rows={4}
             className={editableTextareaClass(true)}
+            autoComplete="off"
           />
         </div>
 

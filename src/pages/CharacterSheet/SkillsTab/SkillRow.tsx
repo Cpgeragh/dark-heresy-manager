@@ -397,6 +397,7 @@ export function SkillRow({
               }
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </PickerBody>
         </PickerModal>

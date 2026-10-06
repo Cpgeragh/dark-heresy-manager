@@ -412,27 +412,27 @@ function DmCampaignList({
               key={campaign.id}
               className={`${uiSection} relative flex items-center gap-3 ${uiCardOverlayLinkFeedback}`}
             >
-                <Link
-                  to={buildRoute.campaignOverview(campaign.id)}
-                  aria-label={campaign.name}
-                  className="absolute inset-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
-                />
-                <span className="pointer-events-none min-w-0 flex-1 font-medium text-slate-200 lg:text-lg">
-                  {campaign.name}
-                </span>
+              <Link
+                to={buildRoute.campaignOverview(campaign.id)}
+                aria-label={campaign.name}
+                className="absolute inset-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
+              />
+              <span className="pointer-events-none min-w-0 flex-1 font-medium text-slate-200 lg:text-lg">
+                {campaign.name}
+              </span>
 
-                <div className="relative z-10 shrink-0">
-                  <button
-                    type="button"
-                    aria-label={`Manage ${campaign.name}`}
-                    aria-haspopup="dialog"
-                    aria-expanded={openActionsId === campaign.id}
-                    className={uiIconButton}
-                    onClick={() => setOpenActionsId(campaign.id)}
-                  >
-                    <GearIcon />
-                  </button>
-                </div>
+              <div className="relative z-10 shrink-0">
+                <button
+                  type="button"
+                  aria-label={`Manage ${campaign.name}`}
+                  aria-haspopup="dialog"
+                  aria-expanded={openActionsId === campaign.id}
+                  className={uiIconButton}
+                  onClick={() => setOpenActionsId(campaign.id)}
+                >
+                  <GearIcon />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -692,6 +692,7 @@ function DmCampaignList({
                   disabled={editing}
                   placeholder="Inquisitor Name"
                   aria-label="Edit Inquisitor name"
+                  autoComplete="off"
                 />
               </div>
               <div>
@@ -712,6 +713,7 @@ function DmCampaignList({
                   disabled={editing}
                   autoFocus
                   aria-label="Edit campaign name"
+                  autoComplete="off"
                 />
               </div>
             </form>
@@ -750,6 +752,7 @@ function DmCampaignList({
                     disabled={deleting}
                     placeholder="DELETE"
                     className={editableInputClass(true)}
+                    autoComplete="off"
                   />
                 </>
               )}
@@ -1011,7 +1014,6 @@ export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
         loading={dmLoading}
         error={dmError}
       />
-
     </div>
   );
   const playingCampaignsSection = (

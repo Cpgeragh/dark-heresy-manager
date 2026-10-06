@@ -102,6 +102,7 @@ export function CorruptionMalignancyPicker({
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the malignancy..."
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>
@@ -125,6 +126,7 @@ export function CorruptionMalignancyPicker({
               placeholder="What this malignancy does..."
               rows={4}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>

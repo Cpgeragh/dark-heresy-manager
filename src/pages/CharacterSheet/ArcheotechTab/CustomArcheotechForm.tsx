@@ -281,6 +281,7 @@ export function CustomArcheotechForm({
               placeholder="Item name…"
               className={editableInputClass(true) + " mt-0.5"}
               autoFocus
+              autoComplete="off"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -296,6 +297,7 @@ export function CustomArcheotechForm({
                 onChange={(e) => setWeight(sanitizeWeightInput(e.target.value))}
                 placeholder="e.g. 2"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
             <div>
@@ -310,6 +312,7 @@ export function CustomArcheotechForm({
                 onChange={(e) => setValue(sanitizeMoneyInput(e.target.value))}
                 placeholder="e.g. 1000"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
           </div>
@@ -363,6 +366,7 @@ export function CustomArcheotechForm({
                   onChange={(e) => setDamage(e.target.value)}
                   placeholder="e.g. 1d10+3"
                   className={editableInputClass(true) + " mt-0.5"}
+                  autoComplete="off"
                 />
               </div>
               <div>
@@ -376,6 +380,7 @@ export function CustomArcheotechForm({
                   onChange={(e) => setPen(e.target.value)}
                   placeholder="e.g. 4"
                   className={editableInputClass(true) + " mt-0.5"}
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -393,6 +398,7 @@ export function CustomArcheotechForm({
                       onChange={(e) => setRange(e.target.value)}
                       placeholder="e.g. 100m"
                       className={editableInputClass(true) + " mt-0.5"}
+                      autoComplete="off"
                     />
                   </div>
                   <div>
@@ -406,6 +412,7 @@ export function CustomArcheotechForm({
                       onChange={(e) => setRof(e.target.value)}
                       placeholder="e.g. S/2/5"
                       className={editableInputClass(true) + " mt-0.5"}
+                      autoComplete="off"
                     />
                   </div>
                 </div>
@@ -421,6 +428,7 @@ export function CustomArcheotechForm({
                       onChange={(e) => setClip(e.target.value)}
                       placeholder="e.g. 30"
                       className={editableInputClass(true) + " mt-0.5"}
+                      autoComplete="off"
                     />
                   </div>
                   <div>
@@ -434,6 +442,7 @@ export function CustomArcheotechForm({
                       onChange={(e) => setRld(e.target.value)}
                       placeholder="e.g. Full"
                       className={editableInputClass(true) + " mt-0.5"}
+                      autoComplete="off"
                     />
                   </div>
                 </div>
@@ -450,6 +459,7 @@ export function CustomArcheotechForm({
                 onChange={(e) => setSpecialRules(e.target.value)}
                 placeholder="e.g. Tearing, Accurate"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
           </CustomFormSection>
@@ -470,6 +480,7 @@ export function CustomArcheotechForm({
                 onChange={(e) => setAp(e.target.value.replace(/[^0-9]/g, ""))}
                 placeholder="e.g. 6"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
             <fieldset>
@@ -529,6 +540,7 @@ export function CustomArcheotechForm({
                 onChange={(e) => setAp(e.target.value.replace(/[^0-9]/g, ""))}
                 placeholder="e.g. 4"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -543,6 +555,7 @@ export function CustomArcheotechForm({
                   onChange={(e) => setDamage(e.target.value)}
                   placeholder="e.g. 1d5"
                   className={editableInputClass(true) + " mt-0.5"}
+                  autoComplete="off"
                 />
               </div>
               <div>
@@ -556,6 +569,7 @@ export function CustomArcheotechForm({
                   onChange={(e) => setPen(e.target.value)}
                   placeholder="e.g. 0"
                   className={editableInputClass(true) + " mt-0.5"}
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -570,6 +584,7 @@ export function CustomArcheotechForm({
                 onChange={(e) => setSpecialRules(e.target.value)}
                 placeholder="e.g. Primitive"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
           </CustomFormSection>
@@ -627,6 +642,7 @@ export function CustomArcheotechForm({
                 onChange={(e) => setProtectionRating(e.target.value.replace(/[^0-9]/g, ""))}
                 placeholder="e.g. 50"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
           </CustomFormSection>
@@ -644,6 +660,7 @@ export function CustomArcheotechForm({
               placeholder="Rules text, special properties…"
               rows={3}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -657,6 +674,7 @@ export function CustomArcheotechForm({
               placeholder="Personal notes, where it was found…"
               rows={2}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>

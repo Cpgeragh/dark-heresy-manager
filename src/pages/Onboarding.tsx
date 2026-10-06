@@ -308,7 +308,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   <input
                     id="onboarding-first-name"
                     type="text"
-                    autoComplete="given-name"
+                    autoComplete="off"
                     autoCapitalize="words"
                     value={name}
                     onChange={(e) => setName(formatFirstNameInput(e.target.value))}

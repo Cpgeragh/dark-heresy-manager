@@ -185,7 +185,8 @@ export function PickerModal({
       {!hideSearch && (
         <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800">
           <input
-            type="text"
+            type="search"
+            name="picker-search"
             placeholder={placeholder}
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}

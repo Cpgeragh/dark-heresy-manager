@@ -212,6 +212,7 @@ export function CustomMeleeForm({
               value={name}
               onChange={(event) => setName(event.target.value)}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
 
@@ -272,6 +273,7 @@ export function CustomMeleeForm({
                 onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
                 placeholder="1d10"
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <input
                 aria-label="Damage bonus"
@@ -284,6 +286,7 @@ export function CustomMeleeForm({
                 }
                 placeholder="Plus"
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <PickerField
                 id="custom-melee-damage-type"
@@ -306,6 +309,7 @@ export function CustomMeleeForm({
               value={pen}
               onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>
@@ -323,6 +327,7 @@ export function CustomMeleeForm({
               value={weight}
               onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
 
@@ -336,6 +341,7 @@ export function CustomMeleeForm({
               value={value}
               onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -374,6 +380,7 @@ export function CustomMeleeForm({
               onChange={(event) => setDescription(event.target.value)}
               rows={3}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>

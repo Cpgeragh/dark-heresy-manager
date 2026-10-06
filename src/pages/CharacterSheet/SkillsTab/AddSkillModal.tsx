@@ -170,6 +170,7 @@ export function AddSkillModal({
             onChange={(event) => setManualCost(sanitizeNonNegativeIntegerInput(event.target.value))}
             placeholder="0"
             className={editableInputClass(true) + " mt-0.5"}
+            autoComplete="off"
           />
         </PickerBody>
       </PickerModal>

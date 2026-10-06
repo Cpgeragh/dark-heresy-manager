@@ -107,6 +107,7 @@ export function Stepper({
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           className="h-full px-1 text-center bg-transparent text-base lg:text-lg font-code text-slate-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          autoComplete="off"
         />
       ) : (
         <span

@@ -112,6 +112,7 @@ export function MutationPicker({
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the mutation..."
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>
@@ -135,6 +136,7 @@ export function MutationPicker({
               placeholder="What this mutation does..."
               rows={4}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>

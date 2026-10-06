@@ -61,6 +61,7 @@ export function CustomTraitForm({
               onChange={(event) => setName(event.target.value)}
               placeholder="Trait name..."
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>
@@ -82,6 +83,7 @@ export function CustomTraitForm({
               placeholder="What this trait does..."
               rows={4}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>

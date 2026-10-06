@@ -45,6 +45,7 @@ export function MessageInput({
           }
         }}
         disabled={disabled || sending}
+        autoComplete="off"
       />
       <Button
         onClick={handleSend}

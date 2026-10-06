@@ -149,6 +149,7 @@ export function CustomInventoryItemForm({
               onChange={(event) => setName(event.target.value)}
               placeholder={namePlaceholder}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           {quantityConfig?.visible && (
@@ -163,6 +164,7 @@ export function CustomInventoryItemForm({
                 onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))}
                 placeholder="1+"
                 className={editableInputClass(true) + " mt-0.5"}
+                autoComplete="off"
               />
             </div>
           )}
@@ -190,6 +192,7 @@ export function CustomInventoryItemForm({
               value={weight}
               onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -202,6 +205,7 @@ export function CustomInventoryItemForm({
               value={value}
               onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -229,6 +233,7 @@ export function CustomInventoryItemForm({
               placeholder={rulesPlaceholder}
               rows={3}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>

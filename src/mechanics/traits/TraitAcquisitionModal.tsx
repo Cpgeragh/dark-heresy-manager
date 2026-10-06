@@ -357,6 +357,7 @@ export function TraitAcquisitionModal({
                 onChange={(event) => setEntity(event.target.value)}
                 placeholder="Enter entity…"
                 className={`${editableInputClass(true)} mt-0.5`}
+                autoComplete="off"
               />
             </div>
             <PickerField
@@ -394,6 +395,7 @@ export function TraitAcquisitionModal({
                   }
                   placeholder="1–10"
                   className={`${editableInputClass(true)} mt-0.5`}
+                  autoComplete="off"
                 />
               </div>
             )}
@@ -408,6 +410,7 @@ export function TraitAcquisitionModal({
                   onChange={(event) => setMutationName(event.target.value)}
                   placeholder="Enter mutation…"
                   className={`${editableInputClass(true)} mt-0.5`}
+                  autoComplete="off"
                 />
               </div>
             )}
@@ -491,6 +494,7 @@ export function TraitAcquisitionModal({
                   }
                   placeholder={`${sanctionRange.min}–${sanctionRange.max}`}
                   className={`${editableInputClass(true)} mt-0.5`}
+                  autoComplete="off"
                 />
               </div>
             )}
@@ -508,6 +512,7 @@ export function TraitAcquisitionModal({
                 }
                 placeholder="3–30"
                 className={`${editableInputClass(true)} mt-0.5`}
+                autoComplete="off"
               />
             </div>
             <RequiredFieldsNote />

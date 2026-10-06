@@ -247,6 +247,7 @@ function XpTransactionModal({
             className={editableInputClass(true)}
             aria-label={`${title} amount`}
             required
+            autoComplete="off"
           />
         </div>
 
@@ -270,6 +271,7 @@ function XpTransactionModal({
             className={editableInputClass(true)}
             aria-label={`${title} reason`}
             required
+            autoComplete="off"
           />
         </div>
 

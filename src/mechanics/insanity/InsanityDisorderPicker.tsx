@@ -173,6 +173,7 @@ export function InsanityDisorderPicker({
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the disorder…"
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>
@@ -216,6 +217,7 @@ export function InsanityDisorderPicker({
               placeholder="What this disorder does…"
               rows={4}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormSection>

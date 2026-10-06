@@ -161,6 +161,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className={editableInputClass(true)}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -171,6 +172,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               value={xpAwarded}
               onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
               className={editableInputClass(true)}
+              autoComplete="off"
             />
           </div>
         </div>
@@ -182,6 +184,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             onChange={(e) => setSummary(e.target.value)}
             rows={3}
             className={editableTextareaClass(true, "none")}
+            autoComplete="off"
           />
         </div>
 
@@ -192,6 +195,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             onChange={(e) => setDmNotes(e.target.value)}
             rows={2}
             className={editableTextareaClass(true, "none")}
+            autoComplete="off"
           />
         </div>
 

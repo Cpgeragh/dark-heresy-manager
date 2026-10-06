@@ -330,6 +330,7 @@ export function CustomRangedForm({
               value={name}
               onChange={(event) => setName(event.target.value)}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -388,6 +389,7 @@ export function CustomRangedForm({
               value={rangeMeters}
               onChange={(event) => setRangeMeters(sanitizePositiveIntegerInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
 
@@ -424,6 +426,7 @@ export function CustomRangedForm({
                 onChange={(event) => setSemiAuto(sanitizePositiveIntegerInput(event.target.value))}
                 placeholder="Semi"
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <input
                 aria-label="Full-auto rate"
@@ -433,6 +436,7 @@ export function CustomRangedForm({
                 onChange={(event) => setFullAuto(sanitizePositiveIntegerInput(event.target.value))}
                 placeholder="Full"
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
             </div>
           </fieldset>
@@ -448,6 +452,7 @@ export function CustomRangedForm({
                 onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
                 placeholder="1d10"
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <input
                 aria-label="Damage bonus"
@@ -460,6 +465,7 @@ export function CustomRangedForm({
                 }
                 placeholder="Plus"
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <PickerField
                 id="custom-ranged-damage-type"
@@ -482,6 +488,7 @@ export function CustomRangedForm({
               value={pen}
               onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
 
@@ -495,6 +502,7 @@ export function CustomRangedForm({
               value={clip}
               onChange={(event) => setClip(sanitizeNonNegativeIntegerInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
 
@@ -512,6 +520,7 @@ export function CustomRangedForm({
                 placeholder="Amount"
                 disabled={reloadType === "Special" || reloadType === "—"}
                 className={editableInputClass(reloadType !== "Special" && reloadType !== "—")}
+                autoComplete="off"
               />
               <PickerField
                 id="custom-ranged-reload-type"
@@ -554,6 +563,7 @@ export function CustomRangedForm({
               value={weight}
               onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
 
@@ -567,6 +577,7 @@ export function CustomRangedForm({
               value={value}
               onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -605,6 +616,7 @@ export function CustomRangedForm({
               onChange={(event) => setDescription(event.target.value)}
               rows={3}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>

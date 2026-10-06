@@ -415,6 +415,7 @@ export function TalentPickerModal({
             }
             placeholder="0"
             className={editableInputClass(true) + " mt-0.5"}
+            autoComplete="off"
           />
         </PickerBody>
       </PickerModal>
@@ -621,6 +622,7 @@ export function TalentPickerModal({
                     "Value…"
                   }
                   className={editableInputClass(true)}
+                  autoComplete="off"
                 />
                 {!traitData?.hideSpecialisationHelp && (
                   <p className={`text-xs ${uiTextPlaceholder}`}>
@@ -644,6 +646,7 @@ export function TalentPickerModal({
                   "specialisation"
                 ).toLocaleLowerCase()}…`}
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
             )}
             {duplicateChoice && (

@@ -206,6 +206,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
               onChange={(event) => setTitle(event.target.value)}
               placeholder="e.g. Session 12, Inquisitor Varn…"
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -218,6 +219,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
               placeholder="What do you want to remember…"
               rows={10}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </CustomFormShell>

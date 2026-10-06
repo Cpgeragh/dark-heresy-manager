@@ -58,6 +58,7 @@ export function AmmoPicker({
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="Ammo name…"
                 className="flex-1 text-sm lg:text-base bg-slate-800 border border-slate-600 rounded px-2 lg:px-3 py-1 lg:py-1.5 text-slate-100 focus:outline-none focus:border-indigo-500"
+                autoComplete="off"
               />
               <Button
                 onClick={() => {

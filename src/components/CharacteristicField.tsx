@@ -166,6 +166,7 @@ export function CharacteristicField({
                 ? "bg-slate-800 border border-red-700 focus:border-red-600"
                 : "bg-slate-800 border border-slate-600 focus:border-red-500"
             } focus:outline-none`}
+            autoComplete="off"
           />
         </div>
 

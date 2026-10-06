@@ -85,6 +85,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className={editableInputClass(true)}
+            autoComplete="off"
           />
         </div>
         <div>
@@ -96,6 +97,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
             value={xpAwarded}
             onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
             className={editableInputClass(true)}
+            autoComplete="off"
           />
         </div>
       </div>
@@ -108,6 +110,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
           className={editableTextareaClass(true, "none")}
+          autoComplete="off"
         />
       </div>
 
@@ -119,6 +122,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
           onChange={(e) => setDmNotes(e.target.value)}
           rows={2}
           className={editableTextareaClass(true, "none")}
+          autoComplete="off"
         />
       </div>
 

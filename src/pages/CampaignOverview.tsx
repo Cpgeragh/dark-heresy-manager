@@ -368,6 +368,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                 <SectionHeader>Characters</SectionHeader>
                 <input
+                  type="search"
+                  name="character-search"
                   placeholder="Search…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -375,6 +377,11 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                     editableInputClass(true) +
                     " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"
                   }
+                  autoComplete="off"
+                  enterKeyHint="search"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
                 />
               </div>
 
@@ -388,6 +395,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleCreate();
                   }}
+                  autoComplete="off"
                 />
                 <Button onClick={handleCreate} loading={creatingCharacter} loadingLabel="Creating">
                   Create

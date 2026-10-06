@@ -177,6 +177,7 @@ export function CustomPieceForm({
             onChange={(e) => setName(e.target.value)}
             placeholder={forceField ? "e.g. Refraction Field" : "e.g. Flak Jacket"}
             className={editableInputClass(true) + " mt-0.5"}
+            autoComplete="off"
           />
         </div>
       </CustomFormSection>
@@ -257,6 +258,7 @@ export function CustomPieceForm({
               onChange={(e) => setProtectionRating(sanitizeNonNegativeIntegerInput(e.target.value))}
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
+              autoComplete="off"
             />
           </div>
         ) : (
@@ -271,6 +273,7 @@ export function CustomPieceForm({
               onChange={(e) => setAp(sanitizeNonNegativeIntegerInput(e.target.value))}
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
+              autoComplete="off"
             />
           </div>
         )}
@@ -288,6 +291,7 @@ export function CustomPieceForm({
               value={weight}
               onChange={(e) => setWeight(sanitizeWeightInput(e.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -300,6 +304,7 @@ export function CustomPieceForm({
               value={value}
               onChange={(e) => setValue(sanitizeMoneyInput(e.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -362,6 +367,7 @@ export function CustomPieceForm({
             placeholder="Special rules or effects…"
             rows={3}
             className={editableTextareaClass(true) + " mt-0.5"}
+            autoComplete="off"
           />
         </div>
       </CustomFormSection>

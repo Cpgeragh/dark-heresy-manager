@@ -53,6 +53,7 @@ export function AssignedItemMetaFields({
             onChange={(event) => setGmCost(sanitizeMoneyInput(event.target.value))}
             placeholder={costPlaceholder}
             className={editableInputClass(true)}
+            autoComplete="off"
           />
           {gmCost.trim() !== "" && !costValid && (
             <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>

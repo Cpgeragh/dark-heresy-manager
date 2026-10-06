@@ -174,6 +174,7 @@ export function CustomShieldForm({
               value={name}
               onChange={(event) => setName(event.target.value)}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div className="col-span-2">
@@ -185,6 +186,7 @@ export function CustomShieldForm({
               onChange={(event) => setLocations(event.target.value)}
               placeholder="Arm & Body"
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>
@@ -206,6 +208,7 @@ export function CustomShieldForm({
               value={ap}
               onChange={(event) => setAp(sanitizeNonNegativeIntegerInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -218,6 +221,7 @@ export function CustomShieldForm({
               value={pen}
               onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <fieldset aria-required="true" className="col-span-2">
@@ -229,6 +233,7 @@ export function CustomShieldForm({
                 value={damageBase}
                 onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <input
                 aria-label="Bash damage bonus"
@@ -240,6 +245,7 @@ export function CustomShieldForm({
                   setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))
                 }
                 className={editableInputClass(true)}
+                autoComplete="off"
               />
               <PickerField
                 id="custom-shield-damage-type"
@@ -266,6 +272,7 @@ export function CustomShieldForm({
               value={weight}
               onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <div>
@@ -278,6 +285,7 @@ export function CustomShieldForm({
               value={value}
               onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
               className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
           <PickerField
@@ -315,6 +323,7 @@ export function CustomShieldForm({
               onChange={(event) => setNotes(event.target.value)}
               rows={3}
               className={editableTextareaClass(true) + " mt-0.5"}
+              autoComplete="off"
             />
           </div>
         </div>

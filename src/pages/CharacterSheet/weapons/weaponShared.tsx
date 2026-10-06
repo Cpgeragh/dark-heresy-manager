@@ -71,6 +71,7 @@ export function WeaponQualitySelector({
             aria-label={`${pendingQuality} value`}
             placeholder="Value"
             className="w-20 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
+            autoComplete="off"
           />
         )}
         <Button variant="ghost" onClick={onConfirmPending} disabled={!canConfirm}>
