@@ -4,12 +4,14 @@
 //   - dmCampaigns: campaigns where dmId == uid
 //   - playerCampaigns: campaigns where memberIds array-contains uid
 //
-// Both exclude archived campaigns (archivedAt == null).
+// Both exclude archived campaigns (archivedAt == null). A third listener holds the DM's archived
+// campaigns, so the Dashboard has all three lists loaded before it appears.
 
 import { useEffect } from "react";
 import { limit, query, where } from "firebase/firestore";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { campaignsCollectionRef } from "../firebase/converters";
+import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
 import { useQuerySubscription } from "../hooks/useFirestoreSubscription";
 import { CampaignsContext } from "./useCampaignsContext";
 import { markApplicationPerformance } from "../performance/performanceMetrics";
@@ -55,6 +57,12 @@ export function CampaignsProvider({ uid, children }: { uid: string; children: Re
         .sort((left, right) => left.name.localeCompare(right.name))
   );
 
+  const {
+    campaigns: archivedCampaigns,
+    loading: archivedLoading,
+    error: archivedError,
+  } = useArchivedCampaigns(uid);
+
   useEffect(() => {
     if (!dmLoading && !playerLoading) {
       markApplicationPerformance("startup:campaign-subscriptions-ready");
@@ -72,6 +80,9 @@ export function CampaignsProvider({ uid, children }: { uid: string; children: Re
         dmError,
         playerError,
         error: dmError ?? playerError,
+        archivedCampaigns,
+        archivedLoading,
+        archivedError,
       }}
     >
       {children}

@@ -11,6 +11,8 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
 import { MessageDrawer } from "./components/MessageDrawer";
 import { SplashScreen } from "./components/SplashScreen";
+import { StartupErrorModal } from "./components/StartupErrorModal";
+import { StartupGate } from "./components/StartupGate";
 import { CampaignsProvider } from "./context/CampaignsContext";
 import { HeaderExtensionProvider } from "./context/HeaderExtensionContext";
 import { ToastProvider, ToastContainer, useToast } from "./components/Toast";
@@ -91,7 +93,12 @@ function AppContent() {
   }
 
   if (authError || linkError || (onboarded && devicesError)) {
-    return withCampaigns(<SplashScreen label="Unable to load your account. Please refresh." />);
+    return withCampaigns(
+      <>
+        <SplashScreen label="Loading…" />
+        <StartupErrorModal />
+      </>
+    );
   }
 
   if (!currentUser) {
@@ -117,7 +124,12 @@ function AppContent() {
   }
 
   if (profileError) {
-    return withCampaigns(<SplashScreen label="Unable to load your account. Please refresh." />);
+    return withCampaigns(
+      <>
+        <SplashScreen label="Loading…" />
+        <StartupErrorModal />
+      </>
+    );
   }
 
   // A completed account must always have a profile. If this device somehow
@@ -146,74 +158,76 @@ function AppContent() {
   // MAIN APP UI
   // -------------------------------------------------
   return withCampaigns(
-    <HeaderExtensionProvider>
-      <UpdateStallNotice />
-      <div className="min-h-screen bg-slate-950 text-slate-100">
-        {/* HEADER */}
-        <AppHeader currentPath={location.pathname} onOpenSettings={() => setSettingsOpen(true)} />
+    <StartupGate ownUid={currentUser.uid} splashLabel={isPostUpgrade ? "Updating…" : "Loading…"}>
+      <HeaderExtensionProvider>
+        <UpdateStallNotice />
+        <div className="min-h-screen bg-slate-950 text-slate-100">
+          {/* HEADER */}
+          <AppHeader currentPath={location.pathname} onOpenSettings={() => setSettingsOpen(true)} />
 
-        {/* ROUTES */}
-        <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
-          <ErrorBoundary>
-            <Suspense
-              fallback={<LoadingState className="py-10 text-center">Loading page…</LoadingState>}
-            >
-              <Routes>
-                <Route
-                  path={ROUTES.DASHBOARD}
-                  element={
-                    <Dashboard
-                      user={currentUser}
-                      effectiveUserId={effectiveUserId}
-                      firstName={firstName}
-                    />
-                  }
-                />
+          {/* ROUTES */}
+          <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+            <ErrorBoundary>
+              <Suspense
+                fallback={<LoadingState className="py-10 text-center">Loading page…</LoadingState>}
+              >
+                <Routes>
+                  <Route
+                    path={ROUTES.DASHBOARD}
+                    element={
+                      <Dashboard
+                        user={currentUser}
+                        effectiveUserId={effectiveUserId}
+                        firstName={firstName}
+                      />
+                    }
+                  />
 
-                <Route
-                  path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                  element={
-                    <CharacterSheet
-                      effectiveUserId={effectiveUserId}
-                      effectiveUserFirstName={firstName}
-                      onOpenMessages={() => setMessagesOpen(true)}
-                    />
-                  }
-                />
+                  <Route
+                    path={ROUTE_PATTERNS.CHARACTER_SHEET}
+                    element={
+                      <CharacterSheet
+                        effectiveUserId={effectiveUserId}
+                        effectiveUserFirstName={firstName}
+                        onOpenMessages={() => setMessagesOpen(true)}
+                      />
+                    }
+                  />
 
-                <Route
-                  path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
-                  element={<CampaignOverview effectiveUserId={effectiveUserId} />}
-                />
+                  <Route
+                    path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                    element={<CampaignOverview effectiveUserId={effectiveUserId} />}
+                  />
 
-                <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </main>
+                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </main>
 
-        <MessageDrawer
-          accountId={effectiveUserId}
-          isOpen={messagesOpen}
-          onClose={() => setMessagesOpen(false)}
-          campaignId={contextCampaignId}
-          characterId={contextCharacterId}
-        />
-
-        {settingsOpen && (
-          <Settings
-            effectiveUserId={effectiveUserId}
-            firstName={firstName}
-            devices={devices}
-            deviceListError={devicesError}
-            disconnect={handleDeviceDisconnect}
-            onClose={() => setSettingsOpen(false)}
+          <MessageDrawer
+            accountId={effectiveUserId}
+            isOpen={messagesOpen}
+            onClose={() => setMessagesOpen(false)}
+            campaignId={contextCampaignId}
+            characterId={contextCharacterId}
           />
-        )}
 
-        <OfflineIndicator />
-      </div>
-    </HeaderExtensionProvider>
+          {settingsOpen && (
+            <Settings
+              effectiveUserId={effectiveUserId}
+              firstName={firstName}
+              devices={devices}
+              deviceListError={devicesError}
+              disconnect={handleDeviceDisconnect}
+              onClose={() => setSettingsOpen(false)}
+            />
+          )}
+
+          <OfflineIndicator />
+        </div>
+      </HeaderExtensionProvider>
+    </StartupGate>
   );
 }
 

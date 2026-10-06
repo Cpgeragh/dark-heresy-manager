@@ -56,6 +56,20 @@ flowchart LR
 
 The session key `pwa-just-upgraded` prevents a reload from re-entering the same update wait. It is consumed on the next startup.
 
+## Application startup gate
+
+After React owns the shell, `src/components/StartupGate.tsx` decides when the signed-in application opens.
+
+| Condition | Required result |
+| --- | --- |
+| Active DM campaigns, active member campaigns, archived campaigns and the recovery backup status have all arrived | Open the application |
+| Any of those loads is still pending | Keep the logo splash |
+| Any of those loads fails, or startup exceeds 30 seconds | Show the startup error modal over the logo splash |
+| Sign-in, the device list or the profile fails | Show the startup error modal over the logo splash |
+| The application has already opened and a campaign list later fails | Keep the application on screen and show the error in the affected list |
+
+`src/components/StartupErrorModal.tsx` cannot be closed with the backdrop or Escape and offers one Try Again action that reloads the page. The timeout is `STARTUP_LOAD_TIMEOUT_MS` in `src/constants/ui.ts`.
+
 ## Static splash
 
 `index.html` contains the same splash as `src/components/SplashScreen.tsx` inside `#root`, so the first paint after any page load, including an update reload, matches the splash. `public/splash-label.js` runs before the application starts and writes "Updating…" into the splash when `pwa-just-upgraded` is present.

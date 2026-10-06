@@ -13,6 +13,21 @@ const authState = vi.hoisted(() => ({
 
 const campaignProviderRenderMock = vi.hoisted(() => vi.fn());
 
+const campaignsState = vi.hoisted(() => ({
+  loading: false,
+  archivedLoading: false,
+  error: null as Error | null,
+  archivedError: null as Error | null,
+}));
+const needsRecoveryCodeBackupMock = vi.hoisted(() => vi.fn());
+
+vi.mock("../../src/context/useCampaignsContext", () => ({
+  useCampaignsContext: () => campaignsState,
+}));
+vi.mock("../../src/services/userAccountService", () => ({
+  needsRecoveryCodeBackup: (...args: unknown[]) => needsRecoveryCodeBackupMock(...args),
+}));
+
 vi.mock("../../src/hooks/useAuth", () => ({
   useAuth: () => authState,
 }));
@@ -66,22 +81,28 @@ describe("App loading boundaries", () => {
     authState.loading = false;
     authState.error = null;
     authState.onboarded = true;
+    campaignsState.loading = false;
+    campaignsState.archivedLoading = false;
+    campaignsState.error = null;
+    campaignsState.archivedError = null;
+    needsRecoveryCodeBackupMock.mockReset();
+    needsRecoveryCodeBackupMock.mockResolvedValue(false);
     campaignProviderRenderMock.mockClear();
   });
 
-  it("renders the dashboard without an intermediate page-loading state", () => {
+  it("renders the dashboard without an intermediate page-loading state", async () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Application header")).toBeInTheDocument();
+    expect(await screen.findByText("Application header")).toBeInTheDocument();
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.queryByText("Loading page…")).not.toBeInTheDocument();
   });
 
-  it("shows an explicit account error instead of an indefinite loading state", () => {
+  it("shows the startup error modal instead of an indefinite loading state", () => {
     authState.currentUser = null;
     authState.error = new Error("sign-in failed");
 
@@ -91,10 +112,16 @@ describe("App loading boundaries", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Unable to load your account. Please refresh.")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Unable to load your account" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Your account could not be loaded. There may be a temporary connection problem."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
   });
 
-  it("starts campaign-list subscriptions before rendering dashboard routes", () => {
+  it("starts campaign-list subscriptions before rendering dashboard routes", async () => {
     const campaignView = render(
       <MemoryRouter initialEntries={["/campaign/campaign-1"]}>
         <App />
@@ -110,7 +137,7 @@ describe("App loading boundaries", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    expect(await screen.findByText("Dashboard")).toBeInTheDocument();
     expect(campaignProviderRenderMock).toHaveBeenCalled();
   });
 });

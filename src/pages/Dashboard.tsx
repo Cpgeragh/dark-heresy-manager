@@ -8,7 +8,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import type { User } from "firebase/auth";
 import { useCampaignsContext } from "../context/useCampaignsContext";
-import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
+import { useStartupStatus } from "../context/useStartupStatus";
 import { useToast } from "../components/Toast";
 import { RecoveryBackupBanner } from "../components/RecoveryBackupBanner";
 import {
@@ -53,7 +53,6 @@ import { ModalHeader } from "../ui/modals/ModalHeader";
 import { InfoModal } from "../components/InfoModal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
-import { LoadingState } from "../ui/LoadingState";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "../hooks/useRecoveryLookup";
 import { claimCharacter } from "../services/characterService";
@@ -160,21 +159,13 @@ function PlayerCampaignRow({
 // ─── DM campaign list (create / edit / archive / delete) ─────────────────────
 
 function DmCampaignList({
-  userUid,
   campaigns,
-  loading,
   error,
 }: {
-  userUid: string;
   campaigns: CampaignWithId[];
-  loading: boolean;
   error: Error | null;
 }) {
-  const {
-    campaigns: archivedCampaigns,
-    loading: archivedLoading,
-    error: archivedError,
-  } = useArchivedCampaigns(userUid);
+  const { archivedCampaigns, archivedError } = useCampaignsContext();
   const [newCampaignName, setNewCampaignName] = useState("");
   const [newInquisitorName, setNewInquisitorName] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -399,8 +390,6 @@ function DmCampaignList({
 
       {error ? (
         <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
-      ) : loading ? (
-        <LoadingState>Loading campaigns…</LoadingState>
       ) : campaigns.length === 0 ? (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
           You have not created any campaigns yet.
@@ -438,7 +427,7 @@ function DmCampaignList({
         </div>
       )}
 
-      {!error && !loading && campaigns.length === FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole && (
+      {!error && campaigns.length === FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole && (
         <CampaignListLimitNotice />
       )}
 
@@ -502,8 +491,6 @@ function DmCampaignList({
       {/* Archived */}
       {archivedError ? (
         <ErrorState>Unable to load archived campaigns.</ErrorState>
-      ) : archivedLoading ? (
-        <LoadingState>Loading archived campaigns…</LoadingState>
       ) : archivedCampaigns.length > 0 ? (
         <div>
           <button
@@ -951,30 +938,24 @@ function ClaimCharacterSection() {
 
 function PlayerCampaignSection({
   campaigns,
-  loading,
   error,
 }: {
   campaigns: CampaignWithId[];
-  loading: boolean;
   error: Error | null;
 }) {
   return (
     <section className="space-y-3">
       <SectionHeader>Campaigns You Play In</SectionHeader>
 
-      {error ? (
-        <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
-      ) : loading ? (
-        <LoadingState>Loading campaigns…</LoadingState>
-      ) : null}
+      {error ? <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState> : null}
 
-      {!error && !loading && campaigns.length === 0 && (
+      {!error && campaigns.length === 0 && (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
           You are not part of any campaigns yet.
         </p>
       )}
 
-      {!error && !loading && campaigns.length > 0 && (
+      {!error && campaigns.length > 0 && (
         <div className="space-y-4">
           {campaigns.map((campaign) => (
             <PlayerCampaignRow
@@ -985,7 +966,7 @@ function PlayerCampaignSection({
           ))}
         </div>
       )}
-      {!error && !loading && campaigns.length === FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole && (
+      {!error && campaigns.length === FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole && (
         <CampaignListLimitNotice />
       )}
       <ClaimCharacterSection />
@@ -996,8 +977,8 @@ function PlayerCampaignSection({
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
-  const { dmCampaigns, playerCampaigns, dmLoading, playerLoading, dmError, playerError } =
-    useCampaignsContext();
+  const { dmCampaigns, playerCampaigns, dmError, playerError } = useCampaignsContext();
+  const { needsRecoveryBackup } = useStartupStatus();
   const isDesktopLayout = useMediaQuery(DESKTOP_LAYOUT_QUERY);
   const [activeCampaignGroup, setActiveCampaignGroup] = useState<CampaignGroup>("yours");
   const {
@@ -1008,25 +989,20 @@ export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
 
   const yourCampaignsSection = (
     <div className="min-w-0 space-y-6">
-      <DmCampaignList
-        userUid={effectiveUserId}
-        campaigns={dmCampaigns}
-        loading={dmLoading}
-        error={dmError}
-      />
+      <DmCampaignList campaigns={dmCampaigns} error={dmError} />
     </div>
   );
   const playingCampaignsSection = (
-    <PlayerCampaignSection
-      campaigns={playerCampaigns}
-      loading={playerLoading}
-      error={playerError}
-    />
+    <PlayerCampaignSection campaigns={playerCampaigns} error={playerError} />
   );
 
   return (
     <PageShell title={firstName ? `${firstName}'s Dashboard` : "Dashboard"}>
-      <RecoveryBackupBanner ownUid={user.uid} effectiveUserId={effectiveUserId} />
+      <RecoveryBackupBanner
+        ownUid={user.uid}
+        effectiveUserId={effectiveUserId}
+        needsBackup={needsRecoveryBackup}
+      />
 
       {isDesktopLayout ? (
         <div className="grid grid-cols-2 items-start gap-6">

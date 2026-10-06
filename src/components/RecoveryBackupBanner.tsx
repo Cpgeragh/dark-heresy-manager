@@ -4,40 +4,30 @@
 // self-only), so each device confirms once. The revealed code is the shared
 // account code (works on linked devices via effectiveUserId).
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
-import { markRecoveryCodeBackedUp, needsRecoveryCodeBackup } from "../services/userAccountService";
+import { markRecoveryCodeBackedUp } from "../services/userAccountService";
 import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
 
 interface Props {
   ownUid: string;
   effectiveUserId: string;
+  needsBackup: boolean;
 }
 
-export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
-  const [needsBackup, setNeedsBackup] = useState(false);
+export function RecoveryBackupBanner({
+  ownUid,
+  effectiveUserId,
+  needsBackup: initialNeedsBackup,
+}: Props) {
+  const [needsBackup, setNeedsBackup] = useState(initialNeedsBackup);
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const confirmingRef = useRef(false);
   const [copied, setCopied] = useState(false);
   const toast = useToast();
-  const showError = toast.error;
-
-  useEffect(() => {
-    let ignore = false;
-    needsRecoveryCodeBackup(ownUid)
-      .then((needsRecoveryBackup) => {
-        if (!ignore) setNeedsBackup(needsRecoveryBackup);
-      })
-      .catch(() => {
-        if (!ignore) showError("Couldn't check your recovery backup status.");
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [ownUid, showError]);
 
   if (!needsBackup) return null;
 

@@ -6,7 +6,7 @@ Repository paths in this document refer to the checked-out commit.
 
 Subscriptions belong to the narrowest component or provider that needs their live result. `useDocumentSubscription` and `useQuerySubscription` own the complete listener lifecycle from start through cleanup.
 
-`CampaignsProvider` is global in `src/App.tsx`. After authentication it can keep the active DM and member campaign queries alive across routes, including startup states. Route pages add only the scoped listeners required by the mounted and enabled surface.
+`CampaignsProvider` is global in `src/App.tsx`. After authentication it keeps the active DM, active member and archived campaign queries alive across routes, including startup states, and `StartupGate` waits for all three before the application opens. Route pages add only the scoped listeners required by the mounted and enabled surface.
 
 ## Query windows
 

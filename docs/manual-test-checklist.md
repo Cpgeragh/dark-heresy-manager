@@ -940,6 +940,13 @@ The landing page after onboarding: separate DM and Player sections on one screen
 
 Use a DM with active and archived campaigns, a player who belongs to multiple campaigns, and another connected device. Work through DM actions first, then campaign navigation and claim states. Refresh after every mutation.
 
+**Startup and loading:**
+
+- [ ] After the logo screen, the Dashboard appears complete: Your Campaigns, Campaigns You Play In, the Archived list and the recovery backup banner are all present on the first frame, with no loading text and nothing appearing afterwards (`StartupGate.tsx`)
+- [ ] Open the app in a fresh browser profile with no saved data and block its network requests in the browser's developer tools: the logo screen shows a pop-up that cannot be closed with the backdrop or Escape, with one Try Again button (`StartupErrorModal.tsx`)
+- [ ] Press Try Again with the block still on: the app reloads and shows the pop-up again; remove the block and press Try Again: the app opens normally
+- [ ] After the Dashboard has opened, switch the network off: the Dashboard stays on screen with the last data and the pop-up never appears
+
 **DM section:**
 
 - [ ] On desktop, Your Campaigns and Campaigns You Play In use the same side-by-side layout as the two Psychic Powers groups; on phone, only one group is visible at a time and the standard swipe/tab control switches between them

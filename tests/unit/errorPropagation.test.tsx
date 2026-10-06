@@ -71,7 +71,6 @@ vi.mock("../../src/components/Toast", () => ({
   useToast: () => mockToastApi,
 }));
 
-import { RecoveryBackupBanner } from "../../src/components/RecoveryBackupBanner";
 import Onboarding from "../../src/pages/Onboarding";
 
 const user = { uid: "user-1" } as User;
@@ -507,17 +506,5 @@ describe("new-device linking", () => {
 
     expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001", "My laptop");
     expect(screen.queryByRole("button", { name: "Reclaim Identity" })).not.toBeInTheDocument();
-  });
-});
-
-describe("recovery backup error propagation", () => {
-  it("reports a failed backup-status check instead of discarding it", async () => {
-    mockNeedsRecoveryCodeBackup.mockRejectedValue(new Error("read failed"));
-
-    render(<RecoveryBackupBanner ownUid="user-1" effectiveUserId="user-1" />);
-
-    await waitFor(() =>
-      expect(mockToastError).toHaveBeenCalledWith("Couldn't check your recovery backup status.")
-    );
   });
 });

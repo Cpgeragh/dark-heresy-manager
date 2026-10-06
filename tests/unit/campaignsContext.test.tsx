@@ -3,6 +3,7 @@
 // Tests for CampaignsProvider, which runs two parallel Firestore listeners:
 //   1. campaigns where dmId == uid
 //   2. campaigns where memberIds array-contains uid
+// and exposes the archived campaigns list from useArchivedCampaigns, which is mocked here.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
@@ -20,17 +21,32 @@ const {
   mockQuery,
   mockUnsubscribeDm,
   mockUnsubscribePlayer,
-} = vi.hoisted(() => ({
-  mockLimit: vi.fn((value: number) => ({ type: "limit", value })),
-  mockOnSnapshot: vi.fn(),
-  mockWhere: vi.fn((..._args: unknown[]) => "where-clause"),
-  mockQuery: vi.fn((..._args: unknown[]) => "query-ref"),
-  mockUnsubscribeDm: vi.fn(),
-  mockUnsubscribePlayer: vi.fn(),
-}));
+  mockUseArchivedCampaigns,
+  archivedState,
+} = vi.hoisted(() => {
+  const state = {
+    campaigns: [] as unknown[],
+    loading: true,
+    error: null as Error | null,
+  };
+  return {
+    mockLimit: vi.fn((value: number) => ({ type: "limit", value })),
+    mockOnSnapshot: vi.fn(),
+    mockWhere: vi.fn((..._args: unknown[]) => "where-clause"),
+    mockQuery: vi.fn((..._args: unknown[]) => "query-ref"),
+    mockUnsubscribeDm: vi.fn(),
+    mockUnsubscribePlayer: vi.fn(),
+    mockUseArchivedCampaigns: vi.fn((_uid: string) => state),
+    archivedState: state,
+  };
+});
 
 vi.mock("../../src/firebase/converters", () => ({
   campaignsCollectionRef: vi.fn(() => "campaigns-ref"),
+}));
+
+vi.mock("../../src/hooks/useArchivedCampaigns", () => ({
+  useArchivedCampaigns: (uid: string) => mockUseArchivedCampaigns(uid),
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -68,6 +84,9 @@ beforeEach(() => {
   capturedDmOnError = null;
   capturedPlayerOnNext = null;
   capturedPlayerOnError = null;
+  archivedState.campaigns = [];
+  archivedState.loading = true;
+  archivedState.error = null;
 
   // First call → DM listener, second call → player listener
   let callCount = 0;
@@ -248,6 +267,29 @@ describe("CampaignsProvider — error handling", () => {
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe("permission-denied");
     expect(result.current.playerCampaigns).toEqual([]);
+  });
+});
+
+describe("CampaignsProvider — archived campaigns", () => {
+  it("asks for the archived campaigns of the same uid", () => {
+    renderHook(() => useCampaignsContext(), { wrapper: makeWrapper("uid-9") });
+    expect(mockUseArchivedCampaigns).toHaveBeenCalledWith("uid-9");
+  });
+
+  it("exposes the archived list, loading flag and error without touching the active loading flag", () => {
+    archivedState.campaigns = [{ id: "old", name: "Old Campaign" }];
+    archivedState.loading = false;
+    archivedState.error = new Error("archived-failed");
+
+    const { result } = renderHook(() => useCampaignsContext(), {
+      wrapper: makeWrapper("uid-1"),
+    });
+
+    expect(result.current.archivedCampaigns).toEqual([{ id: "old", name: "Old Campaign" }]);
+    expect(result.current.archivedLoading).toBe(false);
+    expect(result.current.archivedError?.message).toBe("archived-failed");
+    expect(result.current.loading).toBe(true);
+    expect(result.current.error).toBeNull();
   });
 });
 

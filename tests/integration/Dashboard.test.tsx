@@ -21,13 +21,17 @@ vi.mock("react-router-dom", async () => {
 });
 
 const useCampaignsContextMock = vi.fn();
+const archivedStateMock = vi.fn();
 vi.mock("../../src/context/useCampaignsContext", () => ({
-  useCampaignsContext: () => useCampaignsContextMock(),
-}));
-
-const useArchivedCampaignsMock = vi.fn();
-vi.mock("../../src/hooks/useArchivedCampaigns", () => ({
-  useArchivedCampaigns: (...args: unknown[]) => useArchivedCampaignsMock(...args),
+  useCampaignsContext: () => {
+    const archived = archivedStateMock();
+    return {
+      archivedCampaigns: archived.campaigns,
+      archivedLoading: archived.loading,
+      archivedError: archived.error,
+      ...useCampaignsContextMock(),
+    };
+  },
 }));
 
 const useRecoveryLookupMock = vi.fn();
@@ -117,7 +121,7 @@ beforeEach(() => {
     dmError: null,
     playerError: null,
   });
-  useArchivedCampaignsMock.mockReturnValue({ campaigns: [], loading: false, error: null });
+  archivedStateMock.mockReturnValue({ campaigns: [], loading: false, error: null });
   useRecoveryLookupMock.mockReturnValue({
     loading: false,
     error: null,
@@ -456,7 +460,7 @@ describe("Dashboard DM campaign list", () => {
   it("uses the same named deletion confirmation for an archived campaign", async () => {
     const user = userEvent.setup();
     preflightCampaignDeletionMock.mockResolvedValue({ jobId: "archived-job", totalCount: 5 });
-    useArchivedCampaignsMock.mockReturnValue({
+    archivedStateMock.mockReturnValue({
       campaigns: [dmCampaign({ id: "campaign-2", name: "Retired Crusade" })],
       loading: false,
       error: null,
@@ -466,9 +470,11 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: /Archived/ }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
     const deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
-    expect(within(deleteDialog).getByText(
-      "This permanently deletes this campaign: Retired Crusade. This cannot be undone."
-    )).toBeInTheDocument();
+    expect(
+      within(deleteDialog).getByText(
+        "This permanently deletes this campaign: Retired Crusade. This cannot be undone."
+      )
+    ).toBeInTheDocument();
     expect(within(deleteDialog).queryByText(/documents|Checking affected/)).not.toBeInTheDocument();
 
     await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
@@ -482,7 +488,7 @@ describe("Dashboard DM campaign list", () => {
 
   it("shows archived campaigns behind a toggle, with a working restore action", async () => {
     const user = userEvent.setup();
-    useArchivedCampaignsMock.mockReturnValue({
+    archivedStateMock.mockReturnValue({
       campaigns: [dmCampaign({ id: "campaign-2", name: "Retired Crusade" })],
       loading: false,
       error: null,

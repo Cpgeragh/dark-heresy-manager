@@ -10,6 +10,9 @@ export interface CampaignsContextValue {
   dmError: Error | null;
   playerError: Error | null;
   error: Error | null;
+  archivedCampaigns: CampaignWithId[];
+  archivedLoading: boolean;
+  archivedError: Error | null;
 }
 
 export const CampaignsContext = createContext<CampaignsContextValue>({
@@ -21,6 +24,9 @@ export const CampaignsContext = createContext<CampaignsContextValue>({
   dmError: null,
   playerError: null,
   error: null,
+  archivedCampaigns: [],
+  archivedLoading: true,
+  archivedError: null,
 });
 
 export function useCampaignsContext() {
