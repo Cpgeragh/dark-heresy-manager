@@ -13,6 +13,7 @@ export const colourAmberPlain = "text-amber-300";
 export const colourSkyPlain = "text-sky-300";
 export const colourMetadataLabelText = "text-sky-300/85";
 export const colourTextPrimary = "text-slate-100";
+export const colourOverlayBackdrop = "bg-slate-950/60";
 export const colourRequiredText = "text-red-500";
 export const colourLime = "border-lime-500/50 bg-lime-500/10 text-lime-300";
 export const colourBlue = "border-blue-500/50 bg-blue-500/10 text-blue-300";

@@ -104,6 +104,9 @@ vi.mock("../../src/pages/CharacterSheet/SkillsTab", () => ({
 vi.mock("../../src/mechanics/talents/TalentsTab", () => ({
   TalentsTab: () => <div>Mock TalentsTab</div>,
 }));
+vi.mock("../../src/mechanics/eliteAdvances/EliteAdvancesTab", () => ({
+  EliteAdvancesTab: () => <div>Mock EliteAdvancesTab</div>,
+}));
 vi.mock("../../src/mechanics/traits/TraitsTab", () => ({
   TraitsTab: () => <div>Mock TraitsTab</div>,
 }));
@@ -402,7 +405,7 @@ describe("CharacterSheet tabs", () => {
   it("loads a deferred tab directly from its ?tab= URL", async () => {
     renderSheet("/campaign/campaign-1/character/char-1?tab=weapons");
 
-    expect(screen.getByText("Loading section…")).toBeInTheDocument();
+    expect(screen.queryByText("Loading section…")).not.toBeInTheDocument();
     expect(await screen.findByText("Mock WeaponsTab")).toBeInTheDocument();
     expect(screen.queryByText("Mock CharacteristicsTab")).not.toBeInTheDocument();
   });

@@ -1,6 +1,15 @@
 // src/pages/CharacterSheet.tsx
 
-import { lazy, memo, Suspense, useState, useCallback, useEffect, useMemo } from "react";
+import {
+  lazy,
+  memo,
+  Suspense,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useTransition,
+} from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 import { CharacterKebabContent } from "./CharacterSheet/CharacterKebabContent";
@@ -62,6 +71,7 @@ import {
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { LoadingState } from "../ui/LoadingState";
+import { PendingOverlay } from "../ui/PendingOverlay";
 import { ROUTES } from "../constants/routes";
 import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
@@ -223,6 +233,9 @@ export default function CharacterSheet({
       import("./CharacterSheet/GearTab"),
       import("./CharacterSheet/ArcheotechTab"),
       import("./CharacterSheet/CyberneticsTab"),
+      import("../mechanics/talents/TalentsTab"),
+      import("../mechanics/eliteAdvances/EliteAdvancesTab"),
+      import("./CharacterSheet/PsychicTab"),
     ]);
   }, [params.campaignId, params.characterId]);
 
@@ -262,12 +275,13 @@ export default function CharacterSheet({
     [character?.talentsAndTraits.talents]
   );
 
+  const [tabPending, startTabTransition] = useTransition();
   const handleTabChange = useCallback(
     (tab: TabId) => {
-      navigate(`?tab=${tab}`);
+      startTabTransition(() => navigate(`?tab=${tab}`));
       window.scrollTo({ top: 0, behavior: "instant" });
     },
-    [navigate]
+    [navigate, startTabTransition]
   );
 
   const basePath = `/campaign/${params.campaignId}/character/${params.characterId}`;
@@ -685,7 +699,11 @@ export default function CharacterSheet({
         />
 
         {/* CONTENT CONTAINER */}
-        <div className={containerClass} role="tabpanel" aria-label={`${activeTab} content`}>
+        <div
+          className={`${containerClass} relative`}
+          role="tabpanel"
+          aria-label={`${activeTab} content`}
+        >
           <ErrorBoundary
             fallback={
               <div className="p-6 text-center space-y-4">
@@ -702,7 +720,11 @@ export default function CharacterSheet({
             }
           >
             <Suspense
-              fallback={<LoadingState className="py-10 text-center">Loading section…</LoadingState>}
+              fallback={
+                <div className="relative min-h-48">
+                  <PendingOverlay active />
+                </div>
+              }
             >
               {activeTab === "vitals" && (
                 <VitalsTab
@@ -1026,6 +1048,7 @@ export default function CharacterSheet({
                 />
               )}
             </Suspense>
+            <PendingOverlay active={tabPending} />
           </ErrorBoundary>
         </div>
 
