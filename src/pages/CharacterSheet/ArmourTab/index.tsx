@@ -136,11 +136,7 @@ export function ArmourTab({
     getBusyAction,
   } = useCustomItemLibraryActions<"armour">({ campaignId, userId, itemLabel: "armour" });
 
-  const {
-    items: campaignCustomArmourItems,
-    loading: armourLoading,
-    error: armourError,
-  } = useCampaignCustomItems({
+  const { items: campaignCustomArmourItems, error: armourError } = useCampaignCustomItems({
     campaignId,
     category: "armour",
     mode: isDM ? "admin" : "picker",
@@ -560,11 +556,6 @@ export function ArmourTab({
 
   return (
     <div className="space-y-6">
-      {armourLoading && (
-        <p role="status" className="text-sm text-slate-300">
-          Loading custom armour items…
-        </p>
-      )}
       <section>
         <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>

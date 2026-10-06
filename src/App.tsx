@@ -19,7 +19,8 @@ import { ToastProvider, ToastContainer, useToast } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 import { consumeUpdateStalled, consumePostUpgrade } from "./pwaUpdateState";
-import { LoadingState } from "./ui/LoadingState";
+import { RouteHolder } from "./components/RouteHolder";
+import { RouteLoadingHold } from "./components/RouteLoadingHold";
 import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
 
@@ -168,40 +169,43 @@ function AppContent() {
           {/* ROUTES */}
           <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
             <ErrorBoundary>
-              <Suspense
-                fallback={<LoadingState className="py-10 text-center">Loading page…</LoadingState>}
-              >
-                <Routes>
-                  <Route
-                    path={ROUTES.DASHBOARD}
-                    element={
-                      <Dashboard
-                        user={currentUser}
-                        effectiveUserId={effectiveUserId}
-                        firstName={firstName}
+              <RouteHolder
+                splashLabel={isPostUpgrade ? "Updating…" : "Loading…"}
+                routes={(routeLocation) => (
+                  <Suspense fallback={<RouteLoadingHold />}>
+                    <Routes location={routeLocation}>
+                      <Route
+                        path={ROUTES.DASHBOARD}
+                        element={
+                          <Dashboard
+                            user={currentUser}
+                            effectiveUserId={effectiveUserId}
+                            firstName={firstName}
+                          />
+                        }
                       />
-                    }
-                  />
 
-                  <Route
-                    path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                    element={
-                      <CharacterSheet
-                        effectiveUserId={effectiveUserId}
-                        effectiveUserFirstName={firstName}
-                        onOpenMessages={() => setMessagesOpen(true)}
+                      <Route
+                        path={ROUTE_PATTERNS.CHARACTER_SHEET}
+                        element={
+                          <CharacterSheet
+                            effectiveUserId={effectiveUserId}
+                            effectiveUserFirstName={firstName}
+                            onOpenMessages={() => setMessagesOpen(true)}
+                          />
+                        }
                       />
-                    }
-                  />
 
-                  <Route
-                    path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
-                    element={<CampaignOverview effectiveUserId={effectiveUserId} />}
-                  />
+                      <Route
+                        path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                        element={<CampaignOverview effectiveUserId={effectiveUserId} />}
+                      />
 
-                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-                </Routes>
-              </Suspense>
+                      <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+                    </Routes>
+                  </Suspense>
+                )}
+              />
             </ErrorBoundary>
           </main>
 

@@ -70,11 +70,7 @@ export function ArcheotechTab({
     itemLabel: "archeotech",
   });
 
-  const {
-    items: campaignCustomArcheotechItems,
-    loading: archeotechLoading,
-    error: archeotechError,
-  } = useCampaignCustomItems({
+  const { items: campaignCustomArcheotechItems, error: archeotechError } = useCampaignCustomItems({
     campaignId,
     category: "archeotech",
     mode: isDM ? "admin" : "picker",
@@ -307,11 +303,6 @@ export function ArcheotechTab({
 
   return (
     <div className="space-y-8">
-      {archeotechLoading && (
-        <p role="status" className="text-sm text-slate-300">
-          Loading custom archeotech items…
-        </p>
-      )}
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">

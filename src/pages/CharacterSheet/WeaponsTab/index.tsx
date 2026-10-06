@@ -223,11 +223,7 @@ export function WeaponsTab({
   );
   const customItemsRequiredForOwnedRows = hasLinkedCustomWeapons || hasLinkedCustomShields;
 
-  const {
-    items: campaignCustomItems,
-    loading: customItemsLoading,
-    error: customItemsError,
-  } = useCampaignCustomItems({
+  const { items: campaignCustomItems, error: customItemsError } = useCampaignCustomItems({
     campaignId,
     categories: WEAPON_CUSTOM_ITEM_CATEGORIES,
     mode: isDM ? "admin" : "picker",
@@ -1554,11 +1550,6 @@ export function WeaponsTab({
 
   return (
     <div ref={containerRef} className="space-y-8">
-      {customItemsLoading && (
-        <p role="status" className="text-sm text-slate-300">
-          Loading custom weapons…
-        </p>
-      )}
       <div className="lg:hidden">
         <SegmentedTabs
           id={WEAPON_TABS_ID}

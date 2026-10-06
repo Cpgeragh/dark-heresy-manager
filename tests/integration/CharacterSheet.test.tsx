@@ -246,22 +246,28 @@ describe("CharacterSheet loading/error states", () => {
     expect(screen.getByText("Invalid character route.")).toBeInTheDocument();
   });
 
-  it("shows a loading state", () => {
+  function expectNothingShown() {
+    expect(screen.queryByText("Loading character…")).not.toBeInTheDocument();
+    expect(screen.queryByText("Character not found.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Mock CharacteristicsTab")).not.toBeInTheDocument();
+  }
+
+  it("shows nothing, not even loading text, while the character loads", () => {
     useCharacterSheetMock.mockReturnValue(baseSheetResult({ characterLoading: true }));
     renderSheet();
-    expect(screen.getByText("Loading character…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
-  it("shows a loading state while the DM check is still loading", () => {
+  it("shows nothing while the DM check is still loading", () => {
     useCharacterSheetMock.mockReturnValue(baseSheetResult({ isDMLoading: true }));
     renderSheet();
-    expect(screen.getByText("Loading character…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
-  it("shows a loading state while custom items are still loading", () => {
+  it("shows nothing while custom items are still loading", () => {
     useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: true, error: null });
     renderSheet();
-    expect(screen.getByText("Loading character…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
   it("keeps the release transition neutral if access is revoked before navigation completes", () => {

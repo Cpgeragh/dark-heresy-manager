@@ -229,25 +229,31 @@ describe("CampaignOverview", () => {
     expect(useCampaignCharacterSummariesMock).toHaveBeenLastCalledWith(null);
   });
 
-  it("shows a loading state", () => {
+  function expectNothingShown() {
+    expect(screen.queryByText("Loading campaign…")).not.toBeInTheDocument();
+    expect(screen.queryByText("Campaign not found.")).not.toBeInTheDocument();
+    expect(screen.queryByText("No campaign selected.")).not.toBeInTheDocument();
+  }
+
+  it("shows nothing, not even loading text, while the campaign loads", () => {
     useCampaignMock.mockReturnValue({ campaign: undefined, loading: true, error: null });
     renderPage();
-    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
-  it("shows a loading state while characters are still loading", () => {
+  it("shows nothing while characters are still loading", () => {
     useCampaignCharactersMock.mockReturnValue({ characters: [], loading: true, error: null });
     renderPage();
-    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
-  it("shows a loading state while custom items are still loading", () => {
+  it("shows nothing while custom items are still loading", () => {
     useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: true, error: null });
     renderPage();
-    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
-  it("shows a loading state while sessions are still loading", () => {
+  it("shows nothing while sessions are still loading", () => {
     useSessionsMock.mockReturnValue({
       sessions: [],
       loading: true,
@@ -256,17 +262,17 @@ describe("CampaignOverview", () => {
       updateSession: vi.fn(),
     });
     renderPage();
-    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
-  it("shows a loading state while the party roster is still loading, for a player", () => {
+  it("shows nothing while the party roster is still loading, for a player", () => {
     useCampaignCharacterSummariesMock.mockReturnValue({
       summaries: [],
       loading: true,
       error: null,
     });
     renderPage("player-1");
-    expect(screen.getByText("Loading campaign…")).toBeInTheDocument();
+    expectNothingShown();
   });
 
   it("shows Campaign not found once loading finishes with no campaign", () => {

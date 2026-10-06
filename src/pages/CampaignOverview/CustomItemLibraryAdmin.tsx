@@ -6,7 +6,7 @@ import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import { CustomItemAdminRow } from "./CustomItemAdminRow";
 import { Chip } from "../../ui/chips/Chip";
 import { ErrorState } from "../../ui/ErrorState";
-import { LoadingState } from "../../ui/LoadingState";
+import { useRouteLoading } from "../../context/useRouteReady";
 import {
   CUSTOM_ITEM_CATEGORY_LABELS,
   CUSTOM_ITEM_CATEGORY_ORDER,
@@ -28,6 +28,7 @@ export function CustomItemLibraryAdmin({
     includeArchived: true,
     userId,
   });
+  useRouteLoading(loading);
   const [filterCategory, setFilterCategory] = useState<CustomItemCategory | "all">("all");
   const [filterStatus, setFilterStatus] = useState<CustomItemStatus | "all">("all");
 
@@ -35,9 +36,7 @@ export function CustomItemLibraryAdmin({
     return <ErrorState>Unable to load custom items.</ErrorState>;
   }
 
-  if (loading) {
-    return <LoadingState>Loading custom items…</LoadingState>;
-  }
+  if (loading) return null;
 
   const filtered = items
     .filter((i) => filterCategory === "all" || i.category === filterCategory)

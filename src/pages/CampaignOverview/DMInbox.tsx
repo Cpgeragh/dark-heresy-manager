@@ -10,7 +10,7 @@ import { useToast } from "../../components/Toast";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
-import { LoadingState } from "../../ui/LoadingState";
+import { useRouteLoading } from "../../context/useRouteReady";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import type { CharacterListItem } from "../../types/Firestore";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -121,6 +121,7 @@ export function DMInbox({
 }) {
   recordComponentRender("DMInbox");
   const { threads, loading, error } = useThreads(campaignId);
+  useRouteLoading(loading);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleThread = useCallback((characterId: string) => {
@@ -131,9 +132,7 @@ export function DMInbox({
     return <ErrorState>Unable to load messages. Please refresh the page.</ErrorState>;
   }
 
-  if (loading) {
-    return <LoadingState>Loading messages…</LoadingState>;
-  }
+  if (loading) return null;
 
   if (threads.length === 0) {
     return <p className="text-slate-400 text-sm lg:text-base">No messages yet.</p>;

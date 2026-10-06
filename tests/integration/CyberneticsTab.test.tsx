@@ -283,12 +283,13 @@ describe("CyberneticsTab", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows a loading state", () => {
+  it("shows no loading text while custom items load", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: true, error: null });
     renderTab({
       cybernetics: [{ id: "implant-1", name: "Linked Implant", customLibraryId: "library-1" }],
     });
-    expect(screen.getByText("Loading custom cybernetic items…")).toBeInTheDocument();
+    expect(screen.queryByText("Loading custom cybernetic items…")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("shows both empty messages when nothing is installed", () => {

@@ -74,10 +74,11 @@ describe("DMInbox", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows a loading state", () => {
+  it("shows nothing, not even loading text, while the conversation list loads", () => {
     useThreadsMock.mockReturnValue({ threads: [], loading: true, error: null });
     renderInbox();
-    expect(screen.getByText("Loading messages…")).toBeInTheDocument();
+    expect(screen.queryByText("Loading messages…")).not.toBeInTheDocument();
+    expect(screen.queryByText("No messages yet.")).not.toBeInTheDocument();
   });
 
   it("shows an empty state", () => {

@@ -137,11 +137,7 @@ export function GearTab({
   );
   const customItemsRequiredForOwnedRows = hasLinkedCustomGear || hasLinkedCustomConsumables;
 
-  const {
-    items: campaignCustomItems,
-    loading: customItemsLoading,
-    error: customItemsError,
-  } = useCampaignCustomItems({
+  const { items: campaignCustomItems, error: customItemsError } = useCampaignCustomItems({
     campaignId,
     categories: GEAR_CUSTOM_ITEM_CATEGORIES,
     mode: isDM ? "admin" : "picker",
@@ -627,11 +623,6 @@ export function GearTab({
 
   return (
     <div ref={containerRef} className="space-y-6">
-      {customItemsLoading && (
-        <p role="status" className="text-sm text-slate-300">
-          Loading custom gear…
-        </p>
-      )}
       <div className="lg:hidden">
         <SegmentedTabs
           id={GEAR_TABS_ID}

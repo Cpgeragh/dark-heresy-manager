@@ -76,6 +76,10 @@ Every text, textarea, number, date and search input sets `autoComplete="off"`, b
 
 `src/ui/PendingOverlay.tsx` is the shared loading indicator. It is a dimmed layer with the loading dots that covers the area that is waiting, and it appears only after `PENDING_OVERLAY_DELAY_MS` (200 milliseconds, `src/constants/ui.ts`) and disappears when the wait ends. A wait shorter than the delay shows nothing. `src/pages/CharacterSheet.tsx` switches tabs inside a React transition, so the previous tab stays on screen while a tab that has not downloaded loads, and the overlay covers the tab area for a slow switch. The sheet downloads the code for all seven on-demand tabs in the background when it opens, and those downloads read no data. Panels that load when pressed stay closed until their data is complete: the Admin tab's claim history (`AdminTab.tsx`), a character's History pop-up (`CharacterRow.tsx`), a DM inbox conversation (`DMInbox.tsx`) and the force-assign player picker (`PlayerPicker.tsx`). The player Messages drawer opens at once and shows the overlay in place of its messages until they arrive (`MessageDrawer.tsx`).
 
+### Page switching
+
+`src/components/RouteHolder.tsx` owns page switches. When the path changes, the previous page stays visible and usable while the new page is built out of sight beside it, and its listeners start at once. Each part of a page that waits for data registers with `useRouteLoading` (`src/context/useRouteReady.ts`), and the new page replaces the old one when nothing is still waiting, so the Campaign Overview and the Character Sheet appear complete. `PendingOverlay` covers the old page only after `PENDING_OVERLAY_DELAY_MS`. A page still loading after `ROUTE_LOAD_TIMEOUT_MS` (30 seconds, `src/constants/ui.ts`) is revealed with its load error. The first page on a load or reload stays behind the logo screen until it is ready. A page sets its header menu and back link only while it is the visible page (`useRouteActive`). A change to the query string within a page, such as switching tabs, does not rebuild the page.
+
 ## Navigation and startup
 
 The routed application exposes these canonical paths:

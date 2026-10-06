@@ -62,11 +62,7 @@ export function DrugsTab({
     getBusyAction,
   } = useCustomItemLibraryActions<"drug">({ campaignId, userId, itemLabel: "drug" });
 
-  const {
-    items: campaignCustomDrugItems,
-    loading: drugsLoading,
-    error: drugsError,
-  } = useCampaignCustomItems({
+  const { items: campaignCustomDrugItems, error: drugsError } = useCampaignCustomItems({
     campaignId,
     category: "drug",
     mode: isDM ? "admin" : "picker",
@@ -270,11 +266,6 @@ export function DrugsTab({
 
   return (
     <div className="space-y-6">
-      {drugsLoading && (
-        <p role="status" className="text-sm text-slate-300">
-          Loading custom drug items…
-        </p>
-      )}
       {/* Excessive Drug Use rule */}
       <div
         className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}

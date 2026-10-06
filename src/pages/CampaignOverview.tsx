@@ -29,7 +29,7 @@ import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
-import { LoadingState } from "../ui/LoadingState";
+import { useRouteActive, useRouteLoading, useRouteLoadTimedOut } from "../context/useRouteReady";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 import { useCampaignCharacterSummaries } from "../hooks/useCampaignCharacterSummaries";
 import { MyCharacterCard } from "./CampaignOverview/MyCharacterCard";
@@ -89,6 +89,15 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     loading: partySummariesLoading,
     error: partySummariesError,
   } = useCampaignCharacterSummaries(campaign && campaignId ? campaignId : null);
+  const pageLoading =
+    campaignLoading ||
+    charactersLoading ||
+    customItemsLoading ||
+    sessionsLoading ||
+    partySummariesLoading;
+  useRouteLoading(pageLoading);
+  const routeActive = useRouteActive();
+  const routeTimedOut = useRouteLoadTimedOut();
   const ownCharacterIds = useMemo(() => new Set(characters.map((c) => c.id)), [characters]);
   const partyMembers = useMemo(
     () => partySummaries.filter((s) => !ownCharacterIds.has(s.id)),
@@ -229,6 +238,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
 
   // Inject Import JSON into header kebab for DMs
   useEffect(() => {
+    if (!routeActive) return;
     if (!isDM) {
       clearKebabContent();
       return;
@@ -289,6 +299,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     );
     return () => clearKebabContent();
   }, [
+    routeActive,
     isDM,
     importingCharacter,
     handleImport,
@@ -308,14 +319,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <RouteLoadError resource="campaign" />;
   }
 
-  if (
-    campaignLoading ||
-    charactersLoading ||
-    customItemsLoading ||
-    sessionsLoading ||
-    partySummariesLoading
-  ) {
-    return <LoadingState className="text-center py-10">Loading campaign…</LoadingState>;
+  if (pageLoading) {
+    return routeTimedOut ? <RouteLoadError resource="campaign" /> : null;
   }
 
   if (!campaign) {

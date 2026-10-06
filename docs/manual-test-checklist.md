@@ -1110,6 +1110,10 @@ Use one editable character and one read-only character. Open the sheet on phone 
 - [ ] Keyboard, mouse, touch, and swipe navigation select the same sections without double-activation; rapid navigation never leaves two sections active or saves input to the wrong section
 - [ ] Browser Back/Forward and refresh from Dashboard → Campaign → Character → section produce a coherent route and a working way back; pending/invalid form text is either deliberately preserved or deliberately discarded with warning
 - [ ] Directly open valid Dashboard, Campaign, Character, and onboarding-step URLs in a new tab and after PWA relaunch: each lands on the intended screen after authentication/onboarding gates complete
+- [ ] Tap a campaign on the Dashboard: the Dashboard stays on screen and usable, then the campaign page appears complete, with characters, party, sessions and, for the DM, the inbox and custom items already filled in, and no loading text appears at any point (`RouteHolder.tsx`)
+- [ ] Throttle the network to a slow connection and tap a campaign or character: after a short moment a dimmed overlay with dots covers the old page, the header menu does not change until the swap, and the new page then replaces the old one complete
+- [ ] Reload directly on a character sheet and on a campaign page: the logo screen stays until the page is complete, then the page appears with no "Loading page" or "Loading character" text
+- [ ] Block the network after the Dashboard has opened and tap a campaign you have never opened: after 30 seconds the page appears with its "Unable to load" message and buttons instead of waiting forever
 - [ ] Header actions appear only on their intended routes and roles; Settings, Messages, export, release, edit-enable, and navigation controls all target the currently visible campaign/character after rapid route changes
 - [ ] Repeat Dashboard → Campaign → a dense Character → a large picker five times: picker search remains responsive, closing it restores the sheet, and later cycles do not visibly slow down or retain stale modal, selection, or route state
 

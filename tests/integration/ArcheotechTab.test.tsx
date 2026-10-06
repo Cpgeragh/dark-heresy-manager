@@ -123,10 +123,11 @@ describe("ArcheotechTab", () => {
     expect(screen.getByText("Unable to load custom archeotech items.")).toBeInTheDocument();
   });
 
-  it("shows a loading state", () => {
+  it("shows no loading text while custom items load", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: true, error: null });
     renderTab();
-    expect(screen.getByText("Loading custom archeotech items…")).toBeInTheDocument();
+    expect(screen.queryByText("Loading custom archeotech items…")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("shows the empty message and a zero count when there is no archeotech", () => {

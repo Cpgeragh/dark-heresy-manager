@@ -121,10 +121,11 @@ describe("DrugsTab", () => {
     expect(screen.getByText("Unable to load custom drug items.")).toBeInTheDocument();
   });
 
-  it("shows a loading state", () => {
+  it("shows no loading text while custom items load", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: true, error: null });
     renderTab();
-    expect(screen.getByText("Loading custom drug items…")).toBeInTheDocument();
+    expect(screen.queryByText("Loading custom drug items…")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("shows the empty message when no drugs are carried", () => {

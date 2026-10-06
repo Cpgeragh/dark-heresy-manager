@@ -140,11 +140,7 @@ export function CyberneticsTab({
     [cybernetics]
   );
 
-  const {
-    items: campaignCustomItems,
-    loading: customItemsLoading,
-    error: customItemsError,
-  } = useCampaignCustomItems({
+  const { items: campaignCustomItems, error: customItemsError } = useCampaignCustomItems({
     campaignId,
     categories: CYBERNETIC_CUSTOM_ITEM_CATEGORIES,
     mode: isDM ? "admin" : "picker",
@@ -939,11 +935,6 @@ export function CyberneticsTab({
 
   return (
     <div className="space-y-6">
-      {customItemsLoading && (
-        <p role="status" className="text-sm text-slate-300">
-          Loading custom cybernetic items…
-        </p>
-      )}
       {/* ── INTEGRATED WEAPONS ────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">

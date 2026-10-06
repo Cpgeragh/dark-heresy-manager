@@ -71,6 +71,7 @@ import {
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { LoadingState } from "../ui/LoadingState";
+import { useRouteActive, useRouteLoading, useRouteLoadTimedOut } from "../context/useRouteReady";
 import { PendingOverlay } from "../ui/PendingOverlay";
 import { ROUTES } from "../constants/routes";
 import { RouteLoadError } from "../ui/RouteLoadError";
@@ -120,6 +121,15 @@ const ArcheotechTab = lazy(() =>
     default: ArcheotechTab,
   }))
 );
+
+function TabSuspenseFallback() {
+  useRouteLoading(true);
+  return (
+    <div className="relative min-h-48">
+      <PendingOverlay active />
+    </div>
+  );
+}
 
 const MemoizedCharacteristicsTab = memo(CharacteristicsTab);
 const MemoizedSkillsTab = memo(SkillsTab);
@@ -348,11 +358,15 @@ export default function CharacterSheet({
     loadedCharacterRouteKey === characterRouteKey &&
     isPermissionDenied(characterError);
 
+  const routeActive = useRouteActive();
+  const routeTimedOut = useRouteLoadTimedOut();
+  useRouteLoading(characterLoading || isDMLoading || customItemsLoading);
+
   useEffect(() => {
     if (!accessWasRevoked) return;
-    clearKebabContent();
+    if (routeActive) clearKebabContent();
     navigate(ROUTES.DASHBOARD, { replace: true });
-  }, [accessWasRevoked, clearKebabContent, navigate]);
+  }, [accessWasRevoked, routeActive, clearKebabContent, navigate]);
 
   const handleGenerateRecoveryCode = useCallback(async () => {
     if (!params.campaignId || !params.characterId) return;
@@ -372,7 +386,7 @@ export default function CharacterSheet({
   }, [releaseCharacter, clearKebabContent, navigate]);
 
   useEffect(() => {
-    if (!character || isDMLoading) return;
+    if (!routeActive || !character || isDMLoading) return;
 
     setBackHref(ROUTES.DASHBOARD);
 
@@ -395,6 +409,7 @@ export default function CharacterSheet({
       clearKebabContent();
     };
   }, [
+    routeActive,
     character,
     isDM,
     isDMLoading,
@@ -562,7 +577,7 @@ export default function CharacterSheet({
   }
 
   if (characterLoading || isDMLoading || customItemsLoading) {
-    return <LoadingState className="text-center py-10">Loading character…</LoadingState>;
+    return routeTimedOut ? <RouteLoadError resource="character" /> : null;
   }
 
   if (characterError || customItemsError) {
@@ -719,13 +734,7 @@ export default function CharacterSheet({
               </div>
             }
           >
-            <Suspense
-              fallback={
-                <div className="relative min-h-48">
-                  <PendingOverlay active />
-                </div>
-              }
-            >
+            <Suspense fallback={<TabSuspenseFallback />}>
               {activeTab === "vitals" && (
                 <VitalsTab
                   character={character}

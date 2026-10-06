@@ -212,12 +212,13 @@ describe("GearTab", () => {
     expect(screen.getByText("Unable to load custom gear.")).toBeInTheDocument();
   });
 
-  it("shows a loading state", () => {
+  it("shows no loading text while custom items load", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: true, error: null });
     renderTab({
       gear: [{ id: "gear-1", name: "Linked Gear", customLibraryId: "library-1" }],
     });
-    expect(screen.getByText("Loading custom gear…")).toBeInTheDocument();
+    expect(screen.queryByText("Loading custom gear…")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("shows both empty messages when there is nothing carried", () => {
