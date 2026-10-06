@@ -219,12 +219,13 @@ describe("CharacterRow history modal", () => {
     expect(mockUseClaimLogs).toHaveBeenLastCalledWith("campaign-1", "char-1", true);
   });
 
-  it("shows a loading state", async () => {
+  it("keeps the History pop-up closed and shows no loading text while the history loads", async () => {
     mockUseClaimLogs.mockReturnValue({ logs: [], loading: true, error: null });
     const user = userEvent.setup();
     renderRow();
     await user.click(screen.getByRole("button", { name: "History" }));
-    expect(screen.getByText("Loading history…")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Character history" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Loading history…")).not.toBeInTheDocument();
   });
 
   it("shows an error state", async () => {

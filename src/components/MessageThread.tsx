@@ -8,7 +8,6 @@ import { LoadingDots } from "../ui/LoadingDots";
 export function MessageThread({
   messages,
   currentUid,
-  loading,
   onLoadOlder,
   loadingOlder,
   hasOlderMessages,
@@ -16,7 +15,6 @@ export function MessageThread({
 }: {
   messages: ThreadMessage[];
   currentUid: string;
-  loading: boolean;
   onLoadOlder: () => void;
   loadingOlder: boolean;
   hasOlderMessages: boolean;
@@ -29,10 +27,6 @@ export function MessageThread({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [newestMessageId]);
-
-  if (loading) {
-    return <p className="text-xs lg:text-sm text-slate-500 py-2">Loading messages…</p>;
-  }
 
   if (messages.length === 0) {
     return <p className="text-xs lg:text-sm text-slate-500 py-2 text-center">No messages yet.</p>;

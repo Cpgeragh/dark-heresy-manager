@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { getFirstName } from "../../services/profileService";
+import { PendingOverlay } from "../../ui/PendingOverlay";
 import { PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { uiItemName, uiTextMuted } from "../../ui/styles/editableStyles";
 
@@ -50,7 +51,7 @@ export function PlayerPicker({ memberIds, onSelect, onClose }: Props) {
   const loading = resolvedPlayers?.memberIdsKey !== memberIdsKey;
   const players = resolvedPlayers?.memberIdsKey === memberIdsKey ? resolvedPlayers.players : [];
 
-  const emptyMessage = loading ? "Loading players…" : "No players in this campaign yet.";
+  if (loading) return <PendingOverlay active />;
 
   return (
     <PickerModal
@@ -58,8 +59,8 @@ export function PlayerPicker({ memberIds, onSelect, onClose }: Props) {
       query=""
       onQueryChange={() => {}}
       onClose={onClose}
-      isEmpty={loading || players.length === 0}
-      emptyMessage={emptyMessage}
+      isEmpty={players.length === 0}
+      emptyMessage="No players in this campaign yet."
       hideSearch
     >
       {players.map((player) => (

@@ -8,6 +8,7 @@ import { MessageInput } from "./MessageInput";
 import { useToast } from "./Toast";
 import { CloseButton } from "../ui/buttons/CloseButton";
 import { ErrorState } from "../ui/ErrorState";
+import { PendingOverlay } from "../ui/PendingOverlay";
 import { recordComponentRender } from "../performance/performanceMetrics";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────
@@ -39,17 +40,17 @@ function PlayerThread({
   );
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden px-4 pb-4">
+    <div className="relative flex flex-col flex-1 overflow-hidden px-4 pb-4">
+      <PendingOverlay active={loading} />
       <div className="flex-1 overflow-y-auto">
         {error ? (
           <ErrorState className="text-center py-10">
             Unable to load messages. Please try again later.
           </ErrorState>
-        ) : (
+        ) : loading ? null : (
           <MessageThread
             messages={messages}
             currentUid={playerUid}
-            loading={loading}
             onLoadOlder={() => void loadOlder()}
             loadingOlder={loadingOlder}
             olderError={olderError}

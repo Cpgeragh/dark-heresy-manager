@@ -5,7 +5,7 @@ import type { Character } from "../../types/Character";
 import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { Button } from "../../ui/buttons/Button";
 import { ErrorState } from "../../ui/ErrorState";
-import { LoadingState } from "../../ui/LoadingState";
+import { PendingOverlay } from "../../ui/PendingOverlay";
 import { uiSection, readOnlyBadgeClass } from "../../ui/styles/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
 
@@ -36,12 +36,13 @@ export function AdminTab({
   memberIds,
 }: AdminTabProps) {
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
-  const [showClaimHistory, setShowClaimHistory] = useState(false);
+  const [claimHistoryRequested, setClaimHistoryRequested] = useState(false);
   const {
     logs: claimLog,
     loading: claimLogLoading,
     error: claimLogError,
-  } = useClaimLogs(campaignId, character.id, showClaimHistory);
+  } = useClaimLogs(campaignId, character.id, claimHistoryRequested);
+  const showClaimHistory = claimHistoryRequested && !claimLogLoading;
 
   const latest = claimLog.length > 0 ? claimLog[0] : null;
   const eligibleMemberIds = memberIds.filter((uid) => uid !== character.userId);
@@ -51,7 +52,7 @@ export function AdminTab({
   const latestActorLabel = (character.userId && ownerName) || latest?.actorUid;
 
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
       {/* CONTEXT NOTE */}
       <p className="text-xs lg:text-sm text-slate-400">
         DM-only controls. Changes here immediately affect player access.
@@ -151,7 +152,7 @@ export function AdminTab({
           variant="secondary"
           size="sm"
           aria-expanded={showClaimHistory}
-          onClick={() => setShowClaimHistory((visible) => !visible)}
+          onClick={() => setClaimHistoryRequested((requested) => !requested)}
         >
           {showClaimHistory ? "Close History" : "Open History"}
         </Button>
@@ -160,8 +161,6 @@ export function AdminTab({
           <div className="mt-3">
             {claimLogError ? (
               <ErrorState>Unable to load claim history.</ErrorState>
-            ) : claimLogLoading ? (
-              <LoadingState>Loading claim history…</LoadingState>
             ) : claimLog.length === 0 ? (
               <p className="text-sm lg:text-base text-slate-400">No claim events recorded yet.</p>
             ) : (
@@ -185,6 +184,8 @@ export function AdminTab({
           </div>
         )}
       </section>
+
+      <PendingOverlay active={claimHistoryRequested && claimLogLoading} />
     </div>
   );
 }

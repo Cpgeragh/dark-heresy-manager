@@ -11,6 +11,7 @@ import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
 import { LoadingState } from "../../ui/LoadingState";
+import { PendingOverlay } from "../../ui/PendingOverlay";
 import type { CharacterListItem } from "../../types/Firestore";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 
@@ -73,35 +74,37 @@ function ThreadView({
   }, [campaignId, characterId, toast]);
 
   return (
-    <div className="mt-2 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
-      {error ? (
-        <ErrorState>Unable to load this conversation.</ErrorState>
-      ) : (
-        <MessageThread
-          messages={messages}
-          currentUid={dmUid}
-          loading={loading}
-          onLoadOlder={() => void loadOlder()}
-          loadingOlder={loadingOlder}
-          olderError={olderError}
-          hasOlderMessages={hasOlderMessages}
-        />
-      )}
-      <MessageInput onSend={handleSend} placeholder={`Reply to ${label}…`} />
+    <>
+      <div hidden={loading} className="mt-2 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
+        {error ? (
+          <ErrorState>Unable to load this conversation.</ErrorState>
+        ) : (
+          <MessageThread
+            messages={messages}
+            currentUid={dmUid}
+            onLoadOlder={() => void loadOlder()}
+            loadingOlder={loadingOlder}
+            olderError={olderError}
+            hasOlderMessages={hasOlderMessages}
+          />
+        )}
+        <MessageInput onSend={handleSend} placeholder={`Reply to ${label}…`} />
 
-      {/* Clear chat */}
-      <div className="mt-3 pt-3 border-t border-slate-800">
-        <ConfirmInline
-          triggerLabel="Clear chat"
-          requireText="DELETE"
-          requirePrompt="Type DELETE to clear all messages"
-          size="sm"
-          busy={clearing}
-          busyLabel="Clearing"
-          onConfirm={handleClear}
-        />
+        {/* Clear chat */}
+        <div className="mt-3 pt-3 border-t border-slate-800">
+          <ConfirmInline
+            triggerLabel="Clear chat"
+            requireText="DELETE"
+            requirePrompt="Type DELETE to clear all messages"
+            size="sm"
+            busy={clearing}
+            busyLabel="Clearing"
+            onConfirm={handleClear}
+          />
+        </div>
       </div>
-    </div>
+      <PendingOverlay active={loading} />
+    </>
   );
 }
 
@@ -144,7 +147,7 @@ export function DMInbox({
         const hasUnread = thread.unreadForDM > 0;
 
         return (
-          <div key={thread.characterId}>
+          <div key={thread.characterId} className="relative">
             <button
               type="button"
               onClick={() => toggleThread(thread.characterId)}

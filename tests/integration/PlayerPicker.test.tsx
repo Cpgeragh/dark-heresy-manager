@@ -26,10 +26,11 @@ beforeEach(() => {
 });
 
 describe("PlayerPicker", () => {
-  it("shows a loading message before names resolve", () => {
+  it("does not open the picker or show loading text before names resolve", () => {
     mockGetFirstName.mockReturnValue(new Promise(() => {}));
     renderPicker(["uid-1"]);
-    expect(screen.getByText("Loading players…")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByText("Loading players…")).not.toBeInTheDocument();
   });
 
   it("shows an empty message when the campaign has no members", async () => {
@@ -50,7 +51,7 @@ describe("PlayerPicker", () => {
     await waitFor(() => expect(screen.getByText("Alice")).toBeInTheDocument());
     rerender(<PlayerPicker memberIds={["uid-2"]} onSelect={onSelect} onClose={onClose} />);
 
-    expect(screen.getByText("Loading players…")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.queryByText("Alice")).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByText("Bob")).toBeInTheDocument());
   });
@@ -95,6 +96,7 @@ describe("PlayerPicker", () => {
     mockGetFirstName.mockResolvedValue("Alice");
     const { onClose } = renderPicker(["uid-1"]);
 
+    await waitFor(() => expect(screen.getByText("Alice")).toBeInTheDocument());
     await user.click(screen.getByRole("button", { name: "Close" }));
 
     expect(onClose).toHaveBeenCalled();

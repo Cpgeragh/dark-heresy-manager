@@ -13,6 +13,7 @@ import {
 import { uiSection } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { LoadingDots } from "../../ui/LoadingDots";
+import { PendingOverlay } from "../../ui/PendingOverlay";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
 import { ModalShell } from "../../ui/modals/ModalShell";
@@ -64,7 +65,7 @@ export function CharacterRow({
   isDM: boolean;
 }) {
   recordComponentRender("CharacterRow");
-  const [showHistory, setShowHistory] = useState(false);
+  const [historyRequested, setHistoryRequested] = useState(false);
   const [revealedCode, setRevealedCode] = useState<string | null>(null);
   const [revealing, setRevealing] = useState(false);
   const [deletePreflight, setDeletePreflight] = useState<{
@@ -76,7 +77,8 @@ export function CharacterRow({
     logs,
     loading: logsLoading,
     error: logsError,
-  } = useClaimLogs(campaignId, characterId, showHistory && isDM);
+  } = useClaimLogs(campaignId, characterId, historyRequested && isDM);
+  const showHistory = historyRequested && !logsLoading;
   const toast = useToast();
 
   const handleDelete = useCallback(async () => {
@@ -129,7 +131,7 @@ export function CharacterRow({
     <>
       <Link
         to={`/campaign/${campaignId}/character/${characterId}`}
-        className={uiSection + " block hover:bg-slate-800 transition-colors"}
+        className={uiSection + " relative block hover:bg-slate-800 transition-colors"}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center gap-3">
@@ -183,7 +185,7 @@ export function CharacterRow({
                 size="sm"
                 onClick={(e) => {
                   e.preventDefault();
-                  setShowHistory(true);
+                  setHistoryRequested(true);
                 }}
               >
                 History
@@ -206,21 +208,20 @@ export function CharacterRow({
             )}
           </div>
         </div>
+        <PendingOverlay active={historyRequested && logsLoading} />
       </Link>
 
       {/* History modal */}
       {showHistory && (
         <ModalShell
           ariaLabel="Character history"
-          onClose={() => setShowHistory(false)}
+          onClose={() => setHistoryRequested(false)}
           className="max-w-xs lg:max-w-sm overflow-y-auto"
         >
-          <ModalHeader title="History" onClose={() => setShowHistory(false)} />
+          <ModalHeader title="History" onClose={() => setHistoryRequested(false)} />
           <div className="p-4 lg:p-5 space-y-1">
             {logsError ? (
               <p className="text-xs lg:text-sm text-red-400">Unable to load character history.</p>
-            ) : logsLoading ? (
-              <p className="text-xs lg:text-sm text-slate-500">Loading history…</p>
             ) : logs.length === 0 ? (
               <p className="text-xs lg:text-sm text-slate-500">No history yet.</p>
             ) : (

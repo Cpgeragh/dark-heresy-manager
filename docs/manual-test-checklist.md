@@ -853,6 +853,8 @@ Keep the DM on Admin and the owning player on the same character in a second pro
 - [ ] On an unclaimed character, Force Assign To… opens a picker listing every campaign member by resolved first name (falling back to their raw UID for a member with no profile name yet); selecting one immediately assigns the character to them and turns Player Edit Permission on
 - [ ] Force Assign To… is disabled when the character is already claimed or when the campaign has no members yet; the current owner is never offered as an assignment target
 - [ ] Tab is genuinely invisible/inaccessible to non-DM players
+- [ ] Pressing Open History keeps the list closed until the entries have loaded, with no loading text; on a slow connection a dimmed overlay with dots covers the tab until the history opens complete (`AdminTab.tsx`)
+- [ ] Pressing Force Assign To… opens the player picker only once the member names have resolved, with no loading text (`PlayerPicker.tsx`)
 
 ## 21. Custom Item Library
 
@@ -1005,6 +1007,7 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] With a deliberately seeded character with far more claim-log/XP-proposal/message documents than a single batch could hold, deletion still succeeds: it runs as a resumable job with live chunk progress shown on the confirm button, rather than refusing above a fixed document ceiling
 - [ ] Per-character "History" modal lists claim/release/force-assign/force-release events newest-first, with a readable date on each
 - [ ] Only the DM sees the per-character History action; opening and closing it repeatedly loads normally each time without leaving a stale loading or error state
+- [ ] Pressing History opens the pop-up only once the history has loaded, with no loading text; on a slow connection a dimmed overlay with dots covers the character row until the pop-up opens (`CharacterRow.tsx`)
 - [ ] Leave Campaign Overview open while another profile edits a character: the roster, session attendee names and DM inbox character names all update together from the same roster state
 - [ ] Session History: create a session with a date, XP awarded, a public summary, and private DM-only notes, plus an attendee checklist: XP is **not** applied automatically on save
 - [ ] Session summary and DM notes stop at 4,000 characters, XP accepts only a whole number from 0 to 100,000, and an attendee cannot appear twice
@@ -1039,6 +1042,8 @@ Open the same character thread as player and DM in separate profiles. Start empt
 - [ ] New messages auto-scroll the thread to the bottom on arrival
 - [ ] Empty/whitespace-only messages cannot be sent, and message entry stops at 2,000 characters
 - [ ] Close the player Messages drawer, send a message from the DM, then reopen it: the new message appears when reopened and the closed drawer has not shown stale loading/error content
+- [ ] Tapping a conversation in the DM inbox keeps it closed until its messages have loaded, with no loading text; on a slow connection a dimmed overlay with dots covers that row (`DMInbox.tsx`)
+- [ ] Opening the player Messages drawer slides it open at once, and a dimmed overlay with dots shows in place of the messages until they arrive, with no loading text and no "No messages yet" flash (`MessageDrawer.tsx`)
 - [ ] In a thread with more than 200 messages, opening the thread shows the latest 100 in chronological order; each explicit Load older messages press prepends at most 100 earlier messages with no gaps or duplicates, does not jump back to the bottom, and new arrivals still auto-scroll normally
 - [ ] **Autofill, Android:** the message box in the drawer and in the DM inbox, and the typed DELETE box for Clear chat, each show no autofill suggestion row above the keyboard (`MessageInput.tsx`, `DMInbox.tsx`)
 

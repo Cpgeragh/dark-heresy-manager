@@ -28,7 +28,6 @@ function renderThread(props: Partial<React.ComponentProps<typeof MessageThread>>
     <MessageThread
       messages={[]}
       currentUid="player-1"
-      loading={false}
       onLoadOlder={vi.fn()}
       loadingOlder={false}
       hasOlderMessages={false}
@@ -39,11 +38,6 @@ function renderThread(props: Partial<React.ComponentProps<typeof MessageThread>>
 }
 
 describe("MessageThread", () => {
-  it("shows a loading state", () => {
-    renderThread({ loading: true });
-    expect(screen.getByText("Loading messages…")).toBeInTheDocument();
-  });
-
   it("shows an empty state", () => {
     renderThread();
     expect(screen.getByText("No messages yet.")).toBeInTheDocument();

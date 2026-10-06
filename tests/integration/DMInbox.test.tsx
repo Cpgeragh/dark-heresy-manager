@@ -127,6 +127,30 @@ describe("DMInbox", () => {
     expect(markThreadReadMock).toHaveBeenCalledWith("campaign-1", "char-1", 3);
   });
 
+  it("keeps a conversation hidden and shows no loading text until its messages have loaded", async () => {
+    const user = userEvent.setup();
+    useThreadsMock.mockReturnValue({
+      threads: [{ characterId: "char-1", unreadForDM: 0, lastMessage: null }],
+      loading: false,
+      error: null,
+    });
+    useThreadMessagesMock.mockReturnValue({
+      messages: [],
+      loading: true,
+      error: null,
+      loadOlder: vi.fn(),
+      loadingOlder: false,
+      olderError: null,
+      hasOlderMessages: false,
+    });
+    renderInbox();
+
+    await user.click(screen.getByRole("button", { name: /Vex/ }));
+
+    expect(screen.getByText("Mock MessageThread")).not.toBeVisible();
+    expect(screen.queryByText("Loading messages…")).not.toBeInTheDocument();
+  });
+
   it("collapses an already-expanded thread on a second click", async () => {
     const user = userEvent.setup();
     useThreadsMock.mockReturnValue({
