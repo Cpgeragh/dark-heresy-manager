@@ -83,9 +83,9 @@ confusing output:
 - [ ] `AppHeader.tsx`'s kebab-menu trigger button has no `aria-expanded`,
       `aria-haspopup`, or `aria-controls`: confirm whether a screen reader user has
       any way to know the button opens a menu, or whether it's currently open.
-- [ ] `MessageThread.tsx`'s "Loading messages…" text is a bare `<p>` with no
-      `role="status"`, unlike the app's own `LoadingState.tsx` component which already
-      has one: minor, but worth a quick check for consistency.
+- [ ] `PendingOverlay.tsx` is a `role="status"` layer labelled "Loading": confirm a
+      screen reader announces it when it appears, and that the page underneath cannot be
+      reached by keyboard while it covers the page.
 - [ ] `CampaignOverview.tsx`'s Search input (DM's character list) and Character Name
       input both rely only on `placeholder` text with no `aria-label`/`<label>`.
 - [ ] `CustomItemLibraryAdmin.tsx`'s category and status filter chips communicate the

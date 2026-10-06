@@ -121,7 +121,7 @@ describe("CharacterRow reveal flow", () => {
 });
 
 describe("CharacterRow delete flow", () => {
-  it("checks affected documents on arm and disables confirm while loading", async () => {
+  it("keeps the confirmation closed until the affected documents have been counted", async () => {
     const user = userEvent.setup();
     let resolvePreflight: (value: { jobId: string; totalCount: number }) => void;
     mockPreflightCharacterDeletion.mockReturnValue(
@@ -133,8 +133,8 @@ describe("CharacterRow delete flow", () => {
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(screen.getByText("Checking affected documents…")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Yes" })).toBeDisabled();
+    expect(screen.queryByText("Checking affected documents…")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Yes" })).not.toBeInTheDocument();
 
     resolvePreflight!({ jobId: "job-1", totalCount: 7 });
     await waitFor(() =>

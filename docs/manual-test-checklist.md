@@ -855,6 +855,9 @@ Keep the DM on Admin and the owning player on the same character in a second pro
 - [ ] Tab is genuinely invisible/inaccessible to non-DM players
 - [ ] Pressing Open History keeps the list closed until the entries have loaded, with no loading text; on a slow connection a dimmed overlay with dots covers the tab until the history opens complete (`AdminTab.tsx`)
 - [ ] Pressing Force Assign To… opens the player picker only once the member names have resolved, with no loading text (`PlayerPicker.tsx`)
+- [ ] Pressing Delete on a character row, on a campaign, or on an archived custom item shows nothing new until the count of affected documents is ready, then the "Delete?" question appears with the number in it; on a slow connection a dimmed overlay with dots covers the row or window that was pressed (`ConfirmInline.tsx`)
+- [ ] Releasing a character as a player, or having the DM take the character while the sheet is open, shows the overlay with dots over an empty area, with no "Releasing character" or "Returning to dashboard" text, until the Dashboard appears
+- [ ] Tapping Experience in the sheet menu keeps the previous tab on screen until the XP history has loaded, then shows the Experience tab complete with its history already in it; on a slow connection the overlay covers the previous tab, and no "Loading XP history" text appears (`xpHistoryStore.ts`)
 
 ## 21. Custom Item Library
 

@@ -117,9 +117,7 @@ export function CharacterRow({
     }
   }, [campaignId, characterId]);
 
-  const deleteDetails = deletePreflight.loading ? (
-    <span className="text-xs text-slate-500">Checking affected documents…</span>
-  ) : deletePreflight.error ? (
+  const deleteDetails = deletePreflight.error ? (
     <span className="text-xs text-red-400">{deletePreflight.error}</span>
   ) : deletePreflight.result ? (
     <span className="text-xs text-slate-500">
@@ -208,7 +206,7 @@ export function CharacterRow({
             )}
           </div>
         </div>
-        <PendingOverlay active={historyRequested && logsLoading} />
+        <PendingOverlay active={(historyRequested && logsLoading) || deletePreflight.loading} />
       </Link>
 
       {/* History modal */}

@@ -53,6 +53,7 @@ import { ModalHeader } from "../ui/modals/ModalHeader";
 import { InfoModal } from "../components/InfoModal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
+import { PendingOverlay } from "../ui/PendingOverlay";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "../hooks/useRecoveryLookup";
 import { claimCharacter } from "../services/characterService";
@@ -508,7 +509,7 @@ function DmCampaignList({
               {archivedCampaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className={uiSection + " flex items-center gap-2 opacity-60"}
+                  className={uiSection + " relative flex items-center gap-2 opacity-60"}
                 >
                   <span className="flex-1 text-slate-400 italic lg:text-lg">{campaign.name}</span>
 
@@ -526,18 +527,19 @@ function DmCampaignList({
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => {
+                    onClick={async () => {
                       setDeleteConfirmText("");
+                      await loadDeletePreflight(campaign.id);
                       setPendingCampaignAction({
                         campaignId: campaign.id,
                         campaignName: campaign.name,
                         kind: "delete",
                       });
-                      void loadDeletePreflight(campaign.id);
                     }}
                   >
                     Delete
                   </Button>
+                  <PendingOverlay active={Boolean(deletePreflights[campaign.id]?.loading)} />
                 </div>
               ))}
               {archivedCampaigns.length === FIRESTORE_QUERY_LIMITS.archivedCampaigns && (
@@ -553,7 +555,7 @@ function DmCampaignList({
           ariaLabel={`Manage ${actionsCampaign.name}`}
           onClose={() => !pendingCampaignAction && !editingId && setOpenActionsId(null)}
           suspended={Boolean(pendingCampaignAction || editingId === actionsCampaign.id)}
-          className="min-h-0 max-h-[85vh] max-w-md flex flex-col overflow-hidden"
+          className="relative min-h-0 max-h-[85vh] max-w-md flex flex-col overflow-hidden"
           viewportAware
         >
           <ModalHeader
@@ -610,18 +612,19 @@ function DmCampaignList({
               <RemoveButton
                 label="Delete campaign"
                 className="justify-self-end"
-                onClick={() => {
+                onClick={async () => {
                   setDeleteConfirmText("");
+                  await loadDeletePreflight(actionsCampaign.id);
                   setPendingCampaignAction({
                     campaignId: actionsCampaign.id,
                     campaignName: actionsCampaign.name,
                     kind: "delete",
                   });
-                  void loadDeletePreflight(actionsCampaign.id);
                 }}
               />
             </section>
           </div>
+          <PendingOverlay active={Boolean(deletePreflights[actionsCampaign.id]?.loading)} />
         </ModalShell>
       )}
 

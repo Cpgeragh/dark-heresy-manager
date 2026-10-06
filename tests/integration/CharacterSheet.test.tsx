@@ -270,7 +270,7 @@ describe("CharacterSheet loading/error states", () => {
     expectNothingShown();
   });
 
-  it("keeps the release transition neutral if access is revoked before navigation completes", () => {
+  it("keeps the release transition neutral if access is revoked before navigation completes", async () => {
     useCharacterSheetMock.mockReturnValue(
       baseSheetResult({
         character: undefined,
@@ -280,7 +280,8 @@ describe("CharacterSheet loading/error states", () => {
     );
     renderSheet();
 
-    expect(screen.getByText("Releasing character…")).toBeInTheDocument();
+    expect(await screen.findByRole("status", { name: "Loading" })).toBeInTheDocument();
+    expect(screen.queryByText("Releasing character…")).not.toBeInTheDocument();
     expect(screen.queryByText(/Unable to load this character/)).not.toBeInTheDocument();
   });
 

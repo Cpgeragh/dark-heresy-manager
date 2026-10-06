@@ -24,3 +24,4 @@ export const SEARCH_DEBOUNCE_DELAY = 300;
 export const STARTUP_LOAD_TIMEOUT_MS = 30_000;
 export const PENDING_OVERLAY_DELAY_MS = 200;
 export const ROUTE_LOAD_TIMEOUT_MS = 30_000;
+export const XP_HISTORY_RELEASE_MS = 30_000;

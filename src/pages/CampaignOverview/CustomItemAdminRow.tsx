@@ -13,6 +13,7 @@ import {
   type CustomItemOperationPreflight,
 } from "../../services/customItemService";
 import { StatusBadge } from "../../ui/chips/StatusBadge";
+import { PendingOverlay } from "../../ui/PendingOverlay";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { CUSTOM_ITEM_CATEGORY_LABELS } from "../../constants/customItems";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -25,7 +26,6 @@ type PreflightState = {
 };
 
 function impactDetails(state: PreflightState) {
-  if (state.loading) return <span className="text-xs text-slate-500">Checking impact…</span>;
   if (state.error) return <span className="text-xs text-red-400">{state.error}</span>;
   if (!state.result) return null;
   return (
@@ -104,7 +104,7 @@ export function CustomItemAdminRow({
   };
 
   return (
-    <div className={uiSection}>
+    <div className={`${uiSection} relative`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -190,6 +190,7 @@ export function CustomItemAdminRow({
           )}
         </div>
       </div>
+      <PendingOverlay active={deletePreflight.loading} />
     </div>
   );
 }

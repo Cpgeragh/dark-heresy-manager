@@ -70,7 +70,6 @@ import {
 } from "../services/characterService";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
-import { LoadingState } from "../ui/LoadingState";
 import { useRouteActive, useRouteLoading, useRouteLoadTimedOut } from "../context/useRouteReady";
 import { PendingOverlay } from "../ui/PendingOverlay";
 import { ROUTES } from "../constants/routes";
@@ -121,6 +120,14 @@ const ArcheotechTab = lazy(() =>
     default: ArcheotechTab,
   }))
 );
+
+function ReleasingFrame() {
+  return (
+    <div className="relative min-h-48">
+      <PendingOverlay active />
+    </div>
+  );
+}
 
 function TabSuspenseFallback() {
   useRouteLoading(true);
@@ -568,12 +575,8 @@ export default function CharacterSheet({
     return <div className="text-slate-300 text-center py-10">Invalid character route.</div>;
   }
 
-  if (isReleasing) {
-    return <LoadingState className="text-center py-10">Releasing character…</LoadingState>;
-  }
-
-  if (accessWasRevoked) {
-    return <LoadingState className="text-center py-10">Returning to dashboard…</LoadingState>;
+  if (isReleasing || accessWasRevoked) {
+    return <ReleasingFrame />;
   }
 
   if (characterLoading || isDMLoading || customItemsLoading) {

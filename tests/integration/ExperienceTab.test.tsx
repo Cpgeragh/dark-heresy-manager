@@ -7,9 +7,7 @@ import { ExperienceTab } from "../../src/pages/CharacterSheet/ExperienceTab";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
 
-const mockUseXpHistory = vi.hoisted(() =>
-  vi.fn(() => ({ entries: [], loading: false, error: null }))
-);
+const mockUseXpHistory = vi.hoisted(() => vi.fn(() => ({ entries: [], error: null })));
 
 vi.mock("../../src/hooks/useXpHistory", () => ({ useXpHistory: mockUseXpHistory }));
 
@@ -134,7 +132,6 @@ describe("ExperienceTab named Career Rank ledger", () => {
           createdAt: new Date("2026-10-01T18:30:00.000Z"),
         },
       ],
-      loading: false,
       error: null,
     } as never);
 

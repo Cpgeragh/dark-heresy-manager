@@ -951,11 +951,7 @@ export function ExperienceTab({
 }: ExperienceTabProps) {
   recordComponentRender("ExperienceTab");
   const { experience } = character;
-  const {
-    entries: xpHistory,
-    loading: xpHistoryLoading,
-    error: xpHistoryError,
-  } = useXpHistory(campaignId, character.id);
+  const { entries: xpHistory, error: xpHistoryError } = useXpHistory(campaignId, character.id);
   const remaining = experience.total - experience.spent;
   const rankCards = buildRankCards(character);
   const progression = getCareerRankProgression(
@@ -1054,9 +1050,7 @@ export function ExperienceTab({
       <section className="space-y-3">
         <SectionHeader>XP History</SectionHeader>
         <div className={`${uiSection} space-y-2`}>
-          {xpHistoryLoading ? (
-            <p className={uiTextPlaceholder}>Loading XP history…</p>
-          ) : xpHistoryError ? (
+          {xpHistoryError ? (
             <p className="text-sm text-red-300 lg:text-base">XP history could not be loaded.</p>
           ) : xpHistory.length === 0 ? (
             <p className={uiTextPlaceholder}>No XP adjustments have been recorded yet.</p>

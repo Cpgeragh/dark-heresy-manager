@@ -55,6 +55,7 @@ export function ConfirmInline({
   busyLabel,
 }: ConfirmInlineProps) {
   const [armed, setArmed] = useState(false);
+  const [arming, setArming] = useState(false);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
@@ -63,7 +64,7 @@ export function ConfirmInline({
   const confirmVariant = variant === "warning" ? "warningOutline" : "primary";
   const accent = variant === "warning" ? "text-amber-400" : "text-red-400";
 
-  const handle = (fn: () => void) => (e: React.MouseEvent) => {
+  const handle = (fn: () => void | Promise<void>) => (e: React.MouseEvent) => {
     e.preventDefault();
     fn();
   };
@@ -73,9 +74,14 @@ export function ConfirmInline({
     setText("");
   };
 
-  const arm = () => {
+  const arm = async () => {
+    if (arming) return;
+    if (onArm) {
+      setArming(true);
+      await Promise.resolve(onArm()).catch(() => undefined);
+      setArming(false);
+    }
     setArmed(true);
-    if (onArm) void Promise.resolve(onArm()).catch(() => undefined);
   };
 
   // Run the action, then collapse back to the resting trigger. Disarming in
