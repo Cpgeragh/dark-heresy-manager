@@ -94,6 +94,15 @@ export { getTalentsSpent } from "./talentAdvanceCosts.js";
 export { getSpentXp, type CharacterForSpentXp } from "./xpSpent.js";
 export { CLAIM_LOG_ACTIONS, type ClaimLogAction } from "./claimLog.js";
 export {
+  CUSTOM_ITEM_CATEGORIES,
+  CUSTOM_ITEM_DATA_KEYS,
+  CUSTOM_ITEM_VALIDATION_LIMITS,
+  assertCustomItemCreatorData,
+  assertCustomItemData,
+  assertCustomItemDocumentId,
+  type CustomItemCategory,
+} from "./customItemValidation.js";
+export {
   RECOVERY_CODE_ALPHABET,
   RECOVERY_CODE_PREFIX,
   RECOVERY_CODE_SEGMENT_LENGTH,

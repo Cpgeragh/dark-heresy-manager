@@ -1,15 +1,6 @@
 // src/services/customItemService.ts
 
-import {
-  collection,
-  doc,
-  getDoc,
-  runTransaction,
-  serverTimestamp,
-  updateDoc,
-  writeBatch,
-  type DocumentReference,
-} from "firebase/firestore";
+import { collection, doc, getDoc, type DocumentReference } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import type {
@@ -33,7 +24,6 @@ import {
   BoundedDeletionCollector,
   type DestructiveOperationPreflight,
 } from "../firestore/destructiveOperationPreflight";
-import { deleteRefsAtomically } from "../firestore/firestoreBatchDelete";
 import { driveJobToCompletion } from "../firestore/bulkJobClient";
 import { measurePerformanceMutation } from "../performance/performanceMetrics";
 
@@ -76,6 +66,27 @@ export interface DraftCustomItemDocuments<TCategory extends CustomItemCategory> 
   item: CampaignCustomItem<TCategory>;
   version: CampaignCustomItemVersion<TCategory>;
 }
+
+interface CustomItemMutationRequest {
+  action: "create" | "save-draft" | "publish" | "archive" | "restore" | "delete";
+  campaignId: string;
+  customItemId?: string;
+  versionId?: string;
+  category?: CustomItemCategory;
+  creator?: CustomItemCreator;
+  data?: Record<string, unknown>;
+  operationId?: string;
+}
+
+interface CustomItemMutationResponse {
+  customItemId?: string;
+  versionId?: string;
+}
+
+const callCustomItemMutation = httpsCallable<CustomItemMutationRequest, CustomItemMutationResponse>(
+  functions,
+  "mutateCustomItem"
+);
 
 export function buildDraftCustomItemDocuments<TCategory extends CustomItemCategory>({
   campaignId,
@@ -162,25 +173,20 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
   assertCustomItemCreator(creator);
   const cleanData = stripUndefined(data);
   assertCustomItemData(category, cleanData);
-  const itemRef = doc(customItemsCollectionRef(campaignId));
-  const versionRef = doc(customItemVersionsCollectionRef(campaignId, itemRef.id));
-  const timestamp = serverTimestamp();
-  const { item, version } = buildDraftCustomItemDocuments({
-    campaignId,
-    customItemId: itemRef.id,
-    versionId: versionRef.id,
-    category,
-    creator,
-    data: cleanData,
-    timestamp,
-  });
-
-  const batch = writeBatch(db);
-  batch.set(itemRef, item);
-  batch.set(versionRef, version);
-  await measurePerformanceMutation("custom-item:create-draft", () => batch.commit());
-
-  return { customItemId: itemRef.id, versionId: versionRef.id };
+  const operationId = crypto.randomUUID();
+  const result = await measurePerformanceMutation("custom-item:create-draft", () =>
+    callCustomItemMutation({
+      action: "create",
+      campaignId,
+      category,
+      creator,
+      data: cleanData,
+      operationId,
+    })
+  );
+  if (!result.data.customItemId || !result.data.versionId)
+    throw new Error("Custom-item creation returned an invalid result.");
+  return { customItemId: result.data.customItemId, versionId: result.data.versionId };
 }
 
 export async function saveDraftCustomItem<TCategory extends CustomItemCategory>({
@@ -195,65 +201,18 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
   assertCustomItemCreator(editor, "Custom-item editor");
   const cleanData = stripUndefined(data);
   assertCustomItemData(category, cleanData);
-  const itemRef = customItemDocRef(campaignId, customItemId);
-
-  return measurePerformanceMutation("custom-item:save-draft", () =>
-    runTransaction(db, async (transaction) => {
-      const itemSnap = await transaction.get(itemRef);
-      if (!itemSnap.exists()) throw new Error("Custom item not found.");
-
-      const item = itemSnap.data() as CampaignCustomItem<TCategory>;
-      if (item.category !== category) throw new Error("Custom-item category does not match.");
-      if (item.status === "archived") throw new Error("Archived custom items cannot be edited.");
-
-      const timestamp = serverTimestamp();
-      const isExistingDraft = !!item.draftVersionId;
-      const draftVersionId =
-        item.draftVersionId ?? doc(customItemVersionsCollectionRef(campaignId, customItemId)).id;
-      const draftVersionRef = customItemVersionDocRef(campaignId, customItemId, draftVersionId);
-      const versionNumber = isExistingDraft
-        ? item.latestVersionNumber
-        : item.latestVersionNumber + 1;
-      const name = cleanData.name.trim();
-
-      if (isExistingDraft) {
-        transaction.update(draftVersionRef, {
-          data: cleanData as CampaignCustomItemVersion<TCategory>["data"],
-          updatedAt: timestamp,
-          updatedBy: editor,
-        });
-      } else {
-        const version: CampaignCustomItemVersion<TCategory> = {
-          id: draftVersionId,
-          campaignId,
-          customItemId,
-          category: item.category,
-          versionNumber,
-          status: "draft",
-          data: cleanData,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-          createdBy: editor,
-          updatedBy: editor,
-          publishedAt: null,
-          publishedByUserId: null,
-        };
-        transaction.set(draftVersionRef, stripUndefined(version));
-      }
-      transaction.update(itemRef, {
-        name,
-        data: cleanData,
-        draftVersionId,
-        latestVersionId: draftVersionId,
-        latestVersionNumber: versionNumber,
-        status: "draft",
-        updatedAt: timestamp,
-        updatedBy: editor,
-      });
-
-      return draftVersionId;
+  const result = await measurePerformanceMutation("custom-item:save-draft", () =>
+    callCustomItemMutation({
+      action: "save-draft",
+      campaignId,
+      customItemId,
+      category,
+      creator: editor,
+      data: cleanData,
     })
   );
+  if (!result.data.versionId) throw new Error("Custom-item save returned an invalid result.");
+  return result.data.versionId;
 }
 
 export async function publishCustomItem({
@@ -268,47 +227,15 @@ export async function publishCustomItem({
   if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
   return measurePerformanceMutation("custom-item:publish", () =>
     runSingleFlight("custom-item:publish", [campaignId, customItemId], async () => {
-      const itemRef = customItemDocRef(campaignId, customItemId);
-
-      return runTransaction(db, async (transaction) => {
-        const itemSnap = await transaction.get(itemRef);
-        if (!itemSnap.exists()) throw new Error("Custom item not found.");
-
-        const item = itemSnap.data() as CampaignCustomItem;
-        const targetVersionId = versionId ?? item.draftVersionId ?? item.latestVersionId;
-        if (!targetVersionId) throw new Error("Custom item has no version to publish.");
-
-        const versionRef = customItemVersionDocRef(campaignId, customItemId, targetVersionId);
-        const versionSnap = await transaction.get(versionRef);
-        if (!versionSnap.exists()) throw new Error("Custom item version not found.");
-
-        const version = versionSnap.data() as CampaignCustomItemVersion;
-        assertCustomItemData(version.category, stripUndefined(version.data));
-        const timestamp = serverTimestamp();
-
-        transaction.update(versionRef, {
-          status: "published",
-          publishedAt: timestamp,
-          publishedByUserId: actorUserId,
-          updatedAt: timestamp,
-          updatedBy: { userId: actorUserId },
-        });
-        transaction.update(itemRef, {
-          status: "published",
-          name: version.data.name.trim(),
-          data: stripUndefined(version.data),
-          publishedVersionId: targetVersionId,
-          draftVersionId: null,
-          latestVersionId: targetVersionId,
-          latestVersionNumber: version.versionNumber,
-          archivedAt: null,
-          archivedByUserId: null,
-          updatedAt: timestamp,
-          updatedBy: { userId: actorUserId },
-        });
-
-        return targetVersionId;
+      const result = await callCustomItemMutation({
+        action: "publish",
+        campaignId,
+        customItemId,
+        versionId,
       });
+      if (!result.data.versionId)
+        throw new Error("Custom-item publish returned an invalid result.");
+      return result.data.versionId;
     })
   );
 }
@@ -322,13 +249,7 @@ export async function archiveCustomItem({
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
   await measurePerformanceMutation("custom-item:archive", () =>
-    updateDoc(customItemDocRef(campaignId, customItemId), {
-      status: "archived",
-      archivedAt: serverTimestamp(),
-      archivedByUserId: actorUserId,
-      updatedAt: serverTimestamp(),
-      updatedBy: { userId: actorUserId },
-    })
+    callCustomItemMutation({ action: "archive", campaignId, customItemId })
   );
 }
 
@@ -340,18 +261,8 @@ export async function restoreCustomItem({
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
-  const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
-  if (!itemSnap.exists()) throw new Error("Custom item not found.");
-  const item = itemSnap.data() as CampaignCustomItem;
-  if (item.status !== "archived") throw new Error("Only archived items can be restored.");
   await measurePerformanceMutation("custom-item:restore", () =>
-    updateDoc(customItemDocRef(campaignId, customItemId), {
-      status: item.publishedVersionId ? "published" : "draft",
-      archivedAt: null,
-      archivedByUserId: null,
-      updatedAt: serverTimestamp(),
-      updatedBy: { userId: actorUserId },
-    })
+    callCustomItemMutation({ action: "restore", campaignId, customItemId })
   );
 }
 
@@ -396,9 +307,9 @@ export async function permanentlyDeleteCustomItem({
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   await runSingleFlight("custom-item:permanent-delete", [campaignId, customItemId], async () => {
-    const plan = await buildPermanentCustomItemDeletionPlan(campaignId, customItemId);
-    assertSafeDestructivePreflight(plan.preflight, "Custom item");
-    await deleteRefsAtomically(db, plan.references);
+    const preflight = await preflightPermanentCustomItemDeletion({ campaignId, customItemId });
+    assertSafeDestructivePreflight(preflight, "Custom item");
+    await callCustomItemMutation({ action: "delete", campaignId, customItemId });
   });
 }
 

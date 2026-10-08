@@ -1,17 +1,41 @@
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import type { Character, CharacterHeader, Characteristics } from "../types/Character";
-import type {
-  CustomItemCategory,
-  CustomItemCreator,
-  CustomItemDataByCategory,
-} from "../types/CustomItems";
+import type { CustomItemCreator } from "../types/CustomItems";
+import type { CustomItemCategory, CustomItemDataByCategory } from "../types/CustomItems";
 import { validateCharacterName, validateRecoveryCode } from "../utils/validation";
+import {
+  CUSTOM_ITEM_DATA_KEYS,
+  assertCustomItemCreatorData,
+  assertCustomItemData as assertSharedCustomItemData,
+  assertCustomItemDocumentId,
+} from "shared-rules";
 
 type UnknownRecord = Record<string, unknown>;
 
-/** Union of a type's keys, distributing over a union type instead of intersecting it. */
 type UnionKeys<T> = T extends unknown ? keyof T : never;
 type CategoryKeys<C extends CustomItemCategory> = UnionKeys<CustomItemDataByCategory[C]>;
+type CustomItemSchemaParity = {
+  [C in CustomItemCategory]: Exclude<
+    CategoryKeys<C>,
+    (typeof CUSTOM_ITEM_DATA_KEYS)[C][number]
+  > extends never
+    ? Exclude<(typeof CUSTOM_ITEM_DATA_KEYS)[C][number], CategoryKeys<C>> extends never
+      ? true
+      : false
+    : false;
+};
+const CUSTOM_ITEM_SCHEMA_PARITY: CustomItemSchemaParity = {
+  gear: true,
+  consumable: true,
+  drug: true,
+  cybernetic: true,
+  weapon: true,
+  armour: true,
+  archeotech: true,
+  power: true,
+  trait: true,
+};
+void CUSTOM_ITEM_SCHEMA_PARITY;
 
 /**
  * Builds an allowlist from an object literal keyed by every member of K, so
@@ -131,161 +155,6 @@ const CHARACTERISTIC_KEYS = keysOf<keyof Characteristics>({
   fel: true,
 });
 
-const CUSTOM_ITEM_KEYS: Record<CustomItemCategory, ReadonlySet<string>> = {
-  gear: new Set(
-    keysOf<CategoryKeys<"gear">>({
-      name: true,
-      description: true,
-      weight: true,
-      value: true,
-      availability: true,
-      source: true,
-      grantedByTalentEntryUid: true,
-      grantedByTalentName: true,
-      grantedByType: true,
-    })
-  ),
-  consumable: new Set(
-    keysOf<CategoryKeys<"consumable">>({
-      name: true,
-      description: true,
-      weight: true,
-      value: true,
-      availability: true,
-      source: true,
-    })
-  ),
-  drug: new Set(
-    keysOf<CategoryKeys<"drug">>({
-      name: true,
-      weight: true,
-      value: true,
-      availability: true,
-      source: true,
-      notes: true,
-    })
-  ),
-  cybernetic: new Set(
-    keysOf<CategoryKeys<"cybernetic">>({
-      name: true,
-      craftsmanship: true,
-      notes: true,
-      value: true,
-      availability: true,
-      source: true,
-      concealedWeapon: true,
-      grantedByTalentEntryUid: true,
-      grantedByTalentName: true,
-      grantedByType: true,
-    })
-  ),
-  weapon: new Set(
-    keysOf<CategoryKeys<"weapon">>({
-      weaponKind: true,
-      name: true,
-      class: true,
-      damage: true,
-      pen: true,
-      range: true,
-      rof: true,
-      clip: true,
-      rld: true,
-      specialRules: true,
-      strengthBonusMultiplier: true,
-      weight: true,
-      value: true,
-      availability: true,
-      source: true,
-      custom: true,
-      craftsmanship: true,
-      ammoTracking: true,
-      ammoType: true,
-      loadedAmmoByProfile: true,
-      magazineSlots: true,
-      activeMagazineSlotId: true,
-      alternateRangedAmmoEntries: true,
-      loadedAlternateRangedAmmoId: true,
-      alternateRangedAmmoReferenceId: true,
-      description: true,
-      integrated: true,
-      concealedBionic: true,
-      type: true,
-    })
-  ),
-  armour: new Set(
-    keysOf<CategoryKeys<"armour">>({
-      armourKind: true,
-      name: true,
-      locations: true,
-      ap: true,
-      apOverrides: true,
-      notes: true,
-      weight: true,
-      value: true,
-      availability: true,
-      source: true,
-      craftsmanship: true,
-      qualities: true,
-      custom: true,
-      isForceField: true,
-      protectionRating: true,
-      spareCells: true,
-      damage: true,
-      pen: true,
-      specialRules: true,
-    })
-  ),
-  archeotech: new Set(
-    keysOf<CategoryKeys<"archeotech">>({
-      name: true,
-      type: true,
-      description: true,
-      notes: true,
-      weight: true,
-      value: true,
-      availability: true,
-      source: true,
-      weaponClass: true,
-      damage: true,
-      range: true,
-      rof: true,
-      pen: true,
-      clip: true,
-      rld: true,
-      specialRules: true,
-      ap: true,
-      locations: true,
-      stacks: true,
-      craftsmanship: true,
-      bodyLocation: true,
-      protectionRating: true,
-    })
-  ),
-  power: new Set(
-    keysOf<CategoryKeys<"power">>({
-      name: true,
-      psyRatingTalentEntryUid: true,
-      discipline: true,
-      threshold: true,
-      focusTime: true,
-      sustained: true,
-      range: true,
-      description: true,
-      source: true,
-      origin: true,
-      isMinor: true,
-      custom: true,
-    })
-  ),
-  trait: new Set(
-    keysOf<CategoryKeys<"trait">>({
-      name: true,
-      description: true,
-      source: true,
-    })
-  ),
-};
-
 export const ACCEPTED_PORTRAIT_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 export function encodedByteLength(value: string): number {
@@ -319,24 +188,7 @@ function assertRequiredKeys(
 }
 
 export function assertFirestoreDocumentId(value: unknown, label: string): asserts value is string {
-  if (
-    typeof value !== "string" ||
-    value.length === 0 ||
-    encodedByteLength(value) > 1_500 ||
-    value === "." ||
-    value === ".." ||
-    value.includes("/") ||
-    containsControlCharacter(value)
-  ) {
-    throw new Error(`${label} is invalid.`);
-  }
-}
-
-function containsControlCharacter(value: string): boolean {
-  return Array.from(value).some((character) => {
-    const codePoint = character.codePointAt(0) ?? 0;
-    return codePoint <= 31 || codePoint === 127;
-  });
+  assertCustomItemDocumentId(value, label);
 }
 
 export function assertBoolean(value: unknown, label: string): asserts value is boolean {
@@ -564,54 +416,14 @@ export function assertCustomItemCreator(
   value: unknown,
   label = "Custom-item creator"
 ): asserts value is CustomItemCreator {
-  assertRecord(value, label);
-  assertAllowedKeys(value, new Set(["userId", "characterId", "characterName"]), label);
-  assertFirestoreDocumentId(value.userId, `${label} user ID`);
-  if (value.characterId !== undefined)
-    assertFirestoreDocumentId(value.characterId, `${label} character ID`);
-  if (value.characterName !== undefined) {
-    assertString(value.characterName, `${label} character name`);
-    const result = validateCharacterName(value.characterName);
-    if (!result.isValid) throw new Error(result.error);
-  }
+  assertCustomItemCreatorData(value, label);
 }
 
 export function assertCustomItemData(
   category: unknown,
   value: unknown
 ): asserts value is UnknownRecord {
-  if (typeof category !== "string" || !(category in CUSTOM_ITEM_KEYS)) {
-    throw new Error("Custom-item category is invalid.");
-  }
-  const typedCategory = category as CustomItemCategory;
-  assertRecord(value, "Custom-item data");
-  assertAllowedKeys(value, CUSTOM_ITEM_KEYS[typedCategory], "Custom-item data");
-  assertString(value.name, "Custom-item name");
-  const name = value.name.trim();
-  if (!name) throw new Error("Custom-item name is required.");
-  if (name.length > PRODUCT_LIMITS.customItemNameCharacters) {
-    throw new Error(
-      `Custom-item name cannot exceed ${PRODUCT_LIMITS.customItemNameCharacters} characters.`
-    );
-  }
-  if (
-    typedCategory === "weapon" &&
-    !["ranged", "melee", "grenade"].includes(String(value.weaponKind))
-  ) {
-    throw new Error("Custom weapon kind is invalid.");
-  }
-  if (typedCategory === "armour" && !["worn", "shield"].includes(String(value.armourKind))) {
-    throw new Error("Custom armour kind is invalid.");
-  }
-  assertNestedDataBounds(value, {
-    label: "Custom-item data",
-    maxBytes: PRODUCT_LIMITS.customItemDataBytes,
-    maxArrayEntries: PRODUCT_LIMITS.customItemArrayEntries,
-    maxObjectKeys: PRODUCT_LIMITS.customItemObjectKeys,
-    maxDepth: PRODUCT_LIMITS.customItemNestingDepth,
-    maxStringCharacters: PRODUCT_LIMITS.customItemTextCharacters,
-  });
-  assertExpectedIdFields(value, "Custom-item data");
+  assertSharedCustomItemData(category, value);
 }
 
 export function assertPortraitSource(file: { size: number; type: string }): void {

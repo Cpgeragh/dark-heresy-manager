@@ -294,125 +294,10 @@ service cloud.firestore {
           return camp != null && dmOwnsOrLinked(camp.data.dmId);
         }
 
-        function campaignUser(userId) {
-          let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
-          return camp != null &&
-                 (userId == camp.data.dmId || userId in camp.data.get('memberIds', []));
-        }
-
-        function hasCreator(data) {
-          return ("creator" in data) && validCreator(data.creator);
-        }
-
         function userOwnsCreator(data) {
-          return hasCreator(data) && playerOwnsOrLinked(data.creator.userId);
-        }
-
-        function validCustomItemData(data, category) {
-          return data is map &&
-                 data.size() <= 100 &&
-                 data.name is string &&
-                 data.name.size() > 0 &&
-                 data.name.size() <= 100 &&
-                 (
-                   (category == 'gear' && data.keys().hasOnly([
-                     'name', 'description', 'weight', 'value', 'availability', 'source',
-                     'grantedByTalentEntryUid', 'grantedByTalentName', 'grantedByType'
-                   ])) ||
-                   (category == 'consumable' && data.keys().hasOnly([
-                     'name', 'description', 'weight', 'value', 'availability', 'source'
-                   ])) ||
-                   (category == 'drug' && data.keys().hasOnly([
-                     'name', 'weight', 'value', 'availability', 'source', 'notes'
-                   ])) ||
-                   (category == 'cybernetic' && data.keys().hasOnly([
-                     'name', 'craftsmanship', 'notes', 'value', 'availability', 'source',
-                     'concealedWeapon', 'grantedByTalentEntryUid', 'grantedByTalentName',
-                     'grantedByType'
-                   ])) ||
-                   (category == 'weapon' && data.keys().hasOnly([
-                     'weaponKind', 'name', 'class', 'damage', 'pen', 'range', 'rof', 'clip',
-                     'rld', 'specialRules', 'strengthBonusMultiplier', 'weight', 'value',
-                     'availability', 'source', 'custom', 'craftsmanship', 'ammoTracking',
-                     'ammoType', 'loadedAmmoByProfile', 'magazineSlots', 'activeMagazineSlotId',
-                     'alternateRangedAmmoEntries', 'loadedAlternateRangedAmmoId',
-                     'alternateRangedAmmoReferenceId', 'description', 'integrated',
-                     'concealedBionic', 'type'
-                   ])) ||
-                   (category == 'armour' && data.keys().hasOnly([
-                     'armourKind', 'name', 'locations', 'ap', 'apOverrides', 'notes', 'weight',
-                     'value', 'availability', 'source', 'craftsmanship', 'qualities', 'custom',
-                     'isForceField', 'protectionRating', 'spareCells', 'damage', 'pen',
-                     'specialRules'
-                   ])) ||
-                   (category == 'archeotech' && data.keys().hasOnly([
-                     'name', 'type', 'description', 'notes', 'weight', 'value', 'availability',
-                     'source', 'weaponClass', 'damage', 'range', 'rof', 'pen', 'clip', 'rld',
-                     'specialRules', 'ap', 'locations', 'stacks', 'craftsmanship', 'bodyLocation',
-                     'protectionRating'
-                   ])) ||
-                   (category == 'power' && data.keys().hasOnly([
-                     'name', 'psyRatingTalentEntryUid', 'discipline', 'threshold', 'focusTime',
-                     'sustained', 'range', 'description', 'source', 'origin', 'isMinor', 'custom'
-                   ])) ||
-                   (category == 'trait' && data.keys().hasOnly([
-                     'name', 'description', 'source'
-                   ]))
-                 ) &&
-                 (category != 'weapon' || data.weaponKind in ['ranged', 'melee', 'grenade']) &&
-                 (category != 'armour' || data.armourKind in ['worn', 'shield']) &&
-                  validOptionalString(data, 'description', 4000) &&
-                  validOptionalString(data, 'notes', 4000) &&
-                  validOptionalString(data, 'specialRules', 4000) &&
-                  validOptionalString(data, 'source', 4000) &&
-                  (!('locations' in data) ||
-                    (data.locations is list && data.locations.size() <= 100) ||
-                    (data.locations is string && data.locations.size() <= 4000)) &&
-                 (!('qualities' in data) ||
-                   (data.qualities is list && data.qualities.size() <= 100)) &&
-                 (!('magazineSlots' in data) ||
-                   (data.magazineSlots is list && data.magazineSlots.size() <= 100)) &&
-                 (!('alternateRangedAmmoEntries' in data) ||
-                   (data.alternateRangedAmmoEntries is list &&
-                    data.alternateRangedAmmoEntries.size() <= 100)) &&
-                 (!('loadedAmmoByProfile' in data) ||
-                   (data.loadedAmmoByProfile is map && data.loadedAmmoByProfile.size() <= 100)) &&
-                  (!('apOverrides' in data) ||
-                    (data.apOverrides is map && data.apOverrides.size() <= 100)) &&
-                  validOptionalNumber(data, 'strengthBonusMultiplier', -100000, 100000) &&
-                  validOptionalNumber(data, 'ap', -100000, 100000) &&
-                  validOptionalNumber(data, 'protectionRating', -100000, 100000) &&
-                 validOptionalNumber(data, 'spareCells', 0, 100000);
-        }
-
-        function validCustomItem(data) {
-          return data.keys().hasOnly([
-                   'id', 'campaignId', 'category', 'status', 'name', 'creator', 'createdAt',
-                   'updatedAt', 'createdBy', 'updatedBy', 'publishedVersionId', 'draftVersionId',
-                   'latestVersionId', 'latestVersionNumber', 'archivedAt', 'archivedByUserId', 'data'
-                 ]) &&
-                 data.id == customItemId &&
-                 data.campaignId == campaignId &&
-                 data.category in [
-                   'gear', 'consumable', 'drug', 'cybernetic', 'weapon', 'armour',
-                   'archeotech', 'power', 'trait'
-                 ] &&
-                 data.status in ['draft', 'published', 'archived'] &&
-                 data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
-                 validCreator(data.creator) && validCreator(data.createdBy) &&
-                 validCreator(data.updatedBy) &&
-                 data.createdAt is timestamp && data.updatedAt is timestamp &&
-                  (data.get('publishedVersionId', null) == null ||
-                    validDocumentId(data.publishedVersionId)) &&
-                  (data.get('draftVersionId', null) == null ||
-                    validDocumentId(data.draftVersionId)) &&
-                  validDocumentId(data.latestVersionId) &&
-                 data.latestVersionNumber is int && data.latestVersionNumber > 0 &&
-                 data.latestVersionNumber <= 50 &&
-                 (data.get('archivedAt', null) == null || data.archivedAt is timestamp) &&
-                  (data.get('archivedByUserId', null) == null ||
-                    validDocumentId(data.archivedByUserId)) &&
-                 validCustomItemData(data.data, data.category);
+          return ("creator" in data) &&
+                 data.creator.userId is string &&
+                 playerOwnsOrLinked(data.creator.userId);
         }
 
         function canReadCustomItem(data) {
@@ -424,56 +309,12 @@ service cloud.firestore {
                  );
         }
 
-        function creatorEditKeysOnly() {
-          return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            "name",
-            "data",
-            "draftVersionId",
-            "latestVersionId",
-            "latestVersionNumber",
-            "updatedAt",
-            "updatedBy",
-            "status"
-          ]);
-        }
-
         allow get: if canReadCustomItem(resource.data);
         allow list: if canReadCustomItem(resource.data) && boundedQuery(200);
 
-        allow create:
-          if request.auth != null &&
-             request.resource.data.status == "draft" &&
-              validCustomItem(request.resource.data) &&
-              userOwnsCreator(request.resource.data) &&
-              playerOwnsOrLinked(request.resource.data.createdBy.userId) &&
-              playerOwnsOrLinked(request.resource.data.updatedBy.userId) &&
-              campaignUser(request.resource.data.creator.userId) &&
-              request.resource.data.name == request.resource.data.data.name &&
-             request.resource.data.publishedVersionId == null &&
-             request.resource.data.draftVersionId is string &&
-             request.resource.data.latestVersionId == request.resource.data.draftVersionId;
-
-        allow update:
-          if validCustomItem(request.resource.data) &&
-             (dmOwnsCampaign() ||
-             (
-               userOwnsCreator(resource.data) &&
-               resource.data.status != "archived" &&
-               (request.resource.data.status == resource.data.status ||
-                 (resource.data.status == "published" && request.resource.data.status == "draft")) &&
-               request.resource.data.creator == resource.data.creator &&
-               request.resource.data.campaignId == resource.data.campaignId &&
-               request.resource.data.category == resource.data.category &&
-               request.resource.data.publishedVersionId == resource.data.publishedVersionId &&
-                creatorEditKeysOnly()
-              ));
-
-        allow delete:
-          if dmOwnsCampaign() &&
-             (
-               resource.data.status == "archived" ||
-               !existsAfter(/databases/$(database)/documents/campaigns/$(campaignId))
-             );
+        // Custom-item mutations use the protected callable. Denying client
+        // writes here removes their cost from Firestore's rule expression budget.
+        allow create, update, delete: if false;
 
         match /versions/{versionId} {
 
@@ -486,16 +327,9 @@ service cloud.firestore {
             return get(/databases/$(database)/documents/campaigns/$(campaignId)/customItems/$(customItemId));
           }
 
-          function parentItemAfter() {
-            return getAfter(/databases/$(database)/documents/campaigns/$(campaignId)/customItems/$(customItemId));
-          }
-
-          function parentHasCreator(parent) {
-            return parent.data.creator.userId is string;
-          }
-
           function userOwnsParentCreator(parent) {
-            return parentHasCreator(parent) && playerOwnsOrLinked(parent.data.creator.userId);
+            return parent.data.creator.userId is string &&
+                   playerOwnsOrLinked(parent.data.creator.userId);
           }
 
           function canReadParentVersion() {
@@ -509,75 +343,10 @@ service cloud.firestore {
                    );
           }
 
-          function canCreateDraftVersion() {
-            let parent = parentItemAfter();
-            return request.auth != null &&
-                   parent != null &&
-                   request.resource.data.status == "draft" &&
-                   request.resource.data.customItemId == customItemId &&
-                   request.resource.data.campaignId == campaignId &&
-                   request.resource.data.category == parent.data.category &&
-                   userOwnsParentCreator(parent);
-          }
-
-          function validVersion(data) {
-            return data.keys().hasOnly([
-                     'id', 'campaignId', 'customItemId', 'category', 'versionNumber', 'status',
-                     'data', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'publishedAt',
-                     'publishedByUserId'
-                   ]) &&
-                   data.id == versionId &&
-                   data.campaignId == campaignId &&
-                   data.customItemId == customItemId &&
-                   data.category in [
-                     'gear', 'consumable', 'drug', 'cybernetic', 'weapon', 'armour',
-                     'archeotech', 'power', 'trait'
-                   ] &&
-                   data.versionNumber is int && data.versionNumber > 0 &&
-                   data.versionNumber <= 50 &&
-                   data.status in ['draft', 'published'] &&
-                   validCustomItemData(data.data, data.category) &&
-                   data.createdAt is timestamp && data.updatedAt is timestamp &&
-                   validCreator(data.createdBy) && validCreator(data.updatedBy) &&
-                   (data.get('publishedAt', null) == null || data.publishedAt is timestamp) &&
-                    (data.get('publishedByUserId', null) == null ||
-                      validDocumentId(data.publishedByUserId));
-          }
-
-          function creatorVersionEditKeysOnly() {
-            return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-              "data",
-              "updatedAt",
-              "updatedBy"
-            ]);
-          }
-
           allow get: if canReadParentVersion();
           allow list: if canReadParentVersion() && boundedQuery(100);
 
-          allow create:
-            if validVersion(request.resource.data) &&
-               parentItemAfter() != null &&
-               request.resource.data.category == parentItemAfter().data.category &&
-               playerOwnsOrLinked(request.resource.data.createdBy.userId) &&
-               playerOwnsOrLinked(request.resource.data.updatedBy.userId) &&
-               (dmOwnsCampaign() || canCreateDraftVersion());
-
-          allow update:
-            if validVersion(request.resource.data) &&
-               parentItem() != null &&
-               request.resource.data.category == parentItem().data.category &&
-               playerOwnsOrLinked(request.resource.data.updatedBy.userId) &&
-               (dmOwnsCampaign() ||
-               (
-                 resource.data.status == "draft" &&
-                 request.resource.data.status == "draft" &&
-                 userOwnsParentCreator(parentItem()) &&
-                  creatorVersionEditKeysOnly()
-                ));
-
-          allow delete:
-            if dmOwnsCampaign();
+          allow create, update, delete: if false;
         }
       }
 

@@ -6,12 +6,14 @@ const {
   mockGetDocs,
   mockCallStartCustomItemMutationJob,
   mockCallProcessCustomItemMutationChunk,
+  mockCallMutateCustomItem,
 } = vi.hoisted(() => ({
   mockAtomicDelete: vi.fn().mockResolvedValue(undefined),
   mockGetDoc: vi.fn(),
   mockGetDocs: vi.fn(),
   mockCallStartCustomItemMutationJob: vi.fn(),
   mockCallProcessCustomItemMutationChunk: vi.fn(),
+  mockCallMutateCustomItem: vi.fn(),
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -33,6 +35,7 @@ vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn((_functions: unknown, name: string) => {
     if (name === "startCustomItemMutationJob") return mockCallStartCustomItemMutationJob;
     if (name === "processCustomItemMutationChunk") return mockCallProcessCustomItemMutationChunk;
+    if (name === "mutateCustomItem") return mockCallMutateCustomItem;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
@@ -74,7 +77,7 @@ beforeEach(() => {
 });
 
 describe("permanentlyDeleteCustomItem", () => {
-  it("atomically deletes an archived definition and every version", async () => {
+  it("asks the Function to delete an archived definition after the preflight count", async () => {
     mockGetDoc.mockResolvedValue(itemSnapshot("archived"));
     mockGetDocs.mockResolvedValue({
       docs: [
@@ -83,14 +86,16 @@ describe("permanentlyDeleteCustomItem", () => {
       ],
       empty: false,
     });
+    mockCallMutateCustomItem.mockResolvedValue({ data: { customItemId: "item-1" } });
 
     await permanentlyDeleteCustomItem({ campaignId: "camp-1", customItemId: "item-1" });
 
-    expect(mockAtomicDelete).toHaveBeenCalledWith("mock-db", [
-      "campaigns/camp-1/customItems/item-1",
-      "versions/version-1",
-      "versions/version-2",
-    ]);
+    expect(mockCallMutateCustomItem).toHaveBeenCalledWith({
+      action: "delete",
+      campaignId: "camp-1",
+      customItemId: "item-1",
+    });
+    expect(mockAtomicDelete).not.toHaveBeenCalled();
   });
 });
 

@@ -119,6 +119,11 @@ import {
   type ProcessCustomItemMutationChunkResult,
 } from "./operations/customItemMutationJob.js";
 import {
+  mutateCustomItem as runMutateCustomItem,
+  type CustomItemMutationInput,
+  type CustomItemMutationResult,
+} from "./operations/customItemMutation.js";
+import {
   cancelBulkJob as runCancelBulkJob,
   type CancelBulkJobInput,
 } from "./operations/cancelBulkJob.js";
@@ -653,6 +658,53 @@ export const processCustomItemMutationChunk = onCall<ProcessCustomItemMutationCh
         },
       ],
       handler: ({ uid, data }) => runProcessCustomItemMutationChunk(data, uid),
+    });
+  }
+);
+
+export const mutateCustomItem = onCall<CustomItemMutationInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<CustomItemMutationInput, CustomItemMutationResult>({
+      request,
+      operation: "mutate-custom-item",
+      allowedFields: [
+        "action",
+        "campaignId",
+        "customItemId",
+        "versionId",
+        "category",
+        "creator",
+        "data",
+        "operationId",
+      ],
+      requiredFields: ["action", "campaignId"],
+      fieldShapes: {
+        action: { enum: ["create", "save-draft", "publish", "archive", "restore", "delete"] },
+        campaignId: "string",
+        customItemId: "string",
+        versionId: "string",
+        category: {
+          enum: [
+            "gear",
+            "consumable",
+            "drug",
+            "cybernetic",
+            "weapon",
+            "armour",
+            "archeotech",
+            "power",
+            "trait",
+          ],
+        },
+        operationId: "string",
+      },
+      payloadBounds: { maxBytes: 120_000, maxStringCharacters: 4_000 },
+      rateLimits: [
+        { key: `mutate-custom-item:${callerUid}`, limit: 120, windowMs: 60 * 60 * 1000 },
+      ],
+      handler: ({ uid, data }) => runMutateCustomItem(data, uid),
     });
   }
 );
