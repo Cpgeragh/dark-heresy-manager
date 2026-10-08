@@ -5,7 +5,12 @@ import type { CustomItemOrigin } from "../../constants/customItems";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../ui/forms/OriginSelector";
-import { PickerCustomAction, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import {
+  PickerCustomAction,
+  PickerList,
+  PickerModal,
+  PickerRow,
+} from "../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
@@ -14,9 +19,8 @@ import {
   editableInputClass,
   editableTextareaClass,
   uiInfoModalWrapper,
-  uiItemName,
-  uiSectionShell,
   uiTextLabel,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { MENTAL_TRAUMAS, type MentalTraumaEntry } from "./insanityReference";
 import { createLocalId } from "../../utils/createLocalId";
@@ -175,16 +179,10 @@ export function InsanityTraumaPicker({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {filtered.map((ref) => (
-          <PickerRow
-            key={ref.roll}
-            card
-            className={uiSectionShell}
-            interactive={editable}
-            onClick={() => handleSelect(ref)}
-          >
-            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+          <PickerRow key={ref.roll} interactive={editable} onClick={() => handleSelect(ref)}>
+            <span className={uiItemNameHover}>{ref.name}</span>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <RollChip>{ref.roll}</RollChip>
             </div>
@@ -204,7 +202,7 @@ export function InsanityTraumaPicker({
             </div>
           </PickerRow>
         ))}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

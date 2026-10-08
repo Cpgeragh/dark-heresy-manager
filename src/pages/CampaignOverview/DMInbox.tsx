@@ -10,6 +10,7 @@ import { useToast } from "../../components/Toast";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
+import { uiSection, uiSectionShell } from "../../ui/styles/editableStyles";
 import { useRouteLoading } from "../../context/useRouteReady";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import type { CharacterListItem } from "../../types/Firestore";
@@ -75,7 +76,7 @@ function ThreadView({
 
   return (
     <>
-      <div hidden={loading} className="mt-2 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
+      <div hidden={loading} className={`${uiSection} mt-2`}>
         {error ? (
           <ErrorState>Unable to load this conversation.</ErrorState>
         ) : (
@@ -151,7 +152,7 @@ export function DMInbox({
               type="button"
               onClick={() => toggleThread(thread.characterId)}
               aria-expanded={isExpanded}
-              className="w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 rounded border border-slate-700 bg-slate-900/40 hover:bg-slate-800 transition text-left"
+              className={`${uiSectionShell} w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 hover:bg-slate-800 transition text-left`}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

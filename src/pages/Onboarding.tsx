@@ -11,6 +11,8 @@ import { completeOnboarding, discardOnboardingSetup } from "../services/userAcco
 import { saveFirstName } from "../services/profileService";
 import {
   editableInputClass,
+  uiCodeBox,
+  uiCodeText,
   uiInfoModalWrapper,
   uiSectionHeader,
 } from "../ui/styles/editableStyles";
@@ -451,15 +453,13 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                       Use this code to connect another device or recover your account.
                     </p>
 
-                    <div className="bg-slate-800 border border-slate-600 rounded-lg p-6 text-center">
+                    <div className={uiCodeBox}>
                       <p
                         className={`text-xs lg:text-sm font-semibold ${colourMetadataLabelText} uppercase tracking-widest mb-2`}
                       >
                         Recovery Code
                       </p>
-                      <span className="font-code [font-feature-settings:'zero'] text-xl lg:text-2xl text-white tracking-widest break-all select-all">
-                        {code}
-                      </span>
+                      <span className={uiCodeText}>{code}</span>
                     </div>
 
                     <p className="text-sm lg:text-base text-amber-300 text-center">

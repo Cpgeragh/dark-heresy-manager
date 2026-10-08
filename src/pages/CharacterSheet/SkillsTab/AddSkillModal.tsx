@@ -10,17 +10,15 @@ import type { SkillSource } from "../../../types/SkillSource";
 import { charColour, sourceColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { Button } from "../../../ui/buttons/Button";
-import { PickerModal, PickerBody } from "../../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerBody, PickerRow } from "../../../ui/pickers/PickerModal";
 import { ArrowRight, ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/styles/colourTokens";
 import {
   editableInputClass,
   uiFormLabel,
-  uiItemName,
-  uiSectionShell,
+  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
-import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -194,7 +192,7 @@ export function AddSkillModal({
         hideSearch
         isEmpty={skills.length === 0}
       >
-        <div className="space-y-3 p-3 lg:p-4" data-testid="skill-picker-card-list">
+        <PickerList data-testid="skill-picker-card-list">
           {skills.map((skill) => (
             <SkillRow
               key={skill.id}
@@ -212,55 +210,50 @@ export function AddSkillModal({
               cost={showOverflow ? undefined : unlockedCosts?.get(skill.id)}
             />
           ))}
-        </div>
+        </PickerList>
       </PickerModal>
     );
   }
 
   const renderGroupRow = (item: Extract<ListItem, { type: "group" }>) => (
-    <div key={item.category} className={uiSectionShell + " overflow-hidden"}>
-      <button
-        type="button"
-        onClick={() => setOpenCategory(item.category)}
-        className={`w-full flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 text-left hover:bg-slate-700/40 transition group ${uiPickerPressFeedback(editable)}`}
-      >
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <span className={`${uiItemName} truncate block group-hover:text-white`}>
-            {item.category}
-          </span>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {[
-              ...new Set(
-                item.skills.map((skill) => skill.source).filter((s): s is SkillSource => Boolean(s))
-              ),
-            ].map((source) => (
-              <Chip
-                key={source}
-                size="sm"
-                className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(source)}`}
-              >
-                {source}
-              </Chip>
-            ))}
-            {getSkillGroupCharacteristics(item.skills).map((characteristic) => (
-              <Chip
-                key={characteristic}
-                size="sm"
-                className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
-              >
-                {CHAR_LABEL[characteristic]}
-              </Chip>
-            ))}
-            {item.skills[0].advanced && (
-              <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
-                Advanced
-              </Chip>
-            )}
-          </div>
+    <PickerRow
+      key={item.category}
+      onClick={() => setOpenCategory(item.category)}
+      trailing={<ArrowRight />}
+    >
+      <div className="space-y-1.5">
+        <span className={`${uiItemNameHover} truncate block`}>{item.category}</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {[
+            ...new Set(
+              item.skills.map((skill) => skill.source).filter((s): s is SkillSource => Boolean(s))
+            ),
+          ].map((source) => (
+            <Chip
+              key={source}
+              size="sm"
+              className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(source)}`}
+            >
+              {source}
+            </Chip>
+          ))}
+          {getSkillGroupCharacteristics(item.skills).map((characteristic) => (
+            <Chip
+              key={characteristic}
+              size="sm"
+              className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
+            >
+              {CHAR_LABEL[characteristic]}
+            </Chip>
+          ))}
+          {item.skills[0].advanced && (
+            <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
+              Advanced
+            </Chip>
+          )}
         </div>
-        <ArrowRight />
-      </button>
-    </div>
+      </div>
+    </PickerRow>
   );
 
   if (showOverflow) {
@@ -279,7 +272,7 @@ export function AddSkillModal({
         isEmpty={overflowListItems.length === 0}
         emptyMessage="No skills found."
       >
-        <div className="space-y-3 p-3 lg:p-4" data-testid="skill-picker-card-list">
+        <PickerList data-testid="skill-picker-card-list">
           {overflowListItems.map((item) => {
             if (item.type === "skill") {
               return (
@@ -296,7 +289,7 @@ export function AddSkillModal({
             }
             return renderGroupRow(item);
           })}
-        </div>
+        </PickerList>
       </PickerModal>
     );
   }
@@ -324,7 +317,7 @@ export function AddSkillModal({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4" data-testid="skill-picker-card-list">
+      <PickerList data-testid="skill-picker-card-list">
         {listItems.map((item) => {
           if (item.type === "skill") {
             return (
@@ -342,7 +335,7 @@ export function AddSkillModal({
           }
           return renderGroupRow(item);
         })}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

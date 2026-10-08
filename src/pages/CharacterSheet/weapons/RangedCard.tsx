@@ -26,6 +26,8 @@ import {
 } from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
+  uiCell,
+  uiNoticeBox,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
@@ -40,6 +42,8 @@ import {
   colourArcheotech,
   colourButtonOutlineCyan,
   colourButtonOutlineOrange,
+  colourNoticeAmber,
+  colourNoticePink,
   colourPink,
   colourViolet,
 } from "../../../ui/styles/colourTokens";
@@ -414,7 +418,7 @@ export function RangedCard({
 
   return (
     <div
-      className={`${weapon.concealedBionic ? "border border-pink-500/60 bg-pink-900/10" : uiSectionShell} overflow-hidden`}
+      className={`${weapon.concealedBionic ? `${uiNoticeBox} ${colourNoticePink}` : uiSectionShell} overflow-hidden`}
     >
       {/* Header: always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
@@ -733,7 +737,7 @@ export function RangedCard({
                   {(archeotechGrenades ?? []).map((g) => (
                     <div
                       key={g.id}
-                      className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2"
+                      className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 flex items-center justify-between gap-2`}
                     >
                       <span className={`${uiItemName} truncate`}>{g.name}</span>
                       <Chip size="sm" className={colourArcheotech}>
@@ -772,7 +776,7 @@ export function RangedCard({
                   return (
                     <div
                       key={slot.id}
-                      className="rounded border border-slate-500 bg-slate-800/60 px-2 lg:px-3 py-2 space-y-1.5"
+                      className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5`}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-1.5 min-w-0">

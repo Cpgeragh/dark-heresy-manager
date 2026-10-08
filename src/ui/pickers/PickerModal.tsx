@@ -3,7 +3,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
-import { editableInputClass, uiSpinner } from "../styles/editableStyles";
+import { editableInputClass, uiSectionShell, uiSpinner } from "../styles/editableStyles";
 import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
 import { PlusIcon } from "../icons/PlusIcon";
@@ -15,10 +15,16 @@ export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivE
   return <div className={`p-4 lg:p-5 space-y-4 ${className}`.trim()} {...props} />;
 }
 
+/** The padded stack that holds a picker's rows. */
+export function PickerList({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={`space-y-3 p-3 lg:p-4 ${className}`.trim()} {...props} />;
+}
+
 export type PickerRowProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
   interactive?: boolean;
   selected?: boolean;
-  card?: boolean;
+  /** Content after the row's main content, such as a drill-down arrow. */
+  trailing?: ReactNode;
   /** A handler that returns a promise keeps the row busy, with a spinner, until it settles. */
   onClick?: (event: MouseEvent<HTMLButtonElement>) => unknown;
 };
@@ -30,7 +36,7 @@ export function PickerRow({
   interactive = true,
   onClick,
   selected = false,
-  card = false,
+  trailing,
   tabIndex,
   type = "button",
   ...props
@@ -46,16 +52,23 @@ export function PickerRow({
       aria-busy={pending || undefined}
       onClick={respondsToInput ? handleClick : undefined}
       tabIndex={respondsToInput ? tabIndex : -1}
-      className={`relative w-full text-left ${card ? "p-3 lg:p-4" : "px-4 lg:px-5 py-3 lg:py-4"} transition ${
+      className={`relative w-full text-left ${uiSectionShell} p-3 lg:p-4 transition ${
         respondsToInput ? "group" : ""
-      } ${selected ? "bg-slate-800" : respondsToInput ? "hover:bg-slate-800" : ""} ${
+      } ${selected ? "!bg-slate-800" : respondsToInput ? "hover:bg-slate-800" : ""} ${
         respondsToInput ? "cursor-pointer" : disabled ? "" : "cursor-default"
       } ${uiPickerPressFeedback(respondsToInput)} ${
         pending ? "cursor-wait" : "disabled:opacity-40 disabled:cursor-not-allowed"
       } ${className}`.trim()}
       {...props}
     >
-      {children}
+      {trailing ? (
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">{children}</div>
+          {trailing}
+        </div>
+      ) : (
+        children
+      )}
       {pending && (
         <span
           className={`${uiSpinner} absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2`}
@@ -218,7 +231,7 @@ export function PickerModal({
               }
             : undefined
         }
-        className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800"
+        className="min-h-0 overflow-y-auto flex-1"
       >
         {isEmpty && (
           <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">

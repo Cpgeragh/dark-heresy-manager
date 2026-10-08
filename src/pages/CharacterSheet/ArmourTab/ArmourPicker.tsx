@@ -7,6 +7,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
@@ -14,7 +15,7 @@ import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { Button } from "../../../ui/buttons/Button";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/styles/editableStyles";
+import { uiTextMuted, uiTextBody, uiItemNameHover } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -137,65 +138,63 @@ export function ArmourPicker({
         ) : undefined
       }
     >
-      {pickerEntries.map((entry) => {
-        if (entry.kind === "reference") {
-          const ref = entry.ref;
+      <PickerList>
+        {pickerEntries.map((entry) => {
+          if (entry.kind === "reference") {
+            const ref = entry.ref;
+            return (
+              <PickerRow key={ref.id} interactive={editable} onClick={() => setSelected(ref)}>
+                <span className={uiItemNameHover}>{ref.name}</span>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  <StatChip size="sm" label="AP" value={apBreakdown(ref)} />
+                  <StatChip size="sm" label="Location" value={locationLabel(ref.locations)} />
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  <ItemMetaChips
+                    weight={ref.weight}
+                    value={ref.value}
+                    availability={ref.availability}
+                    source={ref.source}
+                  />
+                </div>
+              </PickerRow>
+            );
+          }
+
+          const item = entry.item;
+          const data = item.data;
+          if (data.armourKind !== "worn") return null;
           return (
-            <PickerRow key={ref.id} interactive={editable} onClick={() => setSelected(ref)}>
-              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-                {ref.name}
-              </span>
+            <PickerRow
+              key={item.id}
+              interactive={editable}
+              onClick={() => onSelectCustomItem?.(item)}
+            >
+              <span className={uiItemNameHover}>{item.name}</span>
               <div className="flex flex-wrap gap-1.5 mt-1">
-                <StatChip size="sm" label="AP" value={apBreakdown(ref)} />
-                <StatChip size="sm" label="Location" value={locationLabel(ref.locations)} />
+                <StatChip size="sm" label="AP" value={apBreakdown(data)} />
+                <StatChip size="sm" label="Location" value={locationLabel(data.locations)} />
               </div>
               <div className="flex flex-wrap gap-1.5 mt-1">
+                {item.status === "draft" && (
+                  <Chip size="sm" className={colourAmberFaint}>
+                    Draft
+                  </Chip>
+                )}
+                <Chip size="sm" className={colourFuchsia}>
+                  Custom
+                </Chip>
                 <ItemMetaChips
-                  weight={ref.weight}
-                  value={ref.value}
-                  availability={ref.availability}
-                  source={ref.source}
+                  weight={data.weight}
+                  value={data.value}
+                  availability={data.availability}
+                  source={data.source}
                 />
               </div>
             </PickerRow>
           );
-        }
-
-        const item = entry.item;
-        const data = item.data;
-        if (data.armourKind !== "worn") return null;
-        return (
-          <PickerRow
-            key={item.id}
-            interactive={editable}
-            onClick={() => onSelectCustomItem?.(item)}
-          >
-            <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-              {item.name}
-            </span>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              <StatChip size="sm" label="AP" value={apBreakdown(data)} />
-              <StatChip size="sm" label="Location" value={locationLabel(data.locations)} />
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {item.status === "draft" && (
-                <Chip size="sm" className={colourAmberFaint}>
-                  Draft
-                </Chip>
-              )}
-              <Chip size="sm" className={colourFuchsia}>
-                Custom
-              </Chip>
-              <ItemMetaChips
-                weight={data.weight}
-                value={data.value}
-                availability={data.availability}
-                source={data.source}
-              />
-            </div>
-          </PickerRow>
-        );
-      })}
+        })}
+      </PickerList>
     </PickerModal>
   );
 }

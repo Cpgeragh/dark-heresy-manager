@@ -8,7 +8,7 @@ import {
 } from "../../../data/reference/weaponReference";
 import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { uiTextBody, uiTextMuted, uiItemName } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextMuted, uiItemNameHover } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
@@ -17,6 +17,7 @@ import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
@@ -229,63 +230,63 @@ export function MeleePicker({
         ) : undefined
       }
     >
-      {pickerEntries.map((entry) => {
-        if (entry.kind === "reference") {
-          const weaponReference = entry.weaponReference;
-          return (
-            <MeleeWeaponCardPickerRow
-              key={weaponReference.id}
-              weaponReference={weaponReference}
-              editable={editable}
-              strengthBonus={strengthBonus}
-              onSelect={() => setSelected(weaponReference)}
-            />
-          );
-        }
-        const item = entry.item;
-        const data = item.data;
-        if (data.weaponKind !== "melee") return null;
-        return (
-          <PickerRow
-            key={item.id}
-            interactive={editable}
-            onClick={() => onSelectCustomItem?.(item)}
-          >
-            <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-              {item.name}
-            </span>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
-              {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
-              {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {(() => {
-                const t = weaponTypeChip(data.type);
-                return t ? (
-                  <Chip size="sm" className={t.className}>
-                    {t.label}
-                  </Chip>
-                ) : null;
-              })()}
-              <ItemMetaChips
-                weight={data.weight}
-                value={data.value}
-                availability={data.availability}
-                source={data.source}
+      <PickerList>
+        {pickerEntries.map((entry) => {
+          if (entry.kind === "reference") {
+            const weaponReference = entry.weaponReference;
+            return (
+              <MeleeWeaponCardPickerRow
+                key={weaponReference.id}
+                weaponReference={weaponReference}
+                editable={editable}
+                strengthBonus={strengthBonus}
+                onSelect={() => setSelected(weaponReference)}
               />
-              {item.status === "draft" && (
-                <Chip size="sm" className={colourAmberFaint}>
-                  Draft
+            );
+          }
+          const item = entry.item;
+          const data = item.data;
+          if (data.weaponKind !== "melee") return null;
+          return (
+            <PickerRow
+              key={item.id}
+              interactive={editable}
+              onClick={() => onSelectCustomItem?.(item)}
+            >
+              <span className={uiItemNameHover}>{item.name}</span>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
+                {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
+                {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {(() => {
+                  const t = weaponTypeChip(data.type);
+                  return t ? (
+                    <Chip size="sm" className={t.className}>
+                      {t.label}
+                    </Chip>
+                  ) : null;
+                })()}
+                <ItemMetaChips
+                  weight={data.weight}
+                  value={data.value}
+                  availability={data.availability}
+                  source={data.source}
+                />
+                {item.status === "draft" && (
+                  <Chip size="sm" className={colourAmberFaint}>
+                    Draft
+                  </Chip>
+                )}
+                <Chip size="sm" className={colourFuchsia}>
+                  Custom
                 </Chip>
-              )}
-              <Chip size="sm" className={colourFuchsia}>
-                Custom
-              </Chip>
-            </div>
-          </PickerRow>
-        );
-      })}
+              </div>
+            </PickerRow>
+          );
+        })}
+      </PickerList>
     </PickerModal>
   );
 }

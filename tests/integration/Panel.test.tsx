@@ -32,6 +32,6 @@ describe("Panel", () => {
     );
     const wrapper = screen.getByText("Body content").parentElement;
     expect(wrapper).toHaveClass("mt-8");
-    expect(wrapper).toHaveClass("border-slate-700");
+    expect(wrapper).toHaveClass("border-slate-500");
   });
 });

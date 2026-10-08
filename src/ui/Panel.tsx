@@ -3,6 +3,7 @@
 // CampaignOverview). Defaults to space-y-6; pass className to extend.
 
 import type { ReactNode } from "react";
+import { uiSectionShell } from "./styles/editableStyles";
 
 export function Panel({
   className = "",
@@ -16,12 +17,10 @@ export function Panel({
   children: ReactNode;
 }) {
   const spacingClass = spacing === "none" ? "" : spacing === "compact" ? "space-y-4" : "space-y-6";
-  const paddingClass = padding === "none" ? "" : "p-4 lg:p-5";
+  const paddingClass = padding === "none" ? "" : "p-3 lg:p-4";
 
   return (
-    <div
-      className={`border border-slate-700 bg-slate-900/40 rounded-lg ${paddingClass} ${spacingClass} ${className}`.trim()}
-    >
+    <div className={`${uiSectionShell} ${paddingClass} ${spacingClass} ${className}`.trim()}>
       {children}
     </div>
   );

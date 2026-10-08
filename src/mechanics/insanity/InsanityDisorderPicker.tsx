@@ -10,6 +10,7 @@ import { OriginSelector } from "../../ui/forms/OriginSelector";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
@@ -22,10 +23,9 @@ import {
   editableTextareaClass,
   uiFormLabel,
   uiInfoModalWrapper,
-  uiItemName,
-  uiSectionShell,
   uiTextBody,
   uiTextLabel,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import {
@@ -326,12 +326,10 @@ export function InsanityDisorderPicker({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {filtered.map((ref) => (
           <PickerRow
             key={ref.id}
-            card
-            className={uiSectionShell}
             interactive={editable}
             onClick={() => {
               setSelected(ref);
@@ -340,7 +338,7 @@ export function InsanityDisorderPicker({
               setNotes("");
             }}
           >
-            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <span className={uiItemNameHover}>{ref.name}</span>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Chip size="sm" className={disorderTypeChipClass(ref.type)}>
                 {ref.type}
@@ -365,7 +363,7 @@ export function InsanityDisorderPicker({
             </div>
           </PickerRow>
         ))}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

@@ -3,6 +3,7 @@
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
 import {
+  uiNoticeBox,
   uiSection,
   uiCardTitle,
   uiTextLabel,
@@ -10,7 +11,7 @@ import {
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { colourArcheotech, colourStacks } from "../../../ui/styles/colourTokens";
+import { colourArcheotech, colourNoticeAmber, colourStacks } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -35,7 +36,7 @@ export function ArcheotechArmourRow({
   const locations = item.locations ?? [];
 
   const containerClass = highlightAsArcheotech
-    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg p-3 lg:p-4"
+    ? `${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4`
     : uiSection;
 
   return (

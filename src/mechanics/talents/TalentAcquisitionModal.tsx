@@ -25,6 +25,7 @@ import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import {
   editableInputClass,
   uiFormLabel,
+  uiSectionShell,
   uiTextBody,
   uiTextError,
   uiTextPlaceholder,
@@ -33,7 +34,7 @@ import {
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
-import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { getGrantedTalentEntries, getGrantedWeaponTrainingIds } from "./talentEffects";
 import { getPurityFatePoints, getPurityRemovalInventory } from "./purityOfFlesh";
 import { getPsyRatingAcquisitionGrants } from "./talentUtils";
@@ -106,7 +107,7 @@ interface AcquisitionPickerConfig {
 
 function ResultRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded border border-slate-700 bg-slate-900/40 px-3 py-2">
+    <div className={`${uiSectionShell} flex items-center justify-between gap-3 px-3 py-2`}>
       <span className={uiFormLabel}>{label}</span>
       <Chip size="lg" className={colourValue}>
         {value}
@@ -518,13 +519,12 @@ export function TalentAcquisitionModal({
           </Button>
         }
       >
-        <div className="space-y-2 p-3 lg:p-4">
+        <PickerList>
           {filteredFatalRemovalItems.map((item) => {
             const selected = fatalRemovalKeys.includes(item.key);
             return (
               <PickerRow
                 key={item.key}
-                card
                 selected={selected}
                 aria-pressed={selected}
                 onClick={() =>
@@ -534,7 +534,6 @@ export function TalentAcquisitionModal({
                       : [...current, item.key]
                   )
                 }
-                className="rounded-lg border border-slate-600"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
@@ -550,7 +549,7 @@ export function TalentAcquisitionModal({
               </PickerRow>
             );
           })}
-        </div>
+        </PickerList>
       </PickerModal>
     );
   }

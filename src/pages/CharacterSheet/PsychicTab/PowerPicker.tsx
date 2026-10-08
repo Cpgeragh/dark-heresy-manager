@@ -10,7 +10,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { Chip } from "../../../ui/chips/Chip";
 import { ArrowLeft, ArrowRight } from "../../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
-import { PickerCustomAction, PickerModal } from "../../../ui/pickers/PickerModal";
+import { PickerCustomAction, PickerList, PickerModal } from "../../../ui/pickers/PickerModal";
 import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 import { PowerCard } from "./PowerCard";
 import { normalisePowerName } from "./psychicPowerHelpers";
@@ -186,7 +186,7 @@ export function PowerPicker({
         ) : undefined
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {pickerItems.map((entry) =>
           entry.kind === "custom" ? (
             <PowerCard
@@ -212,7 +212,7 @@ export function PowerPicker({
             />
           )
         )}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

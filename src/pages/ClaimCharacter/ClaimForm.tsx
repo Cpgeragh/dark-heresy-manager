@@ -5,6 +5,7 @@ import { Button } from "../../ui/buttons/Button";
 import { RecoveryCodeInput } from "../../ui/forms/RecoveryCodeInput";
 import { formatRecoveryCodeInput } from "../../utils/recoveryCode";
 import { validateRecoveryCode } from "../../utils/validation";
+import { uiSection } from "../../ui/styles/editableStyles";
 
 interface ClaimFormProps {
   code: string;
@@ -23,7 +24,7 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
   }, [isValid, loading, onSubmit]);
 
   return (
-    <div className="border border-slate-700 bg-slate-900 p-4 lg:p-5 rounded space-y-3">
+    <div className={`${uiSection} space-y-3`}>
       <RecoveryCodeInput
         value={code}
         onValueChange={onCodeChange}

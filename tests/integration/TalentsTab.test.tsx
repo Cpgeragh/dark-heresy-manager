@@ -432,7 +432,6 @@ describe("TalentsTab", () => {
     const choiceCard = within(dialog).getByText("Resistance").closest("button");
     const acquisitionCard = within(dialog).getByText("Touched by the Fates").closest("button");
 
-    expect(directCard).toHaveClass("flex", "items-center", "gap-3");
     expect(directCard!.querySelector('[data-picker-arrow="right"]')).toBeNull();
     expect(choiceCard!.querySelector('[data-picker-arrow="right"]')).not.toBeNull();
     expect(acquisitionCard!.querySelector('[data-picker-arrow="right"]')).not.toBeNull();

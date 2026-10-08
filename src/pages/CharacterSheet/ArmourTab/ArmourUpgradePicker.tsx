@@ -2,14 +2,15 @@ import type { ArmourUpgradeRef } from "../../../data/reference/armourUpgradeRefe
 import { Button } from "../../../ui/buttons/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import {
+  uiCell,
   uiInfoModalWrapper,
-  uiItemName,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 
 export function ArmourUpgradeCard({
@@ -22,7 +23,7 @@ export function ArmourUpgradeCard({
   onRemove: (upgradeId: string) => void;
 }) {
   return (
-    <div className="bg-slate-800/60 rounded border border-slate-500 px-2 lg:px-3 py-1.5 lg:py-2">
+    <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2`}>
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         {editable && (
@@ -73,23 +74,25 @@ export function ArmourUpgradePicker({
         </Button>
       }
     >
-      {upgrades.map((upgrade) => (
-        <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
-          <span className={`${uiItemName} group-hover:text-white`}>{upgrade.name}</span>
-          <ItemMetaChips
-            weight={upgrade.weight}
-            value={upgrade.value}
-            availability={upgrade.availability}
-            source={upgrade.source}
-            size="sm"
-            className="flex flex-wrap gap-1.5 mt-1"
-          />
-          <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed mt-2`}>
-            {upgrade.description}
-          </p>
-          <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
-        </PickerRow>
-      ))}
+      <PickerList>
+        {upgrades.map((upgrade) => (
+          <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
+            <span className={uiItemNameHover}>{upgrade.name}</span>
+            <ItemMetaChips
+              weight={upgrade.weight}
+              value={upgrade.value}
+              availability={upgrade.availability}
+              source={upgrade.source}
+              size="sm"
+              className="flex flex-wrap gap-1.5 mt-1"
+            />
+            <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed mt-2`}>
+              {upgrade.description}
+            </p>
+            <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
+          </PickerRow>
+        ))}
+      </PickerList>
     </PickerModal>
   );
 }

@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
-import { uiSectionShell, uiCardTitle } from "../../../ui/styles/editableStyles";
+import { uiNoticeBox, uiSectionShell, uiCardTitle } from "../../../ui/styles/editableStyles";
 import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourArcheotech, colourLime } from "../../../ui/styles/colourTokens";
+import { colourArcheotech, colourLime, colourNoticeAmber } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { EquipToggle } from "./weaponShared";
@@ -40,7 +40,7 @@ export function ArcheotechShieldRow({
   const locations = item.locations ?? [];
 
   const containerClass = highlightAsArcheotech
-    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg overflow-hidden"
+    ? `${uiNoticeBox} ${colourNoticeAmber} overflow-hidden`
     : `${uiSectionShell} overflow-hidden`;
 
   return (

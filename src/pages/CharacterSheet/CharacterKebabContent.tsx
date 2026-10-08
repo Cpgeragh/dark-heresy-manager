@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 import { Button } from "../../ui/buttons/Button";
-import { uiSubheading } from "../../ui/styles/editableStyles";
+import { uiCodeBox, uiCodeText, uiSubheading } from "../../ui/styles/editableStyles";
 import { QrModal } from "../../ui/modals/QrModal";
 
 interface Props {
@@ -78,9 +78,7 @@ export function CharacterKebabContent({
         <div className="space-y-2">
           <p className={uiSubheading}>Recovery Code</p>
           <div className="space-y-2">
-            <code className="block w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-amber-300 text-sm lg:text-base break-all">
-              {recoveryCode}
-            </code>
+            <code className={`block w-full ${uiCodeBox} ${uiCodeText}`}>{recoveryCode}</code>
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" size="sm" onClick={copyCode}>
                 {copied ? "Copied" : "Copy"}

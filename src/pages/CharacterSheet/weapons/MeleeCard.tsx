@@ -15,6 +15,7 @@ import {
   usesUnitAmmoTracking,
 } from "../../../data/reference/ammoReference";
 import {
+  uiNoticeBox,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
@@ -24,7 +25,7 @@ import {
   uiCardTitle,
 } from "../../../ui/styles/editableStyles";
 import { uiExpandButton, uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
-import { colourPink, colourViolet } from "../../../ui/styles/colourTokens";
+import { colourNoticePink, colourPink, colourViolet } from "../../../ui/styles/colourTokens";
 import { Button } from "../../../ui/buttons/Button";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
@@ -296,7 +297,7 @@ export function MeleeCard({
 
   return (
     <div
-      className={`${weapon.concealedBionic ? "border border-pink-500/60 bg-pink-900/10" : uiSectionShell} overflow-hidden`}
+      className={`${weapon.concealedBionic ? `${uiNoticeBox} ${colourNoticePink}` : uiSectionShell} overflow-hidden`}
     >
       {/* Header: always visible */}
       <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">

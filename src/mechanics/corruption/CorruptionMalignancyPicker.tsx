@@ -9,6 +9,7 @@ import { OriginSelector } from "../../ui/forms/OriginSelector";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
@@ -19,9 +20,8 @@ import {
   editableInputClass,
   editableTextareaClass,
   uiInfoModalWrapper,
-  uiItemName,
-  uiSectionShell,
   uiTextLabel,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
 import { CORRUPTION_MALIGNANCIES, type CorruptionMalignancyRef } from "./corruptionReference";
@@ -211,12 +211,10 @@ export function CorruptionMalignancyPicker({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {filtered.map((ref) => (
           <PickerRow
             key={ref.id}
-            card
-            className={uiSectionShell}
             interactive={editable}
             onClick={() => {
               if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
@@ -227,7 +225,7 @@ export function CorruptionMalignancyPicker({
               }
             }}
           >
-            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <span className={uiItemNameHover}>{ref.name}</span>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <RollChip>{ref.roll}</RollChip>
             </div>
@@ -243,7 +241,7 @@ export function CorruptionMalignancyPicker({
             </div>
           </PickerRow>
         ))}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

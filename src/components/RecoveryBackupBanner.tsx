@@ -9,6 +9,8 @@ import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService
 import { markRecoveryCodeBackedUp } from "../services/userAccountService";
 import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
+import { colourNoticeAmber } from "../ui/styles/colourTokens";
+import { uiCodeBox, uiCodeText, uiNoticeBox } from "../ui/styles/editableStyles";
 
 interface Props {
   ownUid: string;
@@ -62,7 +64,7 @@ export function RecoveryBackupBanner({
   }
 
   return (
-    <div className="border border-amber-500/60 bg-amber-500/10 rounded-lg p-4 lg:p-5 space-y-3">
+    <div className={`${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4 space-y-3`}>
       <p className="text-sm lg:text-base font-semibold text-amber-200">
         ⚠ Back up your recovery code
       </p>
@@ -72,10 +74,8 @@ export function RecoveryBackupBanner({
       </p>
       {code ? (
         <>
-          <div className="bg-slate-900 border border-slate-600 rounded p-3 text-center">
-            <span className="font-code [font-feature-settings:'zero'] text-lg lg:text-xl text-amber-400 tracking-widest break-all select-all">
-              {code}
-            </span>
+          <div className={uiCodeBox}>
+            <span className={uiCodeText}>{code}</span>
           </div>
           <div className="flex gap-2">
             <Button

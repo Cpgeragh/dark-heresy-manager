@@ -1,7 +1,7 @@
 // src/ui/styles/editableStyles.ts
 
 import { chipClassName } from "./chipStyles";
-import { colourInactive, colourMetadataLabelText } from "./colourTokens";
+import { colourInactive, colourMetadataLabelText, colourTextPrimary } from "./colourTokens";
 import { fieldControlClass, type FieldResize } from "./fieldStyles";
 
 /**
@@ -38,6 +38,15 @@ export const uiSectionShell = "rounded-lg border border-slate-500 bg-slate-900/6
 export const uiSection = `${uiSectionShell} p-3 lg:p-4`;
 
 export const uiCell = "rounded border border-slate-500 bg-slate-900/60";
+
+/** Tinted card shape without a colour: pair with a colourNotice token. */
+export const uiNoticeBox = "rounded-lg border";
+
+/** Recovery code display box: the standard cell, padded and centred. */
+export const uiCodeBox = `${uiCell} p-3 text-center`;
+
+/** Recovery code text: code font, wide tracking, selectable in one tap. */
+export const uiCodeText = `font-code [font-feature-settings:'zero'] text-lg lg:text-xl ${colourTextPrimary} tracking-widest break-all select-all`;
 
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
 export const uiCellLabel = "text-[10px] lg:text-xs text-slate-300 leading-tight";
@@ -83,6 +92,7 @@ export const uiSpinner = "rounded-full border-2 border-slate-800 border-t-red-60
 export const uiSubheading =
   "text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide";
 export const uiItemName = "text-sm lg:text-base font-medium text-slate-200";
+export const uiItemNameHover = `${uiItemName} group-hover:text-white`;
 export const uiCardTitle = "text-sm lg:text-base font-semibold text-slate-200";
 
 // ──────────────────────────────────────────────────────────────────────────────

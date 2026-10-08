@@ -2,8 +2,8 @@ import { useState } from "react";
 import { AMMO_REFERENCE, formatAmmoName } from "../../../data/reference/ammoReference";
 import { Button } from "../../../ui/buttons/Button";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
-import { uiItemName, uiTextMuted } from "../../../ui/styles/editableStyles";
+import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { uiTextMuted, uiItemNameHover } from "../../../ui/styles/editableStyles";
 
 // ─── Ammo Picker ──────────────────────────────────────────────────────────────
 
@@ -84,36 +84,36 @@ export function AmmoPicker({
         ) : undefined
       }
     >
-      {options.map((ammo) => (
-        <PickerRow
-          key={ammo.id}
-          interactive={editable}
-          onClick={() => {
-            onSelect(formatAmmoName(ammo.name), ammo.id);
-            if (closeOnSelect) onClose();
-          }}
-          disabled={editable && !allowDuplicates && existingNames.has(formatAmmoName(ammo.name))}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className={`${uiItemName} group-hover:text-white`}>
-              {formatAmmoName(ammo.name)}
-            </span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <ItemMetaChips
-                availability={ammo.availability}
-                value={ammo.cost}
-                purchaseAmount={ammo.purchaseAmount}
-                bare
-              />
+      <PickerList>
+        {options.map((ammo) => (
+          <PickerRow
+            key={ammo.id}
+            interactive={editable}
+            onClick={() => {
+              onSelect(formatAmmoName(ammo.name), ammo.id);
+              if (closeOnSelect) onClose();
+            }}
+            disabled={editable && !allowDuplicates && existingNames.has(formatAmmoName(ammo.name))}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className={uiItemNameHover}>{formatAmmoName(ammo.name)}</span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <ItemMetaChips
+                  availability={ammo.availability}
+                  value={ammo.cost}
+                  purchaseAmount={ammo.purchaseAmount}
+                  bare
+                />
+              </div>
             </div>
-          </div>
-          {ammo.description && (
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>
-              {ammo.description}
-            </p>
-          )}
-        </PickerRow>
-      ))}
+            {ammo.description && (
+              <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>
+                {ammo.description}
+              </p>
+            )}
+          </PickerRow>
+        ))}
+      </PickerList>
     </PickerModal>
   );
 }

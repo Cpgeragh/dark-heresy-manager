@@ -7,10 +7,9 @@ import {
   editableInputClass,
   uiFormLabel,
   uiInfoModalWrapper,
-  uiItemName,
-  uiSectionShell,
   uiTextLabel,
   uiTextPlaceholder,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
@@ -31,6 +30,7 @@ import type { CampaignCustomItem } from "../../types/CustomItems";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
@@ -441,7 +441,7 @@ export function TalentPickerModal({
           )
         }
       >
-        <div className="space-y-3 p-3 lg:p-4">
+        <PickerList>
           {filteredCustom.map((item) => (
             <PickerRow
               key={item.id}
@@ -450,11 +450,7 @@ export function TalentPickerModal({
                 if (editable) onSelectCustomItem?.(item);
               }}
             >
-              <span
-                className={`${uiItemName} truncate block ${editable ? "group-hover:text-white" : ""}`}
-              >
-                {item.name}
-              </span>
+              <span className={`${uiItemNameHover} truncate block`}>{item.name}</span>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 <Chip className={colourAmberFaint}>
                   {item.status === "draft" ? "Draft" : "Custom"}
@@ -485,9 +481,10 @@ export function TalentPickerModal({
             return (
               <PickerRow
                 key={item.id}
-                card
-                className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
                 interactive={canMakeManualPurchase}
+                trailing={
+                  usesChoicePicker || usesTextEntry || opensAcquisition ? <ArrowRight /> : undefined
+                }
                 onClick={() => {
                   if (!canMakeManualPurchase) return;
                   if (usesChoicePicker) {
@@ -500,13 +497,9 @@ export function TalentPickerModal({
                   }
                 }}
               >
-                <div className="flex-1 min-w-0 space-y-1.5">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span
-                      className={`${uiItemName} truncate ${canMakeManualPurchase ? "group-hover:text-white" : ""}`}
-                    >
-                      {item.name}
-                    </span>
+                    <span className={`${uiItemNameHover} truncate`}>{item.name}</span>
                     {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
                       <span
                         className={uiInfoModalWrapper}
@@ -545,11 +538,10 @@ export function TalentPickerModal({
                     </div>
                   )}
                 </div>
-                {(usesChoicePicker || usesTextEntry || opensAcquisition) && <ArrowRight />}
               </PickerRow>
             );
           })}
-        </div>
+        </PickerList>
       </PickerModal>
     );
   }
@@ -688,7 +680,7 @@ export function TalentPickerModal({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4" data-testid="talent-picker-card-list">
+      <PickerList data-testid="talent-picker-card-list">
         {filtered.map((item) => {
           const row = item as TalentData;
           const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
@@ -740,9 +732,8 @@ export function TalentPickerModal({
           return (
             <PickerRow
               key={item.id}
-              card
-              className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
               interactive={editable}
+              trailing={opensNextStep ? <ArrowRight /> : undefined}
               onClick={() => {
                 if (!editable) return;
                 const itemTalent = item as TalentData;
@@ -756,13 +747,9 @@ export function TalentPickerModal({
                 }
               }}
             >
-              <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
-                  <span
-                    className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
-                  >
-                    {item.name}
-                  </span>
+                  <span className={`${uiItemNameHover} truncate`}>{item.name}</span>
                   {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
                     <span
                       className={uiInfoModalWrapper}
@@ -817,11 +804,10 @@ export function TalentPickerModal({
                   </div>
                 )}
               </div>
-              {opensNextStep && <ArrowRight />}
             </PickerRow>
           );
         })}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

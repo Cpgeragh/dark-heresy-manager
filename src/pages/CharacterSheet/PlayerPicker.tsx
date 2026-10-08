@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { getFirstName } from "../../services/profileService";
 import { PendingOverlay } from "../../ui/PendingOverlay";
-import { PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { uiItemName, uiTextMuted } from "../../ui/styles/editableStyles";
 
 interface PlayerOption {
@@ -63,14 +63,16 @@ export function PlayerPicker({ memberIds, onSelect, onClose }: Props) {
       emptyMessage="No players in this campaign yet."
       hideSearch
     >
-      {players.map((player) => (
-        <PickerRow key={player.uid} onClick={() => onSelect(player.uid)}>
-          <span className={uiItemName}>{player.label}</span>
-          <span className={`block text-xs lg:text-sm ${uiTextMuted} font-code break-all`}>
-            {player.uid}
-          </span>
-        </PickerRow>
-      ))}
+      <PickerList>
+        {players.map((player) => (
+          <PickerRow key={player.uid} onClick={() => onSelect(player.uid)}>
+            <span className={uiItemName}>{player.label}</span>
+            <span className={`block text-xs lg:text-sm ${uiTextMuted} font-code break-all`}>
+              {player.uid}
+            </span>
+          </PickerRow>
+        ))}
+      </PickerList>
     </PickerModal>
   );
 }

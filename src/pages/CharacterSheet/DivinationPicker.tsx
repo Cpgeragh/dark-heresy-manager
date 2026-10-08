@@ -6,8 +6,8 @@ import {
   type DivinationData,
 } from "../../data/reference/divinationData";
 import { Chip } from "../../ui/chips/Chip";
-import { uiInfoModalWrapper, uiItemName, uiTextBody } from "../../ui/styles/editableStyles";
-import { PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { uiInfoModalWrapper, uiTextBody, uiItemNameHover } from "../../ui/styles/editableStyles";
+import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 
@@ -45,30 +45,32 @@ export function DivinationPicker({
       onClose={onClose}
       isEmpty={divinations.length === 0}
     >
-      {divinations.map((divination) => (
-        <PickerRow
-          key={divination.id}
-          selected={divination.id === selectedId}
-          onClick={() => onSelect(divination)}
-        >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`${uiItemName} group-hover:text-white`}>“{divination.result}”</span>
-            <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
-              <InfoModal
-                title={divination.result}
-                content={<DivinationInfoContent divination={divination} />}
-                as="span"
-              />
-            </span>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <RollChip>{divination.roll}</RollChip>
-            <Chip className={`bg-slate-800/40 font-code ${sourceColour(divination.source)}`}>
-              {divination.source}
-            </Chip>
-          </div>
-        </PickerRow>
-      ))}
+      <PickerList>
+        {divinations.map((divination) => (
+          <PickerRow
+            key={divination.id}
+            selected={divination.id === selectedId}
+            onClick={() => onSelect(divination)}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className={uiItemNameHover}>“{divination.result}”</span>
+              <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
+                <InfoModal
+                  title={divination.result}
+                  content={<DivinationInfoContent divination={divination} />}
+                  as="span"
+                />
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <RollChip>{divination.roll}</RollChip>
+              <Chip className={`bg-slate-800/40 font-code ${sourceColour(divination.source)}`}>
+                {divination.source}
+              </Chip>
+            </div>
+          </PickerRow>
+        ))}
+      </PickerList>
     </PickerModal>
   );
 }

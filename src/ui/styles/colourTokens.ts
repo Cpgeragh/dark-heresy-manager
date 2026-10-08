@@ -68,3 +68,31 @@ export const colourButtonOutlineCyan =
   "!border-cyan-500 !text-cyan-300 enabled:hover:!bg-cyan-500/10";
 // Same style, no hover: for static/non-interactive display (e.g. a chip that isn't itself clickable).
 export const colourOutlineFuchsia = "border-fuchsia-400 text-fuchsia-400 font-semibold";
+export const colourNoticeAmber = "border-amber-500/60 bg-amber-900/10";
+export const colourNoticePink = "border-pink-500/60 bg-pink-900/10";
+export const colourNoticeViolet = "border-violet-500/60 bg-violet-900/10";
+export const colourNoticeRed = "border-red-500/60 bg-red-900/10";
+/** Glowing pill look when owned or selected, one entry per colour. */
+export const colourGlowActive = {
+  teal: "border-teal-500/60 bg-teal-950/50 text-teal-300 font-semibold",
+  violet: "border-violet-500/60 bg-violet-950/50 text-violet-300 font-semibold",
+  orange: "border-orange-500/60 bg-orange-950/50 text-orange-300 font-semibold",
+  sky: "border-sky-500/60 bg-sky-950/50 text-sky-300 font-semibold",
+  amber: "border-amber-500/60 bg-amber-950/50 text-amber-300 font-semibold",
+  emerald: "border-emerald-500/60 bg-emerald-950/50 text-emerald-300 font-semibold",
+  cyan: "border-cyan-500/60 bg-cyan-950/50 text-cyan-300 font-semibold",
+  fuchsia: "border-fuchsia-500/60 bg-fuchsia-950/50 text-fuchsia-300 font-semibold",
+  indigo: "border-indigo-500/60 bg-indigo-950/50 text-indigo-300 font-semibold",
+} as const;
+/** The same pill look when not owned or not selected. */
+export const colourGlowInactive = {
+  teal: "border-teal-700/50 bg-teal-950/15 text-teal-400/50",
+  violet: "border-violet-700/50 bg-violet-950/15 text-violet-400/50",
+  orange: "border-orange-700/50 bg-orange-950/15 text-orange-400/50",
+  sky: "border-sky-700/50 bg-sky-950/15 text-sky-400/50",
+  amber: "border-amber-700/50 bg-amber-950/15 text-amber-400/50",
+  emerald: "border-emerald-700/50 bg-emerald-950/15 text-emerald-400/50",
+  cyan: "border-cyan-700/50 bg-cyan-950/15 text-cyan-400/50",
+  fuchsia: "border-fuchsia-700/50 bg-fuchsia-950/15 text-fuchsia-400/50",
+  indigo: "border-indigo-700/50 bg-indigo-950/15 text-indigo-400/50",
+} as const;

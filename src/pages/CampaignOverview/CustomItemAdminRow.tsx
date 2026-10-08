@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { CampaignCustomItem, CustomItemCategory } from "../../types/CustomItems";
 import { Button } from "../../ui/buttons/Button";
+import { Chip } from "../../ui/chips/Chip";
+import { colourInactive } from "../../ui/styles/colourTokens";
 import { uiSection } from "../../ui/styles/editableStyles";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { useToast } from "../../components/Toast";
@@ -109,9 +111,9 @@ export function CustomItemAdminRow({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-sm font-medium text-slate-200">{item.name}</span>
-            <span className="rounded border border-slate-600 bg-slate-800/60 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-400">
+            <Chip size="sm" className={`uppercase tracking-wide ${colourInactive}`}>
               {CUSTOM_ITEM_CATEGORY_LABELS[item.category]}
-            </span>
+            </Chip>
             <StatusBadge status={item.status} />
           </div>
           <p className="text-xs text-slate-400 mt-0.5">

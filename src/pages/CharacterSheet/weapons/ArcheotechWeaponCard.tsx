@@ -8,6 +8,7 @@ import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReferenc
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
+  uiNoticeBox,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
@@ -17,7 +18,7 @@ import {
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
 import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourArcheotech, colourOrange } from "../../../ui/styles/colourTokens";
+import { colourArcheotech, colourNoticeAmber, colourOrange } from "../../../ui/styles/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -82,7 +83,7 @@ export function ArcheotechWeaponCard({
   const showMishaps = item.type === "Grenade";
 
   const containerClass = highlightAsArcheotech
-    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg overflow-hidden"
+    ? `${uiNoticeBox} ${colourNoticeAmber} overflow-hidden`
     : `${uiSectionShell} overflow-hidden`;
 
   return (

@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { OwnershipState } from "../../types/Recovery";
 import { Button } from "../../ui/buttons/Button";
-import { uiTextError } from "../../ui/styles/editableStyles";
+import { uiSection, uiTextError } from "../../ui/styles/editableStyles";
 
 interface ClaimPreviewProps {
   characterName: string;
@@ -46,7 +46,7 @@ export function ClaimPreview({
   }, [ownership, onClaim]);
 
   return (
-    <div className="border border-slate-700 bg-slate-900 p-4 lg:p-5 rounded space-y-4">
+    <div className={`${uiSection} space-y-4`}>
       <h2 className="text-xl lg:text-2xl font-semibold text-slate-100">Character Found</h2>
 
       <div className="text-slate-300 text-sm lg:text-base space-y-1">

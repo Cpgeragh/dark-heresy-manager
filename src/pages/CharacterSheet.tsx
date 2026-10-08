@@ -77,6 +77,7 @@ import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import { TitleToolbar } from "../ui/TitleToolbar";
+import { uiSectionShell } from "../ui/styles/editableStyles";
 import {
   CampaignCustomItemsScope,
   useCampaignCustomItemsRaw,
@@ -667,7 +668,7 @@ export default function CharacterSheet({
 
         {/* DM NAV / OVERRIDE BAR */}
         {isDM && (
-          <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">
+          <div className={`${uiSectionShell} flex items-center justify-between mb-4 p-2`}>
             <span className="text-xs lg:text-sm text-slate-400">DM View</span>
 
             <button

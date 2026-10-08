@@ -24,11 +24,13 @@ import {
   readOnlyBadgeClass,
   uiInfoModalWrapper,
   uiItemName,
+  uiNoticeBox,
   uiSection,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/chips/Chip";
@@ -38,8 +40,9 @@ import { ModalHeader } from "../../ui/modals/ModalHeader";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { InfoModal } from "../../components/InfoModal";
+import { AccordionCard } from "../../ui/AccordionCard";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
-import { PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
   segmentedTabId,
@@ -55,6 +58,7 @@ import {
   colourCareerPathOutline,
   colourEmerald,
   colourEmeraldPlain,
+  colourNoticeRed,
   colourRank,
   colourSkyPlain,
   colourTextPrimary,
@@ -709,29 +713,31 @@ function RankUpModal({
           hideSearch
           maxWidth="max-w-lg"
         >
-          <PickerRow
-            selected={selectedAlternateRankId === ""}
-            aria-pressed={selectedAlternateRankId === ""}
-            onClick={() => {
-              selectAlternateRank("");
-              setRankTypePickerOpen(false);
-            }}
-          >
-            <span className={`${uiItemName} group-hover:text-white`}>{selectedRank.name}</span>
-          </PickerRow>
-          {availableAlternateRanks.map((alternateRank) => (
+          <PickerList>
             <PickerRow
-              key={alternateRank.id}
-              selected={selectedAlternateRankId === alternateRank.id}
-              aria-pressed={selectedAlternateRankId === alternateRank.id}
+              selected={selectedAlternateRankId === ""}
+              aria-pressed={selectedAlternateRankId === ""}
               onClick={() => {
-                selectAlternateRank(alternateRank.id);
+                selectAlternateRank("");
                 setRankTypePickerOpen(false);
               }}
             >
-              <span className={`${uiItemName} group-hover:text-white`}>{alternateRank.name}</span>
+              <span className={uiItemNameHover}>{selectedRank.name}</span>
             </PickerRow>
-          ))}
+            {availableAlternateRanks.map((alternateRank) => (
+              <PickerRow
+                key={alternateRank.id}
+                selected={selectedAlternateRankId === alternateRank.id}
+                aria-pressed={selectedAlternateRankId === alternateRank.id}
+                onClick={() => {
+                  selectAlternateRank(alternateRank.id);
+                  setRankTypePickerOpen(false);
+                }}
+              >
+                <span className={uiItemNameHover}>{alternateRank.name}</span>
+              </PickerRow>
+            ))}
+          </PickerList>
         </PickerModal>
       )}
 
@@ -803,27 +809,22 @@ function CareerPurchaseGroup({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className={`${uiSectionShell} overflow-hidden`}>
-      <button
-        type="button"
-        onClick={() => setExpanded((value) => !value)}
-        aria-expanded={expanded}
-        aria-label={`${expanded ? "Collapse" : "Expand"} ${label} purchases`}
-        className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-slate-700/40 lg:px-4 lg:py-3"
-      >
-        <span
-          className={`min-w-0 flex-1 truncate text-sm font-semibold lg:text-base ${colourSkyPlain}`}
-        >
+    <AccordionCard
+      expanded={expanded}
+      onToggle={() => setExpanded((value) => !value)}
+      aria-label={`${expanded ? "Collapse" : "Expand"} ${label} purchases`}
+      header={
+        <span className={`block truncate text-sm font-semibold lg:text-base ${colourSkyPlain}`}>
           {label}
         </span>
-        <ExpandChevron expanded={expanded} />
-      </button>
+      }
+    >
       {expanded && (
         <div className="space-y-2 border-t border-slate-700 p-2">
           <RankEntryList entries={entries} emptyText="" showKind={false} boxed />
         </div>
       )}
-    </section>
+    </AccordionCard>
   );
 }
 
@@ -1061,7 +1062,7 @@ export function ExperienceTab({
               return (
                 <article
                   key={entry.id}
-                  className="grid gap-2 rounded-lg border border-slate-700 bg-slate-950/30 p-3 sm:grid-cols-[auto_1fr_auto] sm:items-center"
+                  className={`${uiSection} grid gap-2 sm:grid-cols-[auto_1fr_auto] sm:items-center`}
                 >
                   <div
                     className={`font-code text-lg font-semibold ${
@@ -1174,64 +1175,63 @@ export function ExperienceTab({
                 <article
                   key={card.rankId}
                   aria-label={`${card.name} Rank Card`}
-                  className={`${uiSection} ${
-                    card.isCurrent ? "border-red-500/70 bg-red-950/10" : ""
-                  }`}
+                  className={card.isCurrent ? `${uiNoticeBox} ${colourNoticeRed}` : uiSectionShell}
                 >
-                  <header>
-                    <button
-                      type="button"
-                      aria-expanded={expanded}
-                      aria-controls={detailsId}
-                      aria-label={`${expanded ? "Collapse" : "Expand"} ${card.name} Rank Card`}
-                      onClick={() => toggleRankCard(card.rankId)}
-                      className="flex w-full flex-col gap-2 text-left sm:flex-row sm:items-start sm:justify-between"
-                    >
-                      <div className="min-w-0">
-                        <h3 className={`${uiItemName} text-lg text-red-500 lg:text-xl`}>
-                          {card.name}
-                        </h3>
-                        <div className="mt-1 flex flex-wrap gap-1.5">
-                          <Chip className={`${colourRank} font-code`}>Rank {card.tier}</Chip>
-                          <Chip className={`${colourValue} font-code`}>{card.xpLevel} XP</Chip>
-                          {card.isCurrent && <Chip className={colourEmerald}>Current</Chip>}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between gap-3 sm:justify-end">
-                        <div className="sm:text-right">
-                          <div className="text-xs uppercase tracking-wide text-slate-500 lg:text-sm">
-                            Card Spent
-                          </div>
-                          <div className="font-code text-xl text-slate-100 lg:text-2xl">
-                            {card.spentTotal} XP
+                  <AccordionCard
+                    shellClassName="rounded-lg"
+                    showChevron={false}
+                    expanded={expanded}
+                    onToggle={() => toggleRankCard(card.rankId)}
+                    aria-controls={detailsId}
+                    aria-label={`${expanded ? "Collapse" : "Expand"} ${card.name} Rank Card`}
+                    header={
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <h3 className={`${uiItemName} text-lg text-red-500 lg:text-xl`}>
+                            {card.name}
+                          </h3>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            <Chip className={`${colourRank} font-code`}>Rank {card.tier}</Chip>
+                            <Chip className={`${colourValue} font-code`}>{card.xpLevel} XP</Chip>
+                            {card.isCurrent && <Chip className={colourEmerald}>Current</Chip>}
                           </div>
                         </div>
-                        <ExpandChevron expanded={expanded} />
+                        <div className="flex items-center justify-between gap-3 sm:justify-end">
+                          <div className="sm:text-right">
+                            <div className="text-xs uppercase tracking-wide text-slate-500 lg:text-sm">
+                              Card Spent
+                            </div>
+                            <div className="font-code text-xl text-slate-100 lg:text-2xl">
+                              {card.spentTotal} XP
+                            </div>
+                          </div>
+                          <ExpandChevron expanded={expanded} />
+                        </div>
                       </div>
-                    </button>
-                  </header>
-
-                  {expanded && (
-                    <div id={detailsId} className="mt-4 space-y-4">
-                      {editable && card.titleChoice && (
-                        <RankTitleChoice
-                          careerName={
-                            card.titleChoice.includesCareerName ? card.careerRankName : undefined
-                          }
-                          options={card.titleChoice.options}
-                          value={
-                            card.titleChoice.options.includes(card.name)
-                              ? card.name
-                              : card.titleChoice.includesCareerName
-                                ? ""
-                                : card.titleChoice.options[0]
-                          }
-                          onChange={(title) => changeRankTitle(card, title)}
-                        />
-                      )}
-                      <RankDetailsSwitcher card={card} />
-                    </div>
-                  )}
+                    }
+                  >
+                    {expanded && (
+                      <div id={detailsId} className="space-y-4 p-3 pt-0 lg:p-4 lg:pt-0">
+                        {editable && card.titleChoice && (
+                          <RankTitleChoice
+                            careerName={
+                              card.titleChoice.includesCareerName ? card.careerRankName : undefined
+                            }
+                            options={card.titleChoice.options}
+                            value={
+                              card.titleChoice.options.includes(card.name)
+                                ? card.name
+                                : card.titleChoice.includesCareerName
+                                  ? ""
+                                  : card.titleChoice.options[0]
+                            }
+                            onChange={(title) => changeRankTitle(card, title)}
+                          />
+                        )}
+                        <RankDetailsSwitcher card={card} />
+                      </div>
+                    )}
+                  </AccordionCard>
                 </article>
               );
             })}

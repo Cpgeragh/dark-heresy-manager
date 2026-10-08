@@ -644,7 +644,7 @@ describe("BackgroundTab", () => {
     const user = userEvent.setup();
     renderTab({ header: { characterName: "Brother Corvus", gender: "Ecclesiarchy-blessed" } });
     await user.click(screen.getAllByRole("button", { name: "Change Gender" })[0]);
-    expect(screen.getByRole("button", { name: "Other" })).toHaveClass("bg-slate-800");
+    expect(screen.getByRole("button", { name: "Other" })).toHaveClass("!bg-slate-800");
     await user.click(screen.getByRole("button", { name: "Other" }));
     expect(screen.getByLabelText("Rename")).toHaveValue("Ecclesiarchy-blessed");
   });

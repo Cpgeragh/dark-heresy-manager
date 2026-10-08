@@ -35,14 +35,13 @@ import { ViewButton } from "../../ui/buttons/ViewButton";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
-import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import {
   editableInputClass,
   uiFormLabel,
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
-  uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
@@ -223,16 +222,11 @@ function PickerChoice({
   onClick: () => void;
 }) {
   return (
-    <PickerRow
-      card
-      className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
-      onClick={onClick}
-    >
-      <div className="min-w-0 flex-1">
+    <PickerRow trailing={<ArrowRight />} onClick={onClick}>
+      <div>
         <div className={uiItemName}>{label}</div>
         <p className={`mt-1 text-sm ${uiTextBody}`}>{description}</p>
       </div>
-      <ArrowRight />
     </PickerRow>
   );
 }
@@ -255,7 +249,7 @@ function EliteAdvanceKindPicker({
       isEmpty={false}
       hideSearch
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         <PickerChoice
           label="Special"
           description="Packaged Elite Advances such as Encarta Maleficarum."
@@ -271,7 +265,7 @@ function EliteAdvanceKindPicker({
           description="Talents, including Faith Talents, made available as Elite Advances."
           onClick={() => onChoose("talent")}
         />
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }
@@ -325,18 +319,16 @@ function SpecialAdvancePicker({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {filtered.map((advance) => {
           const alternateRankNames = getAlternateRankNames(advance);
           return (
             <PickerRow
               key={advance.id}
-              card
-              className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
               interactive={canAdd}
               onClick={() => canAdd && onSelect(advance)}
             >
-              <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
                   <span className={uiItemName}>{advance.name}</span>
                   <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
@@ -371,7 +363,7 @@ function SpecialAdvancePicker({
             </PickerRow>
           );
         })}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }
@@ -585,7 +577,7 @@ function SkillAdvancePicker({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {filtered.map(({ skill, level, option }) => {
           const replacedRank = option
             ? careerData?.ranks.find((entry) => entry.id === option.replacedRankId)
@@ -594,8 +586,6 @@ function SkillAdvancePicker({
           return (
             <PickerRow
               key={option?.key ?? skill.id}
-              card
-              className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
               interactive={canAdd}
               onClick={() => {
                 if (!canAdd) return;
@@ -625,7 +615,7 @@ function SkillAdvancePicker({
                 );
               }}
             >
-              <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="space-y-1.5">
                 <div className={uiItemName}>{skill.name}</div>
                 <div className="flex flex-wrap gap-1.5">
                   <Chip className={`bg-slate-800/40 font-code ${sourceColour(skill.source)}`}>
@@ -654,7 +644,7 @@ function SkillAdvancePicker({
             </PickerRow>
           );
         })}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }
@@ -736,7 +726,7 @@ function TalentAdvancePicker({
         </button>
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {filtered.map(({ option, talent }) => {
           const replacedRank = option.replacedRankId
             ? careerData?.ranks.find((entry) => entry.id === option.replacedRankId)
@@ -744,12 +734,10 @@ function TalentAdvancePicker({
           return (
             <PickerRow
               key={option.key}
-              card
-              className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
               interactive={editable}
               onClick={() => editable && onBuyFixed(option)}
             >
-              <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
                   <span className={uiItemName}>
                     {talent.name}
@@ -804,7 +792,7 @@ function TalentAdvancePicker({
             </PickerRow>
           );
         })}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

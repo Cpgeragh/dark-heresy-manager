@@ -7,7 +7,6 @@ import {
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
-  uiSectionShell,
   uiTextBody,
   uiTextLabel,
 } from "../../ui/styles/editableStyles";
@@ -22,7 +21,7 @@ import { colourAmberPlain } from "../../ui/styles/colourTokens";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { ExpandChevron } from "../../ui/icons/ExpandChevron";
+import { AccordionCard } from "../../ui/AccordionCard";
 import { normaliseSources } from "./talentUtils";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 
@@ -249,19 +248,16 @@ export function TalentGroupCard({
   recordComponentRender("TalentGroupCard");
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className={uiSectionShell + " overflow-hidden"}>
-      <button
-        type="button"
-        onClick={() => setExpanded((value) => !value)}
-        aria-expanded={expanded}
-        aria-label={`${expanded ? "Collapse" : "Expand"} ${name}`}
-        className="w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
-      >
-        <span className="flex-1 min-w-0 text-sm lg:text-base font-semibold text-slate-100 truncate">
+    <AccordionCard
+      expanded={expanded}
+      onToggle={() => setExpanded((value) => !value)}
+      aria-label={`${expanded ? "Collapse" : "Expand"} ${name}`}
+      header={
+        <span className="block truncate text-sm font-semibold text-slate-100 lg:text-base">
           {name}
         </span>
-        <ExpandChevron expanded={expanded} />
-      </button>
+      }
+    >
       {expanded && (
         <div className="border-t border-slate-700 space-y-2 p-2">
           {[...entries]
@@ -281,6 +277,6 @@ export function TalentGroupCard({
             ))}
         </div>
       )}
-    </div>
+    </AccordionCard>
   );
 }

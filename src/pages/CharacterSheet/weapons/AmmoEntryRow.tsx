@@ -11,6 +11,7 @@ import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import {
+  uiCell,
   uiInfoModalWrapper,
   uiItemName,
   uiTextBody,
@@ -65,7 +66,7 @@ export function AmmoEntryRow({
   const visibleClipSizeLabel = ammoTracking === "clip" ? clipSizeLabel : undefined;
 
   return (
-    <div className="rounded border border-slate-500 bg-slate-800/60 px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5">
+    <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5`}>
       {/* Name row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">

@@ -12,8 +12,7 @@ import { charColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/styles/colourTokens";
-import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
-import { uiSectionShell } from "../../../ui/styles/editableStyles";
+import { AccordionCard } from "../../../ui/AccordionCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface SkillGroupRowProps {
@@ -41,15 +40,12 @@ export function SkillGroupRow({
   const characteristics = getSkillGroupCharacteristics(skills);
 
   return (
-    <div className={uiSectionShell + " overflow-hidden"}>
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={expanded}
-        className="w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
-      >
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <span className="block text-sm lg:text-base font-semibold text-slate-100 truncate">
+    <AccordionCard
+      expanded={expanded}
+      onToggle={toggle}
+      header={
+        <div className="space-y-1.5">
+          <span className="block truncate text-sm font-semibold text-slate-100 lg:text-base">
             {category}
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -69,8 +65,8 @@ export function SkillGroupRow({
             )}
           </div>
         </div>
-        <ExpandChevron expanded={expanded} />
-      </button>
+      }
+    >
       {expanded && (
         <div className="border-t border-slate-700 space-y-2 p-2">
           {skills.map((skill) => (
@@ -86,6 +82,6 @@ export function SkillGroupRow({
           ))}
         </div>
       )}
-    </div>
+    </AccordionCard>
   );
 }

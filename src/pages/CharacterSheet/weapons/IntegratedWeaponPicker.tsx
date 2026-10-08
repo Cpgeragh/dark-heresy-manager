@@ -11,6 +11,7 @@ import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
@@ -19,8 +20,8 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
-  uiItemName,
   uiInfoModalWrapper,
+  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { colourViolet, colourSky, colourOrange } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
@@ -167,200 +168,63 @@ export function IntegratedWeaponPicker({
         ) : undefined
       }
     >
-      {[
-        ...ranged.map((ref) => ({
-          name: ref.name,
-          row: (
-            <PickerRow
-              key={ref.id}
-              interactive={editable}
-              onClick={() => setSelected({ kind: "ranged", ref })}
-            >
-              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-                {ref.name}
-              </span>
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                <Chip size="sm" className={colourViolet}>
-                  Integrated
-                </Chip>
-                <Chip size="sm" className={colourSky}>
-                  Ranged
-                </Chip>
-                <ItemMetaChips
-                  weight={ref.weight}
-                  value={ref.value}
-                  availability={ref.availability}
-                  source={ref.source}
-                />
-              </div>
-              <div
-                className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
-              >
-                <span>{ref.class}</span>
-                <span>{ref.range}</span>
-                <span>{ref.rof}</span>
-                <span>{ref.damage}</span>
-                <span>Pen {ref.pen}</span>
-                <span>Clip {ref.clip}</span>
-              </div>
-              {ref.specialRules && ref.specialRules !== "—" && (
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className={uiTextLabel}>Qualities</span>
-                  <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                    {ref.specialRules}
-                  </span>
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={`${ref.name} Qualities`}
-                      content={<SpecialRulesContent rules={ref.specialRules} />}
-                      as="span"
-                    />
-                  </span>
-                </div>
-              )}
-              {ref.description && (
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={uiTextLabel}>Rules</span>
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={ref.name}
-                      content={<SpecialRulesContent rules="" description={ref.description} />}
-                      as="span"
-                    />
-                  </span>
-                </div>
-              )}
-            </PickerRow>
-          ),
-        })),
-        ...melee.map((ref) => ({
-          name: ref.name,
-          row: (
-            <PickerRow
-              key={ref.id}
-              interactive={editable}
-              onClick={() => setSelected({ kind: "melee", ref })}
-            >
-              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-                {ref.name}
-              </span>
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                <Chip size="sm" className={colourViolet}>
-                  Integrated
-                </Chip>
-                <Chip size="sm" className={colourOrange}>
-                  Melee
-                </Chip>
-                <ItemMetaChips
-                  weight={ref.weight}
-                  value={ref.value}
-                  availability={ref.availability}
-                  source={ref.source}
-                />
-              </div>
-              <div
-                className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
-              >
-                <span>{ref.class}</span>
-                <span>{ref.damage}</span>
-                <span>Pen {ref.pen}</span>
-              </div>
-              {ref.specialRules && ref.specialRules !== "—" && (
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className={uiTextLabel}>Qualities</span>
-                  <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                    {ref.specialRules}
-                  </span>
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={`${ref.name} Qualities`}
-                      content={<SpecialRulesContent rules={ref.specialRules} />}
-                      as="span"
-                    />
-                  </span>
-                </div>
-              )}
-              {ref.description && (
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={uiTextLabel}>Rules</span>
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={ref.name}
-                      content={<SpecialRulesContent rules="" description={ref.description} />}
-                      as="span"
-                    />
-                  </span>
-                </div>
-              )}
-            </PickerRow>
-          ),
-        })),
-        ...custom.map((item) => {
-          const data = item.data;
-          if (data.weaponKind !== "ranged" && data.weaponKind !== "melee") {
-            return { name: item.name, row: null };
-          }
-          const isRanged = data.weaponKind === "ranged";
-          return {
-            name: item.name,
+      <PickerList>
+        {[
+          ...ranged.map((ref) => ({
+            name: ref.name,
             row: (
               <PickerRow
-                key={`custom-${item.id}`}
+                key={ref.id}
                 interactive={editable}
-                onClick={() => onSelectCustomItem?.(item)}
+                onClick={() => setSelected({ kind: "ranged", ref })}
               >
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-                    {item.name}
-                  </span>
-                  <StatusBadge status={item.status} />
-                </div>
+                <span className={uiItemNameHover}>{ref.name}</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   <Chip size="sm" className={colourViolet}>
                     Integrated
                   </Chip>
-                  <Chip size="sm" className={isRanged ? colourSky : colourOrange}>
-                    {isRanged ? "Ranged" : "Melee"}
+                  <Chip size="sm" className={colourSky}>
+                    Ranged
                   </Chip>
                   <ItemMetaChips
-                    weight={data.weight}
-                    value={data.value}
-                    availability={data.availability}
-                    source={data.source}
+                    weight={ref.weight}
+                    value={ref.value}
+                    availability={ref.availability}
+                    source={ref.source}
                   />
                 </div>
                 <div
                   className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
                 >
-                  <span>{data.class}</span>
-                  {isRanged && <span>{data.range}</span>}
-                  {isRanged && <span>{data.rof}</span>}
-                  <span>{data.damage}</span>
-                  <span>Pen {data.pen}</span>
-                  {isRanged && <span>Clip {data.clip}</span>}
+                  <span>{ref.class}</span>
+                  <span>{ref.range}</span>
+                  <span>{ref.rof}</span>
+                  <span>{ref.damage}</span>
+                  <span>Pen {ref.pen}</span>
+                  <span>Clip {ref.clip}</span>
                 </div>
-                {data.specialRules && data.specialRules !== "—" && (
+                {ref.specialRules && ref.specialRules !== "—" && (
                   <div className="flex items-center gap-1.5 mt-1">
                     <span className={uiTextLabel}>Qualities</span>
                     <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                      {data.specialRules}
+                      {ref.specialRules}
                     </span>
                     <span className={uiInfoModalWrapper}>
                       <InfoModal
-                        title={`${item.name} Qualities`}
-                        content={<SpecialRulesContent rules={data.specialRules} />}
+                        title={`${ref.name} Qualities`}
+                        content={<SpecialRulesContent rules={ref.specialRules} />}
                         as="span"
                       />
                     </span>
                   </div>
                 )}
-                {data.description && (
+                {ref.description && (
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className={uiTextLabel}>Rules</span>
                     <span className={uiInfoModalWrapper}>
                       <InfoModal
-                        title={item.name}
-                        content={<SpecialRulesContent rules="" description={data.description} />}
+                        title={ref.name}
+                        content={<SpecialRulesContent rules="" description={ref.description} />}
                         as="span"
                       />
                     </span>
@@ -368,11 +232,144 @@ export function IntegratedWeaponPicker({
                 )}
               </PickerRow>
             ),
-          };
-        }),
-      ]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((entry) => entry.row)}
+          })),
+          ...melee.map((ref) => ({
+            name: ref.name,
+            row: (
+              <PickerRow
+                key={ref.id}
+                interactive={editable}
+                onClick={() => setSelected({ kind: "melee", ref })}
+              >
+                <span className={uiItemNameHover}>{ref.name}</span>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  <Chip size="sm" className={colourViolet}>
+                    Integrated
+                  </Chip>
+                  <Chip size="sm" className={colourOrange}>
+                    Melee
+                  </Chip>
+                  <ItemMetaChips
+                    weight={ref.weight}
+                    value={ref.value}
+                    availability={ref.availability}
+                    source={ref.source}
+                  />
+                </div>
+                <div
+                  className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
+                >
+                  <span>{ref.class}</span>
+                  <span>{ref.damage}</span>
+                  <span>Pen {ref.pen}</span>
+                </div>
+                {ref.specialRules && ref.specialRules !== "—" && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className={uiTextLabel}>Qualities</span>
+                    <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+                      {ref.specialRules}
+                    </span>
+                    <span className={uiInfoModalWrapper}>
+                      <InfoModal
+                        title={`${ref.name} Qualities`}
+                        content={<SpecialRulesContent rules={ref.specialRules} />}
+                        as="span"
+                      />
+                    </span>
+                  </div>
+                )}
+                {ref.description && (
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className={uiTextLabel}>Rules</span>
+                    <span className={uiInfoModalWrapper}>
+                      <InfoModal
+                        title={ref.name}
+                        content={<SpecialRulesContent rules="" description={ref.description} />}
+                        as="span"
+                      />
+                    </span>
+                  </div>
+                )}
+              </PickerRow>
+            ),
+          })),
+          ...custom.map((item) => {
+            const data = item.data;
+            if (data.weaponKind !== "ranged" && data.weaponKind !== "melee") {
+              return { name: item.name, row: null };
+            }
+            const isRanged = data.weaponKind === "ranged";
+            return {
+              name: item.name,
+              row: (
+                <PickerRow
+                  key={`custom-${item.id}`}
+                  interactive={editable}
+                  onClick={() => onSelectCustomItem?.(item)}
+                >
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className={uiItemNameHover}>{item.name}</span>
+                    <StatusBadge status={item.status} />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    <Chip size="sm" className={colourViolet}>
+                      Integrated
+                    </Chip>
+                    <Chip size="sm" className={isRanged ? colourSky : colourOrange}>
+                      {isRanged ? "Ranged" : "Melee"}
+                    </Chip>
+                    <ItemMetaChips
+                      weight={data.weight}
+                      value={data.value}
+                      availability={data.availability}
+                      source={data.source}
+                    />
+                  </div>
+                  <div
+                    className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
+                  >
+                    <span>{data.class}</span>
+                    {isRanged && <span>{data.range}</span>}
+                    {isRanged && <span>{data.rof}</span>}
+                    <span>{data.damage}</span>
+                    <span>Pen {data.pen}</span>
+                    {isRanged && <span>Clip {data.clip}</span>}
+                  </div>
+                  {data.specialRules && data.specialRules !== "—" && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className={uiTextLabel}>Qualities</span>
+                      <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+                        {data.specialRules}
+                      </span>
+                      <span className={uiInfoModalWrapper}>
+                        <InfoModal
+                          title={`${item.name} Qualities`}
+                          content={<SpecialRulesContent rules={data.specialRules} />}
+                          as="span"
+                        />
+                      </span>
+                    </div>
+                  )}
+                  {data.description && (
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={uiTextLabel}>Rules</span>
+                      <span className={uiInfoModalWrapper}>
+                        <InfoModal
+                          title={item.name}
+                          content={<SpecialRulesContent rules="" description={data.description} />}
+                          as="span"
+                        />
+                      </span>
+                    </div>
+                  )}
+                </PickerRow>
+              ),
+            };
+          }),
+        ]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((entry) => entry.row)}
+      </PickerList>
     </PickerModal>
   );
 }

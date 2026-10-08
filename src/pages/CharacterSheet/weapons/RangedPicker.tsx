@@ -11,10 +11,10 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   uiCardTitle,
   uiInfoModalWrapper,
-  uiItemName,
   uiSectionShell,
   uiTextBody,
   uiTextMuted,
+  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
@@ -24,6 +24,7 @@ import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
@@ -410,81 +411,81 @@ export function RangedPicker({
         ) : undefined
       }
     >
-      {pickerEntries.map((entry) => {
-        if (entry.kind === "reference") {
-          const weaponReference = entry.weaponReference;
-          return (
-            <RangedWeaponCardPickerRow
-              key={weaponReference.id}
-              weaponReference={weaponReference}
-              editable={editable}
-              onSelect={() => setSelected(weaponReference)}
-            />
-          );
-        }
-        const item = entry.item;
-        const data = item.data;
-        if (data.weaponKind !== "ranged") return null;
-        return (
-          <PickerRow
-            key={item.id}
-            interactive={editable}
-            onClick={() => onSelectCustomItem?.(item)}
-          >
-            <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-              {item.name}
-            </span>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {data.range && <StatChip size="sm" label="Range" value={data.range} />}
-              {data.rof && <StatChip size="sm" label="ROF" value={data.rof} />}
-              {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
-              {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
-              {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
-              {data.clip && <StatChip size="sm" label="Clip" value={data.clip} />}
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {(() => {
-                const c = weaponClassChip(data.class);
-                return c ? (
-                  <Chip size="sm" className={c.active}>
-                    {c.label}
-                  </Chip>
-                ) : null;
-              })()}
-              {(() => {
-                const t = weaponTypeChip(data.type);
-                return t ? (
-                  <Chip size="sm" className={t.className}>
-                    {t.label}
-                  </Chip>
-                ) : null;
-              })()}
-              {(() => {
-                const f = ammoFamilyChip(data.ammoType);
-                return f ? (
-                  <Chip size="sm" className={f.className}>
-                    {f.label}
-                  </Chip>
-                ) : null;
-              })()}
-              {item.status === "draft" && (
-                <Chip size="sm" className={colourAmberFaint}>
-                  Draft
-                </Chip>
-              )}
-              <Chip size="sm" className={colourFuchsia}>
-                Custom
-              </Chip>
-              <ItemMetaChips
-                weight={data.weight}
-                value={data.value}
-                availability={data.availability}
-                source={data.source}
+      <PickerList>
+        {pickerEntries.map((entry) => {
+          if (entry.kind === "reference") {
+            const weaponReference = entry.weaponReference;
+            return (
+              <RangedWeaponCardPickerRow
+                key={weaponReference.id}
+                weaponReference={weaponReference}
+                editable={editable}
+                onSelect={() => setSelected(weaponReference)}
               />
-            </div>
-          </PickerRow>
-        );
-      })}
+            );
+          }
+          const item = entry.item;
+          const data = item.data;
+          if (data.weaponKind !== "ranged") return null;
+          return (
+            <PickerRow
+              key={item.id}
+              interactive={editable}
+              onClick={() => onSelectCustomItem?.(item)}
+            >
+              <span className={uiItemNameHover}>{item.name}</span>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {data.range && <StatChip size="sm" label="Range" value={data.range} />}
+                {data.rof && <StatChip size="sm" label="ROF" value={data.rof} />}
+                {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
+                {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
+                {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+                {data.clip && <StatChip size="sm" label="Clip" value={data.clip} />}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {(() => {
+                  const c = weaponClassChip(data.class);
+                  return c ? (
+                    <Chip size="sm" className={c.active}>
+                      {c.label}
+                    </Chip>
+                  ) : null;
+                })()}
+                {(() => {
+                  const t = weaponTypeChip(data.type);
+                  return t ? (
+                    <Chip size="sm" className={t.className}>
+                      {t.label}
+                    </Chip>
+                  ) : null;
+                })()}
+                {(() => {
+                  const f = ammoFamilyChip(data.ammoType);
+                  return f ? (
+                    <Chip size="sm" className={f.className}>
+                      {f.label}
+                    </Chip>
+                  ) : null;
+                })()}
+                {item.status === "draft" && (
+                  <Chip size="sm" className={colourAmberFaint}>
+                    Draft
+                  </Chip>
+                )}
+                <Chip size="sm" className={colourFuchsia}>
+                  Custom
+                </Chip>
+                <ItemMetaChips
+                  weight={data.weight}
+                  value={data.value}
+                  availability={data.availability}
+                  source={data.source}
+                />
+              </div>
+            </PickerRow>
+          );
+        })}
+      </PickerList>
     </PickerModal>
   );
 }

@@ -20,12 +20,12 @@ import {
   editableInputClass,
   uiFormLabel,
   uiInfoModalWrapper,
-  uiItemName,
   uiTextBody,
   uiTextLabel,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
-import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
@@ -157,7 +157,7 @@ export function TraitAcquisitionModal({
         hideSearch
         isEmpty={false}
       >
-        <PickerBody>
+        <PickerList>
           {SANCTIONING_RESULTS.map((result) => (
             <PickerRow
               key={result.id}
@@ -168,7 +168,7 @@ export function TraitAcquisitionModal({
               }}
               selected={result.id === sanctionResultId}
             >
-              <span className={`${uiItemName} group-hover:text-white`}>{result.name}</span>
+              <span className={uiItemNameHover}>{result.name}</span>
               <div className="mt-1 flex flex-wrap gap-1.5">
                 <RollChip>{result.roll}</RollChip>
               </div>
@@ -180,7 +180,7 @@ export function TraitAcquisitionModal({
               </div>
             </PickerRow>
           ))}
-        </PickerBody>
+        </PickerList>
       </PickerModal>
     );
   }
@@ -277,13 +277,12 @@ export function TraitAcquisitionModal({
               Choose exactly three Lore or Trade Skills. The selected Skills count as Trained and
               gain +10 while this imprint remains active.
             </p>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {eligibleBlankSkills.map((skill) => {
                 const selected = blankSkills.includes(skill.id);
                 return (
                   <PickerRow
                     key={skill.id}
-                    card
                     interactive
                     onClick={() =>
                       setBlankSkills((current) =>

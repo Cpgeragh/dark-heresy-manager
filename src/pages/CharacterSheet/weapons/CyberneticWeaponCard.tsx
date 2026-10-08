@@ -7,6 +7,7 @@ import type { WeaponCraftsmanship } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import {
+  uiNoticeBox,
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
@@ -14,7 +15,7 @@ import {
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
 import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourPink, colourOrange } from "../../../ui/styles/colourTokens";
+import { colourNoticePink, colourPink, colourOrange } from "../../../ui/styles/colourTokens";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
@@ -51,7 +52,7 @@ export function CyberneticWeaponCard({
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="border border-pink-500/60 bg-pink-900/10 rounded-lg overflow-hidden">
+    <div className={`${uiNoticeBox} ${colourNoticePink} overflow-hidden`}>
       <button
         type="button"
         className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"

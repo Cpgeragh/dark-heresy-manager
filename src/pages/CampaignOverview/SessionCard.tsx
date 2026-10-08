@@ -150,7 +150,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
 
   if (mode === "edit") {
     return (
-      <div className="border border-red-700/40 rounded p-4 lg:p-5 bg-slate-900/60 space-y-4">
+      <div className={`${uiSection} space-y-4`}>
         <SectionHeader as="h3">Edit Session</SectionHeader>
 
         <div className="grid grid-cols-2 gap-4">

@@ -19,7 +19,13 @@ import {
   colourMetadataLabelText,
   colourSkyPlain,
 } from "../ui/styles/colourTokens";
-import { editableInputClass, uiInfoModalWrapper } from "../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  uiCodeBox,
+  uiCodeText,
+  uiInfoModalWrapper,
+  uiSection,
+} from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { ManageDevicesButton } from "../ui/buttons/ManageDevicesButton";
 import { ViewButton } from "../ui/buttons/ViewButton";
@@ -399,10 +405,8 @@ export default function Settings({
             }
           >
             <PickerBody>
-              <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 text-center">
-                <span className="font-code [font-feature-settings:'zero'] text-lg lg:text-xl text-white tracking-widest break-all select-all">
-                  {revealedCode}
-                </span>
+              <div className={uiCodeBox}>
+                <span className={uiCodeText}>{revealedCode}</span>
               </div>
               <p className={`text-xs lg:text-sm ${colourAmberPlain} text-center`}>
                 If anyone else may have seen this code, rotate it now to invalidate it.
@@ -490,10 +494,7 @@ export default function Settings({
           >
             <PickerBody>
               {devices.map((device) => (
-                <div
-                  key={device.uid}
-                  className="rounded-lg border border-slate-700 bg-slate-900/40 p-3"
-                >
+                <div key={device.uid} className={uiSection}>
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-slate-100">

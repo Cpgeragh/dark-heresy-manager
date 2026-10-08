@@ -3,6 +3,7 @@
 import React, { Component } from "react";
 import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
+import { uiSection } from "../ui/styles/editableStyles";
 
 interface Props {
   children: ReactNode;
@@ -93,7 +94,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
 
         {/* Error Details (Dev Only) */}
         {isDev && error && (
-          <div className="bg-slate-900 border border-slate-700 rounded p-4 space-y-2">
+          <div className={`${uiSection} space-y-2`}>
             <div className="text-xs font-mono text-red-400 font-semibold">{error.name}</div>
             <div className="text-xs font-mono text-slate-300">{error.message}</div>
             {error.stack && (

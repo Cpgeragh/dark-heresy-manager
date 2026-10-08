@@ -31,10 +31,7 @@ import {
   getGrantedExoticWeapons,
   getGrantedWeaponTrainingIds,
 } from "../../mechanics/talents/talentEffects";
-import {
-  EXOTIC_TRAINING_ACTIVE_STYLE,
-  EXOTIC_TRAINING_INACTIVE_STYLE,
-} from "./exoticWeaponTrainingStyles";
+import { colourGlowActive, colourGlowInactive } from "../../ui/styles/colourTokens";
 import { ExoticCustomWeaponButton } from "./ExoticCustomWeaponButton";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 
@@ -55,20 +52,12 @@ const WEAPON_TRAINING_GROUP_RGB: Record<string, string> = {
   "Thrown Weapon Training": "251,191,36", // amber-400
 };
 
-const WEAPON_TRAINING_GROUP_ACTIVE_STYLE: Record<string, string> = {
-  "Basic Weapon Training": "border-teal-500/60 bg-teal-950/50 text-teal-300 font-semibold",
-  "Heavy Weapon Training": "border-violet-500/60 bg-violet-950/50 text-violet-300 font-semibold",
-  "Melee Weapon Training": "border-orange-500/60 bg-orange-950/50 text-orange-300 font-semibold",
-  "Pistol Training": "border-sky-500/60 bg-sky-950/50 text-sky-300 font-semibold",
-  "Thrown Weapon Training": "border-amber-500/60 bg-amber-950/50 text-amber-300 font-semibold",
-};
-
-const WEAPON_TRAINING_GROUP_INACTIVE_STYLE: Record<string, string> = {
-  "Basic Weapon Training": "border-teal-700/50 bg-teal-950/15 text-teal-400/50",
-  "Heavy Weapon Training": "border-violet-700/50 bg-violet-950/15 text-violet-400/50",
-  "Melee Weapon Training": "border-orange-700/50 bg-orange-950/15 text-orange-400/50",
-  "Pistol Training": "border-sky-700/50 bg-sky-950/15 text-sky-400/50",
-  "Thrown Weapon Training": "border-amber-700/50 bg-amber-950/15 text-amber-400/50",
+const WEAPON_TRAINING_GROUP_COLOUR: Record<string, keyof typeof colourGlowActive> = {
+  "Basic Weapon Training": "teal",
+  "Heavy Weapon Training": "violet",
+  "Melee Weapon Training": "orange",
+  "Pistol Training": "sky",
+  "Thrown Weapon Training": "amber",
 };
 
 const EXOTIC_WEAPON_TRAINING_RGB = "232,121,249";
@@ -327,8 +316,8 @@ export function WeaponTrainingTab({
                     pulsing ? "animate-psy-pulse" : ""
                   } ${
                     active
-                      ? `${WEAPON_TRAINING_GROUP_ACTIVE_STYLE[group.label]} ${clickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`
-                      : `${WEAPON_TRAINING_GROUP_INACTIVE_STYLE[group.label]} ${clickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`
+                      ? `${colourGlowActive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`
+                      : `${colourGlowInactive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`
                   }`}
                 >
                   {display}
@@ -366,7 +355,7 @@ export function WeaponTrainingTab({
               disabled={!editable}
               onClick={() => setPendingRemoveExotic({ index, name: weapon.name })}
               aria-label={`Remove ${weapon.name}`}
-              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${EXOTIC_TRAINING_ACTIVE_STYLE} ${
+              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${
                 editable ? "hover:bg-slate-800" : "cursor-not-allowed"
               }`}
             >
@@ -378,7 +367,7 @@ export function WeaponTrainingTab({
               key={`granted:${index}:${weapon}`}
               type="button"
               disabled
-              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${EXOTIC_TRAINING_ACTIVE_STYLE} cursor-not-allowed`}
+              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourGlowActive.fuchsia} cursor-not-allowed`}
             >
               {weapon}
             </button>
@@ -392,7 +381,7 @@ export function WeaponTrainingTab({
               aria-pressed="false"
               aria-label={`${entry.name}, ${entry.purchase.cost} XP`}
               style={weaponTrainingPulseVars(EXOTIC_WEAPON_TRAINING_RGB)}
-              className={`animate-psy-pulse px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${EXOTIC_TRAINING_INACTIVE_STYLE} ${
+              className={`animate-psy-pulse px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${colourGlowInactive.fuchsia} ${
                 editable ? "hover:bg-slate-800" : "cursor-not-allowed"
               }`}
             >

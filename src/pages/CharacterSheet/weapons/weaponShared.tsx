@@ -5,20 +5,22 @@ import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules
 import { Button } from "../../../ui/buttons/Button";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
+import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
-import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { ArrowRight } from "../../../ui/icons/PickerArrows";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { CloseIcon } from "../../../ui/buttons/CloseButton";
 import {
+  uiCell,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
   uiFormLabel,
   uiInfoModalWrapper,
-  uiItemName,
+  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { colourEmerald, colourMeta } from "../../../ui/styles/colourTokens";
@@ -106,21 +108,8 @@ export function WeaponQualitySelector({
 export function DamageTypeChip({ damage, size = "md" }: { damage: string; size?: "sm" | "md" }) {
   const damageType = parseDamageType(damage);
   if (!damageType) return null;
-  if (size === "sm") {
-    return (
-      <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-1.5 py-0.5 min-w-[32px] lg:min-w-[38px]">
-        <span className={uiTextLabel}>Type</span>
-        <span className={`text-xs font-code mt-0.5 ${damageType.colour}`}>{damageType.label}</span>
-      </div>
-    );
-  }
   return (
-    <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5 min-w-[36px] lg:min-w-[44px]">
-      <span className={uiTextLabel}>Type</span>
-      <span className={`text-xs lg:text-sm font-code mt-0.5 ${damageType.colour}`}>
-        {damageType.label}
-      </span>
-    </div>
+    <StatChip label="Type" value={damageType.label} size={size} valueColour={damageType.colour} />
   );
 }
 
@@ -205,7 +194,7 @@ export function UpgradeCard({
   const displayedWeightModifier = formatWeightModifier(upgrade.weightModifier);
 
   return (
-    <div className="bg-slate-800/60 rounded border border-slate-500 px-2 lg:px-3 py-1.5 lg:py-2">
+    <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2`}>
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         {editable && (
@@ -273,29 +262,33 @@ export function UpgradePicker({
         </Button>
       }
     >
-      {compatibleUpgrades.map((upgrade) => (
-        <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <span className={`${uiItemName} group-hover:text-white`}>{upgrade.name}</span>
-            <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-              <Chip className={colourMeta}>
-                <span className="leading-none">{"\u2696"}</span>
-                <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
-              </Chip>
-              <ItemMetaChips
-                value={upgrade.value}
-                availability={upgrade.availability}
-                source={upgrade.source}
-                bare
-              />
+      <PickerList>
+        {compatibleUpgrades.map((upgrade) => (
+          <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span className={uiItemNameHover}>{upgrade.name}</span>
+              <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
+                <Chip className={colourMeta}>
+                  <span className="leading-none">{"\u2696"}</span>
+                  <span className="leading-none">
+                    {formatWeightModifier(upgrade.weightModifier)}
+                  </span>
+                </Chip>
+                <ItemMetaChips
+                  value={upgrade.value}
+                  availability={upgrade.availability}
+                  source={upgrade.source}
+                  bare
+                />
+              </div>
             </div>
-          </div>
-          <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
-            {upgrade.description}
-          </p>
-          <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
-        </PickerRow>
-      ))}
+            <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
+              {upgrade.description}
+            </p>
+            <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
+          </PickerRow>
+        ))}
+      </PickerList>
     </PickerModal>
   );
 }

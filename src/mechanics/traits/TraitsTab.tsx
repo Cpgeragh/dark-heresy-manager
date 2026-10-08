@@ -15,13 +15,8 @@ import { getActiveTraitEntries } from "./traitEffects";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../ui/SectionHeader";
-import { ExpandChevron } from "../../ui/icons/ExpandChevron";
-import {
-  uiItemName,
-  uiSection,
-  uiSectionShell,
-  uiTextPlaceholder,
-} from "../../ui/styles/editableStyles";
+import { AccordionCard } from "../../ui/AccordionCard";
+import { uiItemName, uiSection, uiTextPlaceholder } from "../../ui/styles/editableStyles";
 import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
 import { CustomTraitForm } from "./CustomTraitForm";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
@@ -99,23 +94,18 @@ function UnnaturalCharacteristicCards({
   if (groups.length === 1) return renderCharacteristic(groups[0]);
 
   return (
-    <div className={`${uiSectionShell} w-full overflow-hidden`}>
-      <button
-        type="button"
-        onClick={() => setExpanded((value) => !value)}
-        aria-expanded={expanded}
-        aria-label={`${expanded ? "Collapse" : "Expand"} Unnatural Characteristic`}
-        className="w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
-      >
-        <span className={`flex-1 min-w-0 truncate ${uiItemName}`}>Unnatural Characteristic</span>
-        <ExpandChevron expanded={expanded} />
-      </button>
+    <AccordionCard
+      expanded={expanded}
+      onToggle={() => setExpanded((value) => !value)}
+      aria-label={`${expanded ? "Collapse" : "Expand"} Unnatural Characteristic`}
+      header={<span className={`block truncate ${uiItemName}`}>Unnatural Characteristic</span>}
+    >
       {expanded && (
         <div className="border-t border-slate-700 space-y-2 p-2">
           {groups.map(renderCharacteristic)}
         </div>
       )}
-    </div>
+    </AccordionCard>
   );
 }
 

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { uiPickerBackButton } from "../../ui/styles/buttonStyles";
-import { editableInputClass, uiFormLabel, uiItemName } from "../../ui/styles/editableStyles";
-import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { editableInputClass, uiFormLabel, uiItemNameHover } from "../../ui/styles/editableStyles";
+import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 
 const GENDER_OPTIONS = ["Male", "Female", "Other"] as const;
 
@@ -82,18 +82,20 @@ export function GenderPicker({
       hideSearch
       isEmpty={false}
     >
-      {GENDER_OPTIONS.map((option) => {
-        const rowSelected = option === "Other" ? isCustomGender(selected) : selected === option;
-        return (
-          <PickerRow
-            key={option}
-            selected={rowSelected}
-            onClick={() => (option === "Other" ? setNaming(true) : onSelect(option))}
-          >
-            <span className={`${uiItemName} group-hover:text-white`}>{option}</span>
-          </PickerRow>
-        );
-      })}
+      <PickerList>
+        {GENDER_OPTIONS.map((option) => {
+          const rowSelected = option === "Other" ? isCustomGender(selected) : selected === option;
+          return (
+            <PickerRow
+              key={option}
+              selected={rowSelected}
+              onClick={() => (option === "Other" ? setNaming(true) : onSelect(option))}
+            >
+              <span className={uiItemNameHover}>{option}</span>
+            </PickerRow>
+          );
+        })}
+      </PickerList>
     </PickerModal>
   );
 }

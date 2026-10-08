@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { uiPickerBackButton } from "../../ui/styles/buttonStyles";
-import { editableInputClass, uiFormLabel, uiItemName } from "../../ui/styles/editableStyles";
-import { PickerBody, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { editableInputClass, uiFormLabel, uiItemNameHover } from "../../ui/styles/editableStyles";
+import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 
 function qualifierOf(base: string, value?: string): string {
   const prefix = `${base} (`;
@@ -95,29 +95,31 @@ export function AppearanceTraitPicker({
       hideSearch
       isEmpty={false}
     >
-      {sorted.map((option) => {
-        const isAny = option.endsWith("(any)");
-        const base = option.replace(" (any)", "");
-        const rowSelected = isAny
-          ? selected === option || qualifierOf(base, selected) !== ""
-          : selected === option;
-        return (
-          <PickerRow
-            key={option}
-            selected={rowSelected}
-            onClick={() => {
-              if (!isAny) {
-                onSelect(option);
-                return;
-              }
-              setQualifier(qualifierOf(base, selected));
-              setQualifying(option);
-            }}
-          >
-            <span className={`${uiItemName} group-hover:text-white`}>{option}</span>
-          </PickerRow>
-        );
-      })}
+      <PickerList>
+        {sorted.map((option) => {
+          const isAny = option.endsWith("(any)");
+          const base = option.replace(" (any)", "");
+          const rowSelected = isAny
+            ? selected === option || qualifierOf(base, selected) !== ""
+            : selected === option;
+          return (
+            <PickerRow
+              key={option}
+              selected={rowSelected}
+              onClick={() => {
+                if (!isAny) {
+                  onSelect(option);
+                  return;
+                }
+                setQualifier(qualifierOf(base, selected));
+                setQualifying(option);
+              }}
+            >
+              <span className={uiItemNameHover}>{option}</span>
+            </PickerRow>
+          );
+        })}
+      </PickerList>
     </PickerModal>
   );
 }

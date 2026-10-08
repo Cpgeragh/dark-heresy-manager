@@ -10,6 +10,7 @@ import {
   type PsychicPowerRef,
 } from "../../../data/reference/psychicReference";
 import { uiSection, uiFormLabel, uiItemName } from "../../../ui/styles/editableStyles";
+import { colourGlowActive } from "../../../ui/styles/colourTokens";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
@@ -113,18 +114,10 @@ function PowerRouteCard({
   onClick: () => void;
 }) {
   return (
-    <PickerRow
-      card
-      aria-label={title}
-      className="rounded-lg border border-slate-500 bg-slate-900/60"
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-3">
-        <div className="min-w-0 flex-1 space-y-2">
-          <p className={uiItemName}>{title}</p>
-          <Chip className={statusClassName}>{status}</Chip>
-        </div>
-        <ArrowRight />
+    <PickerRow aria-label={title} trailing={<ArrowRight />} onClick={onClick}>
+      <div className="space-y-2">
+        <p className={uiItemName}>{title}</p>
+        <Chip className={statusClassName}>{status}</Chip>
       </div>
     </PickerRow>
   );
@@ -563,7 +556,7 @@ export function PsychicTab({
           <span className={uiFormLabel}>Psy Rating</span>
           <div className="relative inline-flex">
             <div
-              className={`w-[26px] h-[26px] flex items-center justify-center rounded border border-indigo-500/50 bg-indigo-950/40 transition-shadow${
+              className={`w-[26px] h-[26px] flex items-center justify-center rounded border ${colourGlowActive.indigo} transition-shadow${
                 psyRating > 0 ? " animate-psy-pulse" : ""
               }`}
               style={psyRatingPulseVars(psyRating)}

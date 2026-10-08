@@ -7,8 +7,13 @@ import {
   type ConsumableRef,
 } from "../../../data/reference/consumablesReference";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
-import { uiTextBody, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  PickerCustomAction,
+  PickerList,
+  PickerModal,
+  PickerRow,
+} from "../../../ui/pickers/PickerModal";
+import { uiTextBody, uiInfoModalWrapper, uiItemNameHover } from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -62,78 +67,76 @@ export function ConsumablePicker({
         ) : undefined
       }
     >
-      {pickerEntries.map((entry) =>
-        entry.kind === "custom" ? (
-          <PickerRow
-            key={`custom-${entry.item.id}`}
-            interactive={editable}
-            onClick={() => onSelectCustomItem?.(entry.item)}
-          >
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span
-                className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
-              >
-                {entry.item.name}
-              </span>
-              <StatusBadge status={entry.item.status} />
-              {entry.item.data.description && (
-                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                  <InfoModal
-                    title={entry.item.name}
-                    content={
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {entry.item.data.description}
-                      </p>
-                    }
-                    as="span"
-                  />
-                </span>
-              )}
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-              <ItemMetaChips
-                bare
-                weight={entry.item.data.weight}
-                value={entry.item.data.value}
-                availability={entry.item.data.availability}
-                source={entry.item.data.source}
-              />
-            </div>
-          </PickerRow>
-        ) : (
-          <PickerRow key={entry.ref.id} interactive={editable} onClick={() => onSelect(entry.ref)}>
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span
-                className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
-              >
-                {entry.ref.name}
-              </span>
-              {entry.ref.description && (
-                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                  <InfoModal
-                    title={entry.ref.name}
-                    content={
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {entry.ref.description}
-                      </p>
-                    }
-                    as="span"
-                  />
-                </span>
-              )}
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-              <ItemMetaChips
-                bare
-                weight={entry.ref.weight}
-                value={entry.ref.value}
-                availability={entry.ref.availability}
-                source={entry.ref.source}
-              />
-            </div>
-          </PickerRow>
-        )
-      )}
+      <PickerList>
+        {pickerEntries.map((entry) =>
+          entry.kind === "custom" ? (
+            <PickerRow
+              key={`custom-${entry.item.id}`}
+              interactive={editable}
+              onClick={() => onSelectCustomItem?.(entry.item)}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className={`${uiItemNameHover} truncate`}>{entry.item.name}</span>
+                <StatusBadge status={entry.item.status} />
+                {entry.item.data.description && (
+                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                    <InfoModal
+                      title={entry.item.name}
+                      content={
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {entry.item.data.description}
+                        </p>
+                      }
+                      as="span"
+                    />
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                <ItemMetaChips
+                  bare
+                  weight={entry.item.data.weight}
+                  value={entry.item.data.value}
+                  availability={entry.item.data.availability}
+                  source={entry.item.data.source}
+                />
+              </div>
+            </PickerRow>
+          ) : (
+            <PickerRow
+              key={entry.ref.id}
+              interactive={editable}
+              onClick={() => onSelect(entry.ref)}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className={`${uiItemNameHover} truncate`}>{entry.ref.name}</span>
+                {entry.ref.description && (
+                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                    <InfoModal
+                      title={entry.ref.name}
+                      content={
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                          {entry.ref.description}
+                        </p>
+                      }
+                      as="span"
+                    />
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                <ItemMetaChips
+                  bare
+                  weight={entry.ref.weight}
+                  value={entry.ref.value}
+                  availability={entry.ref.availability}
+                  source={entry.ref.source}
+                />
+              </div>
+            </PickerRow>
+          )
+        )}
+      </PickerList>
     </PickerModal>
   );
 }

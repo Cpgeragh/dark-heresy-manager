@@ -9,7 +9,7 @@ import {
 import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
 import { Button } from "../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
-import { uiTextBody } from "../ui/styles/editableStyles";
+import { uiSection, uiTextBody } from "../ui/styles/editableStyles";
 import { colourAmberPlain } from "../ui/styles/colourTokens";
 import { recordComponentRender } from "../performance/performanceMetrics";
 
@@ -143,7 +143,7 @@ export function CharacteristicField({
 
   return (
     <>
-      <div className="mb-4 p-3 lg:p-4 border border-slate-700 rounded-md bg-slate-900/60">
+      <div className={`${uiSection} mb-4`}>
         {!hideLabel && <div className="font-semibold lg:text-lg mb-1">{label}</div>}
 
         {/* Base value */}

@@ -11,7 +11,8 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { uiTextBody, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { uiNoticeBox, uiTextBody, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { colourNoticeViolet } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
@@ -268,7 +269,7 @@ export function DrugsTab({
     <div className="space-y-6">
       {/* Excessive Drug Use rule */}
       <div
-        className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}
+        className={`${uiNoticeBox} ${colourNoticeViolet} p-3 lg:p-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}
       >
         <p className="font-semibold text-violet-400 uppercase tracking-wide">Excessive Drug Use</p>
         <p className="mt-1">

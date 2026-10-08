@@ -5,12 +5,13 @@ import type { HomeworldData } from "../../data/reference/homeworldData";
 import { Chip } from "../../ui/chips/Chip";
 import {
   uiInfoModalWrapper,
-  uiItemName,
+  uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
-import { PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 
 function InfoSection({ title, content }: { title: string; content: string }) {
@@ -80,10 +81,7 @@ export function CareerInfoContent({
           <p className={`${uiTextLabel} font-semibold mb-2`}>{career.specialTable.title}</p>
           <div className="space-y-2">
             {career.specialTable.rows.map((row) => (
-              <div
-                key={row.result}
-                className="rounded border border-slate-700 bg-slate-950/50 px-3 py-2"
-              >
+              <div key={row.result} className={`${uiSectionShell} px-3 py-2`}>
                 <p className="text-xs lg:text-sm font-code text-sky-300 mb-1">{row.result}</p>
                 <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{row.effect}</p>
               </div>
@@ -140,29 +138,31 @@ export function CareerPicker({
       onClose={onClose}
       isEmpty={careers.length === 0}
     >
-      {careers.map((career) => (
-        <PickerRow
-          key={career.id}
-          selected={career.name === selected}
-          onClick={() => onSelect(career)}
-        >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`${uiItemName} group-hover:text-white`}>{career.name}</span>
-            <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
-              <InfoModal
-                title={career.name}
-                content={<CareerInfoContent career={career} homeworld={homeworld} />}
-                as="span"
-              />
-            </span>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
-              {career.source}
-            </Chip>
-          </div>
-        </PickerRow>
-      ))}
+      <PickerList>
+        {careers.map((career) => (
+          <PickerRow
+            key={career.id}
+            selected={career.name === selected}
+            onClick={() => onSelect(career)}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className={uiItemNameHover}>{career.name}</span>
+              <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
+                <InfoModal
+                  title={career.name}
+                  content={<CareerInfoContent career={career} homeworld={homeworld} />}
+                  as="span"
+                />
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
+                {career.source}
+              </Chip>
+            </div>
+          </PickerRow>
+        ))}
+      </PickerList>
     </PickerModal>
   );
 }

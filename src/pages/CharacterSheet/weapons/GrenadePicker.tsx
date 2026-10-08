@@ -9,10 +9,15 @@ import {
   uiTextLabel,
   uiTextMuted,
   uiInfoModalWrapper,
-  uiItemName,
+  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import {
+  PickerCustomAction,
+  PickerList,
+  PickerModal,
+  PickerRow,
+} from "../../../ui/pickers/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import {
@@ -72,39 +77,121 @@ export function GrenadePicker({
         ) : undefined
       }
     >
-      {[
-        ...filteredCustomLibraryItems.map((item) => {
-          const data = item.data;
-          if (data.weaponKind !== "grenade") return { name: item.name, row: null };
-          return {
-            name: item.name,
+      <PickerList>
+        {[
+          ...filteredCustomLibraryItems.map((item) => {
+            const data = item.data;
+            if (data.weaponKind !== "grenade") return { name: item.name, row: null };
+            return {
+              name: item.name,
+              row: (
+                <PickerRow
+                  key={`custom-${item.id}`}
+                  interactive={editable}
+                  onClick={() => onSelectCustom?.(item)}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className={uiItemNameHover}>{item.name}</span>
+                    <StatusBadge status={item.status} />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    <Chip
+                      size="sm"
+                      className={
+                        data.type === "Mine"
+                          ? colourViolet
+                          : data.type === "Missile"
+                            ? colourOrange
+                            : colourCyan
+                      }
+                    >
+                      {data.type ?? "Grenade"}
+                    </Chip>
+                    {(() => {
+                      const c = weaponClassChip(data.class);
+                      return c ? (
+                        <Chip
+                          size="sm"
+                          className={c.label === "Exotic" ? colourTealLight : c.active}
+                        >
+                          {c.label}
+                        </Chip>
+                      ) : null;
+                    })()}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {data.type !== "Mine" && data.type !== "Missile" && (
+                      <StatChip size="sm" label="Range" value={thrownRange} />
+                    )}
+                    {data.damage && data.damage !== "—" && (
+                      <StatChip size="sm" label="Dmg" value={data.damage} />
+                    )}
+                    {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
+                    {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    <ItemMetaChips
+                      weight={data.weight}
+                      value={data.value}
+                      availability={data.availability}
+                      source={data.source}
+                    />
+                  </div>
+                  {data.specialRules && data.specialRules !== "—" && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className={uiTextLabel}>Qualities</span>
+                      <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+                        {data.specialRules}
+                      </span>
+                      <span className={uiInfoModalWrapper}>
+                        <InfoModal
+                          title={`${data.name} Qualities`}
+                          content={<SpecialRulesContent rules={data.specialRules} />}
+                          as="span"
+                        />
+                      </span>
+                    </div>
+                  )}
+                  {data.description && (
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={uiTextLabel}>Rules</span>
+                      <span className={uiInfoModalWrapper}>
+                        <InfoModal
+                          title={data.name}
+                          content={
+                            <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                              {data.description}
+                            </p>
+                          }
+                          as="span"
+                        />
+                      </span>
+                    </div>
+                  )}
+                </PickerRow>
+              ),
+            };
+          }),
+          ...filtered.map((ref) => ({
+            name: ref.name,
             row: (
-              <PickerRow
-                key={`custom-${item.id}`}
-                interactive={editable}
-                onClick={() => onSelectCustom?.(item)}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-                    {item.name}
-                  </span>
-                  <StatusBadge status={item.status} />
-                </div>
+              <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
+                <span className={uiItemNameHover}>{ref.name}</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   <Chip
                     size="sm"
                     className={
-                      data.type === "Mine"
+                      ref.type === "Mine"
                         ? colourViolet
-                        : data.type === "Missile"
+                        : ref.type === "Missile"
                           ? colourOrange
                           : colourCyan
                     }
                   >
-                    {data.type ?? "Grenade"}
+                    {ref.type ?? "Grenade"}
                   </Chip>
                   {(() => {
-                    const c = weaponClassChip(data.class);
+                    const c = weaponClassChip(ref.class);
                     return c ? (
                       <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>
                         {c.label}
@@ -113,47 +200,45 @@ export function GrenadePicker({
                   })()}
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-1">
-                  {data.type !== "Mine" && data.type !== "Missile" && (
+                  {ref.type !== "Mine" && ref.type !== "Missile" && (
                     <StatChip size="sm" label="Range" value={thrownRange} />
                   )}
-                  {data.damage && data.damage !== "—" && (
-                    <StatChip size="sm" label="Dmg" value={data.damage} />
-                  )}
-                  {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
-                  {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+                  {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}
+                  <DamageTypeChip size="sm" damage={ref.damage} />
+                  <StatChip size="sm" label="Pen" value={ref.pen} />
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   <ItemMetaChips
-                    weight={data.weight}
-                    value={data.value}
-                    availability={data.availability}
-                    source={data.source}
+                    weight={ref.weight}
+                    value={ref.value}
+                    availability={ref.availability}
+                    source={ref.source}
                   />
                 </div>
-                {data.specialRules && data.specialRules !== "—" && (
+                {ref.specialRules && ref.specialRules !== "—" && (
                   <div className="flex items-center gap-1.5 mt-1">
                     <span className={uiTextLabel}>Qualities</span>
                     <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                      {data.specialRules}
+                      {ref.specialRules}
                     </span>
                     <span className={uiInfoModalWrapper}>
                       <InfoModal
-                        title={`${data.name} Qualities`}
-                        content={<SpecialRulesContent rules={data.specialRules} />}
+                        title={`${ref.name} Qualities`}
+                        content={<SpecialRulesContent rules={ref.specialRules} />}
                         as="span"
                       />
                     </span>
                   </div>
                 )}
-                {data.description && (
+                {ref.description && (
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className={uiTextLabel}>Rules</span>
                     <span className={uiInfoModalWrapper}>
                       <InfoModal
-                        title={data.name}
+                        title={ref.name}
                         content={
                           <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                            {data.description}
+                            {ref.description}
                           </p>
                         }
                         as="span"
@@ -163,90 +248,11 @@ export function GrenadePicker({
                 )}
               </PickerRow>
             ),
-          };
-        }),
-        ...filtered.map((ref) => ({
-          name: ref.name,
-          row: (
-            <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-                {ref.name}
-              </span>
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                <Chip
-                  size="sm"
-                  className={
-                    ref.type === "Mine"
-                      ? colourViolet
-                      : ref.type === "Missile"
-                        ? colourOrange
-                        : colourCyan
-                  }
-                >
-                  {ref.type ?? "Grenade"}
-                </Chip>
-                {(() => {
-                  const c = weaponClassChip(ref.class);
-                  return c ? (
-                    <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>
-                      {c.label}
-                    </Chip>
-                  ) : null;
-                })()}
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                {ref.type !== "Mine" && ref.type !== "Missile" && (
-                  <StatChip size="sm" label="Range" value={thrownRange} />
-                )}
-                {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}
-                <DamageTypeChip size="sm" damage={ref.damage} />
-                <StatChip size="sm" label="Pen" value={ref.pen} />
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                <ItemMetaChips
-                  weight={ref.weight}
-                  value={ref.value}
-                  availability={ref.availability}
-                  source={ref.source}
-                />
-              </div>
-              {ref.specialRules && ref.specialRules !== "—" && (
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className={uiTextLabel}>Qualities</span>
-                  <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                    {ref.specialRules}
-                  </span>
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={`${ref.name} Qualities`}
-                      content={<SpecialRulesContent rules={ref.specialRules} />}
-                      as="span"
-                    />
-                  </span>
-                </div>
-              )}
-              {ref.description && (
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={uiTextLabel}>Rules</span>
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={ref.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {ref.description}
-                        </p>
-                      }
-                      as="span"
-                    />
-                  </span>
-                </div>
-              )}
-            </PickerRow>
-          ),
-        })),
-      ]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((entry) => entry.row)}
+          })),
+        ]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((entry) => entry.row)}
+      </PickerList>
     </PickerModal>
   );
 }

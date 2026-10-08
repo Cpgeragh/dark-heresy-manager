@@ -6,7 +6,7 @@ import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { InfoModal } from "../../components/InfoModal";
 import { ItemMetaChips } from "../../ui/chips/ItemMetaChips";
-import { PickerModal } from "../../ui/pickers/PickerModal";
+import { PickerList, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { StatChip } from "../../ui/chips/StatChip";
@@ -22,6 +22,7 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { SKILL_DESCRIPTIONS } from "../../data/reference/skillDescriptions";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
@@ -74,9 +75,7 @@ function CompanionPickerCard({
         />
         <div className={`${uiExpandButton} relative pointer-events-none flex items-center gap-2`}>
           <div className="flex items-center gap-1.5">
-            <span className={`${uiItemName} group-hover:text-white`}>
-              {companionReference.name}
-            </span>
+            <span className={uiItemNameHover}>{companionReference.name}</span>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
               <InfoModal
                 title={companionReference.name}
@@ -144,13 +143,15 @@ function CompanionPicker({
         </Button>
       }
     >
-      {available.map((companionReference) => (
-        <CompanionPickerCard
-          key={companionReference.id}
-          companionReference={companionReference}
-          onSelect={editable ? () => onSelect(companionReference) : undefined}
-        />
-      ))}
+      <PickerList>
+        {available.map((companionReference) => (
+          <CompanionPickerCard
+            key={companionReference.id}
+            companionReference={companionReference}
+            onSelect={editable ? () => onSelect(companionReference) : undefined}
+          />
+        ))}
+      </PickerList>
     </PickerModal>
   );
 }

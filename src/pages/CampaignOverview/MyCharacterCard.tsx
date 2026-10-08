@@ -8,6 +8,7 @@ import { revealRecoveryCode } from "../../services/characterService";
 import { useToast } from "../../components/Toast";
 import type { CharacterListItem } from "../../types/Firestore";
 import { LoadingDots } from "../../ui/LoadingDots";
+import { uiSection } from "../../ui/styles/editableStyles";
 
 export function MyCharacterCard({
   character,
@@ -42,7 +43,7 @@ export function MyCharacterCard({
   return (
     <Link
       to={buildRoute.characterSheet(campaignId, character.id)}
-      className="border border-slate-700 rounded-lg p-4 bg-slate-900/60 block hover:bg-slate-800 transition-colors"
+      className={`${uiSection} block hover:bg-slate-800 transition-colors`}
     >
       <div className="flex items-center gap-3">
         <div onClick={(e) => e.stopPropagation()}>

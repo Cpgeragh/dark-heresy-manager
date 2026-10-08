@@ -11,10 +11,11 @@ import {
   editableTextareaClass,
   uiTextMuted,
   uiFormLabel,
+  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
-import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { ITEM_TYPES, type ItemType } from "./archeotechConstants";
@@ -199,20 +200,20 @@ export function CustomArcheotechForm({
         hideSearch
         maxHeight="max-h-[92vh]"
       >
-        {ITEM_TYPES.map((t) => (
-          <PickerRow
-            key={t}
-            onClick={() => {
-              setSelectedType(t);
-              setPhase("details");
-            }}
-          >
-            <p className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
-              {t}
-            </p>
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>{TYPE_DESCRIPTIONS[t]}</p>
-          </PickerRow>
-        ))}
+        <PickerList>
+          {ITEM_TYPES.map((t) => (
+            <PickerRow
+              key={t}
+              onClick={() => {
+                setSelectedType(t);
+                setPhase("details");
+              }}
+            >
+              <p className={uiItemNameHover}>{t}</p>
+              <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>{TYPE_DESCRIPTIONS[t]}</p>
+            </PickerRow>
+          ))}
+        </PickerList>
       </PickerModal>
     );
   }

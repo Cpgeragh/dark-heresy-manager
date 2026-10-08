@@ -1,8 +1,8 @@
 // src/ui/pickers/OptionPickerScreen.tsx
 
-import { PickerModal, PickerRow } from "./PickerModal";
+import { PickerList, PickerModal, PickerRow } from "./PickerModal";
 import { ArrowLeft } from "../icons/PickerArrows";
-import { uiItemName } from "../styles/editableStyles";
+import { uiItemNameHover } from "../styles/editableStyles";
 import { Chip } from "../chips/Chip";
 import { colourAmberFaint, colourRank, colourValue } from "../styles/colourTokens";
 
@@ -43,40 +43,42 @@ export function OptionPickerScreen({
       isEmpty={false}
       hideSearch
     >
-      {options.map((option) => {
-        const value = typeof option === "string" ? option : option.value;
-        const label = typeof option === "string" ? option : option.label;
-        const owned = typeof option === "string" ? false : option.owned;
-        const ownedCount = typeof option === "string" ? undefined : option.ownedCount;
-        const cost = typeof option === "string" ? undefined : option.cost;
-        const rankChips = typeof option === "string" ? undefined : option.rankChips;
-        return (
-          <PickerRow key={value} onClick={() => onSelect(value)} selected={value === selected}>
-            <span className="flex w-full flex-col gap-1.5">
-              <span className="flex w-full items-center justify-between gap-3">
-                <span className={`${uiItemName} group-hover:text-white`}>{label}</span>
-                <span className="flex shrink-0 items-center gap-1.5">
-                  {cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
-                  {ownedCount !== undefined && ownedCount > 0 ? (
-                    <Chip className={colourAmberFaint}>Owned: {ownedCount}</Chip>
-                  ) : owned ? (
-                    <Chip className={colourAmberFaint}>Owned</Chip>
-                  ) : null}
+      <PickerList>
+        {options.map((option) => {
+          const value = typeof option === "string" ? option : option.value;
+          const label = typeof option === "string" ? option : option.label;
+          const owned = typeof option === "string" ? false : option.owned;
+          const ownedCount = typeof option === "string" ? undefined : option.ownedCount;
+          const cost = typeof option === "string" ? undefined : option.cost;
+          const rankChips = typeof option === "string" ? undefined : option.rankChips;
+          return (
+            <PickerRow key={value} onClick={() => onSelect(value)} selected={value === selected}>
+              <span className="flex w-full flex-col gap-1.5">
+                <span className="flex w-full items-center justify-between gap-3">
+                  <span className={uiItemNameHover}>{label}</span>
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    {cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
+                    {ownedCount !== undefined && ownedCount > 0 ? (
+                      <Chip className={colourAmberFaint}>Owned: {ownedCount}</Chip>
+                    ) : owned ? (
+                      <Chip className={colourAmberFaint}>Owned</Chip>
+                    ) : null}
+                  </span>
                 </span>
+                {rankChips && rankChips.length > 0 && (
+                  <span className="flex flex-wrap gap-1.5">
+                    {rankChips.map((rank) => (
+                      <Chip key={rank} size="sm" className={`${colourRank} font-code`}>
+                        {rank}
+                      </Chip>
+                    ))}
+                  </span>
+                )}
               </span>
-              {rankChips && rankChips.length > 0 && (
-                <span className="flex flex-wrap gap-1.5">
-                  {rankChips.map((rank) => (
-                    <Chip key={rank} size="sm" className={`${colourRank} font-code`}>
-                      {rank}
-                    </Chip>
-                  ))}
-                </span>
-              )}
-            </span>
-          </PickerRow>
-        );
-      })}
+            </PickerRow>
+          );
+        })}
+      </PickerList>
     </PickerModal>
   );
 }

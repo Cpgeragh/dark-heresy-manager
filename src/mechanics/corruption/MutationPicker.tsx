@@ -9,6 +9,7 @@ import { OriginSelector } from "../../ui/forms/OriginSelector";
 import {
   PickerBody,
   PickerCustomAction,
+  PickerList,
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
@@ -19,9 +20,8 @@ import {
   editableInputClass,
   editableTextareaClass,
   uiInfoModalWrapper,
-  uiItemName,
-  uiSectionShell,
   uiTextLabel,
+  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
 import { MAJOR_MUTATIONS, MINOR_MUTATIONS, type MutationRef } from "./mutationsReference";
@@ -221,12 +221,10 @@ export function MutationPicker({
         )
       }
     >
-      <div className="space-y-3 p-3 lg:p-4">
+      <PickerList>
         {filtered.map((ref) => (
           <PickerRow
             key={ref.id}
-            card
-            className={uiSectionShell}
             interactive={editable}
             onClick={() => {
               if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
@@ -237,7 +235,7 @@ export function MutationPicker({
               }
             }}
           >
-            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <span className={uiItemNameHover}>{ref.name}</span>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <RollChip>{ref.roll}</RollChip>
             </div>
@@ -253,7 +251,7 @@ export function MutationPicker({
             </div>
           </PickerRow>
         ))}
-      </div>
+      </PickerList>
     </PickerModal>
   );
 }

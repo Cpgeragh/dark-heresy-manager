@@ -20,7 +20,7 @@ import { colourMeta, colourRank } from "../../../ui/styles/colourTokens";
 import { RollChip } from "../../../ui/chips/RollChip";
 import { sourceColour } from "../../../ui/styles/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
-import { uiInfoModalWrapper, uiItemName } from "../../../ui/styles/editableStyles";
+import { uiInfoModalWrapper, uiItemName, uiItemNameHover } from "../../../ui/styles/editableStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { CareerInfoContent, CareerPicker, RankInfoContent } from "../CareerPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "../HomeworldPicker";
@@ -28,7 +28,7 @@ import { TraitAcquisitionModal } from "../../../mechanics/traits/TraitAcquisitio
 import { homeworldNeedsTraitAcquisition } from "../../../mechanics/traits/traitEffects";
 import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
 import { HomeworldTraitAcquisitionModal } from "../HomeworldTraitAcquisitionModal";
-import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 
 export interface BackgroundSetupFieldsProps {
   header: CharacterHeader;
@@ -466,23 +466,25 @@ export function BackgroundSetupFields({
           isEmpty={false}
           hideSearch
         >
-          <PickerRow
-            selected={!selectedAdvanceScheme}
-            aria-pressed={!selectedAdvanceScheme}
-            onClick={() => handleAdvanceSchemeSelect()}
-          >
-            <span className={`${uiItemName} group-hover:text-white`}>{selectedRank.name}</span>
-          </PickerRow>
-          {startingAdvanceSchemes.map((rank) => (
+          <PickerList>
             <PickerRow
-              key={rank.id}
-              selected={selectedAdvanceScheme?.id === rank.id}
-              aria-pressed={selectedAdvanceScheme?.id === rank.id}
-              onClick={() => handleAdvanceSchemeSelect(rank.id)}
+              selected={!selectedAdvanceScheme}
+              aria-pressed={!selectedAdvanceScheme}
+              onClick={() => handleAdvanceSchemeSelect()}
             >
-              <span className={`${uiItemName} group-hover:text-white`}>{rank.name}</span>
+              <span className={uiItemNameHover}>{selectedRank.name}</span>
             </PickerRow>
-          ))}
+            {startingAdvanceSchemes.map((rank) => (
+              <PickerRow
+                key={rank.id}
+                selected={selectedAdvanceScheme?.id === rank.id}
+                aria-pressed={selectedAdvanceScheme?.id === rank.id}
+                onClick={() => handleAdvanceSchemeSelect(rank.id)}
+              >
+                <span className={uiItemNameHover}>{rank.name}</span>
+              </PickerRow>
+            ))}
+          </PickerList>
         </PickerModal>
       )}
 
@@ -495,24 +497,26 @@ export function BackgroundSetupFields({
           isEmpty={false}
           hideSearch
         >
-          <p className="px-3 py-2 text-sm text-slate-300 lg:text-base">
-            Roll 1d5 and select the result.
-          </p>
-          {[1, 2, 3, 4, 5].map((value) => (
-            <PickerRow
-              key={value}
-              selected={false}
-              aria-pressed={false}
-              onClick={() => {
-                commitAdvanceSchemeSelect(pendingAdvanceSchemeId, value);
-                setPendingAdvanceSchemeId(null);
-              }}
-            >
-              <span className={`${uiItemName} group-hover:text-white`}>
-                {value} Insanity {value === 1 ? "Point" : "Points"}
-              </span>
-            </PickerRow>
-          ))}
+          <PickerList>
+            <p className="px-3 py-2 text-sm text-slate-300 lg:text-base">
+              Roll 1d5 and select the result.
+            </p>
+            {[1, 2, 3, 4, 5].map((value) => (
+              <PickerRow
+                key={value}
+                selected={false}
+                aria-pressed={false}
+                onClick={() => {
+                  commitAdvanceSchemeSelect(pendingAdvanceSchemeId, value);
+                  setPendingAdvanceSchemeId(null);
+                }}
+              >
+                <span className={uiItemNameHover}>
+                  {value} Insanity {value === 1 ? "Point" : "Points"}
+                </span>
+              </PickerRow>
+            ))}
+          </PickerList>
         </PickerModal>
       )}
 

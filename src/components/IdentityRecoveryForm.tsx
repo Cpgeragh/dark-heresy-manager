@@ -15,7 +15,6 @@ interface IdentityRecoveryFormProps {
   inputLabelAside?: ReactNode;
   checkLabel?: string;
   onLinked?: () => void | Promise<void>;
-  showFinishingStatus?: boolean;
 }
 
 function recoveryErrorMessage(message: string): string {
@@ -32,7 +31,6 @@ export function IdentityRecoveryForm({
   inputLabelAside,
   checkLabel = "Continue",
   onLinked,
-  showFinishingStatus = false,
 }: IdentityRecoveryFormProps) {
   const toast = useToast();
   const lastErrorRef = useRef<string | null>(null);
@@ -104,12 +102,6 @@ export function IdentityRecoveryForm({
       >
         {checkLabel}
       </Button>
-
-      {showFinishingStatus && flow.phase === "finishing" && (
-        <p className="text-emerald-300 text-sm lg:text-base text-center" role="status">
-          Loading your account…
-        </p>
-      )}
     </form>
   );
 }
