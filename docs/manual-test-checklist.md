@@ -1239,6 +1239,24 @@ Use a Cleric approaching Rank 4 and a separate Cleric who has already selected B
 
 **Watch for:** the replaced rank must not leak into the normal missed-rank list early. Direct Skill and Talent purchases belong on their normal pages, while only packaged advances remain on Elite Advances.
 
+## 35. Shared Card and Picker Layout
+
+The same kind of element looks and behaves the same in every picker and card.
+
+### How to test this system
+
+Open each picker with the sheet editable, and again read-only where a View button exists. Repeat in a narrow window and a wide one, with a mouse for the hover checks.
+
+- [ ] In the Gear, Consumables, Drugs, Cybernetics, Archeotech, Weapons, Armour and Force Field pickers, each row shows the name, then a row of chips, then any description line, with the same small gap above each part (`PickerRowParts.tsx`)
+- [ ] Hovering a row in an editable picker turns its name white and lightens its box together; in a read-only View picker neither changes (`PickerRow` in `PickerModal.tsx`)
+- [ ] A long item name wraps onto a second line with its info icon beside it, and no name is cut with an ellipsis
+- [ ] Pressing the info icon on any row opens its pop-up and does not select the row
+- [ ] The weapon and armour Add upgrade pickers show each upgrade's name, chips and description, with no "applies to" line
+- [ ] The Ammo picker and the option lists on custom forms show costs, availability and Owned tags in a chip row below the name, never to the right of it (`AmmoPicker.tsx`, `OptionPickerScreen.tsx`)
+- [ ] The Talents, Traits, Skills, Elite Advances and Psychic route rows use the same spacing, and their prerequisite lines match the grey of other description lines
+- [ ] Expanding cards, which are talent and trait groups, skill groups, the XP rank card, career purchase groups and Archeotech items with a description, expand and collapse from the header, show the lighter hover and the press effect, and keep their opened content inside the same card (`AccordionCard.tsx`)
+- [ ] No text in the app appears in italics
+
 ## Coverage notes
 
 This checklist covers the 21 character-sheet sections, the cross-cutting systems, and the app-shell pages outside the character sheet. Sections 21–33 cover systems and pages such as Dashboard, Onboarding, Settings, Campaign Overview and Messages. Section 34 covers the added Elite Advance and Alternate Rank flow.

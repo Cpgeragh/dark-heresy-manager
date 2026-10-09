@@ -16,16 +16,10 @@ import type {
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
-import {
-  editableInputClass,
-  uiFormLabel,
-  uiInfoModalWrapper,
-  uiTextBody,
-  uiTextLabel,
-  uiItemNameHover,
-} from "../../ui/styles/editableStyles";
+import { editableInputClass, uiFormLabel, uiTextBody } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
@@ -168,16 +162,14 @@ export function TraitAcquisitionModal({
               }}
               selected={result.id === sanctionResultId}
             >
-              <span className={uiItemNameHover}>{result.name}</span>
-              <div className="mt-1 flex flex-wrap gap-1.5">
+              <PickerRowName name={result.name} />
+              <PickerRowChips>
                 <RollChip>{result.roll}</RollChip>
-              </div>
-              <div className="mt-1 flex items-center gap-1.5">
-                <span className={uiTextLabel}>Rules</span>
-                <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
-                  <InfoModal title={result.name} content={result.effect} as="span" />
-                </span>
-              </div>
+              </PickerRowChips>
+              <PickerRowInfoLine
+                label="Rules"
+                info={<InfoModal title={result.name} content={result.effect} as="span" />}
+              />
             </PickerRow>
           ))}
         </PickerList>
@@ -294,8 +286,7 @@ export function TraitAcquisitionModal({
                       )
                     }
                   >
-                    <span className="flex-1">{skill.name}</span>
-                    {selected && <Chip>Selected</Chip>}
+                    <PickerRowName name={skill.name} badges={selected && <Chip>Selected</Chip>} />
                   </PickerRow>
                 );
               })}

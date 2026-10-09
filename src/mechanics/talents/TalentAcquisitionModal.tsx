@@ -35,6 +35,7 @@ import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPi
 import { PickerField } from "../../ui/pickers/PickerField";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
 import { getGrantedTalentEntries, getGrantedWeaponTrainingIds } from "./talentEffects";
 import { getPurityFatePoints, getPurityRemovalInventory } from "./purityOfFlesh";
 import { getPsyRatingAcquisitionGrants } from "./talentUtils";
@@ -535,17 +536,17 @@ export function TalentAcquisitionModal({
                   )
                 }
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className={uiTextBody}>{item.name}</p>
-                    <p className={uiTextSubtle}>{item.kind}</p>
-                  </div>
-                  {selected && (
-                    <Chip size="sm" className={colourAmberFaint}>
-                      Life-critical
-                    </Chip>
-                  )}
-                </div>
+                <PickerRowName
+                  name={item.name}
+                  badges={
+                    selected && (
+                      <Chip size="sm" className={colourAmberFaint}>
+                        Life-critical
+                      </Chip>
+                    )
+                  }
+                />
+                <PickerRowText>{item.kind}</PickerRowText>
               </PickerRow>
             );
           })}

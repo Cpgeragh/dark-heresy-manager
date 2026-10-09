@@ -11,11 +11,12 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { Button } from "../../../ui/buttons/Button";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { uiTextMuted, uiTextBody, uiItemNameHover } from "../../../ui/styles/editableStyles";
+import { uiTextMuted, uiTextBody } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -144,19 +145,19 @@ export function ArmourPicker({
             const ref = entry.ref;
             return (
               <PickerRow key={ref.id} interactive={editable} onClick={() => setSelected(ref)}>
-                <span className={uiItemNameHover}>{ref.name}</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <PickerRowName name={ref.name} />
+                <PickerRowChips>
                   <StatChip size="sm" label="AP" value={apBreakdown(ref)} />
                   <StatChip size="sm" label="Location" value={locationLabel(ref.locations)} />
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                </PickerRowChips>
+                <PickerRowChips>
                   <ItemMetaChips
                     weight={ref.weight}
                     value={ref.value}
                     availability={ref.availability}
                     source={ref.source}
                   />
-                </div>
+                </PickerRowChips>
               </PickerRow>
             );
           }
@@ -170,12 +171,12 @@ export function ArmourPicker({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(item)}
             >
-              <span className={uiItemNameHover}>{item.name}</span>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+              <PickerRowName name={item.name} />
+              <PickerRowChips>
                 <StatChip size="sm" label="AP" value={apBreakdown(data)} />
                 <StatChip size="sm" label="Location" value={locationLabel(data.locations)} />
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+              </PickerRowChips>
+              <PickerRowChips>
                 {item.status === "draft" && (
                   <Chip size="sm" className={colourAmberFaint}>
                     Draft
@@ -190,7 +191,7 @@ export function ArmourPicker({
                   availability={data.availability}
                   source={data.source}
                 />
-              </div>
+              </PickerRowChips>
             </PickerRow>
           );
         })}

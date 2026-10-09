@@ -10,9 +10,9 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
-  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 
@@ -116,22 +116,22 @@ export function HomeworldPicker({
             selected={homeworld.id === selected}
             onClick={() => onSelect(homeworld)}
           >
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className={uiItemNameHover}>{homeworld.name}</span>
-              <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
+            <PickerRowName
+              name={homeworld.name}
+              info={
                 <InfoModal
                   title={homeworld.name}
                   content={<HomeworldInfoContent homeworld={homeworld} />}
                   as="span"
                 />
-              </span>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              }
+            />
+            <PickerRowChips>
               <RollChip>{homeworld.roll}</RollChip>
               <Chip className={`bg-slate-800/40 font-code ${sourceColour(homeworld.source)}`}>
                 {homeworld.source}
               </Chip>
-            </div>
+            </PickerRowChips>
           </PickerRow>
         ))}
       </PickerList>

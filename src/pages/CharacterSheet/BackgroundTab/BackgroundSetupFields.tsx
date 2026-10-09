@@ -20,7 +20,7 @@ import { colourMeta, colourRank } from "../../../ui/styles/colourTokens";
 import { RollChip } from "../../../ui/chips/RollChip";
 import { sourceColour } from "../../../ui/styles/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
-import { uiInfoModalWrapper, uiItemName, uiItemNameHover } from "../../../ui/styles/editableStyles";
+import { uiInfoModalWrapper, uiItemName } from "../../../ui/styles/editableStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { CareerInfoContent, CareerPicker, RankInfoContent } from "../CareerPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "../HomeworldPicker";
@@ -29,6 +29,7 @@ import { homeworldNeedsTraitAcquisition } from "../../../mechanics/traits/traitE
 import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
 import { HomeworldTraitAcquisitionModal } from "../HomeworldTraitAcquisitionModal";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerRowName } from "../../../ui/pickers/PickerRowParts";
 
 export interface BackgroundSetupFieldsProps {
   header: CharacterHeader;
@@ -472,7 +473,7 @@ export function BackgroundSetupFields({
               aria-pressed={!selectedAdvanceScheme}
               onClick={() => handleAdvanceSchemeSelect()}
             >
-              <span className={uiItemNameHover}>{selectedRank.name}</span>
+              <PickerRowName name={selectedRank.name} />
             </PickerRow>
             {startingAdvanceSchemes.map((rank) => (
               <PickerRow
@@ -481,7 +482,7 @@ export function BackgroundSetupFields({
                 aria-pressed={selectedAdvanceScheme?.id === rank.id}
                 onClick={() => handleAdvanceSchemeSelect(rank.id)}
               >
-                <span className={uiItemNameHover}>{rank.name}</span>
+                <PickerRowName name={rank.name} />
               </PickerRow>
             ))}
           </PickerList>
@@ -511,9 +512,7 @@ export function BackgroundSetupFields({
                   setPendingAdvanceSchemeId(null);
                 }}
               >
-                <span className={uiItemNameHover}>
-                  {value} Insanity {value === 1 ? "Point" : "Points"}
-                </span>
+                <PickerRowName name={`${value} Insanity ${value === 1 ? "Point" : "Points"}`} />
               </PickerRow>
             ))}
           </PickerList>

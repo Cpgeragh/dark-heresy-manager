@@ -14,7 +14,6 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextMuted,
-  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
@@ -28,6 +27,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowRight, ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -433,16 +433,16 @@ export function RangedPicker({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(item)}
             >
-              <span className={uiItemNameHover}>{item.name}</span>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+              <PickerRowName name={item.name} />
+              <PickerRowChips>
                 {data.range && <StatChip size="sm" label="Range" value={data.range} />}
                 {data.rof && <StatChip size="sm" label="ROF" value={data.rof} />}
                 {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
                 {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
                 {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
                 {data.clip && <StatChip size="sm" label="Clip" value={data.clip} />}
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+              </PickerRowChips>
+              <PickerRowChips>
                 {(() => {
                   const c = weaponClassChip(data.class);
                   return c ? (
@@ -481,7 +481,7 @@ export function RangedPicker({
                   availability={data.availability}
                   source={data.source}
                 />
-              </div>
+              </PickerRowChips>
             </PickerRow>
           );
         })}

@@ -15,14 +15,13 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import {
-  uiTextBody,
-  uiTextLabel,
-  uiTextMuted,
-  uiInfoModalWrapper,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+  PickerRowChips,
+  PickerRowInfoLine,
+  PickerRowName,
+} from "../../../ui/pickers/PickerRowParts";
+import { ArrowLeft } from "../../../ui/icons/PickerArrows";
+import { uiTextBody, uiTextMuted } from "../../../ui/styles/editableStyles";
 import { colourViolet, colourSky, colourOrange } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { SpecialRulesContent } from "./weaponShared";
@@ -178,8 +177,8 @@ export function IntegratedWeaponPicker({
                 interactive={editable}
                 onClick={() => setSelected({ kind: "ranged", ref })}
               >
-                <span className={uiItemNameHover}>{ref.name}</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <PickerRowName name={ref.name} />
+                <PickerRowChips>
                   <Chip size="sm" className={colourViolet}>
                     Integrated
                   </Chip>
@@ -192,43 +191,40 @@ export function IntegratedWeaponPicker({
                     availability={ref.availability}
                     source={ref.source}
                   />
-                </div>
-                <div
-                  className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
-                >
+                </PickerRowChips>
+                <PickerRowChips className={`text-xs lg:text-sm ${uiTextBody} font-code`}>
                   <span>{ref.class}</span>
                   <span>{ref.range}</span>
                   <span>{ref.rof}</span>
                   <span>{ref.damage}</span>
                   <span>Pen {ref.pen}</span>
                   <span>Clip {ref.clip}</span>
-                </div>
+                </PickerRowChips>
                 {ref.specialRules && ref.specialRules !== "—" && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className={uiTextLabel}>Qualities</span>
-                    <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                      {ref.specialRules}
-                    </span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Qualities"
+                    info={
                       <InfoModal
                         title={`${ref.name} Qualities`}
                         content={<SpecialRulesContent rules={ref.specialRules} />}
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  >
+                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
+                  </PickerRowInfoLine>
                 )}
                 {ref.description && (
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={uiTextLabel}>Rules</span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Rules"
+                    info={
                       <InfoModal
                         title={ref.name}
                         content={<SpecialRulesContent rules="" description={ref.description} />}
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  />
                 )}
               </PickerRow>
             ),
@@ -241,8 +237,8 @@ export function IntegratedWeaponPicker({
                 interactive={editable}
                 onClick={() => setSelected({ kind: "melee", ref })}
               >
-                <span className={uiItemNameHover}>{ref.name}</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <PickerRowName name={ref.name} />
+                <PickerRowChips>
                   <Chip size="sm" className={colourViolet}>
                     Integrated
                   </Chip>
@@ -255,40 +251,37 @@ export function IntegratedWeaponPicker({
                     availability={ref.availability}
                     source={ref.source}
                   />
-                </div>
-                <div
-                  className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
-                >
+                </PickerRowChips>
+                <PickerRowChips className={`text-xs lg:text-sm ${uiTextBody} font-code`}>
                   <span>{ref.class}</span>
                   <span>{ref.damage}</span>
                   <span>Pen {ref.pen}</span>
-                </div>
+                </PickerRowChips>
                 {ref.specialRules && ref.specialRules !== "—" && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className={uiTextLabel}>Qualities</span>
-                    <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                      {ref.specialRules}
-                    </span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Qualities"
+                    info={
                       <InfoModal
                         title={`${ref.name} Qualities`}
                         content={<SpecialRulesContent rules={ref.specialRules} />}
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  >
+                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
+                  </PickerRowInfoLine>
                 )}
                 {ref.description && (
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={uiTextLabel}>Rules</span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Rules"
+                    info={
                       <InfoModal
                         title={ref.name}
                         content={<SpecialRulesContent rules="" description={ref.description} />}
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  />
                 )}
               </PickerRow>
             ),
@@ -307,11 +300,8 @@ export function IntegratedWeaponPicker({
                   interactive={editable}
                   onClick={() => onSelectCustomItem?.(item)}
                 >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className={uiItemNameHover}>{item.name}</span>
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
+                  <PickerRowChips>
                     <Chip size="sm" className={colourViolet}>
                       Integrated
                     </Chip>
@@ -324,43 +314,42 @@ export function IntegratedWeaponPicker({
                       availability={data.availability}
                       source={data.source}
                     />
-                  </div>
-                  <div
-                    className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}
-                  >
+                  </PickerRowChips>
+                  <PickerRowChips className={`text-xs lg:text-sm ${uiTextBody} font-code`}>
                     <span>{data.class}</span>
                     {isRanged && <span>{data.range}</span>}
                     {isRanged && <span>{data.rof}</span>}
                     <span>{data.damage}</span>
                     <span>Pen {data.pen}</span>
                     {isRanged && <span>Clip {data.clip}</span>}
-                  </div>
+                  </PickerRowChips>
                   {data.specialRules && data.specialRules !== "—" && (
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className={uiTextLabel}>Qualities</span>
-                      <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                        {data.specialRules}
-                      </span>
-                      <span className={uiInfoModalWrapper}>
+                    <PickerRowInfoLine
+                      label="Qualities"
+                      info={
                         <InfoModal
                           title={`${item.name} Qualities`}
                           content={<SpecialRulesContent rules={data.specialRules} />}
                           as="span"
                         />
+                      }
+                    >
+                      <span className={`text-xs lg:text-sm ${uiTextBody}`}>
+                        {data.specialRules}
                       </span>
-                    </div>
+                    </PickerRowInfoLine>
                   )}
                   {data.description && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className={uiTextLabel}>Rules</span>
-                      <span className={uiInfoModalWrapper}>
+                    <PickerRowInfoLine
+                      label="Rules"
+                      info={
                         <InfoModal
                           title={item.name}
                           content={<SpecialRulesContent rules="" description={data.description} />}
                           as="span"
                         />
-                      </span>
-                    </div>
+                      }
+                    />
                   )}
                 </PickerRow>
               ),

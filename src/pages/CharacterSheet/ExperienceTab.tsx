@@ -30,7 +30,6 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
-  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/chips/Chip";
@@ -43,6 +42,7 @@ import { InfoModal } from "../../components/InfoModal";
 import { AccordionCard } from "../../ui/AccordionCard";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
   segmentedTabId,
@@ -722,7 +722,7 @@ function RankUpModal({
                 setRankTypePickerOpen(false);
               }}
             >
-              <span className={uiItemNameHover}>{selectedRank.name}</span>
+              <PickerRowName name={selectedRank.name} />
             </PickerRow>
             {availableAlternateRanks.map((alternateRank) => (
               <PickerRow
@@ -734,7 +734,7 @@ function RankUpModal({
                   setRankTypePickerOpen(false);
                 }}
               >
-                <span className={uiItemNameHover}>{alternateRank.name}</span>
+                <PickerRowName name={alternateRank.name} />
               </PickerRow>
             ))}
           </PickerList>

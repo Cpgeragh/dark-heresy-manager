@@ -14,6 +14,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../ui/icons/PickerArrows";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
@@ -22,10 +23,7 @@ import {
   editableInputClass,
   editableTextareaClass,
   uiFormLabel,
-  uiInfoModalWrapper,
   uiTextBody,
-  uiTextLabel,
-  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import {
@@ -338,15 +336,15 @@ export function InsanityDisorderPicker({
               setNotes("");
             }}
           >
-            <span className={uiItemNameHover}>{ref.name}</span>
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <PickerRowName name={ref.name} />
+            <PickerRowChips>
               <Chip size="sm" className={disorderTypeChipClass(ref.type)}>
                 {ref.type}
               </Chip>
-            </div>
-            <div className="mt-1 flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+            </PickerRowChips>
+            <PickerRowInfoLine
+              label="Rules"
+              info={
                 <InfoModal
                   title={ref.name}
                   content={
@@ -359,8 +357,8 @@ export function InsanityDisorderPicker({
                   }
                   as="span"
                 />
-              </span>
-            </div>
+              }
+            />
           </PickerRow>
         ))}
       </PickerList>

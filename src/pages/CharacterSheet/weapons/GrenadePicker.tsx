@@ -4,13 +4,7 @@ import { useState } from "react";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { GRENADE_REFERENCE, type GrenadeRef } from "../../../data/reference/weaponReference";
-import {
-  uiTextBody,
-  uiTextLabel,
-  uiTextMuted,
-  uiInfoModalWrapper,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+import { uiTextBody } from "../../../ui/styles/editableStyles";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerCustomAction,
@@ -18,6 +12,11 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
+import {
+  PickerRowChips,
+  PickerRowInfoLine,
+  PickerRowName,
+} from "../../../ui/pickers/PickerRowParts";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import {
@@ -90,11 +89,8 @@ export function GrenadePicker({
                   interactive={editable}
                   onClick={() => onSelectCustom?.(item)}
                 >
-                  <div className="flex items-center gap-1.5">
-                    <span className={uiItemNameHover}>{item.name}</span>
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
+                  <PickerRowChips>
                     <Chip
                       size="sm"
                       className={
@@ -118,8 +114,8 @@ export function GrenadePicker({
                         </Chip>
                       ) : null;
                     })()}
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  </PickerRowChips>
+                  <PickerRowChips>
                     {data.type !== "Mine" && data.type !== "Missile" && (
                       <StatChip size="sm" label="Range" value={thrownRange} />
                     )}
@@ -128,34 +124,35 @@ export function GrenadePicker({
                     )}
                     {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
                     {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  </PickerRowChips>
+                  <PickerRowChips>
                     <ItemMetaChips
                       weight={data.weight}
                       value={data.value}
                       availability={data.availability}
                       source={data.source}
                     />
-                  </div>
+                  </PickerRowChips>
                   {data.specialRules && data.specialRules !== "—" && (
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className={uiTextLabel}>Qualities</span>
-                      <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                        {data.specialRules}
-                      </span>
-                      <span className={uiInfoModalWrapper}>
+                    <PickerRowInfoLine
+                      label="Qualities"
+                      info={
                         <InfoModal
                           title={`${data.name} Qualities`}
                           content={<SpecialRulesContent rules={data.specialRules} />}
                           as="span"
                         />
+                      }
+                    >
+                      <span className={`text-xs lg:text-sm ${uiTextBody}`}>
+                        {data.specialRules}
                       </span>
-                    </div>
+                    </PickerRowInfoLine>
                   )}
                   {data.description && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className={uiTextLabel}>Rules</span>
-                      <span className={uiInfoModalWrapper}>
+                    <PickerRowInfoLine
+                      label="Rules"
+                      info={
                         <InfoModal
                           title={data.name}
                           content={
@@ -165,8 +162,8 @@ export function GrenadePicker({
                           }
                           as="span"
                         />
-                      </span>
-                    </div>
+                      }
+                    />
                   )}
                 </PickerRow>
               ),
@@ -176,8 +173,8 @@ export function GrenadePicker({
             name: ref.name,
             row: (
               <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-                <span className={uiItemNameHover}>{ref.name}</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <PickerRowName name={ref.name} />
+                <PickerRowChips>
                   <Chip
                     size="sm"
                     className={
@@ -198,42 +195,41 @@ export function GrenadePicker({
                       </Chip>
                     ) : null;
                   })()}
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                </PickerRowChips>
+                <PickerRowChips>
                   {ref.type !== "Mine" && ref.type !== "Missile" && (
                     <StatChip size="sm" label="Range" value={thrownRange} />
                   )}
                   {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}
                   <DamageTypeChip size="sm" damage={ref.damage} />
                   <StatChip size="sm" label="Pen" value={ref.pen} />
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                </PickerRowChips>
+                <PickerRowChips>
                   <ItemMetaChips
                     weight={ref.weight}
                     value={ref.value}
                     availability={ref.availability}
                     source={ref.source}
                   />
-                </div>
+                </PickerRowChips>
                 {ref.specialRules && ref.specialRules !== "—" && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className={uiTextLabel}>Qualities</span>
-                    <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                      {ref.specialRules}
-                    </span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Qualities"
+                    info={
                       <InfoModal
                         title={`${ref.name} Qualities`}
                         content={<SpecialRulesContent rules={ref.specialRules} />}
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  >
+                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
+                  </PickerRowInfoLine>
                 )}
                 {ref.description && (
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={uiTextLabel}>Rules</span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Rules"
+                    info={
                       <InfoModal
                         title={ref.name}
                         content={
@@ -243,8 +239,8 @@ export function GrenadePicker({
                         }
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  />
                 )}
               </PickerRow>
             ),

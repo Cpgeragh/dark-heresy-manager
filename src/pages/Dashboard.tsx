@@ -511,7 +511,7 @@ function DmCampaignList({
                   key={campaign.id}
                   className={uiSection + " relative flex items-center gap-2 opacity-60"}
                 >
-                  <span className="flex-1 text-slate-400 italic lg:text-lg">{campaign.name}</span>
+                  <span className="flex-1 text-slate-400 lg:text-lg">{campaign.name}</span>
 
                   <Button
                     variant="secondary"

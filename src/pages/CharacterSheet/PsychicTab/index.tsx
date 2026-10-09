@@ -9,13 +9,14 @@ import {
   getPsychicPowerDescription,
   type PsychicPowerRef,
 } from "../../../data/reference/psychicReference";
-import { uiSection, uiFormLabel, uiItemName } from "../../../ui/styles/editableStyles";
+import { uiSection, uiFormLabel } from "../../../ui/styles/editableStyles";
 import { colourGlowActive } from "../../../ui/styles/colourTokens";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { PickerBody, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowRight } from "../../../ui/icons/PickerArrows";
 import { InfoModal } from "../../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../../data/reference/talentDescriptions";
@@ -115,10 +116,10 @@ function PowerRouteCard({
 }) {
   return (
     <PickerRow aria-label={title} trailing={<ArrowRight />} onClick={onClick}>
-      <div className="space-y-2">
-        <p className={uiItemName}>{title}</p>
+      <PickerRowName name={title} />
+      <PickerRowChips>
         <Chip className={statusClassName}>{status}</Chip>
-      </div>
+      </PickerRowChips>
     </PickerRow>
   );
 }

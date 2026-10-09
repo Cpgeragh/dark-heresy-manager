@@ -481,7 +481,7 @@ export function MeleeCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
@@ -522,7 +522,7 @@ export function MeleeCard({
             </div>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{craftsmanship}</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}

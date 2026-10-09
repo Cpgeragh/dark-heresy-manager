@@ -10,12 +10,8 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import {
-  uiTextBody,
-  uiInfoModalWrapper,
-  uiTextGMNote,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import { uiTextBody, uiTextGMNote } from "../../../ui/styles/editableStyles";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
@@ -143,11 +139,11 @@ export function GearPicker({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(entry.item)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.item.name}</span>
-                <StatusBadge status={entry.item.status} />
-                {entry.item.data.description && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+              <PickerRowName
+                name={entry.item.name}
+                badges={<StatusBadge status={entry.item.status} />}
+                info={
+                  entry.item.data.description && (
                     <InfoModal
                       title={entry.item.name}
                       content={
@@ -157,10 +153,10 @@ export function GearPicker({
                       }
                       as="span"
                     />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 <ItemMetaChips
                   bare
                   weight={entry.item.data.weight}
@@ -168,7 +164,7 @@ export function GearPicker({
                   availability={entry.item.data.availability}
                   source={entry.item.data.source}
                 />
-              </div>
+              </PickerRowChips>
             </PickerRow>
           ) : (
             <PickerRow
@@ -176,13 +172,10 @@ export function GearPicker({
               interactive={editable}
               onClick={() => handleSelect(entry.ref)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.ref.name}</span>
-                {entry.ref.description && (
-                  <span
-                    className="inline-flex items-center -translate-y-[1.4px]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+              <PickerRowName
+                name={entry.ref.name}
+                info={
+                  entry.ref.description && (
                     <InfoModal
                       title={entry.ref.name}
                       content={
@@ -192,10 +185,10 @@ export function GearPicker({
                       }
                       as="span"
                     />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 <ItemMetaChips
                   bare
                   weight={entry.ref.weight}
@@ -208,7 +201,7 @@ export function GearPicker({
                 {isVariableMeta(entry.ref.value) && (
                   <span className={uiTextGMNote}>Cost assigned on add</span>
                 )}
-              </div>
+              </PickerRowChips>
             </PickerRow>
           )
         )}

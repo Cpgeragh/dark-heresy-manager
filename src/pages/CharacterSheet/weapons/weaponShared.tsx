@@ -9,6 +9,7 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { ArrowRight } from "../../../ui/icons/PickerArrows";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -20,7 +21,6 @@ import {
   uiTextPlaceholder,
   uiFormLabel,
   uiInfoModalWrapper,
-  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { colourEmerald, colourMeta } from "../../../ui/styles/colourTokens";
@@ -265,27 +265,20 @@ export function UpgradePicker({
       <PickerList>
         {compatibleUpgrades.map((upgrade) => (
           <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <span className={uiItemNameHover}>{upgrade.name}</span>
-              <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-                <Chip className={colourMeta}>
-                  <span className="leading-none">{"\u2696"}</span>
-                  <span className="leading-none">
-                    {formatWeightModifier(upgrade.weightModifier)}
-                  </span>
-                </Chip>
-                <ItemMetaChips
-                  value={upgrade.value}
-                  availability={upgrade.availability}
-                  source={upgrade.source}
-                  bare
-                />
-              </div>
-            </div>
-            <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
-              {upgrade.description}
-            </p>
-            <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
+            <PickerRowName name={upgrade.name} />
+            <PickerRowChips>
+              <Chip className={colourMeta}>
+                <span className="leading-none">{"\u2696"}</span>
+                <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
+              </Chip>
+              <ItemMetaChips
+                value={upgrade.value}
+                availability={upgrade.availability}
+                source={upgrade.source}
+                bare
+              />
+            </PickerRowChips>
+            <PickerRowText className="leading-relaxed">{upgrade.description}</PickerRowText>
           </PickerRow>
         ))}
       </PickerList>

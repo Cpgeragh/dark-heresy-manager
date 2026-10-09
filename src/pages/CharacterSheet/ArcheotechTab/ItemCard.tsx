@@ -89,9 +89,7 @@ export function ItemCard({
             <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
           )}
           {item.notes?.trim() && (
-            <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">
-              {item.notes}
-            </p>
+            <p className="text-xs lg:text-sm text-amber-300/70 leading-relaxed">{item.notes}</p>
           )}
         </div>
       )}

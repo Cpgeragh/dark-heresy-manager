@@ -72,13 +72,13 @@ export const uiTextMuted = "text-slate-300/90";
 export const uiTextSubtle = "text-slate-500";
 
 /** Empty-state or placeholder-like text. */
-export const uiTextPlaceholder = "text-slate-500 italic";
+export const uiTextPlaceholder = "text-slate-500";
 
 /** Tiny uppercase label text used beside values. */
 export const uiTextLabel = `text-[10px] lg:text-xs ${colourMetadataLabelText} uppercase tracking-wide`;
 
 export const uiTextError = "text-red-400 text-sm lg:text-base";
-export const uiTextGMNote = "text-amber-400/70 italic";
+export const uiTextGMNote = "text-amber-400/70";
 
 // ─── Form tokens ──────────────────────────────────────────────────────────────
 

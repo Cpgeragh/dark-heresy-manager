@@ -110,7 +110,7 @@ export function PieceRow({
 
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+          <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
             {qualities.length > 0 ? qualities.join(", ") : "-"}
           </span>
           {qualities.length > 0 && (
@@ -136,7 +136,7 @@ export function PieceRow({
 
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Craftsmanship</span>
-          <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
+          <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{craftsmanship}</span>
           <InfoModal
             title={`${craftsmanship} Armour`}
             content={armourCraftsmanshipDescription(craftsmanship)}
@@ -154,7 +154,11 @@ export function PieceRow({
                   onClick={() => setShowUpgradePicker(true)}
                 />
               ) : (
-                <ViewButton label="View upgrades" size="sm" onClick={() => setShowUpgradePicker(true)} />
+                <ViewButton
+                  label="View upgrades"
+                  size="sm"
+                  onClick={() => setShowUpgradePicker(true)}
+                />
               )}
             </div>
             {upgradeRefs.length === 0 ? (

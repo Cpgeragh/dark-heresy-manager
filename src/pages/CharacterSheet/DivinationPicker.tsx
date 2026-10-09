@@ -6,8 +6,9 @@ import {
   type DivinationData,
 } from "../../data/reference/divinationData";
 import { Chip } from "../../ui/chips/Chip";
-import { uiInfoModalWrapper, uiTextBody, uiItemNameHover } from "../../ui/styles/editableStyles";
+import { uiTextBody } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 
@@ -52,22 +53,22 @@ export function DivinationPicker({
             selected={divination.id === selectedId}
             onClick={() => onSelect(divination)}
           >
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className={uiItemNameHover}>“{divination.result}”</span>
-              <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
+            <PickerRowName
+              name={`“${divination.result}”`}
+              info={
                 <InfoModal
                   title={divination.result}
                   content={<DivinationInfoContent divination={divination} />}
                   as="span"
                 />
-              </span>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              }
+            />
+            <PickerRowChips>
               <RollChip>{divination.roll}</RollChip>
               <Chip className={`bg-slate-800/40 font-code ${sourceColour(divination.source)}`}>
                 {divination.source}
               </Chip>
-            </div>
+            </PickerRowChips>
           </PickerRow>
         ))}
       </PickerList>

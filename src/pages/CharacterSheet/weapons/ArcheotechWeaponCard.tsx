@@ -176,7 +176,7 @@ export function ArcheotechWeaponCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
                 {hasRules ? specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (

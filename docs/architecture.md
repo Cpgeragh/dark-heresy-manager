@@ -84,6 +84,32 @@ Every text, textarea, number, date and search input sets `autoComplete="off"`, b
 
 `src/components/RouteHolder.tsx` owns page switches. When the path changes, the previous page stays visible and usable while the new page is built out of sight beside it, and its listeners start at once. Each part of a page that waits for data registers with `useRouteLoading` (`src/context/useRouteReady.ts`), and the new page replaces the old one when nothing is still waiting, so the Campaign Overview and the Character Sheet appear complete. `PendingOverlay` covers the old page only after `PENDING_OVERLAY_DELAY_MS`. A page still loading after `ROUTE_LOAD_TIMEOUT_MS` (30 seconds, `src/constants/ui.ts`) is revealed with its load error. The first page on a load or reload stays behind the logo screen until it is ready. A page sets its header menu and back link only while it is the visible page (`useRouteActive`). A change to the query string within a page, such as switching tabs, does not rebuild the page.
 
+### Shared card and picker styles
+
+The same kind of element looks and behaves the same everywhere, and colour is the only difference between two uses of one element. Each piece below has one owner.
+
+| Piece               | Owner                                                                                                             | Role                                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Card                | `uiSectionShell` and `uiSection` in `src/ui/styles/editableStyles.ts`, and `src/ui/Panel.tsx`                     | The bordered card; `uiSection` and `Panel` add the card padding                                                   |
+| Inner box           | `uiCell` in `editableStyles.ts` and `src/ui/chips/StatChip.tsx`                                                   | The bordered box inside a card; `StatChip` is built on it                                                         |
+| Notice box          | `uiNoticeBox` with `colourNoticeAmber`, `colourNoticePink`, `colourNoticeViolet`, `colourNoticeRed`               | A tinted box for a warning or highlighted state                                                                   |
+| Glow pill           | `colourGlowActive` and `colourGlowInactive` in `src/ui/styles/colourTokens.ts`                                    | The pill used for trained and untrained choices                                                                   |
+| Recovery code box   | `uiCodeBox` and `uiCodeText` in `editableStyles.ts`                                                               | The box that shows a recovery code                                                                                |
+| Expanding card      | `src/ui/AccordionCard.tsx`                                                                                        | A card whose header button expands the content below it, with the header padding, hover and press of a picker row |
+| Picker row          | `PickerRow` and `PickerList` in `src/ui/pickers/PickerModal.tsx`                                                  | A card that is one button, with an optional `trailing` slot that holds only an arrow                              |
+| Picker row contents | `PickerRowName`, `PickerRowChips`, `PickerRowInfoLine` and `PickerRowText` in `src/ui/pickers/PickerRowParts.tsx` | The name line, the chip row, a label with an info icon, and a description line                                    |
+
+Every picker row builds its inside from the four row content pieces, and these gaps apply to all of them:
+
+| Part             | Gap above (px) | Text                                                  |
+| ---------------- | -------------- | ----------------------------------------------------- |
+| Name line        | 0              | `uiItemNameHover`, which wraps and is never truncated |
+| Chip row         | 4              | Chips set their own size                              |
+| Info line        | 4              | Small label, optional text, then the info icon        |
+| Description line | 4              | Small `slate-300` text                                |
+
+`PickerRow` adds the `group` class only when the row responds to a press, so the name turns white on hover and the box lightens together, and a read-only row shows neither. Pressing an info icon opens its pop-up and does not select the row (`PickerRowName`, `PickerRowInfoLine`). A row never places chips or a cost to the right of its name. The body font, IM Fell English, loads in its normal and italic faces (`src/main.tsx`), and `font-synthesis: none` in `src/index.css` stops the browser from faking an italic; no component sets italic text.
+
 ## Navigation and startup
 
 The routed application exposes these canonical paths:

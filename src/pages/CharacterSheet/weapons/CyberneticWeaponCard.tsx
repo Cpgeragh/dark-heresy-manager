@@ -120,11 +120,11 @@ export function CyberneticWeaponCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Gained From</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{cyberneticName}</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{cyberneticName}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
                 {hasRules ? effectiveSpecialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (
@@ -142,7 +142,7 @@ export function CyberneticWeaponCard({
             </div>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{craftsmanship}</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={`${craftsmanship} Weapon`}

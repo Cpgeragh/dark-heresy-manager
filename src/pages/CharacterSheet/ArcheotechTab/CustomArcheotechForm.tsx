@@ -11,11 +11,11 @@ import {
   editableTextareaClass,
   uiTextMuted,
   uiFormLabel,
-  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { ITEM_TYPES, type ItemType } from "./archeotechConstants";
@@ -209,8 +209,8 @@ export function CustomArcheotechForm({
                 setPhase("details");
               }}
             >
-              <p className={uiItemNameHover}>{t}</p>
-              <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>{TYPE_DESCRIPTIONS[t]}</p>
+              <PickerRowName name={t} />
+              <PickerRowText>{TYPE_DESCRIPTIONS[t]}</PickerRowText>
             </PickerRow>
           ))}
         </PickerList>

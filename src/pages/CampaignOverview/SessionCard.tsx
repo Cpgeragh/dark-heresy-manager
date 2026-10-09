@@ -338,7 +338,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       {session.summary && <p className="text-sm lg:text-base text-slate-300">{session.summary}</p>}
 
       {isDM && session.dmNotes && (
-        <p className="text-xs lg:text-sm text-slate-500 italic border-t border-slate-700 pt-2">
+        <p className="text-xs lg:text-sm text-slate-500 border-t border-slate-700 pt-2">
           DM: {session.dmNotes}
         </p>
       )}

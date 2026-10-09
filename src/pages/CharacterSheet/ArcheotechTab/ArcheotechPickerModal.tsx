@@ -5,13 +5,7 @@ import {
   ARCHEOTECH_REFERENCE,
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
-import {
-  uiTextBody,
-  uiTextMuted,
-  uiInfoModalWrapper,
-  uiTextGMNote,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextMuted, uiTextGMNote } from "../../../ui/styles/editableStyles";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
   PickerCustomAction,
@@ -19,6 +13,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
@@ -162,11 +157,11 @@ export function ArcheotechPickerModal({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(entry.item)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.item.name}</span>
-                <StatusBadge status={entry.item.status} />
-                {entry.item.data.description && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+              <PickerRowName
+                name={entry.item.name}
+                badges={<StatusBadge status={entry.item.status} />}
+                info={
+                  entry.item.data.description && (
                     <InfoModal
                       title={entry.item.name}
                       content={
@@ -176,10 +171,10 @@ export function ArcheotechPickerModal({
                       }
                       as="span"
                     />
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 {entry.item.data.type && (
                   <span className={uiTextMuted}>{entry.item.data.type}</span>
                 )}
@@ -190,7 +185,7 @@ export function ArcheotechPickerModal({
                   availability={entry.item.data.availability}
                   source={entry.item.data.source}
                 />
-              </div>
+              </PickerRowChips>
             </PickerRow>
           ) : (
             <PickerRow
@@ -198,10 +193,10 @@ export function ArcheotechPickerModal({
               interactive={editable}
               onClick={() => handleRowClick(entry.ref)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.ref.name}</span>
-                {entry.ref.description && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+              <PickerRowName
+                name={entry.ref.name}
+                info={
+                  entry.ref.description && (
                     <InfoModal
                       title={entry.ref.name}
                       content={
@@ -211,10 +206,10 @@ export function ArcheotechPickerModal({
                       }
                       as="span"
                     />
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 <span className={uiTextMuted}>{entry.ref.type}</span>
                 <ItemMetaChips
                   bare
@@ -228,7 +223,7 @@ export function ArcheotechPickerModal({
                 {needsGmInput(entry.ref) && (
                   <span className={uiTextGMNote}>GM determines cost &amp; availability</span>
                 )}
-              </div>
+              </PickerRowChips>
             </PickerRow>
           )
         )}

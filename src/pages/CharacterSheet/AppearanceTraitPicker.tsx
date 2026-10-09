@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { uiPickerBackButton } from "../../ui/styles/buttonStyles";
-import { editableInputClass, uiFormLabel, uiItemNameHover } from "../../ui/styles/editableStyles";
+import { editableInputClass, uiFormLabel } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowName } from "../../ui/pickers/PickerRowParts";
 
 function qualifierOf(base: string, value?: string): string {
   const prefix = `${base} (`;
@@ -115,7 +116,7 @@ export function AppearanceTraitPicker({
                 setQualifying(option);
               }}
             >
-              <span className={uiItemNameHover}>{option}</span>
+              <PickerRowName name={option} />
             </PickerRow>
           );
         })}

@@ -13,16 +13,11 @@ import {
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiInfoModalWrapper,
-  uiTextLabel,
-  uiItemNameHover,
-} from "../../ui/styles/editableStyles";
+import { editableInputClass, editableTextareaClass } from "../../ui/styles/editableStyles";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
 import { CORRUPTION_MALIGNANCIES, type CorruptionMalignancyRef } from "./corruptionReference";
 import { createLocalId } from "../../utils/createLocalId";
@@ -225,20 +220,20 @@ export function CorruptionMalignancyPicker({
               }
             }}
           >
-            <span className={uiItemNameHover}>{ref.name}</span>
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <PickerRowName name={ref.name} />
+            <PickerRowChips>
               <RollChip>{ref.roll}</RollChip>
-            </div>
-            <div className="mt-1 flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+            </PickerRowChips>
+            <PickerRowInfoLine
+              label="Rules"
+              info={
                 <InfoModal
                   title={ref.name}
                   content={<MalignancyInfoContent malignancy={ref} />}
                   as="span"
                 />
-              </span>
-            </div>
+              }
+            />
           </PickerRow>
         ))}
       </PickerList>

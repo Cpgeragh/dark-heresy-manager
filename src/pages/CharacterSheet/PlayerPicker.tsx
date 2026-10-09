@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { getFirstName } from "../../services/profileService";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
-import { uiItemName, uiTextMuted } from "../../ui/styles/editableStyles";
+import { PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
 
 interface PlayerOption {
   uid: string;
@@ -66,10 +66,8 @@ export function PlayerPicker({ memberIds, onSelect, onClose }: Props) {
       <PickerList>
         {players.map((player) => (
           <PickerRow key={player.uid} onClick={() => onSelect(player.uid)}>
-            <span className={uiItemName}>{player.label}</span>
-            <span className={`block text-xs lg:text-sm ${uiTextMuted} font-code break-all`}>
-              {player.uid}
-            </span>
+            <PickerRowName name={player.label} />
+            <PickerRowText className="font-code break-all">{player.uid}</PickerRowText>
           </PickerRow>
         ))}
       </PickerList>

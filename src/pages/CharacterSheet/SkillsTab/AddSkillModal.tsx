@@ -11,14 +11,11 @@ import { charColour, sourceColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerList, PickerModal, PickerBody, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowRight, ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/styles/colourTokens";
-import {
-  editableInputClass,
-  uiFormLabel,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+import { editableInputClass, uiFormLabel } from "../../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -221,38 +218,36 @@ export function AddSkillModal({
       onClick={() => setOpenCategory(item.category)}
       trailing={<ArrowRight />}
     >
-      <div className="space-y-1.5">
-        <span className={`${uiItemNameHover} truncate block`}>{item.category}</span>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {[
-            ...new Set(
-              item.skills.map((skill) => skill.source).filter((s): s is SkillSource => Boolean(s))
-            ),
-          ].map((source) => (
-            <Chip
-              key={source}
-              size="sm"
-              className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(source)}`}
-            >
-              {source}
-            </Chip>
-          ))}
-          {getSkillGroupCharacteristics(item.skills).map((characteristic) => (
-            <Chip
-              key={characteristic}
-              size="sm"
-              className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
-            >
-              {CHAR_LABEL[characteristic]}
-            </Chip>
-          ))}
-          {item.skills[0].advanced && (
-            <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
-              Advanced
-            </Chip>
-          )}
-        </div>
-      </div>
+      <PickerRowName name={item.category} />
+      <PickerRowChips>
+        {[
+          ...new Set(
+            item.skills.map((skill) => skill.source).filter((s): s is SkillSource => Boolean(s))
+          ),
+        ].map((source) => (
+          <Chip
+            key={source}
+            size="sm"
+            className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(source)}`}
+          >
+            {source}
+          </Chip>
+        ))}
+        {getSkillGroupCharacteristics(item.skills).map((characteristic) => (
+          <Chip
+            key={characteristic}
+            size="sm"
+            className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
+          >
+            {CHAR_LABEL[characteristic]}
+          </Chip>
+        ))}
+        {item.skills[0].advanced && (
+          <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
+            Advanced
+          </Chip>
+        )}
+      </PickerRowChips>
     </PickerRow>
   );
 

@@ -13,6 +13,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { Button } from "../../../ui/buttons/Button";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
@@ -23,9 +24,7 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
-  uiInfoModalWrapper,
   uiTextGMNote,
-  uiItemNameHover,
 } from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { uiPickerBackButton } from "../../../ui/styles/buttonStyles";
@@ -348,11 +347,11 @@ export function ImplantPicker({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(entry.item)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.item.name}</span>
-                <StatusBadge status={entry.item.status} />
-                {entry.item.data.notes && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+              <PickerRowName
+                name={entry.item.name}
+                badges={<StatusBadge status={entry.item.status} />}
+                info={
+                  entry.item.data.notes && (
                     <InfoModal
                       title={entry.item.name}
                       content={
@@ -362,10 +361,10 @@ export function ImplantPicker({
                       }
                       as="span"
                     />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 <ItemMetaChips
                   bare
                   value={entry.item.data.value}
@@ -375,7 +374,7 @@ export function ImplantPicker({
                 <Chip className={CRAFTSMANSHIP_STYLE[entry.item.data.craftsmanship ?? "Common"]}>
                   {entry.item.data.craftsmanship ?? "Common"}
                 </Chip>
-              </div>
+              </PickerRowChips>
             </PickerRow>
           ) : (
             <PickerRow
@@ -383,15 +382,15 @@ export function ImplantPicker({
               interactive={editable}
               onClick={() => selectImplant(entry.ref)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.ref.name}</span>
-                {(entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good) && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+              <PickerRowName
+                name={entry.ref.name}
+                info={
+                  (entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good) && (
                     <InfoModal title={entry.ref.name} content={implantInfo(entry.ref)} as="span" />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 <ItemMetaChips
                   bare
                   value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
@@ -409,7 +408,7 @@ export function ImplantPicker({
                 {!isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
                   <span className={uiTextGMNote}>Availability assigned on add</span>
                 )}
-              </div>
+              </PickerRowChips>
             </PickerRow>
           )
         )}

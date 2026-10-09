@@ -12,6 +12,7 @@ import {
 import { startPwaStartup } from "./pwaStartup";
 import "./index.css";
 import "@fontsource/im-fell-english/400.css";
+import "@fontsource/im-fell-english/400-italic.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 

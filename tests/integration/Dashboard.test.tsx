@@ -510,8 +510,8 @@ describe("Dashboard player section", () => {
     renderDashboard();
     const dmEmptyState = screen.getByText("You have not created any campaigns yet.");
     const playerEmptyState = screen.getByText(/You are not part of any campaigns yet/);
-    expect(dmEmptyState).toHaveClass("text-slate-500", "italic");
-    expect(playerEmptyState).toHaveClass("text-slate-500", "italic");
+    expect(dmEmptyState).toHaveClass("text-slate-500");
+    expect(playerEmptyState).toHaveClass("text-slate-500");
     expect(dmEmptyState.parentElement).toHaveClass("space-y-3");
     expect(playerEmptyState.parentElement).toHaveClass("space-y-3");
     expect(dmEmptyState.closest(".rounded-lg")).toHaveClass("border-slate-500", "bg-slate-900/60");

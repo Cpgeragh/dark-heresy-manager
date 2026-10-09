@@ -3,7 +3,8 @@ import { AMMO_REFERENCE, formatAmmoName } from "../../../data/reference/ammoRefe
 import { Button } from "../../../ui/buttons/Button";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
-import { uiTextMuted, uiItemNameHover } from "../../../ui/styles/editableStyles";
+import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
+import { uiTextMuted } from "../../../ui/styles/editableStyles";
 
 // ─── Ammo Picker ──────────────────────────────────────────────────────────────
 
@@ -95,21 +96,17 @@ export function AmmoPicker({
             }}
             disabled={editable && !allowDuplicates && existingNames.has(formatAmmoName(ammo.name))}
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className={uiItemNameHover}>{formatAmmoName(ammo.name)}</span>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <ItemMetaChips
-                  availability={ammo.availability}
-                  value={ammo.cost}
-                  purchaseAmount={ammo.purchaseAmount}
-                  bare
-                />
-              </div>
-            </div>
+            <PickerRowName name={formatAmmoName(ammo.name)} />
+            <PickerRowChips>
+              <ItemMetaChips
+                availability={ammo.availability}
+                value={ammo.cost}
+                purchaseAmount={ammo.purchaseAmount}
+                bare
+              />
+            </PickerRowChips>
             {ammo.description && (
-              <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>
-                {ammo.description}
-              </p>
+              <PickerRowText className="line-clamp-2">{ammo.description}</PickerRowText>
             )}
           </PickerRow>
         ))}

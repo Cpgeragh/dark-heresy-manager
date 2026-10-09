@@ -4,14 +4,13 @@ import { CAREER_LIST, type CareerData, type CareerRankData } from "shared-rules"
 import type { HomeworldData } from "../../data/reference/homeworldData";
 import { Chip } from "../../ui/chips/Chip";
 import {
-  uiInfoModalWrapper,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
-  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { sourceColour } from "../../ui/styles/sourceStyles";
 
 function InfoSection({ title, content }: { title: string; content: string }) {
@@ -36,7 +35,7 @@ export function CareerInfoContent({
 
   return (
     <div className="space-y-4">
-      <blockquote className="border-l-2 border-red-700 pl-3 italic">
+      <blockquote className="border-l-2 border-red-700 pl-3">
         <p className={`${uiTextBody} leading-relaxed`}>“{career.quote}”</p>
         <footer className={`mt-1 text-xs lg:text-sm ${uiTextMuted}`}>— {career.attribution}</footer>
       </blockquote>
@@ -145,21 +144,21 @@ export function CareerPicker({
             selected={career.name === selected}
             onClick={() => onSelect(career)}
           >
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className={uiItemNameHover}>{career.name}</span>
-              <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
+            <PickerRowName
+              name={career.name}
+              info={
                 <InfoModal
                   title={career.name}
                   content={<CareerInfoContent career={career} homeworld={homeworld} />}
                   as="span"
                 />
-              </span>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              }
+            />
+            <PickerRowChips>
               <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
                 {career.source}
               </Chip>
-            </div>
+            </PickerRowChips>
           </PickerRow>
         ))}
       </PickerList>

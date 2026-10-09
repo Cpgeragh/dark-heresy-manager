@@ -216,7 +216,7 @@ export function GrenadeCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
                 {hasRules ? item.specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (
@@ -265,7 +265,7 @@ export function GrenadeCard({
               onUpdate={onUpdateQty}
             />
             {isEquipped && item.quantity > 3 && (
-              <span className={`text-[10px] lg:text-xs ${uiTextMuted} italic ml-1`}>
+              <span className={`text-[10px] lg:text-xs ${uiTextMuted} ml-1`}>
                 3 ready, rest stowed
               </span>
             )}

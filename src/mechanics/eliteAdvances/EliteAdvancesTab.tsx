@@ -36,11 +36,10 @@ import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
 import {
   editableInputClass,
   uiFormLabel,
-  uiInfoModalWrapper,
-  uiItemName,
   uiSection,
   uiTextBody,
   uiTextLabel,
@@ -223,10 +222,8 @@ function PickerChoice({
 }) {
   return (
     <PickerRow trailing={<ArrowRight />} onClick={onClick}>
-      <div>
-        <div className={uiItemName}>{label}</div>
-        <p className={`mt-1 text-sm ${uiTextBody}`}>{description}</p>
-      </div>
+      <PickerRowName name={label} />
+      <PickerRowText>{description}</PickerRowText>
     </PickerRow>
   );
 }
@@ -328,38 +325,36 @@ function SpecialAdvancePicker({
               interactive={canAdd}
               onClick={() => canAdd && onSelect(advance)}
             >
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className={uiItemName}>{advance.name}</span>
-                  <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
-                    <InfoModal
-                      title={advance.name}
-                      content={<EliteAdvanceDetails advance={advance} />}
-                      as="span"
-                    />
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour(advance.source)}`}>
-                    {advance.source}
-                  </Chip>
-                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                    {advance.cost} XP
-                  </Chip>
-                </div>
-                {advance.prerequisites && (
-                  <p className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Prerequisites: </span>
-                    {advance.prerequisites}
-                  </p>
-                )}
-                {alternateRankNames.length > 0 && (
-                  <p className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Available through: </span>
-                    {alternateRankNames.join(", ")}
-                  </p>
-                )}
-              </div>
+              <PickerRowName
+                name={advance.name}
+                info={
+                  <InfoModal
+                    title={advance.name}
+                    content={<EliteAdvanceDetails advance={advance} />}
+                    as="span"
+                  />
+                }
+              />
+              <PickerRowChips>
+                <Chip className={`bg-slate-800/40 font-code ${sourceColour(advance.source)}`}>
+                  {advance.source}
+                </Chip>
+                <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                  {advance.cost} XP
+                </Chip>
+              </PickerRowChips>
+              {advance.prerequisites && (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Prerequisites: </span>
+                  {advance.prerequisites}
+                </PickerRowText>
+              )}
+              {alternateRankNames.length > 0 && (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Available through: </span>
+                  {alternateRankNames.join(", ")}
+                </PickerRowText>
+              )}
             </PickerRow>
           );
         })}
@@ -615,32 +610,30 @@ function SkillAdvancePicker({
                 );
               }}
             >
-              <div className="space-y-1.5">
-                <div className={uiItemName}>{skill.name}</div>
-                <div className="flex flex-wrap gap-1.5">
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour(skill.source)}`}>
-                    {skill.source}
+              <PickerRowName name={skill.name} />
+              <PickerRowChips>
+                <Chip className={`bg-slate-800/40 font-code ${sourceColour(skill.source)}`}>
+                  {skill.source}
+                </Chip>
+                <Chip className="border-sky-500/60 bg-sky-950/30 text-sky-300">{level}</Chip>
+                {option && (
+                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                    {option.cost} XP
                   </Chip>
-                  <Chip className="border-sky-500/60 bg-sky-950/30 text-sky-300">{level}</Chip>
-                  {option && (
-                    <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                      {option.cost} XP
-                    </Chip>
-                  )}
-                </div>
-                {option?.eliteAdvanceId && (
-                  <p className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Unlocked by: </span>
-                    {option.eliteAdvanceName ?? option.eliteAdvanceId}
-                  </p>
                 )}
-                {option?.prerequisites && (
-                  <p className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Prerequisites: </span>
-                    {option.prerequisites}
-                  </p>
-                )}
-              </div>
+              </PickerRowChips>
+              {option?.eliteAdvanceId && (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Unlocked by: </span>
+                  {option.eliteAdvanceName ?? option.eliteAdvanceId}
+                </PickerRowText>
+              )}
+              {option?.prerequisites && (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Prerequisites: </span>
+                  {option.prerequisites}
+                </PickerRowText>
+              )}
             </PickerRow>
           );
         })}
@@ -737,58 +730,53 @@ function TalentAdvancePicker({
               interactive={editable}
               onClick={() => editable && onBuyFixed(option)}
             >
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className={uiItemName}>
+              <PickerRowName
+                name={
+                  <>
                     {talent.name}
                     {option.specialisation ? ` (${option.specialisation})` : ""}
-                  </span>
-                  {TALENT_DESCRIPTIONS[talent.id] && (
-                    <span
-                      className={uiInfoModalWrapper}
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      <InfoModal
-                        title={talent.name}
-                        content={TALENT_DESCRIPTIONS[talent.id]}
-                        as="span"
-                      />
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {(Array.isArray(talent.source) ? talent.source : [talent.source]).map(
-                    (source) => (
-                      <Chip
-                        key={source}
-                        className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
-                      >
-                        {source}
-                      </Chip>
-                    )
-                  )}
-                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                    {option.cost} XP
+                  </>
+                }
+                info={
+                  TALENT_DESCRIPTIONS[talent.id] && (
+                    <InfoModal
+                      title={talent.name}
+                      content={TALENT_DESCRIPTIONS[talent.id]}
+                      as="span"
+                    />
+                  )
+                }
+              />
+              <PickerRowChips>
+                {(Array.isArray(talent.source) ? talent.source : [talent.source]).map((source) => (
+                  <Chip
+                    key={source}
+                    className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
+                  >
+                    {source}
                   </Chip>
-                </div>
-                {option.eliteAdvanceId ? (
-                  <p className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Unlocked by: </span>
-                    {option.eliteAdvanceName ?? option.eliteAdvanceId}
-                  </p>
-                ) : (
-                  <p className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Missed rank: </span>
-                    {replacedRank?.name ?? option.replacedRankId}
-                  </p>
-                )}
-                {option.prerequisites && (
-                  <p className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Prerequisites: </span>
-                    {option.prerequisites}
-                  </p>
-                )}
-              </div>
+                ))}
+                <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                  {option.cost} XP
+                </Chip>
+              </PickerRowChips>
+              {option.eliteAdvanceId ? (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Unlocked by: </span>
+                  {option.eliteAdvanceName ?? option.eliteAdvanceId}
+                </PickerRowText>
+              ) : (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Missed rank: </span>
+                  {replacedRank?.name ?? option.replacedRankId}
+                </PickerRowText>
+              )}
+              {option.prerequisites && (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Prerequisites: </span>
+                  {option.prerequisites}
+                </PickerRowText>
+              )}
             </PickerRow>
           );
         })}

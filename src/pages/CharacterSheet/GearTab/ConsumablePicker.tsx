@@ -13,7 +13,8 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { uiTextBody, uiInfoModalWrapper, uiItemNameHover } from "../../../ui/styles/editableStyles";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import { uiTextBody } from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -75,11 +76,11 @@ export function ConsumablePicker({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(entry.item)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.item.name}</span>
-                <StatusBadge status={entry.item.status} />
-                {entry.item.data.description && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+              <PickerRowName
+                name={entry.item.name}
+                badges={<StatusBadge status={entry.item.status} />}
+                info={
+                  entry.item.data.description && (
                     <InfoModal
                       title={entry.item.name}
                       content={
@@ -89,10 +90,10 @@ export function ConsumablePicker({
                       }
                       as="span"
                     />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 <ItemMetaChips
                   bare
                   weight={entry.item.data.weight}
@@ -100,7 +101,7 @@ export function ConsumablePicker({
                   availability={entry.item.data.availability}
                   source={entry.item.data.source}
                 />
-              </div>
+              </PickerRowChips>
             </PickerRow>
           ) : (
             <PickerRow
@@ -108,10 +109,10 @@ export function ConsumablePicker({
               interactive={editable}
               onClick={() => onSelect(entry.ref)}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{entry.ref.name}</span>
-                {entry.ref.description && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+              <PickerRowName
+                name={entry.ref.name}
+                info={
+                  entry.ref.description && (
                     <InfoModal
                       title={entry.ref.name}
                       content={
@@ -121,10 +122,10 @@ export function ConsumablePicker({
                       }
                       as="span"
                     />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+                  )
+                }
+              />
+              <PickerRowChips className="text-xs lg:text-sm">
                 <ItemMetaChips
                   bare
                   weight={entry.ref.weight}
@@ -132,7 +133,7 @@ export function ConsumablePicker({
                   availability={entry.ref.availability}
                   source={entry.ref.source}
                 />
-              </div>
+              </PickerRowChips>
             </PickerRow>
           )
         )}

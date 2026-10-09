@@ -10,13 +10,8 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import {
-  uiTextBody,
-  uiTextLabel,
-  uiTextMuted,
-  uiInfoModalWrapper,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
+import { uiTextBody, uiTextLabel } from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -111,11 +106,11 @@ export function DrugPicker({
                 interactive={editable}
                 onClick={() => onSelectCustomItem?.(item)}
               >
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className={`${uiItemNameHover} truncate`}>{item.name}</span>
-                  <StatusBadge status={item.status} />
-                  {item.data.notes && (
-                    <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                <PickerRowName
+                  name={item.name}
+                  badges={<StatusBadge status={item.status} />}
+                  info={
+                    item.data.notes && (
                       <InfoModal
                         title={item.name}
                         content={
@@ -125,10 +120,10 @@ export function DrugPicker({
                         }
                         as="span"
                       />
-                    </span>
-                  )}
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                    )
+                  }
+                />
+                <PickerRowChips>
                   <ItemMetaChips
                     bare
                     weight={item.data.weight ?? "0 kg"}
@@ -136,7 +131,7 @@ export function DrugPicker({
                     availability={item.data.availability}
                     source={item.data.source}
                   />
-                </div>
+                </PickerRowChips>
               </PickerRow>
             );
           }
@@ -146,15 +141,13 @@ export function DrugPicker({
 
           return (
             <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`${uiItemNameHover} truncate`}>{ref.name}</span>
-                {hasInfo && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                    <InfoModal title={ref.name} content={drugInfoContent(ref)} as="span" />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <PickerRowName
+                name={ref.name}
+                info={
+                  hasInfo && <InfoModal title={ref.name} content={drugInfoContent(ref)} as="span" />
+                }
+              />
+              <PickerRowChips>
                 <ItemMetaChips
                   bare
                   weight={ref.weight ?? "0 kg"}
@@ -162,12 +155,8 @@ export function DrugPicker({
                   availability={ref.availability}
                   source={ref.source}
                 />
-              </div>
-              {ref.duration && (
-                <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>
-                  Duration: {ref.duration}
-                </p>
-              )}
+              </PickerRowChips>
+              {ref.duration && <PickerRowText>Duration: {ref.duration}</PickerRowText>}
             </PickerRow>
           );
         })}

@@ -2,7 +2,7 @@
 
 import { PickerList, PickerModal, PickerRow } from "./PickerModal";
 import { ArrowLeft } from "../icons/PickerArrows";
-import { uiItemNameHover } from "../styles/editableStyles";
+import { PickerRowChips, PickerRowName } from "./PickerRowParts";
 import { Chip } from "../chips/Chip";
 import { colourAmberFaint, colourRank, colourValue } from "../styles/colourTokens";
 
@@ -53,28 +53,25 @@ export function OptionPickerScreen({
           const rankChips = typeof option === "string" ? undefined : option.rankChips;
           return (
             <PickerRow key={value} onClick={() => onSelect(value)} selected={value === selected}>
-              <span className="flex w-full flex-col gap-1.5">
-                <span className="flex w-full items-center justify-between gap-3">
-                  <span className={uiItemNameHover}>{label}</span>
-                  <span className="flex shrink-0 items-center gap-1.5">
-                    {cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
-                    {ownedCount !== undefined && ownedCount > 0 ? (
-                      <Chip className={colourAmberFaint}>Owned: {ownedCount}</Chip>
-                    ) : owned ? (
-                      <Chip className={colourAmberFaint}>Owned</Chip>
-                    ) : null}
-                  </span>
-                </span>
-                {rankChips && rankChips.length > 0 && (
-                  <span className="flex flex-wrap gap-1.5">
-                    {rankChips.map((rank) => (
-                      <Chip key={rank} size="sm" className={`${colourRank} font-code`}>
-                        {rank}
-                      </Chip>
-                    ))}
-                  </span>
-                )}
-              </span>
+              <PickerRowName name={label} />
+              {(cost !== undefined ||
+                (ownedCount !== undefined && ownedCount > 0) ||
+                owned ||
+                (rankChips && rankChips.length > 0)) && (
+                <PickerRowChips>
+                  {cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
+                  {ownedCount !== undefined && ownedCount > 0 ? (
+                    <Chip className={colourAmberFaint}>Owned: {ownedCount}</Chip>
+                  ) : owned ? (
+                    <Chip className={colourAmberFaint}>Owned</Chip>
+                  ) : null}
+                  {rankChips?.map((rank) => (
+                    <Chip key={rank} size="sm" className={`${colourRank} font-code`}>
+                      {rank}
+                    </Chip>
+                  ))}
+                </PickerRowChips>
+              )}
             </PickerRow>
           );
         })}

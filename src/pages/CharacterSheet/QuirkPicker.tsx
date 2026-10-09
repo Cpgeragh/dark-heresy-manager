@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { QUIRK_OPTIONS } from "../../data/reference/appearanceData";
-import { uiItemNameHover } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
+import { PickerRowName } from "../../ui/pickers/PickerRowParts";
 
 export function QuirkPicker({
   existing,
@@ -32,7 +32,7 @@ export function QuirkPicker({
       <PickerList>
         {options.map((quirk) => (
           <PickerRow key={quirk} onClick={() => onSelect(quirk)}>
-            <span className={uiItemNameHover}>{quirk}</span>
+            <PickerRowName name={quirk} />
           </PickerRow>
         ))}
       </PickerList>

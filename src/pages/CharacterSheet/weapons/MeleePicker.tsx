@@ -8,7 +8,7 @@ import {
 } from "../../../data/reference/weaponReference";
 import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { uiTextBody, uiTextMuted, uiItemNameHover } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextMuted } from "../../../ui/styles/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
@@ -21,6 +21,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft, ArrowRight } from "../../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -253,13 +254,13 @@ export function MeleePicker({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(item)}
             >
-              <span className={uiItemNameHover}>{item.name}</span>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+              <PickerRowName name={item.name} />
+              <PickerRowChips>
                 {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
                 {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
                 {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+              </PickerRowChips>
+              <PickerRowChips>
                 {(() => {
                   const t = weaponTypeChip(data.type);
                   return t ? (
@@ -282,7 +283,7 @@ export function MeleePicker({
                 <Chip size="sm" className={colourFuchsia}>
                   Custom
                 </Chip>
-              </div>
+              </PickerRowChips>
             </PickerRow>
           );
         })}

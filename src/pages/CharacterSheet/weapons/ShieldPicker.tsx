@@ -4,13 +4,7 @@ import { useState } from "react";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weaponReference";
-import {
-  uiTextBody,
-  uiTextLabel,
-  uiTextMuted,
-  uiInfoModalWrapper,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+import { uiTextBody } from "../../../ui/styles/editableStyles";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerCustomAction,
@@ -18,6 +12,11 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
+import {
+  PickerRowChips,
+  PickerRowInfoLine,
+  PickerRowName,
+} from "../../../ui/pickers/PickerRowParts";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
@@ -79,11 +78,8 @@ export function ShieldPicker({
                   interactive={editable}
                   onClick={() => onSelectCustom?.(item)}
                 >
-                  <div className="flex items-center gap-1.5">
-                    <span className={uiItemNameHover}>{item.name}</span>
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
+                  <PickerRowChips>
                     <StatChip size="sm" label="AP" value={String(data.ap)} />
                     {data.locations && (
                       <StatChip size="sm" label="Location" value={data.locations} />
@@ -91,34 +87,35 @@ export function ShieldPicker({
                     {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
                     {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
                     {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  </PickerRowChips>
+                  <PickerRowChips>
                     <ItemMetaChips
                       weight={data.weight}
                       value={data.value}
                       availability={data.availability}
                       source={data.source}
                     />
-                  </div>
+                  </PickerRowChips>
                   {data.specialRules && data.specialRules !== "—" && (
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className={uiTextLabel}>Qualities</span>
-                      <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                        {data.specialRules}
-                      </span>
-                      <span className={uiInfoModalWrapper}>
+                    <PickerRowInfoLine
+                      label="Qualities"
+                      info={
                         <InfoModal
                           title={`${data.name} Qualities`}
                           content={<SpecialRulesContent rules={data.specialRules} />}
                           as="span"
                         />
+                      }
+                    >
+                      <span className={`text-xs lg:text-sm ${uiTextBody}`}>
+                        {data.specialRules}
                       </span>
-                    </div>
+                    </PickerRowInfoLine>
                   )}
                   {data.notes && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className={uiTextLabel}>Rules</span>
-                      <span className={uiInfoModalWrapper}>
+                    <PickerRowInfoLine
+                      label="Rules"
+                      info={
                         <InfoModal
                           title={data.name}
                           content={
@@ -128,8 +125,8 @@ export function ShieldPicker({
                           }
                           as="span"
                         />
-                      </span>
-                    </div>
+                      }
+                    />
                   )}
                 </PickerRow>
               ),
@@ -139,41 +136,40 @@ export function ShieldPicker({
             name: ref.name,
             row: (
               <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-                <span className={uiItemNameHover}>{ref.name}</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <PickerRowName name={ref.name} />
+                <PickerRowChips>
                   <StatChip size="sm" label="AP" value={String(ref.ap)} />
                   {ref.locations && <StatChip size="sm" label="Location" value={ref.locations} />}
                   {ref.damage && <StatChip size="sm" label="Dmg" value={ref.damage} />}
                   {ref.damage && <DamageTypeChip size="sm" damage={ref.damage} />}
                   <StatChip size="sm" label="Pen" value={String(ref.pen)} />
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                </PickerRowChips>
+                <PickerRowChips>
                   <ItemMetaChips
                     weight={ref.weight}
                     value={ref.value}
                     availability={ref.availability}
                     source={ref.source}
                   />
-                </div>
+                </PickerRowChips>
                 {ref.specialRules && ref.specialRules !== "—" && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className={uiTextLabel}>Qualities</span>
-                    <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
-                      {ref.specialRules}
-                    </span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Qualities"
+                    info={
                       <InfoModal
                         title={`${ref.name} Qualities`}
                         content={<SpecialRulesContent rules={ref.specialRules} />}
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  >
+                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
+                  </PickerRowInfoLine>
                 )}
                 {ref.notes && (
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={uiTextLabel}>Rules</span>
-                    <span className={uiInfoModalWrapper}>
+                  <PickerRowInfoLine
+                    label="Rules"
+                    info={
                       <InfoModal
                         title={ref.name}
                         content={
@@ -183,8 +179,8 @@ export function ShieldPicker({
                         }
                         as="span"
                       />
-                    </span>
-                  </div>
+                    }
+                  />
                 )}
               </PickerRow>
             ),

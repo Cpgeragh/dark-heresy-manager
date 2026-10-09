@@ -3,15 +3,9 @@ import { Button } from "../../../ui/buttons/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import {
-  uiCell,
-  uiInfoModalWrapper,
-  uiTextBody,
-  uiTextLabel,
-  uiTextPlaceholder,
-  uiItemNameHover,
-} from "../../../ui/styles/editableStyles";
+import { uiCell, uiInfoModalWrapper, uiTextLabel } from "../../../ui/styles/editableStyles";
 
 export function ArmourUpgradeCard({
   upgrade,
@@ -77,19 +71,18 @@ export function ArmourUpgradePicker({
       <PickerList>
         {upgrades.map((upgrade) => (
           <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
-            <span className={uiItemNameHover}>{upgrade.name}</span>
-            <ItemMetaChips
-              weight={upgrade.weight}
-              value={upgrade.value}
-              availability={upgrade.availability}
-              source={upgrade.source}
-              size="sm"
-              className="flex flex-wrap gap-1.5 mt-1"
-            />
-            <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed mt-2`}>
-              {upgrade.description}
-            </p>
-            <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
+            <PickerRowName name={upgrade.name} />
+            <PickerRowChips>
+              <ItemMetaChips
+                weight={upgrade.weight}
+                value={upgrade.value}
+                availability={upgrade.availability}
+                source={upgrade.source}
+                size="sm"
+                bare
+              />
+            </PickerRowChips>
+            <PickerRowText className="leading-relaxed">{upgrade.description}</PickerRowText>
           </PickerRow>
         ))}
       </PickerList>

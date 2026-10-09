@@ -6,10 +6,8 @@ import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
   uiFormLabel,
-  uiInfoModalWrapper,
   uiTextLabel,
   uiTextPlaceholder,
-  uiItemNameHover,
 } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
@@ -34,6 +32,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
+import { PickerRowChips, PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
 import {
@@ -450,12 +449,12 @@ export function TalentPickerModal({
                 if (editable) onSelectCustomItem?.(item);
               }}
             >
-              <span className={`${uiItemNameHover} truncate block`}>{item.name}</span>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <PickerRowName name={item.name} />
+              <PickerRowChips>
                 <Chip className={colourAmberFaint}>
                   {item.status === "draft" ? "Draft" : "Custom"}
                 </Chip>
-              </div>
+              </PickerRowChips>
             </PickerRow>
           ))}
           {overflowFiltered.map((item) => {
@@ -497,47 +496,42 @@ export function TalentPickerModal({
                   }
                 }}
               >
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`${uiItemNameHover} truncate`}>{item.name}</span>
-                    {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                      <span
-                        className={uiInfoModalWrapper}
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        <InfoModal
-                          title={item.name}
-                          content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
-                          as="span"
-                        />
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {sources.map((source) => (
-                      <Chip
-                        key={source}
-                        className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
-                      >
-                        {source}
-                      </Chip>
-                    ))}
-                    {faithGroupChip && (
-                      <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
-                    )}
-                    {ownedCount > 0 && (
-                      <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                        Owned: {ownedCount}
-                      </Chip>
-                    )}
-                  </div>
-                  {row.prerequisites && (
-                    <div className="text-xs lg:text-sm">
-                      <span className={uiTextLabel}>Prerequisites: </span>
-                      <span className="text-slate-300 font-medium">{row.prerequisites}</span>
-                    </div>
+                <PickerRowName
+                  name={item.name}
+                  info={
+                    (TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
+                      <InfoModal
+                        title={item.name}
+                        content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
+                        as="span"
+                      />
+                    )
+                  }
+                />
+                <PickerRowChips>
+                  {sources.map((source) => (
+                    <Chip
+                      key={source}
+                      className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
+                    >
+                      {source}
+                    </Chip>
+                  ))}
+                  {faithGroupChip && (
+                    <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
                   )}
-                </div>
+                  {ownedCount > 0 && (
+                    <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                      Owned: {ownedCount}
+                    </Chip>
+                  )}
+                </PickerRowChips>
+                {row.prerequisites && (
+                  <PickerRowText>
+                    <span className={uiTextLabel}>Prerequisites: </span>
+                    <span className="text-slate-300 font-medium">{row.prerequisites}</span>
+                  </PickerRowText>
+                )}
               </PickerRow>
             );
           })}
@@ -747,63 +741,58 @@ export function TalentPickerModal({
                 }
               }}
             >
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className={`${uiItemNameHover} truncate`}>{item.name}</span>
-                  {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                    <span
-                      className={uiInfoModalWrapper}
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      <InfoModal
-                        title={item.name}
-                        content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
-                        as="span"
-                      />
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {sources.map((source) => (
-                    <Chip
-                      key={source}
-                      className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
-                    >
-                      {source}
+              <PickerRowName
+                name={item.name}
+                info={
+                  (TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
+                    <InfoModal
+                      title={item.name}
+                      content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
+                      as="span"
+                    />
+                  )
+                }
+              />
+              <PickerRowChips>
+                {sources.map((source) => (
+                  <Chip
+                    key={source}
+                    className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
+                  >
+                    {source}
+                  </Chip>
+                ))}
+                {faithGroupChip && (
+                  <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
+                )}
+                {ownedLabel && (
+                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                    {ownedLabel}
+                  </Chip>
+                )}
+                {slotsLeft > 1
+                  ? slotCounts.map((slot) => (
+                      <Chip key={slot.cost} className={colourValue}>
+                        {slot.cost} XP: {slot.count} left
+                      </Chip>
+                    ))
+                  : cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
+              </PickerRowChips>
+              {rankChips && rankChips.length > 0 && (
+                <PickerRowChips>
+                  {rankChips.map((rankName) => (
+                    <Chip key={rankName} size="sm" className={`${colourRank} font-code`}>
+                      {rankName}
                     </Chip>
                   ))}
-                  {faithGroupChip && (
-                    <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
-                  )}
-                  {ownedLabel && (
-                    <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                      {ownedLabel}
-                    </Chip>
-                  )}
-                  {slotsLeft > 1
-                    ? slotCounts.map((slot) => (
-                        <Chip key={slot.cost} className={colourValue}>
-                          {slot.cost} XP: {slot.count} left
-                        </Chip>
-                      ))
-                    : cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
-                </div>
-                {rankChips && rankChips.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {rankChips.map((rankName) => (
-                      <Chip key={rankName} size="sm" className={`${colourRank} font-code`}>
-                        {rankName}
-                      </Chip>
-                    ))}
-                  </div>
-                )}
-                {row.prerequisites && (
-                  <div className="text-xs lg:text-sm">
-                    <span className={uiTextLabel}>Prerequisites: </span>
-                    <span className="text-slate-300 font-medium">{row.prerequisites}</span>
-                  </div>
-                )}
-              </div>
+                </PickerRowChips>
+              )}
+              {row.prerequisites && (
+                <PickerRowText>
+                  <span className={uiTextLabel}>Prerequisites: </span>
+                  <span className="text-slate-300 font-medium">{row.prerequisites}</span>
+                </PickerRowText>
+              )}
             </PickerRow>
           );
         })}
