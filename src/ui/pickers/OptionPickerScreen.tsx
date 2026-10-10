@@ -4,7 +4,6 @@ import { PickerList, PickerModal, PickerRow } from "./PickerModal";
 import { ArrowLeft } from "../icons/PickerArrows";
 import { PickerRowChips, PickerRowName } from "./PickerRowParts";
 import { Chip } from "../chips/Chip";
-import { colourAmberFaint, colourRank, colourValue } from "../styles/colourTokens";
 
 export type PickerOption =
   | string
@@ -59,14 +58,14 @@ export function OptionPickerScreen({
                 owned ||
                 (rankChips && rankChips.length > 0)) && (
                 <PickerRowChips>
-                  {cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
+                  {cost !== undefined && <Chip colour="amber">{cost} XP</Chip>}
                   {ownedCount !== undefined && ownedCount > 0 ? (
-                    <Chip className={colourAmberFaint}>Owned: {ownedCount}</Chip>
+                    <Chip colour="amber">Owned: {ownedCount}</Chip>
                   ) : owned ? (
-                    <Chip className={colourAmberFaint}>Owned</Chip>
+                    <Chip colour="amber">Owned</Chip>
                   ) : null}
                   {rankChips?.map((rank) => (
-                    <Chip key={rank} size="sm" className={`${colourRank} font-code`}>
+                    <Chip key={rank} size="sm" colour="fuchsia" className="font-code">
                       {rank}
                     </Chip>
                   ))}

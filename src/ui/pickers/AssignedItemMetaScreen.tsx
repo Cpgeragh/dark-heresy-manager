@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { Button } from "../buttons/Button";
-import { uiPickerBackButton } from "../styles/buttonStyles";
 import { AssignedItemMetaFields, type AssignedItemMetaFieldsProps } from "./AssignedItemMetaFields";
 import { PickerBody, PickerModal } from "./PickerModal";
 import { OptionPickerScreen } from "./OptionPickerScreen";
@@ -75,9 +74,9 @@ export function AssignedItemMetaScreen({
         <RequiredFieldsNote />
 
         <div className="flex gap-2 pt-1">
-          <button type="button" onClick={onBack} className={uiPickerBackButton}>
+          <Button variant="neutral" onClick={onBack}>
             Back
-          </button>
+          </Button>
           <Button className="flex-1" onClick={onConfirm} disabled={!canConfirm}>
             {confirmLabel}
           </Button>

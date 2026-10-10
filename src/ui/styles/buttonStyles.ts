@@ -1,8 +1,5 @@
 // src/ui/styles/buttonStyles.ts
 
-export const uiPickerBackButton =
-  "px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition";
-
 const PICKER_PRESS_FEEDBACK =
   "active:scale-[0.99] active:!border-red-400 active:!bg-slate-700 active:ring-1 active:ring-red-400/70";
 
@@ -26,6 +23,9 @@ export const uiCardOverlayLinkFeedback =
 export const uiDismissButton = "text-slate-400 hover:text-slate-200 text-lg leading-none";
 
 export const uiExpandButton = "flex-1 min-w-0 text-left";
+
+/** Header of a tappable card: the hover tint, and the group its title turns white with. */
+export const uiCardTapHeader = "group transition hover:bg-slate-700/40";
 
 /** Icon size inside an icon button, matched to the button's own size. */
 export const uiIconButtonIconSize = { md: "w-[18px] h-[18px]", sm: "w-4 h-4" } as const;

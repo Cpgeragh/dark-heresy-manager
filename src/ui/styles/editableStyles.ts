@@ -1,8 +1,8 @@
 // src/ui/styles/editableStyles.ts
 
 import { chipClassName } from "./chipStyles";
-import { colourInactive, colourMetadataLabelText, colourTextPrimary } from "./colourTokens";
-import { fieldControlClass, type FieldResize } from "./fieldStyles";
+import { chipColours, colourMetadataLabelText, colourTextPrimary } from "./colourTokens";
+import { fieldColourClass, fieldControlClass, type FieldResize } from "./fieldStyles";
 
 /**
  * Shared UI styles and tokens.
@@ -18,6 +18,11 @@ import { fieldControlClass, type FieldResize } from "./fieldStyles";
 
 export function editableInputClass(isEditable: boolean) {
   return fieldControlClass({ editable: isEditable });
+}
+
+/** Fill, border and selected border of a text box, for boxes that set their own size. */
+export function editableInputColour(isEditable: boolean, invalid = false) {
+  return fieldColourClass({ editable: isEditable, invalid });
 }
 
 export function editableTextareaClass(isEditable: boolean, resize: FieldResize = "vertical") {
@@ -65,11 +70,8 @@ export const uiCellValue = "text-xl lg:text-2xl font-semibold font-code text-sla
 /** Primary readable body text for rules, notes, descriptions, and explanations. */
 export const uiTextBody = "text-slate-300";
 
-/** Secondary readable text for less prominent facts that are still meaningful. */
-export const uiTextMuted = "text-slate-300/90";
-
-/** Low-priority metadata, dividers, and compact supporting details. */
-export const uiTextSubtle = "text-slate-500";
+/** Secondary game information, such as a stowed item's remaining quantity. */
+export const uiTextSubtle = "text-amber-300";
 
 /** Empty-state or placeholder-like text. */
 export const uiTextPlaceholder = "text-slate-500";
@@ -77,8 +79,37 @@ export const uiTextPlaceholder = "text-slate-500";
 /** Tiny uppercase label text used beside values. */
 export const uiTextLabel = `text-[10px] lg:text-xs ${colourMetadataLabelText} uppercase tracking-wide`;
 
-export const uiTextError = "text-red-400 text-sm lg:text-base";
+/** Shared error colour. Components retain the size appropriate to their layout. */
+export const uiTextError = "text-red-400";
 export const uiTextGMNote = "text-amber-400/70";
+
+/**
+ * Specialist visual styles stay with the component or token that owns them.
+ * Controls need hover, focus, disabled and selected states. Chips and badges
+ * use a linked border, fill and text treatment. Mechanical values and warnings
+ * use colour to communicate a game state, threshold, reward or danger.
+ * Do not replace those styles with a shared text-tone token.
+ */
+
+// ─── Shared heading tokens ───────────────────────────────────────────────────
+
+/** Main title shown above a full page of content. */
+export const uiPageTitle = "text-center font-cinzel text-lg font-bold text-slate-200 lg:text-xl";
+
+/** Compact red title used in the character-sheet toolbar. */
+export const uiToolbarTitle =
+  "px-2 text-center font-cinzel text-sm font-bold leading-tight text-red-500 sm:text-base lg:text-lg";
+
+/** Centred Cinzel title used by modal headers. Size and colour are supplied by the header. */
+export const uiModalTitle = "text-center font-cinzel font-bold";
+export const uiModalTitleAccent = "text-red-500";
+
+/** Plain title used in a side drawer header. */
+export const uiDrawerTitle = "font-semibold text-slate-100";
+
+/** Cinzel label used for an action row inside a settings-style panel. */
+export const uiActionRowLabel =
+  "font-cinzel text-sm font-semibold uppercase tracking-wider text-slate-200 lg:text-base";
 
 // ─── Form tokens ──────────────────────────────────────────────────────────────
 
@@ -94,7 +125,8 @@ export const uiSubheading =
 export const uiItemName = "text-sm lg:text-base font-medium text-slate-200";
 export const uiItemNameHover = `${uiItemName} group-hover:text-white`;
 export const uiCardTitle = "text-sm lg:text-base font-semibold text-slate-200";
+export const uiCardTitleHover = `${uiCardTitle} group-hover:text-white`;
 
 // ──────────────────────────────────────────────────────────────────────────────
 
-export const readOnlyBadgeClass = chipClassName({ className: colourInactive });
+export const readOnlyBadgeClass = chipClassName({ className: chipColours.slate });

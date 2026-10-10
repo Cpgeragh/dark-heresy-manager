@@ -1,6 +1,100 @@
 // src/ui/styles/sourceStyles.ts
 // Colour classes for source-book badges, availability chips, and characteristic chips across all tabs.
 
+import type { ChipColour } from "./colourTokens";
+
+export function sourceChipColour(source: string): ChipColour {
+  switch (source) {
+    case "IH":
+      return "cyan";
+    case "RH":
+      return "teal";
+    case "BoM":
+      return "red";
+    case "BoJ":
+      return "amber";
+    case "CA":
+      return "green";
+    case "DH":
+      return "violet";
+    case "LW":
+      return "orange";
+    case "Asc":
+      return "yellow";
+    case "DotDG":
+      return "pink";
+    case "BSep":
+      return "blue";
+    case "CC":
+      return "rose";
+    case "H3":
+      return "indigo";
+    case "LD":
+      return "sky";
+    case "SDS":
+      return "emerald";
+    case "Custom":
+      return "fuchsia";
+    case "2nd Ed":
+      return "lime";
+    case "CR":
+    default:
+      return "slate";
+  }
+}
+
+export function availabilityChipColour(availability: string | undefined): ChipColour {
+  switch (availability) {
+    case "Common":
+      return "emerald";
+    case "Average":
+      return "sky";
+    case "Uncommon":
+      return "teal";
+    case "Scarce":
+      return "yellow";
+    case "Rare":
+      return "orange";
+    case "Very Rare":
+      return "rose";
+    case "Extremely Rare":
+      return "purple";
+    case "Near Unique":
+      return "pink";
+    case "Unique":
+      return "fuchsia";
+    case "Issued Only":
+      return "cyan";
+    case "Adeptus Mechanicus Only":
+    case "Tech-Priest Only":
+      return "red";
+    case "Abundant":
+    case "Plentiful":
+    default:
+      return "slate";
+  }
+}
+
+export function characteristicChipColour(characteristic: string): ChipColour {
+  switch (characteristic.toLowerCase()) {
+    case "ws":
+    case "bs":
+      return "amber";
+    case "s":
+    case "t":
+    case "ag":
+      return "green";
+    case "int":
+    case "per":
+    case "wp":
+      return "blue";
+    case "fel":
+      return "pink";
+    default:
+      return "slate";
+  }
+}
+
 /**
  * Returns Tailwind text + border classes for a given SkillSource code.
  * Used inline as:
@@ -42,69 +136,6 @@ export function sourceColour(source: string): string {
       return "text-fuchsia-400 border-fuchsia-700/50";
     case "2nd Ed":
       return "text-lime-400 border-lime-700/50";
-    default:
-      return "text-slate-400 border-slate-600";
-  }
-}
-
-/**
- * Returns a Tailwind text colour class for a given availability string.
- * Used inline as:
- *   <span className={`… ${availabilityColour(item.availability)}`}>{item.availability}</span>
- */
-export function availabilityColour(availability: string | undefined): string {
-  switch (availability) {
-    case "Abundant":
-      return "text-slate-500";
-    case "Plentiful":
-      return "text-slate-400";
-    case "Common":
-      return "text-emerald-400";
-    case "Average":
-      return "text-sky-400";
-    case "Uncommon":
-      return "text-teal-400";
-    case "Scarce":
-      return "text-yellow-400";
-    case "Rare":
-      return "text-orange-400";
-    case "Very Rare":
-      return "text-rose-400";
-    case "Extremely Rare":
-      return "text-purple-400";
-    case "Near Unique":
-      return "text-pink-400";
-    case "Unique":
-      return "text-fuchsia-400";
-    case "Issued Only":
-      return "text-cyan-400";
-    case "Adeptus Mechanicus Only":
-      return "text-red-500";
-    default:
-      return "text-slate-400";
-  }
-}
-
-/**
- * Returns Tailwind text + border classes for a characteristic key.
- * Groups: combat (WS/BS) → amber, physical (S/T/Ag) → green,
- *         mental (Int/Per/WP) → blue, social (Fel) → pink.
- */
-export function charColour(characteristic: string): string {
-  switch (characteristic.toLowerCase()) {
-    case "ws":
-    case "bs":
-      return "text-amber-400 border-amber-700/50";
-    case "s":
-    case "t":
-    case "ag":
-      return "text-green-400 border-green-700/50";
-    case "int":
-    case "per":
-    case "wp":
-      return "text-blue-400 border-blue-700/50";
-    case "fel":
-      return "text-pink-400 border-pink-700/50";
     default:
       return "text-slate-400 border-slate-600";
   }

@@ -1248,6 +1248,14 @@ The same kind of element looks and behaves the same in every picker and card.
 Open each picker with the sheet editable, and again read-only where a View button exists. Repeat in a narrow window and a wide one, with a mouse for the hover checks.
 
 - [ ] In the Gear, Consumables, Drugs, Cybernetics, Archeotech, Weapons, Armour and Force Field pickers, each row shows the name, then a row of chips, then any description line, with the same small gap above each part (`PickerRowParts.tsx`)
+- [ ] Passive chips using a named `Chip` colour use the shared size and shape from `Chip.tsx` with matching `500/50` border, `500/10` fill and `300` text; slate and XP use that palette, while source abbreviations use the matching source colour and the code font
+- [ ] XP costs in the Talent, Skill, Elite Advance and option pickers, prices on every item, Owned and Draft tags, the roll chip, the Archeotech label and the session +XP badge all show the same amber (`Chip.tsx`, `ItemMetaChips.tsx`, `RollChip.tsx`)
+- [ ] Weight and per-quantity chips show the lighter grey beside the coloured availability chip, and "Tech-Priest Only" shows red like "Adeptus Mechanicus Only" (`sourceStyles.ts`)
+- [ ] On weapons, Las is red on both the type chip and the ammo chip, Launcher is yellow on both, Exotic is fuchsia on class, type and ammo including grenades, and SP weapons and Solid Projectile ammo are both teal (`weaponHelpers.ts`)
+- [ ] Quality chips on Archeotech items and implants show Poor red, Common grey, Good green and Best amber (`craftsmanship.ts`)
+- [ ] Skill rows show Untrained red, Trained orange, +10 sky and +20 green, with Basic in teal and Advanced in purple (`SkillRow.tsx`)
+- [ ] Session cards show "+XP" in amber and "XP Applied" in green, and the Loaded label on a Ranged magazine and on an ammo row is a green chip (`SessionCard.tsx`, `RangedCard.tsx`, `AmmoEntryRow.tsx`)
+- [ ] Rank card entry kinds, Faith Talent groups and Custom Item Library filter chips use the same lighter chip look, with the active filter red (`ExperienceTab.tsx`, `faithTalentGroups.ts`, `CustomItemLibraryAdmin.tsx`)
 - [ ] Hovering a row in an editable picker turns its name white and lightens its box together; in a read-only View picker neither changes (`PickerRow` in `PickerModal.tsx`)
 - [ ] A long item name wraps onto a second line with its info icon beside it, and no name is cut with an ellipsis
 - [ ] Pressing the info icon on any row opens its pop-up and does not select the row
@@ -1255,6 +1263,20 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The Ammo picker and the option lists on custom forms show costs, availability and Owned tags in a chip row below the name, never to the right of it (`AmmoPicker.tsx`, `OptionPickerScreen.tsx`)
 - [ ] The Talents, Traits, Skills, Elite Advances and Psychic route rows use the same spacing, and their prerequisite lines match the grey of other description lines
 - [ ] Expanding cards, which are talent and trait groups, skill groups, the XP rank card, career purchase groups and Archeotech items with a description, expand and collapse from the header, show the lighter hover and the press effect, and keep their opened content inside the same card (`AccordionCard.tsx`)
+- [ ] The filter buttons in the Ranged, Melee, Psychic power and Insanity pickers, and the Show all button in the Skills, Talent, Trait and Elite Advances pickers, show centred words inside the same border and fill as the item rows, have no arrow, and sink slightly when pressed (`FilterButton.tsx`)
+- [ ] The Insanity custom disorder Type box, the weapon Qualities box and the Talent choice box look and press like the other form boxes, with an arrow, left-aligned words and a red border when selected (`PickerField.tsx`)
+- [ ] Every text box where you type shows the same dark fill and grey border, and a red border when you click into it, including the GM message box, the custom ammo name box, the typed delete confirmation box, the quantity editor on Gear, Drugs and Consumables, and the characteristic Base box (`editableInputColour` in `editableStyles.ts`)
+- [ ] The characteristic Base box shows a red border when its value is invalid, and the not-allowed cursor when the sheet is read-only
+- [ ] The Wear, Stow, Activate and Deactivate buttons on the Armour tab, and the Back buttons in the Gender, Appearance trait, Implant and assigned cost screens, are grey outlined buttons that shrink slightly when pressed and show a red ring when focused (`Button`, `neutral`)
+- [ ] The Campaign options menu rows Import JSON, Repair Character Summaries and Repair Session Summaries are full-width buttons with centred words, show moving dots while they work, and Import JSON opens the file chooser (`CampaignOverview.tsx`)
+- [ ] In every pick-one row, which covers the craftsmanship rows in the weapon, armour, force field, implant and integrated pickers and the custom item forms, the Archeotech and Armour piece location rows, the Psychic power form rows, the Career starting choices and the weapon profile buttons on the Ranged and Melee cards, an unselected button has a dark fill, grey border and dim text that brighten on hover, the selected button shows its own colour, and every button shows a red ring when focused (`ToggleButton.tsx`)
+- [ ] The Origin selector in the custom item forms looks the same as the other pick-one rows (`toggleButtonClass`)
+- [ ] The header Home and Back link, the Options button (a gear picture), the section menu button, the Messages button, and the scroll to top button all have the same red outline and red icon as the Add and Edit buttons, shrink slightly when pressed, and show a red ring when focused (`IconButton`, `uiIconButton`)
+- [ ] Every icon button is a square, and the section menu and Messages buttons are 40px squares, a little larger than the 32px others
+- [ ] The scroll to top button keeps its floating position and shadow and shows a dark fill behind its red outline
+- [ ] Every card you tap to open or choose lightens its header and turns its name white on hover, sinks slightly when pressed, and shows a red focus ring, including the Grenade, Shield, Archeotech, Companion, Psychic power, Skill, Melee and Ranged cards and the Ranged picker rows (`CardOverlayButton`)
+- [ ] A card that is held open or cannot be tapped, such as a Skill row outside a picker, shows no hover tint and keeps a plain name
+- [ ] Choosing a companion in the Companion picker still shows a spinner and the waiting cursor on that card until it saves
 - [ ] No text in the app appears in italics
 
 ## Coverage notes

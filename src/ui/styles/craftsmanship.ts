@@ -1,4 +1,5 @@
 import type { CyberneticCraftsmanship, StandardCraftsmanship } from "../../types/Character";
+import type { ChipColour } from "./colourTokens";
 
 export const CRAFTSMANSHIP_OPTIONS = [
   "Poor",
@@ -9,6 +10,13 @@ export const CRAFTSMANSHIP_OPTIONS = [
 export const CYBERNETIC_CRAFTSMANSHIP_OPTIONS = CRAFTSMANSHIP_OPTIONS.filter(
   (option): option is CyberneticCraftsmanship => option !== "Best"
 );
+
+export const CRAFTSMANSHIP_COLOUR: Record<StandardCraftsmanship, ChipColour> = {
+  Poor: "red",
+  Common: "slate",
+  Good: "emerald",
+  Best: "amber",
+};
 
 export const CRAFTSMANSHIP_STYLE: Record<StandardCraftsmanship, string> = {
   Poor: "border-red-500/70 bg-red-500/15 text-red-300",

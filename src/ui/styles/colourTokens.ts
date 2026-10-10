@@ -1,26 +1,13 @@
 // src/ui/styles/colourTokens.ts
 
-// Lighter border and dimmer text than colourArcheotech. See colourArcheotech for the richer amber used for archeotech items.
-export const colourAmberFaint = "border-amber-400/40 bg-amber-500/10 text-amber-300";
-export const colourFuchsia = "border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300";
-export const colourStacks = "border-sky-700/50 bg-sky-500/10 text-sky-400";
-// Darker border, brighter text. See colourAmberFaint for the lighter amber used for draft status and ammo types.
-export const colourArcheotech = "border-amber-700/50 bg-amber-500/10 text-amber-400";
-export const colourViolet = "border-violet-500/50 bg-violet-500/10 text-violet-300";
-export const colourEmerald = "border-emerald-500/50 bg-emerald-500/10 text-emerald-300";
 export const colourEmeraldPlain = "text-emerald-300";
+export const colourSuccessPlain = "text-emerald-400";
 export const colourAmberPlain = "text-amber-300";
 export const colourSkyPlain = "text-sky-300";
 export const colourMetadataLabelText = "text-sky-300/85";
 export const colourTextPrimary = "text-slate-100";
 export const colourOverlayBackdrop = "bg-slate-950/60";
 export const colourRequiredText = "text-red-500";
-export const colourLime = "border-lime-500/50 bg-lime-500/10 text-lime-300";
-export const colourBlue = "border-blue-500/50 bg-blue-500/10 text-blue-300";
-export const colourPink = "border-pink-500/50 bg-pink-500/10 text-pink-300";
-export const colourMeta = "border-slate-700 bg-slate-900/40 text-slate-300";
-export const colourValue = "border-amber-700/50 bg-slate-900/40 text-amber-400/80";
-export const colourRank = colourFuchsia;
 export const colourCareerPathOutline =
   "border border-fuchsia-500 text-fuchsia-300 enabled:hover:bg-fuchsia-500/10 enabled:active:bg-fuchsia-500/20";
 export const colourCareerPathOutlineMuted =
@@ -31,15 +18,8 @@ export const colourCareerBranchOutlineMuted =
   "border border-emerald-500/50 text-emerald-300/60 enabled:hover:border-emerald-500/70 enabled:hover:bg-emerald-500/5 enabled:hover:text-emerald-300/80 enabled:active:bg-emerald-500/10";
 export const colourButtonNeutralOutline =
   "border border-slate-500 text-slate-200 enabled:hover:bg-slate-800 enabled:active:bg-slate-700/75";
-export const colourInactive = "border-slate-600 bg-slate-800/40 text-slate-300";
-export const colourSky = "border-sky-500/50 bg-sky-500/10 text-sky-300";
-export const colourRose = "border-rose-500/50 bg-rose-500/10 text-rose-300";
-export const colourCyan = "border-cyan-500/50 bg-cyan-500/10 text-cyan-300";
-export const colourPurple = "bg-purple-700/40 border-purple-500 text-purple-300";
-export const colourTeal = "bg-teal-900/40 border-teal-700/50 text-teal-300";
-// Lighter variant: used for weapon class and ammo-type chips (Basic weapon class, Exotic ammo).
-export const colourTealLight = "border-teal-500/50 bg-teal-500/10 text-teal-300";
-export const colourOrange = "border-orange-500/50 bg-orange-500/10 text-orange-300";
+export const colourToggleSelectedNeutral = "border-slate-400 bg-slate-700/70 text-slate-100";
+export const colourToggleSelectedSky = "border-sky-400 bg-sky-500/10 text-sky-300";
 export const colourActiveSky =
   "border-sky-400 bg-sky-600/80 text-white shadow-sm shadow-sky-950/50";
 export const colourActiveRose =
@@ -72,6 +52,29 @@ export const colourNoticeAmber = "border-amber-500/60 bg-amber-900/10";
 export const colourNoticePink = "border-pink-500/60 bg-pink-900/10";
 export const colourNoticeViolet = "border-violet-500/60 bg-violet-900/10";
 export const colourNoticeRed = "border-red-500/60 bg-red-900/10";
+
+export const chipColours = {
+  slate: "border-slate-500/50 bg-slate-500/10 text-slate-300",
+  red: "border-red-500/50 bg-red-500/10 text-red-300",
+  amber: "border-amber-500/50 bg-amber-500/10 text-amber-300",
+  yellow: "border-yellow-500/50 bg-yellow-500/10 text-yellow-300",
+  lime: "border-lime-500/50 bg-lime-500/10 text-lime-300",
+  green: "border-green-500/50 bg-green-500/10 text-green-300",
+  emerald: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
+  teal: "border-teal-500/50 bg-teal-500/10 text-teal-300",
+  cyan: "border-cyan-500/50 bg-cyan-500/10 text-cyan-300",
+  sky: "border-sky-500/50 bg-sky-500/10 text-sky-300",
+  blue: "border-blue-500/50 bg-blue-500/10 text-blue-300",
+  indigo: "border-indigo-500/50 bg-indigo-500/10 text-indigo-300",
+  violet: "border-violet-500/50 bg-violet-500/10 text-violet-300",
+  purple: "border-purple-500/50 bg-purple-500/10 text-purple-300",
+  fuchsia: "border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300",
+  pink: "border-pink-500/50 bg-pink-500/10 text-pink-300",
+  rose: "border-rose-500/50 bg-rose-500/10 text-rose-300",
+  orange: "border-orange-500/50 bg-orange-500/10 text-orange-300",
+} as const;
+
+export type ChipColour = keyof typeof chipColours;
 /** Glowing pill look when owned or selected, one entry per colour. */
 export const colourGlowActive = {
   teal: "border-teal-500/60 bg-teal-950/50 text-teal-300 font-semibold",

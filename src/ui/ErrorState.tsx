@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { uiTextError } from "./styles/editableStyles";
 
 interface ErrorStateProps {
   children: ReactNode;
@@ -7,7 +8,7 @@ interface ErrorStateProps {
 
 export function ErrorState({ children, className = "" }: ErrorStateProps) {
   return (
-    <p role="alert" className={`text-sm lg:text-base text-red-400 ${className}`.trim()}>
+    <p role="alert" className={`text-sm lg:text-base ${uiTextError} ${className}`.trim()}>
       {children}
     </p>
   );

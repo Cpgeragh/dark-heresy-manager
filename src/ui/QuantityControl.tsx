@@ -2,6 +2,7 @@
 // Inline quantity editor: decrement button, click-to-type display, increment button.
 
 import { useQuantityEdit } from "../hooks/useQuantityEdit";
+import { editableInputColour } from "./styles/editableStyles";
 
 interface Props {
   quantity: number;
@@ -68,7 +69,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className={`${sizeStyles.input} font-code text-slate-100 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500`}
+          className={`${sizeStyles.input} rounded border text-center font-code ${editableInputColour(true)}`}
           autoComplete="off"
         />
       ) : (

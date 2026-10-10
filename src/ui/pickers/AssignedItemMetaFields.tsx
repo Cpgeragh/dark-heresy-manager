@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { sanitizeMoneyInput } from "../format/moneyFormat";
-import { editableInputClass, uiTextBody } from "../styles/editableStyles";
+import { editableInputClass, uiTextBody, uiTextError } from "../styles/editableStyles";
 import { RequiredFormLabel } from "../forms/RequiredFormLabel";
 import { PickerField } from "./PickerField";
 
@@ -56,7 +56,7 @@ export function AssignedItemMetaFields({
             autoComplete="off"
           />
           {gmCost.trim() !== "" && !costValid && (
-            <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>
+            <p className={`text-xs lg:text-sm ${uiTextError}`}>Must be a whole number of 0 or more.</p>
           )}
         </div>
       )}
