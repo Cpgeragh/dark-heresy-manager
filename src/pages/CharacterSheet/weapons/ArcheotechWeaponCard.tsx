@@ -15,10 +15,11 @@ import {
   uiTextPlaceholder,
   uiCardTitleHover,
   uiInfoModalWrapper,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
+import { colourNoticeAmber, colourDivider } from "../../../ui/styles/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -194,11 +195,7 @@ export function ArcheotechWeaponCard({
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Rules`}
-                    content={
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {description}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{description}</p>}
                   />
                 </span>
               ) : (
@@ -234,7 +231,7 @@ export function ArcheotechWeaponCard({
             value={value}
             availability={availability}
             source={source}
-            className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
           />
         </div>
       )}

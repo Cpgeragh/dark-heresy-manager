@@ -1,6 +1,7 @@
 import type { SegmentedTimelineSegment } from "../../ui/SegmentedTimeline";
 import type { ChipColour } from "../../ui/styles/colourTokens";
 import { CORRUPTION_TRACK, type CorruptionTrackEntry } from "./corruptionReference";
+import { colourTextPrimary, degreeBarColour, degreeTextColour } from "../../ui/styles/colourTokens";
 
 export function corruptionDegreeChipColour(entry: CorruptionTrackEntry): ChipColour {
   if (entry.terminal) return "rose";
@@ -34,15 +35,15 @@ export function corruptionMutationLevelLabel(entry: CorruptionTrackEntry): strin
 function degreeSegmentColours(degree: string): { bright: string; dim: string } {
   switch (degree) {
     case "Tainted":
-      return { bright: "bg-sky-500/70", dim: "bg-sky-500/35" };
+      return degreeBarColour.first;
     case "Soiled":
-      return { bright: "bg-amber-500/70", dim: "bg-amber-500/35" };
+      return degreeBarColour.second;
     case "Debased":
-      return { bright: "bg-orange-500/70", dim: "bg-orange-500/35" };
+      return degreeBarColour.third;
     case "Profane":
-      return { bright: "bg-fuchsia-500/70", dim: "bg-fuchsia-500/35" };
+      return degreeBarColour.fourth;
     default:
-      return { bright: "bg-slate-500/70", dim: "bg-slate-500/35" };
+      return degreeBarColour.neutral;
   }
 }
 
@@ -72,17 +73,17 @@ export const CORRUPTION_TIMELINE_TOTAL_WIDTH = CORRUPTION_TIMELINE_SEGMENTS.redu
 );
 
 export function corruptionStepperClass(entry: CorruptionTrackEntry): string {
-  if (entry.terminal) return "text-rose-300 animate-pulse";
+  if (entry.terminal) return degreeTextColour.terminal;
   switch (entry.degree) {
     case "Tainted":
-      return "text-sky-200";
+      return degreeTextColour.first;
     case "Soiled":
-      return "text-amber-200";
+      return degreeTextColour.second;
     case "Debased":
-      return "text-orange-200";
+      return degreeTextColour.third;
     case "Profane":
-      return "text-fuchsia-200";
+      return degreeTextColour.fourth;
     default:
-      return "text-slate-100";
+      return colourTextPrimary;
   }
 }

@@ -1,3 +1,4 @@
+import { RequiredMark } from "../../ui/forms/RequiredMark";
 import { editableInputClass, uiFormLabel } from "../../ui/styles/editableStyles";
 import { CHARACTERISTIC_LABELS, type CharacteristicModifier } from "./characteristicModifiers";
 import type { RollValues } from "./rollModifierValues";
@@ -21,8 +22,7 @@ export function RollModifierFields({
     return (
       <div key={modifier.characteristic}>
         <label htmlFor={inputId} className={uiFormLabel}>
-          {CHARACTERISTIC_LABELS[modifier.characteristic]} roll (1d10){" "}
-          <span className="text-red-500">*</span>
+          {CHARACTERISTIC_LABELS[modifier.characteristic]} roll (1d10) <RequiredMark />
         </label>
         <input
           id={inputId}

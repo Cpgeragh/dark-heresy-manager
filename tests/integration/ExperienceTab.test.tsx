@@ -260,9 +260,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
     await user.click(screen.getByRole("button", { name: "Expand Conscript Rank Card" }));
     expect(conscript.getAllByText("Career Purchases from This Rank").length).toBeGreaterThan(0);
     const careerPanel = within(conscript.getByRole("tabpanel", { name: "Career Purchases" }));
-    expect(careerPanel.getByText("Skills")).toHaveClass("text-sky-300");
-    expect(careerPanel.getByText("Talents")).toHaveClass("text-sky-300");
-    expect(careerPanel.getByText("Weapon Training")).toHaveClass("text-sky-300");
+    expect(careerPanel.getByText("Skills")).toHaveClass("text-slate-200");
+    expect(careerPanel.getByText("Talents")).toHaveClass("text-slate-200");
+    expect(careerPanel.getByText("Weapon Training")).toHaveClass("text-slate-200");
     expect(careerPanel.queryByText("Awareness — Trained")).not.toBeInTheDocument();
     await user.click(careerPanel.getByRole("button", { name: "Expand Skills purchases" }));
     await user.click(careerPanel.getByRole("button", { name: "Expand Talents purchases" }));
@@ -665,7 +665,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(spendReason).toBeRequired();
     expect(spendDialog.getByText("Amount").closest("label")).toHaveClass("text-sky-300/85");
     expect(spendDialog.getByText("Reason").closest("label")).toHaveClass("text-sky-300/85");
-    expect(spendDialog.getByText("Required").closest("p")).toHaveClass("text-red-500");
+    expect(spendDialog.getByText("Required").closest("p")).toHaveClass("text-red-400");
     await user.type(spendAmount, "100");
     expect(spendDialog.getByRole("button", { name: "Confirm Spend" })).toBeDisabled();
     await user.type(spendReason, "Rank ceremony");
@@ -678,7 +678,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
 
     expect(onUpdate).not.toHaveBeenCalled();
     expect(dialog.getByText("Applied Rank Up XP Cost")).toBeInTheDocument();
-    expect(dialog.getByText("100 XP")).toHaveClass("text-slate-100");
+    expect(dialog.getByText("100 XP")).toHaveClass("text-slate-200");
     expect(dialog.getByText("Rank ceremony")).toBeInTheDocument();
     expect(dialog.queryByText("Final XP adjustments")).not.toBeInTheDocument();
     expect(

@@ -9,6 +9,7 @@ import {
   uiSection,
   uiTextBody,
   uiTextLabel,
+  uiTextDescription,
 } from "../../ui/styles/editableStyles";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { Button } from "../../ui/buttons/Button";
@@ -17,7 +18,12 @@ import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
-import { colourAmberPlain, type ChipColour } from "../../ui/styles/colourTokens";
+import {
+  colourAmberPlain,
+  type ChipColour,
+  colourTextPrimary,
+  colourDivider,
+} from "../../ui/styles/colourTokens";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
@@ -92,9 +98,7 @@ export function EntryCard({
                 content={
                   infoContent ?? (
                     <div className="space-y-3">
-                      {description && (
-                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
-                      )}
+                      {description && <p className={uiTextDescription}>{description}</p>}
                       {entry.notes && (
                         <div>
                           <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
@@ -106,7 +110,7 @@ export function EntryCard({
                               return (
                                 <p
                                   key={index}
-                                  className={`text-sm ${uiTextBody} leading-relaxed whitespace-pre-line`}
+                                  className={`${uiTextDescription} whitespace-pre-line`}
                                 >
                                   <span className="font-semibold">{heading}</span>
                                   {body && `\n${body}`}
@@ -245,13 +249,13 @@ export function TalentGroupCard({
       onToggle={() => setExpanded((value) => !value)}
       aria-label={`${expanded ? "Collapse" : "Expand"} ${name}`}
       header={
-        <span className="block truncate text-sm font-semibold text-slate-100 lg:text-base">
+        <span className={`block truncate text-sm font-semibold ${colourTextPrimary} lg:text-base`}>
           {name}
         </span>
       }
     >
       {expanded && (
-        <div className="border-t border-slate-700 space-y-2 p-2">
+        <div className={`border-t ${colourDivider} space-y-2 p-2`}>
           {[...entries]
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((entry) => (

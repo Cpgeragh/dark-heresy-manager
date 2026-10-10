@@ -22,7 +22,7 @@ import {
   PickerRowName,
 } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
-import { uiTextBody } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { SpecialRulesContent } from "./weaponShared";
 import {
@@ -87,7 +87,6 @@ export function IntegratedWeaponPicker({
     return (
       <PickerModal
         title={selected.ref.name}
-        titleClassName="text-slate-200"
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
         query=""
@@ -128,9 +127,7 @@ export function IntegratedWeaponPicker({
               ))}
             </div>
           </div>
-          <div
-            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
-          >
+          <div className={uiDescriptionBox}>
             {selected.kind === "ranged"
               ? rangedCraftsmanshipDescription(craftsmanship)
               : meleeCraftsmanshipDescription(craftsmanship)}

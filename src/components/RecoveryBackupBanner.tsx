@@ -9,7 +9,11 @@ import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService
 import { markRecoveryCodeBackedUp } from "../services/userAccountService";
 import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
-import { colourNoticeAmber } from "../ui/styles/colourTokens";
+import {
+  colourNoticeAmber,
+  colourNoticeAmberTitle,
+  colourNoticeAmberText,
+} from "../ui/styles/colourTokens";
 import { uiCodeBox, uiCodeText, uiNoticeBox } from "../ui/styles/editableStyles";
 
 interface Props {
@@ -65,10 +69,10 @@ export function RecoveryBackupBanner({
 
   return (
     <div className={`${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4 space-y-3`}>
-      <p className="text-sm lg:text-base font-semibold text-amber-200">
+      <p className={`text-sm lg:text-base font-semibold ${colourNoticeAmberTitle}`}>
         ⚠ Back up your recovery code
       </p>
-      <p className="text-xs lg:text-sm text-amber-100/80">
+      <p className={`text-xs lg:text-sm ${colourNoticeAmberText}`}>
         It's the only way to restore your account on a new device or if your browser data is
         cleared.
       </p>
@@ -92,7 +96,9 @@ export function RecoveryBackupBanner({
               I've saved it
             </Button>
           </div>
-          {!copied && <p className="text-xs lg:text-sm text-amber-100/70">Copy your code first.</p>}
+          {!copied && (
+            <p className={`text-xs lg:text-sm ${colourNoticeAmberText}`}>Copy your code first.</p>
+          )}
         </>
       ) : (
         <Button onClick={reveal} loading={busy} loadingLabel="Loading">

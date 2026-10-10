@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { uiFormLabel, uiTextError } from "../ui/styles/editableStyles";
+import { colourMetadataLabelText } from "../ui/styles/colourTokens";
 import { fieldControlClass } from "../ui/styles/fieldStyles";
 import { useDebouncedDraft } from "../hooks/useDebouncedDraft";
 
@@ -122,7 +123,10 @@ export function FormField({
 
       {/* Description (only shown if no error) */}
       {!hasError && description && (
-        <span id={`${inputId}-desc`} className="text-[10px] lg:text-xs text-slate-500 mt-0.5">
+        <span
+          id={`${inputId}-desc`}
+          className={`text-[10px] lg:text-xs ${colourMetadataLabelText} mt-0.5`}
+        >
           {description}
         </span>
       )}

@@ -47,6 +47,7 @@ import {
 } from "./armourSnapshotHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
+import { colourTextPrimary } from "../../../ui/styles/colourTokens";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -615,7 +616,9 @@ export function ArmourTab({
                   const total = ap + toughnessBonus + misc;
                   return (
                     <tr key={loc} className="hover:bg-slate-800/40 transition">
-                      <td className="py-2 pr-4 text-slate-100">{ARMOUR_LOCATION_LABELS[loc]}</td>
+                      <td className={`py-2 pr-4 ${colourTextPrimary}`}>
+                        {ARMOUR_LOCATION_LABELS[loc]}
+                      </td>
                       <td className="py-2 px-3 text-center font-code text-white">
                         {toughnessBonus}
                       </td>

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { NoteEntry } from "../../types/Character";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { Button } from "../../ui/buttons/Button";
+import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
 import { Chip } from "../../ui/chips/Chip";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
@@ -16,7 +17,9 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiTextDescription,
 } from "../../ui/styles/editableStyles";
+import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import { createLocalId } from "../../utils/createLocalId";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 
@@ -154,14 +157,14 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
               {column.map((entry) => (
                 <div
                   key={entry.id}
-                  className={`${uiSectionShell} p-4 transition hover:bg-slate-700/40 lg:p-5`}
+                  className={`${uiSectionShell} ${uiCardTapHeader} relative p-4 lg:p-5`}
                 >
-                  <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                    <button
-                      type="button"
-                      onClick={() => openView(entry)}
-                      className="min-w-0 text-left lg:flex-1"
-                    >
+                  <CardOverlayButton
+                    label={`Open note ${entry.title}`}
+                    onClick={() => openView(entry)}
+                  />
+                  <div className="pointer-events-none relative flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0 text-left lg:flex-1">
                       <span className={uiTextLabel}>{entry.title}</span>
                       <p
                         className={`mt-2 text-sm ${uiTextBody} leading-relaxed line-clamp-3 min-h-[4.3rem]`}
@@ -171,9 +174,9 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
                       <Chip size="sm" colour="cyan" className="mt-2">
                         {formatDate(entry.updatedAt)}
                       </Chip>
-                    </button>
+                    </div>
                     {editable && (
-                      <div className="flex shrink-0 justify-end gap-1.5 order-first lg:order-2">
+                      <div className="pointer-events-auto relative z-10 flex shrink-0 justify-end gap-1.5 order-first lg:order-2">
                         <Button size="xs" onClick={() => openEdit(entry)}>
                           Edit
                         </Button>
@@ -236,9 +239,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
           isEmpty={false}
         >
           <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed whitespace-pre-wrap`}>
-              {activeEntry.text}
-            </p>
+            <p className={`${uiTextDescription} whitespace-pre-wrap`}>{activeEntry.text}</p>
           </PickerBody>
         </PickerModal>
       )}

@@ -11,6 +11,7 @@ import { ErrorState } from "../ui/ErrorState";
 import { PendingOverlay } from "../ui/PendingOverlay";
 import { uiDrawerTitle, uiTextPlaceholder } from "../ui/styles/editableStyles";
 import { recordComponentRender } from "../performance/performanceMetrics";
+import { colourPopoverSurface, colourDivider } from "../ui/styles/colourTokens";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────
 
@@ -92,9 +93,7 @@ export function MessageDrawer({
 
       {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 max-w-[85vw] z-50 bg-slate-900 border-l border-slate-700 flex flex-col transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-72 max-w-[85vw] z-50 ${colourPopoverSurface} border-l flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="message-drawer-title"
@@ -102,7 +101,9 @@ export function MessageDrawer({
         inert={!isOpen}
       >
         {/* Panel header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
+        <div
+          className={`flex items-center justify-between px-4 py-3 border-b ${colourDivider} shrink-0`}
+        >
           <h2 id="message-drawer-title" className={uiDrawerTitle}>
             Messages
           </h2>

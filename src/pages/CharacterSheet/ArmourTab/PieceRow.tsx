@@ -7,6 +7,8 @@ import {
   uiTextPlaceholder,
   uiItemName,
   uiInfoModalWrapper,
+  uiRuleName,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -30,6 +32,7 @@ import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { ARMOUR_UPGRADE_REFERENCE } from "../../../data/reference/armourUpgradeReference";
 import { ArmourUpgradeCard, ArmourUpgradePicker } from "./ArmourUpgradePicker";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { colourDivider } from "../../../ui/styles/colourTokens";
 
 interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
@@ -49,8 +52,8 @@ function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
         if (!desc) return null;
         return (
           <div key={name}>
-            <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
-            <p className={`text-sm lg:text-base ${uiTextBody} mt-1 leading-relaxed`}>{desc}</p>
+            <p className={uiRuleName}>{name}</p>
+            <p className={`${uiTextDescription} mt-1`}>{desc}</p>
           </div>
         );
       })}
@@ -145,7 +148,7 @@ export function PieceRow({
         </div>
 
         {(upgradeRefs.length > 0 || addableCompatible.length > 0) && (
-          <div className="border-t border-slate-800 pt-2 mt-2 space-y-1.5">
+          <div className={`border-t ${colourDivider} pt-2 mt-2 space-y-1.5`}>
             <div className="flex items-center justify-between">
               <span className={uiTextLabel}>Upgrades</span>
               {editable ? (

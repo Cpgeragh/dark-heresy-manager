@@ -20,8 +20,13 @@ import {
   uiCell,
   uiCellValue,
   uiInfoModalWrapper,
-  uiTextBody,
+  uiTextDescription,
 } from "../../ui/styles/editableStyles";
+import {
+  colourSuccessPlain,
+  colourTextPrimary,
+  colourErrorText,
+} from "../../ui/styles/colourTokens";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -116,28 +121,30 @@ export function VitalsTab({
   };
 
   function dangerClass(value: number, criticalThreshold: number): string {
-    return value <= criticalThreshold ? "text-red-400 font-semibold" : "";
+    return value <= criticalThreshold ? `${colourErrorText} font-semibold` : "";
   }
 
   function dangerClassAbove(value: number, threshold: number): string {
-    return value > threshold ? "text-red-400 font-semibold" : "";
+    return value > threshold ? `${colourErrorText} font-semibold` : "";
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className={`space-y-6 ${colourTextPrimary}`}>
       <div>
         <SectionHeader className="mb-2">Combat Status</SectionHeader>
         <section className={uiSection}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="flex items-center justify-center gap-1 text-xs lg:text-base text-slate-100 mb-2">
+              <div
+                className={`flex items-center justify-center gap-1 text-xs lg:text-base ${colourTextPrimary} mb-2`}
+              >
                 <span>Total Wounds</span>
                 {woundSources.length > 0 && (
                   <span className={uiInfoModalWrapper}>
                     <InfoModal
                       title="Total Wounds Adjustments"
                       content={
-                        <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
+                        <ul className={`space-y-1 ${uiTextDescription}`}>
                           {woundSources.map((source, index) => (
                             <li key={index}>
                               {source.name} (Talent): {source.amount > 0 ? "+" : ""}
@@ -174,7 +181,7 @@ export function VitalsTab({
                 )}
                 {editable && woundAdjustment !== 0 && (
                   <span
-                    className={`ml-1 text-xs font-code ${woundAdjustment > 0 ? "text-emerald-400" : "text-red-400"}`}
+                    className={`ml-1 text-xs font-code ${woundAdjustment > 0 ? colourSuccessPlain : colourErrorText}`}
                   >
                     = {effectiveWoundsTotal} ({woundAdjustment > 0 ? "+" : ""}
                     {woundAdjustment})
@@ -184,7 +191,7 @@ export function VitalsTab({
             </div>
 
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="text-xs lg:text-base text-slate-100 mb-2">Current Wounds</div>
+              <div className={`text-xs lg:text-base ${colourTextPrimary} mb-2`}>Current Wounds</div>
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={wounds.current}
@@ -198,15 +205,11 @@ export function VitalsTab({
 
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="flex items-center justify-center gap-1 mb-2">
-                <span className="text-xs lg:text-base text-slate-100">Critical Damage</span>
+                <span className={`text-xs lg:text-base ${colourTextPrimary}`}>Critical Damage</span>
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title="Critical Damage"
-                    content={
-                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                        {VITALS_RULE_TEXT.criticalDamage}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{VITALS_RULE_TEXT.criticalDamage}</p>}
                   />
                 </span>
               </div>
@@ -221,15 +224,11 @@ export function VitalsTab({
 
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="flex items-center justify-center gap-1 mb-2">
-                <span className="text-xs lg:text-base text-slate-100">Fatigue</span>
+                <span className={`text-xs lg:text-base ${colourTextPrimary}`}>Fatigue</span>
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title="Fatigue"
-                    content={
-                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                        {VITALS_RULE_TEXT.fatigue}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{VITALS_RULE_TEXT.fatigue}</p>}
                   />
                 </span>
               </div>
@@ -242,7 +241,7 @@ export function VitalsTab({
                 />
               </div>
               {wounds.fatigue > toughnessBonus && (
-                <div className="text-xs text-red-400 font-semibold mt-1">Unconscious</div>
+                <div className={`text-xs ${colourErrorText} font-semibold mt-1`}>Unconscious</div>
               )}
             </div>
           </div>
@@ -257,20 +256,20 @@ export function VitalsTab({
               title="Using Fate Points"
               content={
                 <div className="space-y-2">
-                  <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
+                  <p className={uiTextDescription}>
                     Fate Points allow you to turn luck to your advantage, hitting with that bolter
                     shot when you would have otherwise missed, or cracking the security code on a
                     door just in time to make a hasty escape. Using these twists of fate, you can
                     take a few more risks, which makes the game faster and far more exciting than
                     would otherwise be the case.
                   </p>
-                  <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
+                  <p className={uiTextDescription}>
                     That said, you have a limited pool of Fate Points and whenever you spend a Fate
                     Point, you reduce your pool by one, so choose wisely. Fate Points are restored
                     at the start of the next gaming session. Spending a Fate Point allows a
                     character to do one of the following things:
                   </p>
-                  <ul className={`list-disc list-inside text-sm leading-relaxed ${uiTextBody} lg:text-base space-y-1`}>
+                  <ul className={`list-disc list-inside ${uiTextDescription} space-y-1`}>
                     <li>Re-roll any one failed Test. The results of the re-roll are final.</li>
                     <li>Count as having rolled a 10 for their Initiative.</li>
                     <li>Add an extra degree of success to a Test.</li>
@@ -285,14 +284,16 @@ export function VitalsTab({
         <section className={uiSection}>
           <div className="grid grid-cols-2 gap-3">
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="flex items-center justify-center gap-1 text-xs lg:text-base text-slate-100 mb-2">
+              <div
+                className={`flex items-center justify-center gap-1 text-xs lg:text-base ${colourTextPrimary} mb-2`}
+              >
                 <span>Total</span>
                 {(fateEffects.overrideSource || fateEffects.modifierSources.length > 0) && (
                   <span className={uiInfoModalWrapper}>
                     <InfoModal
                       title="Total Fate Point Adjustments"
                       content={
-                        <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
+                        <ul className={`space-y-1 ${uiTextDescription}`}>
                           {fateEffects.overrideSource && (
                             <li>
                               {fateEffects.overrideSource} (Talent): set to{" "}
@@ -329,7 +330,7 @@ export function VitalsTab({
                   <div className={uiCellValue}>{effectiveFateTotal}</div>
                 )}
                 {editable && effectiveFateTotal !== fate.total && (
-                  <span className="ml-1 text-xs font-code text-emerald-400">
+                  <span className={`ml-1 text-xs font-code ${colourSuccessPlain}`}>
                     = {effectiveFateTotal}
                   </span>
                 )}
@@ -337,7 +338,7 @@ export function VitalsTab({
             </div>
 
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="text-xs lg:text-base text-slate-100 mb-2">Current</div>
+              <div className={`text-xs lg:text-base ${colourTextPrimary} mb-2`}>Current</div>
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={fate.current}

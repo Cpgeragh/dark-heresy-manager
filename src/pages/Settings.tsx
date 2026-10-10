@@ -17,7 +17,9 @@ import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
   colourAmberPlain,
   colourMetadataLabelText,
-  colourSkyPlain,
+  colourTextPrimary,
+  colourDivider,
+  colourDivideList,
 } from "../ui/styles/colourTokens";
 import {
   editableInputClass,
@@ -27,6 +29,7 @@ import {
   uiActionRowLabel,
   uiSection,
   uiTextBody,
+  uiTextMeta,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { ManageDevicesButton } from "../ui/buttons/ManageDevicesButton";
@@ -294,7 +297,7 @@ export default function Settings({
       viewportAware
     >
       <ModalHeader title="Manage Account" onClose={() => !settingsBusy && onClose()} />
-      <div className="min-h-0 flex-1 divide-y divide-slate-700 overflow-y-auto px-4 lg:px-6">
+      <div className={`min-h-0 flex-1 divide-y ${colourDivideList} overflow-y-auto px-4 lg:px-6`}>
         {/* ── Display Name ───────────────────────────────────────────────── */}
         <section className={settingsRowClass}>
           <div>
@@ -498,18 +501,16 @@ export default function Settings({
                 <div key={device.uid} className={uiSection}>
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-100">
+                      <p className={`truncate font-semibold ${colourTextPrimary}`}>
                         {device.name ?? "Unnamed device"}
                       </p>
-                      <p className="mt-1 text-xs text-slate-400 lg:text-sm">
+                      <p className={`mt-1 ${uiTextMeta}`}>
                         {device.linkedAt
                           ? `Linked ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(device.linkedAt)}`
                           : "Link date unavailable"}
                       </p>
                       {device.isCurrentDevice && (
-                        <p className={`mt-1 text-xs lg:text-sm ${colourSkyPlain}`}>
-                          Current device
-                        </p>
+                        <p className={`mt-1 ${uiTextMeta}`}>Current device</p>
                       )}
                     </div>
                     <div className="flex shrink-0 gap-2">
@@ -638,9 +639,7 @@ export default function Settings({
               <dl className="space-y-3 text-sm lg:text-base">
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                  <dd className={uiTextBody}>
-                    {remoteDisconnectTarget.name ?? "Unnamed device"}
-                  </dd>
+                  <dd className={uiTextBody}>{remoteDisconnectTarget.name ?? "Unnamed device"}</dd>
                 </div>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
@@ -841,7 +840,7 @@ export default function Settings({
                 </dd>
               </div>
             </dl>
-            <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
+            <div className={`grid grid-cols-2 gap-3 border-t ${colourDivider} pt-4`}>
               <Button
                 variant="neutral"
                 onClick={() => setLastDeviceWarningOpen(false)}

@@ -22,10 +22,18 @@ import {
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiCardTitleHover,
+  uiRuleName,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourNoticePink, colourToggleSelectedSky } from "../../../ui/styles/colourTokens";
+import {
+  colourNoticePink,
+  colourToggleSelectedSky,
+  colourTextPrimary,
+  colourDivider,
+} from "../../../ui/styles/colourTokens";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { AddButton } from "../../../ui/buttons/AddButton";
@@ -320,11 +328,7 @@ export function MeleeCard({
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
                   title={weapon.name}
-                  content={
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {rulesDescription}
-                    </p>
-                  }
+                  content={<p className={uiTextDescription}>{rulesDescription}</p>}
                 />
               </span>
             )}
@@ -371,15 +375,11 @@ export function MeleeCard({
           )}
           {!forceExpanded &&
             (onSelect ? (
-              <button
-                type="button"
+              <ExpandButton
+                expanded={expanded}
+                label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
                 onClick={() => setExpanded((e) => !e)}
-                aria-expanded={expanded}
-                aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-                className="relative z-10 pointer-events-auto p-1 -m-1"
-              >
-                <ExpandChevron expanded={expanded} />
-              </button>
+              />
             ) : (
               <ExpandChevron expanded={expanded} />
             ))}
@@ -499,14 +499,9 @@ export function MeleeCard({
                     title={`${weapon.name} Rules`}
                     content={
                       <div className="space-y-3">
-                        <p className="text-sm lg:text-base font-semibold text-amber-300">
-                          Concealed Weapon Bionic
-                        </p>
+                        <p className={uiRuleName}>Concealed Weapon Bionic</p>
                         {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                          <p
-                            key={rule}
-                            className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}
-                          >
+                          <p key={rule} className={uiTextDescription}>
                             {rule}
                           </p>
                         ))}
@@ -528,7 +523,9 @@ export function MeleeCard({
                     concealedBionicEffect ? (
                       <div className="space-y-3">
                         <div>
-                          <p className="text-sm lg:text-base text-slate-200 leading-relaxed">
+                          <p
+                            className={`text-sm lg:text-base ${colourTextPrimary} leading-relaxed`}
+                          >
                             {concealedBionicEffect}
                           </p>
                         </div>
@@ -548,11 +545,11 @@ export function MeleeCard({
             value={weapon.value}
             availability={weapon.availability}
             source={weapon.source}
-            className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
           />
 
           {isPistolProfile && pistolProfile && (
-            <div className="border-t border-slate-800 pt-2 space-y-2">
+            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
               <div className="flex items-center justify-between gap-2">
                 <span className={uiTextLabel}>Ammo</span>
                 {editable && (
@@ -599,7 +596,9 @@ export function MeleeCard({
           )}
 
           {isThrown && (
-            <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
+            <div
+              className={`border-t ${colourDivider} pt-2 flex items-center justify-between gap-2`}
+            >
               <span className={uiTextLabel}>Quantity</span>
               <QuantityControl
                 quantity={weapon.quantity ?? 1}
@@ -612,7 +611,7 @@ export function MeleeCard({
 
           {/* Upgrades */}
           {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-            <div className="border-t border-slate-800 pt-2 space-y-1.5">
+            <div className={`border-t ${colourDivider} pt-2 space-y-1.5`}>
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Upgrades</span>
                 {(editable

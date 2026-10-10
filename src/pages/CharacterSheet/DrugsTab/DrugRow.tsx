@@ -9,6 +9,7 @@ import {
   uiTextLabel,
   uiItemName,
   uiInfoModalWrapper,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -17,6 +18,7 @@ import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActi
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { colourHeadingAccent } from "../../../ui/styles/colourTokens";
 
 export function DrugRow({
   item,
@@ -57,43 +59,35 @@ export function DrugRow({
                     {ref?.duration && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Duration</p>
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {ref.duration}
-                        </p>
+                        <p className={uiTextDescription}>{ref.duration}</p>
                       </div>
                     )}
                     {ref?.effect && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Effect</p>
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {ref.effect}
-                        </p>
+                        <p className={uiTextDescription}>{ref.effect}</p>
                       </div>
                     )}
                     {ref?.sideEffect && (
                       <div>
-                        <p className="text-xs lg:text-sm font-semibold text-red-500/70 uppercase tracking-wide mb-1">
+                        <p
+                          className={`text-xs lg:text-sm font-semibold ${colourHeadingAccent} uppercase tracking-wide mb-1`}
+                        >
                           Side Effects
                         </p>
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {ref.sideEffect}
-                        </p>
+                        <p className={uiTextDescription}>{ref.sideEffect}</p>
                       </div>
                     )}
                     {ref?.notes && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {ref.notes}
-                        </p>
+                        <p className={uiTextDescription}>{ref.notes}</p>
                       </div>
                     )}
                     {item.notes && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Player Notes</p>
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {item.notes}
-                        </p>
+                        <p className={uiTextDescription}>{item.notes}</p>
                       </div>
                     )}
                   </>

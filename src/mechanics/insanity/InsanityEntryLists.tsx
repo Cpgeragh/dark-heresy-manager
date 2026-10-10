@@ -21,6 +21,7 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiTextDescription,
 } from "../../ui/styles/editableStyles";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
@@ -70,9 +71,7 @@ function DisorderRow({
                 <InfoModal
                   title={disorder.severity}
                   content={
-                    <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                      {severityDescription(disorder.severity)}
-                    </p>
+                    <p className={uiTextDescription}>{severityDescription(disorder.severity)}</p>
                   }
                 />
               </span>
@@ -213,12 +212,7 @@ function TraumaRow({
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
             <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={name}
-                content={
-                  <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>{effect}</p>
-                }
-              />
+              <InfoModal title={name} content={<p className={uiTextDescription}>{effect}</p>} />
             </span>
           </div>
         </div>
@@ -263,11 +257,7 @@ export function TraumaHeader({ editable, onAdd }: { editable: boolean; onAdd: ()
         <span className={uiInfoModalWrapper}>
           <InfoModal
             title="Mental Trauma"
-            content={
-              <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                {INSANITY_RULE_TEXT.trauma}
-              </p>
-            }
+            content={<p className={uiTextDescription}>{INSANITY_RULE_TEXT.trauma}</p>}
           />
         </span>
       </span>

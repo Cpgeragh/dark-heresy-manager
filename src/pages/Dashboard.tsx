@@ -42,11 +42,8 @@ import { EditButton } from "../ui/buttons/EditButton";
 import { ArchiveButton } from "../ui/buttons/ArchiveButton";
 import { RemoveButton } from "../ui/buttons/RemoveButton";
 import { GearIcon } from "../ui/icons/GearIcon";
-import {
-  uiCardLinkFeedback,
-  uiCardOverlayLinkFeedback,
-  uiIconButton,
-} from "../ui/styles/buttonStyles";
+import { uiCardLinkFeedback, uiCardOverlayLinkFeedback } from "../ui/styles/buttonStyles";
+import { IconButton } from "../ui/buttons/IconButton";
 import { ExpandChevron } from "../ui/icons/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
@@ -69,8 +66,11 @@ import {
   colourActiveRose,
   colourActiveSky,
   colourAmberPlain,
-  colourRequiredText,
+  colourTextPrimary,
+  colourTextMuted,
+  colourDivideList,
 } from "../ui/styles/colourTokens";
+import { RequiredMark } from "../ui/forms/RequiredMark";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../hooks/useMediaQuery";
 import { useSwipeableTabs } from "../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../ui/SegmentedTabs";
@@ -134,7 +134,7 @@ function campaignCreationErrorMessage(error: unknown): string {
 
 function CampaignListLimitNotice() {
   return (
-    <p className="text-xs text-amber-300 lg:text-sm">
+    <p className={`text-xs ${colourAmberPlain} lg:text-sm`}>
       Showing the first {FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole} campaigns.
     </p>
   );
@@ -154,7 +154,7 @@ function PlayerCampaignRow({
       to={buildRoute.campaignOverview(campaignId)}
       className={`${uiSection} flex items-center gap-2 ${uiCardLinkFeedback}`}
     >
-      <span className="flex-1 font-medium text-slate-200 lg:text-lg">{campaignName}</span>
+      <span className={`flex-1 font-medium ${colourTextPrimary} lg:text-lg`}>{campaignName}</span>
     </Link>
   );
 }
@@ -409,21 +409,20 @@ function DmCampaignList({
                 aria-label={campaign.name}
                 className="absolute inset-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
               />
-              <span className="pointer-events-none min-w-0 flex-1 font-medium text-slate-200 lg:text-lg">
+              <span
+                className={`pointer-events-none min-w-0 flex-1 font-medium ${colourTextPrimary} lg:text-lg`}
+              >
                 {campaign.name}
               </span>
 
               <div className="relative z-10 shrink-0">
-                <button
-                  type="button"
-                  aria-label={`Manage ${campaign.name}`}
+                <IconButton
+                  label={`Manage ${campaign.name}`}
                   aria-haspopup="dialog"
                   aria-expanded={openActionsId === campaign.id}
-                  className={uiIconButton}
                   onClick={() => setOpenActionsId(campaign.id)}
-                >
-                  <GearIcon />
-                </button>
+                  icon={<GearIcon />}
+                />
               </div>
             </div>
           ))}
@@ -500,7 +499,7 @@ function DmCampaignList({
             type="button"
             onClick={() => setShowArchived((v) => !v)}
             aria-expanded={showArchived}
-            className="inline-flex items-center gap-1 text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"
+            className={`inline-flex items-center gap-1 text-sm lg:text-base ${uiTextPlaceholder} hover:text-slate-300 transition-colors`}
           >
             <ExpandChevron expanded={showArchived} />
             <span>Archived ({archivedCampaigns.length})</span>
@@ -513,7 +512,7 @@ function DmCampaignList({
                   key={campaign.id}
                   className={uiSection + " relative flex items-center gap-2 opacity-60"}
                 >
-                  <span className="flex-1 text-slate-400 lg:text-lg">{campaign.name}</span>
+                  <span className={`flex-1 ${colourTextMuted} lg:text-lg`}>{campaign.name}</span>
 
                   <Button
                     variant="secondary"
@@ -564,7 +563,9 @@ function DmCampaignList({
             title="Manage Campaign"
             onClose={() => !pendingCampaignAction && !editingId && setOpenActionsId(null)}
           />
-          <div className="min-h-0 flex-1 divide-y divide-slate-700 overflow-y-auto px-4 lg:px-6">
+          <div
+            className={`min-h-0 flex-1 divide-y ${colourDivideList} overflow-y-auto px-4 lg:px-6`}
+          >
             <section className={campaignActionRowClass}>
               <span className="flex items-center gap-1.5">
                 <span className={campaignActionLabelClass}>Edit Campaign</span>
@@ -913,10 +914,7 @@ function ClaimCharacterSection() {
               appearance="form"
               label={
                 <>
-                  Recovery Code{" "}
-                  <span className={colourRequiredText} aria-hidden="true">
-                    *
-                  </span>
+                  Recovery Code <RequiredMark />
                 </>
               }
               labelClassName={uiFormLabel}
@@ -930,10 +928,6 @@ function ClaimCharacterSection() {
               ownership={data.ownership}
               onClaim={handleClaim}
             />
-          )}
-
-          {claiming && (
-            <p className="text-center text-xs text-slate-400 lg:text-sm">Claiming character…</p>
           )}
         </CustomFormShell>
       )}

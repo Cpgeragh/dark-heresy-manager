@@ -3,7 +3,13 @@
 import { useState, useCallback } from "react";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 import { Button } from "../../ui/buttons/Button";
-import { uiCodeBox, uiCodeText, uiSubheading, uiTextError } from "../../ui/styles/editableStyles";
+import {
+  uiCodeBox,
+  uiCodeText,
+  uiSubheading,
+  uiTextError,
+  uiTextMeta,
+} from "../../ui/styles/editableStyles";
 import { QrModal } from "../../ui/modals/QrModal";
 
 interface Props {
@@ -105,9 +111,7 @@ export function CharacterKebabContent({
         canManageRecoveryCode && (
           <div className="space-y-2">
             <p className={uiSubheading}>Recovery Code</p>
-            <p className="text-xs lg:text-sm text-slate-400">
-              This character has no Recovery Code yet.
-            </p>
+            <p className={uiTextMeta}>This character has no Recovery Code yet.</p>
             <Button
               variant="secondary"
               size="sm"
@@ -117,7 +121,9 @@ export function CharacterKebabContent({
             >
               Generate Recovery Code
             </Button>
-            {generateError && <p className={`text-xs lg:text-sm ${uiTextError}`}>{generateError}</p>}
+            {generateError && (
+              <p className={`text-xs lg:text-sm ${uiTextError}`}>{generateError}</p>
+            )}
           </div>
         )
       )}
@@ -136,7 +142,7 @@ export function CharacterKebabContent({
       {canPlayerRelease && (
         <div className="space-y-2">
           <p className={uiSubheading}>Release Character</p>
-          <p className="text-xs lg:text-sm text-slate-400">
+          <p className={uiTextMeta}>
             Unlinks this character from your account. To move devices, connect the new device with
             your account recovery code instead.
           </p>

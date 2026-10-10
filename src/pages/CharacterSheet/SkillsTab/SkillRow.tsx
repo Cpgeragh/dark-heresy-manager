@@ -19,6 +19,7 @@ import {
   uiItemNameHover,
   uiSectionShell,
   uiTextBody,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
@@ -86,13 +87,11 @@ export function SkillRow({
   const hasSkillInfo = Boolean(skillDescription) || talentSources.length > 0;
   const skillInfoContent = (
     <div className="space-y-3">
-      {skillDescription && (
-        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{skillDescription}</p>
-      )}
+      {skillDescription && <p className={uiTextDescription}>{skillDescription}</p>}
       {talentSources.length > 0 && (
         <div>
           <p className={`${uiFormLabel} mb-1`}>Effects</p>
-          <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
+          <ul className={`space-y-1 ${uiTextDescription}`}>
             {talentSources.map((source, index) => (
               <li key={index}>
                 {source.name} ({source.type})

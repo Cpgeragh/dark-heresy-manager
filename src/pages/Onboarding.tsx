@@ -16,6 +16,7 @@ import {
   uiInfoModalWrapper,
   uiSectionHeader,
   uiTextBody,
+  uiTextMeta,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { TitleHeaderActionButton } from "../ui/buttons/TitleHeaderActionButton";
@@ -30,11 +31,13 @@ import { useToast } from "../components/Toast";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { formatFirstNameInput } from "../utils/firstName";
 import {
-  colourMetadataLabelText,
-  colourRequiredText,
+  colourAmberPlain,
   colourTextPrimary,
+  colourPageBackground,
+  colourDivider,
 } from "../ui/styles/colourTokens";
 import { RequiredFieldsNote } from "../ui/forms/CustomFormFooter";
+import { RequiredMark } from "../ui/forms/RequiredMark";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 
@@ -279,7 +282,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-slate-950 text-slate-100">
+    <div className={`flex min-h-svh flex-col ${colourPageBackground} ${colourTextPrimary}`}>
       <AppHeaderShell />
 
       <main className="flex flex-1 items-center justify-center p-6">
@@ -326,7 +329,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   <div className="mb-1 flex items-center gap-1.5">
                     <label htmlFor="onboarding-device-name">
                       <span className={uiSectionHeader}>
-                        Device Name <span className={colourRequiredText}>*</span>
+                        Device Name <RequiredMark />
                       </span>
                     </label>
                     <span className={uiInfoModalWrapper}>
@@ -455,15 +458,13 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                     </p>
 
                     <div className={uiCodeBox}>
-                      <p
-                        className={`text-xs lg:text-sm font-semibold ${colourMetadataLabelText} uppercase tracking-widest mb-2`}
-                      >
+                      <p className={`${uiTextMeta} font-semibold uppercase tracking-widest mb-2`}>
                         Recovery Code
                       </p>
                       <span className={uiCodeText}>{code}</span>
                     </div>
 
-                    <p className="text-sm lg:text-base text-amber-300 text-center">
+                    <p className={`text-sm lg:text-base ${colourAmberPlain} text-center`}>
                       Keep it private. Anyone with this code may be able to access your account.
                     </p>
 
@@ -487,15 +488,12 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                         className="h-4 w-4 shrink-0"
                       />
                       <span>
-                        I've saved my recovery code somewhere safe.{" "}
-                        <span className={colourRequiredText} aria-hidden="true">
-                          *
-                        </span>
+                        I've saved my recovery code somewhere safe. <RequiredMark />
                       </span>
                     </label>
                   </div>
 
-                  <div className="border-t border-slate-700 px-4 py-3 lg:px-5 lg:py-4">
+                  <div className={`border-t ${colourDivider} px-4 py-3 lg:px-5 lg:py-4`}>
                     <div className="space-y-2">
                       <Button
                         type="submit"
@@ -538,7 +536,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
             <p className={`text-sm ${uiTextBody} lg:text-base`}>
               Cancel new account setup? This recovery code will no longer work.
             </p>
-            <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
+            <div className={`grid grid-cols-2 gap-3 border-t ${colourDivider} pt-4`}>
               <Button variant="neutral" onClick={closeCancelSetup} disabled={discardingSetup}>
                 Keep setting up
               </Button>

@@ -307,7 +307,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   ]);
 
   if (!campaignId) {
-    return <div className={`${uiTextPlaceholder} text-center py-10`}>No campaign selected.</div>;
+    return <ErrorState className="py-10 text-center">No campaign selected.</ErrorState>;
   }
 
   if (campaignError || charactersError || (campaign && customItemsError)) {
@@ -319,7 +319,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   }
 
   if (!campaign) {
-    return <div className={`${uiTextPlaceholder} text-center py-10`}>Campaign not found.</div>;
+    return <ErrorState className="py-10 text-center">Campaign not found.</ErrorState>;
   }
 
   const filteredCharacters = search.trim()
@@ -449,7 +449,9 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               {partySummariesError ? (
                 <ErrorState>Unable to load the party roster. Please refresh the page.</ErrorState>
               ) : partyMembers.length === 0 ? (
-                <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No one else has joined yet.</p>
+                <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+                  No one else has joined yet.
+                </p>
               ) : (
                 <div className="space-y-3">
                   {partyMembers.map((s) => (
@@ -494,7 +496,9 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             {sessionsError ? (
               <ErrorState>Unable to load sessions. Please refresh the page.</ErrorState>
             ) : sessions.length === 0 ? (
-              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No sessions recorded yet.</p>
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+                No sessions recorded yet.
+              </p>
             ) : (
               <div className="space-y-3">
                 {sessions.map((session) => (

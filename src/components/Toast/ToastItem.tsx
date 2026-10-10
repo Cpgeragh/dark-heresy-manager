@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useToast, type Toast } from "./ToastContext";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 import { CloseIcon } from "../../ui/buttons/CloseButton";
+import { toastColours } from "../../ui/styles/colourTokens";
 
 interface ToastItemProps {
   toast: Toast;
@@ -27,13 +28,6 @@ export function ToastItem({ toast }: ToastItemProps) {
     removeToast(toast.id);
   }, [removeToast, toast.id]);
 
-  const styles = {
-    success: "bg-green-500/20 border-green-500 text-green-100",
-    error: "bg-red-500/20 border-red-500 text-red-100",
-    warning: "bg-amber-500/20 border-amber-500 text-amber-100",
-    info: "bg-blue-500/20 border-blue-500 text-blue-100",
-  };
-
   const icons = {
     success: "✓",
     error: "!",
@@ -50,7 +44,7 @@ export function ToastItem({ toast }: ToastItemProps) {
       aria-live="polite"
       aria-atomic="true"
       className={`
-        ${styles[toast.type]}
+        ${toastColours[toast.type]}
         border rounded-lg p-4 shadow-lg
         backdrop-blur-sm
         animate-slide-in-right

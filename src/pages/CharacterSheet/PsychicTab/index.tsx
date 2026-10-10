@@ -12,10 +12,10 @@ import {
 import {
   uiSection,
   uiFormLabel,
-  uiTextBody,
   uiTextPlaceholder,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
-import { colourGlowActive } from "../../../ui/styles/colourTokens";
+import { colourGlowActive, colourPsychicText } from "../../../ui/styles/colourTokens";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
@@ -567,7 +567,7 @@ export function PsychicTab({
               }`}
               style={psyRatingPulseVars(psyRating)}
             >
-              <span className="text-sm lg:text-base font-bold font-code text-indigo-300">
+              <span className={`text-sm lg:text-base font-bold font-code ${colourPsychicText}`}>
                 {psyRating}
               </span>
             </div>
@@ -576,7 +576,7 @@ export function PsychicTab({
                 <InfoModal
                   title={`Psy Rating ${psyRating}`}
                   content={
-                    <p className={`text-sm ${uiTextBody} leading-relaxed`}>
+                    <p className={uiTextDescription}>
                       {TALENT_DESCRIPTIONS[`psy-rating-${psyRating}`]}
                     </p>
                   }

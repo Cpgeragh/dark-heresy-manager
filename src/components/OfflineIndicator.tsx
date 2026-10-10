@@ -1,6 +1,7 @@
 // src/components/OfflineIndicator.tsx
 
 import { useEffect, useState } from "react";
+import { colourAmberFill } from "../ui/styles/colourTokens";
 
 export function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -21,7 +22,9 @@ export function OfflineIndicator() {
   if (isOnline) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-amber-500 text-slate-900 text-center text-sm py-2 font-semibold z-50">
+    <div
+      className={`fixed bottom-0 left-0 right-0 ${colourAmberFill} text-center text-sm py-2 font-semibold z-50`}
+    >
       You are offline — keep this page open and retry any change that reports a failure
     </div>
   );

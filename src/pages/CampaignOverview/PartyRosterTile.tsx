@@ -1,7 +1,7 @@
 // src/pages/CampaignOverview/PartyRosterTile.tsx
 
 import { PortraitUpload } from "../../components/PortraitUpload";
-import { uiSection, uiCardTitle } from "../../ui/styles/editableStyles";
+import { uiSection, uiCardTitle, uiTextMeta } from "../../ui/styles/editableStyles";
 import type { CharacterSummaryWithId } from "../../types/Firestore";
 
 export function PartyRosterTile({ summary }: { summary: CharacterSummaryWithId }) {
@@ -15,11 +15,9 @@ export function PartyRosterTile({ summary }: { summary: CharacterSummaryWithId }
       />
       <div>
         <div className={uiCardTitle}>{summary.characterName}</div>
-        {summary.playerName && (
-          <div className="text-xs lg:text-sm text-slate-500">{summary.playerName}</div>
-        )}
+        {summary.playerName && <div className={uiTextMeta}>{summary.playerName}</div>}
         {(summary.career || summary.rank) && (
-          <div className="text-xs lg:text-sm text-slate-400">
+          <div className={uiTextMeta}>
             {[summary.career, summary.rank].filter(Boolean).join(" · ")}
           </div>
         )}

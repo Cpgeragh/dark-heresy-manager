@@ -35,8 +35,11 @@ import {
   uiInfoModalWrapper,
   uiItemName,
   uiCardTitleHover,
+  uiRuleName,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import {
   colourButtonOutlineCyan,
@@ -44,6 +47,8 @@ import {
   colourNoticeAmber,
   colourNoticePink,
   colourToggleSelectedSky,
+  colourDivider,
+  colourFillInset,
 } from "../../../ui/styles/colourTokens";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
@@ -439,11 +444,7 @@ export function RangedCard({
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
                   title={weapon.name}
-                  content={
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {rulesDescription}
-                    </p>
-                  }
+                  content={<p className={uiTextDescription}>{rulesDescription}</p>}
                 />
               </span>
             )}
@@ -498,15 +499,11 @@ export function RangedCard({
           )}
           {!forceExpanded &&
             (onSelect ? (
-              <button
-                type="button"
+              <ExpandButton
+                expanded={expanded}
+                label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
                 onClick={toggleExpanded}
-                aria-expanded={expanded}
-                aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-                className="relative z-10 pointer-events-auto p-1 -m-1"
-              >
-                <ExpandChevron expanded={expanded} />
-              </button>
+              />
             ) : (
               <ExpandChevron expanded={expanded} />
             ))}
@@ -634,14 +631,9 @@ export function RangedCard({
                     title={`${weapon.name} Rules`}
                     content={
                       <div className="space-y-3">
-                        <p className="text-sm lg:text-base font-semibold text-amber-300">
-                          Concealed Weapon Bionic
-                        </p>
+                        <p className={uiRuleName}>Concealed Weapon Bionic</p>
                         {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                          <p
-                            key={rule}
-                            className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}
-                          >
+                          <p key={rule} className={uiTextDescription}>
                             {rule}
                           </p>
                         ))}
@@ -663,9 +655,7 @@ export function RangedCard({
                     concealedBionicEffect ? (
                       <div className="space-y-3">
                         <div>
-                          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                            {concealedBionicEffect}
-                          </p>
+                          <p className={uiTextDescription}>{concealedBionicEffect}</p>
                         </div>
                       </div>
                     ) : (
@@ -678,7 +668,7 @@ export function RangedCard({
           </div>
 
           {/* Weight / Value / Availability / Source */}
-          <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
+          <div className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}>
             <ItemMetaChips
               weight={effective.weight}
               value={effective.value}
@@ -690,7 +680,9 @@ export function RangedCard({
 
           {/* Thrown weapon: quantity counter */}
           {isThrown && (
-            <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
+            <div
+              className={`border-t ${colourDivider} pt-2 flex items-center justify-between gap-2`}
+            >
               <span className={uiTextLabel}>{isThrown ? "Quantity" : "Rounds"}</span>
               <QuantityControl
                 quantity={weapon.quantity ?? 0}
@@ -703,7 +695,7 @@ export function RangedCard({
 
           {/* Grenade launcher: ammo drawn from grenade inventory */}
           {isGrenadeLauncher && (
-            <div className="border-t border-slate-800 pt-2 space-y-2">
+            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
               <span className={uiTextLabel}>Grenades</span>
               {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 &&
               (archeotechGrenades ?? []).length === 0 ? (
@@ -717,7 +709,7 @@ export function RangedCard({
                     .map((g) => (
                       <div
                         key={g.id}
-                        className="rounded bg-slate-800/60 px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2"
+                        className={`rounded ${colourFillInset} px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2`}
                       >
                         <span className={`${uiItemName} truncate`}>{g.name}</span>
                         <QuantityControl
@@ -751,7 +743,7 @@ export function RangedCard({
           )}
 
           {usesMagazineSlots && (
-            <div className="border-t border-slate-800 pt-2 space-y-2">
+            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
               <span className={uiTextLabel}>Magazines</span>
               {activeAmmoFamily && (
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -790,13 +782,7 @@ export function RangedCard({
                             <span className={uiInfoModalWrapper}>
                               <InfoModal
                                 title={displayName ?? `Magazine ${index + 1}`}
-                                content={
-                                  <p
-                                    className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}
-                                  >
-                                    {ammoRef.description}
-                                  </p>
-                                }
+                                content={<p className={uiTextDescription}>{ammoRef.description}</p>}
                               />
                             </span>
                           )}
@@ -866,7 +852,7 @@ export function RangedCard({
 
           {/* Regular weapon: ammo entries */}
           {hasAmmo && !usesMagazineSlots && (
-            <div className="border-t border-slate-800 pt-2 space-y-2">
+            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Ammo</span>
                 {editable ? (
@@ -936,7 +922,7 @@ export function RangedCard({
 
           {/* Upgrades */}
           {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-            <div className="border-t border-slate-800 pt-2 space-y-1.5">
+            <div className={`border-t ${colourDivider} pt-2 space-y-1.5`}>
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Upgrades</span>
                 {(editable

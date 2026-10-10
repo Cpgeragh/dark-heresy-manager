@@ -6,8 +6,19 @@ import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { Button } from "../../ui/buttons/Button";
 import { ErrorState } from "../../ui/ErrorState";
 import { PendingOverlay } from "../../ui/PendingOverlay";
-import { uiSection, readOnlyBadgeClass, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  uiSection,
+  readOnlyBadgeClass,
+  uiTextPlaceholder,
+  uiTextMeta,
+  uiTextBody,
+} from "../../ui/styles/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
+import {
+  colourMetadataLabelText,
+  colourTextPrimary,
+  colourHeadingAccent,
+} from "../../ui/styles/colourTokens";
 
 interface AdminTabProps {
   campaignId: string;
@@ -54,15 +65,13 @@ export function AdminTab({
   return (
     <div className="relative space-y-6">
       {/* CONTEXT NOTE */}
-      <p className="text-xs lg:text-sm text-slate-400">
-        DM-only controls. Changes here immediately affect player access.
-      </p>
+      <p className={uiTextMeta}>DM-only controls. Changes here immediately affect player access.</p>
 
       {/* LATEST EVENT: available only after the DM deliberately opens History. */}
       {showClaimHistory && latest && (
-        <p className="text-xs lg:text-sm text-slate-400">
+        <p className={uiTextMeta}>
           Last ownership event:{" "}
-          <span className="font-code text-slate-300">
+          <span className={`font-code ${uiTextBody}`}>
             {latest.action} by {latestActorLabel}
           </span>
         </p>
@@ -71,14 +80,14 @@ export function AdminTab({
       {/* OWNERSHIP */}
       <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-red-300">Ownership</h3>
+          <h3 className={`font-semibold ${colourHeadingAccent}`}>Ownership</h3>
           <span className={readOnlyBadgeClass}>DM authority</span>
         </div>
 
         <div className="space-y-1 text-sm lg:text-base">
           <div>
             Current owner:{" "}
-            <span className="text-slate-200">
+            <span className={colourTextPrimary}>
               {character.userId ? (ownerName ?? "Unknown player") : "None (unclaimed)"}
             </span>
           </div>
@@ -86,13 +95,13 @@ export function AdminTab({
           {character.userId && (
             <div>
               Owner UID:{" "}
-              <span className="font-code text-slate-200 break-all">{character.userId}</span>
+              <span className={`font-code ${colourTextPrimary} break-all`}>{character.userId}</span>
             </div>
           )}
 
           <div>
             Player editable:{" "}
-            <span className="font-code text-slate-200">
+            <span className={`font-code ${colourTextPrimary}`}>
               {character.isEditableByPlayer ? "true" : "false"}
             </span>
           </div>
@@ -162,19 +171,21 @@ export function AdminTab({
             {claimLogError ? (
               <ErrorState>Unable to load claim history.</ErrorState>
             ) : claimLog.length === 0 ? (
-              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No claim events recorded yet.</p>
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+                No claim events recorded yet.
+              </p>
             ) : (
               <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {claimLog.map((entry, index) => (
                   <li key={entry.id ?? index} className={uiSection + " text-xs lg:text-sm"}>
-                    <div className="font-code text-slate-200">
+                    <div className={`font-code ${colourTextPrimary}`}>
                       {entry.action} @
                       {entry.timestamp && "toDate" in entry.timestamp
                         ? ` ${entry.timestamp.toDate().toLocaleString()}`
                         : " Unknown time"}
                     </div>
 
-                    <div className="text-slate-400">
+                    <div className={colourMetadataLabelText}>
                       Actor: <span className="font-code break-all">{entry.actorUid}</span>
                     </div>
                   </li>

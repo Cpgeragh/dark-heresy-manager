@@ -9,6 +9,7 @@ import {
   uiTextLabel,
   uiItemName,
   uiInfoModalWrapper,
+  uiTextGMNote,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
@@ -85,7 +86,7 @@ export function ItemCard({
             <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
           )}
           {item.notes?.trim() && (
-            <p className="text-xs lg:text-sm text-amber-300/70 leading-relaxed">{item.notes}</p>
+            <p className={`text-xs lg:text-sm ${uiTextGMNote} leading-relaxed`}>{item.notes}</p>
           )}
         </div>
       )}

@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useId, useLayoutEffect } from "react";
 import type { ReactNode } from "react";
+import { uiInfoButton } from "../ui/styles/buttonStyles";
+import { colourPopoverSurface, colourTextPrimary } from "../ui/styles/colourTokens";
 
 interface TooltipProps {
   children: ReactNode;
@@ -77,7 +79,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
         aria-expanded={open}
         aria-controls={tooltipId}
         aria-label="Show additional information"
-        className="text-slate-300 px-2 py-0.5 rounded bg-slate-700 border border-slate-600 hover:bg-slate-600 text-xs"
+        className={`px-2 py-0.5 text-xs ${uiInfoButton}`}
       >
         {children}
       </button>
@@ -94,7 +96,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
             visibility: "hidden",
             maxWidth: maxWidth,
           }}
-          className="z-50 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded shadow-lg"
+          className={`z-50 ${colourPopoverSurface} border ${colourTextPrimary} text-xs px-3 py-2 rounded shadow-lg`}
         >
           {content}
         </div>

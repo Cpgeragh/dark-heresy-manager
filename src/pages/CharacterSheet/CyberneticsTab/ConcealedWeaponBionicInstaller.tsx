@@ -4,10 +4,11 @@ import { resolveMeleeWeaponReference } from "../../../data/reference/weaponRefer
 import { Button } from "../../../ui/buttons/Button";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
-import { uiTextBody, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextError } from "../../../ui/styles/editableStyles";
 import { ImplantRow } from "./ImplantRow";
 import { RangedCard } from "../weapons/RangedCard";
 import { MeleeCard } from "../weapons/MeleeCard";
+import { colourDivider } from "../../../ui/styles/colourTokens";
 
 type WeaponChoice = { id: string; type: "ranged" | "melee"; name: string };
 
@@ -54,12 +55,10 @@ export function ConcealedWeaponBionicInstaller({
             : "Choose an unmodified pistol or one-handed melee weapon."}
         </p>
         {selectingArm && arms.length === 0 && (
-          <p className={uiTextPlaceholder}>Install a Bionic Arm before installing this upgrade.</p>
+          <p className={uiTextError}>Install a Bionic Arm before installing this upgrade.</p>
         )}
         {!selectingArm && weapons.length === 0 && (
-          <p className={uiTextPlaceholder}>
-            Add an eligible weapon before installing this upgrade.
-          </p>
+          <p className={uiTextError}>Add an eligible weapon before installing this upgrade.</p>
         )}
         {selectingArm
           ? arms.map((item) => (
@@ -119,7 +118,7 @@ export function ConcealedWeaponBionicInstaller({
               );
             })}
       </div>
-      <div className="p-4 border-t border-slate-700 flex gap-2">
+      <div className={`p-4 border-t ${colourDivider} flex gap-2`}>
         {!selectingArm && (
           <Button size="sm" onClick={() => setArmId(null)}>
             Back

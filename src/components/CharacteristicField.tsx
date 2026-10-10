@@ -9,8 +9,18 @@ import {
 import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
 import { Button } from "../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
-import { editableInputColour, uiSection, uiTextBody, uiTextError } from "../ui/styles/editableStyles";
-import { colourAmberPlain } from "../ui/styles/colourTokens";
+import {
+  editableInputColour,
+  uiSection,
+  uiTextBody,
+  uiTextError,
+} from "../ui/styles/editableStyles";
+import {
+  colourAmberPlain,
+  colourMetadataLabelText,
+  colourAdvanceFilled,
+  colourAdvanceEmpty,
+} from "../ui/styles/colourTokens";
 import { recordComponentRender } from "../performance/performanceMetrics";
 
 interface Props {
@@ -148,7 +158,7 @@ export function CharacteristicField({
 
         {/* Base value */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-sm lg:text-base text-slate-400">Base:</span>
+          <span className={`text-sm lg:text-base ${colourMetadataLabelText}`}>Base:</span>
           <input
             type="text"
             inputMode="numeric"
@@ -168,7 +178,9 @@ export function CharacteristicField({
 
         {/* Advances */}
         <div className="flex min-w-0 items-start gap-2 mb-2">
-          <span className="shrink-0 pt-1 text-sm lg:text-base text-slate-400">Advances:</span>
+          <span className={`shrink-0 pt-1 text-sm lg:text-base ${colourMetadataLabelText}`}>
+            Advances:
+          </span>
           <div className="grid min-w-0 flex-1 grid-cols-4 gap-1">
             {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
               const filled = idx < advances;
@@ -191,7 +203,7 @@ export function CharacteristicField({
                     aria-pressed={filled}
                     tabIndex={clickable ? 0 : -1}
                     className={`aspect-square w-full max-w-7 sm:max-w-6 lg:max-w-8 border rounded flex items-center justify-center
-                      ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
+                      ${filled ? colourAdvanceFilled : colourAdvanceEmpty}
                       ${
                         clickable
                           ? "cursor-pointer hover:border-red-600 hover:bg-red-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
@@ -213,13 +225,17 @@ export function CharacteristicField({
 
         {/* Total */}
         <div className="text-sm lg:text-base">
-          <span className="text-slate-400">Total:</span>
+          <span className={colourMetadataLabelText}>Total:</span>
           <span className="ml-2 font-bold">{total}</span>
         </div>
 
         {/* Error message */}
         {error && editable && (
-          <div id={`${label}-error`} className={`text-xs lg:text-sm ${uiTextError} mt-2`} role="alert">
+          <div
+            id={`${label}-error`}
+            className={`text-xs lg:text-sm ${uiTextError} mt-2`}
+            role="alert"
+          >
             {error}
           </div>
         )}

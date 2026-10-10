@@ -23,6 +23,7 @@ import { RouteHolder } from "./components/RouteHolder";
 import { RouteLoadingHold } from "./components/RouteLoadingHold";
 import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
+import { colourTextPrimary, colourPageBackground } from "./ui/styles/colourTokens";
 
 const CharacterSheet = lazy(() => import("./pages/CharacterSheet"));
 const CampaignOverview = lazy(() => import("./pages/CampaignOverview"));
@@ -162,7 +163,7 @@ function AppContent() {
     <StartupGate ownUid={currentUser.uid} splashLabel={isPostUpgrade ? "Updating…" : "Loading…"}>
       <HeaderExtensionProvider>
         <UpdateStallNotice />
-        <div className="min-h-screen bg-slate-950 text-slate-100">
+        <div className={`min-h-screen ${colourPageBackground} ${colourTextPrimary}`}>
           {/* HEADER */}
           <AppHeader currentPath={location.pathname} onOpenSettings={() => setSettingsOpen(true)} />
 

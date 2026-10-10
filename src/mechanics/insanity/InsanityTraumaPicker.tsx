@@ -16,7 +16,11 @@ import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
-import { editableInputClass, editableTextareaClass, uiTextBody } from "../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiTextDescription,
+} from "../../ui/styles/editableStyles";
 import { MENTAL_TRAUMAS, type MentalTraumaEntry } from "./insanityReference";
 import { createLocalId } from "../../utils/createLocalId";
 
@@ -186,11 +190,7 @@ export function InsanityTraumaPicker({
               info={
                 <InfoModal
                   title={ref.name}
-                  content={
-                    <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                      {ref.effect}
-                    </p>
-                  }
+                  content={<p className={uiTextDescription}>{ref.effect}</p>}
                   as="span"
                 />
               }

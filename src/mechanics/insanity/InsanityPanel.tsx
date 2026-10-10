@@ -15,8 +15,20 @@ import type {
 import { getTalentInsanityModifierSources } from "../talents/talentEffects";
 import { getTraitInsanityModifierSources } from "../traits/traitEffects";
 import { Chip } from "../../ui/chips/Chip";
-import { colourActiveRose, colourActiveSky } from "../../ui/styles/colourTokens";
-import { uiFormLabel, uiInfoModalWrapper, uiTextBody, uiTextLabel } from "../../ui/styles/editableStyles";
+import {
+  colourActiveRose,
+  colourActiveSky,
+  colourTerminalText,
+  colourDivider,
+} from "../../ui/styles/colourTokens";
+import {
+  uiFormLabel,
+  uiInfoModalWrapper,
+  uiTextBody,
+  uiTextLabel,
+  uiTextDescription,
+  uiThresholdValue,
+} from "../../ui/styles/editableStyles";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import { SegmentedTimeline } from "../../ui/SegmentedTimeline";
 import {
@@ -88,21 +100,19 @@ function InsanityStatusChips({ points }: { points: number }) {
         <span className={uiInfoModalWrapper}>
           <InfoModal
             title="Degree of Madness"
-            content={
-              <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                {INSANITY_RULE_TEXT.degree}
-              </p>
-            }
+            content={<p className={uiTextDescription}>{INSANITY_RULE_TEXT.degree}</p>}
           />
         </span>
       </div>
 
       {entry.terminal ? (
-        <p className="text-center text-xs lg:text-sm uppercase tracking-wide text-rose-300 pt-3 border-t border-slate-500">
+        <p
+          className={`text-center text-xs lg:text-sm uppercase tracking-wide ${colourTerminalText} pt-3 border-t ${colourDivider}`}
+        >
           Character retires from play
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-500">
+        <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${colourDivider}`}>
           <div className="flex flex-col items-center space-y-1.5">
             <span className={uiTextLabel}>Status</span>
             <div className="flex flex-wrap justify-center gap-1.5">
@@ -116,43 +126,31 @@ function InsanityStatusChips({ points }: { points: number }) {
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title="Gaining Disorders"
-                    content={
-                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                        {INSANITY_RULE_TEXT.disorders}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{INSANITY_RULE_TEXT.disorders}</p>}
                   />
                 </span>
               </span>
             </div>
           </div>
-          <div className="flex flex-col items-center space-y-1.5 border-l border-slate-500 pl-3">
+          <div className={`flex flex-col items-center space-y-1.5 border-l ${colourDivider} pl-3`}>
             <span className={uiTextLabel}>Thresholds</span>
             <div className="flex flex-col items-center gap-1">
               {next && (
                 <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
-                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">
-                    {next.min - safePoints}
-                  </span>{" "}
-                  pt{next.min - safePoints === 1 ? "" : "s"} until Trauma Test{" "}
+                  <span className={uiThresholdValue}>{next.min - safePoints}</span> pt
+                  {next.min - safePoints === 1 ? "" : "s"} until Trauma Test{" "}
                   <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
                     <InfoModal
                       title="Mental Trauma"
-                      content={
-                        <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                          {INSANITY_RULE_TEXT.trauma}
-                        </p>
-                      }
+                      content={<p className={uiTextDescription}>{INSANITY_RULE_TEXT.trauma}</p>}
                     />
                   </span>
                 </p>
               )}
               {nextDegree && (
                 <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
-                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">
-                    {nextDegree.min - safePoints}
-                  </span>{" "}
-                  pt{nextDegree.min - safePoints === 1 ? "" : "s"} until{" "}
+                  <span className={uiThresholdValue}>{nextDegree.min - safePoints}</span> pt
+                  {nextDegree.min - safePoints === 1 ? "" : "s"} until{" "}
                   <span className="whitespace-nowrap">{nextDegree.degree}</span>
                 </p>
               )}
@@ -294,7 +292,7 @@ export function InsanityPanel({
                 <InfoModal
                   title="Insanity Point Adjustments"
                   content={
-                    <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
+                    <ul className={`space-y-1 ${uiTextDescription}`}>
                       {recordedSources.map((source, index) => (
                         <li key={index}>
                           {source.name} ({source.type}): +{source.amount}

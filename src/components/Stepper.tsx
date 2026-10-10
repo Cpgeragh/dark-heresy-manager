@@ -1,6 +1,15 @@
 // src/components/Stepper.tsx
 
 import { useState, useCallback } from "react";
+import { uiStepButtonColour, uiStepButtonDisabled } from "../ui/styles/buttonStyles";
+import {
+  colourControlDivider,
+  colourControlDividerDisabled,
+  colourControlShadow,
+  colourControlSurface,
+  colourControlSurfaceDisabled,
+  colourTextPrimary,
+} from "../ui/styles/colourTokens";
 
 interface StepperProps {
   value: number;
@@ -67,16 +76,14 @@ export function Stepper({
   );
 
   const btnClass = `flex items-center justify-center h-full w-7 sm:w-8 lg:w-10 text-lg lg:text-2xl font-bold leading-none pt-0.5 transition select-none ${
-    editable
-      ? "bg-black/20 text-slate-200 hover:text-red-400 active:scale-95"
-      : "bg-black/10 text-slate-500 cursor-not-allowed"
+    editable ? `${uiStepButtonColour} active:scale-95` : uiStepButtonDisabled
   }`;
-  const dividerClass = `h-full w-px ${editable ? "bg-slate-600" : "bg-slate-700"}`;
+  const dividerClass = `h-full w-px ${editable ? colourControlDivider : colourControlDividerDisabled}`;
 
   return (
     <div
-      className={`inline-flex items-center h-7 sm:h-8 lg:h-10 rounded-full border-2 overflow-hidden shadow-lg shadow-black/40 ${
-        editable ? "border-slate-600 bg-slate-800" : "border-slate-700 bg-slate-800/50"
+      className={`inline-flex items-center h-7 sm:h-8 lg:h-10 rounded-full border-2 overflow-hidden ${colourControlShadow} ${
+        editable ? colourControlSurface : colourControlSurfaceDisabled
       }`}
     >
       <button
@@ -106,7 +113,7 @@ export function Stepper({
           }}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="h-full px-1 text-center bg-transparent text-base lg:text-lg font-code text-slate-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className={`h-full px-1 text-center bg-transparent text-base lg:text-lg font-code ${colourTextPrimary} focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           autoComplete="off"
         />
       ) : (
@@ -114,7 +121,7 @@ export function Stepper({
           onClick={handleClick}
           title={editable ? "Click to edit" : undefined}
           className={`flex items-center justify-center h-full min-w-7 sm:min-w-8 lg:min-w-10 px-1.5 text-center text-xl lg:text-2xl font-semibold font-code select-none transition-colors ${
-            dangerClassName || "text-slate-100"
+            dangerClassName || colourTextPrimary
           } ${editable ? "cursor-pointer hover:text-red-400" : ""}`}
         >
           {value}

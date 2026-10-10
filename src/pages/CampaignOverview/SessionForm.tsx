@@ -11,6 +11,7 @@ import {
   editableTextareaClass,
   uiFormLabelSecondary,
   uiSection,
+  uiTextMeta,
 } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 
@@ -127,7 +128,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
       </div>
 
       <div>
-        <p className="text-xs lg:text-sm text-slate-400 mb-2">Attendees</p>
+        <p className={`${uiTextMeta} mb-2`}>Attendees</p>
         <div className="flex flex-wrap gap-3">
           {characters.map((char) => (
             <label

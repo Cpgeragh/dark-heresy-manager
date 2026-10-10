@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weaponReference";
-import { uiTextBody } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextDescription } from "../../../ui/styles/editableStyles";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerCustomAction,
@@ -118,11 +118,7 @@ export function ShieldPicker({
                       info={
                         <InfoModal
                           title={data.name}
-                          content={
-                            <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                              {data.notes}
-                            </p>
-                          }
+                          content={<p className={uiTextDescription}>{data.notes}</p>}
                           as="span"
                         />
                       }
@@ -172,11 +168,7 @@ export function ShieldPicker({
                     info={
                       <InfoModal
                         title={ref.name}
-                        content={
-                          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                            {ref.notes}
-                          </p>
-                        }
+                        content={<p className={uiTextDescription}>{ref.notes}</p>}
                         as="span"
                       />
                     }

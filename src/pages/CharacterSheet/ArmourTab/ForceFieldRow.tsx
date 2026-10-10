@@ -6,6 +6,8 @@ import {
   uiTextPlaceholder,
   uiItemName,
   uiInfoModalWrapper,
+  uiRuleName,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -36,8 +38,8 @@ function ForceFieldQualitiesContent({ qualities }: { qualities: string[] }) {
         if (!desc) return null;
         return (
           <div key={name}>
-            <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
-            <p className={`text-sm lg:text-base ${uiTextBody} mt-1 leading-relaxed`}>{desc}</p>
+            <p className={uiRuleName}>{name}</p>
+            <p className={`${uiTextDescription} mt-1`}>{desc}</p>
           </div>
         );
       })}

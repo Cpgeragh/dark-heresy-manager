@@ -13,6 +13,7 @@ import {
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiCardTitleHover,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
@@ -24,6 +25,7 @@ import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
+import { colourDivider } from "../../../ui/styles/colourTokens";
 
 export function ShieldCard({
   item,
@@ -146,11 +148,7 @@ export function ShieldCard({
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Rules`}
-                    content={
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {item.notes}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{item.notes}</p>}
                   />
                 </span>
               ) : (
@@ -165,7 +163,7 @@ export function ShieldCard({
             value={item.value}
             availability={item.availability}
             source={item.source}
-            className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
           />
         </div>
       )}

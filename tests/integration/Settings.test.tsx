@@ -253,7 +253,7 @@ describe("Settings linked device", () => {
     expect(screen.getByText("Old laptop")).toBeVisible();
     expect(screen.getByText("Current device")).toBeVisible();
     for (const linkedDate of screen.getAllByText(/^Linked /)) {
-      expect(linkedDate).toHaveClass("text-slate-400");
+      expect(linkedDate).toHaveClass("text-sky-300/85");
     }
   });
 

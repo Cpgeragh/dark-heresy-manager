@@ -1,9 +1,9 @@
-import { uiTextBody, uiTextLabel } from "../../ui/styles/editableStyles";
+import { uiRuleName, uiTextLabel, uiTextDescription } from "../../ui/styles/editableStyles";
 import type { CorruptionMalignancyRef } from "./corruptionReference";
 import type { MutationRef } from "./mutationsReference";
 
 function RuleParagraph({ children }: { children: React.ReactNode }) {
-  return <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{children}</p>;
+  return <p className={uiTextDescription}>{children}</p>;
 }
 
 export function MalignancyInfoContent({
@@ -17,7 +17,7 @@ export function MalignancyInfoContent({
     <div className="space-y-3">
       {malignancy.roll && (
         <div>
-          <p className="text-sm lg:text-base font-semibold text-amber-300">{malignancy.roll}</p>
+          <p className={uiRuleName}>{malignancy.roll}</p>
         </div>
       )}
       {malignancy.effect && <RuleParagraph>{malignancy.effect}</RuleParagraph>}
@@ -42,7 +42,7 @@ export function MutationInfoContent({
     <div className="space-y-3">
       {mutation.roll && (
         <div>
-          <p className="text-sm lg:text-base font-semibold text-amber-300">{mutation.roll}</p>
+          <p className={uiRuleName}>{mutation.roll}</p>
         </div>
       )}
       {mutation.effect && <RuleParagraph>{mutation.effect}</RuleParagraph>}

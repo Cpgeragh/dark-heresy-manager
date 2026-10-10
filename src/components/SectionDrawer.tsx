@@ -5,6 +5,13 @@ import type { TabId } from "../pages/CharacterSheet/types";
 import { CloseButton } from "../ui/buttons/CloseButton";
 import { IconButton } from "../ui/buttons/IconButton";
 import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
+import {
+  colourTextPrimary,
+  colourPopoverSurface,
+  colourDivider,
+  colourHeadingAccent,
+  colourBorderRed,
+} from "../ui/styles/colourTokens";
 
 // ================================================================
 // NAVIGATION STRUCTURE
@@ -178,9 +185,7 @@ function SectionDrawerContent({
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-slate-900 border-r border-slate-700 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] ${colourPopoverSurface} border-r flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="Section navigation"
@@ -188,8 +193,10 @@ function SectionDrawerContent({
         inert={!isOpen}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
-          <span className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
+        <div
+          className={`flex items-center justify-between px-4 py-3 border-b ${colourDivider} shrink-0`}
+        >
+          <span className={`text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`}>
             Navigate
           </span>
           <CloseButton onClick={close} ariaLabel="Close navigation" />
@@ -209,7 +216,7 @@ function SectionDrawerContent({
                   <button
                     type="button"
                     onClick={() => openCategory(index)}
-                    className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-200 hover:bg-slate-800 transition text-left"
+                    className={`w-full flex items-center justify-between px-4 py-3 text-sm ${colourTextPrimary} hover:bg-slate-800 transition text-left`}
                   >
                     <span>{cat.label}</span>
                     <ArrowRight />
@@ -232,10 +239,12 @@ function SectionDrawerContent({
                   type="button"
                   onClick={goBack}
                   aria-label={`Back to categories from ${activeCategory.label}`}
-                  className="flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b border-slate-700"
+                  className={`flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b ${colourDivider}`}
                 >
                   <ArrowLeft />
-                  <span className="font-semibold text-slate-200">{activeCategory.label}</span>
+                  <span className={`font-semibold ${colourTextPrimary}`}>
+                    {activeCategory.label}
+                  </span>
                 </button>
 
                 {/* Page list */}
@@ -247,8 +256,8 @@ function SectionDrawerContent({
                         onClick={() => selectTab(tab.id)}
                         className={`w-full px-4 py-3 text-sm text-left transition ${
                           activeTab === tab.id
-                            ? "text-red-500 font-semibold border-l-2 border-red-500"
-                            : "text-slate-200 hover:bg-slate-800"
+                            ? `${colourHeadingAccent} font-semibold border-l-2 ${colourBorderRed}`
+                            : `${colourTextPrimary} hover:bg-slate-800`
                         }`}
                       >
                         {tab.label}

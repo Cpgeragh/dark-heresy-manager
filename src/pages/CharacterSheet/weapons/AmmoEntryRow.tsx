@@ -14,13 +14,14 @@ import {
   uiCell,
   uiInfoModalWrapper,
   uiItemName,
-  uiTextBody,
   uiTextLabel,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import type { AmmoTrackingMode } from "./weaponHelpers";
 import { formatAmmoWeight } from "./formatAmmoWeight";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { colourTextPrimary, colourDotLoaded, colourDotIdle } from "../../../ui/styles/colourTokens";
 
 // ─── Ammo Entry Row ───────────────────────────────────────────────────────────
 
@@ -77,10 +78,10 @@ export function AmmoEntryRow({
             title={isLoaded ? "Loaded" : "Mark as loaded"}
             className={`w-2 h-2 rounded-full shrink-0 transition ${
               isLoaded
-                ? "bg-green-400"
+                ? colourDotLoaded
                 : editable
-                  ? "bg-slate-600 hover:bg-green-500"
-                  : "bg-slate-600"
+                  ? `${colourDotIdle} hover:bg-green-500`
+                  : colourDotIdle
             }`}
           />
           <span className={`${uiItemName} truncate`}>{displayName}</span>
@@ -128,18 +129,14 @@ export function AmmoEntryRow({
               content={
                 <div className="space-y-2">
                   {ammoRef?.description && (
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {ammoRef.description}
-                    </p>
+                    <p className={uiTextDescription}>{ammoRef.description}</p>
                   )}
                   {isChargePack && (
                     <div className="space-y-1">
-                      <p className="text-sm lg:text-base font-semibold text-slate-100">
+                      <p className={`text-sm lg:text-base font-semibold ${colourTextPrimary}`}>
                         Recharging Power Packs
                       </p>
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {RECHARGING_POWER_PACKS_TEXT}
-                      </p>
+                      <p className={uiTextDescription}>{RECHARGING_POWER_PACKS_TEXT}</p>
                     </div>
                   )}
                 </div>

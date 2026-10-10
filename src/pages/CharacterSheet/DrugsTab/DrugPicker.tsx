@@ -11,10 +11,11 @@ import {
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
-import { uiTextBody, uiTextLabel } from "../../../ui/styles/editableStyles";
+import { uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { colourHeadingAccent } from "../../../ui/styles/colourTokens";
 
 function drugInfoContent(ref: DrugRef) {
   return (
@@ -22,27 +23,29 @@ function drugInfoContent(ref: DrugRef) {
       {ref.duration && (
         <div>
           <p className={`${uiTextLabel} font-semibold mb-1`}>Duration</p>
-          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.duration}</p>
+          <p className={uiTextDescription}>{ref.duration}</p>
         </div>
       )}
       {ref.effect && (
         <div>
           <p className={`${uiTextLabel} font-semibold mb-1`}>Effect</p>
-          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.effect}</p>
+          <p className={uiTextDescription}>{ref.effect}</p>
         </div>
       )}
       {ref.sideEffect && (
         <div>
-          <p className="text-xs lg:text-sm font-semibold text-red-500/70 uppercase tracking-wide mb-1">
+          <p
+            className={`text-xs lg:text-sm font-semibold ${colourHeadingAccent} uppercase tracking-wide mb-1`}
+          >
             Side Effects
           </p>
-          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.sideEffect}</p>
+          <p className={uiTextDescription}>{ref.sideEffect}</p>
         </div>
       )}
       {ref.notes && (
         <div>
           <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
+          <p className={uiTextDescription}>{ref.notes}</p>
         </div>
       )}
     </>
@@ -113,11 +116,7 @@ export function DrugPicker({
                     item.data.notes && (
                       <InfoModal
                         title={item.name}
-                        content={
-                          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                            {item.data.notes}
-                          </p>
-                        }
+                        content={<p className={uiTextDescription}>{item.data.notes}</p>}
                         as="span"
                       />
                     )

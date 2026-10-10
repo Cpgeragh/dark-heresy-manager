@@ -16,7 +16,13 @@ import type {
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
-import { editableInputClass, uiFormLabel, uiTextBody, uiTextError } from "../../ui/styles/editableStyles";
+import { RequiredMark } from "../../ui/forms/RequiredMark";
+import {
+  editableInputClass,
+  uiFormLabel,
+  uiTextBody,
+  uiTextError,
+} from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -339,7 +345,7 @@ export function TraitAcquisitionModal({
           <div className="space-y-3">
             <div>
               <label htmlFor="soul-bound-entity" className={uiFormLabel}>
-                Bound entity <span className="text-red-500">*</span>
+                Bound entity <RequiredMark />
               </label>
               <input
                 id="soul-bound-entity"
@@ -373,7 +379,7 @@ export function TraitAcquisitionModal({
             {rollRequired && (
               <div>
                 <label htmlFor="soul-bound-roll" className={uiFormLabel}>
-                  Rolled result (1d10) <span className="text-red-500">*</span>
+                  Rolled result (1d10) <RequiredMark />
                 </label>
                 <input
                   id="soul-bound-roll"
@@ -392,7 +398,7 @@ export function TraitAcquisitionModal({
             {consequence === "mutation" && (
               <div>
                 <label htmlFor="soul-bound-mutation" className={uiFormLabel}>
-                  Mutation <span className="text-red-500">*</span>
+                  Mutation <RequiredMark />
                 </label>
                 <input
                   id="soul-bound-mutation"
@@ -472,7 +478,7 @@ export function TraitAcquisitionModal({
             {sanctionRange && (
               <div>
                 <label htmlFor="sanction-roll" className={uiFormLabel}>
-                  {sanctionRange.label} <span className="text-red-500">*</span>
+                  {sanctionRange.label} <RequiredMark />
                 </label>
                 <input
                   id="sanction-roll"
@@ -490,7 +496,7 @@ export function TraitAcquisitionModal({
             )}
             <div>
               <label htmlFor="sanction-age" className={uiFormLabel}>
-                Starting age increase (3d10) <span className="text-red-500">*</span>
+                Starting age increase (3d10) <RequiredMark />
               </label>
               <input
                 id="sanction-age"

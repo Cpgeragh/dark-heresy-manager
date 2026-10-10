@@ -21,11 +21,12 @@ import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { FilterButton } from "../../ui/pickers/FilterButton";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { RequiredMark } from "../../ui/forms/RequiredMark";
 import {
   editableInputClass,
   editableTextareaClass,
   uiFormLabel,
-  uiTextBody,
+  uiDescriptionBox,
 } from "../../ui/styles/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import {
@@ -186,7 +187,7 @@ export function InsanityDisorderPicker({
         <CustomFormSection title="Rules">
           <div>
             <p className={uiFormLabel}>
-              Severity <span className="text-red-500">*</span>
+              Severity <RequiredMark />
             </p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {customSeverityOptions.map((option) => (
@@ -269,11 +270,7 @@ export function InsanityDisorderPicker({
             </div>
           </div>
           {activeSeverityDescription && (
-            <div
-              className={`text-center text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
-            >
-              {activeSeverityDescription}
-            </div>
+            <div className={`text-center ${uiDescriptionBox}`}>{activeSeverityDescription}</div>
           )}
         </PickerBody>
       </PickerModal>

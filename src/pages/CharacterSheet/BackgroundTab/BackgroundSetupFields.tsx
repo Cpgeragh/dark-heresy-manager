@@ -29,6 +29,7 @@ import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
 import { HomeworldTraitAcquisitionModal } from "../HomeworldTraitAcquisitionModal";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import { colourDivider } from "../../../ui/styles/colourTokens";
 
 export interface BackgroundSetupFieldsProps {
   header: CharacterHeader;
@@ -296,7 +297,7 @@ export function BackgroundSetupFields({
           }
         />
 
-        <div className="border-t border-slate-700/70" />
+        <div className={`border-t ${colourDivider}`} />
 
         <BackgroundPickerField
           label="Career"

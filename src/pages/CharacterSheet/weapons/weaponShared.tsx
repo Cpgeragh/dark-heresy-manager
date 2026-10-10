@@ -17,11 +17,13 @@ import { CloseIcon } from "../../../ui/buttons/CloseButton";
 import {
   editableInputColour,
   uiCell,
-  uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
   uiFormLabel,
   uiInfoModalWrapper,
+  uiRuleName,
+  uiTextDescription,
+  uiTextBody,
 } from "../../../ui/styles/editableStyles";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
@@ -162,15 +164,13 @@ export function SpecialRulesContent({
 
   return (
     <div className="space-y-4">
-      {description && (
-        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{description}</p>
-      )}
+      {description && <p className={uiTextDescription}>{description}</p>}
       {ruleNames.map((name) => {
         const desc = WEAPON_SPECIAL_RULES[name];
         return (
           <div key={name}>
-            <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
-            <p className={`text-sm lg:text-base ${uiTextBody} mt-1 leading-relaxed`}>{desc}</p>
+            <p className={uiRuleName}>{name}</p>
+            <p className={`${uiTextDescription} mt-1`}>{desc}</p>
           </div>
         );
       })}
@@ -194,7 +194,7 @@ export function UpgradeCard({
   return (
     <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2`}>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
+        <span className={`text-xs lg:text-sm font-medium ${uiTextBody}`}>{upgrade.name}</span>
         {editable && (
           <RemoveButton onClick={() => onRemove(upgrade.id)} label={`Remove ${upgrade.name}`} />
         )}
@@ -219,9 +219,7 @@ export function UpgradeCard({
             title={upgrade.name}
             content={
               <div className="space-y-2">
-                <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                  {upgrade.description}
-                </p>
+                <p className={uiTextDescription}>{upgrade.description}</p>
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
               </div>
             }

@@ -9,6 +9,7 @@ import {
   uiInfoModalWrapper,
   uiTextBody,
   uiTextLabel,
+  uiTextDescription,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -19,7 +20,7 @@ function InfoSection({ title, content }: { title: string; content: string }) {
   return (
     <section>
       <p className={`${uiTextLabel} font-semibold mb-1`}>{title}</p>
-      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{content}</p>
+      <p className={uiTextDescription}>{content}</p>
     </section>
   );
 }
@@ -27,9 +28,7 @@ function InfoSection({ title, content }: { title: string; content: string }) {
 export function HomeworldInfoContent({ homeworld }: { homeworld: HomeworldData }) {
   return (
     <div className="space-y-4">
-      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-        {homeworld.description}
-      </p>
+      <p className={uiTextDescription}>{homeworld.description}</p>
 
       {homeworld.skills && (
         <section className="space-y-2">

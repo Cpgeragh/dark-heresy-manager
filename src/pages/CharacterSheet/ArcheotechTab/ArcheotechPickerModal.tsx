@@ -5,7 +5,7 @@ import {
   ARCHEOTECH_REFERENCE,
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
-import { uiTextBody, uiTextGMNote } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextGMNote, uiTextDescription } from "../../../ui/styles/editableStyles";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
   PickerCustomAction,
@@ -164,20 +164,14 @@ export function ArcheotechPickerModal({
                   entry.item.data.description && (
                     <InfoModal
                       title={entry.item.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {entry.item.data.description}
-                        </p>
-                      }
+                      content={<p className={uiTextDescription}>{entry.item.data.description}</p>}
                       as="span"
                     />
                   )
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
-                {entry.item.data.type && (
-                  <span className={uiTextBody}>{entry.item.data.type}</span>
-                )}
+                {entry.item.data.type && <span className={uiTextBody}>{entry.item.data.type}</span>}
                 <ItemMetaChips
                   bare
                   weight={entry.item.data.weight}
@@ -199,11 +193,7 @@ export function ArcheotechPickerModal({
                   entry.ref.description && (
                     <InfoModal
                       title={entry.ref.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {entry.ref.description}
-                        </p>
-                      }
+                      content={<p className={uiTextDescription}>{entry.ref.description}</p>}
                       as="span"
                     />
                   )

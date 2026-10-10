@@ -7,6 +7,11 @@ import type {
 import { Button } from "../../../ui/buttons/Button";
 import { ModalShell } from "../../../ui/modals/ModalShell";
 import { uiModalTitle } from "../../../ui/styles/editableStyles";
+import {
+  colourAmberPlain,
+  colourTextPrimary,
+  colourDivider,
+} from "../../../ui/styles/colourTokens";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";
 
 interface CompleteBackgroundSetupModalProps {
@@ -49,14 +54,12 @@ export function CompleteBackgroundSetupModal({
       viewportAware
       className="max-h-[calc(100dvh-2rem)] max-w-2xl overflow-y-auto"
     >
-      <div className="border-b border-slate-700 px-4 py-4 text-center lg:px-6 lg:py-5">
-        <h2 className={`${uiModalTitle} text-base lg:text-lg`}>
-          Complete Background
-        </h2>
+      <div className={`border-b ${colourDivider} px-4 py-4 text-center lg:px-6 lg:py-5`}>
+        <h2 className={`${uiModalTitle} text-base lg:text-lg`}>Complete Background</h2>
       </div>
 
       <div className="space-y-4 px-4 py-4 lg:px-6 lg:py-5">
-        <p className="text-sm text-slate-200 lg:text-base">
+        <p className={`text-sm ${colourTextPrimary} lg:text-base`}>
           Choose your Homeworld and Career before entering the character sheet. Your starting Rank
           is assigned automatically by your Career.
         </p>
@@ -74,13 +77,13 @@ export function CompleteBackgroundSetupModal({
         />
 
         {!editable && (
-          <p className="text-sm text-amber-300 lg:text-base">
+          <p className={`text-sm ${colourAmberPlain} lg:text-base`}>
             The DM must enable character editing before you can complete this setup.
           </p>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-t border-slate-700 px-4 py-4 lg:px-6 lg:py-5">
+      <div className={`grid grid-cols-2 gap-2 border-t ${colourDivider} px-4 py-4 lg:px-6 lg:py-5`}>
         <Button variant="neutral" onClick={onReturnToDashboard} disabled={saving}>
           Return
         </Button>

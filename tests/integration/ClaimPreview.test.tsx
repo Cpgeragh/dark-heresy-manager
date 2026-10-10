@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ClaimPreview } from "../../src/pages/ClaimCharacter/ClaimPreview";
 
@@ -85,6 +85,32 @@ describe("ClaimPreview", () => {
     );
     fireEvent.click(screen.getByRole("button"));
     expect(onClaim).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the claim button waiting until the claim finishes", async () => {
+    let finishClaim: () => void = () => undefined;
+    const onClaim = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishClaim = resolve;
+        })
+    );
+    render(
+      <ClaimPreview
+        characterName={characterName}
+        campaignName={campaignName}
+        ownership="unclaimed"
+        onClaim={onClaim}
+      />
+    );
+    const button = screen.getByRole("button");
+    expect(button).not.toHaveAttribute("aria-busy");
+
+    fireEvent.click(button);
+    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+
+    finishClaim();
+    await waitFor(() => expect(button).not.toHaveAttribute("aria-busy"));
   });
 
   it("does not call onClaim when character is already claimed", () => {

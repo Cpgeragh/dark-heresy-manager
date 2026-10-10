@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { HomeworldTraitChoices } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
+import { RequiredMark } from "../../ui/forms/RequiredMark";
 import { editableInputClass, uiFormLabel } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
@@ -129,7 +130,7 @@ export function HomeworldTraitAcquisitionModal({
           {homeworldId === "mind-cleansed" && (
             <div>
               <label htmlFor="mind-cleansed-insanity" className={uiFormLabel}>
-                Starting Insanity Points <span className="text-red-500">*</span>
+                Starting Insanity Points <RequiredMark />
               </label>
               <input
                 id="mind-cleansed-insanity"

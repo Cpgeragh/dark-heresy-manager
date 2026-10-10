@@ -6,9 +6,9 @@ import {
   uiSection,
   uiItemName,
   uiInfoModalWrapper,
-  uiTextBody,
-  uiTextSubtle,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
+import { colourAmberPlain } from "../../../ui/styles/colourTokens";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
@@ -56,9 +56,7 @@ export function ItemRow({
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={item.name}
-                  content={
-                    <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.description}</p>
-                  }
+                  content={<p className={uiTextDescription}>{item.description}</p>}
                 />
               </span>
             )}
@@ -71,7 +69,7 @@ export function ItemRow({
             className="flex flex-wrap gap-1.5 mt-1"
           />
           {item.grantedByTalentName && (
-          <p className={`mt-1 text-xs ${uiTextSubtle}`}>
+            <p className={`mt-1 text-xs ${colourAmberPlain}`}>
               {item.grantedByTalentName} ({item.grantedByType}): Granted
             </p>
           )}

@@ -159,7 +159,7 @@ describe("NotesTab editing and deleting", () => {
     const user = userEvent.setup();
     render(<NotesWiring initial={oneEntry()} />);
 
-    await user.click(screen.getByText("Session 12"));
+    await user.click(screen.getByRole("button", { name: "Open note Session 12" }));
 
     const dialog = screen.getByRole("dialog", { name: "Session 12" });
     expect(within(dialog).getByText("Found the relic.")).toBeInTheDocument();
@@ -187,7 +187,7 @@ describe("NotesTab editing and deleting", () => {
     const user = userEvent.setup();
     render(<NotesWiring initial={oneEntry()} editable={false} />);
 
-    await user.click(screen.getByText("Session 12"));
+    await user.click(screen.getByRole("button", { name: "Open note Session 12" }));
 
     const dialog = screen.getByRole("dialog", { name: "Session 12" });
     expect(within(dialog).getByText("Found the relic.")).toBeInTheDocument();

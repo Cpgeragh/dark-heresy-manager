@@ -20,7 +20,9 @@ import {
   uiSection,
   uiTextBody,
   uiTextError,
+  uiTextMeta,
 } from "../../ui/styles/editableStyles";
+import { colourDivider } from "../../ui/styles/colourTokens";
 
 interface Character {
   id: string;
@@ -203,7 +205,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
         </div>
 
         <div>
-          <p className="text-xs lg:text-sm text-slate-400 mb-2">Attendees</p>
+          <p className={`${uiTextMeta} mb-2`}>Attendees</p>
           <div className="flex flex-wrap gap-3">
             {characters.map((char) => (
               <label
@@ -221,9 +223,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
           </div>
         </div>
 
-        <p className="text-xs lg:text-sm text-slate-500">
-          Note: XP changes do not retroactively adjust character totals.
-        </p>
+        <p className={uiTextMeta}>Note: XP changes do not retroactively adjust character totals.</p>
 
         <div className="grid grid-cols-2 gap-2">
           <Button fullWidth onClick={handleSave} loading={saving} loadingLabel="Saving">
@@ -273,7 +273,9 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                     This session's XP was already applied. Deleting it won't remove that XP unless
                     checked below.
                   </span>
-                  <label className="flex items-center gap-1.5 text-xs lg:text-sm text-slate-300 cursor-pointer">
+                  <label
+                    className={`flex items-center gap-1.5 text-xs lg:text-sm ${uiTextBody} cursor-pointer`}
+                  >
                     <input
                       type="checkbox"
                       checked={reverseXp}
@@ -282,7 +284,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                     />
                     Also remove {session.xpAwarded} XP from attendees
                   </label>
-                  <span className="text-xs lg:text-sm text-slate-500">
+                  <span className={uiTextMeta}>
                     This will affect {reverseXp ? xpAffectedDocuments : 2} documents.
                   </span>
                   <div className="flex items-center gap-1">
@@ -327,7 +329,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       </div>
 
       {session.attendees.length > 0 && (
-        <p className="text-xs lg:text-sm text-slate-400">
+        <p className={uiTextMeta}>
           Attendees: {session.attendees.map((id) => nameById[id] ?? id).join(", ")}
         </p>
       )}
@@ -335,9 +337,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       {session.summary && <p className={`text-sm lg:text-base ${uiTextBody}`}>{session.summary}</p>}
 
       {isDM && session.dmNotes && (
-        <p className="text-xs lg:text-sm text-slate-500 border-t border-slate-700 pt-2">
-          DM: {session.dmNotes}
-        </p>
+        <p className={`${uiTextMeta} border-t ${colourDivider} pt-2`}>DM: {session.dmNotes}</p>
       )}
     </div>
   );

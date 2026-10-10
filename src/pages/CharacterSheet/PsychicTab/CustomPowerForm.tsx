@@ -9,6 +9,7 @@ import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
+import { RequiredMark } from "../../../ui/forms/RequiredMark";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
@@ -16,8 +17,10 @@ import {
   editableTextareaClass,
   uiFormLabel,
   uiTextError,
+  uiFormLabelHint,
+  uiTextMeta,
 } from "../../../ui/styles/editableStyles";
-import { chipColours } from "../../../ui/styles/colourTokens";
+import { chipColours, colourToggleSelectedRed } from "../../../ui/styles/colourTokens";
 import { disciplineColours } from "./psychicStyles";
 import { normalisePowerName } from "./psychicPowerHelpers";
 
@@ -161,7 +164,7 @@ export function CustomPowerForm({
       <PickerBody>
         <div className="space-y-1">
           <label className={uiFormLabel}>
-            Name <span className="text-red-400">*</span>
+            Name <RequiredMark />
           </label>
           <input
             type="text"
@@ -181,7 +184,7 @@ export function CustomPowerForm({
 
         <div className="space-y-1">
           <label className={uiFormLabel}>
-            Discipline <span className="text-red-400">*</span>
+            Discipline <RequiredMark />
           </label>
           {target === "minor" || requiredDiscipline ? (
             <Chip
@@ -213,7 +216,7 @@ export function CustomPowerForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className={uiFormLabel}>
-              PT <span className="text-red-400">*</span>
+              PT <RequiredMark />
             </label>
             <input
               type="text"
@@ -228,14 +231,14 @@ export function CustomPowerForm({
 
           <div className="space-y-1">
             <label className={uiFormLabel}>
-              Action <span className="text-red-400">*</span>
+              Action <RequiredMark />
             </label>
             <div className="grid grid-cols-2 gap-1.5">
               {(["Half Action", "Full Action"] as const).map((action) => (
                 <ToggleButton
                   key={action}
                   selected={focusTime === action}
-                  selectedClassName="border-red-500 bg-red-500/20 text-red-400 font-semibold"
+                  selectedClassName={colourToggleSelectedRed}
                   className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setFocusTime(action)}
                 >
@@ -248,7 +251,7 @@ export function CustomPowerForm({
 
         <div className="space-y-1">
           <label className={uiFormLabel}>
-            Range <span className="text-red-400">*</span>
+            Range <RequiredMark />
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             {[
@@ -260,7 +263,7 @@ export function CustomPowerForm({
               <ToggleButton
                 key={mode}
                 selected={rangeMode === mode}
-                selectedClassName="border-red-500 bg-red-500/20 text-red-400 font-semibold"
+                selectedClassName={colourToggleSelectedRed}
                 className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                 onClick={() => setRangeMode(mode as CustomRangeMode)}
               >
@@ -283,7 +286,7 @@ export function CustomPowerForm({
                 className={editableInputClass(true) + " w-28 font-code"}
                 autoComplete="off"
               />
-              <span className="text-xs lg:text-sm text-slate-400">
+              <span className={uiTextMeta}>
                 {rangeMode === "km-radius" ? "km radius" : "metres"}
               </span>
             </div>
@@ -293,14 +296,14 @@ export function CustomPowerForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className={uiFormLabel}>
-              Sustained <span className="text-red-400">*</span>
+              Sustained <RequiredMark />
             </label>
             <div className="grid grid-cols-2 gap-1.5">
               {(["Yes", "No"] as const).map((value) => (
                 <ToggleButton
                   key={value}
                   selected={sustained === value}
-                  selectedClassName="border-red-500 bg-red-500/20 text-red-400 font-semibold"
+                  selectedClassName={colourToggleSelectedRed}
                   className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setSustained(value)}
                 >
@@ -315,7 +318,7 @@ export function CustomPowerForm({
 
         <div className="space-y-1">
           <label className={uiFormLabel}>
-            Description <span className="text-slate-600">(optional)</span>
+            Description <span className={uiFormLabelHint}>(optional)</span>
           </label>
           <textarea
             value={description}

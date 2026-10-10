@@ -13,10 +13,16 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
-  uiTextSubtle,
   uiInfoModalWrapper,
   uiCardTitleHover,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
+import {
+  colourAmberPlain,
+  colourDivider,
+  colourTextMuted,
+  colourFillInset,
+} from "../../../ui/styles/colourTokens";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import { Chip } from "../../../ui/chips/Chip";
@@ -77,10 +83,10 @@ export function GrenadeCard({
       <div className={uiSection + " opacity-60"}>
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-sm lg:text-base font-semibold text-slate-400 truncate">
+            <p className={`text-sm lg:text-base font-semibold ${colourTextMuted} truncate`}>
               {item.name}
             </p>
-            <p className={`text-xs lg:text-sm ${uiTextSubtle}`}>
+            <p className={`text-xs lg:text-sm ${colourAmberPlain}`}>
               Stowed · {item.quantity} remaining
             </p>
           </div>
@@ -189,9 +195,11 @@ export function GrenadeCard({
               </>
             )}
             {item.damage === "Special" && (
-              <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
+              <div
+                className={`flex flex-col items-center ${colourFillInset} rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]`}
+              >
                 <span className={uiTextLabel}>Damage</span>
-                <span className="text-sm lg:text-base font-code text-amber-400 mt-0.5">
+                <span className={`text-sm lg:text-base font-code ${colourAmberPlain} mt-0.5`}>
                   Special
                 </span>
               </div>
@@ -221,11 +229,7 @@ export function GrenadeCard({
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Rules`}
-                    content={
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {rulesDescription}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{rulesDescription}</p>}
                   />
                 </span>
               ) : (
@@ -252,7 +256,7 @@ export function GrenadeCard({
               onUpdate={onUpdateQty}
             />
             {isEquipped && item.quantity > 3 && (
-              <span className={`text-[10px] lg:text-xs ${uiTextSubtle} ml-1`}>
+              <span className={`text-[10px] lg:text-xs ${colourAmberPlain} ml-1`}>
                 3 ready, rest stowed
               </span>
             )}
@@ -264,7 +268,7 @@ export function GrenadeCard({
             value={item.value}
             availability={item.availability}
             source={item.source}
-            className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
           />
         </div>
       )}

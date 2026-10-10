@@ -12,6 +12,7 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextPlaceholder,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
@@ -21,6 +22,7 @@ import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
@@ -112,7 +114,7 @@ export function PowerCard({
   const modalContent = (
     <>
       {power.description ? (
-        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{power.description}</p>
+        <p className={uiTextDescription}>{power.description}</p>
       ) : (
         <p className={`text-sm ${uiTextPlaceholder}`}>No description recorded.</p>
       )}
@@ -162,15 +164,11 @@ export function PowerCard({
           )}
 
           {onSelect ? (
-            <button
-              type="button"
+            <ExpandButton
+              expanded={expanded}
+              label={`${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`}
               onClick={() => setExpanded((value) => !value)}
-              aria-expanded={expanded}
-              aria-label={`${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`}
-              className="relative z-10 pointer-events-auto p-1 -m-1"
-            >
-              <ExpandChevron expanded={expanded} />
-            </button>
+            />
           ) : (
             <ExpandChevron expanded={expanded} />
           )}

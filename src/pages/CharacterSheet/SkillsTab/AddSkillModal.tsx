@@ -134,7 +134,6 @@ export function AddSkillModal({
     return (
       <PickerModal
         title={`Train ${pendingManualSkill.name}`}
-        titleClassName="text-red-500"
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
         query=""
@@ -179,7 +178,6 @@ export function AddSkillModal({
     return (
       <PickerModal
         title={openCategory}
-        titleClassName="text-red-500"
         placeholder=""
         query=""
         onQueryChange={() => {}}
@@ -258,7 +256,6 @@ export function AddSkillModal({
     return (
       <PickerModal
         title={allSkillsTitle ?? modalTitle}
-        titleClassName="text-red-500"
         placeholder="Search skills…"
         query={search}
         onQueryChange={setSearch}
@@ -294,7 +291,6 @@ export function AddSkillModal({
   return (
     <PickerModal
       title={modalTitle}
-      titleClassName="text-red-500"
       placeholder="Search skills…"
       query={search}
       onQueryChange={setSearch}

@@ -13,6 +13,8 @@ import {
   uiInfoModalWrapper,
   uiSectionShell,
   uiTextBody,
+  uiTextDescription,
+  uiDescriptionBox,
 } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
@@ -35,6 +37,7 @@ import { DamageTypeChip } from "./weaponShared";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { RangedCard } from "./RangedCard";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import {
   weaponClassChip,
@@ -101,11 +104,7 @@ function RangedWeaponCardPickerRow({
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal
                     title={weaponReference.name}
-                    content={
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {weaponReference.description}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{weaponReference.description}</p>}
                   />
                 </span>
               )}
@@ -127,15 +126,11 @@ function RangedWeaponCardPickerRow({
           </div>
           <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
             {editable ? (
-              <button
-                type="button"
+              <ExpandButton
+                expanded={false}
+                label={`Expand ${weaponReference.name} details`}
                 onClick={showDetails}
-                aria-expanded={false}
-                aria-label={`Expand ${weaponReference.name} details`}
-                className="relative z-10 pointer-events-auto p-1 -m-1"
-              >
-                <ExpandChevron expanded={false} />
-              </button>
+              />
             ) : (
               <ExpandChevron expanded={false} />
             )}
@@ -316,7 +311,6 @@ export function RangedPicker({
     return (
       <PickerModal
         title={selected.name}
-        titleClassName="text-slate-200"
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
         query=""
@@ -353,11 +347,7 @@ export function RangedPicker({
               ))}
             </div>
           </div>
-          <div
-            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
-          >
-            {rangedCraftsmanshipDescription(craftsmanship)}
-          </div>
+          <div className={uiDescriptionBox}>{rangedCraftsmanshipDescription(craftsmanship)}</div>
         </PickerBody>
       </PickerModal>
     );

@@ -5,7 +5,7 @@ import { Button } from "../../ui/buttons/Button";
 import { RecoveryCodeInput } from "../../ui/forms/RecoveryCodeInput";
 import { formatRecoveryCodeInput } from "../../utils/recoveryCode";
 import { validateRecoveryCode } from "../../utils/validation";
-import { uiSection } from "../../ui/styles/editableStyles";
+import { uiSection, uiTextBody } from "../../ui/styles/editableStyles";
 
 interface ClaimFormProps {
   code: string;
@@ -30,7 +30,7 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
         onValueChange={onCodeChange}
         disabled={loading}
         label="Enter Recovery Code"
-        labelClassName="block text-sm lg:text-base text-slate-300"
+        labelClassName={`block text-sm lg:text-base ${uiTextBody}`}
         accent="red"
         showValidation
       />

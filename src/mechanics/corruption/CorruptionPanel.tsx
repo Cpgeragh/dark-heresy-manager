@@ -18,6 +18,8 @@ import {
   colourActiveEmerald,
   colourActiveOrange,
   colourActiveSky,
+  colourTerminalText,
+  colourDivider,
 } from "../../ui/styles/colourTokens";
 import {
   uiFormLabel,
@@ -25,6 +27,8 @@ import {
   uiTextLabel,
   uiTextBody,
   uiTextPlaceholder,
+  uiTextDescription,
+  uiThresholdValue,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
@@ -107,21 +111,19 @@ function CorruptionStatusChips({ points }: { points: number }) {
         <span className={uiInfoModalWrapper}>
           <InfoModal
             title="Degree of Corruption"
-            content={
-              <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                {CORRUPTION_RULE_TEXT.degree}
-              </p>
-            }
+            content={<p className={uiTextDescription}>{CORRUPTION_RULE_TEXT.degree}</p>}
           />
         </span>
       </div>
 
       {entry.terminal ? (
-        <p className="text-center text-xs lg:text-sm uppercase tracking-wide text-rose-300 pt-3 border-t border-slate-500">
+        <p
+          className={`text-center text-xs lg:text-sm uppercase tracking-wide ${colourTerminalText} pt-3 border-t ${colourDivider}`}
+        >
           Character removed from play
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-500">
+        <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${colourDivider}`}>
           <div className="flex flex-col items-center space-y-1.5">
             <span className={uiTextLabel}>Status</span>
             <div className="flex flex-wrap justify-center gap-1.5">
@@ -135,32 +137,24 @@ function CorruptionStatusChips({ points }: { points: number }) {
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title="Mutation"
-                    content={
-                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                        {CORRUPTION_RULE_TEXT.mutation}
-                      </p>
-                    }
+                    content={<p className={uiTextDescription}>{CORRUPTION_RULE_TEXT.mutation}</p>}
                   />
                 </span>
               </span>
             </div>
           </div>
-          <div className="flex flex-col items-center space-y-1.5 border-l border-slate-500 pl-3">
+          <div className={`flex flex-col items-center space-y-1.5 border-l ${colourDivider} pl-3`}>
             <span className={uiTextLabel}>Thresholds</span>
             <div className="flex flex-col items-center gap-1">
               {nextMalignancyTest !== undefined && (
                 <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
-                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">
-                    {nextMalignancyTest - safePoints}
-                  </span>{" "}
-                  pt{nextMalignancyTest - safePoints === 1 ? "" : "s"} until Malignancy Test{" "}
+                  <span className={uiThresholdValue}>{nextMalignancyTest - safePoints}</span> pt
+                  {nextMalignancyTest - safePoints === 1 ? "" : "s"} until Malignancy Test{" "}
                   <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
                     <InfoModal
                       title="The Malignancy Test"
                       content={
-                        <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
-                          {CORRUPTION_RULE_TEXT.malignancyTest}
-                        </p>
+                        <p className={uiTextDescription}>{CORRUPTION_RULE_TEXT.malignancyTest}</p>
                       }
                     />
                   </span>
@@ -168,10 +162,8 @@ function CorruptionStatusChips({ points }: { points: number }) {
               )}
               {nextDegree && (
                 <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
-                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">
-                    {nextDegree.min - safePoints}
-                  </span>{" "}
-                  pt{nextDegree.min - safePoints === 1 ? "" : "s"} until {nextDegree.degree}
+                  <span className={uiThresholdValue}>{nextDegree.min - safePoints}</span> pt
+                  {nextDegree.min - safePoints === 1 ? "" : "s"} until {nextDegree.degree}
                 </p>
               )}
             </div>

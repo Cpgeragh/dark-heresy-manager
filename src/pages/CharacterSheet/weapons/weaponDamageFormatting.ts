@@ -1,4 +1,5 @@
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { damageTypeTextColour } from "../../../ui/styles/colourTokens";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
   a.localeCompare(b)
@@ -29,13 +30,13 @@ export function parseDamageType(
   const letter = damage.trim().slice(-1).toUpperCase();
   switch (letter) {
     case "I":
-      return { letter: "I", label: "Impact", colour: "text-blue-400" };
+      return { letter: "I", label: "Impact", colour: damageTypeTextColour.impact };
     case "R":
-      return { letter: "R", label: "Rending", colour: "text-red-400" };
+      return { letter: "R", label: "Rending", colour: damageTypeTextColour.rending };
     case "E":
-      return { letter: "E", label: "Energy", colour: "text-orange-400" };
+      return { letter: "E", label: "Energy", colour: damageTypeTextColour.energy };
     case "X":
-      return { letter: "X", label: "Explosive", colour: "text-yellow-400" };
+      return { letter: "X", label: "Explosive", colour: damageTypeTextColour.explosive };
     default:
       return null;
   }

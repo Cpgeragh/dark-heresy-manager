@@ -10,10 +10,19 @@ import {
   preflightCharacterDeletion,
   revealRecoveryCode,
 } from "../../services/characterService";
-import { uiSection, uiTextError, uiTextPlaceholder } from "../../ui/styles/editableStyles";
-import { colourSuccessPlain } from "../../ui/styles/colourTokens";
+import {
+  uiSection,
+  uiTextError,
+  uiTextPlaceholder,
+  uiTextMeta,
+} from "../../ui/styles/editableStyles";
+import {
+  colourSuccessPlain,
+  colourMetadataLabelText,
+  colourTextPrimary,
+} from "../../ui/styles/colourTokens";
 import { Button } from "../../ui/buttons/Button";
-import { LoadingDots } from "../../ui/LoadingDots";
+import { RevealCodeButton } from "../../ui/buttons/RevealCodeButton";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
@@ -121,7 +130,7 @@ export function CharacterRow({
   const deleteDetails = deletePreflight.error ? (
     <span className={`text-xs ${uiTextError}`}>{deletePreflight.error}</span>
   ) : deletePreflight.result ? (
-    <span className="text-xs text-slate-500">
+    <span className={`text-xs ${colourMetadataLabelText}`}>
       {`This permanently deletes ${deletePreflight.result.totalCount} document${deletePreflight.result.totalCount === 1 ? "" : "s"}.`}
     </span>
   ) : null;
@@ -141,31 +150,14 @@ export function CharacterRow({
               canEdit={false}
             />
             <div>
-              <span className="font-semibold text-slate-100 text-sm lg:text-base leading-tight">
+              <span
+                className={`font-semibold ${colourTextPrimary} text-sm lg:text-base leading-tight`}
+              >
                 {characterName}
               </span>
-              <p className="text-xs lg:text-sm text-slate-500 font-code [font-feature-settings:'zero'] mt-0.5">
+              <p className={`${uiTextMeta} font-code [font-feature-settings:'zero'] mt-0.5`}>
                 Recovery:{" "}
-                {revealedCode ?? (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      void handleReveal();
-                    }}
-                    disabled={revealing}
-                    className="underline hover:text-slate-300 disabled:opacity-50"
-                  >
-                    {revealing ? (
-                      <span>
-                        Revealing
-                        <LoadingDots />
-                      </span>
-                    ) : (
-                      "Reveal"
-                    )}
-                  </button>
-                )}
+                {revealedCode ?? <RevealCodeButton revealing={revealing} onReveal={handleReveal} />}
               </p>
               <p className="text-xs lg:text-sm mt-0.5">
                 {userId ? (
@@ -220,16 +212,16 @@ export function CharacterRow({
           <ModalHeader title="History" onClose={() => setHistoryRequested(false)} />
           <div className="p-4 lg:p-5 space-y-1">
             {logsError ? (
-              <p className={`text-xs lg:text-sm ${uiTextError}`}>Unable to load character history.</p>
+              <p className={`text-xs lg:text-sm ${uiTextError}`}>
+                Unable to load character history.
+              </p>
             ) : logs.length === 0 ? (
               <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No history yet.</p>
             ) : (
               logs.map((log) => (
-                <p key={log.id} className="text-xs lg:text-sm text-slate-400">
-                  <span className="text-slate-200">{formatAction(log.action)}</span>
-                  {log.timestamp && (
-                    <span className="text-slate-600"> · {formatTimestamp(log.timestamp)}</span>
-                  )}
+                <p key={log.id} className={uiTextMeta}>
+                  <span className={colourTextPrimary}>{formatAction(log.action)}</span>
+                  {log.timestamp && <span> · {formatTimestamp(log.timestamp)}</span>}
                 </p>
               ))
             )}

@@ -19,6 +19,7 @@ import {
   uiItemName,
   uiSection,
   uiTextPlaceholder,
+  uiTextMeta,
 } from "../../../ui/styles/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import {
@@ -27,7 +28,13 @@ import {
 } from "../../../data/reference/divinationData";
 import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../../data/reference/appearanceData";
 import { Chip } from "../../../ui/chips/Chip";
-import { chipColours, colourActiveRose, colourActiveSky } from "../../../ui/styles/colourTokens";
+import {
+  chipColours,
+  colourActiveRose,
+  colourActiveSky,
+  colourTextPrimary,
+  colourDivider,
+} from "../../../ui/styles/colourTokens";
 import { RollChip } from "../../../ui/chips/RollChip";
 import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
@@ -250,7 +257,7 @@ export function BackgroundTab({
                       title="Age"
                       content={
                         <div>
-                          <div className="font-semibold text-slate-100">Modifiers</div>
+                          <div className={`font-semibold ${colourTextPrimary}`}>Modifiers</div>
                           <ul className="mt-1 space-y-1">
                             <li>Sanctioned Psyker: +{sanctioningAgeIncrease}</li>
                           </ul>
@@ -322,7 +329,7 @@ export function BackgroundTab({
                 className={editableInputClass(editable) + " font-code"}
                 autoComplete="off"
               />
-              <span className="text-xs lg:text-sm text-slate-400">m</span>
+              <span className={uiTextMeta}>m</span>
             </div>
           </div>
           <div className="space-y-1">
@@ -343,12 +350,12 @@ export function BackgroundTab({
                 className={editableInputClass(editable) + " font-code"}
                 autoComplete="off"
               />
-              <span className="text-xs lg:text-sm text-slate-400">kg</span>
+              <span className={uiTextMeta}>kg</span>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-700/70" />
+        <div className={`border-t ${colourDivider}`} />
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <BackgroundPickerField
@@ -393,7 +400,7 @@ export function BackgroundTab({
           />
         </div>
 
-        <div className="border-t border-slate-700/70" />
+        <div className={`border-t ${colourDivider}`} />
 
         <div>
           <p className={`${uiFormLabel} mb-1.5`}>
@@ -436,7 +443,7 @@ export function BackgroundTab({
           </div>
         </div>
 
-        <div className="border-t border-slate-700/70" />
+        <div className={`border-t ${colourDivider}`} />
 
         <FormField
           label="Description"
@@ -472,7 +479,7 @@ export function BackgroundTab({
           onUpdateInsanity={onUpdateInsanity}
         />
 
-        <div className="border-t border-slate-700/70" />
+        <div className={`border-t ${colourDivider}`} />
 
         <BackgroundPickerField
           label="Divination"
@@ -506,7 +513,7 @@ export function BackgroundTab({
           }
         />
 
-        <div className="border-t border-slate-700/70" />
+        <div className={`border-t ${colourDivider}`} />
 
         <FormField
           label="Background Notes"
@@ -523,7 +530,7 @@ export function BackgroundTab({
   );
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className={`space-y-6 ${colourTextPrimary}`}>
       {/* IDENTITY */}
       <div>
         <SectionHeader className="mb-3">Identity</SectionHeader>

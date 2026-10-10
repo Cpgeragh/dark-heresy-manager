@@ -11,7 +11,7 @@ import {
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
-import { uiTextBody, uiTextGMNote } from "../../../ui/styles/editableStyles";
+import { uiTextGMNote, uiTextDescription } from "../../../ui/styles/editableStyles";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
@@ -146,11 +146,7 @@ export function GearPicker({
                   entry.item.data.description && (
                     <InfoModal
                       title={entry.item.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {entry.item.data.description}
-                        </p>
-                      }
+                      content={<p className={uiTextDescription}>{entry.item.data.description}</p>}
                       as="span"
                     />
                   )
@@ -178,11 +174,7 @@ export function GearPicker({
                   entry.ref.description && (
                     <InfoModal
                       title={entry.ref.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {entry.ref.description}
-                        </p>
-                      }
+                      content={<p className={uiTextDescription}>{entry.ref.description}</p>}
                       as="span"
                     />
                   )

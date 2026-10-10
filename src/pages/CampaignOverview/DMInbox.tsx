@@ -8,13 +8,22 @@ import { MessageThread } from "../../components/MessageThread";
 import { MessageInput } from "../../components/MessageInput";
 import { useToast } from "../../components/Toast";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
+import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
-import { uiSection, uiSectionShell, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
+import {
+  uiItemNameHover,
+  uiSection,
+  uiSectionShell,
+  uiTextPlaceholder,
+  uiTextMeta,
+} from "../../ui/styles/editableStyles";
 import { useRouteLoading } from "../../context/useRouteReady";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import type { CharacterListItem } from "../../types/Firestore";
 import { recordComponentRender } from "../../performance/performanceMetrics";
+import { colourDivider, colourAmberFill } from "../../ui/styles/colourTokens";
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -92,7 +101,7 @@ function ThreadView({
         <MessageInput onSend={handleSend} placeholder={`Reply to ${label}…`} />
 
         {/* Clear chat */}
-        <div className="mt-3 pt-3 border-t border-slate-800">
+        <div className={`mt-3 pt-3 border-t ${colourDivider}`}>
           <ConfirmInline
             triggerLabel="Clear chat"
             requireText="DELETE"
@@ -148,29 +157,31 @@ export function DMInbox({
 
         return (
           <div key={thread.characterId} className="relative">
-            <button
-              type="button"
-              onClick={() => toggleThread(thread.characterId)}
-              aria-expanded={isExpanded}
-              className={`${uiSectionShell} w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 hover:bg-slate-800 transition text-left`}
+            <div
+              className={`${uiSectionShell} ${uiCardTapHeader} relative w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 text-left`}
             >
-              <div className="flex-1 min-w-0">
+              <CardOverlayButton
+                label={hasUnread ? `${label}, ${thread.unreadForDM} unread` : label}
+                expanded={isExpanded}
+                onClick={() => toggleThread(thread.characterId)}
+              />
+              <div className="pointer-events-none relative flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm lg:text-base font-medium text-slate-100">{label}</span>
+                  <span className={uiItemNameHover}>{label}</span>
                   {hasUnread && (
-                    <span className="text-xs lg:text-sm px-1.5 lg:px-2 py-0.5 bg-amber-500 text-slate-900 rounded-full font-semibold leading-none">
+                    <span
+                      className={`text-xs lg:text-sm px-1.5 lg:px-2 py-0.5 ${colourAmberFill} rounded-full font-semibold leading-none`}
+                    >
                       {thread.unreadForDM}
                     </span>
                   )}
                 </div>
                 {thread.lastMessage && (
-                  <p className="text-xs lg:text-sm text-slate-500 truncate mt-0.5">
-                    {thread.lastMessage}
-                  </p>
+                  <p className={`${uiTextMeta} truncate mt-0.5`}>{thread.lastMessage}</p>
                 )}
               </div>
               <ExpandChevron expanded={isExpanded} />
-            </button>
+            </div>
 
             {isExpanded && (
               <ThreadView

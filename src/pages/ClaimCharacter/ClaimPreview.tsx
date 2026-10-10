@@ -4,7 +4,12 @@ import { useCallback } from "react";
 import type { OwnershipState } from "../../types/Recovery";
 import { Button } from "../../ui/buttons/Button";
 import { uiSection, uiTextBody, uiTextError } from "../../ui/styles/editableStyles";
-import { colourSuccessPlain } from "../../ui/styles/colourTokens";
+import {
+  colourAmberPlain,
+  colourSuccessPlain,
+  colourMetadataLabelText,
+  colourTextPrimary,
+} from "../../ui/styles/colourTokens";
 
 interface ClaimPreviewProps {
   characterName: string;
@@ -30,7 +35,9 @@ export function ClaimPreview({
 
       case "claimed-by-you":
         return (
-          <p className="text-amber-300 text-sm lg:text-base">You already own this character.</p>
+          <p className={`${colourAmberPlain} text-sm lg:text-base`}>
+            You already own this character.
+          </p>
         );
 
       case "claimed-by-other":
@@ -42,22 +49,22 @@ export function ClaimPreview({
   }
 
   const handleClaim = useCallback(() => {
-    if (ownership !== "unclaimed") return;
-    onClaim();
+    if (ownership !== "unclaimed") return undefined;
+    return onClaim();
   }, [ownership, onClaim]);
 
   return (
     <div className={`${uiSection} space-y-4`}>
-      <h2 className="text-xl lg:text-2xl font-semibold text-slate-100">Character Found</h2>
+      <h2 className={`text-xl lg:text-2xl font-semibold ${colourTextPrimary}`}>Character Found</h2>
 
       <div className={`${uiTextBody} text-sm lg:text-base space-y-1`}>
         <p>
-          <span className="text-slate-400">Character:</span>{" "}
+          <span className={colourMetadataLabelText}>Character:</span>{" "}
           <span className="font-semibold">{characterName}</span>
         </p>
 
         <p>
-          <span className="text-slate-400">Campaign:</span>{" "}
+          <span className={colourMetadataLabelText}>Campaign:</span>{" "}
           <span className="font-semibold">{campaignName}</span>
         </p>
       </div>

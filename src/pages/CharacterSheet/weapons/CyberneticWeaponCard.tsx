@@ -11,10 +11,11 @@ import {
   uiTextLabel,
   uiTextBody,
   uiTextPlaceholder,
-  uiCardTitle,
+  uiCardTitleHover,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
-import { uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import { colourNoticePink } from "../../../ui/styles/colourTokens";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
@@ -53,15 +54,17 @@ export function CyberneticWeaponCard({
 
   return (
     <div className={`${uiNoticeBox} ${colourNoticePink} overflow-hidden`}>
-      <button
-        type="button"
-        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
-        onClick={() => setExpanded((e) => !e)}
-        aria-expanded={expanded}
+      <div
+        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
       >
-        <div className={uiExpandButton}>
+        <CardOverlayButton
+          label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+          expanded={expanded}
+          onClick={() => setExpanded((e) => !e)}
+        />
+        <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex items-center gap-2">
-            <p className={uiCardTitle}>{weapon.name}</p>
+            <p className={uiCardTitleHover}>{weapon.name}</p>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
             <Chip size="sm" colour="pink">
@@ -84,7 +87,7 @@ export function CyberneticWeaponCard({
           </div>
         </div>
         <ExpandChevron expanded={expanded} />
-      </button>
+      </div>
 
       {expanded && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">

@@ -5,12 +5,12 @@ import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsRefere
 import { Chip } from "../../../ui/chips/Chip";
 import {
   uiSection,
-  uiTextBody,
-  uiTextSubtle,
   uiTextLabel,
   uiItemName,
   uiInfoModalWrapper,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
+import { colourAmberPlain } from "../../../ui/styles/colourTokens";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
@@ -85,13 +85,13 @@ export function ImplantRow({
                     {ref?.notes && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
-                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
+                        <p className={uiTextDescription}>{ref.notes}</p>
                       </div>
                     )}
                     {item.notes && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.notes}</p>
+                        <p className={uiTextDescription}>{item.notes}</p>
                       </div>
                     )}
                   </div>
@@ -117,7 +117,7 @@ export function ImplantRow({
           />
         </div>
         {item.grantedByTalentName && (
-          <p className={`mt-1 text-xs ${uiTextSubtle}`}>
+          <p className={`mt-1 text-xs ${colourAmberPlain}`}>
             {item.grantedByTalentName} ({item.grantedByType}): Granted
           </p>
         )}
@@ -153,9 +153,7 @@ export function ImplantRow({
               <InfoModal
                 title={`${displayedCraftsmanship} ${item.name}`}
                 content={
-                  <p className={`whitespace-pre-line text-sm ${uiTextBody} leading-relaxed`}>
-                    {qualityDescription}
-                  </p>
+                  <p className={`whitespace-pre-line ${uiTextDescription}`}>{qualityDescription}</p>
                 }
               />
             </span>
@@ -175,12 +173,6 @@ export function ImplantRow({
         )}
       </div>
 
-      {/* Info button */}
-      <button type="button" onClick={() => undefined} title="View rules" className="hidden">
-        ⓘ
-      </button>
-
-      {/* Craftsmanship badge: clickable when editable */}
       {/* Remove */}
       {editable && !item.grantedByTalentEntryUid && (
         <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />

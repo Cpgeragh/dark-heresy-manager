@@ -21,7 +21,13 @@ import { ModalShell } from "../../../ui/modals/ModalShell";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { uiTextBody, uiTextLabel, uiTextGMNote } from "../../../ui/styles/editableStyles";
+import {
+  uiTextBody,
+  uiTextLabel,
+  uiTextGMNote,
+  uiTextDescription,
+  uiDescriptionBox,
+} from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
@@ -39,6 +45,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
 import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
+import { colourDivider } from "../../../ui/styles/colourTokens";
 
 interface Props {
   editable?: boolean;
@@ -143,13 +150,13 @@ export function ImplantPicker({
       {ref.notes && (
         <div>
           <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
-          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
+          <p className={uiTextDescription}>{ref.notes}</p>
         </div>
       )}
       {availableCraftsmanship(ref).map((quality) => (
         <div key={quality}>
           <p className={`${uiTextLabel} font-semibold mb-1`}>{quality}</p>
-          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+          <p className={uiTextDescription}>
             {ref.id === "ih-concealed-weapon-bionic"
               ? concealedWeaponBionicDescription(quality)
               : craftsmanshipDescription(ref, quality)}
@@ -209,23 +216,16 @@ export function ImplantPicker({
       >
         <ModalHeader title={selected.name} onClose={resetPicker} />
 
-        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
+        <PickerList>
           <p className={`text-xs lg:text-sm ${uiTextBody}`}>Select installation side:</p>
-          <div className="flex flex-col gap-2">
-            {options.map((opt) => (
-              <button
-                type="button"
-                key={opt.label}
-                onClick={() => setLocation(opt.value)}
-                className="py-2 lg:py-2.5 px-3 lg:px-4 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-200 text-left transition"
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+          {options.map((opt) => (
+            <PickerRow key={opt.label} onClick={() => setLocation(opt.value)}>
+              <PickerRowName name={opt.label} />
+            </PickerRow>
+          ))}
+        </PickerList>
 
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
+        <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider}`}>
           <Button variant="neutral" onClick={resetPicker}>
             Back
           </Button>
@@ -272,9 +272,7 @@ export function ImplantPicker({
             </div>
           </div>
 
-          <div
-            className={`whitespace-pre-line text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
-          >
+          <div className={`whitespace-pre-line ${uiDescriptionBox}`}>
             {selected.id === "ih-concealed-weapon-bionic"
               ? concealedWeaponBionicDescription(craftsmanship)
               : craftsmanshipDescription(selected, craftsmanship)}
@@ -286,7 +284,7 @@ export function ImplantPicker({
           />
         </PickerBody>
 
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
+        <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider} flex gap-2`}>
           <Button variant="neutral" onClick={resetPicker}>
             Back
           </Button>
@@ -343,11 +341,7 @@ export function ImplantPicker({
                   entry.item.data.notes && (
                     <InfoModal
                       title={entry.item.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {entry.item.data.notes}
-                        </p>
-                      }
+                      content={<p className={uiTextDescription}>{entry.item.data.notes}</p>}
                       as="span"
                     />
                   )

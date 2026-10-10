@@ -33,8 +33,14 @@ import {
   uiCellLabel,
   uiCellValueSm,
   uiInfoModalWrapper,
-  uiTextBody,
+  uiTextDescription,
 } from "../../ui/styles/editableStyles";
+import {
+  colourSuccessPlain,
+  colourTextPrimary,
+  colourDivider,
+  colourErrorText,
+} from "../../ui/styles/colourTokens";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
   getTraitMovementEffects,
@@ -84,13 +90,13 @@ function StatBlock({
       {/* Header */}
       <div className="flex items-baseline justify-between">
         <span className="flex items-center gap-1">
-          <span className="text-sm lg:text-base text-slate-100">{label}</span>
+          <span className={`text-sm lg:text-base ${colourTextPrimary}`}>{label}</span>
           {adjustment !== 0 && (
             <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={`${label} Adjustments`}
                 content={
-                  <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
+                  <ul className={`space-y-1 ${uiTextDescription}`}>
                     {sources.map((source, i) => (
                       <li key={i}>
                         {source.name} ({source.type}): {source.amount > 0 ? "+" : ""}
@@ -103,11 +109,11 @@ function StatBlock({
             </span>
           )}
         </span>
-        <span className="text-xl lg:text-2xl font-semibold font-code text-slate-100">
+        <span className={`text-xl lg:text-2xl font-semibold font-code ${colourTextPrimary}`}>
           {effectiveTotal}
           {adjustment !== 0 && (
             <span
-              className={`ml-1 text-xs lg:text-sm font-code ${adjustment > 0 ? "text-emerald-400" : "text-red-400"}`}
+              className={`ml-1 text-xs lg:text-sm font-code ${adjustment > 0 ? colourSuccessPlain : colourErrorText}`}
             >
               ({adjustment > 0 ? "+" : ""}
               {adjustment})
@@ -396,7 +402,7 @@ export function CharacteristicsTab({
   );
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className={`space-y-6 ${colourTextPrimary}`}>
       {/* Stats */}
       <div>
         <SectionHeader className="mb-2">Stats</SectionHeader>
@@ -464,7 +470,7 @@ export function CharacteristicsTab({
               title="Movement"
               content={
                 <>
-                  <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                  <p className={uiTextDescription}>
                     During a Round, characters may move at one of four speeds: Half Move, Full Move,
                     Charge, or Run. The number of metres a character may move in his Turn is
                     determined by his Agility Bonus. Traits can modify some or all movement speeds.
@@ -477,8 +483,8 @@ export function CharacteristicsTab({
                     <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
                   </div>
                   {movementEffects.sources.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-slate-700">
-                      <div className="font-semibold text-slate-100">Movement effects</div>
+                    <div className={`mt-2 pt-2 border-t ${colourDivider}`}>
+                      <div className={`font-semibold ${colourTextPrimary}`}>Movement effects</div>
                       <ul className="mt-1 space-y-1">
                         {movementEffects.sources.map((source, i) => (
                           <li key={i}>{source}</li>

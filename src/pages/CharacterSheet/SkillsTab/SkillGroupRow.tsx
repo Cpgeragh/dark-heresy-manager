@@ -13,6 +13,7 @@ import { Chip } from "../../../ui/chips/Chip";
 import { SkillRow } from "./SkillRow";
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { colourTextPrimary, colourDivider } from "../../../ui/styles/colourTokens";
 
 interface SkillGroupRowProps {
   category: string;
@@ -44,7 +45,9 @@ export function SkillGroupRow({
       onToggle={toggle}
       header={
         <div className="space-y-1.5">
-          <span className="block truncate text-sm font-semibold text-slate-100 lg:text-base">
+          <span
+            className={`block truncate text-sm font-semibold ${colourTextPrimary} lg:text-base`}
+          >
             {category}
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -68,7 +71,7 @@ export function SkillGroupRow({
       }
     >
       {expanded && (
-        <div className="border-t border-slate-700 space-y-2 p-2">
+        <div className={`border-t ${colourDivider} space-y-2 p-2`}>
           {skills.map((skill) => (
             <SkillRow
               key={skill.id}

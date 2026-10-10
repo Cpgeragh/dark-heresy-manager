@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { GRENADE_REFERENCE, type GrenadeRef } from "../../../data/reference/weaponReference";
-import { uiTextBody } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextDescription } from "../../../ui/styles/editableStyles";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerCustomAction,
@@ -146,11 +146,7 @@ export function GrenadePicker({
                       info={
                         <InfoModal
                           title={data.name}
-                          content={
-                            <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                              {data.description}
-                            </p>
-                          }
+                          content={<p className={uiTextDescription}>{data.description}</p>}
                           as="span"
                         />
                       }
@@ -219,11 +215,7 @@ export function GrenadePicker({
                     info={
                       <InfoModal
                         title={ref.name}
-                        content={
-                          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                            {ref.description}
-                          </p>
-                        }
+                        content={<p className={uiTextDescription}>{ref.description}</p>}
                         as="span"
                       />
                     }

@@ -11,6 +11,7 @@ import {
   editableTextareaClass,
   uiTextBody,
   uiFormLabel,
+  uiFormLabelHint,
 } from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -20,7 +21,13 @@ import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { ITEM_TYPES, type ItemType } from "./archeotechConstants";
 import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
-import { chipColours } from "../../../ui/styles/colourTokens";
+import {
+  chipColours,
+  colourControlSurface,
+  colourToggleSelectedRed,
+  colourErrorText,
+  colourStateRed,
+} from "../../../ui/styles/colourTokens";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
@@ -259,7 +266,6 @@ export function CustomArcheotechForm({
     <CustomFormShell
       title={startType ? title : (selectedType ?? title)}
       scrollPositionRef={formScrollPositionRef}
-      titleClassName="text-slate-200"
       closeLabel={startType ? undefined : <ArrowLeft />}
       closeAriaLabel={startType ? "Close" : "Back"}
       onClose={startType ? onCancel : () => setPhase("select")}
@@ -445,7 +451,7 @@ export function CustomArcheotechForm({
             )}
             <div>
               <label htmlFor="custom-archeotech-special-rules" className={uiFormLabel}>
-                Special Rules <span className="text-slate-600">(optional)</span>
+                Special Rules <span className={uiFormLabelHint}>(optional)</span>
               </label>
               <input
                 id="custom-archeotech-special-rules"
@@ -485,7 +491,7 @@ export function CustomArcheotechForm({
                   <ToggleButton
                     key={loc}
                     selected={locations.includes(loc)}
-                    selectedClassName="border-red-500/60 bg-red-500/10 text-red-300"
+                    selectedClassName={colourToggleSelectedRed}
                     className="px-2.5 py-1 text-xs lg:text-sm font-medium"
                     onClick={() => toggleLocation(loc)}
                   >
@@ -500,12 +506,12 @@ export function CustomArcheotechForm({
                 onClick={() => setStacks(!stacks)}
                 className={[
                   "w-4 h-4 rounded border flex items-center justify-center transition shrink-0",
-                  stacks ? "border-red-500 bg-red-500/20" : "border-slate-600 bg-slate-800",
+                  stacks ? colourStateRed : colourControlSurface,
                 ].join(" ")}
                 aria-label="Stacks with worn armour"
                 aria-pressed={stacks}
               >
-                {stacks && <span className="text-red-400 text-[10px] leading-none">✓</span>}
+                {stacks && <span className={`${colourErrorText} text-[10px] leading-none`}>✓</span>}
               </button>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 Stacks with worn armour{" "}
@@ -565,7 +571,7 @@ export function CustomArcheotechForm({
             </div>
             <div>
               <label htmlFor="custom-archeotech-shield-special-rules" className={uiFormLabel}>
-                Special Rules <span className="text-slate-600">(optional)</span>
+                Special Rules <span className={uiFormLabelHint}>(optional)</span>
               </label>
               <input
                 id="custom-archeotech-shield-special-rules"
@@ -593,14 +599,14 @@ export function CustomArcheotechForm({
             />
             <fieldset>
               <legend className={`${uiFormLabel} block mb-1.5`}>
-                Body Location <span className="text-slate-600">(optional)</span>
+                Body Location <span className={uiFormLabelHint}>(optional)</span>
               </legend>
               <div className="flex flex-wrap gap-2">
                 {ARMOUR_LOCATION_ORDER.map((loc) => (
                   <ToggleButton
                     key={loc}
                     selected={bodyLocation.includes(loc)}
-                    selectedClassName="border-red-500/60 bg-red-500/10 text-red-300"
+                    selectedClassName={colourToggleSelectedRed}
                     className="px-2.5 py-1 text-xs lg:text-sm font-medium"
                     onClick={() => toggleBodyLocation(loc)}
                   >
@@ -636,7 +642,7 @@ export function CustomArcheotechForm({
         <CustomFormSection title="Rules">
           <div>
             <label htmlFor="custom-archeotech-description" className={uiFormLabel}>
-              Description / Rules <span className="text-slate-600">(optional)</span>
+              Description / Rules <span className={uiFormLabelHint}>(optional)</span>
             </label>
             <textarea
               id="custom-archeotech-description"
@@ -650,7 +656,7 @@ export function CustomArcheotechForm({
           </div>
           <div>
             <label htmlFor="custom-archeotech-notes" className={uiFormLabel}>
-              Notes <span className="text-slate-600">(optional)</span>
+              Notes <span className={uiFormLabelHint}>(optional)</span>
             </label>
             <textarea
               id="custom-archeotech-notes"

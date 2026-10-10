@@ -36,13 +36,18 @@ import {
 import {
   uiInfoModalWrapper,
   uiSection,
-  uiTextBody,
   uiTextPlaceholder,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { SkillRow } from "./SkillRow";
 import { SkillGroupRow } from "./SkillGroupRow";
 import { AddSkillModal } from "./AddSkillModal";
 import type { SkillWithComputed } from "./skillsConstants";
+import {
+  colourTextPrimary,
+  colourToggleSelectedViolet,
+  colourToggleSelectedFuchsia,
+} from "../../../ui/styles/colourTokens";
 
 interface SkillsTabProps {
   skills: SkillEntry[];
@@ -68,13 +73,12 @@ const SKILLS_TABS = [
   {
     value: "basic",
     label: "Basic",
-    activeClassName: "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50",
+    activeClassName: colourToggleSelectedViolet,
   },
   {
     value: "advanced",
     label: "Advanced",
-    activeClassName:
-      "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
+    activeClassName: colourToggleSelectedFuchsia,
   },
 ] as const satisfies readonly SegmentedTabOption<SkillsView>[];
 
@@ -82,7 +86,7 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
   const basic = type === "basic";
   const title = basic ? "Basic Skills" : "Advanced Skills";
   const content = basic ? (
-    <div className={`space-y-3 text-sm leading-relaxed lg:text-base ${uiTextBody}`}>
+    <div className={`space-y-3 ${uiTextDescription}`}>
       <p>
         Basic Skills can be attempted while Untrained using half the relevant Characteristic,
         rounded down.
@@ -93,7 +97,7 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
       </p>
     </div>
   ) : (
-    <div className={`space-y-3 text-sm leading-relaxed lg:text-base ${uiTextBody}`}>
+    <div className={`space-y-3 ${uiTextDescription}`}>
       <p>
         Advanced Skills cannot be attempted while Untrained. The displayed Total shows the
         Characteristic value the Skill will use once it becomes Trained.
@@ -363,7 +367,7 @@ export function SkillsTab({
   const renderBasicSection = () => <div className="space-y-2">{renderItems(basicItems)}</div>;
 
   return (
-    <div className="space-y-4 text-slate-100">
+    <div className={`space-y-4 ${colourTextPrimary}`}>
       {!isDesktopLayout ? (
         <div ref={containerRef} className="space-y-4">
           <SegmentedTabs

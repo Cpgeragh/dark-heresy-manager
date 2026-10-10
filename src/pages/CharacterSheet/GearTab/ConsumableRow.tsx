@@ -3,10 +3,10 @@
 import type { ConsumableItem } from "../../../types/Character";
 import {
   uiSection,
-  uiTextBody,
   uiTextLabel,
   uiItemName,
   uiInfoModalWrapper,
+  uiTextDescription,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -62,9 +62,7 @@ export function ConsumableRow({
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={item.name}
-                  content={
-                    <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.description}</p>
-                  }
+                  content={<p className={uiTextDescription}>{item.description}</p>}
                 />
               </span>
             )}

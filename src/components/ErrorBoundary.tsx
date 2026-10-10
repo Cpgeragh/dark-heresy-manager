@@ -3,7 +3,8 @@
 import React, { Component } from "react";
 import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
-import { uiSection, uiTextError } from "../ui/styles/editableStyles";
+import { uiSection, uiTextError, uiTextBody, uiTextPlaceholder } from "../ui/styles/editableStyles";
+import { colourTextPrimary, colourPageBackground, colourStateRed } from "../ui/styles/colourTokens";
 
 interface Props {
   children: ReactNode;
@@ -77,18 +78,20 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
   const isDev = import.meta.env.DEV;
 
   return (
-    <div className="fixed inset-0 z-40 flex overflow-y-auto bg-slate-950 p-4 pt-14">
+    <div className={`fixed inset-0 z-40 flex overflow-y-auto ${colourPageBackground} p-4 pt-14`}>
       <div className="m-auto w-full max-w-md space-y-4">
         {/* Error Icon */}
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center">
+          <div
+            className={`w-16 h-16 rounded-full ${colourStateRed} border-2 flex items-center justify-center`}
+          >
             <span className={`text-3xl ${uiTextError}`}>⚠</span>
           </div>
         </div>
 
         {/* Error Message */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-slate-100">Something went wrong</h1>
+          <h1 className={`text-2xl font-bold ${colourTextPrimary}`}>Something went wrong</h1>
           <p className={uiTextError}>The application encountered an unexpected error.</p>
         </div>
 
@@ -96,13 +99,17 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
         {isDev && error && (
           <div className={`${uiSection} space-y-2`}>
             <div className={`text-xs font-mono ${uiTextError} font-semibold`}>{error.name}</div>
-            <div className="text-xs font-mono text-slate-300">{error.message}</div>
+            <div className={`text-xs font-mono ${uiTextBody}`}>{error.message}</div>
             {error.stack && (
               <details className="mt-2">
-                <summary className="text-xs text-slate-500 cursor-pointer hover:text-slate-400">
+                <summary
+                  className={`text-xs ${uiTextPlaceholder} cursor-pointer hover:text-slate-400`}
+                >
                   Stack trace
                 </summary>
-                <pre className="mt-2 text-[10px] text-slate-500 overflow-x-auto">{error.stack}</pre>
+                <pre className={`mt-2 text-[10px] ${uiTextPlaceholder} overflow-x-auto`}>
+                  {error.stack}
+                </pre>
               </details>
             )}
           </div>
@@ -119,7 +126,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
         </div>
 
         {/* Help Text */}
-        <p className="text-xs text-center text-slate-500">
+        <p className={`text-xs text-center ${uiTextPlaceholder}`}>
           If this problem persists, please contact support or refresh the page.
         </p>
       </div>

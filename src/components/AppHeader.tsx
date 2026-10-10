@@ -10,6 +10,7 @@ import { QrCodeIcon } from "../ui/icons/QrCodeIcon";
 import { QrModal } from "../ui/modals/QrModal";
 import { uiIconButton, uiIconButtonIconSize } from "../ui/styles/buttonStyles";
 import { AppHeaderShell } from "./AppHeaderShell";
+import { colourPopoverSurface } from "../ui/styles/colourTokens";
 
 interface AppHeaderProps {
   currentPath: string;
@@ -75,14 +76,11 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
               </Link>
             )}
             {isOnDashboard && (
-              <button
-                type="button"
+              <IconButton
+                label="Share App"
                 onClick={() => setShareOpen(true)}
-                aria-label="Share App"
-                className={uiIconButton}
-              >
-                <QrCodeIcon />
-              </button>
+                icon={<QrCodeIcon />}
+              />
             )}
           </>
         }
@@ -91,14 +89,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
             {/* Settings + kebab */}
             {/* Settings: dashboard only */}
             {isOnDashboard && (
-              <button
-                type="button"
-                onClick={onOpenSettings}
-                aria-label="Settings"
-                className={uiIconButton}
-              >
-                <GearIcon />
-              </button>
+              <IconButton label="Settings" onClick={onOpenSettings} icon={<GearIcon />} />
             )}
 
             {/* Kebab menu */}
@@ -111,7 +102,9 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
                 />
 
                 {kebabOpen && (
-                  <div className="absolute right-0 top-full mt-2 z-50 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-4">
+                  <div
+                    className={`absolute right-0 top-full mt-2 z-50 w-72 ${colourPopoverSurface} border rounded-xl shadow-2xl p-4`}
+                  >
                     {kebabContent}
                   </div>
                 )}

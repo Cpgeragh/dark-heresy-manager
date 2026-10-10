@@ -2,6 +2,7 @@ import type { InsanityDisorderSeverity } from "../../types/Character";
 import type { SegmentedTimelineSegment } from "../../ui/SegmentedTimeline";
 import type { ChipColour } from "../../ui/styles/colourTokens";
 import { INSANITY_TRACK, type InsanityTrackEntry } from "./insanityReference";
+import { colourTextPrimary, degreeBarColour, degreeTextColour } from "../../ui/styles/colourTokens";
 
 export const severityChipColour: Record<InsanityDisorderSeverity, ChipColour> = {
   Minor: "sky",
@@ -72,17 +73,17 @@ export function insanityDisorderLevelLabel(entry: InsanityTrackEntry): string {
 function degreeSegmentColours(degree: string): { bright: string; dim: string } {
   switch (degree) {
     case "Stable":
-      return { bright: "bg-emerald-500/70", dim: "bg-emerald-500/35" };
+      return degreeBarColour.stable;
     case "Unsettled":
-      return { bright: "bg-sky-500/70", dim: "bg-sky-500/35" };
+      return degreeBarColour.first;
     case "Disturbed":
-      return { bright: "bg-amber-500/70", dim: "bg-amber-500/35" };
+      return degreeBarColour.second;
     case "Unhinged":
-      return { bright: "bg-orange-500/70", dim: "bg-orange-500/35" };
+      return degreeBarColour.third;
     case "Deranged":
-      return { bright: "bg-fuchsia-500/70", dim: "bg-fuchsia-500/35" };
+      return degreeBarColour.fourth;
     default:
-      return { bright: "bg-slate-500/70", dim: "bg-slate-500/35" };
+      return degreeBarColour.neutral;
   }
 }
 
@@ -109,19 +110,19 @@ export const INSANITY_TIMELINE_TOTAL_WIDTH = INSANITY_TIMELINE_SEGMENTS.reduce(
 );
 
 export function insanityStepperClass(entry: InsanityTrackEntry): string {
-  if (entry.terminal) return "text-rose-300 animate-pulse";
+  if (entry.terminal) return degreeTextColour.terminal;
   switch (entry.degree) {
     case "Stable":
-      return "text-slate-100";
+      return colourTextPrimary;
     case "Unsettled":
-      return "text-sky-200";
+      return degreeTextColour.first;
     case "Disturbed":
-      return "text-amber-200";
+      return degreeTextColour.second;
     case "Unhinged":
-      return "text-orange-200";
+      return degreeTextColour.third;
     case "Deranged":
-      return "text-fuchsia-200";
+      return degreeTextColour.fourth;
     default:
-      return "text-slate-100";
+      return colourTextPrimary;
   }
 }

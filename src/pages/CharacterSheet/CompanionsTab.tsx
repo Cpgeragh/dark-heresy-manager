@@ -14,6 +14,7 @@ import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { usePendingClick } from "../../ui/usePendingClick";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
+import { ExpandButton } from "../../ui/buttons/ExpandButton";
 import { uiCardTapHeader, uiExpandButton } from "../../ui/styles/buttonStyles";
 import {
   uiInfoModalWrapper,
@@ -23,12 +24,14 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiItemNameHover,
+  uiRuleName,
 } from "../../ui/styles/editableStyles";
 import { SKILL_DESCRIPTIONS } from "../../data/reference/skillDescriptions";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TALENT_LIST } from "shared-rules";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { GEAR_REFERENCE } from "../../data/reference/gearReference";
+import { colourDivider } from "../../ui/styles/colourTokens";
 
 const CHARACTERISTICS: { key: keyof CompanionRef["characteristics"]; label: string }[] = [
   { key: "ws", label: "WS" },
@@ -84,21 +87,20 @@ function CompanionPickerCard({
           {pending ? (
             <span className={`${uiSpinner} relative z-10 h-4 w-4 ml-auto`} aria-hidden="true" />
           ) : (
-            <button
-              type="button"
-              aria-expanded={expanded}
-              aria-label={expanded ? "Collapse companion details" : "Expand companion details"}
+            <ExpandButton
+              expanded={expanded}
+              label={expanded ? "Collapse companion details" : "Expand companion details"}
               onClick={toggle}
-              className="relative z-10 pointer-events-auto p-1 -m-1 ml-auto"
-            >
-              <ExpandChevron expanded={expanded} />
-            </button>
+              className="ml-auto"
+            />
           )}
         </div>
       </div>
 
       {expanded && (
-        <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
+        <div
+          className={`px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t ${colourDivider} space-y-3`}
+        >
           <CompanionProfileDetails
             companionReference={companionReference}
             statSize="sm"
@@ -213,7 +215,7 @@ function ProfileEntries({
               <div className="space-y-3">
                 {entries.map((entry, index) => (
                   <div key={entry}>
-                    <p className="font-semibold text-amber-300">{entry}</p>
+                    <p className={uiRuleName}>{entry}</p>
                     <p className={`mt-1 leading-relaxed ${uiTextBody}`}>{descriptions[index]}</p>
                   </div>
                 ))}
@@ -251,7 +253,7 @@ function CompanionProfileDetails({
         <StatChip size={statSize} label="Wounds" value={companionReference.wounds} />
       </div>
 
-      <div className="space-y-1 border-t border-slate-800 pt-2 mt-2">
+      <div className={`space-y-1 border-t ${colourDivider} pt-2 mt-2`}>
         <SectionHeader as="h3" className="mb-2">
           Abilities
         </SectionHeader>
@@ -278,7 +280,7 @@ function CompanionProfileDetails({
         />
       </div>
 
-      <div className="space-y-1 border-t border-slate-800 pt-2 mt-2">
+      <div className={`space-y-1 border-t ${colourDivider} pt-2 mt-2`}>
         <SectionHeader as="h3" className="mb-2">
           Equipment
         </SectionHeader>
@@ -305,7 +307,7 @@ function CompanionProfileDetails({
         />
       </div>
 
-      <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-2">
+      <div className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-2`}>
         <ItemMetaChips source={companionReference.source} bare size="sm" />
       </div>
     </>

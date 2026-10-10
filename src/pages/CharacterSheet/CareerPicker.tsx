@@ -7,16 +7,18 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
+  uiTextDescription,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
+import { colourMetadataLabelText, colourAccentBar } from "../../ui/styles/colourTokens";
 
 function InfoSection({ title, content }: { title: string; content: string }) {
   return (
     <section>
       <p className={`${uiTextLabel} font-semibold mb-1`}>{title}</p>
-      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{content}</p>
+      <p className={uiTextDescription}>{content}</p>
     </section>
   );
 }
@@ -34,12 +36,12 @@ export function CareerInfoContent({
 
   return (
     <div className="space-y-4">
-      <blockquote className="border-l-2 border-red-700 pl-3">
+      <blockquote className={`border-l-2 ${colourAccentBar} pl-3`}>
         <p className={`${uiTextBody} leading-relaxed`}>“{career.quote}”</p>
         <footer className={`mt-1 text-xs lg:text-sm ${uiTextBody}`}>— {career.attribution}</footer>
       </blockquote>
 
-      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{career.description}</p>
+      <p className={uiTextDescription}>{career.description}</p>
 
       {career.requirements?.length && (
         <InfoSection title="Requirements" content={career.requirements.join(" ")} />
@@ -80,8 +82,10 @@ export function CareerInfoContent({
           <div className="space-y-2">
             {career.specialTable.rows.map((row) => (
               <div key={row.result} className={`${uiSectionShell} px-3 py-2`}>
-                <p className="text-xs lg:text-sm font-code text-sky-300 mb-1">{row.result}</p>
-                <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{row.effect}</p>
+                <p className={`text-xs lg:text-sm font-code ${colourMetadataLabelText} mb-1`}>
+                  {row.result}
+                </p>
+                <p className={uiTextDescription}>{row.effect}</p>
               </div>
             ))}
           </div>

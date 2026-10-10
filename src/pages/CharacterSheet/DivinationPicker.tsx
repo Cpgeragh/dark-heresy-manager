@@ -6,16 +6,14 @@ import {
   type DivinationData,
 } from "../../data/reference/divinationData";
 import { Chip } from "../../ui/chips/Chip";
-import { uiTextBody } from "../../ui/styles/editableStyles";
+import { uiTextDescription } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 
 export function DivinationInfoContent({ divination }: { divination: DivinationData }) {
-  return (
-    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{divination.effect}</p>
-  );
+  return <p className={uiTextDescription}>{divination.effect}</p>;
 }
 
 export function DivinationPicker({

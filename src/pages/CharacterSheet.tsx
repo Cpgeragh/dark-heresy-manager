@@ -78,12 +78,20 @@ import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import { TitleToolbar } from "../ui/TitleToolbar";
-import { uiSectionShell, uiTextError, uiTextPlaceholder } from "../ui/styles/editableStyles";
+import { uiSectionShell, uiTextBody, uiTextError, uiTextMeta } from "../ui/styles/editableStyles";
+import { ErrorState } from "../ui/ErrorState";
 import {
   CampaignCustomItemsScope,
   useCampaignCustomItemsRaw,
 } from "../hooks/useCampaignCustomItems";
 import { useCampaignsContext } from "../context/useCampaignsContext";
+import { ToggleButton } from "../ui/buttons/ToggleButton";
+import {
+  colourAmberPlain,
+  colourEditOverrideSurface,
+  colourToggleSelectedAmber,
+  colourFillFloating,
+} from "../ui/styles/colourTokens";
 
 const TalentsTab = memo(
   lazy(() =>
@@ -574,7 +582,7 @@ export default function CharacterSheet({
   // ================================================================
 
   if (!path) {
-    return <div className={`${uiTextPlaceholder} text-center py-10`}>Invalid character route.</div>;
+    return <ErrorState className="py-10 text-center">Invalid character route.</ErrorState>;
   }
 
   if (isReleasing || accessWasRevoked) {
@@ -591,9 +599,9 @@ export default function CharacterSheet({
 
   if (!character) {
     return (
-      <div className={`${uiTextPlaceholder} text-center py-10 space-y-4`}>
-        <p className="text-lg font-semibold">Character not found.</p>
-        <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+      <div className="py-10 text-center space-y-4">
+        <p className={`text-lg font-semibold ${uiTextError}`}>Character not found.</p>
+        <p className={`text-sm lg:text-base ${uiTextBody}`}>
           This character may have been deleted or the link is invalid.
         </p>
       </div>
@@ -648,10 +656,9 @@ export default function CharacterSheet({
     admin: "Admin",
   };
 
-  const containerClass = [
-    "border p-4 lg:p-5 rounded-lg transition-colors",
-    dmOverrideActive ? "border-amber-400 bg-amber-500/10" : "border-slate-700 bg-slate-900/40",
-  ].join(" ");
+  const containerClass = dmOverrideActive
+    ? `rounded-lg border p-4 lg:p-5 transition-colors ${colourEditOverrideSurface}`
+    : `${uiSectionShell} p-4 lg:p-5 transition-colors`;
 
   return (
     <CampaignCustomItemsScope
@@ -662,7 +669,7 @@ export default function CharacterSheet({
     >
       <div>
         {ownerProfileError && (
-          <p className="mb-4 text-sm lg:text-base text-amber-300">
+          <p className={`mb-4 text-sm lg:text-base ${colourAmberPlain}`}>
             Unable to refresh the owner&apos;s profile name; showing the stored name.
           </p>
         )}
@@ -670,21 +677,17 @@ export default function CharacterSheet({
         {/* DM NAV / OVERRIDE BAR */}
         {isDM && (
           <div className={`${uiSectionShell} flex items-center justify-between mb-4 p-2`}>
-            <span className="text-xs lg:text-sm text-slate-400">DM View</span>
+            <span className={uiTextMeta}>DM View</span>
 
-            <button
-              type="button"
+            <ToggleButton
+              selected={!dmReadOnly}
+              selectedClassName={colourToggleSelectedAmber}
               onClick={toggleDmReadOnly}
               aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
-              aria-pressed={!dmReadOnly}
-              className={`text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border ${
-                dmReadOnly
-                  ? "border-slate-600 bg-slate-800 text-slate-300"
-                  : "border-amber-400 bg-amber-500 text-slate-900 font-semibold"
-              }`}
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5"
             >
               {dmReadOnly ? "Read-only" : "Editing enabled"}
-            </button>
+            </ToggleButton>
           </div>
         )}
 
@@ -1070,7 +1073,7 @@ export default function CharacterSheet({
           <IconButton
             label="Scroll to top"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bottom-6 right-4 z-50 h-9 w-9 bg-slate-900/90 shadow-lg"
+            className={`fixed bottom-6 right-4 z-50 h-9 w-9 ${colourFillFloating} shadow-lg`}
             icon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"

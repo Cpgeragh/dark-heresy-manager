@@ -12,6 +12,13 @@ import {
   ACCEPTED_PORTRAIT_MIME_TYPES,
   assertPortraitSource,
 } from "../firestore/firebaseValidation";
+import { uiTextMeta, uiTextPlaceholder } from "../ui/styles/editableStyles";
+import {
+  colourHeadingAccent,
+  colourControlRaised,
+  colourBorderRed,
+  colourFillControl,
+} from "../ui/styles/colourTokens";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 
@@ -135,7 +142,9 @@ export function PortraitUpload({
     <>
       {/* Portrait circle */}
       <div className="relative shrink-0 w-12 h-12 lg:w-14 lg:h-14">
-        <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-slate-700 border border-slate-600 flex items-center justify-center">
+        <div
+          className={`w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden ${colourControlRaised} border flex items-center justify-center`}
+        >
           {currentPortraitUrl ? (
             <img src={currentPortraitUrl} alt="Portrait" className="w-full h-full object-cover" />
           ) : (
@@ -145,7 +154,7 @@ export function PortraitUpload({
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6 text-slate-500"
+              className={`w-6 h-6 ${uiTextPlaceholder}`}
             >
               <path
                 strokeLinecap="round"
@@ -164,7 +173,7 @@ export function PortraitUpload({
               e.stopPropagation();
               fileInputRef.current?.click();
             }}
-            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border border-red-500 text-red-500 flex items-center justify-center hover:bg-red-500/10 transition"
+            className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border ${colourBorderRed} ${colourHeadingAccent} flex items-center justify-center hover:bg-red-500/10 transition`}
             aria-label="Upload portrait"
           >
             <svg
@@ -199,7 +208,7 @@ export function PortraitUpload({
           <ModalHeader title="Position Portrait" onClose={handleCancel} />
           <div className="p-4 lg:p-5 space-y-4">
             {/* Cropper */}
-            <div className="relative h-64 rounded-lg overflow-hidden bg-slate-800">
+            <div className={`relative h-64 rounded-lg overflow-hidden ${colourFillControl}`}>
               <Cropper
                 image={imageSrc}
                 crop={crop}
@@ -215,7 +224,7 @@ export function PortraitUpload({
 
             {/* Zoom slider */}
             <div className="flex items-center gap-3">
-              <span className="text-xs lg:text-sm text-slate-500">Zoom</span>
+              <span className={uiTextMeta}>Zoom</span>
               <input
                 type="range"
                 min={1}

@@ -17,7 +17,7 @@ import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { uiTextBody } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
@@ -71,7 +71,6 @@ export function ForceFieldPicker({
     return (
       <PickerModal
         title={selected.name}
-        titleClassName="text-slate-200"
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
         query=""
@@ -108,9 +107,7 @@ export function ForceFieldPicker({
               ))}
             </div>
           </div>
-          <div
-            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
-          >
+          <div className={uiDescriptionBox}>
             {forceFieldCraftsmanshipDescription(craftsmanship)}
           </div>
         </PickerBody>

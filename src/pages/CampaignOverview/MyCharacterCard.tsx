@@ -7,8 +7,13 @@ import { PortraitUpload } from "../../components/PortraitUpload";
 import { revealRecoveryCode } from "../../services/characterService";
 import { useToast } from "../../components/Toast";
 import type { CharacterListItem } from "../../types/Firestore";
-import { LoadingDots } from "../../ui/LoadingDots";
-import { uiSection } from "../../ui/styles/editableStyles";
+import { RevealCodeButton } from "../../ui/buttons/RevealCodeButton";
+import { uiSection, uiTextMeta, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  colourMetadataLabelText,
+  colourTextPrimary,
+  colourErrorText,
+} from "../../ui/styles/colourTokens";
 
 export function MyCharacterCard({
   character,
@@ -55,34 +60,38 @@ export function MyCharacterCard({
           />
         </div>
         <div className="flex-1 space-y-1">
-          <div className="font-semibold text-slate-200 leading-tight lg:text-lg">{name}</div>
+          <div className={`font-semibold ${colourTextPrimary} leading-tight lg:text-lg`}>
+            {name}
+          </div>
           {(career || rank) && (
-            <div className="text-sm lg:text-base text-slate-400">
+            <div className={`text-sm lg:text-base ${colourMetadataLabelText}`}>
               {[career, rank].filter(Boolean).join(" · ")}
             </div>
           )}
           {(character.wounds || xpLeft !== null) && (
-            <div className="flex flex-wrap gap-3 text-xs lg:text-sm text-slate-400">
+            <div className={`flex flex-wrap gap-3 ${uiTextMeta}`}>
               {character.wounds && (
                 <span>
                   ❤{" "}
                   <span
                     className={
                       character.wounds.current <= 2
-                        ? "text-red-400 font-semibold"
-                        : "text-slate-200"
+                        ? `${colourErrorText} font-semibold`
+                        : colourTextPrimary
                     }
                   >
                     {character.wounds.current}
                   </span>
-                  <span className="text-slate-600"> / </span>
-                  <span className="text-slate-200">{character.wounds.total}</span> Wounds
+                  <span className={uiTextPlaceholder}> / </span>
+                  <span className={colourTextPrimary}>{character.wounds.total}</span> Wounds
                 </span>
               )}
               {xpLeft !== null && (
                 <span>
                   ✦{" "}
-                  <span className={xpLeft < 0 ? "text-red-400 font-semibold" : "text-slate-200"}>
+                  <span
+                    className={xpLeft < 0 ? `${colourErrorText} font-semibold` : colourTextPrimary}
+                  >
                     {xpLeft}
                   </span>{" "}
                   XP remaining
@@ -90,31 +99,9 @@ export function MyCharacterCard({
               )}
             </div>
           )}
-          <div
-            className="text-xs lg:text-sm text-slate-600 font-code"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={`${uiTextMeta} font-code`} onClick={(e) => e.stopPropagation()}>
             Recovery:{" "}
-            {revealedCode ?? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  void handleReveal();
-                }}
-                disabled={revealing}
-                className="underline hover:text-slate-400 disabled:opacity-50"
-              >
-                {revealing ? (
-                  <span>
-                    Revealing
-                    <LoadingDots />
-                  </span>
-                ) : (
-                  "Reveal"
-                )}
-              </button>
-            )}
+            {revealedCode ?? <RevealCodeButton revealing={revealing} onReveal={handleReveal} />}
           </div>
         </div>
       </div>

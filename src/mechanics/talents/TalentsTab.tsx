@@ -35,6 +35,10 @@ import { uiTextBody } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { getFaithTalentGroupChip, type FaithTalentGroupChip } from "./faithTalentGroups";
 import { useTalentAcquisitionFlow } from "./useTalentAcquisitionFlow";
+import {
+  colourToggleSelectedViolet,
+  colourToggleSelectedFuchsia,
+} from "../../ui/styles/colourTokens";
 
 interface TalentsTabProps {
   talents: TalentsAndTraitsBlock;
@@ -61,13 +65,12 @@ const TALENT_TABS = [
   {
     value: "talents",
     label: "Talents",
-    activeClassName: "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50",
+    activeClassName: colourToggleSelectedViolet,
   },
   {
     value: "faith",
     label: "Faith Talents",
-    activeClassName:
-      "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
+    activeClassName: colourToggleSelectedFuchsia,
   },
 ] as const satisfies readonly SegmentedTabOption<ViewGroup>[];
 const TALENT_TABS_ID = "talent-groups";

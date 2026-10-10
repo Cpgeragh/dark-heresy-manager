@@ -23,13 +23,14 @@ import { Chip } from "../../ui/chips/Chip";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import {
   editableInputClass,
+  uiCell,
   uiFormLabel,
   uiSectionShell,
   uiTextBody,
   uiTextError,
   uiTextPlaceholder,
-  uiTextSubtle,
 } from "../../ui/styles/editableStyles";
+import { colourAmberPlain } from "../../ui/styles/colourTokens";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
@@ -729,12 +730,12 @@ export function TalentAcquisitionModal({
                 No removable items are currently installed.
               </p>
             ) : (
-              <div className="space-y-2 rounded border border-slate-700 p-3">
+              <div className={`space-y-2 ${uiCell} p-3`}>
                 {purityInventory.map((item) => (
                   <div key={item.key} className="flex items-start justify-between gap-3 text-sm">
                     <div className="min-w-0">
                       <p className={uiTextBody}>{item.name}</p>
-                      <p className={uiTextSubtle}>{item.kind}</p>
+                      <p className={colourAmberPlain}>{item.kind}</p>
                     </div>
                     <Chip
                       size="sm"
@@ -777,7 +778,7 @@ export function TalentAcquisitionModal({
               Record one immediate Reformed Skin replacement for each life-critical removal.
             </p>
             {fatalRemovalItems.map((item) => (
-              <div key={item.key} className="space-y-1.5 rounded border border-slate-700 p-3">
+              <div key={item.key} className={`space-y-1.5 ${uiCell} p-3`}>
                 <label className={uiFormLabel}>{item.name}</label>
                 <input
                   className={editableInputClass(true)}
@@ -837,7 +838,7 @@ export function TalentAcquisitionModal({
             {disorders.map((disorder) => {
               const selected = removedDisorderIds.includes(disorder.id);
               return (
-                <div key={disorder.id} className="space-y-2 rounded border border-slate-700 p-3">
+                <div key={disorder.id} className={`space-y-2 ${uiCell} p-3`}>
                   <label className={`flex items-center gap-3 text-sm ${uiTextBody}`}>
                     <input
                       type="checkbox"

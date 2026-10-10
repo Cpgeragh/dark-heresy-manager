@@ -25,6 +25,7 @@ import { createDraftCustomItem, saveDraftCustomItem } from "../../services/custo
 import { useToast } from "../../components/Toast";
 import type { CampaignCustomItem, CustomTraitData } from "../../types/CustomItems";
 import { recordComponentRender } from "../../performance/performanceMetrics";
+import { colourDivider } from "../../ui/styles/colourTokens";
 
 interface TraitsTabProps {
   talents: TalentsAndTraitsBlock;
@@ -101,7 +102,7 @@ function UnnaturalCharacteristicCards({
       header={<span className={`block truncate ${uiItemName}`}>Unnatural Characteristic</span>}
     >
       {expanded && (
-        <div className="border-t border-slate-700 space-y-2 p-2">
+        <div className={`border-t ${colourDivider} space-y-2 p-2`}>
           {groups.map(renderCharacteristic)}
         </div>
       )}

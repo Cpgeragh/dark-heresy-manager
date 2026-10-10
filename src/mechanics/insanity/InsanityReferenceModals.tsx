@@ -1,7 +1,7 @@
-import { uiTextBody, uiTextLabel } from "../../ui/styles/editableStyles";
+import { uiRuleName, uiTextLabel, uiTextDescription } from "../../ui/styles/editableStyles";
 
 function RuleParagraph({ children }: { children: React.ReactNode }) {
-  return <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{children}</p>;
+  return <p className={uiTextDescription}>{children}</p>;
 }
 
 export function DisorderInfoContent({
@@ -21,7 +21,7 @@ export function DisorderInfoContent({
     <div className="space-y-3">
       {(type !== name || typeDescription) && (
         <div>
-          <p className="text-sm lg:text-base font-semibold text-amber-300">{type}</p>
+          <p className={uiRuleName}>{type}</p>
           {typeDescription && <RuleParagraph>{typeDescription}</RuleParagraph>}
         </div>
       )}
