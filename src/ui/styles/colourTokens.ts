@@ -41,6 +41,17 @@ export const colourDotIdle = "bg-slate-600";
 export const colourTextMuted = "text-slate-400";
 export const colourTextBody = "text-slate-300";
 export const colourTextPlaceholder = "text-slate-500";
+export const colourHoverSurface = "hover:bg-slate-800";
+export const colourHoverRaised = "hover:bg-slate-600";
+export const colourHoverTextPrimary = "hover:text-slate-200";
+export const colourHoverTextBody = "hover:text-slate-300";
+export const colourEnabledHoverTextBody = "enabled:hover:text-slate-300";
+export const colourHoverTextStrong = "hover:text-white";
+export const colourGroupHoverTextStrong = "group-hover:text-white";
+export const colourHoverTextAccent = "hover:text-red-400";
+export const colourHoverAccentTint = "hover:bg-red-500/10";
+export const colourHoverToastControl = "hover:bg-white/10";
+export const colourHoverLoadedDot = "hover:bg-green-500";
 export const colourTextGMNote = "text-amber-400/70";
 export const colourCustomEntryText = "text-fuchsia-400";
 export const colourHeadingAccent = "text-red-500";
@@ -58,6 +69,36 @@ export const colourToggleSelectedViolet =
   "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50";
 export const colourToggleSelectedFuchsia =
   "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50";
+export const colourToggleUnselected = `${colourControlSurface} ${colourTextMuted}`;
+export const colourToggleUnselectedHover = `hover:border-slate-500 ${colourHoverTextBody}`;
+export const colourAdvanceHover = "hover:border-red-600 hover:bg-red-900/60";
+export const colourPickerCustomAction =
+  "border-red-500/70 bg-red-950/20 text-red-400 enabled:hover:border-red-400 enabled:hover:bg-red-950/35 enabled:hover:text-red-300";
+export const colourPickerSelected = "!bg-slate-800";
+export const colourSegmentedTabInactive = `border-transparent ${colourTextMuted} ${colourHoverSurface} ${colourHoverTextPrimary}`;
+
+export const colourEnabledHoverRedTint = "enabled:hover:bg-red-500/10";
+export const colourEnabledHoverFuchsiaTint = "enabled:hover:bg-fuchsia-500/10";
+export const colourEnabledHoverEmeraldTint = "enabled:hover:bg-emerald-500/10";
+export const colourEnabledHoverSlateSurface = "enabled:hover:bg-slate-800";
+
+export const colourButtonPrimary = `border border-red-500 text-red-500 ${colourEnabledHoverRedTint}`;
+export const colourButtonSecondary =
+  "border border-transparent bg-slate-700 text-slate-300 enabled:hover:bg-slate-600";
+export const colourButtonGhost = `border border-slate-600 text-slate-400 ${colourEnabledHoverSlateSurface}`;
+export const colourButtonDanger =
+  "border border-transparent bg-red-700 text-white enabled:hover:bg-red-600";
+export const colourButtonDangerGhost =
+  "border border-transparent bg-red-900/40 text-red-400 enabled:hover:bg-red-900/70";
+export const colourButtonWarning =
+  "border border-transparent bg-amber-600 text-slate-950 enabled:hover:bg-amber-500";
+export const colourButtonWarningOutline =
+  "border border-amber-500 text-amber-400 enabled:hover:bg-amber-500/10";
+export const colourButtonWarningGhost =
+  "border border-transparent bg-amber-900/40 text-amber-400 enabled:hover:bg-amber-900/70";
+export const colourButtonSuccess =
+  "border border-transparent bg-green-700 text-white enabled:hover:bg-green-600";
+export const colourButtonSuccessOutline = `border border-emerald-500 text-emerald-300 ${colourEnabledHoverEmeraldTint}`;
 
 /** Text colour of a track step in the Insanity and Corruption steppers, by how far along the track it is. */
 export const degreeTextColour = {
@@ -93,15 +134,13 @@ export const toastColours = {
   warning: "bg-amber-500/20 border-amber-500 text-amber-100",
   info: "bg-blue-500/20 border-blue-500 text-blue-100",
 } as const;
-export const colourCareerPathOutline =
-  "border border-fuchsia-500 text-fuchsia-300 enabled:hover:bg-fuchsia-500/10 enabled:active:bg-fuchsia-500/20";
+export const colourCareerPathOutline = `border border-fuchsia-500 text-fuchsia-300 ${colourEnabledHoverFuchsiaTint}`;
 export const colourCareerPathOutlineMuted =
-  "border border-fuchsia-500/50 text-fuchsia-300/60 enabled:hover:border-fuchsia-500/70 enabled:hover:bg-fuchsia-500/5 enabled:hover:text-fuchsia-300/80 enabled:active:bg-fuchsia-500/10";
-export const colourCareerBranchOutline =
-  "border border-emerald-500 text-emerald-300 enabled:hover:bg-emerald-500/10 enabled:active:bg-emerald-500/20";
+  "border border-fuchsia-500/50 text-fuchsia-300/60 enabled:hover:border-fuchsia-500/70 enabled:hover:bg-fuchsia-500/5 enabled:hover:text-fuchsia-300/80";
+export const colourCareerBranchOutline = `border border-emerald-500 text-emerald-300 ${colourEnabledHoverEmeraldTint}`;
 export const colourCareerBranchOutlineMuted =
-  "border border-emerald-500/50 text-emerald-300/60 enabled:hover:border-emerald-500/70 enabled:hover:bg-emerald-500/5 enabled:hover:text-emerald-300/80 enabled:active:bg-emerald-500/10";
-export const colourButtonNeutralOutline = `border border-slate-500 ${colourTextPrimary} enabled:hover:bg-slate-800 enabled:active:bg-slate-700/75`;
+  "border border-emerald-500/50 text-emerald-300/60 enabled:hover:border-emerald-500/70 enabled:hover:bg-emerald-500/5 enabled:hover:text-emerald-300/80";
+export const colourButtonNeutralOutline = `border border-slate-500 ${colourTextPrimary} ${colourEnabledHoverSlateSurface}`;
 export const colourToggleSelectedAmber =
   "border-amber-400 bg-amber-500 text-slate-900 font-semibold";
 export const colourToggleSelectedNeutral = `border-slate-400 bg-slate-700/70 ${colourTextPrimary}`;

@@ -17,11 +17,13 @@ import {
   uiTextError,
 } from "../ui/styles/editableStyles";
 import {
+  colourAdvanceHover,
   colourAmberPlain,
   colourMetadataLabelText,
   colourAdvanceFilled,
   colourAdvanceEmpty,
 } from "../ui/styles/colourTokens";
+import { uiDisabledLook, uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { recordComponentRender } from "../performance/performanceMetrics";
 
 interface Props {
@@ -207,10 +209,8 @@ export function CharacteristicField({
                       ${filled ? colourAdvanceFilled : colourAdvanceEmpty}
                       ${
                         clickable
-                          ? "cursor-pointer hover:border-red-600 hover:bg-red-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                          : editable && locked
-                            ? "opacity-50 cursor-not-allowed"
-                            : "cursor-default"
+                          ? `cursor-pointer ${colourAdvanceHover} ${uiPressFeedback()} ${uiFocusRing}`
+                          : uiDisabledLook
                       }`}
                   />
                   {typeof cost === "number" && (

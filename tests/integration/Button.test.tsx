@@ -12,6 +12,10 @@ describe("Button", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(onClick).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Save" })).toHaveClass(
+      "active:scale-[0.98]",
+      "focus-visible:ring-red-500"
+    );
   });
 
   it("shows the loading label, marks itself busy and ignores clicks while loading", async () => {

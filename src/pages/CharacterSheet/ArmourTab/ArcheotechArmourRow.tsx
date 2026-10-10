@@ -11,6 +11,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
+  uiInactiveItem,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -44,7 +45,7 @@ export function ArcheotechArmourRow({
 
   return (
     <div
-      className={[containerClass, "flex items-start gap-3", !isEquipped ? "opacity-60" : ""].join(
+      className={[containerClass, "flex items-start gap-3", !isEquipped ? uiInactiveItem : ""].join(
         " "
       )}
     >

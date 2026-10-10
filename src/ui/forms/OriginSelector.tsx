@@ -3,6 +3,7 @@ import { sourceColour } from "../styles/sourceStyles";
 import { toggleButtonClass } from "../buttons/ToggleButton";
 import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
 import { colourFillSelected } from "../styles/colourTokens";
+import { uiDisabledLook, uiFocusWithinRing } from "../styles/buttonStyles";
 
 interface OriginSelectorProps {
   name: string;
@@ -39,9 +40,10 @@ export function OriginSelector({
                 `${sourceColour(option)} ${colourFillSelected} font-semibold`,
                 [
                   "relative cursor-pointer text-center text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5",
-                  "focus-within:outline-none focus-within:ring-2 focus-within:ring-red-500",
-                  disabled ? "cursor-not-allowed opacity-50" : "",
-                ].join(" ")
+                  uiFocusWithinRing,
+                  disabled ? uiDisabledLook : "",
+                ].join(" "),
+                !disabled
               )}
             >
               <input

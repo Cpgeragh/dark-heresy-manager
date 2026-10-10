@@ -4,7 +4,13 @@
 // and the blocked clicks while loading.
 
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
-import { uiIconButton, uiIconButtonCompact, uiIconButtonIconSize } from "../styles/buttonStyles";
+import {
+  uiDisabledControl,
+  uiIconButton,
+  uiIconButtonCompact,
+  uiIconButtonIconSize,
+  uiPressFeedback,
+} from "../styles/buttonStyles";
 import { uiSpinner } from "../styles/editableStyles";
 import { usePendingClick } from "../usePendingClick";
 
@@ -40,7 +46,9 @@ export function IconButton({
       aria-label={label}
       aria-busy={busy || undefined}
       disabled={disabled || busy}
-      className={`${size === "sm" ? uiIconButtonCompact : uiIconButton} ${className}`.trim()}
+      className={`${size === "sm" ? uiIconButtonCompact : uiIconButton} ${
+        busy ? "cursor-wait" : uiDisabledControl
+      } ${uiPressFeedback(!disabled && !busy)} ${className}`.trim()}
       onClick={handleClick}
       {...buttonProps}
     >

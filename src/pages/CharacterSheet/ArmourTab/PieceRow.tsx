@@ -8,6 +8,7 @@ import {
   uiTextPlaceholder,
   uiItemName,
   uiInfoModalWrapper,
+  uiInactiveItem,
   uiRuleName,
   uiTextDescription,
 } from "../../../ui/styles/editableStyles";
@@ -93,7 +94,7 @@ export function PieceRow({
   const addableCompatible = compatible.filter((upgrade) => !upgradeIds.includes(upgrade.id));
 
   return (
-    <div className={[uiSection, "flex items-start gap-3", !worn ? "opacity-60" : ""].join(" ")}>
+    <div className={[uiSection, "flex items-start gap-3", !worn ? uiInactiveItem : ""].join(" ")}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} truncate`}>{piece.name}</span>

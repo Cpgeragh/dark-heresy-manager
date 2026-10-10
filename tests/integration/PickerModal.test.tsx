@@ -73,7 +73,10 @@ describe("PickerModal", () => {
   it("gives interactive picker rows visible pressed feedback", () => {
     const { rerender } = render(<PickerRow>Interactive row</PickerRow>);
     expect(screen.getByRole("button", { name: "Interactive row" })).toHaveClass(
-      "active:scale-[0.99]",
+      "active:scale-[0.98]",
+      "focus-visible:ring-red-500"
+    );
+    expect(screen.getByRole("button", { name: "Interactive row" })).not.toHaveClass(
       "active:!border-red-400",
       "active:!bg-slate-700",
       "active:ring-1"
@@ -81,7 +84,7 @@ describe("PickerModal", () => {
 
     rerender(<PickerRow interactive={false}>Read-only row</PickerRow>);
     expect(screen.getByRole("button", { name: "Read-only row" })).not.toHaveClass(
-      "active:scale-[0.99]"
+      "active:scale-[0.98]"
     );
   });
 
@@ -99,7 +102,7 @@ describe("PickerModal", () => {
       "button:enabled"
     );
     expect(screen.getByRole("button", { name: "Bespoke filter" })).not.toHaveClass(
-      "active:!bg-slate-700"
+      "active:scale-[0.98]"
     );
   });
 

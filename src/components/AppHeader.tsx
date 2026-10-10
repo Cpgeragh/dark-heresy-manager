@@ -8,7 +8,7 @@ import { IconButton } from "../ui/buttons/IconButton";
 import { GearIcon } from "../ui/icons/GearIcon";
 import { QrCodeIcon } from "../ui/icons/QrCodeIcon";
 import { QrModal } from "../ui/modals/QrModal";
-import { uiIconButton, uiIconButtonIconSize } from "../ui/styles/buttonStyles";
+import { uiIconButton, uiIconButtonIconSize, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { AppHeaderShell } from "./AppHeaderShell";
 import { colourPopoverSurface } from "../ui/styles/colourTokens";
 
@@ -56,7 +56,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
             {(backHref || currentPath !== ROUTES.DASHBOARD) && (
               <Link
                 to={backHref ?? ROUTES.DASHBOARD}
-                className={uiIconButton}
+                className={`${uiIconButton} ${uiPressFeedback()}`}
                 aria-label={backHref ? "Back" : "Dashboard"}
               >
                 <svg

@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
-import { colourTextMuted } from "../styles/colourTokens";
+import { colourHoverTextPrimary, colourTextMuted } from "../styles/colourTokens";
+import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 
 interface TitleHeaderActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   align?: "start" | "end";
@@ -10,6 +11,7 @@ export function TitleHeaderActionButton({
   align = "end",
   className = "",
   type = "button",
+  disabled,
   ...props
 }: TitleHeaderActionButtonProps) {
   const alignment = align === "start" ? "justify-self-start" : "justify-self-end";
@@ -17,7 +19,10 @@ export function TitleHeaderActionButton({
   return (
     <button
       type={type}
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center ${alignment} rounded-lg text-lg ${colourTextMuted} transition hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-40 lg:text-xl ${className}`.trim()}
+      disabled={disabled}
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center ${alignment} rounded-lg text-lg ${colourTextMuted} ${
+        disabled ? "" : colourHoverTextPrimary
+      } transition ${uiPressFeedback(!disabled)} ${uiFocusRing} ${uiDisabledControl} lg:text-xl ${className}`.trim()}
       {...props}
     />
   );

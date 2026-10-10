@@ -143,10 +143,7 @@ export function ImplantRow({
               }
               disabled={!canChangeQuality}
               colour={CRAFTSMANSHIP_COLOUR[displayedCraftsmanship]}
-              className={[
-                canChangeQuality ? "cursor-pointer hover:opacity-80" : "cursor-default",
-                "transition shrink-0",
-              ].join(" ")}
+              className="shrink-0"
             >
               {displayedCraftsmanship}
             </Chip>

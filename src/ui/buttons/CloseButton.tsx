@@ -2,7 +2,8 @@
 // Back navigation and destructive removal controls remain separate.
 
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
-import { colourTextMuted } from "../styles/colourTokens";
+import { colourHoverTextPrimary, colourTextMuted } from "../styles/colourTokens";
+import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 
 export type CloseIconProps = Omit<HTMLAttributes<HTMLSpanElement>, "children">;
 
@@ -25,13 +26,17 @@ export function CloseButton({
   ariaLabel = "Close",
   className = "",
   type = "button",
+  disabled,
   ...props
 }: CloseButtonProps) {
   return (
     <button
       type={type}
       aria-label={ariaLabel}
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg lg:text-xl ${colourTextMuted} hover:text-slate-200 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${className}`.trim()}
+      disabled={disabled}
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg lg:text-xl ${colourTextMuted} ${
+        disabled ? "" : colourHoverTextPrimary
+      } transition ${uiPressFeedback(!disabled)} ${uiFocusRing} ${uiDisabledControl} ${className}`.trim()}
       {...props}
     >
       <CloseIcon />

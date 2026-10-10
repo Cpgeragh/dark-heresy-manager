@@ -4,7 +4,12 @@ import React, { Component } from "react";
 import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
 import { uiSection, uiTextError, uiTextBody, uiTextPlaceholder } from "../ui/styles/editableStyles";
-import { colourTextPrimary, colourPageBackground, colourStateRed } from "../ui/styles/colourTokens";
+import {
+  colourHoverTextBody,
+  colourPageBackground,
+  colourStateRed,
+  colourTextPrimary,
+} from "../ui/styles/colourTokens";
 
 interface Props {
   children: ReactNode;
@@ -103,7 +108,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
             {error.stack && (
               <details className="mt-2">
                 <summary
-                  className={`text-xs ${uiTextPlaceholder} cursor-pointer hover:text-slate-400`}
+                  className={`text-xs ${uiTextPlaceholder} cursor-pointer ${colourHoverTextBody}`}
                 >
                   Stack trace
                 </summary>

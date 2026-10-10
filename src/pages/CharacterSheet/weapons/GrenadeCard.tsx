@@ -13,6 +13,7 @@ import {
   uiSplitRow,
   uiSection,
   uiSectionShell,
+  uiInactiveItem,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
@@ -83,7 +84,7 @@ export function GrenadeCard({
   // Stowed overflow card: read-only, always collapsed
   if (isStowedCard) {
     return (
-      <div className={uiSection + " opacity-60"}>
+      <div className={`${uiSection} ${uiInactiveItem}`}>
         <div className={`${uiSplitRow}`}>
           <div className="min-w-0">
             <p className={`text-sm lg:text-base font-semibold ${colourTextMuted} truncate`}>

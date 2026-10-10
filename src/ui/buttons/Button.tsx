@@ -7,13 +7,23 @@
 
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import {
+  colourButtonDanger,
+  colourButtonDangerGhost,
+  colourButtonGhost,
   colourButtonNeutralOutline,
+  colourButtonPrimary,
+  colourButtonSecondary,
+  colourButtonSuccess,
+  colourButtonSuccessOutline,
+  colourButtonWarning,
+  colourButtonWarningGhost,
+  colourButtonWarningOutline,
   colourCareerBranchOutline,
   colourCareerBranchOutlineMuted,
   colourCareerPathOutline,
   colourCareerPathOutlineMuted,
 } from "../styles/colourTokens";
-import { uiButtonPressShrink } from "../styles/buttonStyles";
+import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 import { LoadingDots } from "../LoadingDots";
 import { usePendingClick } from "../usePendingClick";
 
@@ -49,34 +59,22 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onC
   children: ReactNode;
 }
 
-// Outline variants press to their own colour at twice the hover tint. Solid variants press one
-// shade brighter than hover.
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    "border border-red-500 text-red-500 enabled:hover:bg-red-500/10 enabled:active:bg-red-500/20",
+  primary: colourButtonPrimary,
   careerPath: colourCareerPathOutline,
   careerPathMuted: colourCareerPathOutlineMuted,
   careerBranch: colourCareerBranchOutline,
   careerBranchMuted: colourCareerBranchOutlineMuted,
-  secondary:
-    "border border-transparent bg-slate-700 text-slate-300 enabled:hover:bg-slate-600 enabled:active:bg-slate-500",
-  ghost:
-    "border border-slate-600 text-slate-400 enabled:hover:bg-slate-800 enabled:active:bg-slate-700/75",
+  secondary: colourButtonSecondary,
+  ghost: colourButtonGhost,
   neutral: colourButtonNeutralOutline,
-  danger:
-    "border border-transparent bg-red-700 text-white enabled:hover:bg-red-600 enabled:active:bg-red-500",
-  dangerGhost:
-    "border border-transparent bg-red-900/40 text-red-400 enabled:hover:bg-red-900/70 enabled:active:bg-red-900",
-  warning:
-    "border border-transparent bg-amber-600 text-slate-950 enabled:hover:bg-amber-500 enabled:active:bg-amber-400",
-  warningOutline:
-    "border border-amber-500 text-amber-400 enabled:hover:bg-amber-500/10 enabled:active:bg-amber-500/20",
-  warningGhost:
-    "border border-transparent bg-amber-900/40 text-amber-400 enabled:hover:bg-amber-900/70 enabled:active:bg-amber-900",
-  success:
-    "border border-transparent bg-green-700 text-white enabled:hover:bg-green-600 enabled:active:bg-green-500",
-  successOutline:
-    "border border-emerald-500 text-emerald-300 enabled:hover:bg-emerald-500/10 enabled:active:bg-emerald-500/20",
+  danger: colourButtonDanger,
+  dangerGhost: colourButtonDangerGhost,
+  warning: colourButtonWarning,
+  warningOutline: colourButtonWarningOutline,
+  warningGhost: colourButtonWarningGhost,
+  success: colourButtonSuccess,
+  successOutline: colourButtonSuccessOutline,
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -109,10 +107,9 @@ export function Button({
       disabled={disabled || busy}
       className={[
         "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-lg font-semibold transition",
-        "disabled:cursor-not-allowed",
-        busy ? "" : "disabled:opacity-50",
-        uiButtonPressShrink,
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500",
+        busy ? "cursor-wait" : uiDisabledControl,
+        uiPressFeedback(!disabled && !busy),
+        uiFocusRing,
         VARIANTS[variant],
         SIZES[size],
         fullWidth ? "w-full" : "",

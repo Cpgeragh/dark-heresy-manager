@@ -37,13 +37,19 @@ import {
   uiTextBody,
   uiTextError,
   uiTextPlaceholder,
+  uiInactiveItem,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { EditButton } from "../ui/buttons/EditButton";
 import { ArchiveButton } from "../ui/buttons/ArchiveButton";
 import { RemoveButton } from "../ui/buttons/RemoveButton";
 import { GearIcon } from "../ui/icons/GearIcon";
-import { uiCardLinkFeedback, uiCardOverlayLinkFeedback } from "../ui/styles/buttonStyles";
+import {
+  uiCardLinkFeedback,
+  uiCardOverlayLinkFeedback,
+  uiFocusRing,
+  uiPressFeedback,
+} from "../ui/styles/buttonStyles";
 import { IconButton } from "../ui/buttons/IconButton";
 import { ExpandChevron } from "../ui/icons/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
@@ -70,6 +76,7 @@ import {
   colourTextPrimary,
   colourTextMuted,
   colourDivideList,
+  colourHoverTextBody,
 } from "../ui/styles/colourTokens";
 import { RequiredMark } from "../ui/forms/RequiredMark";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../hooks/useMediaQuery";
@@ -408,7 +415,7 @@ function DmCampaignList({
               <Link
                 to={buildRoute.campaignOverview(campaign.id)}
                 aria-label={campaign.name}
-                className="absolute inset-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
+                className={`absolute inset-0 rounded-lg focus-visible:ring-inset ${uiFocusRing}`}
               />
               <span
                 className={`pointer-events-none min-w-0 flex-1 font-medium ${colourTextPrimary} lg:text-lg`}
@@ -500,7 +507,7 @@ function DmCampaignList({
             type="button"
             onClick={() => setShowArchived((v) => !v)}
             aria-expanded={showArchived}
-            className={`inline-flex items-center gap-1 text-sm lg:text-base ${uiTextPlaceholder} hover:text-slate-300 transition-colors`}
+            className={`inline-flex items-center gap-1 text-sm lg:text-base ${uiTextPlaceholder} ${colourHoverTextBody} ${uiPressFeedback()} ${uiFocusRing} transition-colors`}
           >
             <ExpandChevron expanded={showArchived} />
             <span>Archived ({archivedCampaigns.length})</span>
@@ -511,7 +518,7 @@ function DmCampaignList({
               {archivedCampaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className={`${uiSection} relative ${uiInlineRow} opacity-60`}
+                  className={`${uiSection} relative ${uiInlineRow} ${uiInactiveItem}`}
                 >
                   <span className={`flex-1 ${colourTextMuted} lg:text-lg`}>{campaign.name}</span>
 

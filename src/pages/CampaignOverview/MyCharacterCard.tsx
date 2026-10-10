@@ -14,6 +14,7 @@ import {
   colourTextPrimary,
   colourErrorText,
 } from "../../ui/styles/colourTokens";
+import { uiCardLinkFeedback } from "../../ui/styles/buttonStyles";
 
 export function MyCharacterCard({
   character,
@@ -48,7 +49,7 @@ export function MyCharacterCard({
   return (
     <Link
       to={buildRoute.characterSheet(campaignId, character.id)}
-      className={`${uiSection} block hover:bg-slate-800 transition-colors`}
+      className={`${uiSection} block ${uiCardLinkFeedback}`}
     >
       <div className="flex items-center gap-3">
         <div onClick={(e) => e.stopPropagation()}>

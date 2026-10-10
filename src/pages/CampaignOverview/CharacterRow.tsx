@@ -17,6 +17,7 @@ import {
   uiTextPlaceholder,
   uiTextMeta,
 } from "../../ui/styles/editableStyles";
+import { uiCardLinkFeedback } from "../../ui/styles/buttonStyles";
 import {
   colourSuccessPlain,
   colourMetadataLabelText,
@@ -140,7 +141,7 @@ export function CharacterRow({
     <>
       <Link
         to={`/campaign/${campaignId}/character/${characterId}`}
-        className={uiSection + " relative block hover:bg-slate-800 transition-colors"}
+        className={`${uiSection} relative block ${uiCardLinkFeedback}`}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center gap-3">

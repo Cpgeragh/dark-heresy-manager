@@ -14,10 +14,19 @@ import {
 import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
 import { PlusIcon } from "../icons/PlusIcon";
-import { uiPickerPressFeedback } from "../styles/buttonStyles";
+import {
+  uiDisabledControl,
+  uiFocusRing,
+  uiHoverSurface,
+  uiPressFeedback,
+} from "../styles/buttonStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { usePendingClick } from "../usePendingClick";
-import { colourDivider } from "../styles/colourTokens";
+import {
+  colourDivider,
+  colourPickerCustomAction,
+  colourPickerSelected,
+} from "../styles/colourTokens";
 
 export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`p-4 lg:p-5 space-y-4 ${className}`.trim()} {...props} />;
@@ -62,10 +71,10 @@ export function PickerRow({
       tabIndex={respondsToInput ? tabIndex : -1}
       className={`relative w-full text-left ${uiSectionShell} p-3 lg:p-4 transition ${
         respondsToInput ? "group" : ""
-      } ${selected ? "!bg-slate-800" : respondsToInput ? "hover:bg-slate-800" : ""} ${
+      } ${selected ? colourPickerSelected : respondsToInput ? uiHoverSurface : ""} ${
         respondsToInput ? "cursor-pointer" : disabled ? "" : "cursor-default"
-      } ${uiPickerPressFeedback(respondsToInput)} ${
-        pending ? "cursor-wait" : "disabled:opacity-40 disabled:cursor-not-allowed"
+      } ${uiPressFeedback(respondsToInput)} ${uiFocusRing} ${
+        pending ? "cursor-wait" : uiDisabledControl
       } ${className}`.trim()}
       {...props}
     >
@@ -100,7 +109,7 @@ export function PickerCustomAction({
   return (
     <button
       type={type}
-      className={`group ${uiInlineRow} w-full justify-center rounded border border-red-500/70 bg-red-950/20 py-2.5 text-sm text-red-400 transition hover:border-red-400 hover:bg-red-950/35 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 lg:text-base ${uiPickerPressFeedback(!props.disabled)} ${className}`.trim()}
+      className={`group ${uiInlineRow} w-full justify-center rounded border ${colourPickerCustomAction} py-2.5 text-sm transition ${uiDisabledControl} lg:text-base ${uiPressFeedback(!props.disabled)} ${uiFocusRing} ${className}`.trim()}
       {...props}
     >
       <PlusIcon className="h-4 w-4 shrink-0" />

@@ -1,7 +1,12 @@
 // src/components/Stepper.tsx
 
 import { useState, useCallback } from "react";
-import { uiStepButtonColour, uiStepButtonDisabled } from "../ui/styles/buttonStyles";
+import {
+  uiEditableValueHover,
+  uiFocusRing,
+  uiStepButtonColour,
+  uiStepButtonDisabled,
+} from "../ui/styles/buttonStyles";
 import {
   colourControlDivider,
   colourControlDividerDisabled,
@@ -76,7 +81,7 @@ export function Stepper({
   );
 
   const btnClass = `flex items-center justify-center h-full w-7 sm:w-8 lg:w-10 text-lg lg:text-2xl font-bold leading-none pt-0.5 transition select-none ${
-    editable ? `${uiStepButtonColour} active:scale-95` : uiStepButtonDisabled
+    editable ? uiStepButtonColour : uiStepButtonDisabled
   }`;
   const dividerClass = `h-full w-px ${editable ? colourControlDivider : colourControlDividerDisabled}`;
 
@@ -88,6 +93,7 @@ export function Stepper({
     >
       <button
         type="button"
+        disabled={!editable}
         aria-disabled={!editable}
         onClick={() => adjust(-1)}
         aria-label="Decrease"
@@ -113,7 +119,7 @@ export function Stepper({
           }}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className={`h-full px-1 text-center bg-transparent text-base lg:text-lg font-code ${colourTextPrimary} focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+          className={`h-full px-1 text-center bg-transparent text-base lg:text-lg font-code ${colourTextPrimary} ${uiFocusRing} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           autoComplete="off"
         />
       ) : (
@@ -122,7 +128,7 @@ export function Stepper({
           title={editable ? "Click to edit" : undefined}
           className={`flex items-center justify-center h-full min-w-7 sm:min-w-8 lg:min-w-10 px-1.5 text-center text-xl lg:text-2xl font-semibold font-code select-none transition-colors ${
             dangerClassName || colourTextPrimary
-          } ${editable ? "cursor-pointer hover:text-red-400" : ""}`}
+          } ${editable ? `cursor-pointer ${uiEditableValueHover}` : ""}`}
         >
           {value}
         </span>
@@ -132,6 +138,7 @@ export function Stepper({
 
       <button
         type="button"
+        disabled={!editable}
         aria-disabled={!editable}
         onClick={() => adjust(1)}
         aria-label="Increase"

@@ -31,7 +31,6 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
         disabled={loading}
         label="Enter Recovery Code"
         labelClassName={`block text-sm lg:text-base ${uiTextBody}`}
-        accent="red"
         showValidation
       />
 

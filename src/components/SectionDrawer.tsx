@@ -12,6 +12,7 @@ import {
   colourHeadingAccent,
   colourBorderRed,
 } from "../ui/styles/colourTokens";
+import { uiFocusRing, uiHoverSurface, uiPressFeedback } from "../ui/styles/buttonStyles";
 
 // ================================================================
 // NAVIGATION STRUCTURE
@@ -216,7 +217,7 @@ function SectionDrawerContent({
                   <button
                     type="button"
                     onClick={() => openCategory(index)}
-                    className={`w-full flex items-center justify-between px-4 py-3 text-sm ${colourTextPrimary} hover:bg-slate-800 transition text-left`}
+                    className={`w-full flex items-center justify-between px-4 py-3 text-sm ${colourTextPrimary} ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} transition text-left`}
                   >
                     <span>{cat.label}</span>
                     <ArrowRight />
@@ -239,7 +240,7 @@ function SectionDrawerContent({
                   type="button"
                   onClick={goBack}
                   aria-label={`Back to categories from ${activeCategory.label}`}
-                  className={`flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b ${colourDivider}`}
+                  className={`flex items-center gap-2 px-4 py-3 w-full text-sm ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} transition border-b ${colourDivider}`}
                 >
                   <ArrowLeft />
                   <span className={`font-semibold ${colourTextPrimary}`}>
@@ -257,8 +258,8 @@ function SectionDrawerContent({
                         className={`w-full px-4 py-3 text-sm text-left transition ${
                           activeTab === tab.id
                             ? `${colourHeadingAccent} font-semibold border-l-2 ${colourBorderRed}`
-                            : `${colourTextPrimary} hover:bg-slate-800`
-                        }`}
+                            : `${colourTextPrimary} ${uiHoverSurface}`
+                        } ${uiPressFeedback()} ${uiFocusRing}`}
                       >
                         {tab.label}
                       </button>

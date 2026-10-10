@@ -13,6 +13,7 @@ import {
   colourOnAmberDim,
   colourFillRaised,
 } from "../ui/styles/colourTokens";
+import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 
 export function MessageThread({
   messages,
@@ -48,7 +49,9 @@ export function MessageThread({
       {hasOlderMessages && (
         <button
           type="button"
-          className={`self-center text-xs lg:text-sm ${colourAmberPlain} hover:text-amber-300 disabled:text-slate-500`}
+          className={`self-center text-xs lg:text-sm ${colourAmberPlain} ${uiPressFeedback(
+            !loadingOlder
+          )} ${uiFocusRing} ${loadingOlder ? "cursor-wait" : ""}`}
           onClick={onLoadOlder}
           disabled={loadingOlder}
         >

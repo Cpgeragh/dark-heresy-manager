@@ -320,7 +320,7 @@ describe("SkillsTab", () => {
     const list = within(dialog).getByTestId("skill-picker-card-list");
     expect(list).toHaveClass("space-y-3", "p-3");
     const selectAwareness = within(dialog).getByRole("button", { name: "Select Awareness" });
-    expect(selectAwareness.parentElement).toHaveClass("hover:bg-slate-700/40");
+    expect(selectAwareness.parentElement).toHaveClass("hover:bg-slate-800");
     const awarenessCard = selectAwareness.closest("div.rounded-lg");
     expect(awarenessCard).toHaveClass("border-slate-500");
     expect(within(awarenessCard!).getAllByText("CR").length).toBeGreaterThan(0);

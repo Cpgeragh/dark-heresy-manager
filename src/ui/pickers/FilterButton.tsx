@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { uiSectionShell } from "../styles/editableStyles";
-import { uiPickerPressFeedback } from "../styles/buttonStyles";
+import { uiFocusRing, uiHoverSurface, uiPressFeedback } from "../styles/buttonStyles";
 import { colourTextPrimary } from "../styles/colourTokens";
 
 interface FilterButtonProps {
@@ -15,7 +15,7 @@ export function FilterButton({ children, onClick, className = "" }: FilterButton
     <button
       type="button"
       onClick={onClick}
-      className={`${uiSectionShell} px-2 py-1 text-center text-xs lg:text-sm ${colourTextPrimary} ${uiPickerPressFeedback()} ${className}`.trim()}
+      className={`${uiSectionShell} px-2 py-1 text-center text-xs lg:text-sm ${colourTextPrimary} ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} ${className}`.trim()}
     >
       {children}
     </button>

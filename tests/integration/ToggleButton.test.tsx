@@ -69,6 +69,20 @@ describe("ToggleButton", () => {
     await userEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
   });
+
+  it("uses the shared press, focus and disabled treatments", () => {
+    render(
+      <ToggleButton selected={false} selectedClassName={selectedColour} disabled>
+        Good
+      </ToggleButton>
+    );
+
+    expect(screen.getByRole("button", { name: "Good" })).toHaveClass(
+      "focus-visible:ring-red-500",
+      "disabled:opacity-50"
+    );
+    expect(screen.getByRole("button", { name: "Good" })).not.toHaveClass("active:scale-[0.98]");
+  });
 });
 
 describe("toggleButtonClass", () => {

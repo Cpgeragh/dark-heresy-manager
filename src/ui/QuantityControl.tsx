@@ -2,7 +2,7 @@
 // Inline quantity editor: decrement button, click-to-type display, increment button.
 
 import { useQuantityEdit } from "../hooks/useQuantityEdit";
-import { uiStepButtonColour } from "./styles/buttonStyles";
+import { uiEditableValueHover, uiStepButtonColour } from "./styles/buttonStyles";
 import { editableInputColour } from "./styles/editableStyles";
 import { colourTextPrimary } from "./styles/colourTokens";
 
@@ -79,9 +79,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           onClick={editable ? start : undefined}
           title={editable ? "Click to set quantity" : undefined}
           className={`${sizeStyles.display} font-code ${colourTextPrimary} text-center ${
-            editable
-              ? "cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
-              : ""
+            editable ? `cursor-pointer ${uiEditableValueHover}` : ""
           }`}
         >
           {quantity}

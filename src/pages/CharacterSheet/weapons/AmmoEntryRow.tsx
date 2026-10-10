@@ -23,7 +23,13 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { AmmoTrackingMode } from "./weaponHelpers";
 import { formatAmmoWeight } from "./formatAmmoWeight";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { colourTextPrimary, colourDotLoaded, colourDotIdle } from "../../../ui/styles/colourTokens";
+import {
+  colourDotIdle,
+  colourDotLoaded,
+  colourHoverLoadedDot,
+  colourTextPrimary,
+} from "../../../ui/styles/colourTokens";
+import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../../../ui/styles/buttonStyles";
 
 // ─── Ammo Entry Row ───────────────────────────────────────────────────────────
 
@@ -82,9 +88,9 @@ export function AmmoEntryRow({
               isLoaded
                 ? colourDotLoaded
                 : editable
-                  ? `${colourDotIdle} hover:bg-green-500`
+                  ? `${colourDotIdle} ${colourHoverLoadedDot}`
                   : colourDotIdle
-            }`}
+            } ${uiPressFeedback(editable)} ${uiFocusRing} ${uiDisabledControl}`}
           />
           <span className={`${uiItemName} truncate`}>{displayName}</span>
           {isLoaded && (

@@ -18,7 +18,9 @@ import {
   colourControlRaised,
   colourBorderRed,
   colourFillControl,
+  colourHoverAccentTint,
 } from "../ui/styles/colourTokens";
+import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 
@@ -173,7 +175,7 @@ export function PortraitUpload({
               e.stopPropagation();
               fileInputRef.current?.click();
             }}
-            className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border ${colourBorderRed} ${colourHeadingAccent} flex items-center justify-center hover:bg-red-500/10 transition`}
+            className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border ${colourBorderRed} ${colourHeadingAccent} flex items-center justify-center ${colourHoverAccentTint} ${uiPressFeedback()} ${uiFocusRing} transition`}
             aria-label="Upload portrait"
           >
             <svg

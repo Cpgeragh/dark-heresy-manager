@@ -1,6 +1,7 @@
 import { useRef, type KeyboardEvent } from "react";
 import { segmentedTabId, segmentedTabPanelId } from "./styles/segmentedTabStyles";
-import { colourTextMuted, colourTabTrackSurface } from "./styles/colourTokens";
+import { colourSegmentedTabInactive, colourTabTrackSurface } from "./styles/colourTokens";
+import { uiFocusRing, uiPressFeedback } from "./styles/buttonStyles";
 
 export interface SegmentedTabOption<T extends string> {
   value: T;
@@ -23,7 +24,7 @@ const tabButtonBase =
 const tabButtonBaseNarrow =
   "rounded-md px-2 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border";
 const tabButtonBaseCompact = "rounded-md px-1 py-1.5 text-[11px] font-semibold transition border";
-const tabButtonInactive = `border-transparent ${colourTextMuted} hover:bg-slate-800 hover:text-slate-200`;
+const tabButtonInactive = colourSegmentedTabInactive;
 
 function tabButtonClass(optionCount: number) {
   if (optionCount <= 2) return tabButtonBase;
@@ -93,7 +94,8 @@ export function SegmentedTabs<T extends string>({
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={[
               tabButtonClass(options.length),
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300",
+              uiPressFeedback(),
+              uiFocusRing,
               active ? option.activeClassName : tabButtonInactive,
             ].join(" ")}
           >

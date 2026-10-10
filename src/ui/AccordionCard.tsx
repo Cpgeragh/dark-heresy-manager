@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ExpandChevron } from "./icons/ExpandChevron";
-import { uiPickerPressFeedback } from "./styles/buttonStyles";
+import { uiFocusRing, uiHoverSurface, uiPressFeedback } from "./styles/buttonStyles";
 import { uiSectionShell } from "./styles/editableStyles";
 
 interface AccordionCardProps {
@@ -33,7 +33,7 @@ export function AccordionCard({
         onClick={onToggle}
         aria-expanded={expanded}
         {...aria}
-        className={`group flex w-full items-center gap-3 p-3 text-left transition hover:bg-slate-800 lg:p-4 ${uiPickerPressFeedback(true)}`}
+        className={`group flex w-full items-center gap-3 p-3 text-left transition ${uiHoverSurface} lg:p-4 ${uiPressFeedback()} ${uiFocusRing}`}
       >
         <div className="min-w-0 flex-1">{header}</div>
         {showChevron && <ExpandChevron expanded={expanded} />}

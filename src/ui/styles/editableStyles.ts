@@ -2,6 +2,7 @@
 
 import { chipClassName } from "./chipStyles";
 import {
+  colourGroupHoverTextStrong,
   chipColours,
   colourAccentBar,
   colourAmberPlain,
@@ -67,6 +68,12 @@ export const uiSplitRow = "flex items-center justify-between gap-2";
 
 /** Two-column form field grid which collapses to one column on a phone. */
 export const uiFieldGrid = "grid grid-cols-1 gap-3 sm:grid-cols-2";
+
+/** De-emphasised card content that is present but not currently active. */
+export const uiInactiveItem = "opacity-60";
+
+/** Adjacent carousel content that is visible only as navigation context. */
+export const uiInactivePreview = "pointer-events-none opacity-50";
 
 /** Tinted card shape without a colour: pair with a colourNotice token. */
 export const uiNoticeBox = "rounded-lg border";
@@ -154,9 +161,9 @@ export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]
 export const uiSpinner = "rounded-full border-2 border-slate-800 border-t-red-600 animate-spin";
 export const uiSubheading = `text-xs lg:text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`;
 export const uiItemName = `text-sm lg:text-base font-medium ${colourTextPrimary}`;
-export const uiItemNameHover = `${uiItemName} group-hover:text-white`;
+export const uiItemNameHover = `${uiItemName} ${colourGroupHoverTextStrong}`;
 export const uiCardTitle = `text-sm lg:text-base font-semibold ${colourTextPrimary}`;
-export const uiCardTitleHover = `${uiCardTitle} group-hover:text-white`;
+export const uiCardTitleHover = `${uiCardTitle} ${colourGroupHoverTextStrong}`;
 /** Rule or ability name above its description inside an info modal. */
 export const uiRuleName = `text-sm lg:text-base font-semibold ${colourMetadataLabelText}`;
 

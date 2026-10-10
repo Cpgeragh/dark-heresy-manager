@@ -7,7 +7,7 @@ import {
 } from "../styles/editableStyles";
 import { ArrowRight } from "../icons/PickerArrows";
 import { RequiredFormLabel } from "../forms/RequiredFormLabel";
-import { uiPickerPressFeedback } from "../styles/buttonStyles";
+import { uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 
 interface SharedPickerFieldProps {
   id: string;
@@ -70,7 +70,7 @@ export function PickerField({
         onClick={onClick}
         className={`${editableInputClass(!disabled)} ${
           label ? "mt-0.5" : ""
-        } appearance-none text-left flex items-center justify-between ${uiPickerPressFeedback(!disabled)} ${buttonClassName}`.trim()}
+        } appearance-none text-left flex items-center justify-between ${uiPressFeedback(!disabled)} ${uiFocusRing} ${buttonClassName}`.trim()}
       >
         <span className={value ? "" : uiTextPlaceholder}>{value || placeholder}</span>
         <ArrowRight />

@@ -4,7 +4,8 @@ import { useState, useCallback } from "react";
 import { useToast, type Toast } from "./ToastContext";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 import { CloseIcon } from "../../ui/buttons/CloseButton";
-import { toastColours } from "../../ui/styles/colourTokens";
+import { colourHoverToastControl, toastColours } from "../../ui/styles/colourTokens";
+import { uiFocusRing, uiPressFeedback } from "../../ui/styles/buttonStyles";
 
 interface ToastItemProps {
   toast: Toast;
@@ -68,7 +69,7 @@ export function ToastItem({ toast }: ToastItemProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className="inline-flex h-8 w-8 items-center justify-center rounded text-xs transition hover:bg-white/10"
+            className={`inline-flex h-8 w-8 items-center justify-center rounded text-xs transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing}`}
             aria-label="Copy message to clipboard"
             title="Copy to clipboard"
           >
@@ -79,7 +80,7 @@ export function ToastItem({ toast }: ToastItemProps) {
         <button
           type="button"
           onClick={handleDismiss}
-          className="inline-flex h-8 w-8 items-center justify-center rounded text-xl transition hover:bg-white/10 lg:h-9 lg:w-9 lg:text-2xl"
+          className={`inline-flex h-8 w-8 items-center justify-center rounded text-xl transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing} lg:h-9 lg:w-9 lg:text-2xl`}
           aria-label="Dismiss notification"
           title="Dismiss"
         >

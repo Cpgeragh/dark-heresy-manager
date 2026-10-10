@@ -3,16 +3,28 @@
 // the behaviour are shared; the caller passes the selected colour and its own size classes.
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { colourControlSurface, colourTextMuted } from "../styles/colourTokens";
+import { colourToggleUnselected, colourToggleUnselectedHover } from "../styles/colourTokens";
+import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 
-const TOGGLE_BASE =
-  "rounded border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-50";
+const TOGGLE_BASE = `rounded border transition ${uiFocusRing} ${uiDisabledControl}`;
 
-const TOGGLE_UNSELECTED = `${colourControlSurface} ${colourTextMuted} hover:border-slate-500 hover:text-slate-300`;
+const TOGGLE_UNSELECTED = colourToggleUnselected;
 
 /** Classes for a pick-one button, for a caller that cannot use a button element, such as a radio label. */
-export function toggleButtonClass(selected: boolean, selectedClassName: string, className = "") {
-  return [TOGGLE_BASE, selected ? selectedClassName : TOGGLE_UNSELECTED, className]
+export function toggleButtonClass(
+  selected: boolean,
+  selectedClassName: string,
+  className = "",
+  interactive = true
+) {
+  return [
+    TOGGLE_BASE,
+    selected
+      ? selectedClassName
+      : `${TOGGLE_UNSELECTED} ${interactive ? colourToggleUnselectedHover : ""}`,
+    uiPressFeedback(interactive),
+    className,
+  ]
     .filter(Boolean)
     .join(" ");
 }
@@ -34,13 +46,15 @@ export function ToggleButton({
   selectedClassName,
   className,
   children,
+  disabled,
   ...rest
 }: ToggleButtonProps) {
   return (
     <button
       type="button"
       aria-pressed={selected}
-      className={toggleButtonClass(selected, selectedClassName, className)}
+      disabled={disabled}
+      className={toggleButtonClass(selected, selectedClassName, className, !disabled)}
       {...rest}
     >
       {children}

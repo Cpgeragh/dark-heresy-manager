@@ -11,6 +11,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
+  uiInactiveItem,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -42,7 +43,9 @@ export function ArcheotechForceFieldRow({
 
   return (
     <div
-      className={[containerClass, "flex items-start gap-3", !active ? "opacity-60" : ""].join(" ")}
+      className={[containerClass, "flex items-start gap-3", !active ? uiInactiveItem : ""].join(
+        " "
+      )}
     >
       <div className="flex-1 min-w-0">
         <div className={`${uiInlineRow} flex-wrap`}>

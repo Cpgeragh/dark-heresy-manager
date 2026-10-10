@@ -2,6 +2,7 @@
 // The chevron that expands or collapses a card's details, sitting above the card's tap overlay.
 
 import { ExpandChevron } from "../icons/ExpandChevron";
+import { uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 
 interface ExpandButtonProps {
   expanded: boolean;
@@ -17,7 +18,7 @@ export function ExpandButton({ expanded, label, onClick, className = "" }: Expan
       onClick={onClick}
       aria-expanded={expanded}
       aria-label={label}
-      className={`relative z-10 pointer-events-auto p-1 -m-1 ${className}`.trim()}
+      className={`relative z-10 pointer-events-auto p-1 -m-1 ${uiPressFeedback()} ${uiFocusRing} ${className}`.trim()}
     >
       <ExpandChevron expanded={expanded} />
     </button>

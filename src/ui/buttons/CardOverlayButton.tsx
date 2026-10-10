@@ -4,7 +4,7 @@
 // hover tint, and its title carries `uiCardTitleHover` or `uiItemNameHover`.
 
 import type { ButtonHTMLAttributes } from "react";
-import { uiPickerPressFeedback } from "../styles/buttonStyles";
+import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 
 type CardOverlayButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -31,7 +31,9 @@ export function CardOverlayButton({
       aria-expanded={expanded}
       aria-busy={pending || undefined}
       disabled={disabled || pending}
-      className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500 ${uiPickerPressFeedback()} ${pending ? "cursor-wait" : ""}`.trim()}
+      className={`absolute inset-0 w-full rounded focus-visible:ring-inset ${uiFocusRing} ${uiPressFeedback(
+        !disabled && !pending
+      )} ${pending ? "cursor-wait" : uiDisabledControl}`.trim()}
       {...rest}
     />
   );

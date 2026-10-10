@@ -34,6 +34,7 @@ import {
   uiCellLabel,
   uiCellValueSm,
   uiInfoModalWrapper,
+  uiInactivePreview,
   uiTextDescription,
 } from "../../ui/styles/editableStyles";
 import {
@@ -539,7 +540,7 @@ export function CharacteristicsTab({
           >
             <div
               aria-hidden="true"
-              className="pointer-events-none opacity-50"
+              className={uiInactivePreview}
               style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
             >
               <StatBlock
@@ -572,7 +573,7 @@ export function CharacteristicsTab({
             </div>
             <div
               aria-hidden="true"
-              className="pointer-events-none opacity-50"
+              className={uiInactivePreview}
               style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0 }}
             >
               <StatBlock

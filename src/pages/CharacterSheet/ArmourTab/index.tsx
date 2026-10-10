@@ -48,6 +48,7 @@ import {
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import { colourTextPrimary } from "../../../ui/styles/colourTokens";
+import { uiHoverSurface } from "../../../ui/styles/buttonStyles";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -615,7 +616,7 @@ export function ArmourTab({
                   const misc = bionic + traitArmourBonus;
                   const total = ap + toughnessBonus + misc;
                   return (
-                    <tr key={loc} className="hover:bg-slate-800/40 transition">
+                    <tr key={loc} className={`${uiHoverSurface} transition`}>
                       <td className={`py-2 pr-4 ${colourTextPrimary}`}>
                         {ARMOUR_LOCATION_LABELS[loc]}
                       </td>

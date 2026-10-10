@@ -43,6 +43,12 @@ import {
 } from "../../ui/styles/colourTokens";
 import { ExoticCustomWeaponButton } from "./ExoticCustomWeaponButton";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
+import {
+  uiDisabledControl,
+  uiFocusRing,
+  uiHoverSurface,
+  uiPressFeedback,
+} from "../../ui/styles/buttonStyles";
 
 const EXOTIC_WEAPON_TRAINING_OPTIONS = Array.from(
   new Set(
@@ -321,12 +327,12 @@ export function WeaponTrainingTab({
                       ? weaponTrainingPulseVars(WEAPON_TRAINING_GROUP_RGB[group.label])
                       : undefined
                   }
-                  className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${
-                    pulsing ? "animate-psy-pulse" : ""
-                  } ${
+                  className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${uiPressFeedback(
+                    clickable
+                  )} ${uiFocusRing} ${uiDisabledControl} ${pulsing ? "animate-psy-pulse" : ""} ${
                     active
-                      ? `${colourGlowActive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`
-                      : `${colourGlowInactive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? "hover:bg-slate-800" : "cursor-not-allowed"}`
+                      ? `${colourGlowActive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? uiHoverSurface : ""}`
+                      : `${colourGlowInactive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? uiHoverSurface : ""}`
                   }`}
                 >
                   {display}
@@ -365,8 +371,8 @@ export function WeaponTrainingTab({
               onClick={() => setPendingRemoveExotic({ index, name: weapon.name })}
               aria-label={`Remove ${weapon.name}`}
               className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${
-                editable ? "hover:bg-slate-800" : "cursor-not-allowed"
-              }`}
+                editable ? uiHoverSurface : ""
+              } ${uiPressFeedback(editable)} ${uiFocusRing} ${uiDisabledControl}`}
             >
               {weapon.name}
             </button>
@@ -376,7 +382,7 @@ export function WeaponTrainingTab({
               key={`granted:${index}:${weapon}`}
               type="button"
               disabled
-              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourGlowActive.fuchsia} cursor-not-allowed`}
+              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${uiFocusRing} ${uiDisabledControl}`}
             >
               {weapon}
             </button>
@@ -391,8 +397,8 @@ export function WeaponTrainingTab({
               aria-label={`${entry.name}, ${entry.purchase.cost} XP`}
               style={weaponTrainingPulseVars(EXOTIC_WEAPON_TRAINING_RGB)}
               className={`animate-psy-pulse px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${colourGlowInactive.fuchsia} ${
-                editable ? "hover:bg-slate-800" : "cursor-not-allowed"
-              }`}
+                editable ? uiHoverSurface : ""
+              } ${uiPressFeedback(editable)} ${uiFocusRing} ${uiDisabledControl}`}
             >
               {entry.name}
             </button>

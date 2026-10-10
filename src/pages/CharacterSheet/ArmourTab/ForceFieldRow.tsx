@@ -7,6 +7,7 @@ import {
   uiTextPlaceholder,
   uiItemName,
   uiInfoModalWrapper,
+  uiInactiveItem,
   uiRuleName,
   uiTextDescription,
 } from "../../../ui/styles/editableStyles";
@@ -70,7 +71,7 @@ export function ForceFieldRow({
   const craftsmanship = piece.craftsmanship ?? "Common";
 
   return (
-    <div className={[uiSection, "flex items-start gap-3", !active ? "opacity-60" : ""].join(" ")}>
+    <div className={[uiSection, "flex items-start gap-3", !active ? uiInactiveItem : ""].join(" ")}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} truncate`}>{piece.name}</span>
