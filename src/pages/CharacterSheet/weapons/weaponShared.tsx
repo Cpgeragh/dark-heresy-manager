@@ -10,11 +10,12 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
-import { ArrowRight } from "../../../ui/icons/PickerArrows";
+import { PickerField } from "../../../ui/pickers/PickerField";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { CloseIcon } from "../../../ui/buttons/CloseButton";
 import {
+  editableInputColour,
   uiCell,
   uiTextBody,
   uiTextLabel,
@@ -23,7 +24,6 @@ import {
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
-import { colourEmerald, colourMeta } from "../../../ui/styles/colourTokens";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 
@@ -52,16 +52,14 @@ export function WeaponQualitySelector({
     <div className="col-span-2 space-y-2">
       <label className={uiFormLabel}>Qualities</label>
       <div className="flex gap-2">
-        <button
-          type="button"
+        <PickerField
+          id="weapon-quality-picker"
+          ariaLabel="Qualities"
+          className="w-full"
+          value={pendingQuality ?? ""}
+          placeholder="Choose quality…"
           onClick={onOpenPicker}
-          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between"
-        >
-          <span className={pendingQuality ? "" : "text-slate-500"}>
-            {pendingQuality ?? "Choose quality…"}
-          </span>
-          <ArrowRight />
-        </button>
+        />
         {needsParameter && (
           <input
             type="text"
@@ -72,7 +70,7 @@ export function WeaponQualitySelector({
             }
             aria-label={`${pendingQuality} value`}
             placeholder="Value"
-            className="w-20 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
+            className={`w-20 rounded border px-2 py-1 text-sm lg:text-base ${editableInputColour(true)}`}
             autoComplete="off"
           />
         )}
@@ -83,7 +81,7 @@ export function WeaponQualitySelector({
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((quality) => (
-            <Chip key={quality} className="border-slate-600 bg-slate-800/80 text-slate-200">
+            <Chip key={quality} colour="slate">
               {quality}
               <button
                 type="button"
@@ -128,7 +126,7 @@ export function EquipToggle({
 }) {
   if (!editable) {
     return equipped ? (
-      <Chip size="sm" className={`${colourEmerald} uppercase tracking-wide shrink-0`}>
+      <Chip size="sm" colour="emerald" className="uppercase tracking-wide shrink-0">
         Equipped
       </Chip>
     ) : null;
@@ -202,7 +200,7 @@ export function UpgradeCard({
         )}
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
-        <Chip size="sm" className={colourMeta}>
+        <Chip size="sm" colour="slate">
           <span className="leading-none">{"\u2696"}</span>
           <span className="leading-none">{displayedWeightModifier}</span>
         </Chip>
@@ -267,7 +265,7 @@ export function UpgradePicker({
           <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
             <PickerRowName name={upgrade.name} />
             <PickerRowChips>
-              <Chip className={colourMeta}>
+              <Chip colour="slate">
                 <span className="leading-none">{"\u2696"}</span>
                 <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
               </Chip>

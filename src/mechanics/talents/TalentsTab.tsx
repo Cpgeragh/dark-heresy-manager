@@ -190,7 +190,7 @@ const TalentCards = memo(function TalentCards({
             confirmDeletion
             statusAfterSource
             statusChip={statusChip?.label}
-            statusChipClassName={statusChip?.className}
+            statusChipColour={statusChip?.colour}
           />
         );
       }
@@ -236,7 +236,7 @@ const TalentCards = memo(function TalentCards({
             onRemove={onRemove}
             statusAfterSource
             statusChip={statusChip?.label}
-            statusChipClassName={statusChip?.className}
+            statusChipColour={statusChip?.colour}
           />
         );
       }
@@ -249,7 +249,7 @@ const TalentCards = memo(function TalentCards({
           onRemove={onRemove}
           confirmDeletion
           statusChip={statusChip?.label}
-          statusChipClassName={statusChip?.className}
+          statusChipColour={statusChip?.colour}
           statusAfterSource
           removable={
             !entry.grantedByTalentEntryUid &&

@@ -3,11 +3,11 @@
 import { InfoModal } from "../../../components/InfoModal";
 import { useState } from "react";
 import { Chip } from "../../../ui/chips/Chip";
-import { sourceColour } from "../../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours, psychicSelectionSourceColours } from "./psychicStyles";
 import {
-  uiCardTitle,
+  uiCardTitleHover,
   uiInfoModalWrapper,
   uiSectionShell,
   uiTextBody,
@@ -20,7 +20,8 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
@@ -32,7 +33,6 @@ interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   onLinkPurchase?: () => void;
   onLinkPsyRatingGrant?: () => void;
   talentSourceName?: string;
-  pickerMode?: boolean;
 }
 
 /** Shared stat row: used in both the card and the InfoModal header. */
@@ -50,22 +50,22 @@ function PowerIdentityChips({
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
       {sourceLabel && (
-        <Chip className={`bg-slate-800/40 font-code ${sourceColour(sourceLabel)}`}>
+        <Chip colour={sourceChipColour(sourceLabel)} className="font-code">
           {sourceLabel}
         </Chip>
       )}
       {power.discipline && (
-        <Chip className={disciplineColours[power.discipline] ?? disciplineColours.default}>
+        <Chip colour={disciplineColours[power.discipline] ?? disciplineColours.default}>
           {power.discipline}
         </Chip>
       )}
       {power.talentEntryUid && (
-        <Chip className={psychicSelectionSourceColours.talent}>
+        <Chip colour={psychicSelectionSourceColours.talent}>
           {talentSourceName ?? "Talent purchase"}
         </Chip>
       )}
       {power.psyRatingTalentEntryUid && (
-        <Chip className={psychicSelectionSourceColours.psyRating}>
+        <Chip colour={psychicSelectionSourceColours.psyRating}>
           {talentSourceName ?? "Psy Rating grant"}
         </Chip>
       )}
@@ -104,7 +104,6 @@ export function PowerCard({
   onLinkPurchase,
   onLinkPsyRatingGrant,
   talentSourceName,
-  pickerMode = false,
 }: PowerCardProps) {
   recordComponentRender("PowerCard");
   const [expanded, setExpanded] = useState(false);
@@ -122,22 +121,22 @@ export function PowerCard({
 
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
-      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4 text-sm lg:text-base group">
-        <button
-          type="button"
-          onClick={onSelect ?? (() => setExpanded((value) => !value))}
-          aria-expanded={onSelect ? undefined : expanded}
-          aria-label={
+      <div
+        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4 text-sm lg:text-base`}
+      >
+        <CardOverlayButton
+          label={
             onSelect
               ? (selectLabel ?? `Select ${power.name || "psychic power"}`)
               : `${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`
           }
-          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
+          expanded={onSelect ? undefined : expanded}
+          onClick={onSelect ?? (() => setExpanded((value) => !value))}
         />
 
         <div className="relative pointer-events-none min-w-0 flex-1 space-y-1.5">
           <div className="flex items-center gap-1.5">
-            <p className={`${uiCardTitle} ${onSelect ? "group-hover:text-white" : ""}`}>
+            <p className={uiCardTitleHover}>
               {power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
             </p>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>

@@ -8,10 +8,10 @@ import {
 } from "../../../data/reference/psychicReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { Chip } from "../../../ui/chips/Chip";
-import { ArrowLeft, ArrowRight } from "../../../ui/icons/PickerArrows";
+import { ArrowLeft } from "../../../ui/icons/PickerArrows";
+import { FilterButton } from "../../../ui/pickers/FilterButton";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { PickerCustomAction, PickerList, PickerModal } from "../../../ui/pickers/PickerModal";
-import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 import { PowerCard } from "./PowerCard";
 import { normalisePowerName } from "./psychicPowerHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -154,25 +154,15 @@ export function PowerPicker({
       filterRow={
         <div className="flex flex-wrap gap-2 w-full">
           {!minorOnly && !requiredDiscipline && (
-            <button
-              type="button"
-              onClick={() => setShowDisciplineFilterPicker(true)}
-              className={`flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
-            >
-              <span>{disciplineFilter ?? "All Disciplines"}</span>
-              <ArrowRight />
-            </button>
+            <FilterButton className="flex-1" onClick={() => setShowDisciplineFilterPicker(true)}>
+              {disciplineFilter ?? "All Disciplines"}
+            </FilterButton>
           )}
-          <button
-            type="button"
-            onClick={() => setShowSourceFilterPicker(true)}
-            className={`flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
-          >
-            <span>{sourceFilter ?? "All Sources"}</span>
-            <ArrowRight />
-          </button>
+          <FilterButton className="flex-1" onClick={() => setShowSourceFilterPicker(true)}>
+            {sourceFilter ?? "All Sources"}
+          </FilterButton>
           {selectionLocked && (
-            <Chip className="border-amber-500/70 bg-amber-950/30 text-amber-300">
+            <Chip colour="amber">
               All selections used
             </Chip>
           )}
@@ -193,7 +183,6 @@ export function PowerPicker({
               key={`custom-${entry.item.id}`}
               power={customPowerPreview(entry.item)}
               editable={false}
-              pickerMode
               onRemove={() => undefined}
               onSelect={
                 editable && !selectionLocked ? () => onSelectCustomItem(entry.item) : undefined
@@ -205,7 +194,6 @@ export function PowerPicker({
               key={`reference-${entry.ref.id}`}
               power={referencePowerPreview(entry.ref)}
               editable={false}
-              pickerMode
               onRemove={() => undefined}
               onSelect={editable && !selectionLocked ? () => onSelect(entry.ref) : undefined}
               selectLabel={`Select ${entry.ref.name}`}

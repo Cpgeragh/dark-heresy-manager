@@ -13,6 +13,7 @@ import {
   effectiveMeleeStats,
   getCompatibleUpgrades,
   weaponClassChip,
+  weaponTypeChip,
   ammoFamilyChip,
   compatibleAmmoIdsForAmmoType,
   rangedCraftsmanshipDescription,
@@ -50,7 +51,6 @@ describe("normaliseName", () => {
 });
 import { WEAPON_UPGRADE_REFERENCE } from "../../src/data/reference/weaponUpgradeReference";
 import { AMMO_REFERENCE } from "../../src/data/reference/ammoReference";
-import { colourOrange, colourAmberFaint } from "../../src/ui/styles/colourTokens";
 import type { RangedWeapon, MeleeWeapon } from "../../src/types/Character";
 
 function upgrade(id: string) {
@@ -509,7 +509,30 @@ describe("weaponClassChip", () => {
   it("falls back to a generic style for an unrecognised class", () => {
     const chip = weaponClassChip("Melee");
     expect(chip?.label).toBe("Melee");
-    expect(chip?.active).toContain("slate");
+    expect(chip?.colour).toBe("slate");
+  });
+});
+
+describe("weapon chip colours", () => {
+  it("uses one colour for Las across weapon type and ammo family", () => {
+    expect(weaponTypeChip("Las")?.colour).toBe("red");
+    expect(ammoFamilyChip("Las")?.colour).toBe("red");
+  });
+
+  it("uses one colour for Launcher across weapon type and ammo family", () => {
+    expect(weaponTypeChip("Launcher")?.colour).toBe("yellow");
+    expect(ammoFamilyChip("Launcher")?.colour).toBe("yellow");
+  });
+
+  it("uses one colour for SP weapons and Solid Projectile ammo", () => {
+    expect(weaponTypeChip("SP")?.colour).toBe("teal");
+    expect(ammoFamilyChip("Solid Projectile")?.colour).toBe("teal");
+  });
+
+  it("uses one colour for Exotic across weapon class, weapon type and ammo family", () => {
+    expect(weaponClassChip("Exotic")?.colour).toBe("fuchsia");
+    expect(weaponTypeChip("Exotic")?.colour).toBe("fuchsia");
+    expect(ammoFamilyChip("Exotic")?.colour).toBe("fuchsia");
   });
 });
 
@@ -680,19 +703,19 @@ describe("meleeClassChips", () => {
   });
 
   it("returns just a Melee chip for a plain melee weapon", () => {
-    expect(meleeClassChips("Melee")).toEqual([{ label: "Melee", className: colourOrange }]);
+    expect(meleeClassChips("Melee")).toEqual([{ label: "Melee", colour: "orange" }]);
   });
 
   it("adds a Thrown chip when the class mentions Thrown", () => {
     const chips = meleeClassChips("Melee / Thrown");
     expect(chips).toEqual([
-      { label: "Melee", className: colourOrange },
-      { label: "Thrown", className: colourAmberFaint },
+      { label: "Melee", colour: "orange" },
+      { label: "Thrown", colour: "amber" },
     ]);
   });
 
   it("is case-insensitive", () => {
-    expect(meleeClassChips("MELEE")).toEqual([{ label: "Melee", className: colourOrange }]);
+    expect(meleeClassChips("MELEE")).toEqual([{ label: "Melee", colour: "orange" }]);
   });
 });
 

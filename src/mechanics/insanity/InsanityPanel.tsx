@@ -16,7 +16,7 @@ import { getTalentInsanityModifierSources } from "../talents/talentEffects";
 import { getTraitInsanityModifierSources } from "../traits/traitEffects";
 import { Chip } from "../../ui/chips/Chip";
 import { colourActiveRose, colourActiveSky } from "../../ui/styles/colourTokens";
-import { uiFormLabel, uiInfoModalWrapper, uiTextLabel } from "../../ui/styles/editableStyles";
+import { uiFormLabel, uiInfoModalWrapper, uiTextBody, uiTextLabel } from "../../ui/styles/editableStyles";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import { SegmentedTimeline } from "../../ui/SegmentedTimeline";
 import {
@@ -36,8 +36,8 @@ import {
 import {
   INSANITY_TIMELINE_SEGMENTS,
   INSANITY_TIMELINE_TOTAL_WIDTH,
-  insanityDegreeChipClass,
-  insanityDisorderLevelChipClass,
+  insanityDegreeChipColour,
+  insanityDisorderLevelChipColour,
   insanityDisorderLevelLabel,
   insanityStepperClass,
 } from "./insanityUi";
@@ -82,14 +82,14 @@ function InsanityStatusChips({ points }: { points: number }) {
       />
 
       <div className="flex justify-center items-center gap-1.5">
-        <Chip size="lg" className={insanityDegreeChipClass(entry)}>
+        <Chip size="lg" colour={insanityDegreeChipColour(entry)}>
           {entry.degree}
         </Chip>
         <span className={uiInfoModalWrapper}>
           <InfoModal
             title="Degree of Madness"
             content={
-              <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+              <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                 {INSANITY_RULE_TEXT.degree}
               </p>
             }
@@ -106,18 +106,18 @@ function InsanityStatusChips({ points }: { points: number }) {
           <div className="flex flex-col items-center space-y-1.5">
             <span className={uiTextLabel}>Status</span>
             <div className="flex flex-wrap justify-center gap-1.5">
-              <Chip size="sm" className={insanityDegreeChipClass(entry)}>
+              <Chip size="sm" colour={insanityDegreeChipColour(entry)}>
                 Trauma Modifier: {entry.traumaModifier}
               </Chip>
               <span className="inline-flex items-center gap-1">
-                <Chip size="sm" className={insanityDisorderLevelChipClass(entry)}>
+                <Chip size="sm" colour={insanityDisorderLevelChipColour(entry)}>
                   Disorder Level: {insanityDisorderLevelLabel(entry)}
                 </Chip>
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title="Gaining Disorders"
                     content={
-                      <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                         {INSANITY_RULE_TEXT.disorders}
                       </p>
                     }
@@ -130,7 +130,7 @@ function InsanityStatusChips({ points }: { points: number }) {
             <span className={uiTextLabel}>Thresholds</span>
             <div className="flex flex-col items-center gap-1">
               {next && (
-                <p className="text-xs lg:text-sm text-slate-300 text-center">
+                <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
                   <span className="font-code text-sm lg:text-base font-bold text-amber-400">
                     {next.min - safePoints}
                   </span>{" "}
@@ -139,7 +139,7 @@ function InsanityStatusChips({ points }: { points: number }) {
                     <InfoModal
                       title="Mental Trauma"
                       content={
-                        <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                        <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                           {INSANITY_RULE_TEXT.trauma}
                         </p>
                       }
@@ -148,7 +148,7 @@ function InsanityStatusChips({ points }: { points: number }) {
                 </p>
               )}
               {nextDegree && (
-                <p className="text-xs lg:text-sm text-slate-300 text-center">
+                <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
                   <span className="font-code text-sm lg:text-base font-bold text-amber-400">
                     {nextDegree.min - safePoints}
                   </span>{" "}
@@ -294,7 +294,7 @@ export function InsanityPanel({
                 <InfoModal
                   title="Insanity Point Adjustments"
                   content={
-                    <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                    <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                       {recordedSources.map((source, index) => (
                         <li key={index}>
                           {source.name} ({source.type}): +{source.amount}

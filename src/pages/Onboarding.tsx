@@ -15,6 +15,7 @@ import {
   uiCodeText,
   uiInfoModalWrapper,
   uiSectionHeader,
+  uiTextBody,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { TitleHeaderActionButton } from "../ui/buttons/TitleHeaderActionButton";
@@ -534,7 +535,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
         >
           <ModalHeader title="Cancel New Account Setup" onClose={closeCancelSetup} />
           <div className="space-y-4 p-4 lg:p-5">
-            <p className="text-sm text-slate-300 lg:text-base">
+            <p className={`text-sm ${uiTextBody} lg:text-base`}>
               Cancel new account setup? This recovery code will no longer work.
             </p>
             <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">

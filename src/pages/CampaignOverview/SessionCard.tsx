@@ -10,6 +10,7 @@ import {
 } from "../../services/sessionService";
 import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/buttons/Button";
+import { Chip } from "../../ui/chips/Chip";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
@@ -17,6 +18,8 @@ import {
   editableTextareaClass,
   uiFormLabelSecondary,
   uiSection,
+  uiTextBody,
+  uiTextError,
 } from "../../ui/styles/editableStyles";
 
 interface Character {
@@ -239,19 +242,13 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       <div className="flex items-center justify-between">
         <span className="font-semibold lg:text-lg">{dateStr}</span>
         <div className="flex items-center gap-2">
-          {session.xpAwarded > 0 && (
-            <span className="text-xs lg:text-sm px-2 lg:px-3 py-1 bg-red-500/20 text-red-500 rounded">
-              +{session.xpAwarded} XP
-            </span>
-          )}
+          {session.xpAwarded > 0 && <Chip colour="amber">+{session.xpAwarded} XP</Chip>}
           {isDM &&
             session.xpAwarded > 0 &&
             session.attendees.length > 0 &&
             session.xpApplied !== undefined &&
             (session.xpApplied === true ? (
-              <span className="text-xs lg:text-sm px-2 lg:px-3 py-1 bg-green-500/20 text-green-400 rounded">
-                XP Applied ✓
-              </span>
+              <Chip colour="green">XP Applied ✓</Chip>
             ) : (
               <Button
                 size="sm"
@@ -272,7 +269,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             (session.xpApplied === true ? (
               confirmingDelete ? (
                 <div className="flex flex-col items-start gap-1.5">
-                  <span className="text-xs lg:text-sm text-red-400">
+                  <span className={`text-xs lg:text-sm ${uiTextError}`}>
                     This session's XP was already applied. Deleting it won't remove that XP unless
                     checked below.
                   </span>
@@ -335,7 +332,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
         </p>
       )}
 
-      {session.summary && <p className="text-sm lg:text-base text-slate-300">{session.summary}</p>}
+      {session.summary && <p className={`text-sm lg:text-base ${uiTextBody}`}>{session.summary}</p>}
 
       {isDM && session.dmNotes && (
         <p className="text-xs lg:text-sm text-slate-500 border-t border-slate-700 pt-2">

@@ -22,7 +22,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
-import { sourceColour } from "../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import {
   getInsanityDisorderRef,
@@ -31,7 +31,7 @@ import {
   INSANITY_RULE_TEXT,
   INSANITY_SEVERITIES,
 } from "./insanityReference";
-import { disorderTypeChipClass, severityChipClass } from "./insanityUi";
+import { disorderTypeChipColour, severityChipColour } from "./insanityUi";
 
 function severityDescription(severity: InsanityDisorderSeverity): string {
   return INSANITY_SEVERITIES.find((entry) => entry.severity === severity)?.description ?? "";
@@ -59,18 +59,18 @@ function DisorderRow({
         <div className="min-w-0">
           <span className={uiItemName}>{disorder.name}</span>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={disorderTypeChipClass(disorder.type)}>
+            <Chip size="sm" colour={disorderTypeChipColour(disorder.type)}>
               {disorder.type}
             </Chip>
             <span className="inline-flex items-center gap-1">
-              <Chip size="sm" className={severityChipClass[disorder.severity]}>
+              <Chip size="sm" colour={severityChipColour[disorder.severity]}>
                 {disorder.severity}
               </Chip>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={disorder.severity}
                   content={
-                    <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                    <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                       {severityDescription(disorder.severity)}
                     </p>
                   }
@@ -78,10 +78,7 @@ function DisorderRow({
               </span>
             </span>
             {disorder.source && (
-              <Chip
-                size="sm"
-                className={`bg-slate-800/40 font-code ${sourceColour(disorder.source)}`}
-              >
+              <Chip size="sm" colour={sourceChipColour(disorder.source)} className="font-code">
                 {disorder.source}
               </Chip>
             )}
@@ -207,10 +204,7 @@ function TraumaRow({
             <div className="mt-1 flex flex-wrap gap-1.5">
               {roll && <RollChip>{roll}</RollChip>}
               {trauma.source && (
-                <Chip
-                  size="sm"
-                  className={`bg-slate-800/40 font-code ${sourceColour(trauma.source)}`}
-                >
+                <Chip size="sm" colour={sourceChipColour(trauma.source)} className="font-code">
                   {trauma.source}
                 </Chip>
               )}
@@ -222,7 +216,7 @@ function TraumaRow({
               <InfoModal
                 title={name}
                 content={
-                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">{effect}</p>
+                  <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>{effect}</p>
                 }
               />
             </span>
@@ -270,7 +264,7 @@ export function TraumaHeader({ editable, onAdd }: { editable: boolean; onAdd: ()
           <InfoModal
             title="Mental Trauma"
             content={
-              <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+              <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                 {INSANITY_RULE_TEXT.trauma}
               </p>
             }

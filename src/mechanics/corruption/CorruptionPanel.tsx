@@ -23,6 +23,7 @@ import {
   uiFormLabel,
   uiInfoModalWrapper,
   uiTextLabel,
+  uiTextBody,
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
@@ -48,7 +49,7 @@ import {
 import {
   CORRUPTION_TIMELINE_SEGMENTS,
   CORRUPTION_TIMELINE_TOTAL_WIDTH,
-  corruptionDegreeChipClass,
+  corruptionDegreeChipColour,
   corruptionMutationLevelLabel,
   corruptionStepperClass,
 } from "./corruptionUi";
@@ -100,14 +101,14 @@ function CorruptionStatusChips({ points }: { points: number }) {
       />
 
       <div className="flex justify-center items-center gap-1.5">
-        <Chip size="lg" className={corruptionDegreeChipClass(entry)}>
+        <Chip size="lg" colour={corruptionDegreeChipColour(entry)}>
           {entry.degree}
         </Chip>
         <span className={uiInfoModalWrapper}>
           <InfoModal
             title="Degree of Corruption"
             content={
-              <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+              <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                 {CORRUPTION_RULE_TEXT.degree}
               </p>
             }
@@ -124,18 +125,18 @@ function CorruptionStatusChips({ points }: { points: number }) {
           <div className="flex flex-col items-center space-y-1.5">
             <span className={uiTextLabel}>Status</span>
             <div className="flex flex-wrap justify-center gap-1.5">
-              <Chip size="sm" className={corruptionDegreeChipClass(entry)}>
+              <Chip size="sm" colour={corruptionDegreeChipColour(entry)}>
                 Malignancy Test Modifier: {entry.malignancyModifier}
               </Chip>
               <span className="inline-flex items-center gap-1">
-                <Chip size="sm" className={corruptionDegreeChipClass(entry)}>
+                <Chip size="sm" colour={corruptionDegreeChipColour(entry)}>
                   Mutation Level: {corruptionMutationLevelLabel(entry)}
                 </Chip>
                 <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title="Mutation"
                     content={
-                      <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                         {CORRUPTION_RULE_TEXT.mutation}
                       </p>
                     }
@@ -148,7 +149,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
             <span className={uiTextLabel}>Thresholds</span>
             <div className="flex flex-col items-center gap-1">
               {nextMalignancyTest !== undefined && (
-                <p className="text-xs lg:text-sm text-slate-300 text-center">
+                <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
                   <span className="font-code text-sm lg:text-base font-bold text-amber-400">
                     {nextMalignancyTest - safePoints}
                   </span>{" "}
@@ -157,7 +158,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
                     <InfoModal
                       title="The Malignancy Test"
                       content={
-                        <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                        <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                           {CORRUPTION_RULE_TEXT.malignancyTest}
                         </p>
                       }
@@ -166,7 +167,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
                 </p>
               )}
               {nextDegree && (
-                <p className="text-xs lg:text-sm text-slate-300 text-center">
+                <p className={`text-xs lg:text-sm ${uiTextBody} text-center`}>
                   <span className="font-code text-sm lg:text-base font-bold text-amber-400">
                     {nextDegree.min - safePoints}
                   </span>{" "}

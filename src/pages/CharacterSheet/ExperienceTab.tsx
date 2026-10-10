@@ -29,6 +29,7 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
+  uiTextError,
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
@@ -56,13 +57,11 @@ import {
   colourActiveSky,
   colourAmberPlain,
   colourCareerPathOutline,
-  colourEmerald,
   colourEmeraldPlain,
   colourNoticeRed,
-  colourRank,
   colourSkyPlain,
   colourTextPrimary,
-  colourValue,
+  type ChipColour,
 } from "../../ui/styles/colourTokens";
 import {
   applyAlternateRankEliteAdvanceGrants,
@@ -93,14 +92,14 @@ const ENTRY_KIND_LABELS: Record<RankCardEntryKind, string> = {
   "xp-spend": "XP Spend",
 };
 
-const ENTRY_KIND_CLASSES: Record<RankCardEntryKind, string> = {
-  characteristic: "border-sky-700/60 bg-sky-950/30 text-sky-300",
-  skill: "border-blue-700/60 bg-blue-950/30 text-blue-300",
-  talent: "border-amber-700/60 bg-amber-950/30 text-amber-300",
-  trait: "border-violet-700/60 bg-violet-950/30 text-violet-300",
-  "elite-advance": "border-fuchsia-700/60 bg-fuchsia-950/30 text-fuchsia-300",
-  "weapon-training": "border-emerald-700/60 bg-emerald-950/30 text-emerald-300",
-  "xp-spend": "border-red-700/60 bg-red-950/30 text-red-300",
+const ENTRY_KIND_COLOURS: Record<RankCardEntryKind, ChipColour> = {
+  characteristic: "sky",
+  skill: "blue",
+  talent: "amber",
+  trait: "violet",
+  "elite-advance": "fuchsia",
+  "weapon-training": "emerald",
+  "xp-spend": "red",
 };
 
 type CareerPurchaseKind = Extract<
@@ -228,7 +227,7 @@ function XpTransactionModal({
       />
       <div className="space-y-4 p-4 lg:p-5">
         {!isSpend && (
-          <p className="text-sm text-slate-300 lg:text-base">
+          <p className={`text-sm ${uiTextBody} lg:text-base`}>
             {isRemove
               ? "Correct excess awarded XP. This decreases Total XP without changing Spent XP."
               : "Award XP to the character. This increases Total XP without changing Spent XP."}
@@ -280,7 +279,7 @@ function XpTransactionModal({
         </div>
 
         {(isSpend || isRemove) && amountDraft !== "" && amount > availableForAction && (
-          <p className="text-sm text-red-400 lg:text-base" role="alert">
+          <p className={`text-sm ${uiTextError} lg:text-base`} role="alert">
             {isRemove
               ? `Only ${remaining} unspent XP can be removed.`
               : `Only ${availableForAction} XP is available for this cost.`}
@@ -785,7 +784,7 @@ function RankEntryList({
           <div className="min-w-0 space-y-1">
             <div className="text-sm text-slate-100 lg:text-base">{entry.name}</div>
             {showKind && (
-              <Chip size="sm" className={ENTRY_KIND_CLASSES[entry.kind]}>
+              <Chip size="sm" colour={ENTRY_KIND_COLOURS[entry.kind]}>
                 {ENTRY_KIND_LABELS[entry.kind]}
               </Chip>
             )}
@@ -1052,7 +1051,7 @@ export function ExperienceTab({
         <SectionHeader>XP History</SectionHeader>
         <div className={`${uiSection} space-y-2`}>
           {xpHistoryError ? (
-            <p className="text-sm text-red-300 lg:text-base">XP history could not be loaded.</p>
+            <p className={`text-sm ${uiTextError} lg:text-base`}>XP history could not be loaded.</p>
           ) : xpHistory.length === 0 ? (
             <p className={uiTextPlaceholder}>No XP adjustments have been recorded yet.</p>
           ) : (
@@ -1191,9 +1190,13 @@ export function ExperienceTab({
                             {card.name}
                           </h3>
                           <div className="mt-1 flex flex-wrap gap-1.5">
-                            <Chip className={`${colourRank} font-code`}>Rank {card.tier}</Chip>
-                            <Chip className={`${colourValue} font-code`}>{card.xpLevel} XP</Chip>
-                            {card.isCurrent && <Chip className={colourEmerald}>Current</Chip>}
+                            <Chip colour="fuchsia" className="font-code">
+                              Rank {card.tier}
+                            </Chip>
+                            <Chip colour="amber" className="font-code">
+                              {card.xpLevel} XP
+                            </Chip>
+                            {card.isCurrent && <Chip colour="emerald">Current</Chip>}
                           </div>
                         </div>
                         <div className="flex items-center justify-between gap-3 sm:justify-end">

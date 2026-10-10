@@ -28,17 +28,7 @@ import {
   INTEGRATED_RANGED_NAMES,
   INTEGRATED_MELEE_NAMES,
 } from "../../../data/reference/integratedWeapons";
-import {
-  colourAmberFaint,
-  colourCyan,
-  colourFuchsia,
-  colourLime,
-  colourOrange,
-  colourRose,
-  colourSky,
-  colourTealLight,
-  colourViolet,
-} from "../../../ui/styles/colourTokens";
+import type { ChipColour } from "../../../ui/styles/colourTokens";
 import type { WeaponType } from "../../../data/reference/weaponClassification";
 
 // ─── Integrated Weapon Classification ─────────────────────────────────────
@@ -493,113 +483,90 @@ export function calcEntryWeight(
   return entry.clips * clipWeight + (entry.rounds / clipSize) * clipWeight;
 }
 
-const WEAPON_CLASS_STYLES: Record<string, { active: string; inactive: string }> = {
-  Pistol: { active: colourSky, inactive: "border-sky-500/30 bg-sky-500/5 text-sky-400/50" },
-  Basic: { active: colourTealLight, inactive: "border-teal-500/30 bg-teal-500/5 text-teal-400/50" },
-  Heavy: {
-    active: colourViolet,
-    inactive: "border-violet-500/30 bg-violet-500/5 text-violet-400/50",
-  },
-  Thrown: {
-    active: colourAmberFaint,
-    inactive: "border-amber-500/30 bg-amber-500/5 text-amber-400/50",
-  },
-  Exotic: {
-    active: colourFuchsia,
-    inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50",
-  },
+const WEAPON_CLASS_COLOURS: Record<string, ChipColour> = {
+  Pistol: "sky",
+  Basic: "teal",
+  Heavy: "violet",
+  Thrown: "amber",
+  Exotic: "fuchsia",
 };
 
-const slateFallbackStyle = "border-slate-500/70 bg-slate-700/40 text-slate-300";
-
-export function weaponClassChip(
-  cls?: string
-): { label: string; active: string; inactive: string } | undefined {
+export function weaponClassChip(cls?: string): { label: string; colour: ChipColour } | undefined {
   if (!cls) return undefined;
   const n = cls.toLowerCase();
-  for (const [key, style] of Object.entries(WEAPON_CLASS_STYLES)) {
-    if (n.includes(key.toLowerCase())) return { label: key, ...style };
+  for (const [key, colour] of Object.entries(WEAPON_CLASS_COLOURS)) {
+    if (n.includes(key.toLowerCase())) return { label: key, colour };
   }
-  return {
-    label: cls,
-    active: slateFallbackStyle,
-    inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50",
-  };
+  return { label: cls, colour: "slate" };
 }
 
-const WEAPON_TYPE_STYLES: Record<WeaponType, string> = {
-  Bolt: colourAmberFaint,
-  Chain: colourOrange,
-  Exotic: colourFuchsia,
-  Flame: colourOrange,
-  Las: colourRose,
-  Launcher: colourLime,
-  Melta: colourViolet,
-  Plasma: colourSky,
-  Power: colourViolet,
-  Primitive: slateFallbackStyle,
-  Shock: colourCyan,
-  SP: colourTealLight,
+const WEAPON_TYPE_COLOURS: Record<WeaponType, ChipColour> = {
+  Bolt: "amber",
+  Chain: "orange",
+  Exotic: "fuchsia",
+  Flame: "orange",
+  Las: "red",
+  Launcher: "yellow",
+  Melta: "violet",
+  Plasma: "sky",
+  Power: "violet",
+  Primitive: "slate",
+  Shock: "cyan",
+  SP: "teal",
 };
 
 export function weaponTypeChip(
   type?: WeaponType
-): { label: string; className: string } | undefined {
-  return type ? { label: type, className: WEAPON_TYPE_STYLES[type] } : undefined;
+): { label: string; colour: ChipColour } | undefined {
+  return type ? { label: type, colour: WEAPON_TYPE_COLOURS[type] } : undefined;
 }
 
 export function ammoFamilyChip(
   ammoType?: string
-): { label: string; className: string } | undefined {
+): { label: string; colour: ChipColour } | undefined {
   if (!ammoType) return undefined;
   const normalized = ammoType.toLowerCase();
   if (normalized === "las" || normalized.includes("charge pack")) {
-    return { label: "Las", className: "border-red-500/60 bg-red-500/10 text-red-300" };
+    return { label: "Las", colour: "red" };
   }
   if (normalized === "bolt" || normalized.includes("bolt")) {
-    return { label: "Bolt", className: colourAmberFaint };
+    return { label: "Bolt", colour: "amber" };
   }
   if (normalized === "solid projectile" || normalized.includes("bullet")) {
-    return {
-      label: "Solid Projectile",
-      className: slateFallbackStyle,
-    };
+    return { label: "Solid Projectile", colour: "teal" };
   }
   if (normalized === "shell" || normalized.includes("shell") || normalized === "shot") {
-    return { label: "Shell", className: colourLime };
+    return { label: "Shell", colour: "lime" };
   }
   if (normalized === "flame" || normalized.includes("fuel")) {
-    return { label: "Flame", className: colourOrange };
+    return { label: "Flame", colour: "orange" };
   }
   if (normalized === "melta" || normalized.includes("melta")) {
-    return { label: "Melta", className: colourViolet };
+    return { label: "Melta", colour: "violet" };
   }
   if (normalized === "plasma" || normalized.includes("plasma")) {
-    return { label: "Plasma", className: colourSky };
+    return { label: "Plasma", colour: "sky" };
   }
   if (normalized === "launcher" || normalized.includes("grenade")) {
-    return {
-      label: "Launcher",
-      className: "border-yellow-500/60 bg-yellow-500/10 text-yellow-300",
-    };
+    return { label: "Launcher", colour: "yellow" };
   }
   if (
     normalized === "primitive" ||
     normalized.includes("arrow") ||
     normalized.includes("quarrel")
   ) {
-    return { label: "Primitive", className: "border-stone-500/70 bg-stone-700/30 text-stone-300" };
+    return { label: "Primitive", colour: "slate" };
   }
   if (normalized === "shuriken" || normalized.includes("shuriken")) {
-    return { label: "Shuriken", className: colourFuchsia };
+    return { label: "Shuriken", colour: "fuchsia" };
   }
   if (normalized === "power cell" || normalized.includes("power cell")) {
-    return { label: "Power Cell", className: colourCyan };
+    return { label: "Power Cell", colour: "cyan" };
   }
   if (normalized === "exotic" || normalized.includes("exotic")) {
-    return { label: "Exotic", className: colourTealLight };
+    return { label: "Exotic", colour: "fuchsia" };
   }
-  return { label: ammoType, className: slateFallbackStyle };
+  return { label: ammoType, colour: "slate" };
 }
 
 // ─── Custom Ammo Families ──────────────────────────────────────────────────
@@ -721,15 +688,15 @@ export function meleeDamageForCraftsmanship(
 
 // ─── Melee Class Chips ──────────────────────────────────────────────────────
 
-export function meleeClassChips(cls?: string): { label: string; className: string }[] {
+export function meleeClassChips(cls?: string): { label: string; colour: ChipColour }[] {
   if (!cls) return [];
   const normalized = cls.toLowerCase();
-  const chips: { label: string; className: string }[] = [];
+  const chips: { label: string; colour: ChipColour }[] = [];
   if (normalized.includes("melee")) {
-    chips.push({ label: "Melee", className: colourOrange });
+    chips.push({ label: "Melee", colour: "orange" });
   }
   if (normalized.includes("thrown")) {
-    chips.push({ label: "Thrown", className: colourAmberFaint });
+    chips.push({ label: "Thrown", colour: "amber" });
   }
   return chips;
 }

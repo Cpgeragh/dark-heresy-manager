@@ -3,6 +3,7 @@ import type { InsanityDisorderEntry, InsanityDisorderSeverity } from "../../type
 import type { CustomItemOrigin } from "../../constants/customItems";
 import { InfoModal } from "../../components/InfoModal";
 import { Button } from "../../ui/buttons/Button";
+import { ToggleButton } from "../../ui/buttons/ToggleButton";
 import { Chip } from "../../ui/chips/Chip";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
@@ -16,9 +17,10 @@ import {
 } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
-import { ArrowRight, ArrowLeft } from "../../ui/icons/PickerArrows";
+import { ArrowLeft } from "../../ui/icons/PickerArrows";
+import { FilterButton } from "../../ui/pickers/FilterButton";
+import { PickerField } from "../../ui/pickers/PickerField";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
-import { uiPickerPressFeedback } from "../../ui/styles/buttonStyles";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -32,7 +34,8 @@ import {
   INSANITY_SEVERITIES,
   type InsanityDisorderRef,
 } from "./insanityReference";
-import { disorderTypeChipClass, inactiveChipClass, severityChipClass } from "./insanityUi";
+import { chipColours } from "../../ui/styles/colourTokens";
+import { disorderTypeChipColour, severityChipColour } from "./insanityUi";
 import { createLocalId } from "../../utils/createLocalId";
 
 const customDisorderTypes = [
@@ -149,18 +152,14 @@ export function InsanityDisorderPicker({
         }}
       >
         <CustomFormSection title="Identity">
-          <div>
-            <RequiredFormLabel htmlFor="custom-disorder-type">Type</RequiredFormLabel>
-            <button
-              id="custom-disorder-type"
-              type="button"
-              onClick={() => setShowTypePicker(true)}
-              className={`mt-1 w-full rounded border border-slate-500 bg-slate-900 px-2 py-1.5 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
-            >
-              <span>{customType}</span>
-              <ArrowRight />
-            </button>
-          </div>
+          <PickerField
+            id="custom-disorder-type"
+            label="Type"
+            required
+            value={customType}
+            placeholder="Choose type"
+            onClick={() => setShowTypePicker(true)}
+          />
           <div>
             <RequiredFormLabel htmlFor="custom-disorder-name">Name</RequiredFormLabel>
             <input
@@ -196,9 +195,7 @@ export function InsanityDisorderPicker({
                   as="button"
                   type="button"
                   onClick={() => setSeverity(option)}
-                  className={
-                    activeCustomSeverity === option ? severityChipClass[option] : inactiveChipClass
-                  }
+                  colour={activeCustomSeverity === option ? severityChipColour[option] : "slate"}
                 >
                   {option}
                 </Chip>
@@ -259,19 +256,15 @@ export function InsanityDisorderPicker({
             </p>
             <div className="flex gap-2">
               {selected.severityOptions.map((option) => (
-                <button
+                <ToggleButton
                   key={option}
-                  type="button"
+                  selected={activeSeverity === option}
+                  selectedClassName={chipColours[severityChipColour[option]]}
+                  className="flex-1 py-1.5 lg:py-2 text-sm lg:text-base font-medium"
                   onClick={() => setSeverity(option)}
-                  className={[
-                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                    activeSeverity === option
-                      ? severityChipClass[option]
-                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                  ].join(" ")}
                 >
                   {option}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </div>
@@ -297,14 +290,9 @@ export function InsanityDisorderPicker({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       filterRow={
-        <button
-          type="button"
-          onClick={() => setShowTypeFilterPicker(true)}
-          className={`w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
-        >
-          <span>{typeFilter === "All" ? "All Disorder Types" : typeFilter}</span>
-          <ArrowRight />
-        </button>
+        <FilterButton className="w-full" onClick={() => setShowTypeFilterPicker(true)}>
+          {typeFilter === "All" ? "All Disorder Types" : typeFilter}
+        </FilterButton>
       }
       footer={
         editable && (
@@ -338,7 +326,7 @@ export function InsanityDisorderPicker({
           >
             <PickerRowName name={ref.name} />
             <PickerRowChips>
-              <Chip size="sm" className={disorderTypeChipClass(ref.type)}>
+              <Chip size="sm" colour={disorderTypeChipColour(ref.type)}>
                 {ref.type}
               </Chip>
             </PickerRowChips>

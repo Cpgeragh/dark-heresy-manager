@@ -5,9 +5,6 @@ interface AppHeaderShellProps {
   right?: ReactNode;
 }
 
-export const appHeaderIconButtonClass =
-  "flex h-8 w-8 items-center justify-center rounded-lg border border-slate-600 bg-slate-800 text-slate-300 transition hover:bg-slate-700";
-
 export function AppHeaderShell({ left, right }: AppHeaderShellProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur">

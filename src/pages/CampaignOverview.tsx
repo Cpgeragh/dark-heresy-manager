@@ -22,9 +22,14 @@ import { readCharacterImportFile } from "../firestore/firebaseValidation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { editableInputClass, uiSubheading, uiTextLabel } from "../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  uiSubheading,
+  uiTextBody,
+  uiTextLabel,
+  uiTextPlaceholder,
+} from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
-import { LoadingDots } from "../ui/LoadingDots";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -140,6 +145,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   const creatingCharacterRef = useRef(false);
   const [importingCharacter, setImportingCharacter] = useState(false);
   const importingCharacterRef = useRef(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
   const [repairingSummaries, setRepairingSummaries] = useState(false);
   const repairingSummariesRef = useRef(false);
   const [repairingSessionSummaries, setRepairingSessionSummaries] = useState(false);
@@ -246,55 +252,44 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     setKebabContent(
       <div className="space-y-2">
         <p className={uiSubheading}>Character Data</p>
-        <label
-          className={`block px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${importingCharacter ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={handleImport}
+          disabled={importingCharacter}
+        />
+        <Button
+          variant="neutral"
+          size="sm"
+          fullWidth
+          loading={importingCharacter}
+          loadingLabel="Importing"
+          onClick={() => importInputRef.current?.click()}
         >
-          {importingCharacter ? (
-            <span>
-              Importing
-              <LoadingDots />
-            </span>
-          ) : (
-            "Import JSON"
-          )}
-          <input
-            type="file"
-            accept=".json"
-            className="hidden"
-            onChange={handleImport}
-            disabled={importingCharacter}
-          />
-        </label>
-        <button
-          type="button"
+          Import JSON
+        </Button>
+        <Button
+          variant="neutral"
+          size="sm"
+          fullWidth
+          loading={repairingSummaries}
+          loadingLabel="Repairing"
           onClick={handleRepairSummaries}
-          disabled={repairingSummaries}
-          className={`block w-full text-left px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${repairingSummaries ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
         >
-          {repairingSummaries ? (
-            <span>
-              Repairing
-              <LoadingDots />
-            </span>
-          ) : (
-            "Repair Character Summaries"
-          )}
-        </button>
-        <button
-          type="button"
+          Repair Character Summaries
+        </Button>
+        <Button
+          variant="neutral"
+          size="sm"
+          fullWidth
+          loading={repairingSessionSummaries}
+          loadingLabel="Repairing"
           onClick={handleRepairSessionSummaries}
-          disabled={repairingSessionSummaries}
-          className={`block w-full text-left px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${repairingSessionSummaries ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
         >
-          {repairingSessionSummaries ? (
-            <span>
-              Repairing
-              <LoadingDots />
-            </span>
-          ) : (
-            "Repair Session Summaries"
-          )}
-        </button>
+          Repair Session Summaries
+        </Button>
       </div>
     );
     return () => clearKebabContent();
@@ -312,7 +307,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   ]);
 
   if (!campaignId) {
-    return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
+    return <div className={`${uiTextPlaceholder} text-center py-10`}>No campaign selected.</div>;
   }
 
   if (campaignError || charactersError || (campaign && customItemsError)) {
@@ -324,7 +319,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   }
 
   if (!campaign) {
-    return <div className="text-slate-300 text-center py-10">Campaign not found.</div>;
+    return <div className={`${uiTextPlaceholder} text-center py-10`}>Campaign not found.</div>;
   }
 
   const filteredCharacters = search.trim()
@@ -346,12 +341,12 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           {(campaign.gmName || campaign.inquisitorName) && (
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {campaign.gmName && (
-                <span className="text-sm lg:text-base text-slate-300">
+                <span className={`text-sm lg:text-base ${uiTextBody}`}>
                   <span className={uiTextLabel}>GM</span> {campaign.gmName}
                 </span>
               )}
               {campaign.inquisitorName && (
-                <span className="text-sm lg:text-base text-slate-300">
+                <span className={`text-sm lg:text-base ${uiTextBody}`}>
                   <span className={uiTextLabel}>Inquisitor</span> {campaign.inquisitorName}
                 </span>
               )}
@@ -409,7 +404,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
 
               <div className="space-y-3">
                 {filteredCharacters.length === 0 ? (
-                  <p className="text-slate-400 text-sm lg:text-base">
+                  <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
                     {search.trim() ? `No characters match "${search}".` : "No characters yet."}
                   </p>
                 ) : (
@@ -434,7 +429,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             <div>
               <SectionHeader className="mb-3">My Characters</SectionHeader>
               {characters.length === 0 ? (
-                <p className="text-slate-400 text-sm lg:text-base">
+                <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
                   You haven't claimed a character in this campaign yet.
                 </p>
               ) : (
@@ -454,7 +449,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               {partySummariesError ? (
                 <ErrorState>Unable to load the party roster. Please refresh the page.</ErrorState>
               ) : partyMembers.length === 0 ? (
-                <p className="text-slate-400 text-sm lg:text-base">No one else has joined yet.</p>
+                <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No one else has joined yet.</p>
               ) : (
                 <div className="space-y-3">
                   {partyMembers.map((s) => (
@@ -499,7 +494,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             {sessionsError ? (
               <ErrorState>Unable to load sessions. Please refresh the page.</ErrorState>
             ) : sessions.length === 0 ? (
-              <p className="text-slate-400 text-sm lg:text-base">No sessions recorded yet.</p>
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No sessions recorded yet.</p>
             ) : (
               <div className="space-y-3">
                 {sessions.map((session) => (

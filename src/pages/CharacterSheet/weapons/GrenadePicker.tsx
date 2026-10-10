@@ -19,12 +19,6 @@ import {
 } from "../../../ui/pickers/PickerRowParts";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
-import {
-  colourCyan,
-  colourOrange,
-  colourViolet,
-  colourTealLight,
-} from "../../../ui/styles/colourTokens";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -93,12 +87,12 @@ export function GrenadePicker({
                   <PickerRowChips>
                     <Chip
                       size="sm"
-                      className={
+                      colour={
                         data.type === "Mine"
-                          ? colourViolet
+                          ? "violet"
                           : data.type === "Missile"
-                            ? colourOrange
-                            : colourCyan
+                            ? "orange"
+                            : "cyan"
                       }
                     >
                       {data.type ?? "Grenade"}
@@ -106,10 +100,7 @@ export function GrenadePicker({
                     {(() => {
                       const c = weaponClassChip(data.class);
                       return c ? (
-                        <Chip
-                          size="sm"
-                          className={c.label === "Exotic" ? colourTealLight : c.active}
-                        >
+                        <Chip size="sm" colour={c.colour}>
                           {c.label}
                         </Chip>
                       ) : null;
@@ -177,12 +168,8 @@ export function GrenadePicker({
                 <PickerRowChips>
                   <Chip
                     size="sm"
-                    className={
-                      ref.type === "Mine"
-                        ? colourViolet
-                        : ref.type === "Missile"
-                          ? colourOrange
-                          : colourCyan
+                    colour={
+                      ref.type === "Mine" ? "violet" : ref.type === "Missile" ? "orange" : "cyan"
                     }
                   >
                     {ref.type ?? "Grenade"}
@@ -190,7 +177,7 @@ export function GrenadePicker({
                   {(() => {
                     const c = weaponClassChip(ref.class);
                     return c ? (
-                      <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>
+                      <Chip size="sm" colour={c.colour}>
                         {c.label}
                       </Chip>
                     ) : null;

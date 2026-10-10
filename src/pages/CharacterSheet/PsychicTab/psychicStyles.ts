@@ -3,35 +3,30 @@
 
 import type { CSSProperties } from "react";
 import {
+  chipColours,
   colourGlowActive,
   colourGlowInactive,
-  colourInactive,
-  colourViolet,
-  colourEmerald,
-  colourCyan,
-  colourOrange,
-  colourSky,
-  colourFuchsia,
+  type ChipColour,
 } from "../../../ui/styles/colourTokens";
 
-export const disciplineColours: Record<string, string> = {
-  Minor: colourViolet,
-  Biomancy: colourEmerald,
-  Divination: colourCyan,
-  Pyromancy: colourOrange,
-  Telekinetics: colourSky,
-  Telepathy: colourFuchsia,
-  default: colourInactive,
+export const disciplineColours: Record<string, ChipColour> = {
+  Minor: "violet",
+  Biomancy: "emerald",
+  Divination: "cyan",
+  Pyromancy: "orange",
+  Telekinetics: "sky",
+  Telepathy: "fuchsia",
+  default: "slate",
 };
 
 export const disciplineActiveColours: Record<string, string> = {
-  Minor: colourViolet,
+  Minor: chipColours.violet,
   Biomancy: colourGlowActive.emerald,
   Divination: colourGlowActive.cyan,
   Pyromancy: colourGlowActive.orange,
   Telekinetics: colourGlowActive.sky,
   Telepathy: colourGlowActive.fuchsia,
-  default: colourInactive,
+  default: chipColours.slate,
 };
 
 export const disciplineInactiveColours: Record<string, string> = {
@@ -40,13 +35,13 @@ export const disciplineInactiveColours: Record<string, string> = {
   Pyromancy: colourGlowInactive.orange,
   Telekinetics: colourGlowInactive.sky,
   Telepathy: colourGlowInactive.fuchsia,
-  default: colourInactive,
+  default: chipColours.slate,
 };
 
 export const psychicSelectionSourceColours = {
-  talent: "border-amber-500/50 bg-amber-500/10 text-amber-300",
-  psyRating: "border-indigo-500/50 bg-indigo-500/10 text-indigo-300",
-} as const;
+  talent: "amber",
+  psyRating: "indigo",
+} as const satisfies Record<string, ChipColour>;
 
 /** CSS custom properties for the Psy Rating pulse, scaled across supported ratings. */
 export function psyRatingPulseVars(psyRating: number): CSSProperties {

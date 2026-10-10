@@ -8,10 +8,9 @@ import {
   type SkillWithComputed,
 } from "./skillsConstants";
 import type { SkillTierAccess } from "shared-rules";
-import { charColour } from "../../../ui/styles/sourceStyles";
+import { characteristicChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { SkillRow } from "./SkillRow";
-import { colourPurple } from "../../../ui/styles/colourTokens";
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
@@ -53,13 +52,14 @@ export function SkillGroupRow({
               <Chip
                 key={characteristic}
                 size="sm"
-                className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
+                colour={characteristicChipColour(characteristic)}
+                className="font-code shrink-0"
               >
                 {CHAR_LABEL[characteristic]}
               </Chip>
             ))}
             {skills[0].advanced && (
-              <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
+              <Chip size="sm" colour="purple" className="shrink-0">
                 Advanced
               </Chip>
             )}

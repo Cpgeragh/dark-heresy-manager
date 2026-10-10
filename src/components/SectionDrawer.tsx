@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { TabId } from "../pages/CharacterSheet/types";
 import { CloseButton } from "../ui/buttons/CloseButton";
+import { IconButton } from "../ui/buttons/IconButton";
 import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
 
 // ================================================================
@@ -159,14 +160,12 @@ function SectionDrawerContent({
   return (
     <>
       {/* Trigger: hamburger only */}
-      <button
-        type="button"
+      <IconButton
+        label="Open section navigation"
         onClick={open}
-        aria-label="Open section navigation"
-        className="flex h-10 w-11 items-center justify-center rounded-lg border border-slate-500 bg-slate-800 text-base leading-none text-slate-200 transition hover:bg-slate-700"
-      >
-        ☰
-      </button>
+        className="h-10 w-10"
+        icon={<span aria-hidden="true">☰</span>}
+      />
 
       {/* Backdrop */}
       {isOpen && (

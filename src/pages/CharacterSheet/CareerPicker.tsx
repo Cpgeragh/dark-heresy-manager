@@ -7,11 +7,10 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
-import { sourceColour } from "../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 
 function InfoSection({ title, content }: { title: string; content: string }) {
   return (
@@ -37,7 +36,7 @@ export function CareerInfoContent({
     <div className="space-y-4">
       <blockquote className="border-l-2 border-red-700 pl-3">
         <p className={`${uiTextBody} leading-relaxed`}>“{career.quote}”</p>
-        <footer className={`mt-1 text-xs lg:text-sm ${uiTextMuted}`}>— {career.attribution}</footer>
+        <footer className={`mt-1 text-xs lg:text-sm ${uiTextBody}`}>— {career.attribution}</footer>
       </blockquote>
 
       <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{career.description}</p>
@@ -155,7 +154,7 @@ export function CareerPicker({
               }
             />
             <PickerRowChips>
-              <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
+              <Chip colour={sourceChipColour(career.source)} className="font-code">
                 {career.source}
               </Chip>
             </PickerRowChips>

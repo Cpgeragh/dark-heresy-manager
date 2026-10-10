@@ -5,7 +5,6 @@ import type { NoteEntry } from "../../types/Character";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { colourCyan } from "../../ui/styles/colourTokens";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
@@ -164,10 +163,12 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
                       className="min-w-0 text-left lg:flex-1"
                     >
                       <span className={uiTextLabel}>{entry.title}</span>
-                      <p className="mt-2 text-sm text-slate-300 leading-relaxed line-clamp-3 min-h-[4.3rem]">
+                      <p
+                        className={`mt-2 text-sm ${uiTextBody} leading-relaxed line-clamp-3 min-h-[4.3rem]`}
+                      >
                         {entry.text}
                       </p>
-                      <Chip size="sm" className={`mt-2 ${colourCyan}`}>
+                      <Chip size="sm" colour="cyan" className="mt-2">
                         {formatDate(entry.updatedAt)}
                       </Chip>
                     </button>

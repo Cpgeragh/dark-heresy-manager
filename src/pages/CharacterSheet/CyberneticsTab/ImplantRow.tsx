@@ -6,14 +6,14 @@ import { Chip } from "../../../ui/chips/Chip";
 import {
   uiSection,
   uiTextBody,
+  uiTextSubtle,
   uiTextLabel,
-  uiTextMuted,
   uiItemName,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
+import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import {
@@ -102,7 +102,7 @@ export function ImplantRow({
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
-            <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
+            <Chip colour="slate">
               {item.bodyLocation.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
             </Chip>
           )}
@@ -117,17 +117,15 @@ export function ImplantRow({
           />
         </div>
         {item.grantedByTalentName && (
-          <p className="mt-1 text-xs text-amber-300">
+          <p className={`mt-1 text-xs ${uiTextSubtle}`}>
             {item.grantedByTalentName} ({item.grantedByType}): Granted
           </p>
         )}
         {linkedArmName && linkedWeaponName && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className={uiTextLabel}>Linked</span>
-            <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">{linkedArmName}</Chip>
-            <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">
-              {linkedWeaponName}
-            </Chip>
+            <Chip colour="pink">{linkedArmName}</Chip>
+            <Chip colour="pink">{linkedWeaponName}</Chip>
           </div>
         )}
         {item.craftsmanship && (
@@ -143,8 +141,8 @@ export function ImplantRow({
                   : displayedCraftsmanship
               }
               disabled={!canChangeQuality}
+              colour={CRAFTSMANSHIP_COLOUR[displayedCraftsmanship]}
               className={[
-                CRAFTSMANSHIP_STYLE[displayedCraftsmanship],
                 canChangeQuality ? "cursor-pointer hover:opacity-80" : "cursor-default",
                 "transition shrink-0",
               ].join(" ")}

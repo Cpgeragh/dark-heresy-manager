@@ -16,11 +16,10 @@ import {
   careerNeedsStartingChoice,
 } from "../../../mechanics/career/careerStartingBenefits";
 import { Chip } from "../../../ui/chips/Chip";
-import { colourMeta, colourRank } from "../../../ui/styles/colourTokens";
 import { RollChip } from "../../../ui/chips/RollChip";
-import { sourceColour } from "../../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
-import { uiInfoModalWrapper, uiItemName } from "../../../ui/styles/editableStyles";
+import { uiInfoModalWrapper, uiItemName, uiTextBody } from "../../../ui/styles/editableStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { CareerInfoContent, CareerPicker, RankInfoContent } from "../CareerPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "../HomeworldPicker";
@@ -274,9 +273,7 @@ export function BackgroundSetupFields({
                 <span className={`${uiItemName} truncate`}>{selectedHomeworld.name}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <RollChip>{selectedHomeworld.roll}</RollChip>
-                  <Chip
-                    className={`bg-slate-800/40 font-code ${sourceColour(selectedHomeworld.source)}`}
-                  >
+                  <Chip colour={sourceChipColour(selectedHomeworld.source)} className="font-code">
                     {selectedHomeworld.source}
                   </Chip>
                 </div>
@@ -309,9 +306,7 @@ export function BackgroundSetupFields({
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={`${uiItemName} truncate`}>{selectedCareer.name}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip
-                    className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}
-                  >
+                  <Chip colour={sourceChipColour(selectedCareer.source)} className="font-code">
                     {selectedCareer.source}
                   </Chip>
                 </div>
@@ -345,9 +340,7 @@ export function BackgroundSetupFields({
                 <span className={`${uiItemName} truncate`}>{sanctioning.resultName}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
                   {sanctioningRef && <RollChip>{sanctioningRef.roll}</RollChip>}
-                  <Chip
-                    className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}
-                  >
+                  <Chip colour={sourceChipColour(selectedCareer.source)} className="font-code">
                     {selectedCareer.source}
                   </Chip>
                 </div>
@@ -376,17 +369,15 @@ export function BackgroundSetupFields({
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={`${uiItemName} truncate`}>{selectedRank.name}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip className={colourRank}>Rank {selectedRank.tier}</Chip>
-                  <Chip className={colourMeta}>{selectedRank.xpLevel} XP</Chip>
+                  <Chip colour="fuchsia">Rank {selectedRank.tier}</Chip>
+                  <Chip colour="slate">{selectedRank.xpLevel} XP</Chip>
                   {selectedRank.paths?.length && (
-                    <Chip className={colourMeta}>
+                    <Chip colour="slate">
                       {selectedRank.paths.length > 1 ? "Paths" : "Path"}:{" "}
                       {selectedRank.paths.join(" / ")}
                     </Chip>
                   )}
-                  <Chip
-                    className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}
-                  >
+                  <Chip colour={sourceChipColour(selectedCareer.source)} className="font-code">
                     {selectedCareer.source}
                   </Chip>
                 </div>
@@ -420,12 +411,11 @@ export function BackgroundSetupFields({
                   {selectedAdvanceScheme?.name ?? selectedRank.name}
                 </span>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip className={colourRank}>Rank 1</Chip>
+                  <Chip colour="fuchsia">Rank 1</Chip>
                   {selectedAdvanceSchemeSource && (
                     <Chip
-                      className={`bg-slate-800/40 font-code ${sourceColour(
-                        selectedAdvanceSchemeSource
-                      )}`}
+                      colour={sourceChipColour(selectedAdvanceSchemeSource)}
+                      className="font-code"
                     >
                       {selectedAdvanceSchemeSource}
                     </Chip>
@@ -499,7 +489,7 @@ export function BackgroundSetupFields({
           hideSearch
         >
           <PickerList>
-            <p className="px-3 py-2 text-sm text-slate-300 lg:text-base">
+            <p className={`px-3 py-2 text-sm ${uiTextBody} lg:text-base`}>
               Roll 1d5 and select the result.
             </p>
             {[1, 2, 3, 4, 5].map((value) => (

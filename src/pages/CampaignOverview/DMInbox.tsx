@@ -10,7 +10,7 @@ import { useToast } from "../../components/Toast";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
-import { uiSection, uiSectionShell } from "../../ui/styles/editableStyles";
+import { uiSection, uiSectionShell, uiTextPlaceholder } from "../../ui/styles/editableStyles";
 import { useRouteLoading } from "../../context/useRouteReady";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import type { CharacterListItem } from "../../types/Firestore";
@@ -136,7 +136,7 @@ export function DMInbox({
   if (loading) return null;
 
   if (threads.length === 0) {
-    return <p className="text-slate-400 text-sm lg:text-base">No messages yet.</p>;
+    return <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No messages yet.</p>;
   }
 
   return (

@@ -16,7 +16,6 @@ import {
   uiItemName,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
 } from "../../../ui/styles/editableStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import type { AmmoTrackingMode } from "./weaponHelpers";
@@ -86,9 +85,9 @@ export function AmmoEntryRow({
           />
           <span className={`${uiItemName} truncate`}>{displayName}</span>
           {isLoaded && (
-            <span className="text-[10px] lg:text-xs text-green-500 uppercase tracking-wide shrink-0">
+            <Chip size="sm" colour="green" className="uppercase tracking-wide shrink-0">
               Loaded
-            </span>
+            </Chip>
           )}
         </div>
         {editable && (
@@ -101,7 +100,7 @@ export function AmmoEntryRow({
       {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
         <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
           {visibleClipSizeLabel && (
-            <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
+            <Chip size="sm" colour="slate">
               {visibleClipSizeLabel}
             </Chip>
           )}
@@ -114,7 +113,7 @@ export function AmmoEntryRow({
               bare
             />
           )}
-          <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
+          <Chip size="sm" colour="slate">
             ⚖ {formatWeightForDisplay(formatAmmoWeight(weightKg ?? 0))}
           </Chip>
         </div>

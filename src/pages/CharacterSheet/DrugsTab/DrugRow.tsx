@@ -7,7 +7,6 @@ import {
   uiSection,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiItemName,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
@@ -104,7 +103,7 @@ export function DrugRow({
           )}
         </div>
         {ref?.duration && (
-          <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>Duration: {ref.duration}</p>
+          <p className={`text-xs lg:text-sm ${uiTextBody} mt-0.5`}>Duration: {ref.duration}</p>
         )}
         <ItemMetaChips
           weight={item.weight ?? ref?.weight ?? "0 kg"}

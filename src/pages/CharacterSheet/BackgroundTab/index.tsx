@@ -27,9 +27,9 @@ import {
 } from "../../../data/reference/divinationData";
 import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../../data/reference/appearanceData";
 import { Chip } from "../../../ui/chips/Chip";
-import { colourActiveRose, colourActiveSky, colourMeta } from "../../../ui/styles/colourTokens";
+import { chipColours, colourActiveRose, colourActiveSky } from "../../../ui/styles/colourTokens";
 import { RollChip } from "../../../ui/chips/RollChip";
-import { sourceColour } from "../../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
 import {
@@ -418,7 +418,7 @@ export function BackgroundTab({
               .map((quirk) => (
                 <span
                   key={quirk}
-                  className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourMeta}`}
+                  className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${chipColours.slate}`}
                 >
                   {quirk}
                   {editable && (
@@ -483,9 +483,7 @@ export function BackgroundTab({
                 <span className={uiItemName}>{selectedDivination.result}</span>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <RollChip>{selectedDivination.roll}</RollChip>
-                  <Chip
-                    className={`bg-slate-800/40 font-code ${sourceColour(selectedDivination.source)}`}
-                  >
+                  <Chip colour={sourceChipColour(selectedDivination.source)} className="font-code">
                     {selectedDivination.source}
                   </Chip>
                 </div>

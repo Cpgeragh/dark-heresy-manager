@@ -4,7 +4,7 @@ import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
 import { validateRecoveryCode } from "../utils/validation";
-import { editableInputClass, uiSectionHeader } from "../ui/styles/editableStyles";
+import { editableInputClass, uiSectionHeader, uiTextBody } from "../ui/styles/editableStyles";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 interface IdentityRecoveryFormProps {
@@ -57,7 +57,7 @@ export function IdentityRecoveryForm({
         void flow.link(onLinked);
       }}
     >
-      {description && <p className="text-slate-300 text-sm lg:text-base">{description}</p>}
+      {description && <p className={`${uiTextBody} text-sm lg:text-base`}>{description}</p>}
 
       <RecoveryCodeInput
         value={flow.code}

@@ -3,7 +3,7 @@
 import React, { Component } from "react";
 import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
-import { uiSection } from "../ui/styles/editableStyles";
+import { uiSection, uiTextError } from "../ui/styles/editableStyles";
 
 interface Props {
   children: ReactNode;
@@ -82,20 +82,20 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
         {/* Error Icon */}
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center">
-            <span className="text-3xl text-red-400">⚠</span>
+            <span className={`text-3xl ${uiTextError}`}>⚠</span>
           </div>
         </div>
 
         {/* Error Message */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-slate-100">Something went wrong</h1>
-          <p className="text-slate-400">The application encountered an unexpected error.</p>
+          <p className={uiTextError}>The application encountered an unexpected error.</p>
         </div>
 
         {/* Error Details (Dev Only) */}
         {isDev && error && (
           <div className={`${uiSection} space-y-2`}>
-            <div className="text-xs font-mono text-red-400 font-semibold">{error.name}</div>
+            <div className={`text-xs font-mono ${uiTextError} font-semibold`}>{error.name}</div>
             <div className="text-xs font-mono text-slate-300">{error.message}</div>
             {error.stack && (
               <details className="mt-2">

@@ -3,6 +3,8 @@ import { TALENT_LIST, type CareerData } from "shared-rules";
 import { DEFAULT_SKILLS } from "../../data/reference/defaultSkills";
 import type { CareerStartingChoices } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
+import { ToggleButton } from "../../ui/buttons/ToggleButton";
+import { colourToggleSelectedSky } from "../../ui/styles/colourTokens";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { uiFormLabel } from "../../ui/styles/editableStyles";
 
@@ -63,19 +65,15 @@ export function CareerStartingChoiceModal({
               <label className={uiFormLabel}>Starting Skill</label>
               <div className="flex flex-wrap gap-2">
                 {grant.options.map((option, optionIndex) => (
-                  <button
-                    type="button"
+                  <ToggleButton
                     key={option.skillId}
-                    aria-pressed={skillChoices[index] === optionIndex}
+                    selected={skillChoices[index] === optionIndex}
+                    selectedClassName={colourToggleSelectedSky}
+                    className="flex-1 px-3 py-2 text-sm"
                     onClick={() => setSkillChoices((prev) => ({ ...prev, [index]: optionIndex }))}
-                    className={`flex-1 px-3 py-2 rounded border text-sm ${
-                      skillChoices[index] === optionIndex
-                        ? "border-sky-400 bg-sky-500/10 text-sky-300 font-semibold"
-                        : "border-slate-500 bg-slate-800 text-slate-100"
-                    }`}
                   >
                     {skillNameById.get(option.skillId) ?? option.skillId}
-                  </button>
+                  </ToggleButton>
                 ))}
               </div>
             </div>
@@ -85,19 +83,15 @@ export function CareerStartingChoiceModal({
               <label className={uiFormLabel}>Starting Talent</label>
               <div className="flex flex-wrap gap-2">
                 {grant.options.map((option, optionIndex) => (
-                  <button
-                    type="button"
+                  <ToggleButton
                     key={`${option.talentId}-${option.specialisation ?? ""}`}
-                    aria-pressed={talentChoices[index] === optionIndex}
+                    selected={talentChoices[index] === optionIndex}
+                    selectedClassName={colourToggleSelectedSky}
+                    className="flex-1 px-3 py-2 text-sm"
                     onClick={() => setTalentChoices((prev) => ({ ...prev, [index]: optionIndex }))}
-                    className={`flex-1 px-3 py-2 rounded border text-sm ${
-                      talentChoices[index] === optionIndex
-                        ? "border-sky-400 bg-sky-500/10 text-sky-300 font-semibold"
-                        : "border-slate-500 bg-slate-800 text-slate-100"
-                    }`}
                   >
                     {talentOptionLabel(option.talentId, option.specialisation)}
-                  </button>
+                  </ToggleButton>
                 ))}
               </div>
             </div>

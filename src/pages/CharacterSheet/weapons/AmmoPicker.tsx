@@ -4,7 +4,7 @@ import { Button } from "../../../ui/buttons/Button";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
-import { uiTextMuted } from "../../../ui/styles/editableStyles";
+import { editableInputColour, uiTextBody } from "../../../ui/styles/editableStyles";
 
 // ─── Ammo Picker ──────────────────────────────────────────────────────────────
 
@@ -51,14 +51,14 @@ export function AmmoPicker({
       footer={
         editable && showCustom ? (
           <div className="space-y-2">
-            <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Custom / unlisted ammo</p>
+            <p className={`text-xs lg:text-sm ${uiTextBody}`}>Custom / unlisted ammo</p>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="Ammo name…"
-                className="flex-1 text-sm lg:text-base bg-slate-800 border border-slate-600 rounded px-2 lg:px-3 py-1 lg:py-1.5 text-slate-100 focus:outline-none focus:border-indigo-500"
+                className={`flex-1 rounded border px-2 lg:px-3 py-1 lg:py-1.5 text-sm lg:text-base ${editableInputColour(true)}`}
                 autoComplete="off"
               />
               <Button

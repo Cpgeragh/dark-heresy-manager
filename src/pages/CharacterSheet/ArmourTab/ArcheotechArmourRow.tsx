@@ -10,8 +10,9 @@ import {
   uiTextPlaceholder,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
+import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { colourArcheotech, colourNoticeAmber, colourStacks } from "../../../ui/styles/colourTokens";
+import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -52,11 +53,13 @@ export function ArcheotechArmourRow({
         <div className="mt-1 flex flex-wrap gap-1.5">
           {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
           {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-          {item.stacks && <Chip className={colourStacks}>Stacks</Chip>}
+          {item.stacks && <Chip colour="sky">Stacks</Chip>}
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {highlightAsArcheotech && (
-            <Chip className={`${colourArcheotech} shrink-0`}>Archeotech</Chip>
+            <Chip colour="amber" className="shrink-0">
+              Archeotech
+            </Chip>
           )}
           <div className="flex items-center gap-1.5 mt-1">
             <span className={uiTextLabel}>Rules</span>
@@ -73,13 +76,9 @@ export function ArcheotechArmourRow({
       </div>
 
       {editable && onToggleEquip && (
-        <button
-          type="button"
-          onClick={onToggleEquip}
-          className="text-xs lg:text-sm px-2 lg:px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
-        >
+        <Button variant="neutral" size="sm" onClick={onToggleEquip}>
           {isEquipped ? "Stow" : "Wear"}
-        </button>
+        </Button>
       )}
 
       {editable && <RemoveButton onClick={onRemove} label="Remove" />}

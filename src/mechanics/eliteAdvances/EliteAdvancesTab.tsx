@@ -35,6 +35,7 @@ import { ViewButton } from "../../ui/buttons/ViewButton";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
+import { FilterButton } from "../../ui/pickers/FilterButton";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
 import {
@@ -45,7 +46,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
-import { sourceColour } from "../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
 import { EntryCard } from "../talents/TalentEntryCards";
 import { TalentPickerModal } from "../talents/TalentPickerModal";
@@ -306,13 +307,9 @@ function SpecialAdvancePicker({
       emptyMessage="No Special Elite Advances available."
       filterRow={
         !showAll && (
-          <button
-            type="button"
-            onClick={() => setShowAll(true)}
-            className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-left text-xs text-slate-200 lg:text-sm"
-          >
+          <FilterButton className="w-full" onClick={() => setShowAll(true)}>
             Show all
-          </button>
+          </FilterButton>
         )
       }
     >
@@ -336,10 +333,10 @@ function SpecialAdvancePicker({
                 }
               />
               <PickerRowChips>
-                <Chip className={`bg-slate-800/40 font-code ${sourceColour(advance.source)}`}>
+                <Chip colour={sourceChipColour(advance.source)} className="font-code">
                   {advance.source}
                 </Chip>
-                <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                <Chip colour="amber">
                   {advance.cost} XP
                 </Chip>
               </PickerRowChips>
@@ -562,13 +559,9 @@ function SkillAdvancePicker({
       emptyMessage="No Elite Advance Skills available."
       filterRow={
         !showAll && (
-          <button
-            type="button"
-            onClick={() => setShowAll(true)}
-            className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-left text-xs text-slate-200 lg:text-sm"
-          >
+          <FilterButton className="w-full" onClick={() => setShowAll(true)}>
             Show all
-          </button>
+          </FilterButton>
         )
       }
     >
@@ -612,12 +605,12 @@ function SkillAdvancePicker({
             >
               <PickerRowName name={skill.name} />
               <PickerRowChips>
-                <Chip className={`bg-slate-800/40 font-code ${sourceColour(skill.source)}`}>
+                <Chip colour={sourceChipColour(skill.source)} className="font-code">
                   {skill.source}
                 </Chip>
-                <Chip className="border-sky-500/60 bg-sky-950/30 text-sky-300">{level}</Chip>
+                <Chip colour="sky">{level}</Chip>
                 {option && (
-                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                  <Chip colour="amber">
                     {option.cost} XP
                   </Chip>
                 )}
@@ -710,13 +703,9 @@ function TalentAdvancePicker({
       isEmpty={filtered.length === 0}
       emptyMessage="No Elite Advance Talents available."
       filterRow={
-        <button
-          type="button"
-          onClick={() => setShowAll(true)}
-          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-left text-xs text-slate-200 lg:text-sm"
-        >
+        <FilterButton className="w-full" onClick={() => setShowAll(true)}>
           Show all
-        </button>
+        </FilterButton>
       }
     >
       <PickerList>
@@ -749,14 +738,11 @@ function TalentAdvancePicker({
               />
               <PickerRowChips>
                 {(Array.isArray(talent.source) ? talent.source : [talent.source]).map((source) => (
-                  <Chip
-                    key={source}
-                    className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
-                  >
+                  <Chip key={source} colour={sourceChipColour(source)} className="font-code">
                     {source}
                   </Chip>
                 ))}
-                <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                <Chip colour="amber">
                   {option.cost} XP
                 </Chip>
               </PickerRowChips>

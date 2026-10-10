@@ -27,7 +27,7 @@ import { ErrorState } from "../../../ui/ErrorState";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { uiItemName, uiSection, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 import { Chip } from "../../../ui/chips/Chip";
-import { sourceColour } from "../../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import { createDraftCustomItem, saveDraftCustomItem } from "../../../services/customItemService";
@@ -971,8 +971,8 @@ export function CyberneticsTab({
               <div key={name} className={uiSection}>
                 <div className={uiItemName}>{name}</div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <Chip className={`bg-slate-800/40 font-code ${sourceColour("CR")}`}>CR</Chip>
-                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                  <Chip colour={sourceChipColour("CR")} className="font-code">CR</Chip>
+                  <Chip colour="amber">
                     Granted by Mechanicus Implants
                   </Chip>
                 </div>

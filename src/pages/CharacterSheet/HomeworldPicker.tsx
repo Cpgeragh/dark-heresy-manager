@@ -9,12 +9,11 @@ import {
   uiInfoModalWrapper,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { RollChip } from "../../ui/chips/RollChip";
-import { sourceColour } from "../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 
 function InfoSection({ title, content }: { title: string; content: string }) {
   return (
@@ -49,7 +48,7 @@ export function HomeworldInfoContent({ homeworld }: { homeworld: HomeworldData }
                   </span>
                 )}
               </div>
-              <span className={`shrink-0 text-xs lg:text-sm ${uiTextMuted}`}>{skill.rule}</span>
+              <span className={`shrink-0 text-xs lg:text-sm ${uiTextBody}`}>{skill.rule}</span>
             </div>
           ))}
         </section>
@@ -128,7 +127,7 @@ export function HomeworldPicker({
             />
             <PickerRowChips>
               <RollChip>{homeworld.roll}</RollChip>
-              <Chip className={`bg-slate-800/40 font-code ${sourceColour(homeworld.source)}`}>
+              <Chip colour={sourceChipColour(homeworld.source)} className="font-code">
                 {homeworld.source}
               </Chip>
             </PickerRowChips>

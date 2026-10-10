@@ -6,6 +6,7 @@ import type {
 } from "../../../types/Character";
 import { Button } from "../../../ui/buttons/Button";
 import { ModalShell } from "../../../ui/modals/ModalShell";
+import { uiModalTitle } from "../../../ui/styles/editableStyles";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";
 
 interface CompleteBackgroundSetupModalProps {
@@ -49,7 +50,7 @@ export function CompleteBackgroundSetupModal({
       className="max-h-[calc(100dvh-2rem)] max-w-2xl overflow-y-auto"
     >
       <div className="border-b border-slate-700 px-4 py-4 text-center lg:px-6 lg:py-5">
-        <h2 className="font-cinzel text-base font-bold text-red-500 lg:text-lg">
+        <h2 className={`${uiModalTitle} text-base lg:text-lg`}>
           Complete Background
         </h2>
       </div>

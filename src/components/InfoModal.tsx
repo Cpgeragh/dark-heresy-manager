@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { CloseButton } from "../ui/buttons/CloseButton";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 import { ModalShell } from "../ui/modals/ModalShell";
+import { uiTextBody } from "../ui/styles/editableStyles";
 
 interface InfoModalProps {
   title: string;
@@ -84,7 +85,7 @@ export function InfoModal({ title, content, hideTitle = false, as = "button" }: 
               className="sticky top-0 bg-slate-900"
             />
           )}
-          <div className="px-4 lg:px-5 py-3 lg:py-4 text-sm lg:text-base text-slate-300 space-y-1.5 lg:space-y-2">
+          <div className={`px-4 lg:px-5 py-3 lg:py-4 text-sm lg:text-base ${uiTextBody} space-y-1.5 lg:space-y-2`}>
             {hideTitle && (
               <CloseButton onClick={() => setOpen(false)} className="float-right ml-3 mb-1" />
             )}

@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 import { Button } from "../../ui/buttons/Button";
-import { uiCodeBox, uiCodeText, uiSubheading } from "../../ui/styles/editableStyles";
+import { uiCodeBox, uiCodeText, uiSubheading, uiTextError } from "../../ui/styles/editableStyles";
 import { QrModal } from "../../ui/modals/QrModal";
 
 interface Props {
@@ -99,7 +99,7 @@ export function CharacterKebabContent({
               )}
             </div>
           </div>
-          {revokeError && <p className="text-xs lg:text-sm text-red-400">{revokeError}</p>}
+          {revokeError && <p className={`text-xs lg:text-sm ${uiTextError}`}>{revokeError}</p>}
         </div>
       ) : (
         canManageRecoveryCode && (
@@ -117,7 +117,7 @@ export function CharacterKebabContent({
             >
               Generate Recovery Code
             </Button>
-            {generateError && <p className="text-xs lg:text-sm text-red-400">{generateError}</p>}
+            {generateError && <p className={`text-xs lg:text-sm ${uiTextError}`}>{generateError}</p>}
           </div>
         )
       )}

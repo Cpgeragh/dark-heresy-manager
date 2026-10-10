@@ -14,10 +14,10 @@ import {
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { Button } from "../../../ui/buttons/Button";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { uiTextMuted, uiTextBody } from "../../../ui/styles/editableStyles";
-import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
+import { uiTextBody } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
@@ -93,22 +93,18 @@ export function ForceFieldPicker({
       >
         <PickerBody>
           <div>
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select field craftsmanship:</p>
+            <p className={`text-xs lg:text-sm ${uiTextBody} mb-2`}>Select field craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((q) => (
-                <button
-                  type="button"
+                <ToggleButton
                   key={q}
+                  selected={craftsmanship === q}
+                  selectedClassName={CRAFTSMANSHIP_STYLE[q]}
+                  className="flex-1 py-1.5 lg:py-2 text-sm lg:text-base font-medium"
                   onClick={() => setCraftsmanship(q)}
-                  className={[
-                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                    craftsmanship === q
-                      ? CRAFTSMANSHIP_STYLE[q]
-                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                  ].join(" ")}
                 >
                   {q}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </div>
@@ -179,11 +175,11 @@ export function ForceFieldPicker({
               </PickerRowChips>
               <PickerRowChips>
                 {item.status === "draft" && (
-                  <Chip size="sm" className={colourAmberFaint}>
+                  <Chip size="sm" colour="amber">
                     Draft
                   </Chip>
                 )}
-                <Chip size="sm" className={colourFuchsia}>
+                <Chip size="sm" colour="fuchsia">
                   Custom
                 </Chip>
                 <ItemMetaChips

@@ -2,7 +2,13 @@
 
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
-import { uiSection, uiItemName, uiInfoModalWrapper } from "../../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiItemName,
+  uiInfoModalWrapper,
+  uiTextBody,
+  uiTextSubtle,
+} from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
@@ -51,7 +57,7 @@ export function ItemRow({
                 <InfoModal
                   title={item.name}
                   content={
-                    <p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>
+                    <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.description}</p>
                   }
                 />
               </span>
@@ -65,7 +71,7 @@ export function ItemRow({
             className="flex flex-wrap gap-1.5 mt-1"
           />
           {item.grantedByTalentName && (
-            <p className="mt-1 text-xs text-amber-300">
+          <p className={`mt-1 text-xs ${uiTextSubtle}`}>
               {item.grantedByTalentName} ({item.grantedByType}): Granted
             </p>
           )}

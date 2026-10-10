@@ -7,13 +7,11 @@ import {
   uiSection,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiItemName,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { colourStacks } from "../../../ui/styles/colourTokens";
-import { CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
+import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -62,9 +60,7 @@ export function ItemCard({
     <>
       <span className={uiItemName}>{item.name}</span>
       {libraryItem && <StatusBadge status={libraryItem.status} />}
-      {item.type && (
-        <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>{item.type}</Chip>
-      )}
+      {item.type && <Chip colour="slate">{item.type}</Chip>}
     </>
   );
 
@@ -80,7 +76,7 @@ export function ItemCard({
       {expanded && (
         <div className="space-y-1.5">
           {specialRules && (
-            <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
+            <p className={`text-xs lg:text-sm ${uiTextBody}`}>
               <span className={`${uiTextLabel} mr-1`}>Special</span>
               {specialRules}
             </p>
@@ -101,7 +97,7 @@ export function ItemCard({
             <StatChip label="Location" value={locationLabel(item.locations)} />
           )}
           {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-          {item.stacks && <Chip className={colourStacks}>Stacks</Chip>}
+          {item.stacks && <Chip colour="sky">Stacks</Chip>}
         </div>
       )}
       {item.type === "Force Field" && item.protectionRating !== undefined && (
@@ -130,7 +126,7 @@ export function ItemCard({
           {item.craftsmanship && (
             <>
               <span className={uiTextLabel}>Quality</span>
-              <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship]} shrink-0`}>
+              <Chip colour={CRAFTSMANSHIP_COLOUR[item.craftsmanship]} className="shrink-0">
                 {item.craftsmanship}
               </Chip>
             </>

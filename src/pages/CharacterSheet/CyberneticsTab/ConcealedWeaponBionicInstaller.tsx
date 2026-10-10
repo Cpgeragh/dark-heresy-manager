@@ -4,7 +4,7 @@ import { resolveMeleeWeaponReference } from "../../../data/reference/weaponRefer
 import { Button } from "../../../ui/buttons/Button";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
-import { uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 import { ImplantRow } from "./ImplantRow";
 import { RangedCard } from "../weapons/RangedCard";
 import { MeleeCard } from "../weapons/MeleeCard";
@@ -48,7 +48,7 @@ export function ConcealedWeaponBionicInstaller({
     >
       <ModalHeader title="Concealed Weapon Bionic" onClose={onClose} />
       <div className="p-4 lg:p-5 space-y-3">
-        <p className="text-sm text-slate-300">
+        <p className={`text-sm ${uiTextBody}`}>
           {selectingArm
             ? "Choose the existing Bionic Arm that will house the weapon."
             : "Choose an unmodified pistol or one-handed melee weapon."}

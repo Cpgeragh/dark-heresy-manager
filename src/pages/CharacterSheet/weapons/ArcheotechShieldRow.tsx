@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
-import { uiNoticeBox, uiSectionShell, uiCardTitle } from "../../../ui/styles/editableStyles";
-import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourArcheotech, colourLime, colourNoticeAmber } from "../../../ui/styles/colourTokens";
+import { uiNoticeBox, uiSectionShell, uiCardTitleHover } from "../../../ui/styles/editableStyles";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { EquipToggle } from "./weaponShared";
@@ -45,25 +46,23 @@ export function ArcheotechShieldRow({
 
   return (
     <div className={containerClass}>
-      <div className="relative w-full flex items-stretch gap-2 p-3 lg:p-4">
-        <button
-          type="button"
+      <div className={`${uiCardTapHeader} relative w-full flex items-stretch gap-2 p-3 lg:p-4`}>
+        <CardOverlayButton
+          label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+          expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
-          aria-expanded={expanded}
-          aria-label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={uiCardTitle}>{item.name}</span>
+            <span className={uiCardTitleHover}>{item.name}</span>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
             {highlightAsArcheotech && (
-              <Chip size="sm" className={`${colourArcheotech} shrink-0`}>
+              <Chip size="sm" colour="amber" className="shrink-0">
                 Archeotech
               </Chip>
             )}
-            <Chip size="sm" className={colourLime}>
+            <Chip size="sm" colour="lime">
               Shield
             </Chip>
           </div>

@@ -33,6 +33,7 @@ import {
   uiCellLabel,
   uiCellValueSm,
   uiInfoModalWrapper,
+  uiTextBody,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
@@ -89,7 +90,7 @@ function StatBlock({
               <InfoModal
                 title={`${label} Adjustments`}
                 content={
-                  <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                  <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                     {sources.map((source, i) => (
                       <li key={i}>
                         {source.name} ({source.type}): {source.amount > 0 ? "+" : ""}
@@ -463,7 +464,7 @@ export function CharacteristicsTab({
               title="Movement"
               content={
                 <>
-                  <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
+                  <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
                     During a Round, characters may move at one of four speeds: Half Move, Full Move,
                     Charge, or Run. The number of metres a character may move in his Turn is
                     determined by his Agility Bonus. Traits can modify some or all movement speeds.

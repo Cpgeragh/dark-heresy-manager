@@ -22,7 +22,7 @@ import {
   RANGED_WEAPON_REFERENCE,
 } from "../../data/reference/weaponReference";
 import { Button } from "../../ui/buttons/Button";
-import { editableInputClass, uiFormLabel, uiTextBody } from "../../ui/styles/editableStyles";
+import { editableInputClass, uiFormLabel, uiTextBody, uiTextSubtle } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
@@ -326,7 +326,7 @@ export function WeaponTrainingTab({
             })}
           </div>
           {group.items.some((item) => grantedTraining.includes(item.id)) && (
-            <p className="mt-1 text-xs text-amber-300">
+            <p className={`mt-1 text-xs ${uiTextSubtle}`}>
               Granted by a Talent, Trait, or Career effect:{" "}
               {group.items
                 .filter((item) => grantedTraining.includes(item.id))
@@ -337,7 +337,7 @@ export function WeaponTrainingTab({
           {hasKnaveOfPistols &&
             (group.label === "Basic Weapon Training" ||
               group.label === "Heavy Weapon Training") && (
-              <p className="mt-1 text-xs text-amber-300">
+              <p className={`mt-1 text-xs ${uiTextSubtle}`}>
                 Knave of Pistols prevents acquiring new training in this group.
               </p>
             )}
@@ -391,7 +391,7 @@ export function WeaponTrainingTab({
           {isDM && <ExoticCustomWeaponButton onClick={() => setShowExoticPicker(true)} />}
         </div>
         {grantedExotics.length > 0 && (
-          <p className="mt-1 text-xs text-amber-300">Granted by Sicarius Tutoring (Guardsman)</p>
+          <p className={`mt-1 text-xs ${uiTextSubtle}`}>Granted by Sicarius Tutoring (Guardsman)</p>
         )}
       </div>
 
@@ -587,7 +587,7 @@ export function WeaponTrainingTab({
             <label className={uiFormLabel}>Weapon Name</label>
             <p className={`text-sm lg:text-base ${uiTextBody}`}>{newExoticName}</p>
             {hasKnaveOfPistols && (
-              <p className="text-xs text-amber-300">
+              <p className={`text-xs ${uiTextSubtle}`}>
                 Knave of Pistols limits this list to pistol-only specialisations.
               </p>
             )}

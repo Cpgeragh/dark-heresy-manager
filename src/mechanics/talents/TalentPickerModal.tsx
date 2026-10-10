@@ -6,6 +6,8 @@ import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
   uiFormLabel,
+  uiTextBody,
+  uiTextError,
   uiTextLabel,
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
@@ -14,8 +16,7 @@ import { Chip } from "../../ui/chips/Chip";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
-import { sourceColour } from "../../ui/styles/sourceStyles";
-import { colourAmberFaint, colourRank, colourValue } from "../../ui/styles/colourTokens";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import {
   getNextTalentCost,
@@ -33,7 +34,9 @@ import {
   PickerRow,
 } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
+import { FilterButton } from "../../ui/pickers/FilterButton";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
+import { PickerField } from "../../ui/pickers/PickerField";
 import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
 import {
   sanitizeNonNegativeIntegerInput,
@@ -451,9 +454,7 @@ export function TalentPickerModal({
             >
               <PickerRowName name={item.name} />
               <PickerRowChips>
-                <Chip className={colourAmberFaint}>
-                  {item.status === "draft" ? "Draft" : "Custom"}
-                </Chip>
+                <Chip colour="amber">{item.status === "draft" ? "Draft" : "Custom"}</Chip>
               </PickerRowChips>
             </PickerRow>
           ))}
@@ -510,26 +511,19 @@ export function TalentPickerModal({
                 />
                 <PickerRowChips>
                   {sources.map((source) => (
-                    <Chip
-                      key={source}
-                      className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
-                    >
+                    <Chip key={source} colour={sourceChipColour(source)} className="font-code">
                       {source}
                     </Chip>
                   ))}
                   {faithGroupChip && (
-                    <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
+                    <Chip colour={faithGroupChip.colour}>{faithGroupChip.label}</Chip>
                   )}
-                  {ownedCount > 0 && (
-                    <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                      Owned: {ownedCount}
-                    </Chip>
-                  )}
+                  {ownedCount > 0 && <Chip colour="amber">Owned: {ownedCount}</Chip>}
                 </PickerRowChips>
                 {row.prerequisites && (
                   <PickerRowText>
                     <span className={uiTextLabel}>Prerequisites: </span>
-                    <span className="text-slate-300 font-medium">{row.prerequisites}</span>
+                    <span className={`${uiTextBody} font-medium`}>{row.prerequisites}</span>
                   </PickerRowText>
                 )}
               </PickerRow>
@@ -570,18 +564,12 @@ export function TalentPickerModal({
         <PickerBody>
           <div className="space-y-2">
             {choiceOptions.length > 0 && !detailChoice ? (
-              <button
-                type="button"
+              <PickerField
+                id="talent-choice-picker"
+                ariaLabel={talentData.specialisationLabel ?? "Choice"}
+                placeholder={`${talentData.specialisationLabel ?? "Choice"}…`}
                 onClick={() => setShowChoicePicker(true)}
-                className={
-                  editableInputClass(true) + " text-left flex items-center justify-between"
-                }
-              >
-                <span className="text-slate-500">
-                  {talentData.specialisationLabel ?? "Choice"}…
-                </span>
-                <ArrowRight />
-              </button>
+              />
             ) : isNumeric ? (
               <>
                 <input
@@ -636,7 +624,7 @@ export function TalentPickerModal({
               />
             )}
             {duplicateChoice && (
-              <p className="text-xs lg:text-sm text-red-300">That choice is already owned.</p>
+              <p className={`text-xs lg:text-sm ${uiTextError}`}>That choice is already owned.</p>
             )}
             <Button fullWidth onClick={handleSpecAdd} disabled={!canAdd}>
               Add {picked.name}
@@ -659,13 +647,9 @@ export function TalentPickerModal({
       isEmpty={filtered.length === 0}
       filterRow={
         hasOverflow && (
-          <button
-            type="button"
-            onClick={() => setShowOverflow(true)}
-            className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left"
-          >
+          <FilterButton className="w-full" onClick={() => setShowOverflow(true)}>
             {showAllLabel}
-          </button>
+          </FilterButton>
         )
       }
       footer={
@@ -755,33 +739,26 @@ export function TalentPickerModal({
               />
               <PickerRowChips>
                 {sources.map((source) => (
-                  <Chip
-                    key={source}
-                    className={`bg-slate-800/40 font-code ${sourceColour(source)}`}
-                  >
+                  <Chip key={source} colour={sourceChipColour(source)} className="font-code">
                     {source}
                   </Chip>
                 ))}
                 {faithGroupChip && (
-                  <Chip className={faithGroupChip.className}>{faithGroupChip.label}</Chip>
+                  <Chip colour={faithGroupChip.colour}>{faithGroupChip.label}</Chip>
                 )}
-                {ownedLabel && (
-                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-                    {ownedLabel}
-                  </Chip>
-                )}
+                {ownedLabel && <Chip colour="amber">{ownedLabel}</Chip>}
                 {slotsLeft > 1
                   ? slotCounts.map((slot) => (
-                      <Chip key={slot.cost} className={colourValue}>
+                      <Chip key={slot.cost} colour="amber">
                         {slot.cost} XP: {slot.count} left
                       </Chip>
                     ))
-                  : cost !== undefined && <Chip className={colourValue}>{cost} XP</Chip>}
+                  : cost !== undefined && <Chip colour="amber">{cost} XP</Chip>}
               </PickerRowChips>
               {rankChips && rankChips.length > 0 && (
                 <PickerRowChips>
                   {rankChips.map((rankName) => (
-                    <Chip key={rankName} size="sm" className={`${colourRank} font-code`}>
+                    <Chip key={rankName} size="sm" colour="fuchsia" className="font-code">
                       {rankName}
                     </Chip>
                   ))}
@@ -790,7 +767,7 @@ export function TalentPickerModal({
               {row.prerequisites && (
                 <PickerRowText>
                   <span className={uiTextLabel}>Prerequisites: </span>
-                  <span className="text-slate-300 font-medium">{row.prerequisites}</span>
+                  <span className={`${uiTextBody} font-medium`}>{row.prerequisites}</span>
                 </PickerRowText>
               )}
             </PickerRow>

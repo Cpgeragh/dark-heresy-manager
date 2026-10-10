@@ -9,7 +9,7 @@ import type {
 import {
   editableInputClass,
   editableTextareaClass,
-  uiTextMuted,
+  uiTextBody,
   uiFormLabel,
 } from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
@@ -20,7 +20,8 @@ import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { ITEM_TYPES, type ItemType } from "./archeotechConstants";
 import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
-import { colourSky, colourRose } from "../../../ui/styles/colourTokens";
+import { chipColours } from "../../../ui/styles/colourTokens";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
@@ -335,22 +336,15 @@ export function CustomArcheotechForm({
                 <legend className={uiFormLabel}>Class</legend>
                 <div className="flex gap-2 mt-0.5">
                   {(["Ranged", "Melee"] as const).map((cls) => (
-                    <button
-                      type="button"
+                    <ToggleButton
                       key={cls}
-                      aria-pressed={weaponClass === cls}
+                      selected={weaponClass === cls}
+                      selectedClassName={cls === "Ranged" ? chipColours.sky : chipColours.rose}
+                      className="flex-1 py-1.5 text-sm lg:text-base font-medium"
                       onClick={() => setWeaponClass(weaponClass === cls ? "" : cls)}
-                      className={[
-                        "flex-1 py-1.5 rounded border text-sm lg:text-base font-medium transition",
-                        weaponClass === cls
-                          ? cls === "Ranged"
-                            ? colourSky
-                            : colourRose
-                          : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                      ].join(" ")}
                     >
                       {cls}
-                    </button>
+                    </ToggleButton>
                   ))}
                 </div>
               </fieldset>
@@ -488,20 +482,15 @@ export function CustomArcheotechForm({
               <legend className={`${uiFormLabel} block mb-1.5`}>Locations</legend>
               <div className="flex flex-wrap gap-2">
                 {ARMOUR_LOCATION_ORDER.map((loc) => (
-                  <button
-                    type="button"
+                  <ToggleButton
                     key={loc}
-                    aria-pressed={locations.includes(loc)}
+                    selected={locations.includes(loc)}
+                    selectedClassName="border-red-500/60 bg-red-500/10 text-red-300"
+                    className="px-2.5 py-1 text-xs lg:text-sm font-medium"
                     onClick={() => toggleLocation(loc)}
-                    className={[
-                      "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
-                      locations.includes(loc)
-                        ? "border-red-500/60 bg-red-500/10 text-red-300"
-                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500",
-                    ].join(" ")}
                   >
                     {ARMOUR_LOCATION_LABELS[loc]}
-                  </button>
+                  </ToggleButton>
                 ))}
               </div>
             </fieldset>
@@ -518,9 +507,9 @@ export function CustomArcheotechForm({
               >
                 {stacks && <span className="text-red-400 text-[10px] leading-none">✓</span>}
               </button>
-              <span className="text-xs lg:text-sm text-slate-300">
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 Stacks with worn armour{" "}
-                <span className={uiTextMuted}>(default: take higher value)</span>
+                <span className={uiTextBody}>(default: take higher value)</span>
               </span>
             </div>
           </CustomFormSection>
@@ -608,20 +597,15 @@ export function CustomArcheotechForm({
               </legend>
               <div className="flex flex-wrap gap-2">
                 {ARMOUR_LOCATION_ORDER.map((loc) => (
-                  <button
-                    type="button"
+                  <ToggleButton
                     key={loc}
-                    aria-pressed={bodyLocation.includes(loc)}
+                    selected={bodyLocation.includes(loc)}
+                    selectedClassName="border-red-500/60 bg-red-500/10 text-red-300"
+                    className="px-2.5 py-1 text-xs lg:text-sm font-medium"
                     onClick={() => toggleBodyLocation(loc)}
-                    className={[
-                      "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
-                      bodyLocation.includes(loc)
-                        ? "border-red-500/60 bg-red-500/10 text-red-300"
-                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500",
-                    ].join(" ")}
                   >
                     {ARMOUR_LOCATION_LABELS[loc]}
-                  </button>
+                  </ToggleButton>
                 ))}
               </div>
             </fieldset>

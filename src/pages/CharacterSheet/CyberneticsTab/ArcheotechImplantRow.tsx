@@ -9,8 +9,8 @@ import {
   uiCardTitle,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { colourArcheotech, colourNoticeAmber } from "../../../ui/styles/colourTokens";
-import { CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
+import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
+import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
@@ -40,7 +40,9 @@ export function ArcheotechImplantRow({
         <div className="flex items-center gap-2 flex-wrap">
           <span className={uiCardTitle}>{item.name}</span>
           {highlightAsArcheotech && (
-            <Chip className={`${colourArcheotech} shrink-0`}>Archeotech</Chip>
+            <Chip colour="amber" className="shrink-0">
+              Archeotech
+            </Chip>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-1.5 mt-1">
@@ -53,7 +55,7 @@ export function ArcheotechImplantRow({
           {item.craftsmanship && (
             <>
               <span className={uiTextLabel}>Quality</span>
-              <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship]} shrink-0`}>
+              <Chip colour={CRAFTSMANSHIP_COLOUR[item.craftsmanship]} className="shrink-0">
                 {item.craftsmanship}
               </Chip>
             </>

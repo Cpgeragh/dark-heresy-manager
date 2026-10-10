@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useMatch } from "react-router-dom";
 import { useHeaderExtension } from "../context/useHeaderExtension";
 import { ROUTES } from "../constants/routes";
+import { IconButton } from "../ui/buttons/IconButton";
 import { GearIcon } from "../ui/icons/GearIcon";
 import { QrCodeIcon } from "../ui/icons/QrCodeIcon";
 import { QrModal } from "../ui/modals/QrModal";
-import { uiIconButton } from "../ui/styles/buttonStyles";
-import { AppHeaderShell, appHeaderIconButtonClass } from "./AppHeaderShell";
+import { uiIconButton, uiIconButtonIconSize } from "../ui/styles/buttonStyles";
+import { AppHeaderShell } from "./AppHeaderShell";
 
 interface AppHeaderProps {
   currentPath: string;
@@ -54,7 +55,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
             {(backHref || currentPath !== ROUTES.DASHBOARD) && (
               <Link
                 to={backHref ?? ROUTES.DASHBOARD}
-                className={appHeaderIconButtonClass}
+                className={uiIconButton}
                 aria-label={backHref ? "Back" : "Dashboard"}
               >
                 <svg
@@ -63,7 +64,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-5 h-5 text-slate-300"
+                  className={uiIconButtonIconSize.md}
                 >
                   <path
                     strokeLinecap="round"
@@ -103,14 +104,11 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
             {/* Kebab menu */}
             {kebabContent && (
               <div className="relative" ref={kebabRef}>
-                <button
-                  type="button"
+                <IconButton
+                  label="Options"
                   onClick={() => setKebabOpen((v) => !v)}
-                  aria-label="Options"
-                  className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-base leading-none"
-                >
-                  ⋮
-                </button>
+                  icon={<GearIcon />}
+                />
 
                 {kebabOpen && (
                   <div className="absolute right-0 top-full mt-2 z-50 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-4">

@@ -16,8 +16,8 @@ import { Chip } from "../../ui/chips/Chip";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
-import { sourceColour } from "../../ui/styles/sourceStyles";
-import { colourAmberPlain } from "../../ui/styles/colourTokens";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
+import { colourAmberPlain, type ChipColour } from "../../ui/styles/colourTokens";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
@@ -33,7 +33,7 @@ interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   displayName?: string;
   secondaryText?: string;
   statusChip?: string;
-  statusChipClassName?: string;
+  statusChipColour?: ChipColour;
   removable?: boolean;
   deletionBlockedMessage?: string;
   statusAfterSource?: boolean;
@@ -49,7 +49,7 @@ export function EntryCard({
   displayName,
   secondaryText,
   statusChip,
-  statusChipClassName,
+  statusChipColour,
   removable = true,
   deletionBlockedMessage,
   statusAfterSource = false,
@@ -138,19 +138,11 @@ export function EntryCard({
         )}
         <div className="flex flex-wrap items-center gap-1.5">
           {refSources.map((source) => (
-            <Chip key={source} className={`bg-slate-800/40 font-code ${sourceColour(source)}`}>
+            <Chip key={source} colour={sourceChipColour(source)} className="font-code">
               {source}
             </Chip>
           ))}
-          {statusChip && (
-            <Chip
-              className={
-                statusChipClassName ?? "border-amber-500/60 bg-amber-950/30 text-amber-300"
-              }
-            >
-              {statusChip}
-            </Chip>
-          )}
+          {statusChip && <Chip colour={statusChipColour ?? "amber"}>{statusChip}</Chip>}
         </div>
         {statusAfterSource && secondaryText && (
           <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>
@@ -235,7 +227,7 @@ export function TalentGroupCard({
   onRemove,
   statusAfterSource = false,
   statusChip,
-  statusChipClassName,
+  statusChipColour,
 }: {
   name: string;
   entries: readonly TalentEntry[];
@@ -243,7 +235,7 @@ export function TalentGroupCard({
   onRemove: (uid: string) => void;
   statusAfterSource?: boolean;
   statusChip?: string;
-  statusChipClassName?: string;
+  statusChipColour?: ChipColour;
 }) {
   recordComponentRender("TalentGroupCard");
   const [expanded, setExpanded] = useState(false);
@@ -272,7 +264,7 @@ export function TalentGroupCard({
                 removable={!entry.grantedByTalentEntryUid}
                 statusAfterSource={statusAfterSource}
                 statusChip={statusChip}
-                statusChipClassName={statusChipClassName}
+                statusChipColour={statusChipColour}
               />
             ))}
         </div>

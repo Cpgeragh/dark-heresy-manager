@@ -16,7 +16,7 @@ import type {
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
-import { editableInputClass, uiFormLabel, uiTextBody } from "../../ui/styles/editableStyles";
+import { editableInputClass, uiFormLabel, uiTextBody, uiTextError } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -670,7 +670,7 @@ export function TraitAcquisitionModal({
                 disabled={upgradeCandidates.length === 0}
               />
               {upgradeCandidates.length === 0 && (
-                <p className="text-sm text-red-400">
+                <p className={`text-sm ${uiTextError}`}>
                   No installed Poor or Common cybernetic can be upgraded.
                 </p>
               )}

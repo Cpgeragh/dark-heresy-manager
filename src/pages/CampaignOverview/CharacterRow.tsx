@@ -10,7 +10,8 @@ import {
   preflightCharacterDeletion,
   revealRecoveryCode,
 } from "../../services/characterService";
-import { uiSection } from "../../ui/styles/editableStyles";
+import { uiSection, uiTextError, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import { colourSuccessPlain } from "../../ui/styles/colourTokens";
 import { Button } from "../../ui/buttons/Button";
 import { LoadingDots } from "../../ui/LoadingDots";
 import { PendingOverlay } from "../../ui/PendingOverlay";
@@ -118,7 +119,7 @@ export function CharacterRow({
   }, [campaignId, characterId]);
 
   const deleteDetails = deletePreflight.error ? (
-    <span className="text-xs text-red-400">{deletePreflight.error}</span>
+    <span className={`text-xs ${uiTextError}`}>{deletePreflight.error}</span>
   ) : deletePreflight.result ? (
     <span className="text-xs text-slate-500">
       {`This permanently deletes ${deletePreflight.result.totalCount} document${deletePreflight.result.totalCount === 1 ? "" : "s"}.`}
@@ -168,9 +169,9 @@ export function CharacterRow({
               </p>
               <p className="text-xs lg:text-sm mt-0.5">
                 {userId ? (
-                  <span className="text-green-400">Claimed</span>
+                  <span className={colourSuccessPlain}>Claimed</span>
                 ) : (
-                  <span className="text-slate-500">Unclaimed</span>
+                  <span className={uiTextPlaceholder}>Unclaimed</span>
                 )}
               </p>
             </div>
@@ -219,9 +220,9 @@ export function CharacterRow({
           <ModalHeader title="History" onClose={() => setHistoryRequested(false)} />
           <div className="p-4 lg:p-5 space-y-1">
             {logsError ? (
-              <p className="text-xs lg:text-sm text-red-400">Unable to load character history.</p>
+              <p className={`text-xs lg:text-sm ${uiTextError}`}>Unable to load character history.</p>
             ) : logs.length === 0 ? (
-              <p className="text-xs lg:text-sm text-slate-500">No history yet.</p>
+              <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No history yet.</p>
             ) : (
               logs.map((log) => (
                 <p key={log.id} className="text-xs lg:text-sm text-slate-400">

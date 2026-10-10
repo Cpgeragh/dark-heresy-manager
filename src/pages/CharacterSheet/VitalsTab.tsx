@@ -14,7 +14,14 @@ import {
   getTalentFateEffects,
   getTalentWoundModifierSources,
 } from "../../mechanics/talents/talentEffects";
-import { uiSection, uiCell, uiCellValue, uiInfoModalWrapper } from "../../ui/styles/editableStyles";
+import {
+  editableInputColour,
+  uiSection,
+  uiCell,
+  uiCellValue,
+  uiInfoModalWrapper,
+  uiTextBody,
+} from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -35,8 +42,7 @@ interface VitalsTabProps {
   talents?: TalentsAndTraitsBlock;
 }
 
-const totalInputClass =
-  "w-full rounded border px-2 lg:px-3 py-1.5 lg:py-2 text-center text-xl lg:text-2xl font-semibold font-code transition bg-slate-900 border-slate-500 text-slate-200 focus:outline-none focus:border-red-500";
+const totalInputClass = `w-full rounded border px-2 lg:px-3 py-1.5 lg:py-2 text-center text-xl lg:text-2xl font-semibold font-code ${editableInputColour(true)}`;
 
 export function VitalsTab({
   character,
@@ -131,7 +137,7 @@ export function VitalsTab({
                     <InfoModal
                       title="Total Wounds Adjustments"
                       content={
-                        <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                        <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                           {woundSources.map((source, index) => (
                             <li key={index}>
                               {source.name} (Talent): {source.amount > 0 ? "+" : ""}
@@ -197,7 +203,7 @@ export function VitalsTab({
                   <InfoModal
                     title="Critical Damage"
                     content={
-                      <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                         {VITALS_RULE_TEXT.criticalDamage}
                       </p>
                     }
@@ -220,7 +226,7 @@ export function VitalsTab({
                   <InfoModal
                     title="Fatigue"
                     content={
-                      <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                      <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                         {VITALS_RULE_TEXT.fatigue}
                       </p>
                     }
@@ -251,20 +257,20 @@ export function VitalsTab({
               title="Using Fate Points"
               content={
                 <div className="space-y-2">
-                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                  <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                     Fate Points allow you to turn luck to your advantage, hitting with that bolter
                     shot when you would have otherwise missed, or cracking the security code on a
                     door just in time to make a hasty escape. Using these twists of fate, you can
                     take a few more risks, which makes the game faster and far more exciting than
                     would otherwise be the case.
                   </p>
-                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                  <p className={`text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                     That said, you have a limited pool of Fate Points and whenever you spend a Fate
                     Point, you reduce your pool by one, so choose wisely. Fate Points are restored
                     at the start of the next gaming session. Spending a Fate Point allows a
                     character to do one of the following things:
                   </p>
-                  <ul className="list-disc list-inside text-sm leading-relaxed text-slate-300 lg:text-base space-y-1">
+                  <ul className={`list-disc list-inside text-sm leading-relaxed ${uiTextBody} lg:text-base space-y-1`}>
                     <li>Re-roll any one failed Test. The results of the re-roll are final.</li>
                     <li>Count as having rolled a 10 for their Initiative.</li>
                     <li>Add an extra degree of success to a Test.</li>
@@ -286,7 +292,7 @@ export function VitalsTab({
                     <InfoModal
                       title="Total Fate Point Adjustments"
                       content={
-                        <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                        <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
                           {fateEffects.overrideSource && (
                             <li>
                               {fateEffects.overrideSource} (Talent): set to{" "}

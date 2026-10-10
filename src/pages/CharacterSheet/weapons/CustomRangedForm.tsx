@@ -11,6 +11,8 @@ import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
+import { colourToggleSelectedNeutral } from "../../../ui/styles/colourTokens";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
@@ -357,20 +359,15 @@ export function CustomRangedForm({
           <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
-              <button
+              <ToggleButton
                 key={option}
-                type="button"
-                aria-pressed={craftsmanship === option}
+                selected={craftsmanship === option}
+                selectedClassName={CRAFTSMANSHIP_STYLE[option]}
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                 onClick={() => setCraftsmanship(option)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  craftsmanship === option
-                    ? CRAFTSMANSHIP_STYLE[option]
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
               >
                 {option}
-              </button>
+              </ToggleButton>
             ))}
           </div>
         </fieldset>
@@ -405,19 +402,14 @@ export function CustomRangedForm({
           <fieldset aria-required="true" className="col-span-2">
             <RequiredFormLabel as="legend">Rate of Fire</RequiredFormLabel>
             <div className="grid grid-cols-3 gap-2 mt-0.5">
-              <button
-                type="button"
+              <ToggleButton
+                selected={singleShot}
+                selectedClassName={colourToggleSelectedNeutral}
+                className="px-2 py-1 text-sm lg:text-base font-medium"
                 onClick={() => setSingleShot((value) => !value)}
-                aria-pressed={singleShot}
-                className={[
-                  "rounded border px-2 py-1 text-sm lg:text-base font-medium transition",
-                  singleShot
-                    ? "border-slate-400 bg-slate-700/70 text-slate-100"
-                    : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
               >
                 Single
-              </button>
+              </ToggleButton>
               <input
                 aria-label="Semi-auto rate"
                 type="text"

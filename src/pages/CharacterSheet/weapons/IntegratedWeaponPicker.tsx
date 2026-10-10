@@ -1,9 +1,10 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
 import { useRef } from "react";
 import type { WeaponCraftsmanship } from "../../../types/Character";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { Button } from "../../../ui/buttons/Button";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -21,8 +22,7 @@ import {
   PickerRowName,
 } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
-import { uiTextBody, uiTextMuted } from "../../../ui/styles/editableStyles";
-import { colourViolet, colourSky, colourOrange } from "../../../ui/styles/colourTokens";
+import { uiTextBody } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { SpecialRulesContent } from "./weaponShared";
 import {
@@ -113,22 +113,18 @@ export function IntegratedWeaponPicker({
       >
         <PickerBody>
           <div>
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
+            <p className={`text-xs lg:text-sm ${uiTextBody} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((option) => (
-                <button
-                  type="button"
+                <ToggleButton
                   key={option}
+                  selected={craftsmanship === option}
+                  selectedClassName={CRAFTSMANSHIP_STYLE[option]}
+                  className="flex-1 py-1.5 lg:py-2 text-sm lg:text-base font-medium"
                   onClick={() => setCraftsmanship(option)}
-                  className={[
-                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                    craftsmanship === option
-                      ? CRAFTSMANSHIP_STYLE[option]
-                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                  ].join(" ")}
                 >
                   {option}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </div>
@@ -179,10 +175,10 @@ export function IntegratedWeaponPicker({
               >
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
-                  <Chip size="sm" className={colourViolet}>
+                  <Chip size="sm" colour="violet">
                     Integrated
                   </Chip>
-                  <Chip size="sm" className={colourSky}>
+                  <Chip size="sm" colour="sky">
                     Ranged
                   </Chip>
                   <ItemMetaChips
@@ -239,10 +235,10 @@ export function IntegratedWeaponPicker({
               >
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
-                  <Chip size="sm" className={colourViolet}>
+                  <Chip size="sm" colour="violet">
                     Integrated
                   </Chip>
-                  <Chip size="sm" className={colourOrange}>
+                  <Chip size="sm" colour="orange">
                     Melee
                   </Chip>
                   <ItemMetaChips
@@ -302,10 +298,10 @@ export function IntegratedWeaponPicker({
                 >
                   <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
                   <PickerRowChips>
-                    <Chip size="sm" className={colourViolet}>
+                    <Chip size="sm" colour="violet">
                       Integrated
                     </Chip>
-                    <Chip size="sm" className={isRanged ? colourSky : colourOrange}>
+                    <Chip size="sm" colour={isRanged ? "sky" : "orange"}>
                       {isRanged ? "Ranged" : "Melee"}
                     </Chip>
                     <ItemMetaChips

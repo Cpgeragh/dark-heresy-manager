@@ -8,6 +8,8 @@ import {
   uiFormLabel,
 } from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
+import { colourToggleSelectedNeutral } from "../../../ui/styles/colourTokens";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
@@ -264,19 +266,15 @@ export function CustomGrenadeForm({
       <CustomFormSection title="Combat">
         <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Damage mode">
           {(["damage", "special", "none"] as const).map((option) => (
-            <button
+            <ToggleButton
               key={option}
-              type="button"
-              aria-pressed={damageMode === option}
+              selected={damageMode === option}
+              selectedClassName={colourToggleSelectedNeutral}
+              className="px-2 py-1 text-xs lg:text-sm capitalize"
               onClick={() => setDamageMode(option)}
-              className={`rounded border px-2 py-1 text-xs lg:text-sm capitalize transition ${
-                damageMode === option
-                  ? "border-slate-400 bg-slate-700/70 text-slate-100"
-                  : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300"
-              }`}
             >
               {option === "none" ? "No damage" : option}
-            </button>
+            </ToggleButton>
           ))}
         </div>
         {damageMode === "damage" && (

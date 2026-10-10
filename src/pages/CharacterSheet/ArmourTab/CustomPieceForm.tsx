@@ -15,7 +15,7 @@ import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { Chip } from "../../../ui/chips/Chip";
-import { colourAmberFaint } from "../../../ui/styles/colourTokens";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
@@ -191,20 +191,15 @@ export function CustomPieceForm({
           <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
-              <button
+              <ToggleButton
                 key={option}
-                type="button"
-                aria-pressed={craftsmanship === option}
+                selected={craftsmanship === option}
+                selectedClassName={CRAFTSMANSHIP_STYLE[option]}
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                 onClick={() => setCraftsmanship(option)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  craftsmanship === option
-                    ? CRAFTSMANSHIP_STYLE[option]
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
               >
                 {option}
-              </button>
+              </ToggleButton>
             ))}
           </div>
         </fieldset>
@@ -225,20 +220,15 @@ export function CustomPieceForm({
                   "rightLeg",
                 ] as ArmourLocationKey[]
               ).map((loc) => (
-                <button
+                <ToggleButton
                   key={loc}
-                  type="button"
-                  aria-pressed={selectedLocs.has(loc)}
+                  selected={selectedLocs.has(loc)}
+                  selectedClassName="border-red-600 bg-red-600/20 text-red-400"
+                  className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => toggleLoc(loc)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    selectedLocs.has(loc)
-                      ? "border-red-600 bg-red-600/20 text-red-400"
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
                 >
                   {ARMOUR_LOCATION_LABELS[loc]}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </fieldset>
@@ -330,7 +320,9 @@ export function CustomPieceForm({
           </p>
           {forceField ? (
             <div className="flex items-center gap-1.5">
-              <Chip className={`w-fit ${colourAmberFaint}`}>Overload</Chip>
+              <Chip colour="amber" className="w-fit">
+                Overload
+              </Chip>
               <span className={uiInfoModalWrapper}>
                 <InfoModal title="Overload" content={ARMOUR_SPECIAL_RULES.Overload} />
               </span>
@@ -338,20 +330,15 @@ export function CustomPieceForm({
           ) : (
             <div className="grid grid-cols-3 gap-1.5">
               {WORN_ARMOUR_QUALITY_OPTIONS.map((q) => (
-                <button
+                <ToggleButton
                   key={q}
-                  type="button"
-                  aria-pressed={selectedQualities.has(q)}
+                  selected={selectedQualities.has(q)}
+                  selectedClassName="border-amber-600 bg-amber-600/20 text-amber-400"
+                  className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => toggleQuality(q)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    selectedQualities.has(q)
-                      ? "border-amber-600 bg-amber-600/20 text-amber-400"
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
                 >
                   {q}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           )}

@@ -15,22 +15,17 @@ import {
 } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { Button } from "../../../ui/buttons/Button";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import {
-  uiTextBody,
-  uiTextLabel,
-  uiTextMuted,
-  uiTextGMNote,
-} from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextLabel, uiTextGMNote } from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { uiPickerBackButton } from "../../../ui/styles/buttonStyles";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
-import { CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
+import { CRAFTSMANSHIP_COLOUR, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import {
   availableCraftsmanship,
@@ -215,7 +210,7 @@ export function ImplantPicker({
         <ModalHeader title={selected.name} onClose={resetPicker} />
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
-          <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Select installation side:</p>
+          <p className={`text-xs lg:text-sm ${uiTextBody}`}>Select installation side:</p>
           <div className="flex flex-col gap-2">
             {options.map((opt) => (
               <button
@@ -231,9 +226,9 @@ export function ImplantPicker({
         </div>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
-          <button type="button" onClick={resetPicker} className={uiPickerBackButton}>
+          <Button variant="neutral" onClick={resetPicker}>
             Back
-          </button>
+          </Button>
         </div>
       </ModalShell>
     );
@@ -252,33 +247,27 @@ export function ImplantPicker({
 
         <PickerBody>
           {location && (
-            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted}`}>
+            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextBody}`}>
               <span>Installing on:</span>
-              <Chip className="border-slate-600 bg-slate-800 text-slate-300">
+              <Chip colour="slate">
                 {location.map((item) => ARMOUR_LOCATION_LABELS[item]).join(" & ")}
               </Chip>
             </div>
           )}
 
           <div>
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>
-              Select craftsmanship quality:
-            </p>
+            <p className={`text-xs lg:text-sm ${uiTextBody} mb-2`}>Select craftsmanship quality:</p>
             <div className="flex gap-2">
               {qualities.map((q) => (
-                <button
-                  type="button"
+                <ToggleButton
                   key={q}
+                  selected={craftsmanship === q}
+                  selectedClassName={CRAFTSMANSHIP_STYLE[q]}
+                  className="flex-1 py-1.5 lg:py-2 text-sm lg:text-base font-medium"
                   onClick={() => setCraftsmanship(q)}
-                  className={[
-                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                    craftsmanship === q
-                      ? CRAFTSMANSHIP_STYLE[q]
-                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                  ].join(" ")}
                 >
                   {q}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </div>
@@ -298,9 +287,9 @@ export function ImplantPicker({
         </PickerBody>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button type="button" onClick={resetPicker} className={uiPickerBackButton}>
+          <Button variant="neutral" onClick={resetPicker}>
             Back
-          </button>
+          </Button>
           <Button
             className="flex-1"
             onClick={() => {
@@ -371,7 +360,7 @@ export function ImplantPicker({
                   availability={entry.item.data.availability}
                   source={entry.item.data.source}
                 />
-                <Chip className={CRAFTSMANSHIP_STYLE[entry.item.data.craftsmanship ?? "Common"]}>
+                <Chip colour={CRAFTSMANSHIP_COLOUR[entry.item.data.craftsmanship ?? "Common"]}>
                   {entry.item.data.craftsmanship ?? "Common"}
                 </Chip>
               </PickerRowChips>

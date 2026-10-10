@@ -31,23 +31,22 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiItemName,
-  uiCardTitle,
+  uiCardTitleHover,
 } from "../../../ui/styles/editableStyles";
-import { uiExpandButton, uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import {
-  colourArcheotech,
   colourButtonOutlineCyan,
   colourButtonOutlineOrange,
   colourNoticeAmber,
   colourNoticePink,
-  colourPink,
-  colourViolet,
+  colourToggleSelectedSky,
 } from "../../../ui/styles/colourTokens";
 import { Button } from "../../../ui/buttons/Button";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
@@ -118,7 +117,6 @@ export function RangedCard({
   slotsDisabled = false,
   forceExpanded = false,
   integrated = false,
-  pickerMode = false,
   knaveOfPistols = false,
   expanded: controlledExpanded,
   onExpandedChange,
@@ -147,7 +145,6 @@ export function RangedCard({
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
   integrated?: boolean;
-  pickerMode?: boolean;
   knaveOfPistols?: boolean;
   expanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
@@ -421,23 +418,23 @@ export function RangedCard({
       className={`${weapon.concealedBionic ? `${uiNoticeBox} ${colourNoticePink}` : uiSectionShell} overflow-hidden`}
     >
       {/* Header: always visible */}
-      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
+      <div
+        className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
+      >
         {!forceExpanded && (
-          <button
-            type="button"
-            onClick={onSelect ?? toggleExpanded}
-            aria-expanded={onSelect ? undefined : expanded}
-            aria-label={
+          <CardOverlayButton
+            label={
               onSelect
                 ? `Select ${weapon.name}`
                 : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`
             }
-            className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
+            expanded={onSelect ? undefined : expanded}
+            onClick={onSelect ?? toggleExpanded}
           />
         )}
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className={uiCardTitle}>{weapon.name}</p>
+            <p className={uiCardTitleHover}>{weapon.name}</p>
             {rulesDescription && (
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
@@ -452,7 +449,7 @@ export function RangedCard({
             )}
             {libraryItem && <StatusBadge status={libraryItem.status} />}
             {integrated && (
-              <Chip size="sm" className={colourViolet}>
+              <Chip size="sm" colour="violet">
                 Integrated
               </Chip>
             )}
@@ -460,30 +457,30 @@ export function RangedCard({
           {(weapon.class || activeWeaponType || weapon.concealedBionic) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {weapon.concealedBionic && (
-                <Chip size="sm" className={colourPink}>
+                <Chip size="sm" colour="pink">
                   Concealed Bionic
                 </Chip>
               )}
               {weapon.concealedBionic && (
-                <Chip size="sm" className={colourPink}>
+                <Chip size="sm" colour="pink">
                   Cybernetic
                 </Chip>
               )}
               {(() => {
                 const c = weaponClassChip(weapon.class);
                 return c ? (
-                  <Chip size="sm" className={c.active}>
+                  <Chip size="sm" colour={c.colour}>
                     {c.label}
                   </Chip>
                 ) : null;
               })()}
               {activeWeaponType && (
-                <Chip size="sm" className={activeWeaponType.className}>
+                <Chip size="sm" colour={activeWeaponType.colour}>
                   {activeWeaponType.label}
                 </Chip>
               )}
               {hasKnaveBallisticPenalty && (
-                <Chip size="sm" className="border-amber-500/60 bg-amber-950/50 text-amber-300">
+                <Chip size="sm" colour="amber">
                   Knave: BS −10
                 </Chip>
               )}
@@ -540,41 +537,44 @@ export function RangedCard({
 
           {(alternateProfiles.length > 0 || alternateMeleeProfiles.length > 0) && (
             <div className="flex flex-wrap gap-1.5">
-              <button
-                type="button"
+              <ToggleButton
+                selected={!isMeleeProfile && activeProfileIndex === 0}
+                selectedClassName={colourToggleSelectedSky}
+                className="px-2 py-1 text-xs lg:text-sm"
                 onClick={() => {
                   setActiveProfileIndex(0);
                   setActiveMeleeProfileIndex(null);
                 }}
-                className={`rounded border px-2 py-1 text-xs lg:text-sm ${!isMeleeProfile && activeProfileIndex === 0 ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}
               >
                 {alternateMeleeProfiles.length > 0 ? "Ranged" : "Primary"}
-              </button>
+              </ToggleButton>
               {alternateProfiles.map((profile, index) => (
-                <button
+                <ToggleButton
                   key={profile.label}
-                  type="button"
+                  selected={!isMeleeProfile && activeProfileIndex === index + 1}
+                  selectedClassName={colourToggleSelectedSky}
+                  className="px-2 py-1 text-xs lg:text-sm"
                   onClick={() => {
                     setActiveProfileIndex(index + 1);
                     setActiveMeleeProfileIndex(null);
                   }}
-                  className={`rounded border px-2 py-1 text-xs lg:text-sm ${!isMeleeProfile && activeProfileIndex === index + 1 ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}
                 >
                   {profile.label}
-                </button>
+                </ToggleButton>
               ))}
               {alternateMeleeProfiles.map((profile, index) => (
-                <button
+                <ToggleButton
                   key={profile.label}
-                  type="button"
+                  selected={activeMeleeProfileIndex === index}
+                  selectedClassName={colourToggleSelectedSky}
+                  className="px-2 py-1 text-xs lg:text-sm"
                   onClick={() => {
                     setActiveProfileIndex(0);
                     setActiveMeleeProfileIndex(index);
                   }}
-                  className={`rounded border px-2 py-1 text-xs lg:text-sm ${activeMeleeProfileIndex === index ? "border-sky-400 bg-sky-950/60 text-sky-200" : "border-slate-600 text-slate-300"}`}
                 >
                   {profile.label}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           )}
@@ -614,7 +614,7 @@ export function RangedCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
@@ -655,7 +655,7 @@ export function RangedCard({
             </div>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{craftsmanship}</span>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
@@ -740,7 +740,7 @@ export function RangedCard({
                       className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 flex items-center justify-between gap-2`}
                     >
                       <span className={`${uiItemName} truncate`}>{g.name}</span>
-                      <Chip size="sm" className={colourArcheotech}>
+                      <Chip size="sm" colour="amber">
                         Archeotech
                       </Chip>
                     </div>
@@ -755,7 +755,7 @@ export function RangedCard({
               <span className={uiTextLabel}>Magazines</span>
               {activeAmmoFamily && (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip size="sm" className={activeAmmoFamily.className}>
+                  <Chip size="sm" colour={activeAmmoFamily.colour}>
                     {activeAmmoFamily.label}
                   </Chip>
                 </div>
@@ -803,9 +803,9 @@ export function RangedCard({
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isActive ? (
-                            <span className="inline-flex items-center justify-center rounded-lg border border-green-500 px-2 py-0.5 text-xs font-semibold text-green-400 lg:text-sm shrink-0">
+                            <Chip colour="green" className="shrink-0">
                               Loaded
-                            </span>
+                            </Chip>
                           ) : (
                             editable &&
                             slot.referenceId && (
@@ -842,10 +842,7 @@ export function RangedCard({
                               bare
                             />
                           )}
-                          <Chip
-                            size="sm"
-                            className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}
-                          >
+                          <Chip size="sm" colour="slate">
                             ⚖ {formatWeightForDisplay(formatAmmoWeight(magazineWeight))}
                           </Chip>
                         </div>
@@ -858,7 +855,7 @@ export function RangedCard({
                           size="xs"
                           onUpdate={(rounds) => handleUpdateMagazineRounds(slot.id, rounds)}
                         />
-                        <span className={uiTextMuted}>/ {magazineCapacity}</span>
+                        <span className={uiTextBody}>/ {magazineCapacity}</span>
                       </div>
                     </div>
                   );
@@ -881,7 +878,7 @@ export function RangedCard({
 
               {activeAmmoFamily && (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Chip size="sm" className={activeAmmoFamily.className}>
+                  <Chip size="sm" colour={activeAmmoFamily.colour}>
                     {activeAmmoFamily.label}
                   </Chip>
                 </div>

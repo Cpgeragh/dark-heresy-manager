@@ -17,6 +17,7 @@ import { CharacterKebabContent } from "./CharacterSheet/CharacterKebabContent";
 import { useCharacterSheet } from "./CharacterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { Button } from "../ui/buttons/Button";
+import { IconButton } from "../ui/buttons/IconButton";
 
 import { VitalsTab } from "./CharacterSheet/VitalsTab";
 import { InsanityTab } from "./CharacterSheet/InsanityTab";
@@ -77,7 +78,7 @@ import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import { TitleToolbar } from "../ui/TitleToolbar";
-import { uiSectionShell } from "../ui/styles/editableStyles";
+import { uiSectionShell, uiTextError, uiTextPlaceholder } from "../ui/styles/editableStyles";
 import {
   CampaignCustomItemsScope,
   useCampaignCustomItemsRaw,
@@ -573,7 +574,7 @@ export default function CharacterSheet({
   // ================================================================
 
   if (!path) {
-    return <div className="text-slate-300 text-center py-10">Invalid character route.</div>;
+    return <div className={`${uiTextPlaceholder} text-center py-10`}>Invalid character route.</div>;
   }
 
   if (isReleasing || accessWasRevoked) {
@@ -590,9 +591,9 @@ export default function CharacterSheet({
 
   if (!character) {
     return (
-      <div className="text-slate-300 text-center py-10 space-y-4">
+      <div className={`${uiTextPlaceholder} text-center py-10 space-y-4`}>
         <p className="text-lg font-semibold">Character not found.</p>
-        <p className="text-sm lg:text-base text-slate-400">
+        <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
           This character may have been deleted or the link is invalid.
         </p>
       </div>
@@ -693,27 +694,27 @@ export default function CharacterSheet({
           title={TAB_TITLES[activeTab]}
           left={<SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />}
           right={
-            <button
-              type="button"
+            <IconButton
+              label="Messages"
               onClick={onOpenMessages}
-              aria-label="Messages"
-              className="flex h-10 w-11 items-center justify-center justify-self-end rounded-lg border border-slate-500 bg-slate-800 text-slate-300 transition hover:bg-slate-700 hover:text-white"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
-                />
-              </svg>
-            </button>
+              className="h-10 w-10 justify-self-end"
+              icon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+                  />
+                </svg>
+              }
+            />
           }
         />
 
@@ -726,9 +727,9 @@ export default function CharacterSheet({
           <ErrorBoundary
             fallback={
               <div className="p-6 text-center space-y-4">
-                <div className="text-slate-300">
+                <div>
                   <p className="text-lg font-semibold mb-2">Failed to load this tab</p>
-                  <p className="text-sm lg:text-base text-slate-400">
+                  <p className={`text-sm lg:text-base ${uiTextError}`}>
                     An error occurred while displaying this content.
                   </p>
                 </div>
@@ -1066,23 +1067,23 @@ export default function CharacterSheet({
         </div>
 
         {showScrollTop && (
-          <button
-            type="button"
+          <IconButton
+            label="Scroll to top"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            aria-label="Scroll to top"
-            className="fixed bottom-6 right-4 z-50 w-9 h-9 rounded bg-slate-800/85 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-slate-700/90 transition shadow-lg"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-            </svg>
-          </button>
+            className="fixed bottom-6 right-4 z-50 h-9 w-9 bg-slate-900/90 shadow-lg"
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="currentColor"
+                className="h-5 w-5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+              </svg>
+            }
+          />
         )}
       </div>
     </CampaignCustomItemsScope>

@@ -10,8 +10,9 @@ import {
   uiTextPlaceholder,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
+import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { colourArcheotech, colourNoticeAmber } from "../../../ui/styles/colourTokens";
+import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -45,7 +46,9 @@ export function ArcheotechForceFieldRow({
         <div className="flex items-center gap-2 flex-wrap">
           <span className={uiCardTitle}>{item.name}</span>
           {highlightAsArcheotech && (
-            <Chip className={`${colourArcheotech} shrink-0`}>Archeotech</Chip>
+            <Chip colour="amber" className="shrink-0">
+              Archeotech
+            </Chip>
           )}
         </div>
         {item.protectionRating !== undefined && (
@@ -72,13 +75,9 @@ export function ArcheotechForceFieldRow({
       </div>
 
       {editable && onToggleEquip && (
-        <button
-          type="button"
-          onClick={onToggleEquip}
-          className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
-        >
+        <Button variant="neutral" size="sm" onClick={onToggleEquip}>
           {active ? "Deactivate" : "Activate"}
-        </button>
+        </Button>
       )}
 
       {editable && <RemoveButton onClick={onRemove} label="Remove" />}

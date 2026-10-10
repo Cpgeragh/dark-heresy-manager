@@ -12,13 +12,13 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiTextPlaceholder,
-  uiCardTitle,
+  uiCardTitleHover,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
-import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourArcheotech, colourNoticeAmber, colourOrange } from "../../../ui/styles/colourTokens";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -89,34 +89,34 @@ export function ArcheotechWeaponCard({
   return (
     <div className={containerClass}>
       {/* Header: always visible */}
-      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
-        <button
-          type="button"
+      <div
+        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
+      >
+        <CardOverlayButton
+          label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+          expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
-          aria-expanded={expanded}
-          aria-label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex items-center gap-2 flex-wrap">
-            <p className={uiCardTitle}>{item.name}</p>
+            <p className={uiCardTitleHover}>{item.name}</p>
           </div>
           {(highlightAsArcheotech || weaponClass) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {highlightAsArcheotech && (
-                <Chip size="sm" className={`${colourArcheotech} shrink-0`}>
+                <Chip size="sm" colour="amber" className="shrink-0">
                   Archeotech
                 </Chip>
               )}
               {weaponClass === "Melee" ? (
-                <Chip size="sm" className={colourOrange}>
+                <Chip size="sm" colour="orange">
                   Melee
                 </Chip>
               ) : weaponClass ? (
                 (() => {
                   const c = weaponClassChip(weaponClass);
                   return c ? (
-                    <Chip size="sm" className={c.active}>
+                    <Chip size="sm" colour={c.colour}>
                       {c.label}
                     </Chip>
                   ) : null;
@@ -176,7 +176,7 @@ export function ArcheotechWeaponCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 {hasRules ? specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (

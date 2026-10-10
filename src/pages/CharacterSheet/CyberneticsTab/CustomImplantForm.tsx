@@ -13,6 +13,7 @@ import {
 } from "../../../ui/styles/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import {
   CRAFTSMANSHIP_STYLE,
   CYBERNETIC_CRAFTSMANSHIP_OPTIONS,
@@ -162,20 +163,15 @@ export function CustomImplantForm({
             <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
             <div className="mt-0.5 grid grid-cols-3 gap-1.5">
               {CYBERNETIC_CRAFTSMANSHIP_OPTIONS.map((option) => (
-                <button
+                <ToggleButton
                   key={option}
-                  type="button"
-                  aria-pressed={craftsmanship === option}
+                  selected={craftsmanship === option}
+                  selectedClassName={`${CRAFTSMANSHIP_STYLE[option]} font-semibold`}
+                  className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setCraftsmanship(option)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    craftsmanship === option
-                      ? `${CRAFTSMANSHIP_STYLE[option]} font-semibold`
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
                 >
                   {option}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </fieldset>

@@ -30,8 +30,11 @@ import {
 import type { CampaignWithId } from "../types/Firestore";
 import {
   uiSection,
+  uiActionRowLabel,
   editableInputClass,
   uiFormLabel,
+  uiTextBody,
+  uiTextError,
   uiTextPlaceholder,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
@@ -102,8 +105,7 @@ const CAMPAIGN_GROUP_TABS_ID = "dashboard-campaign-groups";
 const DELETE_PREFLIGHT_CACHE_MS = 60 * 60 * 1000;
 const campaignActionRowClass =
   "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4 lg:py-5";
-const campaignActionLabelClass =
-  "font-cinzel text-sm font-semibold uppercase tracking-wider text-slate-200 lg:text-base";
+const campaignActionLabelClass = uiActionRowLabel;
 
 interface DeletePreflightState {
   loading: boolean;
@@ -786,14 +788,14 @@ function DmCampaignList({
           }
         >
           <PickerBody>
-            <p className="text-sm lg:text-base text-slate-300">
+            <p className={`text-sm lg:text-base ${uiTextBody}`}>
               {pendingCampaignAction.kind === "archive"
                 ? `This archives this campaign: ${pendingCampaignAction.campaignName}. You can restore it later.`
                 : `This permanently deletes this campaign: ${pendingCampaignAction.campaignName}. This cannot be undone.`}
             </p>
             {pendingCampaignAction.kind === "delete" &&
               deletePreflights[pendingCampaignAction.campaignId]?.error && (
-                <span className="text-xs text-red-400">
+                <span className={`text-xs ${uiTextError}`}>
                   {deletePreflights[pendingCampaignAction.campaignId]?.error}
                 </span>
               )}

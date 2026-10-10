@@ -9,6 +9,7 @@ import { useToast } from "./Toast";
 import { CloseButton } from "../ui/buttons/CloseButton";
 import { ErrorState } from "../ui/ErrorState";
 import { PendingOverlay } from "../ui/PendingOverlay";
+import { uiDrawerTitle, uiTextPlaceholder } from "../ui/styles/editableStyles";
 import { recordComponentRender } from "../performance/performanceMetrics";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────
@@ -102,7 +103,7 @@ export function MessageDrawer({
       >
         {/* Panel header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
-          <h2 id="message-drawer-title" className="font-semibold text-slate-100">
+          <h2 id="message-drawer-title" className={uiDrawerTitle}>
             Messages
           </h2>
           <CloseButton onClick={onClose} ariaLabel="Close messages" />
@@ -112,7 +113,7 @@ export function MessageDrawer({
         {isOpen && campaignId && characterId ? (
           <PlayerThread campaignId={campaignId} characterId={characterId} playerUid={accountId} />
         ) : (
-          <p className="text-sm text-slate-500 text-center py-10 px-6">
+          <p className={`text-sm ${uiTextPlaceholder} text-center py-10 px-6`}>
             Open a character sheet to message your DM.
           </p>
         )}

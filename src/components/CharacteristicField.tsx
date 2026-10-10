@@ -9,7 +9,7 @@ import {
 import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
 import { Button } from "../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
-import { uiSection, uiTextBody } from "../ui/styles/editableStyles";
+import { editableInputColour, uiSection, uiTextBody, uiTextError } from "../ui/styles/editableStyles";
 import { colourAmberPlain } from "../ui/styles/colourTokens";
 import { recordComponentRender } from "../performance/performanceMetrics";
 
@@ -161,11 +161,7 @@ export function CharacteristicField({
             aria-label={`${label} base value`}
             aria-invalid={!!error}
             aria-describedby={error ? `${label}-error` : undefined}
-            className={`w-20 lg:w-24 px-2 lg:px-3 py-1 lg:py-1.5 rounded text-sm lg:text-base text-slate-100 ${
-              error && editable
-                ? "bg-slate-800 border border-red-700 focus:border-red-600"
-                : "bg-slate-800 border border-slate-600 focus:border-red-500"
-            } focus:outline-none`}
+            className={`w-20 lg:w-24 rounded border px-2 lg:px-3 py-1 lg:py-1.5 text-sm lg:text-base ${editableInputColour(editable, !!error)}`}
             autoComplete="off"
           />
         </div>
@@ -223,7 +219,7 @@ export function CharacteristicField({
 
         {/* Error message */}
         {error && editable && (
-          <div id={`${label}-error`} className="text-xs lg:text-sm text-red-600 mt-2" role="alert">
+          <div id={`${label}-error`} className={`text-xs lg:text-sm ${uiTextError} mt-2`} role="alert">
             {error}
           </div>
         )}

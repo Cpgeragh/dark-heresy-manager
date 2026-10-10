@@ -6,7 +6,6 @@ import { Chip } from "../../ui/chips/Chip";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { RollChip } from "../../ui/chips/RollChip";
-import { colourRose, colourSky } from "../../ui/styles/colourTokens";
 import {
   uiInfoModalWrapper,
   uiItemName,
@@ -14,7 +13,7 @@ import {
   uiTextBody,
   uiTextLabel,
 } from "../../ui/styles/editableStyles";
-import { sourceColour } from "../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
 import { getMutationRef } from "./mutationsReference";
@@ -50,10 +49,7 @@ export function MutationRow({
             <div className="mt-1 flex flex-wrap gap-1.5">
               {display.roll && <RollChip>{display.roll}</RollChip>}
               {mutation.source && (
-                <Chip
-                  size="sm"
-                  className={`bg-slate-800/40 font-code ${sourceColour(mutation.source)}`}
-                >
+                <Chip size="sm" colour={sourceChipColour(mutation.source)} className="font-code">
                   {mutation.source}
                 </Chip>
               )}
@@ -65,7 +61,7 @@ export function MutationRow({
                 <Chip
                   key={entry.characteristic}
                   size="sm"
-                  className={entry.value === undefined ? colourRose : colourSky}
+                  colour={entry.value === undefined ? "rose" : "sky"}
                 >
                   {entry.label}: {entry.value ?? "not recorded"}
                 </Chip>

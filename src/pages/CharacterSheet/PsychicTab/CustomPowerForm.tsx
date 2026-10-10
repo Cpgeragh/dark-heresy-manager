@@ -6,6 +6,7 @@ import {
 } from "../../../data/reference/psychicReference";
 import type { CustomItemOrigin } from "../../../constants/customItems";
 import { Button } from "../../../ui/buttons/Button";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
@@ -14,7 +15,9 @@ import {
   editableInputClass,
   editableTextareaClass,
   uiFormLabel,
+  uiTextError,
 } from "../../../ui/styles/editableStyles";
+import { chipColours } from "../../../ui/styles/colourTokens";
 import { disciplineColours } from "./psychicStyles";
 import { normalisePowerName } from "./psychicPowerHelpers";
 
@@ -170,7 +173,7 @@ export function CustomPowerForm({
             autoComplete="off"
           />
           {nameExists && (
-            <p className="text-xs lg:text-sm text-red-300">
+            <p className={`text-xs lg:text-sm ${uiTextError}`}>
               That power is already on this character.
             </p>
           )}
@@ -182,26 +185,26 @@ export function CustomPowerForm({
           </label>
           {target === "minor" || requiredDiscipline ? (
             <Chip
-              className={`w-fit ${disciplineColours[target === "minor" ? "Minor" : (requiredDiscipline ?? "")] ?? disciplineColours.default}`}
+              colour={
+                disciplineColours[target === "minor" ? "Minor" : (requiredDiscipline ?? "")] ??
+                disciplineColours.default
+              }
+              className="w-fit"
             >
               {target === "minor" ? "Minor" : requiredDiscipline}
             </Chip>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {majorDisciplines.map((d) => (
-                <button
+                <ToggleButton
                   key={d}
-                  type="button"
+                  selected={discipline === d}
+                  selectedClassName={`${chipColours[disciplineColours[d] ?? disciplineColours.default]} font-semibold`}
+                  className="text-xs lg:text-sm px-2.5 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setDiscipline(d)}
-                  className={[
-                    "text-xs lg:text-sm px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    discipline === d
-                      ? `${disciplineColours[d] ?? disciplineColours.default} font-semibold`
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
                 >
                   {d}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           )}
@@ -229,19 +232,15 @@ export function CustomPowerForm({
             </label>
             <div className="grid grid-cols-2 gap-1.5">
               {(["Half Action", "Full Action"] as const).map((action) => (
-                <button
+                <ToggleButton
                   key={action}
-                  type="button"
+                  selected={focusTime === action}
+                  selectedClassName="border-red-500 bg-red-500/20 text-red-400 font-semibold"
+                  className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setFocusTime(action)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    focusTime === action
-                      ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
                 >
                   {action.replace(" Action", "")}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </div>
@@ -258,19 +257,15 @@ export function CustomPowerForm({
               ["you", "You"],
               ["unlimited", "Unlimited"],
             ].map(([mode, label]) => (
-              <button
+              <ToggleButton
                 key={mode}
-                type="button"
+                selected={rangeMode === mode}
+                selectedClassName="border-red-500 bg-red-500/20 text-red-400 font-semibold"
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                 onClick={() => setRangeMode(mode as CustomRangeMode)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  rangeMode === mode
-                    ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
               >
                 {label}
-              </button>
+              </ToggleButton>
             ))}
           </div>
           {(rangeMode === "meters" || rangeMode === "km-radius") && (
@@ -302,19 +297,15 @@ export function CustomPowerForm({
             </label>
             <div className="grid grid-cols-2 gap-1.5">
               {(["Yes", "No"] as const).map((value) => (
-                <button
+                <ToggleButton
                   key={value}
-                  type="button"
+                  selected={sustained === value}
+                  selectedClassName="border-red-500 bg-red-500/20 text-red-400 font-semibold"
+                  className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setSustained(value)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    sustained === value
-                      ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
                 >
                   {value}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </div>

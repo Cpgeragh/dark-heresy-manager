@@ -404,7 +404,7 @@ describe("TalentsTab", () => {
     });
 
     expect(screen.queryByText("None.")).not.toBeInTheDocument();
-    expect(screen.getAllByText("General")[0]).toHaveClass("text-slate-200");
+    expect(screen.getAllByText("General")[0]).toHaveClass("text-slate-300");
     expect(screen.getAllByText("Emperor's Mercy")[0]).toHaveClass("text-emerald-300");
     expect(screen.getAllByText("Emperor's Sign")[0]).toHaveClass("text-violet-300");
     expect(screen.getAllByText("Emperor's Wrath")[0]).toHaveClass("text-amber-300");

@@ -8,7 +8,6 @@ import { Chip } from "../../ui/chips/Chip";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { RollChip } from "../../ui/chips/RollChip";
-import { colourRose, colourSky } from "../../ui/styles/colourTokens";
 import {
   uiInfoModalWrapper,
   uiItemName,
@@ -16,7 +15,7 @@ import {
   uiTextBody,
   uiTextLabel,
 } from "../../ui/styles/editableStyles";
-import { sourceColour } from "../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
 import { getCorruptionMalignancyRef } from "./corruptionReference";
@@ -52,10 +51,7 @@ export function MalignancyRow({
             <div className="mt-1 flex flex-wrap gap-1.5">
               {display.roll && <RollChip>{display.roll}</RollChip>}
               {malignancy.source && (
-                <Chip
-                  size="sm"
-                  className={`bg-slate-800/40 font-code ${sourceColour(malignancy.source)}`}
-                >
+                <Chip size="sm" colour={sourceChipColour(malignancy.source)} className="font-code">
                   {malignancy.source}
                 </Chip>
               )}
@@ -67,7 +63,7 @@ export function MalignancyRow({
                 <Chip
                   key={entry.characteristic}
                   size="sm"
-                  className={entry.value === undefined ? colourRose : colourSky}
+                  colour={entry.value === undefined ? "rose" : "sky"}
                 >
                   {entry.label}: {entry.value ?? "not recorded"}
                 </Chip>

@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import type { SkillTierAccess } from "shared-rules";
-import { charColour, sourceColour } from "../../../ui/styles/sourceStyles";
+import { characteristicChipColour, sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -16,17 +16,13 @@ import {
   editableInputClass,
   uiFormLabel,
   uiInfoModalWrapper,
-  uiItemName,
+  uiItemNameHover,
   uiSectionShell,
   uiTextBody,
 } from "../../../ui/styles/editableStyles";
-import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
-import {
-  colourAmberPlain,
-  colourPurple,
-  colourTeal,
-  colourValue,
-} from "../../../ui/styles/colourTokens";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
+import { colourAmberPlain, type ChipColour } from "../../../ui/styles/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
@@ -46,11 +42,11 @@ interface SkillRowProps {
   isDM?: boolean;
 }
 
-const LEVEL_BADGE: Record<string, string> = {
-  untrained: "bg-red-500/10 border-red-500 text-red-500",
-  trained: "bg-orange-500/10 border-orange-400 text-orange-400",
-  "+10": "bg-sky-500/10 border-sky-400 text-sky-400",
-  "+20": "bg-green-500/10 border-green-400 text-green-400",
+const LEVEL_BADGE: Record<string, ChipColour> = {
+  untrained: "red",
+  trained: "orange",
+  "+10": "sky",
+  "+20": "green",
 };
 
 export function SkillRow({
@@ -72,7 +68,7 @@ export function SkillRow({
   const [manualUpgradeArmed, setManualUpgradeArmed] = useState(false);
   const [manualUpgradeCost, setManualUpgradeCost] = useState("");
 
-  const levelBadgeClass = LEVEL_BADGE[skill.level] ?? "";
+  const levelBadgeColour = LEVEL_BADGE[skill.level];
   const talentSources = skill.talentSources ?? [];
   const talentSourceSummary = talentSources
     .map(
@@ -96,7 +92,7 @@ export function SkillRow({
       {talentSources.length > 0 && (
         <div>
           <p className={`${uiFormLabel} mb-1`}>Effects</p>
-          <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+          <ul className={`space-y-1 text-sm leading-relaxed ${uiTextBody} lg:text-base`}>
             {talentSources.map((source, index) => (
               <li key={index}>
                 {source.name} ({source.type})
@@ -150,27 +146,18 @@ export function SkillRow({
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* COLLAPSED ROW */}
       <div
-        className={`relative w-full text-left group ${onSelect ? "hover:bg-slate-700/40 transition" : ""} ${
+        className={`relative w-full text-left ${onSelect ? uiCardTapHeader : ""} ${
           previewMode ? "p-3 lg:p-4" : "px-3 lg:px-4 py-2.5 lg:py-3"
         }`}
       >
         {onSelect && (
-          <button
-            type="button"
-            onClick={() => onSelect(skill.id)}
-            aria-label={`Select ${skill.name}`}
-            className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(previewMode)}`}
-          />
+          <CardOverlayButton label={`Select ${skill.name}`} onClick={() => onSelect(skill.id)} />
         )}
         {/* Mobile: header, right-aligned upgrade, metadata with an isolated Total, then the full-width effect. */}
         <div className="relative pointer-events-none lg:hidden space-y-2.5">
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span
-                className={`${uiItemName} break-words ${onSelect ? "group-hover:text-white" : ""}`}
-              >
-                {displayName}
-              </span>
+              <span className={`${uiItemNameHover} break-words`}>{displayName}</span>
               {hasSkillInfo && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal title={skill.name} content={skillInfoContent} as="span" />
@@ -202,27 +189,29 @@ export function SkillRow({
               {previewMode && skill.source && (
                 <Chip
                   size="sm"
-                  className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}
+                  colour={sourceChipColour(skill.source)}
+                  className="font-code shrink-0"
                 >
                   {skill.source}
                 </Chip>
               )}
               {previewMode && cost !== undefined && (
-                <Chip size="sm" className={`font-code shrink-0 ${colourValue}`}>
+                <Chip size="sm" colour="amber" className="font-code shrink-0">
                   {cost} XP
                 </Chip>
               )}
               <Chip
                 size="sm"
-                className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}
+                colour={characteristicChipColour(skill.characteristic)}
+                className="font-code shrink-0"
               >
                 {CHAR_LABEL[skill.characteristic]}
               </Chip>
-              <Chip size="sm" className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}>
+              <Chip size="sm" colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
                 {skill.advanced ? "Advanced" : "Basic"}
               </Chip>
               {!hideLevelChip && (
-                <Chip size="sm" className={`shrink-0 ${levelBadgeClass}`}>
+                <Chip size="sm" colour={levelBadgeColour} className="shrink-0">
                   {skill.level === "trained"
                     ? "Trained"
                     : skill.level === "untrained"
@@ -247,11 +236,7 @@ export function SkillRow({
         <div className="relative pointer-events-none hidden lg:block lg:space-y-2.5">
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span
-                className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}
-              >
-                {displayName}
-              </span>
+              <span className={`${uiItemNameHover} truncate`}>{displayName}</span>
               {hasSkillInfo && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal title={skill.name} content={skillInfoContent} as="span" />
@@ -282,25 +267,26 @@ export function SkillRow({
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <div className="flex flex-wrap items-center gap-1.5">
               {previewMode && skill.source && (
-                <Chip
-                  className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}
-                >
+                <Chip colour={sourceChipColour(skill.source)} className="font-code shrink-0">
                   {skill.source}
                 </Chip>
               )}
               {previewMode && cost !== undefined && (
-                <Chip className={`font-code shrink-0 ${colourValue}`}>{cost} XP</Chip>
+                <Chip colour="amber" className="font-code shrink-0">
+                  {cost} XP
+                </Chip>
               )}
               <Chip
-                className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}
+                colour={characteristicChipColour(skill.characteristic)}
+                className="font-code shrink-0"
               >
                 {CHAR_LABEL[skill.characteristic]}
               </Chip>
-              <Chip className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}>
+              <Chip colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
                 {skill.advanced ? "Advanced" : "Basic"}
               </Chip>
               {!hideLevelChip && (
-                <Chip className={`shrink-0 ${levelBadgeClass}`}>
+                <Chip colour={levelBadgeColour} className="shrink-0">
                   {skill.level === "trained"
                     ? "Trained"
                     : skill.level === "untrained"

@@ -13,6 +13,7 @@ import {
   CUSTOM_ITEM_STATUS_ORDER,
 } from "../../constants/customItems";
 import { recordComponentRender } from "../../performance/performanceMetrics";
+import { uiTextPlaceholder } from "../../ui/styles/editableStyles";
 
 export function CustomItemLibraryAdmin({
   campaignId,
@@ -42,16 +43,13 @@ export function CustomItemLibraryAdmin({
     .filter((i) => filterCategory === "all" || i.category === filterCategory)
     .filter((i) => filterStatus === "all" || i.status === filterStatus);
 
-  const activeChip = "border-red-500/50 bg-red-500/10 text-red-300";
-  const inactiveChip = "border-slate-600 bg-slate-800/60 text-slate-400 hover:text-slate-200";
-
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-1.5">
         <Chip
           as="button"
           onClick={() => setFilterCategory("all")}
-          className={filterCategory === "all" ? activeChip : inactiveChip}
+          colour={filterCategory === "all" ? "red" : "slate"}
         >
           All categories
         </Chip>
@@ -60,7 +58,7 @@ export function CustomItemLibraryAdmin({
             as="button"
             key={cat}
             onClick={() => setFilterCategory(cat)}
-            className={filterCategory === cat ? activeChip : inactiveChip}
+            colour={filterCategory === cat ? "red" : "slate"}
           >
             {CUSTOM_ITEM_CATEGORY_LABELS[cat]}
           </Chip>
@@ -70,7 +68,7 @@ export function CustomItemLibraryAdmin({
         <Chip
           as="button"
           onClick={() => setFilterStatus("all")}
-          className={filterStatus === "all" ? activeChip : inactiveChip}
+          colour={filterStatus === "all" ? "red" : "slate"}
         >
           All statuses
         </Chip>
@@ -79,14 +77,14 @@ export function CustomItemLibraryAdmin({
             as="button"
             key={s}
             onClick={() => setFilterStatus(s)}
-            className={filterStatus === s ? activeChip : inactiveChip}
+            colour={filterStatus === s ? "red" : "slate"}
           >
             {s.charAt(0).toUpperCase() + s.slice(1)}
           </Chip>
         ))}
       </div>
       {filtered.length === 0 ? (
-        <p className="text-slate-400 text-sm">No custom items match the current filter.</p>
+        <p className={`text-sm ${uiTextPlaceholder}`}>No custom items match the current filter.</p>
       ) : (
         <div className="space-y-2">
           {filtered.map((item) => (

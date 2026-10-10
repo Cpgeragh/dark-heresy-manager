@@ -11,6 +11,7 @@ import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
@@ -240,20 +241,15 @@ export function CustomMeleeForm({
           <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
-              <button
+              <ToggleButton
                 key={option}
-                type="button"
-                aria-pressed={craftsmanship === option}
+                selected={craftsmanship === option}
+                selectedClassName={CRAFTSMANSHIP_STYLE[option]}
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                 onClick={() => setCraftsmanship(option)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  craftsmanship === option
-                    ? CRAFTSMANSHIP_STYLE[option]
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
               >
                 {option}
-              </button>
+              </ToggleButton>
             ))}
           </div>
         </fieldset>

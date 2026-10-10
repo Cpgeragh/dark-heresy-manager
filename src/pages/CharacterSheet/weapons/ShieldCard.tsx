@@ -10,14 +10,13 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiCardTitle,
+  uiCardTitleHover,
 } from "../../../ui/styles/editableStyles";
-import { uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import { Chip } from "../../../ui/chips/Chip";
-import { colourLime } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -60,21 +59,21 @@ export function ShieldCard({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header: always visible */}
-      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
-        <button
-          type="button"
+      <div
+        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
+      >
+        <CardOverlayButton
+          label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+          expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
-          aria-expanded={expanded}
-          aria-label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className={uiCardTitle}>{item.name}</p>
+            <p className={uiCardTitleHover}>{item.name}</p>
             {libraryItem && <StatusBadge status={libraryItem.status} />}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={colourLime}>
+            <Chip size="sm" colour="lime">
               Shield
             </Chip>
           </div>
@@ -129,7 +128,7 @@ export function ShieldCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 {hasRules ? item.specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (

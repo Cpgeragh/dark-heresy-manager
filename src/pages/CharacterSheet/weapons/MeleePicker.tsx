@@ -8,10 +8,10 @@ import {
 } from "../../../data/reference/weaponReference";
 import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { uiTextBody, uiTextMuted } from "../../../ui/styles/editableStyles";
-import { colourAmberFaint, colourFuchsia } from "../../../ui/styles/colourTokens";
+import { uiTextBody } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
@@ -22,14 +22,14 @@ import {
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
-import { ArrowLeft, ArrowRight } from "../../../ui/icons/PickerArrows";
+import { ArrowLeft } from "../../../ui/icons/PickerArrows";
+import { FilterButton } from "../../../ui/pickers/FilterButton";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip } from "./weaponShared";
 import { MeleeCard } from "./MeleeCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { meleeCraftsmanshipDescription, weaponTypeChip } from "./weaponHelpers";
-import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 
 function MeleeWeaponCardPickerRow({
   weaponReference,
@@ -62,7 +62,6 @@ function MeleeWeaponCardPickerRow({
     <MeleeCard
       weapon={weapon}
       editable={false}
-      pickerMode
       strengthBonus={strengthBonus}
       onSelect={editable ? onSelect : undefined}
       onRemove={() => {}}
@@ -176,22 +175,18 @@ export function MeleePicker({
       >
         <PickerBody>
           <div>
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
+            <p className={`text-xs lg:text-sm ${uiTextBody} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((q) => (
-                <button
-                  type="button"
+                <ToggleButton
                   key={q}
+                  selected={craftsmanship === q}
+                  selectedClassName={CRAFTSMANSHIP_STYLE[q]}
+                  className="flex-1 py-1.5 lg:py-2 text-sm lg:text-base font-medium"
                   onClick={() => setCraftsmanship(q)}
-                  className={[
-                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                    craftsmanship === q
-                      ? CRAFTSMANSHIP_STYLE[q]
-                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                  ].join(" ")}
                 >
                   {q}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           </div>
@@ -216,14 +211,9 @@ export function MeleePicker({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
-        <button
-          type="button"
-          onClick={() => setShowTypeFilterPicker(true)}
-          className={`w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
-        >
-          <span>{typeFilter ?? "All Types"}</span>
-          <ArrowRight />
-        </button>
+        <FilterButton className="w-full" onClick={() => setShowTypeFilterPicker(true)}>
+          {typeFilter ?? "All Types"}
+        </FilterButton>
       }
       footer={
         editable && showCustom ? (
@@ -264,7 +254,7 @@ export function MeleePicker({
                 {(() => {
                   const t = weaponTypeChip(data.type);
                   return t ? (
-                    <Chip size="sm" className={t.className}>
+                    <Chip size="sm" colour={t.colour}>
                       {t.label}
                     </Chip>
                   ) : null;
@@ -276,11 +266,11 @@ export function MeleePicker({
                   source={data.source}
                 />
                 {item.status === "draft" && (
-                  <Chip size="sm" className={colourAmberFaint}>
+                  <Chip size="sm" colour="amber">
                     Draft
                   </Chip>
                 )}
-                <Chip size="sm" className={colourFuchsia}>
+                <Chip size="sm" colour="fuchsia">
                   Custom
                 </Chip>
               </PickerRowChips>

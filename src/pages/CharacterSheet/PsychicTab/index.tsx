@@ -9,7 +9,12 @@ import {
   getPsychicPowerDescription,
   type PsychicPowerRef,
 } from "../../../data/reference/psychicReference";
-import { uiSection, uiFormLabel } from "../../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiFormLabel,
+  uiTextBody,
+  uiTextPlaceholder,
+} from "../../../ui/styles/editableStyles";
 import { colourGlowActive } from "../../../ui/styles/colourTokens";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
@@ -26,7 +31,11 @@ import {
   psyRatingPulseVars,
   psychicSelectionSourceColours,
 } from "./psychicStyles";
-import { colourActiveSky, colourActiveRose } from "../../../ui/styles/colourTokens";
+import {
+  colourActiveSky,
+  colourActiveRose,
+  type ChipColour,
+} from "../../../ui/styles/colourTokens";
 import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
 import {
   segmentedTabId,
@@ -94,11 +103,7 @@ function PowerSectionHeading({
   return (
     <div className="flex min-w-0 flex-col items-start gap-2">
       <SectionHeader>{title}</SectionHeader>
-      {availableSelections > 0 && (
-        <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
-          Available: {availableSelections}
-        </Chip>
-      )}
+      {availableSelections > 0 && <Chip colour="amber">Available: {availableSelections}</Chip>}
     </div>
   );
 }
@@ -106,19 +111,19 @@ function PowerSectionHeading({
 function PowerRouteCard({
   title,
   status,
-  statusClassName,
+  statusColour,
   onClick,
 }: {
   title: string;
   status: string;
-  statusClassName: string;
+  statusColour: ChipColour;
   onClick: () => void;
 }) {
   return (
     <PickerRow aria-label={title} trailing={<ArrowRight />} onClick={onClick}>
       <PickerRowName name={title} />
       <PickerRowChips>
-        <Chip className={statusClassName}>{status}</Chip>
+        <Chip colour={statusColour}>{status}</Chip>
       </PickerRowChips>
     </PickerRow>
   );
@@ -571,7 +576,7 @@ export function PsychicTab({
                 <InfoModal
                   title={`Psy Rating ${psyRating}`}
                   content={
-                    <p className="text-sm text-slate-300 leading-relaxed">
+                    <p className={`text-sm ${uiTextBody} leading-relaxed`}>
                       {TALENT_DESCRIPTIONS[`psy-rating-${psyRating}`]}
                     </p>
                   }
@@ -639,7 +644,7 @@ export function PsychicTab({
               )}
             </div>
             {activePowers.length === 0 ? (
-              <p className="text-sm lg:text-base text-slate-400">{activeEmptyText}</p>
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>{activeEmptyText}</p>
             ) : (
               <PowerGrid
                 powers={activePowers}
@@ -693,7 +698,9 @@ export function PsychicTab({
               )}
             </div>
             {psychic.minorPowers.length === 0 ? (
-              <p className="text-sm lg:text-base text-slate-400">No minor powers recorded.</p>
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+                No minor powers recorded.
+              </p>
             ) : (
               <PowerGrid
                 powers={psychic.minorPowers}
@@ -730,7 +737,9 @@ export function PsychicTab({
               )}
             </div>
             {psychic.majorPowers.length === 0 ? (
-              <p className="text-sm lg:text-base text-slate-400">No major powers recorded.</p>
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+                No major powers recorded.
+              </p>
             ) : (
               <PowerGrid
                 powers={psychic.majorPowers}
@@ -791,7 +800,7 @@ export function PsychicTab({
                       ? availableMinorPurchases.length
                       : availableMajorPurchases.length
                   }`}
-                  statusClassName={psychicSelectionSourceColours.talent}
+                  statusColour={psychicSelectionSourceColours.talent}
                   onClick={() => {
                     const available =
                       purchaseChoiceTarget === "minor"
@@ -816,7 +825,7 @@ export function PsychicTab({
                       ? availableMinorPsyRatingCount
                       : availableMajorPsyRatingCount
                   }`}
-                  statusClassName={psychicSelectionSourceColours.psyRating}
+                  statusColour={psychicSelectionSourceColours.psyRating}
                   onClick={() => {
                     const available =
                       purchaseChoiceTarget === "minor"
@@ -837,7 +846,7 @@ export function PsychicTab({
                     : "Add independent Major power"
                 }
                 status="No selection used"
-                statusClassName="border-slate-500 bg-slate-800/40 text-slate-300"
+                statusColour="slate"
                 onClick={() => {
                   setPendingTalentEntryUid(undefined);
                   setPurchaseModeTarget(null);

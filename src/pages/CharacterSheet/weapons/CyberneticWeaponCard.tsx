@@ -9,13 +9,13 @@ import { Chip } from "../../../ui/chips/Chip";
 import {
   uiNoticeBox,
   uiTextLabel,
-  uiTextMuted,
+  uiTextBody,
   uiTextPlaceholder,
   uiCardTitle,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
 import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { colourNoticePink, colourPink, colourOrange } from "../../../ui/styles/colourTokens";
+import { colourNoticePink } from "../../../ui/styles/colourTokens";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
@@ -64,18 +64,18 @@ export function CyberneticWeaponCard({
             <p className={uiCardTitle}>{weapon.name}</p>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={colourPink}>
+            <Chip size="sm" colour="pink">
               Cybernetic
             </Chip>
             {weapon.class === "Melee" ? (
-              <Chip size="sm" className={colourOrange}>
+              <Chip size="sm" colour="orange">
                 Melee
               </Chip>
             ) : weapon.class ? (
               (() => {
                 const c = weaponClassChip(weapon.class);
                 return c ? (
-                  <Chip size="sm" className={c.active}>
+                  <Chip size="sm" colour={c.colour}>
                     {c.label}
                   </Chip>
                 ) : null;
@@ -120,11 +120,11 @@ export function CyberneticWeaponCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Gained From</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{cyberneticName}</span>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>{cyberneticName}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 {hasRules ? effectiveSpecialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (
@@ -142,7 +142,7 @@ export function CyberneticWeaponCard({
             </div>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{craftsmanship}</span>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={`${craftsmanship} Weapon`}

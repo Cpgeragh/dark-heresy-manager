@@ -19,14 +19,15 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiCardTitle,
+  uiCardTitleHover,
 } from "../../../ui/styles/editableStyles";
-import { uiExpandButton, uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
-import { colourNoticePink, colourPink, colourViolet } from "../../../ui/styles/colourTokens";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { colourNoticePink, colourToggleSelectedSky } from "../../../ui/styles/colourTokens";
 import { Button } from "../../../ui/buttons/Button";
+import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
@@ -95,7 +96,6 @@ export function MeleeCard({
   slotsDisabled = false,
   forceExpanded = false,
   integrated = false,
-  pickerMode = false,
 }: {
   weapon: MeleeWeapon;
   editable: boolean;
@@ -116,7 +116,6 @@ export function MeleeCard({
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
   integrated?: boolean;
-  pickerMode?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
   recordComponentRender("MeleeCard");
   const [expanded, setExpanded] = useState(isEquipped);
@@ -300,23 +299,23 @@ export function MeleeCard({
       className={`${weapon.concealedBionic ? `${uiNoticeBox} ${colourNoticePink}` : uiSectionShell} overflow-hidden`}
     >
       {/* Header: always visible */}
-      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
+      <div
+        className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
+      >
         {!forceExpanded && (
-          <button
-            type="button"
-            onClick={onSelect ?? (() => setExpanded((e) => !e))}
-            aria-expanded={onSelect ? undefined : expanded}
-            aria-label={
+          <CardOverlayButton
+            label={
               onSelect
                 ? `Select ${weapon.name}`
                 : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`
             }
-            className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
+            expanded={onSelect ? undefined : expanded}
+            onClick={onSelect ?? (() => setExpanded((e) => !e))}
           />
         )}
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className={uiCardTitle}>{weapon.name}</p>
+            <p className={uiCardTitleHover}>{weapon.name}</p>
             {rulesDescription && (
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
@@ -331,7 +330,7 @@ export function MeleeCard({
             )}
             {libraryItem && <StatusBadge status={libraryItem.status} />}
             {integrated && (
-              <Chip size="sm" className={colourViolet}>
+              <Chip size="sm" colour="violet">
                 Integrated
               </Chip>
             )}
@@ -339,22 +338,22 @@ export function MeleeCard({
           {(classChips.length > 0 || activeWeaponType || weapon.concealedBionic) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {weapon.concealedBionic && (
-                <Chip size="sm" className={colourPink}>
+                <Chip size="sm" colour="pink">
                   Concealed Bionic
                 </Chip>
               )}
               {weapon.concealedBionic && (
-                <Chip size="sm" className={colourPink}>
+                <Chip size="sm" colour="pink">
                   Cybernetic
                 </Chip>
               )}
               {classChips.map((chip) => (
-                <Chip key={chip.label} size="sm" className={chip.className}>
+                <Chip key={chip.label} size="sm" colour={chip.colour}>
                   {chip.label}
                 </Chip>
               ))}
               {activeWeaponType && (
-                <Chip size="sm" className={activeWeaponType.className}>
+                <Chip size="sm" colour={activeWeaponType.colour}>
                   {activeWeaponType.label}
                 </Chip>
               )}
@@ -416,9 +415,16 @@ export function MeleeCard({
                 ...alternateMeleeProfiles.map((profile) => profile.label),
                 ...(pistolProfile ? ["Pistol"] : []),
               ].map((profile) => (
-                <button
-                  type="button"
+                <ToggleButton
                   key={profile}
+                  selected={
+                    activeProfile ===
+                    (profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee")
+                      ? "Melee"
+                      : profile)
+                  }
+                  selectedClassName={colourToggleSelectedSky}
+                  className="px-2 py-1 text-xs lg:text-sm"
                   onClick={() =>
                     setActiveProfile(
                       profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee")
@@ -426,17 +432,9 @@ export function MeleeCard({
                         : profile
                     )
                   }
-                  className={`rounded border px-2 py-1 text-xs lg:text-sm ${
-                    activeProfile ===
-                    (profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee")
-                      ? "Melee"
-                      : profile)
-                      ? "border-sky-400 bg-sky-950/60 text-sky-200"
-                      : "border-slate-600 text-slate-300"
-                  }`}
                 >
                   {profile}
-                </button>
+                </ToggleButton>
               ))}
             </div>
           )}
@@ -481,7 +479,7 @@ export function MeleeCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
@@ -522,7 +520,7 @@ export function MeleeCard({
             </div>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{craftsmanship}</span>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
@@ -564,7 +562,7 @@ export function MeleeCard({
                 )}
               </div>
               {pistolAmmoFamily && (
-                <Chip size="sm" className={pistolAmmoFamily.className}>
+                <Chip size="sm" colour={pistolAmmoFamily.colour}>
                   {pistolAmmoFamily.label}
                 </Chip>
               )}

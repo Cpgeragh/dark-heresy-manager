@@ -425,6 +425,19 @@ describe("CampaignOverview", () => {
     expect(importCharacterMock).toHaveBeenCalledWith("campaign-1", {});
   });
 
+  it("opens the file chooser from the Import JSON button", async () => {
+    const user = userEvent.setup();
+    renderPage("dm-1");
+
+    const kebabContent = setKebabContentMock.mock.calls.at(-1)?.[0];
+    render(kebabContent);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const clickSpy = vi.spyOn(fileInput, "click");
+    await user.click(screen.getByRole("button", { name: "Import JSON" }));
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("shows an error toast when import fails", async () => {
     readCharacterImportFileMock.mockRejectedValue(new Error("Invalid file"));
     renderPage("dm-1");

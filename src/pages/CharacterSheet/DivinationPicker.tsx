@@ -10,7 +10,7 @@ import { uiTextBody } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { RollChip } from "../../ui/chips/RollChip";
-import { sourceColour } from "../../ui/styles/sourceStyles";
+import { sourceChipColour } from "../../ui/styles/sourceStyles";
 
 export function DivinationInfoContent({ divination }: { divination: DivinationData }) {
   return (
@@ -65,7 +65,7 @@ export function DivinationPicker({
             />
             <PickerRowChips>
               <RollChip>{divination.roll}</RollChip>
-              <Chip className={`bg-slate-800/40 font-code ${sourceColour(divination.source)}`}>
+              <Chip colour={sourceChipColour(divination.source)} className="font-code">
                 {divination.source}
               </Chip>
             </PickerRowChips>

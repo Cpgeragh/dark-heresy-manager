@@ -1,71 +1,58 @@
 import type { InsanityDisorderSeverity } from "../../types/Character";
 import type { SegmentedTimelineSegment } from "../../ui/SegmentedTimeline";
-import {
-  colourAmberFaint,
-  colourBlue,
-  colourEmerald,
-  colourFuchsia,
-  colourInactive,
-  colourLime,
-  colourOrange,
-  colourPink,
-  colourRose,
-  colourSky,
-  colourTeal,
-} from "../../ui/styles/colourTokens";
-import { chipClassName } from "../../ui/styles/chipStyles";
+import type { ChipColour } from "../../ui/styles/colourTokens";
 import { INSANITY_TRACK, type InsanityTrackEntry } from "./insanityReference";
 
-export const severityChipClass: Record<InsanityDisorderSeverity, string> = {
-  Minor: colourSky,
-  Severe: colourAmberFaint,
-  Acute: colourRose,
+export const severityChipColour: Record<InsanityDisorderSeverity, ChipColour> = {
+  Minor: "sky",
+  Severe: "amber",
+  Acute: "rose",
 };
 
-const DISORDER_TYPE_COLOURS: Record<string, string> = {
-  "The Flesh is Weak": colourBlue,
-  Phobia: colourOrange,
-  "Obsession/Compulsion": colourTeal,
-  "Visions and Voices": colourFuchsia,
-  Delusion: colourLime,
-  "Horrific Nightmares": colourPink,
+const DISORDER_TYPE_COLOURS: Record<string, ChipColour> = {
+  "The Flesh is Weak": "blue",
+  Phobia: "orange",
+  "Obsession/Compulsion": "teal",
+  "Visions and Voices": "fuchsia",
+  Delusion: "lime",
+  "Horrific Nightmares": "pink",
 };
 
-export function disorderTypeChipClass(type: string): string {
-  return DISORDER_TYPE_COLOURS[type] ?? colourInactive;
+export function disorderTypeChipColour(type: string): ChipColour {
+  return DISORDER_TYPE_COLOURS[type] ?? "slate";
 }
 
-export function insanityDegreeChipClass(entry: InsanityTrackEntry): string {
-  if (entry.terminal) return colourRose;
+export function insanityDegreeChipColour(entry: InsanityTrackEntry): ChipColour {
+  if (entry.terminal) return "rose";
   switch (entry.degree) {
     case "Stable":
-      return colourEmerald;
+      return "emerald";
     case "Unsettled":
-      return colourSky;
+      return "sky";
     case "Disturbed":
-      return colourAmberFaint;
+      return "amber";
     case "Unhinged":
-      return colourOrange;
+      return "orange";
     case "Deranged":
-      return colourFuchsia;
+      return "fuchsia";
     default:
-      return colourInactive;
+      return "slate";
   }
 }
 
-export function insanityDisorderLevelChipClass(entry: InsanityTrackEntry): string {
+export function insanityDisorderLevelChipColour(entry: InsanityTrackEntry): ChipColour {
   switch (entry.degree) {
     case "Stable":
     case "Unsettled":
-      return colourEmerald;
+      return "emerald";
     case "Disturbed":
-      return colourSky;
+      return "sky";
     case "Unhinged":
-      return colourFuchsia;
+      return "fuchsia";
     case "Deranged":
-      return colourOrange;
+      return "orange";
     default:
-      return colourInactive;
+      return "slate";
   }
 }
 
@@ -138,6 +125,3 @@ export function insanityStepperClass(entry: InsanityTrackEntry): string {
       return "text-slate-100";
   }
 }
-
-export const referenceTriggerClass = chipClassName({ className: colourInactive });
-export const inactiveChipClass = colourInactive;

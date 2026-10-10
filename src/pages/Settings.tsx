@@ -24,7 +24,9 @@ import {
   uiCodeBox,
   uiCodeText,
   uiInfoModalWrapper,
+  uiActionRowLabel,
   uiSection,
+  uiTextBody,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { ManageDevicesButton } from "../ui/buttons/ManageDevicesButton";
@@ -47,8 +49,7 @@ interface Props {
 }
 
 const settingsRowClass = "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4 lg:py-5";
-const settingsLabelClass =
-  "font-cinzel text-sm font-semibold uppercase tracking-wider text-slate-200 lg:text-base";
+const settingsLabelClass = uiActionRowLabel;
 
 export default function Settings({
   effectiveUserId,
@@ -447,7 +448,7 @@ export default function Settings({
             }
           >
             <PickerBody>
-              <p className="text-sm lg:text-base text-slate-300">
+              <p className={`text-sm lg:text-base ${uiTextBody}`}>
                 Rotate code? A new one is generated and the old one stops working immediately.
               </p>
             </PickerBody>
@@ -551,7 +552,7 @@ export default function Settings({
           >
             <PickerBody>
               {!renameTarget.name && (
-                <p className="text-sm text-slate-300 lg:text-base">
+                <p className={`text-sm ${uiTextBody} lg:text-base`}>
                   Give this device a name so you can recognise it in your connected devices list.
                 </p>
               )}
@@ -637,25 +638,25 @@ export default function Settings({
               <dl className="space-y-3 text-sm lg:text-base">
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                  <dd className="text-slate-300">
+                  <dd className={uiTextBody}>
                     {remoteDisconnectTarget.name ?? "Unnamed device"}
                   </dd>
                 </div>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                  <dd className="text-slate-300">
+                  <dd className={uiTextBody}>
                     This device will lose access to the account and return to Create Your Account.
                   </dd>
                 </div>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
-                  <dd className="text-slate-300">
+                  <dd className={uiTextBody}>
                     Campaigns and characters remain available on the other connected devices.
                   </dd>
                 </div>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Recovery code</dt>
-                  <dd className="text-slate-300">
+                  <dd className={uiTextBody}>
                     The code will be replaced. The replacement remains available under View Account
                     Recovery Code in Settings.
                   </dd>
@@ -701,23 +702,23 @@ export default function Settings({
               <dl className="space-y-3 text-sm lg:text-base">
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                  <dd className="text-slate-300">{currentDeviceName}</dd>
+                  <dd className={uiTextBody}>{currentDeviceName}</dd>
                 </div>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                  <dd className="text-slate-300">
+                  <dd className={uiTextBody}>
                     This device will lose access to the account and return to Create Your Account.
                   </dd>
                 </div>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
-                  <dd className="text-slate-300">
+                  <dd className={uiTextBody}>
                     Campaigns and characters remain available on the other connected devices.
                   </dd>
                 </div>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Reconnect</dt>
-                  <dd className="text-slate-300">
+                  <dd className={uiTextBody}>
                     Use the account recovery code to connect this device again.
                   </dd>
                 </div>
@@ -802,7 +803,7 @@ export default function Settings({
             }
           >
             <PickerBody>
-              <p className="text-sm lg:text-base text-slate-300">
+              <p className={`text-sm lg:text-base ${uiTextBody}`}>
                 This permanently deletes your account. This cannot be undone.
               </p>
             </PickerBody>
@@ -824,18 +825,18 @@ export default function Settings({
             <dl className="space-y-3 text-sm lg:text-base">
               <div>
                 <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                <dd className="text-slate-300">{currentDeviceName}</dd>
+                <dd className={uiTextBody}>{currentDeviceName}</dd>
               </div>
               <div>
                 <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                <dd className="text-slate-300">
+                <dd className={uiTextBody}>
                   This device will lose access to the account and return to Create Your Account. No
                   devices will remain connected.
                 </dd>
               </div>
               <div>
                 <dt className={`font-semibold ${colourMetadataLabelText}`}>Access</dt>
-                <dd className="text-slate-300">
+                <dd className={uiTextBody}>
                   You will need the account recovery code to connect a device again.
                 </dd>
               </div>

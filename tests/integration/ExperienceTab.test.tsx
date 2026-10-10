@@ -154,7 +154,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     ).toHaveClass("border-emerald-500/50", "text-emerald-300");
     expect(
       within(screen.getByRole("article", { name: "Conscript Rank Card" })).getByText("0–499 XP")
-    ).toHaveClass("border-amber-700/50", "text-amber-400/80");
+    ).toHaveClass("border-amber-500/50", "text-amber-300");
     expect(
       within(screen.getByRole("article", { name: "Conscript Rank Card" })).getByText("Rank 1")
     ).toHaveClass("border-fuchsia-500/50", "text-fuchsia-300");

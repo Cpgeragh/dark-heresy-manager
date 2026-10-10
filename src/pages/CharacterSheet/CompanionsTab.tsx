@@ -13,10 +13,10 @@ import { StatChip } from "../../ui/chips/StatChip";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { usePendingClick } from "../../ui/usePendingClick";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
-import { uiExpandButton, uiPickerPressFeedback } from "../../ui/styles/buttonStyles";
+import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../ui/styles/buttonStyles";
 import {
   uiInfoModalWrapper,
-  uiItemName,
   uiSectionShell,
   uiSpinner,
   uiTextBody,
@@ -59,19 +59,16 @@ function CompanionPickerCard({
 
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
-      <div className="relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group">
-        <button
-          type="button"
-          onClick={onSelect ? handleSelect : toggle}
-          disabled={pending}
-          aria-busy={pending || undefined}
-          aria-expanded={onSelect ? undefined : expanded}
-          aria-label={
+      <div className={`${uiCardTapHeader} relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left`}>
+        <CardOverlayButton
+          label={
             onSelect
               ? `Select ${companionReference.name}`
               : `${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`
           }
-          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(Boolean(onSelect))} ${pending ? "cursor-wait" : ""}`}
+          expanded={onSelect ? undefined : expanded}
+          pending={pending}
+          onClick={onSelect ? handleSelect : toggle}
         />
         <div className={`${uiExpandButton} relative pointer-events-none flex items-center gap-2`}>
           <div className="flex items-center gap-1.5">
@@ -332,17 +329,17 @@ function CompanionCard({
 
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
-      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
-        <button
-          type="button"
+      <div
+        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
+      >
+        <CardOverlayButton
+          label={`${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`}
+          expanded={expanded}
           onClick={() => setExpanded((current) => !current)}
-          aria-expanded={expanded}
-          aria-label={`${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`}
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex items-center gap-1.5">
-            <h3 className={uiItemName}>{companionReference.name}</h3>
+            <h3 className={uiItemNameHover}>{companionReference.name}</h3>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
               <InfoModal title={companionReference.name} content={companionReference.description} />
             </span>

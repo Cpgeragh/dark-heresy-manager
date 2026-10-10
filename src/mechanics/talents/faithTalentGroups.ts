@@ -1,4 +1,5 @@
 import type { FaithTalentGroup, TalentData } from "shared-rules";
+import type { ChipColour } from "../../ui/styles/colourTokens";
 
 export const FAITH_TALENT_GROUP_LABELS: Record<FaithTalentGroup, string> = {
   general: "General",
@@ -7,16 +8,16 @@ export const FAITH_TALENT_GROUP_LABELS: Record<FaithTalentGroup, string> = {
   wrath: "Emperor's Wrath",
 };
 
-export const FAITH_TALENT_GROUP_CHIP_CLASSES: Record<FaithTalentGroup, string> = {
-  general: "border-slate-500/60 bg-slate-800/60 text-slate-200",
-  sign: "border-violet-500/60 bg-violet-950/30 text-violet-300",
-  mercy: "border-emerald-500/60 bg-emerald-950/30 text-emerald-300",
-  wrath: "border-amber-500/60 bg-amber-950/30 text-amber-300",
+export const FAITH_TALENT_GROUP_CHIP_COLOURS: Record<FaithTalentGroup, ChipColour> = {
+  general: "slate",
+  sign: "violet",
+  mercy: "emerald",
+  wrath: "amber",
 };
 
 export interface FaithTalentGroupChip {
   label: string;
-  className: string;
+  colour: ChipColour;
 }
 
 export function getFaithTalentGroupLabel(
@@ -31,6 +32,6 @@ export function getFaithTalentGroupChip(
   if (!talent?.faithGroup) return undefined;
   return {
     label: FAITH_TALENT_GROUP_LABELS[talent.faithGroup],
-    className: FAITH_TALENT_GROUP_CHIP_CLASSES[talent.faithGroup],
+    colour: FAITH_TALENT_GROUP_CHIP_COLOURS[talent.faithGroup],
   };
 }

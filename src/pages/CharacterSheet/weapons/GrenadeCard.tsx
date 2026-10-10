@@ -12,20 +12,13 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiTextPlaceholder,
   uiTextSubtle,
   uiInfoModalWrapper,
-  uiCardTitle,
+  uiCardTitleHover,
 } from "../../../ui/styles/editableStyles";
-import { uiExpandButton } from "../../../ui/styles/buttonStyles";
-import {
-  colourEmerald,
-  colourCyan,
-  colourOrange,
-  colourViolet,
-  colourTealLight,
-} from "../../../ui/styles/colourTokens";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -91,7 +84,7 @@ export function GrenadeCard({
               Stowed · {item.quantity} remaining
             </p>
           </div>
-          <Chip size="sm" className="border-slate-600 bg-slate-800/40 text-slate-300 shrink-0">
+          <Chip size="sm" colour="slate" className="shrink-0">
             Stowed
           </Chip>
         </div>
@@ -113,42 +106,36 @@ export function GrenadeCard({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header: always visible */}
-      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
-        <button
-          type="button"
+      <div
+        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
+      >
+        <CardOverlayButton
+          label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+          expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
-          aria-expanded={expanded}
-          aria-label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className={`${uiCardTitle} truncate`}>{item.name}</p>
+            <p className={`${uiCardTitleHover} truncate`}>{item.name}</p>
             {libraryItem && <StatusBadge status={libraryItem.status} />}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
             <Chip
               size="sm"
-              className={
-                item.type === "Mine"
-                  ? colourViolet
-                  : item.type === "Missile"
-                    ? colourOrange
-                    : colourCyan
-              }
+              colour={item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"}
             >
               {item.type ?? "Grenade"}
             </Chip>
             {(() => {
               const c = weaponClassChip(item.class);
               return c ? (
-                <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>
+                <Chip size="sm" colour={c.colour}>
                   {c.label}
                 </Chip>
               ) : null;
             })()}
             {isEquipped && (
-              <Chip size="sm" className={colourEmerald}>
+              <Chip size="sm" colour="emerald">
                 {equippedCount} ready
               </Chip>
             )}
@@ -216,7 +203,7 @@ export function GrenadeCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 {hasRules ? item.specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (
@@ -257,7 +244,7 @@ export function GrenadeCard({
 
           {/* Quantity row */}
           <div className="flex items-center gap-3 pt-1">
-            <span className={`text-xs lg:text-sm ${uiTextMuted} uppercase tracking-wide`}>Qty</span>
+            <span className={`text-xs lg:text-sm ${uiTextBody} uppercase tracking-wide`}>Qty</span>
             <QuantityControl
               quantity={item.quantity}
               editable={editable}
@@ -265,7 +252,7 @@ export function GrenadeCard({
               onUpdate={onUpdateQty}
             />
             {isEquipped && item.quantity > 3 && (
-              <span className={`text-[10px] lg:text-xs ${uiTextMuted} ml-1`}>
+              <span className={`text-[10px] lg:text-xs ${uiTextSubtle} ml-1`}>
                 3 ready, rest stowed
               </span>
             )}

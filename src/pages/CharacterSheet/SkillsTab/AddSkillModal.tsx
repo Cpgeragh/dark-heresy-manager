@@ -7,14 +7,14 @@ import {
   type SkillWithComputed,
 } from "./skillsConstants";
 import type { SkillSource } from "../../../types/SkillSource";
-import { charColour, sourceColour } from "../../../ui/styles/sourceStyles";
+import { characteristicChipColour, sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { Button } from "../../../ui/buttons/Button";
+import { FilterButton } from "../../../ui/pickers/FilterButton";
 import { PickerList, PickerModal, PickerBody, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowRight, ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { SkillRow } from "./SkillRow";
-import { colourPurple } from "../../../ui/styles/colourTokens";
 import { editableInputClass, uiFormLabel } from "../../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
@@ -228,7 +228,8 @@ export function AddSkillModal({
           <Chip
             key={source}
             size="sm"
-            className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(source)}`}
+            colour={sourceChipColour(source)}
+            className="font-code shrink-0"
           >
             {source}
           </Chip>
@@ -237,13 +238,14 @@ export function AddSkillModal({
           <Chip
             key={characteristic}
             size="sm"
-            className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
+            colour={characteristicChipColour(characteristic)}
+            className="font-code shrink-0"
           >
             {CHAR_LABEL[characteristic]}
           </Chip>
         ))}
         {item.skills[0].advanced && (
-          <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
+          <Chip size="sm" colour="purple" className="shrink-0">
             Advanced
           </Chip>
         )}
@@ -302,13 +304,9 @@ export function AddSkillModal({
       emptyMessage="No skills found."
       filterRow={
         unlockedCosts && (
-          <button
-            type="button"
-            onClick={() => setShowOverflow(true)}
-            className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left"
-          >
+          <FilterButton className="w-full" onClick={() => setShowOverflow(true)}>
             {showAllLabel}
-          </button>
+          </FilterButton>
         )
       }
     >

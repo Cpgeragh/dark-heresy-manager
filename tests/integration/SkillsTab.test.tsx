@@ -111,14 +111,8 @@ describe("SkillsTab", () => {
     expect(screen.getAllByText("Basic Skills").length).toBeGreaterThan(0);
     // Name also appears in the (closed) InfoModal dialog title, so match either.
     expect(screen.getAllByText("Awareness").length).toBeGreaterThan(0);
-    const skillRows = screen
-      .getAllByText("Awareness")
-      .map((name) => name.closest("div.group"))
-      .filter((row): row is HTMLElement => row instanceof HTMLElement);
-    expect(skillRows.length).toBeGreaterThan(0);
-    for (const row of skillRows) {
-      expect(row).not.toHaveClass("hover:bg-slate-700/40");
-    }
+    expect(document.querySelector(".hover\\:bg-slate-700\\/40")).toBeNull();
+    expect(document.querySelector("div.group")).toBeNull();
   });
 
   it("explains how untrained Basic and Advanced Skill totals are used", async () => {

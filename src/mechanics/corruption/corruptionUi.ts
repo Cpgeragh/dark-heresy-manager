@@ -1,28 +1,20 @@
 import type { SegmentedTimelineSegment } from "../../ui/SegmentedTimeline";
-import {
-  colourAmberFaint,
-  colourFuchsia,
-  colourInactive,
-  colourOrange,
-  colourRose,
-  colourSky,
-} from "../../ui/styles/colourTokens";
-import { chipClassName } from "../../ui/styles/chipStyles";
+import type { ChipColour } from "../../ui/styles/colourTokens";
 import { CORRUPTION_TRACK, type CorruptionTrackEntry } from "./corruptionReference";
 
-export function corruptionDegreeChipClass(entry: CorruptionTrackEntry): string {
-  if (entry.terminal) return colourRose;
+export function corruptionDegreeChipColour(entry: CorruptionTrackEntry): ChipColour {
+  if (entry.terminal) return "rose";
   switch (entry.degree) {
     case "Tainted":
-      return colourSky;
+      return "sky";
     case "Soiled":
-      return colourAmberFaint;
+      return "amber";
     case "Debased":
-      return colourOrange;
+      return "orange";
     case "Profane":
-      return colourFuchsia;
+      return "fuchsia";
     default:
-      return colourInactive;
+      return "slate";
   }
 }
 
@@ -94,6 +86,3 @@ export function corruptionStepperClass(entry: CorruptionTrackEntry): string {
       return "text-slate-100";
   }
 }
-
-export const referenceTriggerClass = chipClassName({ className: colourInactive });
-export const inactiveChipClass = colourInactive;

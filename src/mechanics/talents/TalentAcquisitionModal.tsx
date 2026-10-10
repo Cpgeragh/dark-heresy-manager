@@ -20,7 +20,6 @@ import type {
 } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { colourAmberFaint, colourInactive, colourValue } from "../../ui/styles/colourTokens";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import {
   editableInputClass,
@@ -110,7 +109,7 @@ function ResultRow({ label, value }: { label: string; value: number }) {
   return (
     <div className={`${uiSectionShell} flex items-center justify-between gap-3 px-3 py-2`}>
       <span className={uiFormLabel}>{label}</span>
-      <Chip size="lg" className={colourValue}>
+      <Chip size="lg" colour="amber">
         {value}
       </Chip>
     </div>
@@ -540,7 +539,7 @@ export function TalentAcquisitionModal({
                   name={item.name}
                   badges={
                     selected && (
-                      <Chip size="sm" className={colourAmberFaint}>
+                      <Chip size="sm" colour="amber">
                         Life-critical
                       </Chip>
                     )
@@ -739,7 +738,8 @@ export function TalentAcquisitionModal({
                     </div>
                     <Chip
                       size="sm"
-                      className={`shrink-0 ${item.qualifiesForFate ? colourAmberFaint : colourInactive}`}
+                      colour={item.qualifiesForFate ? "amber" : "slate"}
+                      className="shrink-0"
                     >
                       {item.qualifiesForFate ? "Qualifies for Fate" : "Removed — no Fate"}
                     </Chip>

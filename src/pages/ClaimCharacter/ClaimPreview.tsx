@@ -3,7 +3,8 @@
 import { useCallback } from "react";
 import type { OwnershipState } from "../../types/Recovery";
 import { Button } from "../../ui/buttons/Button";
-import { uiSection, uiTextError } from "../../ui/styles/editableStyles";
+import { uiSection, uiTextBody, uiTextError } from "../../ui/styles/editableStyles";
+import { colourSuccessPlain } from "../../ui/styles/colourTokens";
 
 interface ClaimPreviewProps {
   characterName: string;
@@ -22,7 +23,7 @@ export function ClaimPreview({
     switch (ownership) {
       case "unclaimed":
         return (
-          <p className="text-green-400 text-sm lg:text-base">
+          <p className={`text-sm lg:text-base ${colourSuccessPlain}`}>
             This character is unclaimed and available.
           </p>
         );
@@ -49,7 +50,7 @@ export function ClaimPreview({
     <div className={`${uiSection} space-y-4`}>
       <h2 className="text-xl lg:text-2xl font-semibold text-slate-100">Character Found</h2>
 
-      <div className="text-slate-300 text-sm lg:text-base space-y-1">
+      <div className={`${uiTextBody} text-sm lg:text-base space-y-1`}>
         <p>
           <span className="text-slate-400">Character:</span>{" "}
           <span className="font-semibold">{characterName}</span>

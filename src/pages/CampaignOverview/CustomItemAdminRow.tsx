@@ -4,8 +4,7 @@ import { useState } from "react";
 import type { CampaignCustomItem, CustomItemCategory } from "../../types/CustomItems";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { colourInactive } from "../../ui/styles/colourTokens";
-import { uiSection } from "../../ui/styles/editableStyles";
+import { uiSection, uiTextError } from "../../ui/styles/editableStyles";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {
@@ -28,10 +27,10 @@ type PreflightState = {
 };
 
 function impactDetails(state: PreflightState) {
-  if (state.error) return <span className="text-xs text-red-400">{state.error}</span>;
+  if (state.error) return <span className={`text-xs ${uiTextError}`}>{state.error}</span>;
   if (!state.result) return null;
   return (
-    <span className={state.result.safe ? "text-xs text-slate-500" : "text-xs text-red-400"}>
+    <span className={state.result.safe ? "text-xs text-slate-500" : `text-xs ${uiTextError}`}>
       {state.result.safe
         ? `Affects ${state.result.affectedDocuments} document${state.result.affectedDocuments === 1 ? "" : "s"}${state.result.affectedCopies ? ` (${state.result.affectedCopies} linked copies)` : ""}.`
         : (state.result.reason ?? "This operation is not safe to start.")}
@@ -111,7 +110,7 @@ export function CustomItemAdminRow({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-sm font-medium text-slate-200">{item.name}</span>
-            <Chip size="sm" className={`uppercase tracking-wide ${colourInactive}`}>
+            <Chip size="sm" colour="slate" className="uppercase tracking-wide">
               {CUSTOM_ITEM_CATEGORY_LABELS[item.category]}
             </Chip>
             <StatusBadge status={item.status} />

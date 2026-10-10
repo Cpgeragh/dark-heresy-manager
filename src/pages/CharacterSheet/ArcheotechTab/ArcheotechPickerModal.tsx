@@ -5,7 +5,7 @@ import {
   ARCHEOTECH_REFERENCE,
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
-import { uiTextBody, uiTextMuted, uiTextGMNote } from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiTextGMNote } from "../../../ui/styles/editableStyles";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
   PickerCustomAction,
@@ -176,7 +176,7 @@ export function ArcheotechPickerModal({
               />
               <PickerRowChips className="text-xs lg:text-sm">
                 {entry.item.data.type && (
-                  <span className={uiTextMuted}>{entry.item.data.type}</span>
+                  <span className={uiTextBody}>{entry.item.data.type}</span>
                 )}
                 <ItemMetaChips
                   bare
@@ -210,7 +210,7 @@ export function ArcheotechPickerModal({
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
-                <span className={uiTextMuted}>{entry.ref.type}</span>
+                <span className={uiTextBody}>{entry.ref.type}</span>
                 <ItemMetaChips
                   bare
                   weight={entry.ref.weight}

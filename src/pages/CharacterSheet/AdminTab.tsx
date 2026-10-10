@@ -6,7 +6,7 @@ import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { Button } from "../../ui/buttons/Button";
 import { ErrorState } from "../../ui/ErrorState";
 import { PendingOverlay } from "../../ui/PendingOverlay";
-import { uiSection, readOnlyBadgeClass } from "../../ui/styles/editableStyles";
+import { uiSection, readOnlyBadgeClass, uiTextPlaceholder } from "../../ui/styles/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
 
 interface AdminTabProps {
@@ -162,7 +162,7 @@ export function AdminTab({
             {claimLogError ? (
               <ErrorState>Unable to load claim history.</ErrorState>
             ) : claimLog.length === 0 ? (
-              <p className="text-sm lg:text-base text-slate-400">No claim events recorded yet.</p>
+              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No claim events recorded yet.</p>
             ) : (
               <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {claimLog.map((entry, index) => (

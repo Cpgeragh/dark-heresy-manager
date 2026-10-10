@@ -3,11 +3,12 @@ import type { WornArmourPiece } from "../../../types/Character";
 import {
   uiSection,
   uiTextLabel,
-  uiTextMuted,
+  uiTextBody,
   uiTextPlaceholder,
   uiItemName,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
+import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -49,7 +50,7 @@ function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
         return (
           <div key={name}>
             <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
-            <p className={`text-sm lg:text-base ${uiTextMuted} mt-1 leading-relaxed`}>{desc}</p>
+            <p className={`text-sm lg:text-base ${uiTextBody} mt-1 leading-relaxed`}>{desc}</p>
           </div>
         );
       })}
@@ -110,7 +111,7 @@ export function PieceRow({
 
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextMuted}`}>
+          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
             {qualities.length > 0 ? qualities.join(", ") : "-"}
           </span>
           {qualities.length > 0 && (
@@ -136,7 +137,7 @@ export function PieceRow({
 
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Craftsmanship</span>
-          <span className={`text-xs lg:text-sm ${uiTextMuted}`}>{craftsmanship}</span>
+          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
           <InfoModal
             title={`${craftsmanship} Armour`}
             content={armourCraftsmanshipDescription(craftsmanship)}
@@ -193,13 +194,9 @@ export function PieceRow({
       </div>
 
       {editable && (
-        <button
-          type="button"
-          onClick={() => onToggle(piece.id)}
-          className="text-xs lg:text-sm px-2 lg:px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
-        >
+        <Button variant="neutral" size="sm" onClick={() => onToggle(piece.id)}>
           {worn ? "Stow" : "Wear"}
-        </button>
+        </Button>
       )}
 
       {editable && <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />}

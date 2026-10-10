@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { ThreadMessage } from "../types/Firestore";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import { LoadingDots } from "../ui/LoadingDots";
+import { uiTextError, uiTextPlaceholder } from "../ui/styles/editableStyles";
 
 export function MessageThread({
   messages,
@@ -29,7 +30,7 @@ export function MessageThread({
   }, [newestMessageId]);
 
   if (messages.length === 0) {
-    return <p className="text-xs lg:text-sm text-slate-500 py-2 text-center">No messages yet.</p>;
+    return <p className={`text-xs lg:text-sm ${uiTextPlaceholder} py-2 text-center`}>No messages yet.</p>;
   }
 
   return (
@@ -52,7 +53,7 @@ export function MessageThread({
         </button>
       )}
       {olderError && (
-        <p className="text-xs lg:text-sm text-red-400 text-center">
+        <p className={`text-xs lg:text-sm ${uiTextError} text-center`}>
           Older messages could not be loaded. Try again.
         </p>
       )}

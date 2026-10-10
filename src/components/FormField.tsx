@@ -1,7 +1,7 @@
 // src/components/FormField.tsx
 
 import { useCallback } from "react";
-import { uiFormLabel } from "../ui/styles/editableStyles";
+import { uiFormLabel, uiTextError } from "../ui/styles/editableStyles";
 import { fieldControlClass } from "../ui/styles/fieldStyles";
 import { useDebouncedDraft } from "../hooks/useDebouncedDraft";
 
@@ -113,7 +113,7 @@ export function FormField({
       {hasError && (
         <span
           id={`${inputId}-error`}
-          className="text-[10px] lg:text-xs text-red-400 mt-0.5"
+          className={`text-[10px] lg:text-xs ${uiTextError} mt-0.5`}
           role="alert"
         >
           {error}

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
-import { uiPickerBackButton } from "../../ui/styles/buttonStyles";
 import { editableInputClass, uiFormLabel } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -46,13 +45,9 @@ export function AppearanceTraitPicker({
         isEmpty={false}
         footer={
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setQualifying(null)}
-              className={uiPickerBackButton}
-            >
+            <Button variant="neutral" size="sm" onClick={() => setQualifying(null)}>
               Back
-            </button>
+            </Button>
             <Button
               size="sm"
               type="button"
