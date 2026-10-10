@@ -1,11 +1,12 @@
 import { uiCell, uiTextLabel } from "../styles/editableStyles";
+import { colourTextPrimary } from "../styles/colourTokens";
 
 export function StatChip({
   label,
   value,
   size = "md",
   compactOnMobile = true,
-  valueColour = "text-slate-200",
+  valueColour = colourTextPrimary,
 }: {
   label: string;
   value: string | number;

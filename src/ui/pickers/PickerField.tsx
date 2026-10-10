@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
-import { editableInputClass, uiFormLabel } from "../styles/editableStyles";
+import {
+  editableInputClass,
+  uiFormLabel,
+  uiFormLabelHint,
+  uiTextPlaceholder,
+} from "../styles/editableStyles";
 import { ArrowRight } from "../icons/PickerArrows";
 import { RequiredFormLabel } from "../forms/RequiredFormLabel";
 import { uiPickerPressFeedback } from "../styles/buttonStyles";
@@ -52,11 +57,7 @@ export function PickerField({
         ) : (
           <label htmlFor={id} className={uiFormLabel}>
             {label}
-            {supportingText && (
-              <span className="ml-1 normal-case tracking-normal text-slate-500">
-                {supportingText}
-              </span>
-            )}
+            {supportingText && <span className={uiFormLabelHint}>{supportingText}</span>}
           </label>
         ))}
       <button
@@ -71,7 +72,7 @@ export function PickerField({
           label ? "mt-0.5" : ""
         } appearance-none text-left flex items-center justify-between ${uiPickerPressFeedback(!disabled)} ${buttonClassName}`.trim()}
       >
-        <span className={value ? "" : "text-slate-500"}>{value || placeholder}</span>
+        <span className={value ? "" : uiTextPlaceholder}>{value || placeholder}</span>
         <ArrowRight />
       </button>
     </div>

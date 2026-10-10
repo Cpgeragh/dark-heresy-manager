@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { colourTextMuted } from "../styles/colourTokens";
 
 interface TitleHeaderActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   align?: "start" | "end";
@@ -16,7 +17,7 @@ export function TitleHeaderActionButton({
   return (
     <button
       type={type}
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center ${alignment} rounded-lg text-lg text-slate-400 transition hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-40 lg:text-xl ${className}`.trim()}
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center ${alignment} rounded-lg text-lg ${colourTextMuted} transition hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-40 lg:text-xl ${className}`.trim()}
       {...props}
     />
   );

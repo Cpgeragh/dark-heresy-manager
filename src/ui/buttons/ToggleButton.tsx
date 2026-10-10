@@ -3,12 +3,12 @@
 // the behaviour are shared; the caller passes the selected colour and its own size classes.
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { colourControlSurface, colourTextMuted } from "../styles/colourTokens";
 
 const TOGGLE_BASE =
   "rounded border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-50";
 
-const TOGGLE_UNSELECTED =
-  "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300";
+const TOGGLE_UNSELECTED = `${colourControlSurface} ${colourTextMuted} hover:border-slate-500 hover:text-slate-300`;
 
 /** Classes for a pick-one button, for a caller that cannot use a button element, such as a radio label. */
 export function toggleButtonClass(selected: boolean, selectedClassName: string, className = "") {

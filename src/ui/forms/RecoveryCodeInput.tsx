@@ -13,7 +13,12 @@ import {
 } from "shared-rules";
 import { formatRecoveryCodeInputChange } from "../../utils/recoveryCode";
 import { validateRecoveryCode } from "../../utils/validation";
-import { editableInputClass, uiSectionHeader } from "../styles/editableStyles";
+import { editableInputClass, uiSectionHeader, uiTextMeta } from "../styles/editableStyles";
+import {
+  colourSuccessPlain,
+  colourTextPrimary,
+  colourControlSurface,
+} from "../styles/colourTokens";
 
 const RECOVERY_CODE_FORMATTED_LENGTH =
   RECOVERY_CODE_PREFIX.length + RECOVERY_CODE_SEGMENTS * (RECOVERY_CODE_SEGMENT_LENGTH + 1);
@@ -92,7 +97,7 @@ export function RecoveryCodeInput({
       className={
         appearance === "form"
           ? `${editableInputClass(true)} font-code [font-feature-settings:'zero'] disabled:cursor-not-allowed disabled:opacity-50`
-          : `w-full rounded-lg border border-slate-600 bg-slate-800 font-code [font-feature-settings:'zero'] text-slate-100 placeholder:text-slate-600 focus:outline-none disabled:opacity-50 ${sizing} ${focusColour}`
+          : `w-full rounded-lg border ${colourControlSurface} font-code [font-feature-settings:'zero'] ${colourTextPrimary} placeholder:text-slate-600 focus:outline-none disabled:opacity-50 ${sizing} ${focusColour}`
       }
     />
   );
@@ -109,9 +114,9 @@ export function RecoveryCodeInput({
       )}
       {input}
       {showValidation && (
-        <span className="mt-1 block text-xs lg:text-sm text-slate-400">
+        <span className={`mt-1 block ${uiTextMeta}`}>
           Format: <span className="font-code [font-feature-settings:'zero']">DH-XXXX-XXXX</span>{" "}
-          <span className={isValid ? "text-green-400" : "text-slate-500"}>
+          <span className={isValid ? colourSuccessPlain : undefined}>
             {isValid ? "Valid" : "Not valid yet"}
           </span>
         </span>

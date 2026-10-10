@@ -1278,6 +1278,18 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] A card that is held open or cannot be tapped, such as a Skill row outside a picker, shows no hover tint and keeps a plain name
 - [ ] Choosing a companion in the Companion picker still shows a spinner and the waiting cursor on that card until it saves
 - [ ] No text in the app appears in italics
+- [ ] Every required marker is the same red asterisk, in the custom item forms, the Device Name labels, the Insanity severity label and the Required note, and a screen reader skips it (`RequiredMark.tsx`)
+- [ ] Names, values, headings, form labels and XP numbers share one light grey, and the small labels such as Attendees, Current rank and Card spent share one sky blue (`colourTextPrimary`, `uiTextMeta`)
+- [ ] Rule names inside info modals, such as a weapon special rule, an armour rule, a Malignancy roll and an Insanity type, show in sky blue above a description that matches every other description (`uiRuleName`, `uiTextDescription`)
+- [ ] Every divider line inside a card, drawer or modal is the same grey, including the lines inside the Insanity and Corruption panels (`colourDivider`)
+- [ ] The box around each character sheet tab has the standard card border and fill, and shows an amber outline while the DM editing override is on (`CharacterSheet.tsx`)
+- [ ] The expand chevron on the Companion, Psychic power, Melee and Ranged cards expands and collapses the card, and the Cybernetic weapon card header, each note preview and each DM inbox thread open or expand from anywhere on the card with the hover tint and press effect (`ExpandButton.tsx`, `CardOverlayButton`)
+- [ ] The Reveal link on a character row and on a My Character card looks and behaves the same (`RevealCodeButton.tsx`)
+- [ ] The plus and minus buttons on the wounds, fate and similar counters match the ones on Gear, Drugs and ammo quantities, and the info buttons in modals and tooltips match each other (`uiStepButtonColour`, `uiInfoButton`)
+- [ ] The "Select installation side" options in the implant picker look like the other picker rows (`ImplantPicker.tsx`)
+- [ ] The Share App, Settings and Manage campaign buttons use the red outlined icon button, and the DM read-only toggle on the character sheet matches the other pick-one buttons, with an amber selected look (`IconButton`, `ToggleButton`)
+- [ ] The selected red toggles in the Psychic power, Archeotech and Armour piece forms share one look, and the violet and fuchsia filter pills in Skills and Talents match each other
+- [ ] The Insanity and Corruption timelines and steppers use the same degree colours, and damage type letters, toasts and the splash screen show their usual colours
 
 ## Coverage notes
 

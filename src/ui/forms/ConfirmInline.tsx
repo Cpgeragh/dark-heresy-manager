@@ -8,6 +8,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Button } from "../buttons/Button";
 import { editableInputColour } from "../styles/editableStyles";
+import { colourAmberPlain, colourErrorText } from "../styles/colourTokens";
 
 interface ConfirmInlineProps {
   /** Label on the resting trigger button. */
@@ -63,7 +64,7 @@ export function ConfirmInline({
 
   const triggerVariant = variant === "warning" ? "warningOutline" : "primary";
   const confirmVariant = variant === "warning" ? "warningOutline" : "primary";
-  const accent = variant === "warning" ? "text-amber-400" : "text-red-400";
+  const accent = variant === "warning" ? colourAmberPlain : colourErrorText;
 
   const handle = (fn: () => void | Promise<void>) => (e: React.MouseEvent) => {
     e.preventDefault();

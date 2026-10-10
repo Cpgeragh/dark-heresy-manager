@@ -3,6 +3,7 @@ import { sanitizeMoneyInput } from "../format/moneyFormat";
 import { editableInputClass, uiTextBody, uiTextError } from "../styles/editableStyles";
 import { RequiredFormLabel } from "../forms/RequiredFormLabel";
 import { PickerField } from "./PickerField";
+import { colourTextPrimary } from "../styles/colourTokens";
 
 export interface AssignedItemMetaFieldsProps {
   itemName: string;
@@ -37,7 +38,7 @@ export function AssignedItemMetaFields({
   return (
     <>
       <p className={`text-sm lg:text-base ${uiTextBody}`}>
-        <span className="font-medium text-slate-200">{itemName}</span> {explanation}
+        <span className={`font-medium ${colourTextPrimary}`}>{itemName}</span> {explanation}
       </p>
 
       {requiresCost && (
@@ -56,7 +57,9 @@ export function AssignedItemMetaFields({
             autoComplete="off"
           />
           {gmCost.trim() !== "" && !costValid && (
-            <p className={`text-xs lg:text-sm ${uiTextError}`}>Must be a whole number of 0 or more.</p>
+            <p className={`text-xs lg:text-sm ${uiTextError}`}>
+              Must be a whole number of 0 or more.
+            </p>
           )}
         </div>
       )}

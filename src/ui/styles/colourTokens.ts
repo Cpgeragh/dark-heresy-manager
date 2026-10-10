@@ -1,13 +1,98 @@
 // src/ui/styles/colourTokens.ts
 
-export const colourEmeraldPlain = "text-emerald-300";
 export const colourSuccessPlain = "text-emerald-400";
 export const colourAmberPlain = "text-amber-300";
-export const colourSkyPlain = "text-sky-300";
 export const colourMetadataLabelText = "text-sky-300/85";
-export const colourTextPrimary = "text-slate-100";
+export const colourTextPrimary = "text-slate-200";
+export const colourDivider = "border-slate-700";
+export const colourControlSurface = "border-slate-600 bg-slate-800";
+export const colourPopoverSurface = "bg-slate-900 border-slate-700";
+export const colourPageBackground = "bg-slate-950";
+export const colourControlSurfaceDisabled = "border-slate-700 bg-slate-800/50";
+export const colourControlDivider = "bg-slate-600";
+export const colourControlDividerDisabled = "bg-slate-700";
+export const colourControlShadow = "shadow-lg shadow-black/40";
+export const colourSplashRule = "border-slate-800";
+export const colourEditOverrideSurface = "border-amber-400 bg-amber-500/10";
 export const colourOverlayBackdrop = "bg-slate-950/60";
-export const colourRequiredText = "text-red-500";
+export const colourErrorText = "text-red-400";
+export const colourRequiredText = colourErrorText;
+export const colourDivideList = "divide-slate-700";
+export const colourAccentBar = "border-red-700";
+export const colourBorderRed = "border-red-500";
+export const colourBorderControl = "border-slate-600";
+export const colourControlRaised = "border-slate-600 bg-slate-700";
+export const colourStateRed = "border-red-500 bg-red-500/20";
+export const colourAdvanceFilled = "bg-red-700 border-red-500";
+export const colourAdvanceEmpty = "bg-slate-900 border-slate-600";
+export const colourFillInset = "bg-slate-800/60";
+export const colourFillPanel = "bg-slate-900";
+export const colourFillRaised = "bg-slate-700";
+export const colourFillControl = "bg-slate-800";
+export const colourFillSelected = "bg-slate-800/70";
+export const colourFillHeader = "bg-slate-900/80";
+export const colourFillFloating = "bg-slate-900/90";
+export const colourModalSurface = "bg-slate-900 border-slate-500";
+export const colourTabTrackSurface = "border-slate-600 bg-slate-950/70";
+export const colourTimelineMarker = "bg-slate-100";
+export const colourQrBackground = "bg-white";
+export const colourDotLoaded = "bg-green-400";
+export const colourDotIdle = "bg-slate-600";
+export const colourTextMuted = "text-slate-400";
+export const colourTextBody = "text-slate-300";
+export const colourTextPlaceholder = "text-slate-500";
+export const colourTextGMNote = "text-amber-400/70";
+export const colourCustomEntryText = "text-fuchsia-400";
+export const colourHeadingAccent = "text-red-500";
+export const colourNoticeAmberTitle = "text-amber-200";
+export const colourNoticeAmberText = "text-amber-100/80";
+export const colourAmberFill = "bg-amber-500 text-slate-900";
+export const colourOnAmberDim = "text-amber-900/70";
+export const colourSplashTitle = "text-red-600";
+export const colourTerminalText = "text-rose-300";
+export const colourPsychicText = "text-indigo-300";
+export const colourDrugNoticeText = "text-violet-400";
+export const colourToggleSelectedRed = "border-red-500 bg-red-500/20 text-red-400 font-semibold";
+export const colourToggleSelectedAmberSoft = "border-amber-600 bg-amber-600/20 text-amber-400";
+export const colourToggleSelectedViolet =
+  "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50";
+export const colourToggleSelectedFuchsia =
+  "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50";
+
+/** Text colour of a track step in the Insanity and Corruption steppers, by how far along the track it is. */
+export const degreeTextColour = {
+  first: "text-sky-200",
+  second: "text-amber-200",
+  third: "text-orange-200",
+  fourth: "text-fuchsia-200",
+  terminal: `${colourTerminalText} animate-pulse`,
+} as const;
+
+/** Bar fill of a segment in the Insanity and Corruption timelines, bright when reached and dim otherwise. */
+export const degreeBarColour = {
+  stable: { bright: "bg-emerald-500/70", dim: "bg-emerald-500/35" },
+  first: { bright: "bg-sky-500/70", dim: "bg-sky-500/35" },
+  second: { bright: "bg-amber-500/70", dim: "bg-amber-500/35" },
+  third: { bright: "bg-orange-500/70", dim: "bg-orange-500/35" },
+  fourth: { bright: "bg-fuchsia-500/70", dim: "bg-fuchsia-500/35" },
+  neutral: { bright: "bg-slate-500/70", dim: "bg-slate-500/35" },
+} as const;
+
+/** Text colour of the damage type letter on a weapon. */
+export const damageTypeTextColour = {
+  impact: "text-blue-400",
+  rending: colourErrorText,
+  energy: "text-orange-400",
+  explosive: "text-yellow-400",
+} as const;
+
+/** Fill, border and text of a toast, by its type. */
+export const toastColours = {
+  success: "bg-green-500/20 border-green-500 text-green-100",
+  error: "bg-red-500/20 border-red-500 text-red-100",
+  warning: "bg-amber-500/20 border-amber-500 text-amber-100",
+  info: "bg-blue-500/20 border-blue-500 text-blue-100",
+} as const;
 export const colourCareerPathOutline =
   "border border-fuchsia-500 text-fuchsia-300 enabled:hover:bg-fuchsia-500/10 enabled:active:bg-fuchsia-500/20";
 export const colourCareerPathOutlineMuted =
@@ -16,9 +101,10 @@ export const colourCareerBranchOutline =
   "border border-emerald-500 text-emerald-300 enabled:hover:bg-emerald-500/10 enabled:active:bg-emerald-500/20";
 export const colourCareerBranchOutlineMuted =
   "border border-emerald-500/50 text-emerald-300/60 enabled:hover:border-emerald-500/70 enabled:hover:bg-emerald-500/5 enabled:hover:text-emerald-300/80 enabled:active:bg-emerald-500/10";
-export const colourButtonNeutralOutline =
-  "border border-slate-500 text-slate-200 enabled:hover:bg-slate-800 enabled:active:bg-slate-700/75";
-export const colourToggleSelectedNeutral = "border-slate-400 bg-slate-700/70 text-slate-100";
+export const colourButtonNeutralOutline = `border border-slate-500 ${colourTextPrimary} enabled:hover:bg-slate-800 enabled:active:bg-slate-700/75`;
+export const colourToggleSelectedAmber =
+  "border-amber-400 bg-amber-500 text-slate-900 font-semibold";
+export const colourToggleSelectedNeutral = `border-slate-400 bg-slate-700/70 ${colourTextPrimary}`;
 export const colourToggleSelectedSky = "border-sky-400 bg-sky-500/10 text-sky-300";
 export const colourActiveSky =
   "border-sky-400 bg-sky-600/80 text-white shadow-sm shadow-sky-950/50";

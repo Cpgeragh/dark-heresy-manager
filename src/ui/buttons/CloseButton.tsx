@@ -2,6 +2,7 @@
 // Back navigation and destructive removal controls remain separate.
 
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
+import { colourTextMuted } from "../styles/colourTokens";
 
 export type CloseIconProps = Omit<HTMLAttributes<HTMLSpanElement>, "children">;
 
@@ -30,7 +31,7 @@ export function CloseButton({
     <button
       type={type}
       aria-label={ariaLabel}
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg lg:text-xl text-slate-400 hover:text-slate-200 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${className}`.trim()}
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg lg:text-xl ${colourTextMuted} hover:text-slate-200 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${className}`.trim()}
       {...props}
     >
       <CloseIcon />

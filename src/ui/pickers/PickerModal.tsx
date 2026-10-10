@@ -3,13 +3,19 @@
 
 import { useLayoutEffect, useRef } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
-import { editableInputClass, uiSectionShell, uiSpinner } from "../styles/editableStyles";
+import {
+  editableInputClass,
+  uiSectionShell,
+  uiSpinner,
+  uiTextPlaceholder,
+} from "../styles/editableStyles";
 import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
 import { PlusIcon } from "../icons/PlusIcon";
 import { uiPickerPressFeedback } from "../styles/buttonStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { usePendingClick } from "../usePendingClick";
+import { colourDivider } from "../styles/colourTokens";
 
 export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`p-4 lg:p-5 space-y-4 ${className}`.trim()} {...props} />;
@@ -196,7 +202,7 @@ export function PickerModal({
 
       {/* Search */}
       {!hideSearch && (
-        <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800">
+        <div className={`px-4 lg:px-5 py-2 lg:py-3 border-b ${colourDivider}`}>
           <input
             type="search"
             name="picker-search"
@@ -216,7 +222,9 @@ export function PickerModal({
 
       {/* Optional filter row (e.g. discipline chips) */}
       {filterRow && (
-        <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800 flex flex-wrap gap-1.5 justify-center">
+        <div
+          className={`px-4 lg:px-5 py-2 lg:py-3 border-b ${colourDivider} flex flex-wrap gap-1.5 justify-center`}
+        >
           {filterRow}
         </div>
       )}
@@ -234,7 +242,7 @@ export function PickerModal({
         className="min-h-0 overflow-y-auto flex-1"
       >
         {isEmpty && (
-          <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">
+          <p className={`p-4 lg:p-5 text-sm lg:text-base ${uiTextPlaceholder} text-center`}>
             {emptyMessage}
           </p>
         )}
@@ -243,7 +251,7 @@ export function PickerModal({
 
       {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
       {footer && (
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">{footer}</div>
+        <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider}`}>{footer}</div>
       )}
     </ModalShell>
   );

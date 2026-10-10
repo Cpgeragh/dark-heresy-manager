@@ -1,11 +1,12 @@
 import { Button } from "../buttons/Button";
 import { colourRequiredText } from "../styles/colourTokens";
+import { RequiredMark } from "./RequiredMark";
 
 /** Shared footer key for forms that mark mandatory controls with a red asterisk. */
 export function RequiredFieldsNote() {
   return (
     <p className={`text-xs lg:text-sm ${colourRequiredText}`}>
-      <span aria-hidden="true">*</span> Required
+      <RequiredMark /> Required
     </p>
   );
 }

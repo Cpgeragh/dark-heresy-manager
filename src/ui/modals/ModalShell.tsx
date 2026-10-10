@@ -4,6 +4,7 @@
 import { createPortal } from "react-dom";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { colourTextPrimary, colourModalSurface } from "../styles/colourTokens";
 
 export const MODAL_OPENED_EVENT = "dhm:modal-opened";
 export const MODAL_LAYER_CHANGED_EVENT = "dhm:modal-layer-changed";
@@ -172,7 +173,7 @@ export function ModalShell({
       onClose={() => {
         if (!unmountingRef.current) onClose();
       }}
-      className={`m-auto w-[calc(100%-2rem)] bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 text-slate-200 ${
+      className={`m-auto w-[calc(100%-2rem)] ${colourModalSurface} border rounded-xl shadow-2xl p-0 ${colourTextPrimary} ${
         suspended
           ? "invisible backdrop:bg-transparent backdrop:backdrop-blur-none"
           : "backdrop:bg-black/70 backdrop:backdrop-blur-sm"

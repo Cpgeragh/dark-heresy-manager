@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { uiModalTitle, uiModalTitleAccent } from "./styles/editableStyles";
+import { colourDivider } from "./styles/colourTokens";
 
 interface CenteredTitleHeaderProps {
   as?: "h1" | "h2";
@@ -24,12 +25,10 @@ export function CenteredTitleHeader({
 
   return (
     <div
-      className={`grid grid-cols-[2rem_1fr_2rem] items-center border-b border-slate-700 px-4 py-3 lg:px-5 lg:py-4 ${className}`.trim()}
+      className={`grid grid-cols-[2rem_1fr_2rem] items-center border-b ${colourDivider} px-4 py-3 lg:px-5 lg:py-4 ${className}`.trim()}
     >
       {left ?? <span aria-hidden />}
-      <Heading className={`${uiModalTitle} ${titleSizeClass} ${titleClassName}`}>
-        {title}
-      </Heading>
+      <Heading className={`${uiModalTitle} ${titleSizeClass} ${titleClassName}`}>{title}</Heading>
       {right ?? <span aria-hidden />}
     </div>
   );

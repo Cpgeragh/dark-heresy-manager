@@ -2,6 +2,7 @@ import { RequiredFormLabel } from "./RequiredFormLabel";
 import { sourceColour } from "../styles/sourceStyles";
 import { toggleButtonClass } from "../buttons/ToggleButton";
 import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
+import { colourFillSelected } from "../styles/colourTokens";
 
 interface OriginSelectorProps {
   name: string;
@@ -35,7 +36,7 @@ export function OriginSelector({
               key={option}
               className={toggleButtonClass(
                 selected,
-                `${sourceColour(option)} bg-slate-800/70 font-semibold`,
+                `${sourceColour(option)} ${colourFillSelected} font-semibold`,
                 [
                   "relative cursor-pointer text-center text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5",
                   "focus-within:outline-none focus-within:ring-2 focus-within:ring-red-500",

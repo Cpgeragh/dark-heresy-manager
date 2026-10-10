@@ -2,7 +2,9 @@
 // Inline quantity editor: decrement button, click-to-type display, increment button.
 
 import { useQuantityEdit } from "../hooks/useQuantityEdit";
+import { uiStepButtonColour } from "./styles/buttonStyles";
 import { editableInputColour } from "./styles/editableStyles";
+import { colourTextPrimary } from "./styles/colourTokens";
 
 interface Props {
   quantity: number;
@@ -54,7 +56,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           type="button"
           onClick={() => onUpdate(Math.max(0, quantity - 1))}
           aria-label="Decrease quantity"
-          className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
+          className={`${sizeStyles.btn} rounded ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
           −
         </button>
@@ -76,7 +78,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
         <span
           onClick={editable ? start : undefined}
           title={editable ? "Click to set quantity" : undefined}
-          className={`${sizeStyles.display} font-code text-slate-100 text-center ${
+          className={`${sizeStyles.display} font-code ${colourTextPrimary} text-center ${
             editable
               ? "cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
               : ""
@@ -91,7 +93,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           type="button"
           onClick={() => onUpdate(quantity + 1)}
           aria-label="Increase quantity"
-          className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
+          className={`${sizeStyles.btn} rounded ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
           +
         </button>
