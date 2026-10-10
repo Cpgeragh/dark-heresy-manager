@@ -22,7 +22,12 @@ import {
   RANGED_WEAPON_REFERENCE,
 } from "../../data/reference/weaponReference";
 import { Button } from "../../ui/buttons/Button";
-import { editableInputClass, uiFormLabel, uiTextBody } from "../../ui/styles/editableStyles";
+import {
+  uiChipRow,
+  editableInputClass,
+  uiFormLabel,
+  uiTextBody,
+} from "../../ui/styles/editableStyles";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
@@ -269,7 +274,7 @@ export function WeaponTrainingTab({
       {WEAPON_TRAINING_GROUPS.map((group) => (
         <div key={group.label}>
           <p className={`${uiFormLabel} mb-1.5`}>{group.label}</p>
-          <div className="flex flex-wrap justify-center gap-1.5">
+          <div className={`${uiChipRow} justify-center`}>
             {group.items.map(({ id, display }) => {
               const trainingId = id as WeaponTrainingTalentId;
               const granted = grantedTraining.includes(trainingId);
@@ -351,7 +356,7 @@ export function WeaponTrainingTab({
       <div>
         <p className={`${uiFormLabel} mb-1.5`}>Exotic Weapon Training</p>
 
-        <div className="flex flex-wrap justify-center items-center gap-1.5 max-w-xl mx-auto">
+        <div className={`${uiChipRow} justify-center items-center max-w-xl mx-auto`}>
           {weaponTraining.exoticWeapons.map((weapon, index) => (
             <button
               key={`owned:${index}:${weapon.name}`}

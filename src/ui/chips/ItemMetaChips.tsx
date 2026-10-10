@@ -1,3 +1,4 @@
+import { uiChipRow } from "../styles/editableStyles";
 // src/ui/chips/ItemMetaChips.tsx
 // Shared helper for ordinary item metadata chips.
 
@@ -12,7 +13,7 @@ interface Props {
   availability?: string | null;
   source?: string | null;
   purchaseAmount?: string | null;
-  /** Override the wrapper className. Defaults to "flex flex-wrap gap-1.5". */
+  /** Override the wrapper className. Defaults to uiChipRow. */
   className?: string;
   /**
    * When true, renders chips as a React Fragment with no wrapper div.
@@ -74,5 +75,5 @@ export function ItemMetaChips({
   );
 
   if (bare) return chips;
-  return <div className={className ?? "flex flex-wrap gap-1.5"}>{chips}</div>;
+  return <div className={className ?? uiChipRow}>{chips}</div>;
 }

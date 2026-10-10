@@ -7,6 +7,7 @@ import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { RollChip } from "../../ui/chips/RollChip";
 import {
+  uiChipRow,
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
@@ -46,7 +47,7 @@ export function MutationRow({
         <div className="min-w-0">
           <span className={uiItemName}>{display.name}</span>
           {(display.roll || mutation.source) && (
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <div className={`mt-1 ${uiChipRow}`}>
               {display.roll && <RollChip>{display.roll}</RollChip>}
               {mutation.source && (
                 <Chip size="sm" colour={sourceChipColour(mutation.source)} className="font-code">
@@ -56,7 +57,7 @@ export function MutationRow({
             </div>
           )}
           {rollEntries.length > 0 && (
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <div className={`mt-1 ${uiChipRow}`}>
               {rollEntries.map((entry) => (
                 <Chip
                   key={entry.characteristic}

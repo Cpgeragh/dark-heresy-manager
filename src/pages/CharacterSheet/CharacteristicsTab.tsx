@@ -28,6 +28,7 @@ import {
   makeCurrentRankPurchase,
 } from "shared-rules";
 import {
+  uiInlineRow,
   uiSection,
   uiCell,
   uiCellLabel,
@@ -430,7 +431,7 @@ export function CharacteristicsTab({
 
       {/* Characteristic Bonuses */}
       <div>
-        <div className="flex items-center gap-2 mb-2">
+        <div className={`${uiInlineRow} mb-2`}>
           <SectionHeader>Characteristic Bonuses</SectionHeader>
           <span className={uiInfoModalWrapper}>
             <InfoModal
@@ -463,7 +464,7 @@ export function CharacteristicsTab({
 
       {/* Movement */}
       <div>
-        <div className="flex items-center gap-2 mb-2">
+        <div className={`${uiInlineRow} mb-2`}>
           <SectionHeader>Movement</SectionHeader>
           <span className={uiInfoModalWrapper}>
             <InfoModal

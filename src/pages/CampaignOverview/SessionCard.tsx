@@ -14,6 +14,7 @@ import { Chip } from "../../ui/chips/Chip";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
+  uiInlineRow,
   editableInputClass,
   editableTextareaClass,
   uiFormLabelSecondary,
@@ -241,7 +242,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
     <div className={uiSection + " space-y-2"}>
       <div className="flex items-center justify-between">
         <span className="font-semibold lg:text-lg">{dateStr}</span>
-        <div className="flex items-center gap-2">
+        <div className={`${uiInlineRow}`}>
           {session.xpAwarded > 0 && <Chip colour="amber">+{session.xpAwarded} XP</Chip>}
           {isDM &&
             session.xpAwarded > 0 &&

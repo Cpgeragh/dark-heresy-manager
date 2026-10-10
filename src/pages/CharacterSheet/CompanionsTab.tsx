@@ -17,6 +17,8 @@ import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../ui/buttons/ExpandButton";
 import { uiCardTapHeader, uiExpandButton } from "../../ui/styles/buttonStyles";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiInfoModalWrapper,
   uiSectionShell,
   uiSpinner,
@@ -73,7 +75,7 @@ function CompanionPickerCard({
           pending={pending}
           onClick={onSelect ? handleSelect : toggle}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none flex items-center gap-2`}>
+        <div className={`${uiExpandButton} relative pointer-events-none ${uiInlineRow}`}>
           <div className="flex items-center gap-1.5">
             <span className={uiItemNameHover}>{companionReference.name}</span>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
@@ -240,7 +242,7 @@ function CompanionProfileDetails({
 }) {
   return (
     <>
-      <div className="flex flex-wrap gap-1.5 mt-2">
+      <div className={`${uiChipRow} mt-2`}>
         {CHARACTERISTICS.map(({ key, label }) => (
           <StatChip
             key={key}
@@ -307,7 +309,7 @@ function CompanionProfileDetails({
         />
       </div>
 
-      <div className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-2`}>
+      <div className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-2`}>
         <ItemMetaChips source={companionReference.source} bare size="sm" />
       </div>
     </>
@@ -347,7 +349,7 @@ function CompanionCard({
             </span>
           </div>
         </div>
-        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
           <ExpandChevron expanded={expanded} />
         </div>
       </div>

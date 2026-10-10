@@ -15,6 +15,8 @@ import { RollChip } from "../../ui/chips/RollChip";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
+  uiChipRow,
+  uiSplitRow,
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
@@ -59,7 +61,7 @@ function DisorderRow({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className={uiItemName}>{disorder.name}</span>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <div className={`mt-1 ${uiChipRow} items-center`}>
             <Chip size="sm" colour={disorderTypeChipColour(disorder.type)}>
               {disorder.type}
             </Chip>
@@ -200,7 +202,7 @@ function TraumaRow({
         <div className="min-w-0">
           <span className={uiItemName}>{name}</span>
           {(roll || trauma.source) && (
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <div className={`mt-1 ${uiChipRow}`}>
               {roll && <RollChip>{roll}</RollChip>}
               {trauma.source && (
                 <Chip size="sm" colour={sourceChipColour(trauma.source)} className="font-code">
@@ -251,7 +253,7 @@ function TraumaRow({
 
 export function TraumaHeader({ editable, onAdd }: { editable: boolean; onAdd: () => void }) {
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className={`${uiSplitRow}`}>
       <span className="inline-flex items-center gap-1.5">
         <SectionHeader>Temporary Trauma</SectionHeader>
         <span className={uiInfoModalWrapper}>
@@ -302,7 +304,7 @@ export function TraumaList({
 
 export function DisordersHeader({ editable, onAdd }: { editable: boolean; onAdd: () => void }) {
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className={`${uiSplitRow}`}>
       <SectionHeader>Disorders</SectionHeader>
       {editable ? (
         <AddButton label="Add Disorder" onClick={onAdd} />

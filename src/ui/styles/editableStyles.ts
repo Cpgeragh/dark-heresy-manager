@@ -56,6 +56,18 @@ export const uiSection = `${uiSectionShell} p-3 lg:p-4`;
 
 export const uiCell = "rounded border border-slate-500 bg-slate-900/60";
 
+/** Wrapping row of compact chips or chip-shaped controls. */
+export const uiChipRow = "flex flex-wrap gap-1.5";
+
+/** Inline row whose contents are vertically centred. */
+export const uiInlineRow = "flex items-center gap-2";
+
+/** Inline row with its contents split between the two ends. */
+export const uiSplitRow = "flex items-center justify-between gap-2";
+
+/** Two-column form field grid which collapses to one column on a phone. */
+export const uiFieldGrid = "grid grid-cols-1 gap-3 sm:grid-cols-2";
+
 /** Tinted card shape without a colour: pair with a colourNotice token. */
 export const uiNoticeBox = "rounded-lg border";
 

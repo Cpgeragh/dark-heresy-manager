@@ -8,6 +8,8 @@ import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReferenc
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiNoticeBox,
   uiSectionShell,
   uiTextBody,
@@ -99,11 +101,11 @@ export function ArcheotechWeaponCard({
           onClick={() => setExpanded((e) => !e)}
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className={`${uiInlineRow} flex-wrap`}>
             <p className={uiCardTitleHover}>{item.name}</p>
           </div>
           {(highlightAsArcheotech || weaponClass) && (
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+            <div className={`mt-0.5 ${uiChipRow} items-center`}>
               {highlightAsArcheotech && (
                 <Chip size="sm" colour="amber" className="shrink-0">
                   Archeotech
@@ -126,7 +128,7 @@ export function ArcheotechWeaponCard({
             </div>
           )}
         </div>
-        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -149,7 +151,7 @@ export function ArcheotechWeaponCard({
 
           {/* Stat chips: only for items with structured weapon data */}
           {hasWeaponStats && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`${uiChipRow}`}>
               {range && <StatChip label="Range" value={range} />}
               {rof && <StatChip label="RoF" value={rof} />}
               {damage && (
@@ -231,7 +233,7 @@ export function ArcheotechWeaponCard({
             value={value}
             availability={availability}
             source={source}
-            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
+            className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
           />
         </div>
       )}

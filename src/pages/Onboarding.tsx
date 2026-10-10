@@ -10,6 +10,7 @@ import { createAccount, getRecoveryCode } from "../services/identityService";
 import { completeOnboarding, discardOnboardingSetup } from "../services/userAccountService";
 import { saveFirstName } from "../services/profileService";
 import {
+  uiInlineRow,
   editableInputClass,
   uiCodeBox,
   uiCodeText,
@@ -478,7 +479,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                     </Button>
 
                     <label
-                      className={`flex cursor-pointer items-center justify-center gap-2 text-sm lg:text-base ${colourTextPrimary}`}
+                      className={`${uiInlineRow} cursor-pointer justify-center text-sm lg:text-base ${colourTextPrimary}`}
                     >
                       <input
                         type="checkbox"

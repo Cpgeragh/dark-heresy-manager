@@ -11,6 +11,8 @@ import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import {
+  uiChipRow,
+  uiSplitRow,
   uiCell,
   uiInfoModalWrapper,
   uiItemName,
@@ -68,7 +70,7 @@ export function AmmoEntryRow({
   return (
     <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5`}>
       {/* Name row */}
-      <div className="flex items-center justify-between gap-2">
+      <div className={`${uiSplitRow}`}>
         <div className="flex items-center gap-1.5 min-w-0">
           <button
             type="button"
@@ -99,7 +101,7 @@ export function AmmoEntryRow({
       </div>
 
       {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
-        <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
+        <div className={`${uiChipRow} items-center text-[10px] lg:text-xs`}>
           {visibleClipSizeLabel && (
             <Chip size="sm" colour="slate">
               {visibleClipSizeLabel}

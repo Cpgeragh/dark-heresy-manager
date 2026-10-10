@@ -22,6 +22,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
+  uiInlineRow,
   uiTextBody,
   uiTextLabel,
   uiTextGMNote,
@@ -247,7 +248,7 @@ export function ImplantPicker({
 
         <PickerBody>
           {location && (
-            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextBody}`}>
+            <div className={`${uiInlineRow} text-xs lg:text-sm ${uiTextBody}`}>
               <span>Installing on:</span>
               <Chip colour="slate">
                 {location.map((item) => ARMOUR_LOCATION_LABELS[item]).join(" & ")}

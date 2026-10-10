@@ -4,7 +4,9 @@
 import { useLayoutEffect, useRef } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
 import {
+  uiChipRow,
   editableInputClass,
+  uiInlineRow,
   uiSectionShell,
   uiSpinner,
   uiTextPlaceholder,
@@ -98,7 +100,7 @@ export function PickerCustomAction({
   return (
     <button
       type={type}
-      className={`group flex w-full items-center justify-center gap-2 rounded border border-red-500/70 bg-red-950/20 py-2.5 text-sm text-red-400 transition hover:border-red-400 hover:bg-red-950/35 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 lg:text-base ${uiPickerPressFeedback(!props.disabled)} ${className}`.trim()}
+      className={`group ${uiInlineRow} w-full justify-center rounded border border-red-500/70 bg-red-950/20 py-2.5 text-sm text-red-400 transition hover:border-red-400 hover:bg-red-950/35 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 lg:text-base ${uiPickerPressFeedback(!props.disabled)} ${className}`.trim()}
       {...props}
     >
       <PlusIcon className="h-4 w-4 shrink-0" />
@@ -223,7 +225,7 @@ export function PickerModal({
       {/* Optional filter row (e.g. discipline chips) */}
       {filterRow && (
         <div
-          className={`px-4 lg:px-5 py-2 lg:py-3 border-b ${colourDivider} flex flex-wrap gap-1.5 justify-center`}
+          className={`px-4 lg:px-5 py-2 lg:py-3 border-b ${colourDivider} ${uiChipRow} justify-center`}
         >
           {filterRow}
         </div>

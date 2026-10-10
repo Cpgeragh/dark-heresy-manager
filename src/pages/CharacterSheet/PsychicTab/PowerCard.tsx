@@ -7,6 +7,7 @@ import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours, psychicSelectionSourceColours } from "./psychicStyles";
 import {
+  uiChipRow,
   uiCardTitleHover,
   uiInfoModalWrapper,
   uiSectionShell,
@@ -50,7 +51,7 @@ function PowerIdentityChips({
     return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+    <div className={`${uiChipRow} items-center text-xs lg:text-sm`}>
       {sourceLabel && (
         <Chip colour={sourceChipColour(sourceLabel)} className="font-code">
           {sourceLabel}

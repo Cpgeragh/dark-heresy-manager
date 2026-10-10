@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CampaignCustomItem, CustomItemCategory } from "../../types/CustomItems";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { uiSection, uiTextError } from "../../ui/styles/editableStyles";
+import { uiChipRow, uiInlineRow, uiSection, uiTextError } from "../../ui/styles/editableStyles";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {
@@ -113,7 +113,7 @@ export function CustomItemAdminRow({
     <div className={`${uiSection} relative`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={`${uiChipRow} items-center`}>
             <span className={`text-sm font-medium ${colourTextPrimary}`}>{item.name}</span>
             <Chip size="sm" colour="slate" className="uppercase tracking-wide">
               {CUSTOM_ITEM_CATEGORY_LABELS[item.category]}
@@ -124,7 +124,7 @@ export function CustomItemAdminRow({
             {item.creator.characterName ?? "Unknown character"}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className={`${uiInlineRow} flex-wrap shrink-0`}>
           {item.status === "draft" && (
             <Button
               size="xs"

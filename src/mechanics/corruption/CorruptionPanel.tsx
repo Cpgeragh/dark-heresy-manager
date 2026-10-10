@@ -22,6 +22,8 @@ import {
   colourDivider,
 } from "../../ui/styles/colourTokens";
 import {
+  uiChipRow,
+  uiSplitRow,
   uiFormLabel,
   uiInfoModalWrapper,
   uiTextLabel,
@@ -126,7 +128,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
         <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${colourDivider}`}>
           <div className="flex flex-col items-center space-y-1.5">
             <span className={uiTextLabel}>Status</span>
-            <div className="flex flex-wrap justify-center gap-1.5">
+            <div className={`${uiChipRow} justify-center`}>
               <Chip size="sm" colour={corruptionDegreeChipColour(entry)}>
                 Malignancy Test Modifier: {entry.malignancyModifier}
               </Chip>
@@ -186,7 +188,7 @@ function GroupHeader({
   onAdd: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className={`${uiSplitRow}`}>
       <SectionHeader>{label}</SectionHeader>
       {editable ? (
         <AddButton label={`Add ${singular}`} onClick={onAdd} />

@@ -20,6 +20,7 @@ import {
   setRankUpXpCost,
 } from "../../mechanics/experience/xpTransactions";
 import {
+  uiChipRow,
   editableInputClass,
   readOnlyBadgeClass,
   uiCardTitle,
@@ -1200,7 +1201,7 @@ export function ExperienceTab({
                           <h3 className={`${uiItemName} text-lg ${colourHeadingAccent} lg:text-xl`}>
                             {card.name}
                           </h3>
-                          <div className="mt-1 flex flex-wrap gap-1.5">
+                          <div className={`mt-1 ${uiChipRow}`}>
                             <Chip colour="fuchsia" className="font-code">
                               Rank {card.tier}
                             </Chip>

@@ -19,7 +19,12 @@ import { Chip } from "../../../ui/chips/Chip";
 import { RollChip } from "../../../ui/chips/RollChip";
 import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
-import { uiInfoModalWrapper, uiItemName, uiTextBody } from "../../../ui/styles/editableStyles";
+import {
+  uiChipRow,
+  uiInfoModalWrapper,
+  uiItemName,
+  uiTextBody,
+} from "../../../ui/styles/editableStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { CareerInfoContent, CareerPicker, RankInfoContent } from "../CareerPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "../HomeworldPicker";
@@ -272,7 +277,7 @@ export function BackgroundSetupFields({
             selectedHomeworld && (
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={`${uiItemName} truncate`}>{selectedHomeworld.name}</span>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   <RollChip>{selectedHomeworld.roll}</RollChip>
                   <Chip colour={sourceChipColour(selectedHomeworld.source)} className="font-code">
                     {selectedHomeworld.source}
@@ -306,7 +311,7 @@ export function BackgroundSetupFields({
             selectedCareer && (
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={`${uiItemName} truncate`}>{selectedCareer.name}</span>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   <Chip colour={sourceChipColour(selectedCareer.source)} className="font-code">
                     {selectedCareer.source}
                   </Chip>
@@ -339,7 +344,7 @@ export function BackgroundSetupFields({
             value={
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={`${uiItemName} truncate`}>{sanctioning.resultName}</span>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   {sanctioningRef && <RollChip>{sanctioningRef.roll}</RollChip>}
                   <Chip colour={sourceChipColour(selectedCareer.source)} className="font-code">
                     {selectedCareer.source}
@@ -369,7 +374,7 @@ export function BackgroundSetupFields({
             selectedRank && (
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={`${uiItemName} truncate`}>{selectedRank.name}</span>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   <Chip colour="fuchsia">Rank {selectedRank.tier}</Chip>
                   <Chip colour="slate">{selectedRank.xpLevel} XP</Chip>
                   {selectedRank.paths?.length && (
@@ -411,7 +416,7 @@ export function BackgroundSetupFields({
                 <span className={`${uiItemName} truncate`}>
                   {selectedAdvanceScheme?.name ?? selectedRank.name}
                 </span>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   <Chip colour="fuchsia">Rank 1</Chip>
                   {selectedAdvanceSchemeSource && (
                     <Chip

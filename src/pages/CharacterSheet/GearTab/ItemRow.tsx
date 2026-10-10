@@ -3,6 +3,8 @@
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiSection,
   uiItemName,
   uiInfoModalWrapper,
@@ -49,7 +51,7 @@ export function ItemRow({
     <div className={uiSection}>
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className={`${uiInlineRow}`}>
             <p className={uiItemName}>{item.name}</p>
             {libraryItem && <StatusBadge status={libraryItem.status} />}
             {hasDesc && (
@@ -66,7 +68,7 @@ export function ItemRow({
             value={value}
             availability={availability}
             source={item.source}
-            className="flex flex-wrap gap-1.5 mt-1"
+            className={`${uiChipRow} mt-1`}
           />
           {item.grantedByTalentName && (
             <p className={`mt-1 text-xs ${colourAmberPlain}`}>

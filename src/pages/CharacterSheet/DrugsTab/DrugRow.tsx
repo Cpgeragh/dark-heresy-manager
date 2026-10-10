@@ -4,6 +4,8 @@ import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiSection,
   uiTextBody,
   uiTextLabel,
@@ -47,7 +49,7 @@ export function DrugRow({
     <div className={[uiSection, "flex items-start gap-3"].join(" ")}>
       {/* Name + duration + chips */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className={`${uiInlineRow}`}>
           <p className={uiItemName}>{item.name}</p>
           {libraryItem && <StatusBadge status={libraryItem.status} />}
           {hasInfo && (
@@ -104,7 +106,7 @@ export function DrugRow({
           value={item.value ?? ref?.value}
           availability={item.availability ?? ref?.availability}
           source={item.source}
-          className="flex flex-wrap gap-1.5 mt-1"
+          className={`${uiChipRow} mt-1`}
         />
         {libraryItem && (
           <CustomItemActionButtons

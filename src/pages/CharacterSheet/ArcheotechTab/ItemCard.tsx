@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiSection,
   uiTextBody,
   uiTextLabel,
@@ -93,7 +95,7 @@ export function ItemCard({
 
       {/* Type-specific stat chips */}
       {item.type === "Armour" && (
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <div className={`mt-1 ${uiChipRow}`}>
           {item.locations && item.locations.length > 0 && (
             <StatChip label="Location" value={locationLabel(item.locations)} />
           )}
@@ -107,7 +109,7 @@ export function ItemCard({
         </div>
       )}
       {item.type === "Shield" && (
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <div className={`mt-1 ${uiChipRow}`}>
           {item.locations && item.locations.length > 0 && (
             <StatChip label="Location" value={locationLabel(item.locations)} />
           )}
@@ -115,7 +117,7 @@ export function ItemCard({
         </div>
       )}
       {item.type === "Cybernetic" && (
-        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+        <div className={`mt-1 ${uiChipRow} items-center`}>
           {item.bodyLocation && item.bodyLocation.length > 0 && (
             <StatChip
               label="Location"
@@ -141,7 +143,7 @@ export function ItemCard({
         value={value}
         availability={availability}
         source={source}
-        className="flex flex-wrap gap-1.5 mt-1.5"
+        className={`${uiChipRow} mt-1.5`}
       />
       {libraryItem && (
         <CustomItemActionButtons
@@ -163,7 +165,7 @@ export function ItemCard({
       <AccordionCard
         expanded={expanded}
         onToggle={() => setExpanded((v) => !v)}
-        header={<div className="flex flex-wrap items-center gap-2">{titleContent}</div>}
+        header={<div className={`${uiInlineRow} flex-wrap`}>{titleContent}</div>}
       >
         <div className="px-3 pb-3 lg:px-4 lg:pb-4">{details}</div>
       </AccordionCard>
@@ -174,7 +176,7 @@ export function ItemCard({
     <div className={uiSection}>
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className={`${uiInlineRow} flex-wrap`}>
             {titleContent}
             {description && (
               <span className={uiInfoModalWrapper}>

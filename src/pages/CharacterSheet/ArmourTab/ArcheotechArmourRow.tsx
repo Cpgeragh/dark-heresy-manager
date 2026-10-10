@@ -3,6 +3,8 @@
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiNoticeBox,
   uiSection,
   uiCardTitle,
@@ -47,15 +49,15 @@ export function ArcheotechArmourRow({
       )}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className={`${uiInlineRow} flex-wrap`}>
           <span className={uiCardTitle}>{item.name}</span>
         </div>
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <div className={`mt-1 ${uiChipRow}`}>
           {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
           {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
           {item.stacks && <Chip colour="sky">Stacks</Chip>}
         </div>
-        <div className="flex flex-wrap gap-1.5 mt-1">
+        <div className={`${uiChipRow} mt-1`}>
           {highlightAsArcheotech && (
             <Chip colour="amber" className="shrink-0">
               Archeotech

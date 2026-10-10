@@ -7,6 +7,8 @@ import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActi
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
@@ -70,17 +72,17 @@ export function ShieldCard({
           onClick={() => setExpanded((e) => !e)}
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={`${uiChipRow} items-center`}>
             <p className={uiCardTitleHover}>{item.name}</p>
             {libraryItem && <StatusBadge status={libraryItem.status} />}
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          <div className={`mt-0.5 ${uiChipRow} items-center`}>
             <Chip size="sm" colour="lime">
               Shield
             </Chip>
           </div>
         </div>
-        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -116,7 +118,7 @@ export function ShieldCard({
           )}
 
           {/* Stats */}
-          <div className="flex flex-wrap gap-1.5">
+          <div className={`${uiChipRow}`}>
             <StatChip label="AP" value={String(item.ap)} />
             {item.locations && <StatChip label="Location" value={item.locations} />}
             {item.damage && (
@@ -163,7 +165,7 @@ export function ShieldCard({
             value={item.value}
             availability={item.availability}
             source={item.source}
-            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
+            className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
           />
         </div>
       )}

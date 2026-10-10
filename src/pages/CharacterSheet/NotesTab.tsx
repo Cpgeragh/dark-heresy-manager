@@ -11,6 +11,7 @@ import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import {
+  uiInlineRow,
   editableInputClass,
   editableTextareaClass,
   uiSectionShell,
@@ -123,7 +124,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
   return (
     <div className="space-y-3">
       {(editable || entries.length > 0) && (
-        <div className="flex items-center justify-end gap-2">
+        <div className={`${uiInlineRow} justify-end`}>
           {entries.length > 0 && (
             <input
               type="search"

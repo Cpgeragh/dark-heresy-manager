@@ -13,6 +13,8 @@ import type {
 import { FormField } from "../../../components/FormField";
 import { InfoModal } from "../../../components/InfoModal";
 import {
+  uiChipRow,
+  uiInlineRow,
   editableInputClass,
   uiFormLabel,
   uiInfoModalWrapper,
@@ -313,7 +315,7 @@ export function BackgroundTab({
           </div>
           <div className="space-y-1">
             <label className={uiFormLabel}>Height</label>
-            <div className="flex items-center gap-2">
+            <div className={`${uiInlineRow}`}>
               <input
                 type="text"
                 inputMode="decimal"
@@ -334,7 +336,7 @@ export function BackgroundTab({
           </div>
           <div className="space-y-1">
             <label className={uiFormLabel}>Weight</label>
-            <div className="flex items-center gap-2">
+            <div className={`${uiInlineRow}`}>
               <input
                 type="text"
                 inputMode="numeric"
@@ -419,7 +421,7 @@ export function BackgroundTab({
           {(header.quirks ?? []).length === 0 && !editable && (
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
           )}
-          <div className="flex flex-wrap gap-1.5">
+          <div className={`${uiChipRow}`}>
             {[...(header.quirks ?? [])]
               .sort((a, b) => a.localeCompare(b))
               .map((quirk) => (
@@ -488,7 +490,7 @@ export function BackgroundTab({
             selectedDivination && (
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className={uiItemName}>{selectedDivination.result}</span>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   <RollChip>{selectedDivination.roll}</RollChip>
                   <Chip colour={sourceChipColour(selectedDivination.source)} className="font-code">
                     {selectedDivination.source}

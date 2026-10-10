@@ -13,6 +13,9 @@ import { RequiredMark } from "../../../ui/forms/RequiredMark";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
+  uiChipRow,
+  uiInlineRow,
+  uiFieldGrid,
   editableInputClass,
   editableTextareaClass,
   uiFormLabel,
@@ -197,7 +200,7 @@ export function CustomPowerForm({
               {target === "minor" ? "Minor" : requiredDiscipline}
             </Chip>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`${uiChipRow}`}>
               {majorDisciplines.map((d) => (
                 <ToggleButton
                   key={d}
@@ -213,7 +216,7 @@ export function CustomPowerForm({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className={`${uiFieldGrid}`}>
           <div className="space-y-1">
             <label className={uiFormLabel}>
               PT <RequiredMark />
@@ -272,7 +275,7 @@ export function CustomPowerForm({
             ))}
           </div>
           {(rangeMode === "meters" || rangeMode === "km-radius") && (
-            <div className="flex items-center gap-2 pt-1">
+            <div className={`${uiInlineRow} pt-1`}>
               <input
                 type="text"
                 inputMode={rangeMode === "km-radius" ? "decimal" : "numeric"}
@@ -293,7 +296,7 @@ export function CustomPowerForm({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className={`${uiFieldGrid}`}>
           <div className="space-y-1">
             <label className={uiFormLabel}>
               Sustained <RequiredMark />

@@ -15,6 +15,9 @@ import {
   usesUnitAmmoTracking,
 } from "../../../data/reference/ammoReference";
 import {
+  uiChipRow,
+  uiInlineRow,
+  uiSplitRow,
   uiNoticeBox,
   uiSectionShell,
   uiTextBody,
@@ -322,7 +325,7 @@ export function MeleeCard({
           />
         )}
         <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={`${uiChipRow} items-center`}>
             <p className={uiCardTitleHover}>{weapon.name}</p>
             {rulesDescription && (
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
@@ -340,7 +343,7 @@ export function MeleeCard({
             )}
           </div>
           {(classChips.length > 0 || activeWeaponType || weapon.concealedBionic) && (
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+            <div className={`mt-0.5 ${uiChipRow} items-center`}>
               {weapon.concealedBionic && (
                 <Chip size="sm" colour="pink">
                   Concealed Bionic
@@ -364,7 +367,7 @@ export function MeleeCard({
             </div>
           )}
         </div>
-        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -440,7 +443,7 @@ export function MeleeCard({
           )}
 
           {isPistolProfile && pistolProfile ? (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`${uiChipRow}`}>
               <StatChip label="Range" value={pistolProfile.range} />
               <StatChip label="RoF" value={pistolProfile.rof} />
               <StatChip
@@ -453,7 +456,7 @@ export function MeleeCard({
               <StatChip label="Reload" value={pistolProfile.reload} />
             </div>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`${uiChipRow}`}>
               {thrownRange && <StatChip label="Range" value={thrownRange} />}
               {displayedMeleeDamage && (
                 <StatChip label="Damage" value={displayMeleeDamage(displayedMeleeDamage)} />
@@ -545,12 +548,12 @@ export function MeleeCard({
             value={weapon.value}
             availability={weapon.availability}
             source={weapon.source}
-            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
+            className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
           />
 
           {isPistolProfile && pistolProfile && (
             <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
-              <div className="flex items-center justify-between gap-2">
+              <div className={`${uiSplitRow}`}>
                 <span className={uiTextLabel}>Ammo</span>
                 {editable && (
                   <Button size="xs" onClick={() => setShowPistolAmmoPicker(true)}>
@@ -596,9 +599,7 @@ export function MeleeCard({
           )}
 
           {isThrown && (
-            <div
-              className={`border-t ${colourDivider} pt-2 flex items-center justify-between gap-2`}
-            >
+            <div className={`border-t ${colourDivider} pt-2 ${uiSplitRow}`}>
               <span className={uiTextLabel}>Quantity</span>
               <QuantityControl
                 quantity={weapon.quantity ?? 1}

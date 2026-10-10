@@ -7,6 +7,8 @@ import type { WeaponCraftsmanship } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiNoticeBox,
   uiTextLabel,
   uiTextBody,
@@ -63,10 +65,10 @@ export function CyberneticWeaponCard({
           onClick={() => setExpanded((e) => !e)}
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex items-center gap-2">
+          <div className={`${uiInlineRow}`}>
             <p className={uiCardTitleHover}>{weapon.name}</p>
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          <div className={`mt-0.5 ${uiChipRow} items-center`}>
             <Chip size="sm" colour="pink">
               Cybernetic
             </Chip>
@@ -91,7 +93,7 @@ export function CyberneticWeaponCard({
 
       {expanded && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
-          <div className="flex flex-wrap gap-1.5">
+          <div className={`${uiChipRow}`}>
             {weapon.type === "ranged" && weapon.range && (
               <StatChip label="Range" value={weapon.range} />
             )}

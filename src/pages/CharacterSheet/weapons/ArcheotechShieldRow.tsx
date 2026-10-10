@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
-import { uiNoticeBox, uiSectionShell, uiCardTitleHover } from "../../../ui/styles/editableStyles";
+import {
+  uiChipRow,
+  uiInlineRow,
+  uiNoticeBox,
+  uiSectionShell,
+  uiCardTitleHover,
+} from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
@@ -53,10 +59,10 @@ export function ArcheotechShieldRow({
           onClick={() => setExpanded((e) => !e)}
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className={`${uiInlineRow} flex-wrap`}>
             <span className={uiCardTitleHover}>{item.name}</span>
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          <div className={`mt-0.5 ${uiChipRow} items-center`}>
             {highlightAsArcheotech && (
               <Chip size="sm" colour="amber" className="shrink-0">
                 Archeotech
@@ -67,7 +73,7 @@ export function ArcheotechShieldRow({
             </Chip>
           </div>
         </div>
-        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -87,7 +93,7 @@ export function ArcheotechShieldRow({
               <RemoveButton onClick={onRemove} label="Remove" />
             </div>
           )}
-          <div className="mt-1 flex flex-wrap gap-1.5">
+          <div className={`mt-1 ${uiChipRow}`}>
             {locations.length > 0 && (
               <StatChip size="sm" label="Location" value={locationLabel(locations)} />
             )}
@@ -97,7 +103,7 @@ export function ArcheotechShieldRow({
             weight={item.weight}
             value={item.value}
             availability={item.availability}
-            className="flex flex-wrap gap-1.5 mt-1"
+            className={`${uiChipRow} mt-1`}
           />
         </div>
       )}

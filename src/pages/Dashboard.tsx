@@ -29,6 +29,7 @@ import {
 } from "../services/campaignService";
 import type { CampaignWithId } from "../types/Firestore";
 import {
+  uiInlineRow,
   uiSection,
   uiActionRowLabel,
   editableInputClass,
@@ -152,7 +153,7 @@ function PlayerCampaignRow({
   return (
     <Link
       to={buildRoute.campaignOverview(campaignId)}
-      className={`${uiSection} flex items-center gap-2 ${uiCardLinkFeedback}`}
+      className={`${uiSection} ${uiInlineRow} ${uiCardLinkFeedback}`}
     >
       <span className={`flex-1 font-medium ${colourTextPrimary} lg:text-lg`}>{campaignName}</span>
     </Link>
@@ -510,7 +511,7 @@ function DmCampaignList({
               {archivedCampaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className={uiSection + " relative flex items-center gap-2 opacity-60"}
+                  className={`${uiSection} relative ${uiInlineRow} opacity-60`}
                 >
                   <span className={`flex-1 ${colourTextMuted} lg:text-lg`}>{campaign.name}</span>
 

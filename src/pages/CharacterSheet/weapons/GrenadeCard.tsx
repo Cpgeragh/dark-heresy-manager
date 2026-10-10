@@ -8,6 +8,9 @@ import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButto
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { GRENADE_REFERENCE } from "../../../data/reference/weaponReference";
 import {
+  uiChipRow,
+  uiInlineRow,
+  uiSplitRow,
   uiSection,
   uiSectionShell,
   uiTextBody,
@@ -81,7 +84,7 @@ export function GrenadeCard({
   if (isStowedCard) {
     return (
       <div className={uiSection + " opacity-60"}>
-        <div className="flex items-center justify-between gap-2">
+        <div className={`${uiSplitRow}`}>
           <div className="min-w-0">
             <p className={`text-sm lg:text-base font-semibold ${colourTextMuted} truncate`}>
               {item.name}
@@ -121,11 +124,11 @@ export function GrenadeCard({
           onClick={() => setExpanded((e) => !e)}
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={`${uiChipRow} items-center`}>
             <p className={`${uiCardTitleHover} truncate`}>{item.name}</p>
             {libraryItem && <StatusBadge status={libraryItem.status} />}
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          <div className={`mt-0.5 ${uiChipRow} items-center`}>
             <Chip
               size="sm"
               colour={item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"}
@@ -147,7 +150,7 @@ export function GrenadeCard({
             )}
           </div>
         </div>
-        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -161,7 +164,7 @@ export function GrenadeCard({
       </div>
 
       {expanded && (
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-2">
+        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && (
             <div className="flex justify-end">
               <RemoveButton onClick={onRemove} label="Remove" />
@@ -183,7 +186,7 @@ export function GrenadeCard({
           )}
 
           {/* Stat chips */}
-          <div className="flex flex-wrap gap-1.5">
+          <div className={`${uiChipRow}`}>
             {item.type !== "Mine" && item.type !== "Missile" && (
               <StatChip label="Range" value={thrownRange} />
             )}
@@ -268,7 +271,7 @@ export function GrenadeCard({
             value={item.value}
             availability={item.availability}
             source={item.source}
-            className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}
+            className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
           />
         </div>
       )}

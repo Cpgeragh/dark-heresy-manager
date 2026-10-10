@@ -2,6 +2,7 @@
 
 import type { HTMLAttributes, ReactNode } from "react";
 import {
+  uiChipRow,
   uiInfoModalWrapper,
   uiItemNameHover,
   uiTextBody,
@@ -18,7 +19,7 @@ export function PickerRowName({
   info?: ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+    <div className={`${uiChipRow} min-w-0 items-center`}>
       <span className={uiItemNameHover}>{name}</span>
       {badges}
       {info && (
@@ -31,9 +32,7 @@ export function PickerRowName({
 }
 
 export function PickerRowChips({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={`mt-1 flex flex-wrap items-center gap-1.5 ${className}`.trim()} {...props} />
-  );
+  return <div className={`mt-1 ${uiChipRow} items-center ${className}`.trim()} {...props} />;
 }
 
 export function PickerRowInfoLine({

@@ -7,6 +7,7 @@ import type {
   CyberneticCraftsmanship,
 } from "../../../types/Character";
 import {
+  uiInlineRow,
   editableInputClass,
   editableTextareaClass,
   uiTextBody,
@@ -500,7 +501,7 @@ export function CustomArcheotechForm({
                 ))}
               </div>
             </fieldset>
-            <div className="flex items-center gap-2">
+            <div className={`${uiInlineRow}`}>
               <button
                 type="button"
                 onClick={() => setStacks(!stacks)}

@@ -13,6 +13,7 @@ import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
+  uiChipRow,
   editableInputClass,
   uiFormLabel,
   uiInfoModalWrapper,
@@ -184,7 +185,7 @@ export function SkillRow({
             </div>
           )}
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className={`${uiChipRow} items-center`}>
               {previewMode && skill.source && (
                 <Chip
                   size="sm"
@@ -264,7 +265,7 @@ export function SkillRow({
             )}
           </div>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className={`${uiChipRow} items-center`}>
               {previewMode && skill.source && (
                 <Chip colour={sourceChipColour(skill.source)} className="font-code shrink-0">
                   {skill.source}

@@ -9,6 +9,8 @@ import {
 import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiCardTitleHover,
   uiInfoModalWrapper,
   uiSectionShell,
@@ -98,7 +100,7 @@ function RangedWeaponCardPickerRow({
             onClick={editable ? onSelect : showDetails}
           />
           <div className={`${uiExpandButton} relative pointer-events-none`}>
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className={`${uiChipRow} items-center`}>
               <p className={uiCardTitleHover}>{weaponReference.name}</p>
               {weaponReference.description && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
@@ -110,7 +112,7 @@ function RangedWeaponCardPickerRow({
               )}
             </div>
             {(classChip || typeChip) && (
-              <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              <div className={`mt-0.5 ${uiChipRow} items-center`}>
                 {classChip && (
                   <Chip size="sm" colour={classChip.colour}>
                     {classChip.label}
@@ -124,7 +126,7 @@ function RangedWeaponCardPickerRow({
               </div>
             )}
           </div>
-          <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+          <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
             {editable ? (
               <ExpandButton
                 expanded={false}

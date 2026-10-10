@@ -23,6 +23,7 @@ import { PickerField } from "../../ui/pickers/PickerField";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RequiredMark } from "../../ui/forms/RequiredMark";
 import {
+  uiChipRow,
   editableInputClass,
   editableTextareaClass,
   uiFormLabel,
@@ -189,7 +190,7 @@ export function InsanityDisorderPicker({
             <p className={uiFormLabel}>
               Severity <RequiredMark />
             </p>
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <div className={`mt-1 ${uiChipRow}`}>
               {customSeverityOptions.map((option) => (
                 <Chip
                   key={option}

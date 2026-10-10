@@ -1,5 +1,6 @@
 import type { WornArmourPiece } from "../../../types/Character";
 import {
+  uiChipRow,
   uiSection,
   uiTextLabel,
   uiTextBody,
@@ -76,7 +77,7 @@ export function ForceFieldRow({
           {libraryItem && <StatusBadge status={libraryItem.status} />}
         </div>
 
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <div className={`mt-1 ${uiChipRow}`}>
           {piece.protectionRating !== undefined && (
             <StatChip label="PR" value={String(piece.protectionRating)} />
           )}
@@ -87,7 +88,7 @@ export function ForceFieldRow({
           value={piece.value}
           availability={piece.availability}
           source={piece.source}
-          className="flex flex-wrap gap-1.5 mt-1"
+          className={`${uiChipRow} mt-1`}
         />
 
         <div className="flex items-center gap-1.5 mt-1">

@@ -13,6 +13,7 @@ import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import {
+  uiInlineRow,
   uiItemNameHover,
   uiSection,
   uiSectionShell,
@@ -166,7 +167,7 @@ export function DMInbox({
                 onClick={() => toggleThread(thread.characterId)}
               />
               <div className="pointer-events-none relative flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className={`${uiInlineRow}`}>
                   <span className={uiItemNameHover}>{label}</span>
                   {hasUnread && (
                     <span

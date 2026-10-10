@@ -4,6 +4,7 @@ import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/chips/Chip";
 import {
+  uiChipRow,
   uiSection,
   uiTextLabel,
   uiItemName,
@@ -100,7 +101,7 @@ export function ImplantRow({
             </span>
           )}
         </div>
-        <div className="flex flex-wrap gap-1.5 mt-1">
+        <div className={`${uiChipRow} mt-1`}>
           {item.bodyLocation && item.bodyLocation.length > 0 && (
             <Chip colour="slate">
               {item.bodyLocation.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
@@ -122,7 +123,7 @@ export function ImplantRow({
           </p>
         )}
         {linkedArmName && linkedWeaponName && (
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <div className={`mt-1 ${uiChipRow} items-center`}>
             <span className={uiTextLabel}>Linked</span>
             <Chip colour="pink">{linkedArmName}</Chip>
             <Chip colour="pink">{linkedWeaponName}</Chip>

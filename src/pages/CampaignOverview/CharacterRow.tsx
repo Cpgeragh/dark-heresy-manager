@@ -11,6 +11,7 @@ import {
   revealRecoveryCode,
 } from "../../services/characterService";
 import {
+  uiInlineRow,
   uiSection,
   uiTextError,
   uiTextPlaceholder,
@@ -169,7 +170,7 @@ export function CharacterRow({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-center sm:justify-start">
+          <div className={`${uiInlineRow} flex-wrap sm:shrink-0 justify-center sm:justify-start`}>
             {isDM && (
               <Button
                 variant="secondary"

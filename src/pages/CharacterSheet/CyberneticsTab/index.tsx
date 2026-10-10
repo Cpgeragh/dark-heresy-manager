@@ -25,7 +25,13 @@ import { Button } from "../../../ui/buttons/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
-import { uiItemName, uiSection, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import {
+  uiChipRow,
+  uiFieldGrid,
+  uiItemName,
+  uiSection,
+  uiTextPlaceholder,
+} from "../../../ui/styles/editableStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -959,7 +965,7 @@ export function CyberneticsTab({
       {career === "Tech-Priest" && (
         <section className="space-y-3">
           <SectionHeader>Mechanicus Implants</SectionHeader>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className={`${uiFieldGrid}`}>
             {[
               "Electro-Graft",
               "Electoo Inductors",
@@ -970,11 +976,11 @@ export function CyberneticsTab({
             ].map((name) => (
               <div key={name} className={uiSection}>
                 <div className={uiItemName}>{name}</div>
-                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <Chip colour={sourceChipColour("CR")} className="font-code">CR</Chip>
-                  <Chip colour="amber">
-                    Granted by Mechanicus Implants
+                <div className={`mt-1.5 ${uiChipRow} items-center`}>
+                  <Chip colour={sourceChipColour("CR")} className="font-code">
+                    CR
                   </Chip>
+                  <Chip colour="amber">Granted by Mechanicus Implants</Chip>
                 </div>
               </div>
             ))}

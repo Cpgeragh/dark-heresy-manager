@@ -10,6 +10,7 @@ import {
   type PsychicPowerRef,
 } from "../../../data/reference/psychicReference";
 import {
+  uiChipRow,
   uiSection,
   uiFormLabel,
   uiTextPlaceholder,
@@ -589,7 +590,7 @@ export function PsychicTab({
         {/* Disciplines: read-only status chips activated through Psy Rating Talents */}
         <div>
           <p className={`${uiFormLabel} mb-1.5 text-center`}>Disciplines</p>
-          <div className="flex flex-wrap gap-1.5 justify-center">
+          <div className={`${uiChipRow} justify-center`}>
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
               return (

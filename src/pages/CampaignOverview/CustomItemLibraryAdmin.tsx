@@ -13,7 +13,7 @@ import {
   CUSTOM_ITEM_STATUS_ORDER,
 } from "../../constants/customItems";
 import { recordComponentRender } from "../../performance/performanceMetrics";
-import { uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import { uiChipRow, uiTextPlaceholder } from "../../ui/styles/editableStyles";
 
 export function CustomItemLibraryAdmin({
   campaignId,
@@ -45,7 +45,7 @@ export function CustomItemLibraryAdmin({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-1.5">
+      <div className={`${uiChipRow}`}>
         <Chip
           as="button"
           onClick={() => setFilterCategory("all")}
@@ -64,7 +64,7 @@ export function CustomItemLibraryAdmin({
           </Chip>
         ))}
       </div>
-      <div className="flex flex-wrap gap-1.5">
+      <div className={`${uiChipRow}`}>
         <Chip
           as="button"
           onClick={() => setFilterStatus("all")}

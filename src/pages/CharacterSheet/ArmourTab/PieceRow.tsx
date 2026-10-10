@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { WornArmourPiece } from "../../../types/Character";
 import {
+  uiChipRow,
   uiSection,
   uiTextLabel,
   uiTextBody,
@@ -100,7 +101,7 @@ export function PieceRow({
         </div>
 
         <div className="mt-1 space-y-1">
-          <div className="flex flex-wrap gap-1.5">
+          <div className={`${uiChipRow}`}>
             <StatChip label="Location" value={locationLabel(piece.locations)} />
             <StatChip label="AP" value={apDesc} />
           </div>

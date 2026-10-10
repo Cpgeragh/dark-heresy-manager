@@ -15,6 +15,8 @@ import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { CloseIcon } from "../../../ui/buttons/CloseButton";
 import {
+  uiChipRow,
+  uiSplitRow,
   editableInputColour,
   uiCell,
   uiTextLabel,
@@ -81,7 +83,7 @@ export function WeaponQualitySelector({
         </Button>
       </div>
       {selected.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className={`${uiChipRow}`}>
           {selected.map((quality) => (
             <Chip key={quality} colour="slate">
               {quality}
@@ -193,7 +195,7 @@ export function UpgradeCard({
 
   return (
     <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2`}>
-      <div className="flex items-center justify-between gap-2">
+      <div className={`${uiSplitRow}`}>
         <span className={`text-xs lg:text-sm font-medium ${uiTextBody}`}>{upgrade.name}</span>
         {editable && (
           <RemoveButton onClick={() => onRemove(upgrade.id)} label={`Remove ${upgrade.name}`} />

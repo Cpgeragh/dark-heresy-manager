@@ -6,6 +6,7 @@ import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerMo
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import {
+  uiSplitRow,
   uiCell,
   uiInfoModalWrapper,
   uiTextLabel,
@@ -23,7 +24,7 @@ export function ArmourUpgradeCard({
 }) {
   return (
     <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2`}>
-      <div className="flex items-center justify-between gap-2">
+      <div className={`${uiSplitRow}`}>
         <span className={`text-xs lg:text-sm font-medium ${uiTextBody}`}>{upgrade.name}</span>
         {editable && (
           <RemoveButton onClick={() => onRemove(upgrade.id)} label={`Remove ${upgrade.name}`} />

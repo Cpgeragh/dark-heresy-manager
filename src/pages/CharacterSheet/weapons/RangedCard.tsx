@@ -26,6 +26,9 @@ import {
 } from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
+  uiChipRow,
+  uiInlineRow,
+  uiSplitRow,
   uiCell,
   uiNoticeBox,
   uiSectionShell,
@@ -438,7 +441,7 @@ export function RangedCard({
           />
         )}
         <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={`${uiChipRow} items-center`}>
             <p className={uiCardTitleHover}>{weapon.name}</p>
             {rulesDescription && (
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
@@ -456,7 +459,7 @@ export function RangedCard({
             )}
           </div>
           {(weapon.class || activeWeaponType || weapon.concealedBionic) && (
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+            <div className={`mt-0.5 ${uiChipRow} items-center`}>
               {weapon.concealedBionic && (
                 <Chip size="sm" colour="pink">
                   Concealed Bionic
@@ -488,7 +491,7 @@ export function RangedCard({
             </div>
           )}
         </div>
-        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
+        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -533,7 +536,7 @@ export function RangedCard({
           )}
 
           {(alternateProfiles.length > 0 || alternateMeleeProfiles.length > 0) && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`${uiChipRow}`}>
               <ToggleButton
                 selected={!isMeleeProfile && activeProfileIndex === 0}
                 selectedClassName={colourToggleSelectedSky}
@@ -578,7 +581,7 @@ export function RangedCard({
 
           {/* Stats grid */}
           {isMeleeProfile && activeMeleeProfile ? (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`${uiChipRow}`}>
               <StatChip
                 label="Damage"
                 value={activeMeleeProfile.damage.replace(/\s*[IREX]$/i, "").trim()}
@@ -592,7 +595,7 @@ export function RangedCard({
               />
             </div>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={`${uiChipRow}`}>
               {effective.range && <StatChip label="Range" value={effective.range} />}
               {baseWeapon.rof && <StatChip label="RoF" value={baseWeapon.rof} />}
               {effective.damage && (
@@ -668,7 +671,7 @@ export function RangedCard({
           </div>
 
           {/* Weight / Value / Availability / Source */}
-          <div className={`flex flex-wrap gap-1.5 border-t ${colourDivider} pt-2 mt-1`}>
+          <div className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}>
             <ItemMetaChips
               weight={effective.weight}
               value={effective.value}
@@ -680,9 +683,7 @@ export function RangedCard({
 
           {/* Thrown weapon: quantity counter */}
           {isThrown && (
-            <div
-              className={`border-t ${colourDivider} pt-2 flex items-center justify-between gap-2`}
-            >
+            <div className={`border-t ${colourDivider} pt-2 ${uiSplitRow}`}>
               <span className={uiTextLabel}>{isThrown ? "Quantity" : "Rounds"}</span>
               <QuantityControl
                 quantity={weapon.quantity ?? 0}
@@ -709,7 +710,7 @@ export function RangedCard({
                     .map((g) => (
                       <div
                         key={g.id}
-                        className={`rounded ${colourFillInset} px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2`}
+                        className={`rounded ${colourFillInset} px-2.5 lg:px-3 py-2 lg:py-2.5 ${uiSplitRow}`}
                       >
                         <span className={`${uiItemName} truncate`}>{g.name}</span>
                         <QuantityControl
@@ -729,7 +730,7 @@ export function RangedCard({
                   {(archeotechGrenades ?? []).map((g) => (
                     <div
                       key={g.id}
-                      className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 flex items-center justify-between gap-2`}
+                      className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 ${uiSplitRow}`}
                     >
                       <span className={`${uiItemName} truncate`}>{g.name}</span>
                       <Chip size="sm" colour="amber">
@@ -746,7 +747,7 @@ export function RangedCard({
             <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
               <span className={uiTextLabel}>Magazines</span>
               {activeAmmoFamily && (
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   <Chip size="sm" colour={activeAmmoFamily.colour}>
                     {activeAmmoFamily.label}
                   </Chip>
@@ -770,8 +771,8 @@ export function RangedCard({
                       key={slot.id}
                       className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5`}
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                      <div className={`${uiSplitRow} flex-wrap`}>
+                        <div className={`${uiChipRow} items-center min-w-0`}>
                           <span className={uiTextLabel}>Magazine {index + 1}</span>
                           {displayName ? (
                             <span className={uiItemName}>{displayName}</span>
@@ -818,7 +819,7 @@ export function RangedCard({
                         </div>
                       </div>
                       {(ammoRef || magazineCapacity > 0) && (
-                        <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
+                        <div className={`${uiChipRow} items-center text-[10px] lg:text-xs`}>
                           {ammoRef && (
                             <ItemMetaChips
                               value={ammoRef.cost}
@@ -863,7 +864,7 @@ export function RangedCard({
               </div>
 
               {activeAmmoFamily && (
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className={`${uiChipRow} items-center`}>
                   <Chip size="sm" colour={activeAmmoFamily.colour}>
                     {activeAmmoFamily.label}
                   </Chip>

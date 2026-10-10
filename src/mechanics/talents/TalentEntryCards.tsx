@@ -4,6 +4,7 @@ import { TALENT_LIST } from "shared-rules";
 import { TRAIT_LIST } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
+  uiChipRow,
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
@@ -140,7 +141,7 @@ export function EntryCard({
             Gained from: {eliteAdvanceSource} (Elite Advance)
           </p>
         )}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className={`${uiChipRow} items-center`}>
           {refSources.map((source) => (
             <Chip key={source} colour={sourceChipColour(source)} className="font-code">
               {source}

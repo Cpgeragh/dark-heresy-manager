@@ -2,6 +2,8 @@
 
 import type { ConsumableItem } from "../../../types/Character";
 import {
+  uiChipRow,
+  uiInlineRow,
   uiSection,
   uiTextLabel,
   uiItemName,
@@ -55,7 +57,7 @@ export function ConsumableRow({
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className={`${uiInlineRow}`}>
             <p className={uiItemName}>{item.name}</p>
             {libraryItem && <StatusBadge status={libraryItem.status} />}
             {hasDesc && (
@@ -72,7 +74,7 @@ export function ConsumableRow({
             value={item.value}
             availability={item.availability}
             source={item.source}
-            className="flex flex-wrap gap-1.5 mt-1"
+            className={`${uiChipRow} mt-1`}
           />
           {libraryItem && (
             <CustomItemActionButtons

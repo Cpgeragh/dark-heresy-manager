@@ -10,6 +10,7 @@ import { validateCharacteristicBase, validateCharacteristicTotal } from "../util
 import { Button } from "../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
 import {
+  uiInlineRow,
   editableInputColour,
   uiSection,
   uiTextBody,
@@ -157,7 +158,7 @@ export function CharacteristicField({
         {!hideLabel && <div className="font-semibold lg:text-lg mb-1">{label}</div>}
 
         {/* Base value */}
-        <div className="flex items-center gap-2 mb-2">
+        <div className={`${uiInlineRow} mb-2`}>
           <span className={`text-sm lg:text-base ${colourMetadataLabelText}`}>Base:</span>
           <input
             type="text"

@@ -1,3 +1,5 @@
+import { uiChipRow } from "../../../ui/styles/editableStyles";
+
 // src/pages/CharacterSheet/SkillsTab/SkillGroupRow.tsx
 
 import { useState, useCallback } from "react";
@@ -50,7 +52,7 @@ export function SkillGroupRow({
           >
             {category}
           </span>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={`${uiChipRow} items-center`}>
             {characteristics.map((characteristic) => (
               <Chip
                 key={characteristic}
