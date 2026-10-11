@@ -1,8 +1,8 @@
 import { RequiredFormLabel } from "./RequiredFormLabel";
-import { sourceColour } from "../styles/sourceStyles";
+import { sourceChipColour } from "../styles/sourceStyles";
 import { toggleButtonClass } from "../buttons/ToggleButton";
 import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
-import { colourFillSelected } from "../styles/colourTokens";
+import { colourToggleSelected } from "../styles/colourTokens";
 import { uiDisabledLook, uiFocusWithinRing } from "../styles/buttonStyles";
 import { uiStackField } from "../styles/editableStyles";
 
@@ -41,7 +41,7 @@ export function OriginSelector({
               key={option}
               className={toggleButtonClass(
                 selected,
-                `${sourceColour(option)} ${colourFillSelected} font-semibold`,
+                colourToggleSelected[sourceChipColour(option)],
                 [
                   "relative cursor-pointer text-center text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5",
                   uiFocusWithinRing,

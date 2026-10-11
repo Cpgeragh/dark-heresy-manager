@@ -53,7 +53,7 @@ import {
   colourButtonOutlineOrange,
   colourNoticeAmber,
   colourNoticePink,
-  colourToggleSelectedSky,
+  colourToggleSelected,
   colourDivider,
   colourFillInset,
 } from "../../../ui/styles/colourTokens";
@@ -544,7 +544,7 @@ export function RangedCard({
             <div className={`${uiChipRow}`}>
               <ToggleButton
                 selected={!isMeleeProfile && activeProfileIndex === 0}
-                selectedClassName={colourToggleSelectedSky}
+                selectedClassName={colourToggleSelected.red}
                 className="px-2 py-1 text-xs lg:text-sm"
                 onClick={() => {
                   setActiveProfileIndex(0);
@@ -557,7 +557,7 @@ export function RangedCard({
                 <ToggleButton
                   key={profile.label}
                   selected={!isMeleeProfile && activeProfileIndex === index + 1}
-                  selectedClassName={colourToggleSelectedSky}
+                  selectedClassName={colourToggleSelected.red}
                   className="px-2 py-1 text-xs lg:text-sm"
                   onClick={() => {
                     setActiveProfileIndex(index + 1);
@@ -571,7 +571,7 @@ export function RangedCard({
                 <ToggleButton
                   key={profile.label}
                   selected={activeMeleeProfileIndex === index}
-                  selectedClassName={colourToggleSelectedSky}
+                  selectedClassName={colourToggleSelected.red}
                   className="px-2 py-1 text-xs lg:text-sm"
                   onClick={() => {
                     setActiveProfileIndex(0);

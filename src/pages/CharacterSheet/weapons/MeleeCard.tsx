@@ -37,7 +37,7 @@ import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
 import {
   colourNoticePink,
-  colourToggleSelectedSky,
+  colourToggleSelected,
   colourTextPrimary,
   colourDivider,
 } from "../../../ui/styles/colourTokens";
@@ -430,7 +430,7 @@ export function MeleeCard({
                       ? "Melee"
                       : profile)
                   }
-                  selectedClassName={colourToggleSelectedSky}
+                  selectedClassName={colourToggleSelected.red}
                   className="px-2 py-1 text-xs lg:text-sm"
                   onClick={() =>
                     setActiveProfile(

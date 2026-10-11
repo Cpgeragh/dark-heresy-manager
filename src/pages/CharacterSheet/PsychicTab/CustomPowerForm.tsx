@@ -24,7 +24,7 @@ import {
   uiTextMeta,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
-import { chipColours, colourToggleSelectedRed } from "../../../ui/styles/colourTokens";
+import { chipColours, colourToggleSelected } from "../../../ui/styles/colourTokens";
 import { disciplineColours } from "./psychicStyles";
 import { normalisePowerName } from "./psychicPowerHelpers";
 
@@ -242,7 +242,7 @@ export function CustomPowerForm({
                 <ToggleButton
                   key={action}
                   selected={focusTime === action}
-                  selectedClassName={colourToggleSelectedRed}
+                  selectedClassName={colourToggleSelected.red}
                   className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setFocusTime(action)}
                 >
@@ -267,7 +267,7 @@ export function CustomPowerForm({
               <ToggleButton
                 key={mode}
                 selected={rangeMode === mode}
-                selectedClassName={colourToggleSelectedRed}
+                selectedClassName={colourToggleSelected.red}
                 className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                 onClick={() => setRangeMode(mode as CustomRangeMode)}
               >
@@ -307,7 +307,7 @@ export function CustomPowerForm({
                 <ToggleButton
                   key={value}
                   selected={sustained === value}
-                  selectedClassName={colourToggleSelectedRed}
+                  selectedClassName={colourToggleSelected.red}
                   className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setSustained(value)}
                 >

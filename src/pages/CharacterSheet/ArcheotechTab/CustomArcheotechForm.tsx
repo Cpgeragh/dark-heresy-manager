@@ -26,7 +26,7 @@ import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import {
   chipColours,
   colourControlSurface,
-  colourToggleSelectedRed,
+  colourToggleSelected,
   colourErrorText,
   colourStateRed,
 } from "../../../ui/styles/colourTokens";
@@ -494,7 +494,7 @@ export function CustomArcheotechForm({
                   <ToggleButton
                     key={loc}
                     selected={locations.includes(loc)}
-                    selectedClassName={colourToggleSelectedRed}
+                    selectedClassName={colourToggleSelected.red}
                     className="px-2.5 py-1 text-xs lg:text-sm font-medium"
                     onClick={() => toggleLocation(loc)}
                   >
@@ -609,7 +609,7 @@ export function CustomArcheotechForm({
                   <ToggleButton
                     key={loc}
                     selected={bodyLocation.includes(loc)}
-                    selectedClassName={colourToggleSelectedRed}
+                    selectedClassName={colourToggleSelected.red}
                     className="px-2.5 py-1 text-xs lg:text-sm font-medium"
                     onClick={() => toggleBodyLocation(loc)}
                   >

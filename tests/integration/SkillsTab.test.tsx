@@ -292,7 +292,7 @@ describe("SkillsTab", () => {
       await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
       const dialog = screen.getByRole("dialog", { name: "Manage Skill" });
       const downgradeButton = within(dialog).getByRole("button", { name: `Downgrade to ${label}` });
-      expect(downgradeButton).toHaveClass("border-amber-500", "text-amber-400");
+      expect(downgradeButton).toHaveClass("border-amber-500", "text-amber-500");
       expect(downgradeButton).not.toHaveClass("bg-amber-900/40");
       expect(within(dialog).getByRole("button", { name: "Delete Skill" })).toBeInTheDocument();
       expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();

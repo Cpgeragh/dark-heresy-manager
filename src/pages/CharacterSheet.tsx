@@ -98,7 +98,7 @@ import { ToggleButton } from "../ui/buttons/ToggleButton";
 import {
   colourAmberPlain,
   colourEditOverrideSurface,
-  colourToggleSelectedAmber,
+  colourToggleSelected,
   colourFillFloating,
 } from "../ui/styles/colourTokens";
 
@@ -690,7 +690,7 @@ export default function CharacterSheet({
 
             <ToggleButton
               selected={!dmReadOnly}
-              selectedClassName={colourToggleSelectedAmber}
+              selectedClassName={colourToggleSelected.amber}
               onClick={toggleDmReadOnly}
               aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
               className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5"

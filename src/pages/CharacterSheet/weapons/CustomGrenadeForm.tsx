@@ -8,7 +8,7 @@ import {
   uiFormLabel,
 } from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
-import { colourToggleSelectedNeutral } from "../../../ui/styles/colourTokens";
+import { colourToggleSelected } from "../../../ui/styles/colourTokens";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -269,7 +269,7 @@ export function CustomGrenadeForm({
             <ToggleButton
               key={option}
               selected={damageMode === option}
-              selectedClassName={colourToggleSelectedNeutral}
+              selectedClassName={colourToggleSelected.slate}
               className="px-2 py-1 text-xs lg:text-sm capitalize"
               onClick={() => setDamageMode(option)}
             >

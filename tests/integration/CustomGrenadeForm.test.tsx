@@ -145,7 +145,7 @@ describe("CustomGrenadeForm", () => {
     renderForm({
       initialGrenade: { id: "g1", name: "Old Device", quantity: 1, damage: "Special" },
     });
-    expect(screen.getByRole("button", { name: "special" })).toHaveClass("border-slate-400");
+    expect(screen.getByRole("button", { name: "special" })).toHaveClass("border-slate-500/50");
   });
 
   it("calls onCancel when Cancel is clicked", async () => {

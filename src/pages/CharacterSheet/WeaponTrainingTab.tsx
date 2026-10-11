@@ -170,7 +170,7 @@ export function WeaponTrainingTab({
     if (!pendingRemoveTraining) return;
     handleRemoveTraining(pendingRemoveTraining.id);
     setPendingRemoveTraining(null);
-  }, [pendingRemoveTraining, handleRemoveTraining]);
+  }, [pendingRemoveTraining, handleRemoveTraining, setPendingRemoveTraining]);
 
   const confirmTrain = useCallback(() => {
     if (!pendingTrain) return;
@@ -183,7 +183,7 @@ export function WeaponTrainingTab({
       },
     });
     setPendingTrain(null);
-  }, [pendingTrain, weaponTraining, onUpdate]);
+  }, [pendingTrain, weaponTraining, onUpdate, setPendingTrain]);
 
   const manualTrainCostNumber = Number(manualTrainCost);
   const canConfirmManualTrain = manualTrainCost.trim() !== "";
@@ -212,6 +212,8 @@ export function WeaponTrainingTab({
     career,
     rank,
     onUpdate,
+    setPendingManualTrain,
+    setManualTrainCost,
   ]);
 
   const availableExoticOptions = hasKnaveOfPistols
@@ -226,7 +228,7 @@ export function WeaponTrainingTab({
     setShowExoticForm(false);
     setNewExoticName("");
     setNewExoticCost("");
-  }, []);
+  }, [setShowExoticForm, setNewExoticName, setNewExoticCost]);
 
   const confirmAddExotic = useCallback(() => {
     if (!canConfirmExotic) return;
@@ -263,7 +265,7 @@ export function WeaponTrainingTab({
     if (!pendingRemoveExotic) return;
     handleRemoveExotic(pendingRemoveExotic.index);
     setPendingRemoveExotic(null);
-  }, [pendingRemoveExotic, handleRemoveExotic]);
+  }, [pendingRemoveExotic, handleRemoveExotic, setPendingRemoveExotic]);
 
   const confirmExoticPurchase = useCallback(() => {
     if (!pendingExoticPurchase) return;
@@ -274,7 +276,7 @@ export function WeaponTrainingTab({
     };
     onUpdate({ ...weaponTraining, exoticWeapons: [...weaponTraining.exoticWeapons, entry] });
     setPendingExoticPurchase(null);
-  }, [pendingExoticPurchase, weaponTraining, onUpdate]);
+  }, [pendingExoticPurchase, weaponTraining, onUpdate, setPendingExoticPurchase]);
 
   return (
     <div className={`${uiStackPage} text-center`}>

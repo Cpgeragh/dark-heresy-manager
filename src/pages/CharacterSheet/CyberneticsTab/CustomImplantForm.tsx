@@ -166,7 +166,7 @@ export function CustomImplantForm({
                 <ToggleButton
                   key={option}
                   selected={craftsmanship === option}
-                  selectedClassName={`${CRAFTSMANSHIP_STYLE[option]} font-semibold`}
+                  selectedClassName={CRAFTSMANSHIP_STYLE[option]}
                   className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => setCraftsmanship(option)}
                 >

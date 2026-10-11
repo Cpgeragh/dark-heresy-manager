@@ -4,7 +4,7 @@ import { DEFAULT_SKILLS } from "../../data/reference/defaultSkills";
 import type { CareerStartingChoices } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
 import { ToggleButton } from "../../ui/buttons/ToggleButton";
-import { colourToggleSelectedSky } from "../../ui/styles/colourTokens";
+import { colourToggleSelected } from "../../ui/styles/colourTokens";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { uiFormLabel, uiStackBody, uiStackField } from "../../ui/styles/editableStyles";
 
@@ -68,7 +68,7 @@ export function CareerStartingChoiceModal({
                   <ToggleButton
                     key={option.skillId}
                     selected={skillChoices[index] === optionIndex}
-                    selectedClassName={colourToggleSelectedSky}
+                    selectedClassName={colourToggleSelected.red}
                     className="flex-1 px-3 py-2 text-sm"
                     onClick={() => setSkillChoices((prev) => ({ ...prev, [index]: optionIndex }))}
                   >
@@ -86,7 +86,7 @@ export function CareerStartingChoiceModal({
                   <ToggleButton
                     key={`${option.talentId}-${option.specialisation ?? ""}`}
                     selected={talentChoices[index] === optionIndex}
-                    selectedClassName={colourToggleSelectedSky}
+                    selectedClassName={colourToggleSelected.red}
                     className="flex-1 px-3 py-2 text-sm"
                     onClick={() => setTalentChoices((prev) => ({ ...prev, [index]: optionIndex }))}
                   >

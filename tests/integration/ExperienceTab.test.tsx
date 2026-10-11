@@ -640,7 +640,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(dialog.getByText("The DM may apply an XP cost to ranking up.")).toBeInTheDocument();
     expect(dialog.queryByRole("button", { name: "Add XP" })).not.toBeInTheDocument();
     const spendButton = dialog.getByRole("button", { name: "Spend XP" });
-    expect(spendButton).toHaveClass("w-full", "border-amber-500", "text-amber-400");
+    expect(spendButton).toHaveClass("w-full", "border-amber-500", "text-amber-500");
 
     await user.click(spendButton);
     const spendDialog = within(screen.getByRole("dialog", { name: "Spend XP" }));
@@ -802,7 +802,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
     const nextRank = dialog.getByTestId("single-next-rank");
     expect(nextRank).toHaveTextContent("Armsman");
-    expect(nextRank).toHaveClass("border-fuchsia-500", "text-fuchsia-300");
+    expect(nextRank).toHaveClass("border-fuchsia-500", "text-fuchsia-500");
     await user.click(dialog.getByRole("button", { name: "Armsman" }));
 
     const rankTypePicker = within(screen.getByRole("dialog", { name: "Choose Rank Type" }));
@@ -830,7 +830,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(lieutenant).toHaveClass("border-emerald-500/50", "text-emerald-300/60");
 
     await user.click(scout);
-    expect(scout).toHaveClass("border-emerald-500", "text-emerald-300");
+    expect(scout).toHaveClass("border-emerald-500", "text-emerald-500");
     expect(scout).not.toHaveClass("border-emerald-500/50", "text-emerald-300/60");
   });
 
@@ -840,8 +840,8 @@ describe("ExperienceTab named Career Rank ledger", () => {
     const add = screen.getByRole("button", { name: "Add XP" });
     const remove = screen.getByRole("button", { name: "Remove XP" });
     const rankUp = screen.getByRole("button", { name: "Rank Up" });
-    expect(add).toHaveClass("border-emerald-500", "text-emerald-300");
-    expect(remove).toHaveClass("border-amber-500", "text-amber-400");
+    expect(add).toHaveClass("border-emerald-500", "text-emerald-500");
+    expect(remove).toHaveClass("border-amber-500", "text-amber-500");
     expect(rankUp).toHaveClass("border-red-500", "text-red-500");
 
     await user.click(add);
@@ -852,7 +852,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     );
     expect(dialog.getByRole("button", { name: "Confirm Add XP" })).toHaveClass(
       "border-emerald-500",
-      "text-emerald-300"
+      "text-emerald-500"
     );
   });
 

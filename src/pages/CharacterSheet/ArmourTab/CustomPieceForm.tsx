@@ -29,10 +29,7 @@ import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
-import {
-  colourToggleSelectedRed,
-  colourToggleSelectedAmberSoft,
-} from "../../../ui/styles/colourTokens";
+import { colourToggleSelected } from "../../../ui/styles/colourTokens";
 
 const WORN_ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = [
   "Primitive",
@@ -228,7 +225,7 @@ export function CustomPieceForm({
                 <ToggleButton
                   key={loc}
                   selected={selectedLocs.has(loc)}
-                  selectedClassName={colourToggleSelectedRed}
+                  selectedClassName={colourToggleSelected.red}
                   className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => toggleLoc(loc)}
                 >
@@ -338,7 +335,7 @@ export function CustomPieceForm({
                 <ToggleButton
                   key={q}
                   selected={selectedQualities.has(q)}
-                  selectedClassName={colourToggleSelectedAmberSoft}
+                  selectedClassName={colourToggleSelected.amber}
                   className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5"
                   onClick={() => toggleQuality(q)}
                 >

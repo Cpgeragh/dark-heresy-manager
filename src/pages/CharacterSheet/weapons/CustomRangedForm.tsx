@@ -12,7 +12,7 @@ import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
-import { colourToggleSelectedNeutral } from "../../../ui/styles/colourTokens";
+import { colourToggleSelected } from "../../../ui/styles/colourTokens";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
@@ -405,7 +405,7 @@ export function CustomRangedForm({
             <div className="grid grid-cols-3 gap-2 mt-0.5">
               <ToggleButton
                 selected={singleShot}
-                selectedClassName={colourToggleSelectedNeutral}
+                selectedClassName={colourToggleSelected.slate}
                 className="px-2 py-1 text-sm lg:text-base font-medium"
                 onClick={() => setSingleShot((value) => !value)}
               >
