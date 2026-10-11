@@ -1282,6 +1282,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] Names, values, headings, form labels and XP numbers share one light grey, and the small labels such as Attendees, Current rank and Card spent share one sky blue (`colourTextPrimary`, `uiTextMeta`)
 - [ ] Rule names inside info modals, such as a weapon special rule, an armour rule, a Malignancy roll and an Insanity type, show in sky blue above a description that matches every other description (`uiRuleName`, `uiTextDescription`)
 - [ ] Every divider line inside a card, drawer or modal is the same grey, including the lines inside the Insanity and Corruption panels (`colourDivider`)
+- [ ] The Armour Location Summary and Explosive Mishaps tables use the same heading style, slate-200 body text, slate-700 heading and row dividers, and vertical cell spacing; neither table row shows a hover state (`tableStyles.ts`)
 - [ ] The box around each character sheet tab has the standard card border and fill, and shows an amber outline while the DM editing override is on (`CharacterSheet.tsx`)
 - [ ] The expand chevron on the Companion, Psychic power, Melee and Ranged cards expands and collapses the card, and the Cybernetic weapon card header, each note preview and each DM inbox thread open or expand from anywhere on the card with the hover tint and press effect (`ExpandButton.tsx`, `CardOverlayButton`)
 - [ ] The Reveal link on a character row and on a My Character card looks and behaves the same (`RevealCodeButton.tsx`)

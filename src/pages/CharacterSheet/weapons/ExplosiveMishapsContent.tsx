@@ -1,5 +1,11 @@
-import { uiTextBody, uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
-import { colourTextPrimary, colourDivider } from "../../../ui/styles/colourTokens";
+import { uiTextDescription } from "../../../ui/styles/editableStyles";
+import {
+  uiTable,
+  uiTableBody,
+  uiTableCell,
+  uiTableHeaderCell,
+  uiTableHeaderRow,
+} from "../../../ui/styles/tableStyles";
 
 export function ExplosiveMishapsContent() {
   return (
@@ -9,42 +15,36 @@ export function ExplosiveMishapsContent() {
         has happened. Roll on the table below to find out the results.
       </p>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm lg:text-base border-collapse">
+        <table className={uiTable}>
           <thead>
-            <tr className={`${uiTextLabel} border-b ${colourDivider}`}>
-              <th className="py-1.5 pr-3 font-medium">Roll</th>
-              <th className="py-1.5 font-medium">Result</th>
+            <tr className={uiTableHeaderRow}>
+              <th className={`${uiTableHeaderCell} pr-3`}>Roll</th>
+              <th className={uiTableHeaderCell}>Result</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/60">
+          <tbody className={uiTableBody}>
             <tr>
-              <td className={`py-2 pr-3 align-top font-code ${uiTextBody} whitespace-nowrap`}>
-                1-5
-              </td>
-              <td className={`py-2 ${uiTextBody}`}>
-                <span className={`font-semibold ${colourTextPrimary}`}>Dud.</span> The explosive or
-                round fails to explode and, in the case of grenade launchers, the weapon must be
-                reloaded before it can fire.
+              <td className={`${uiTableCell} pr-3 align-top font-code whitespace-nowrap`}>1-5</td>
+              <td className={uiTableCell}>
+                <span className="font-semibold">Dud.</span> The explosive or round fails to explode
+                and, in the case of grenade launchers, the weapon must be reloaded before it can
+                fire.
               </td>
             </tr>
             <tr>
-              <td className={`py-2 pr-3 align-top font-code ${uiTextBody} whitespace-nowrap`}>
-                6-8
-              </td>
-              <td className={`py-2 ${uiTextBody}`}>
-                <span className={`font-semibold ${colourTextPrimary}`}>"It might be ok…"</span>{" "}
-                Nothing happens. Roll again on this table next round.
+              <td className={`${uiTableCell} pr-3 align-top font-code whitespace-nowrap`}>6-8</td>
+              <td className={uiTableCell}>
+                <span className="font-semibold">"It might be ok…"</span> Nothing happens. Roll again
+                on this table next round.
               </td>
             </tr>
             <tr>
-              <td className={`py-2 pr-3 align-top font-code ${uiTextBody} whitespace-nowrap`}>
-                9-0
-              </td>
-              <td className={`py-2 ${uiTextBody}`}>
-                <span className={`font-semibold ${colourTextPrimary}`}>BOOM!</span> The round or
-                explosive detonates immediately. Centre the effect on the character. If this was the
-                result of firing a grenade launcher, the grenade detonates in the barrel, having its
-                normal effect as well as destroying the weapon.
+              <td className={`${uiTableCell} pr-3 align-top font-code whitespace-nowrap`}>9-0</td>
+              <td className={uiTableCell}>
+                <span className="font-semibold">BOOM!</span> The round or explosive detonates
+                immediately. Centre the effect on the character. If this was the result of firing a
+                grenade launcher, the grenade detonates in the barrel, having its normal effect as
+                well as destroying the weapon.
               </td>
             </tr>
           </tbody>

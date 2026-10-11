@@ -26,10 +26,16 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import {
   uiSection,
-  uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
 } from "../../../ui/styles/editableStyles";
+import {
+  uiTable,
+  uiTableBody,
+  uiTableCell,
+  uiTableHeaderCell,
+  uiTableHeaderRow,
+} from "../../../ui/styles/tableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import { InfoModal } from "../../../components/InfoModal";
@@ -47,8 +53,6 @@ import {
 } from "./armourSnapshotHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
-import { colourTextPrimary } from "../../../ui/styles/colourTokens";
-import { uiHoverSurface } from "../../../ui/styles/buttonStyles";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -562,13 +566,13 @@ export function ArmourTab({
         <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>
           <div className="overflow-x-auto">
-            <table className="w-full lg:table-fixed text-sm lg:text-base border-collapse">
+            <table className={`${uiTable} lg:table-fixed`}>
               <thead>
-                <tr className={uiTextLabel}>
-                  <th className="lg:w-32 text-left py-1.5 pr-4 font-medium">Location</th>
-                  <th className="text-center py-1.5 px-3 font-medium">TB</th>
-                  <th className="text-center py-1.5 px-3 font-medium">AP</th>
-                  <th className="text-center py-1.5 px-3 font-medium">
+                <tr className={uiTableHeaderRow}>
+                  <th className={`${uiTableHeaderCell} pr-4 text-left lg:w-32`}>Location</th>
+                  <th className={`${uiTableHeaderCell} px-3 text-center`}>TB</th>
+                  <th className={`${uiTableHeaderCell} px-3 text-center`}>AP</th>
+                  <th className={`${uiTableHeaderCell} px-3 text-center`}>
                     <span className="inline-flex items-center gap-1">
                       Misc
                       {hasMisc && (
@@ -599,10 +603,10 @@ export function ArmourTab({
                       )}
                     </span>
                   </th>
-                  <th className="text-center py-1.5 px-3 font-medium">Total</th>
+                  <th className={`${uiTableHeaderCell} px-3 text-center`}>Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className={uiTableBody}>
                 {ARMOUR_LOCATION_ORDER.map((loc) => {
                   const regularAp = wornApAt(regularArmour, loc);
                   const nonStackingArcheotechAp = archeotechArmourWorn
@@ -616,20 +620,18 @@ export function ArmourTab({
                   const misc = bionic + traitArmourBonus;
                   const total = ap + toughnessBonus + misc;
                   return (
-                    <tr key={loc} className={`${uiHoverSurface} transition`}>
-                      <td className={`py-2 pr-4 ${colourTextPrimary}`}>
-                        {ARMOUR_LOCATION_LABELS[loc]}
-                      </td>
-                      <td className="py-2 px-3 text-center font-code text-white">
+                    <tr key={loc}>
+                      <td className={`${uiTableCell} pr-4`}>{ARMOUR_LOCATION_LABELS[loc]}</td>
+                      <td className={`${uiTableCell} px-3 text-center font-code`}>
                         {toughnessBonus}
                       </td>
-                      <td className="py-2 px-3 text-center font-code text-white">+{ap}</td>
+                      <td className={`${uiTableCell} px-3 text-center font-code`}>+{ap}</td>
                       <td
-                        className={`py-2 px-3 text-center font-code ${misc > 0 ? "text-white" : "text-slate-700"}`}
+                        className={`${uiTableCell} px-3 text-center font-code ${misc > 0 ? "" : uiTextPlaceholder}`}
                       >
                         {misc > 0 ? `+${misc}` : "-"}
                       </td>
-                      <td className="py-2 px-3 text-center font-code font-semibold text-emerald-400">
+                      <td className={`${uiTableCell} px-3 text-center font-code font-semibold`}>
                         {total}
                       </td>
                     </tr>
