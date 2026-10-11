@@ -1,19 +1,21 @@
 // src/ui/icons/PickerArrows.tsx
 
-export function ArrowRight() {
+import { colourIconMuted } from "../styles/colourTokens";
+
+function Arrow({ direction }: { direction: "left" | "right" }) {
   return (
     <svg
-      data-picker-arrow="right"
+      data-picker-arrow={direction}
       viewBox="0 0 20 20"
       fill="none"
       aria-hidden="true"
       focusable="false"
-      className="w-4 h-4 text-slate-400 shrink-0"
+      className={`h-4 w-4 shrink-0 ${colourIconMuted} ${direction === "left" ? "rotate-180" : ""}`}
     >
       <path
         d="M3.5 10h13m-5-5 5 5-5 5"
         stroke="currentColor"
-        strokeWidth="1.75"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -21,23 +23,10 @@ export function ArrowRight() {
   );
 }
 
+export function ArrowRight() {
+  return <Arrow direction="right" />;
+}
+
 export function ArrowLeft() {
-  return (
-    <svg
-      data-picker-arrow="left"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-      focusable="false"
-      className="w-4 h-4 text-slate-400 shrink-0"
-    >
-      <path
-        d="M16.5 10h-13m5-5-5 5 5 5"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  return <Arrow direction="left" />;
 }

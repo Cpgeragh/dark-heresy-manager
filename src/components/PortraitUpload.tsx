@@ -7,6 +7,8 @@ import { uploadPortrait } from "../services/portraitService";
 import { Button } from "../ui/buttons/Button";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 import { ModalShell } from "../ui/modals/ModalShell";
+import { PlusIcon } from "../ui/icons/PlusIcon";
+import { PortraitIcon } from "../ui/icons/PortraitIcon";
 import { useToast } from "./Toast";
 import {
   ACCEPTED_PORTRAIT_MIME_TYPES,
@@ -150,20 +152,7 @@ export function PortraitUpload({
           {currentPortraitUrl ? (
             <img src={currentPortraitUrl} alt="Portrait" className="w-full h-full object-cover" />
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className={`w-6 h-6 ${uiTextPlaceholder}`}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-              />
-            </svg>
+            <PortraitIcon className={`h-6 w-6 ${uiTextPlaceholder}`} />
           )}
         </div>
 
@@ -178,16 +167,7 @@ export function PortraitUpload({
             className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border ${colourBorderRed} ${colourHeadingAccent} flex items-center justify-center ${colourHoverAccentTint} ${uiPressFeedback()} ${uiFocusRing} transition`}
             aria-label="Upload portrait"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="currentColor"
-              className="w-3 h-3"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
+            <PlusIcon className="h-3 w-3" />
           </button>
         )}
 

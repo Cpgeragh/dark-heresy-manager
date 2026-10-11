@@ -13,7 +13,8 @@ import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/picker
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { CloseIcon } from "../../../ui/buttons/CloseButton";
+import { CloseIcon } from "../../../ui/icons/CloseIcon";
+import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import {
   uiChipRow,
   uiSplitRow,
@@ -203,7 +204,7 @@ export function UpgradeCard({
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
         <Chip size="sm" colour="slate">
-          <span className="leading-none">{"\u2696"}</span>
+          <WeightIcon className="h-[1em] w-[1em] shrink-0" />
           <span className="leading-none">{displayedWeightModifier}</span>
         </Chip>
         <ItemMetaChips
@@ -266,7 +267,7 @@ export function UpgradePicker({
             <PickerRowName name={upgrade.name} />
             <PickerRowChips>
               <Chip colour="slate">
-                <span className="leading-none">{"\u2696"}</span>
+                <WeightIcon className="h-[1em] w-[1em] shrink-0" />
                 <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
               </Chip>
               <ItemMetaChips

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { CloseButton } from "../ui/buttons/CloseButton";
+import { InfoIcon } from "../ui/icons/InfoIcon";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { uiInfoButton } from "../ui/styles/buttonStyles";
@@ -20,22 +21,7 @@ export function InfoModal({ title, content, hideTitle = false, as = "button" }: 
   const [open, setOpen] = useState(false);
 
   const triggerClassName = `inline-flex h-3.5 w-[18px] shrink-0 items-center justify-center text-sm leading-none transform-gpu ${uiInfoButton}`;
-  const triggerIcon = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2}
-      stroke="currentColor"
-      className="w-2.5 h-2.5"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-      />
-    </svg>
-  );
+  const triggerIcon = <InfoIcon className="h-2.5 w-2.5" />;
 
   return (
     <>

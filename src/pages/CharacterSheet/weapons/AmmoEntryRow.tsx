@@ -10,6 +10,7 @@ import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
+import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import {
   uiChipRow,
   uiSplitRow,
@@ -123,7 +124,8 @@ export function AmmoEntryRow({
             />
           )}
           <Chip size="sm" colour="slate">
-            ⚖ {formatWeightForDisplay(formatAmmoWeight(weightKg ?? 0))}
+            <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+            <span>{formatWeightForDisplay(formatAmmoWeight(weightKg ?? 0))}</span>
           </Chip>
         </div>
       )}

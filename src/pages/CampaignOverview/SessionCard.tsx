@@ -11,6 +11,7 @@ import {
 import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
+import { CheckIcon } from "../../ui/icons/CheckIcon";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
@@ -249,7 +250,10 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             session.attendees.length > 0 &&
             session.xpApplied !== undefined &&
             (session.xpApplied === true ? (
-              <Chip colour="green">XP Applied ✓</Chip>
+              <Chip colour="green">
+                <span>XP Applied</span>
+                <CheckIcon className="h-[1em] w-[1em]" />
+              </Chip>
             ) : (
               <Button
                 size="sm"

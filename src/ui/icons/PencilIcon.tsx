@@ -1,6 +1,8 @@
 // src/ui/icons/PencilIcon.tsx
 
-export function PencilIcon({ className = "w-4 h-4" }: { className?: string }) {
+import type { IconProps } from "./iconTypes";
+
+export function PencilIcon({ className = "w-4 h-4" }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

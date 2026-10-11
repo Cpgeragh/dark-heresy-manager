@@ -64,9 +64,11 @@ describe("ToastItem", () => {
     await user.click(screen.getByRole("button", { name: "Copy message to clipboard" }));
 
     await waitFor(() => expect(writeTextMock).toHaveBeenCalledWith("DH-AAAA-BBBB"));
-    expect(screen.getByRole("button", { name: "Copy message to clipboard" })).toHaveTextContent(
-      "✓"
-    );
+    expect(
+      screen
+        .getByRole("button", { name: "Copy message to clipboard" })
+        .querySelector('[data-icon="check"]')
+    ).toBeInTheDocument();
   });
 
   it("reverts the copied indicator after the feedback duration", async () => {
@@ -77,18 +79,22 @@ describe("ToastItem", () => {
 
       await user.click(screen.getByRole("button", { name: "Copy message to clipboard" }));
       await waitFor(() =>
-        expect(screen.getByRole("button", { name: "Copy message to clipboard" })).toHaveTextContent(
-          "✓"
-        )
+        expect(
+          screen
+            .getByRole("button", { name: "Copy message to clipboard" })
+            .querySelector('[data-icon="check"]')
+        ).toBeInTheDocument()
       );
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(2000); // COPY_FEEDBACK_DURATION
       });
 
-      expect(screen.getByRole("button", { name: "Copy message to clipboard" })).toHaveTextContent(
-        "📋"
-      );
+      expect(
+        screen
+          .getByRole("button", { name: "Copy message to clipboard" })
+          .querySelector('[data-icon="copy"]')
+      ).toBeInTheDocument();
     } finally {
       vi.useRealTimers();
     }

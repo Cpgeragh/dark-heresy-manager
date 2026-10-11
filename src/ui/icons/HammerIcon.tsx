@@ -1,12 +1,14 @@
 // src/ui/icons/HammerIcon.tsx
 
-export function HammerIcon({ className = "w-[18px] h-[18px]" }: { className?: string }) {
+import type { IconProps } from "./iconTypes";
+
+export function HammerIcon({ className = "w-[18px] h-[18px]" }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      strokeWidth={1.5}
+      strokeWidth={2}
       stroke="currentColor"
       className={className}
       aria-hidden="true"

@@ -1,19 +1,10 @@
 // Shared close control for modals, drawers, and other dismissible surfaces.
 // Back navigation and destructive removal controls remain separate.
 
-import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
+import type { ButtonHTMLAttributes } from "react";
+import { CloseIcon } from "../icons/CloseIcon";
 import { colourHoverTextPrimary, colourTextMuted } from "../styles/colourTokens";
 import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
-
-export type CloseIconProps = Omit<HTMLAttributes<HTMLSpanElement>, "children">;
-
-export function CloseIcon({ className = "", ...props }: CloseIconProps) {
-  return (
-    <span aria-hidden="true" className={`leading-none ${className}`.trim()} {...props}>
-      ×
-    </span>
-  );
-}
 
 export type CloseButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,

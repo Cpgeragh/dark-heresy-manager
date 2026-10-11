@@ -1,11 +1,13 @@
-export function QrCodeIcon({ className = "w-[18px] h-[18px]" }: { className?: string }) {
+import type { IconProps } from "./iconTypes";
+
+export function QrCodeIcon({ className = "w-[18px] h-[18px]" }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={2}
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"

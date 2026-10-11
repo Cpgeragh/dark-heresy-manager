@@ -9,6 +9,7 @@ import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService
 import { markRecoveryCodeBackedUp } from "../services/userAccountService";
 import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
+import { WarningIcon } from "../ui/icons/WarningIcon";
 import {
   colourNoticeAmber,
   colourNoticeAmberTitle,
@@ -69,8 +70,11 @@ export function RecoveryBackupBanner({
 
   return (
     <div className={`${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4 space-y-3`}>
-      <p className={`text-sm lg:text-base font-semibold ${colourNoticeAmberTitle}`}>
-        ⚠ Back up your recovery code
+      <p
+        className={`inline-flex items-center gap-1.5 text-sm lg:text-base font-semibold ${colourNoticeAmberTitle}`}
+      >
+        <WarningIcon className="h-[1em] w-[1em] shrink-0" />
+        <span>Back up your recovery code</span>
       </p>
       <p className={`text-xs lg:text-sm ${colourNoticeAmberText}`}>
         It's the only way to restore your account on a new device or if your browser data is

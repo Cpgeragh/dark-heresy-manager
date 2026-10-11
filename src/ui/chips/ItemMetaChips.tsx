@@ -6,6 +6,7 @@ import { Chip } from "./Chip";
 import { formatMoneyForDisplay } from "../format/moneyFormat";
 import { availabilityChipColour, sourceChipColour } from "../styles/sourceStyles";
 import { formatWeightForDisplay } from "../format/weightFormat";
+import { WeightIcon } from "../icons/WeightIcon";
 
 interface Props {
   weight?: string | null;
@@ -47,7 +48,7 @@ export function ItemMetaChips({
     <>
       {displayedWeight && (
         <Chip size={size} colour="slate">
-          <span className="leading-none">{"\u2696"}</span>
+          <WeightIcon className="h-[1em] w-[1em] shrink-0" />
           <span className="leading-none">{displayedWeight}</span>
         </Chip>
       )}

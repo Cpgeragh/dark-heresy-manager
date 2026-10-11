@@ -3,6 +3,7 @@
 import React, { Component } from "react";
 import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
+import { WarningIcon } from "../ui/icons/WarningIcon";
 import { uiSection, uiTextError, uiTextBody, uiTextPlaceholder } from "../ui/styles/editableStyles";
 import {
   colourHoverTextBody,
@@ -90,7 +91,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
           <div
             className={`w-16 h-16 rounded-full ${colourStateRed} border-2 flex items-center justify-center`}
           >
-            <span className={`text-3xl ${uiTextError}`}>⚠</span>
+            <WarningIcon className={`h-8 w-8 ${uiTextError}`} />
           </div>
         </div>
 

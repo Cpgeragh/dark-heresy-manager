@@ -20,6 +20,7 @@ import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerMo
 import { PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
+import { CheckIcon } from "../../../ui/icons/CheckIcon";
 import { ITEM_TYPES, type ItemType } from "./archeotechConstants";
 import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import {
@@ -513,7 +514,7 @@ export function CustomArcheotechForm({
                 aria-label="Stacks with worn armour"
                 aria-pressed={stacks}
               >
-                {stacks && <span className={`${colourErrorText} text-[10px] leading-none`}>✓</span>}
+                {stacks && <CheckIcon className={`h-[10px] w-[10px] ${colourErrorText}`} />}
               </button>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>
                 Stacks with worn armour{" "}

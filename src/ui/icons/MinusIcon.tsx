@@ -1,8 +1,6 @@
-// src/ui/icons/PlusIcon.tsx
-
 import type { IconProps } from "./iconTypes";
 
-export function PlusIcon({ className = "w-4 h-4" }: IconProps) {
+export function MinusIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -12,7 +10,6 @@ export function PlusIcon({ className = "w-4 h-4" }: IconProps) {
       aria-hidden="true"
       focusable="false"
     >
-      <rect x="8.5" y="3" width="3" height="14" rx="1" />
       <rect x="3" y="8.5" width="14" height="3" rx="1" />
     </svg>
   );

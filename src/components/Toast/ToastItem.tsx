@@ -3,7 +3,12 @@
 import { useState, useCallback } from "react";
 import { useToast, type Toast } from "./ToastContext";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
-import { CloseIcon } from "../../ui/buttons/CloseButton";
+import { CheckIcon } from "../../ui/icons/CheckIcon";
+import { CloseIcon } from "../../ui/icons/CloseIcon";
+import { CopyIcon } from "../../ui/icons/CopyIcon";
+import { ExclamationIcon } from "../../ui/icons/ExclamationIcon";
+import { InfoIcon } from "../../ui/icons/InfoIcon";
+import { WarningIcon } from "../../ui/icons/WarningIcon";
 import { colourHoverToastControl, toastColours } from "../../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../../ui/styles/buttonStyles";
 
@@ -30,10 +35,10 @@ export function ToastItem({ toast }: ToastItemProps) {
   }, [removeToast, toast.id]);
 
   const icons = {
-    success: "✓",
-    error: "!",
-    warning: "⚠",
-    info: "ℹ",
+    success: <CheckIcon className="h-[1em] w-[1em]" />,
+    error: <ExclamationIcon className="h-[1em] w-[1em]" />,
+    warning: <WarningIcon className="h-[1em] w-[1em]" />,
+    info: <InfoIcon className="h-[1em] w-[1em]" />,
   };
   const gridColumns = toast.copyText
     ? "grid-cols-[4.25rem_minmax(0,1fr)_4.25rem]"
@@ -73,7 +78,7 @@ export function ToastItem({ toast }: ToastItemProps) {
             aria-label="Copy message to clipboard"
             title="Copy to clipboard"
           >
-            <span aria-hidden="true">{copied ? "✓" : "📋"}</span>
+            {copied ? <CheckIcon /> : <CopyIcon />}
           </button>
         )}
 

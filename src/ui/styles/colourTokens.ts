@@ -39,6 +39,7 @@ export const colourQrBackground = "bg-white";
 export const colourDotLoaded = "bg-green-400";
 export const colourDotIdle = "bg-slate-600";
 export const colourTextMuted = "text-slate-400";
+export const colourIconMuted = colourTextMuted;
 export const colourTextBody = "text-slate-300";
 export const colourTextPlaceholder = "text-slate-500";
 export const colourHoverSurface = "hover:bg-slate-800";
@@ -85,7 +86,7 @@ export const colourEnabledHoverSlateSurface = "enabled:hover:bg-slate-800";
 export const colourButtonPrimary = `border border-red-500 text-red-500 ${colourEnabledHoverRedTint}`;
 export const colourButtonSecondary =
   "border border-transparent bg-slate-700 text-slate-300 enabled:hover:bg-slate-600";
-export const colourButtonGhost = `border border-slate-600 text-slate-400 ${colourEnabledHoverSlateSurface}`;
+export const colourButtonGhost = `border border-slate-600 ${colourTextMuted} ${colourEnabledHoverSlateSurface}`;
 export const colourButtonDanger =
   "border border-transparent bg-red-700 text-white enabled:hover:bg-red-600";
 export const colourButtonDangerGhost =

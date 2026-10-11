@@ -2,6 +2,8 @@
 // Inline quantity editor: decrement button, click-to-type display, increment button.
 
 import { useQuantityEdit } from "../hooks/useQuantityEdit";
+import { MinusIcon } from "./icons/MinusIcon";
+import { PlusIcon } from "./icons/PlusIcon";
 import { uiEditableValueHover, uiStepButtonColour } from "./styles/buttonStyles";
 import { editableInputColour } from "./styles/editableStyles";
 import { colourTextPrimary } from "./styles/colourTokens";
@@ -58,7 +60,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           aria-label="Decrease quantity"
           className={`${sizeStyles.btn} rounded ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
-          −
+          <MinusIcon className="h-[1em] w-[1em]" />
         </button>
       )}
 
@@ -93,7 +95,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           aria-label="Increase quantity"
           className={`${sizeStyles.btn} rounded ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
-          +
+          <PlusIcon className="h-[1em] w-[1em]" />
         </button>
       )}
     </div>

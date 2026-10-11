@@ -1,6 +1,8 @@
 // src/components/Stepper.tsx
 
 import { useState, useCallback } from "react";
+import { MinusIcon } from "../ui/icons/MinusIcon";
+import { PlusIcon } from "../ui/icons/PlusIcon";
 import {
   uiEditableValueHover,
   uiFocusRing,
@@ -99,7 +101,7 @@ export function Stepper({
         aria-label="Decrease"
         className={btnClass}
       >
-        −
+        <MinusIcon className="h-[1em] w-[1em]" />
       </button>
 
       <div className={dividerClass} />
@@ -144,7 +146,7 @@ export function Stepper({
         aria-label="Increase"
         className={btnClass}
       >
-        +
+        <PlusIcon className="h-[1em] w-[1em]" />
       </button>
     </div>
   );

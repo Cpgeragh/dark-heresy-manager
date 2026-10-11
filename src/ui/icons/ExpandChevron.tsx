@@ -1,12 +1,16 @@
 // src/ui/icons/ExpandChevron.tsx
 
+import { colourIconMuted } from "../styles/colourTokens";
+
 export function ExpandChevron({ expanded }: { expanded: boolean }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
-      className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}
+      className={`w-4 h-4 ${colourIconMuted} shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}
+      aria-hidden="true"
+      focusable="false"
     >
       <path
         fillRule="evenodd"

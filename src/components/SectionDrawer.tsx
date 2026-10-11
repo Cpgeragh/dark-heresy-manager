@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { TabId } from "../pages/CharacterSheet/types";
 import { CloseButton } from "../ui/buttons/CloseButton";
 import { IconButton } from "../ui/buttons/IconButton";
+import { MenuIcon } from "../ui/icons/MenuIcon";
 import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
 import {
   colourTextPrimary,
@@ -172,7 +173,7 @@ function SectionDrawerContent({
         label="Open section navigation"
         onClick={open}
         className="h-10 w-10"
-        icon={<span aria-hidden="true">☰</span>}
+        icon={<MenuIcon />}
       />
 
       {/* Backdrop */}

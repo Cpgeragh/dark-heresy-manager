@@ -51,7 +51,7 @@ import { AppearanceTraitPicker } from "../AppearanceTraitPicker";
 import { GenderPicker } from "../GenderPicker";
 import { QuirkPicker } from "../QuirkPicker";
 import { AddButton } from "../../../ui/buttons/AddButton";
-import { CloseIcon } from "../../../ui/buttons/CloseButton";
+import { CloseIcon } from "../../../ui/icons/CloseIcon";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";

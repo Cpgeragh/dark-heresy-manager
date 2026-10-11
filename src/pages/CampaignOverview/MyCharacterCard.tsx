@@ -8,6 +8,8 @@ import { revealRecoveryCode } from "../../services/characterService";
 import { useToast } from "../../components/Toast";
 import type { CharacterListItem } from "../../types/Firestore";
 import { RevealCodeButton } from "../../ui/buttons/RevealCodeButton";
+import { ExperienceIcon } from "../../ui/icons/ExperienceIcon";
+import { HeartIcon } from "../../ui/icons/HeartIcon";
 import { uiSection, uiTextMeta, uiTextPlaceholder } from "../../ui/styles/editableStyles";
 import {
   colourMetadataLabelText,
@@ -72,8 +74,8 @@ export function MyCharacterCard({
           {(character.wounds || xpLeft !== null) && (
             <div className={`flex flex-wrap gap-3 ${uiTextMeta}`}>
               {character.wounds && (
-                <span>
-                  ❤{" "}
+                <span className="inline-flex items-center gap-1">
+                  <HeartIcon className="h-[1em] w-[1em] shrink-0" />
                   <span
                     className={
                       character.wounds.current <= 2
@@ -83,19 +85,19 @@ export function MyCharacterCard({
                   >
                     {character.wounds.current}
                   </span>
-                  <span className={uiTextPlaceholder}> / </span>
+                  <span className={uiTextPlaceholder}>/</span>
                   <span className={colourTextPrimary}>{character.wounds.total}</span> Wounds
                 </span>
               )}
               {xpLeft !== null && (
-                <span>
-                  ✦{" "}
+                <span className="inline-flex items-center gap-1">
+                  <ExperienceIcon className="h-[1em] w-[1em] shrink-0" />
                   <span
                     className={xpLeft < 0 ? `${colourErrorText} font-semibold` : colourTextPrimary}
                   >
                     {xpLeft}
-                  </span>{" "}
-                  XP remaining
+                  </span>
+                  <span>XP remaining</span>
                 </span>
               )}
             </div>

@@ -1,6 +1,8 @@
 // src/ui/icons/UnlinkIcon.tsx
 
-export function UnlinkIcon({ className = "w-4 h-4" }: { className?: string }) {
+import type { IconProps } from "./iconTypes";
+
+export function UnlinkIcon({ className = "w-4 h-4" }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -11,6 +13,8 @@ export function UnlinkIcon({ className = "w-4 h-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      aria-hidden="true"
+      focusable="false"
     >
       <path d="m19 5 3-3" />
       <path d="m2 22 3-3" />

@@ -64,6 +64,7 @@ import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
+import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import { StatChip } from "../../../ui/chips/StatChip";
 import {
   DamageTypeChip,
@@ -830,7 +831,8 @@ export function RangedCard({
                             />
                           )}
                           <Chip size="sm" colour="slate">
-                            ⚖ {formatWeightForDisplay(formatAmmoWeight(magazineWeight))}
+                            <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+                            <span>{formatWeightForDisplay(formatAmmoWeight(magazineWeight))}</span>
                           </Chip>
                         </div>
                       )}

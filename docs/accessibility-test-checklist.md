@@ -32,44 +32,19 @@ Found by reading the source directly, not yet confirmed live: check these
 first, they're the most likely places a screen reader will produce
 confusing output:
 
-- [ ] `ToastItem.tsx`'s type icon (✓ / ! / ⚠ / ℹ) has no `aria-hidden`, and
-      every toast is `role="alert" aria-live="polite"`: confirm whether a
-      screen reader announces a raw glyph name before the actual message on
-      every single toast in the app. If so, the icon `<div>` needs
-      `aria-hidden="true"` added, matching how the same file's own copy
-      button icon is already correctly hidden two lines below it.
-- [ ] `MyCharacterCard.tsx`'s ❤ (Wounds) and ✦ (XP) glyphs have no
-      `aria-hidden` or accessible label: confirm whether a screen reader
-      reads a raw Unicode character name in front of the number instead of
-      something meaningful like "Wounds" or "XP remaining."
 - [ ] `PortraitUpload.tsx`'s uploaded image always uses `alt="Portrait"`
       regardless of which character it belongs to: on a page like
       Campaign Overview showing several characters' portraits
       at once, confirm whether this reads as ambiguous to a screen reader
       user versus naming the character.
-- [ ] `ItemMetaChips.tsx`'s weight chip renders `⚖` (`"⚖"`) directly before the weight
-      value with no `aria-hidden`: confirm whether a screen reader announces a raw glyph
-      name before every weight value shown anywhere in the app (Weapons, Armour, Gear,
-      Cybernetics, Drugs, Archeotech, and anywhere else `ItemMetaChips` renders a weight
-      chip). If so, the icon `<span>` needs `aria-hidden="true"` added, matching the fix
-      already flagged for `ToastItem.tsx`.
 - [ ] `PickerModal.tsx`'s search input (the shared search box every "Add X" reference
       picker in the app uses) has no `aria-label` and no associated `<label>`, relying
       only on `placeholder="Search…"`: confirm whether a screen reader announces
       anything meaningful when the field receives focus. If not, add an `aria-label`
       directly on the input.
-- [ ] `PlusIcon.tsx` does not set `aria-hidden="true"`/`focusable="false"` on its `<svg>`,
-      unlike `TrashIcon.tsx`, `EyeIcon.tsx`, and `PickerArrows.tsx`. This is likely
-      harmless inside a button that already has an accessible name, but confirm
-      `PickerModal.tsx`'s `PickerCustomAction` specifically, where `PlusIcon` sits next
-      to visible text inside a button with no `aria-label` of its own.
 - [ ] `OfflineIndicator.tsx`'s offline banner has no `role="status"` or `aria-live`:
       confirm whether a screen reader announces anything when connectivity drops,
       given the banner just appears/disappears with no live-region wiring.
-- [ ] `ErrorBoundary.tsx`'s `⚠` icon and `RecoveryBackupBanner.tsx`'s `⚠` icon both
-      render the glyph as plain inline text with no `aria-hidden`: same pattern as
-      `ToastItem.tsx`, confirm whether a screen reader announces a raw glyph name
-      before "Something went wrong" / "Back up your recovery code" in either place.
 - [ ] `SectionDrawer.tsx` and `MessageDrawer.tsx` (the app's only two drawer surfaces)
       correctly set `role="dialog"`, `aria-modal`, and `inert` when closed, but neither
       moves focus into the drawer on open, traps Tab while it's open, or restores focus
@@ -125,18 +100,15 @@ confusing output:
       in the app (e.g. `CareerStartingChoiceModal.tsx`, `WeaponTrainingTab.tsx`'s own
       weapon-group buttons).
 
-- [ ] `weaponShared.tsx`'s `⚖` weight-modifier glyph (`UpgradeCard`, `UpgradePicker`) has no
-      `aria-hidden`, a separate instance of the already-flagged icon bug since it bypasses
-      `ItemMetaChips`. Its `WeaponQualitySelector`'s "Qualities" label also isn't
-      programmatically connected to the button/input group it describes.
+- [ ] `weaponShared.tsx`'s `WeaponQualitySelector` has a "Qualities" label that is not
+      programmatically connected to the button and input group it describes.
 - [ ] `IntegratedWeaponPicker.tsx`, `MeleePicker.tsx`, and `RangedPicker.tsx` all share the
       same "Select weapon craftsmanship" button group (Poor/Common/Good/Best) with no
       `aria-pressed` on any of the buttons: a third location for the missing-toggle-state
       pattern already flagged for `CustomItemLibraryAdmin.tsx` and
       `PsychicTab/CustomPowerForm.tsx`.
-- [ ] `RangedCard.tsx`'s `⚖` glyph appears twice more (ammo-entry weight, magazine weight),
-      both raw text with no `aria-hidden`. Separately, its alternate-weapon-profile switcher
-      buttons have no `aria-pressed`/`aria-selected`, selection shown by colour only.
+- [ ] `RangedCard.tsx`'s alternate-weapon-profile switcher buttons have no
+      `aria-pressed`/`aria-selected`, with selection shown by colour only.
 - [ ] `MeleeCard.tsx` has the identical alternate-profile switcher gap as `RangedCard.tsx`
       (Melee/Pistol/per-profile buttons), no `aria-pressed`/`aria-selected`.
 
