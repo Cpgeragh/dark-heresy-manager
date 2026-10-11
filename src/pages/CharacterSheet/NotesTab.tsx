@@ -21,6 +21,7 @@ import {
   uiTextDescription,
 } from "../../ui/styles/editableStyles";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
+import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { createLocalId } from "../../utils/createLocalId";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 
@@ -177,7 +178,9 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
                       </Chip>
                     </div>
                     {editable && (
-                      <div className="pointer-events-auto relative z-10 flex shrink-0 justify-end gap-1.5 order-first lg:order-2">
+                      <div
+                        className={`pointer-events-auto relative ${uiLayerLocal} flex shrink-0 justify-end gap-1.5 order-first lg:order-2`}
+                      >
                         <Button size="xs" onClick={() => openEdit(entry)}>
                           Edit
                         </Button>

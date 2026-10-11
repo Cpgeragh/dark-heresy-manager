@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { colourAmberFill } from "../ui/styles/colourTokens";
+import { uiLayerForeground } from "../ui/styles/layerStyles";
 
 export function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -23,9 +24,9 @@ export function OfflineIndicator() {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 ${colourAmberFill} text-center text-sm py-2 font-semibold z-50`}
+      className={`fixed bottom-0 left-0 right-0 ${colourAmberFill} text-center text-sm py-2 font-semibold ${uiLayerForeground}`}
     >
-      You are offline — keep this page open and retry any change that reports a failure
+      You are offline. Keep this page open and retry any change that reports a failure.
     </div>
   );
 }

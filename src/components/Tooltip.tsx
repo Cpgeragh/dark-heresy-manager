@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useId, useLayoutEffect } from "react";
 import type { ReactNode } from "react";
 import { uiInfoButton } from "../ui/styles/buttonStyles";
 import { colourPopoverSurface, colourTextPrimary } from "../ui/styles/colourTokens";
+import { uiLayerForeground } from "../ui/styles/layerStyles";
 
 interface TooltipProps {
   children: ReactNode;
@@ -96,7 +97,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
             visibility: "hidden",
             maxWidth: maxWidth,
           }}
-          className={`z-50 ${colourPopoverSurface} border ${colourTextPrimary} text-xs px-3 py-2 rounded shadow-lg`}
+          className={`${uiLayerForeground} ${colourPopoverSurface} border ${colourTextPrimary} text-xs px-3 py-2 rounded shadow-lg`}
         >
           {content}
         </div>

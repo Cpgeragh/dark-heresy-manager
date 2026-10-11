@@ -12,6 +12,8 @@ import { PendingOverlay } from "../ui/PendingOverlay";
 import { uiDrawerTitle, uiTextPlaceholder } from "../ui/styles/editableStyles";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import { colourPopoverSurface, colourDivider } from "../ui/styles/colourTokens";
+import { uiLayerForeground } from "../ui/styles/layerStyles";
+import { DrawerBackdrop } from "../ui/DrawerBackdrop";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────
 
@@ -83,17 +85,11 @@ export function MessageDrawer({
   recordComponentRender("MessageDrawer");
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={onClose}
-      />
+      <DrawerBackdrop isOpen={isOpen} onClose={onClose} />
 
       {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 max-w-[85vw] z-50 ${colourPopoverSurface} border-l flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-72 max-w-[85vw] ${uiLayerForeground} ${colourPopoverSurface} border-l flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="message-drawer-title"

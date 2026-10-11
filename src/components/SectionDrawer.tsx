@@ -6,6 +6,7 @@ import { CloseButton } from "../ui/buttons/CloseButton";
 import { IconButton } from "../ui/buttons/IconButton";
 import { MenuIcon } from "../ui/icons/MenuIcon";
 import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
+import { DrawerBackdrop } from "../ui/DrawerBackdrop";
 import {
   colourTextPrimary,
   colourPopoverSurface,
@@ -14,6 +15,7 @@ import {
   colourBorderRed,
 } from "../ui/styles/colourTokens";
 import { uiFocusRing, uiHoverSurface, uiPressFeedback } from "../ui/styles/buttonStyles";
+import { uiLayerForeground } from "../ui/styles/layerStyles";
 
 // ================================================================
 // NAVIGATION STRUCTURE
@@ -176,18 +178,11 @@ function SectionDrawerContent({
         icon={<MenuIcon />}
       />
 
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-          onClick={close}
-          aria-hidden="true"
-        />
-      )}
+      <DrawerBackdrop isOpen={isOpen} onClose={close} />
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] ${colourPopoverSurface} border-r flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 ${uiLayerForeground} w-72 max-w-[85vw] ${colourPopoverSurface} border-r flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="Section navigation"

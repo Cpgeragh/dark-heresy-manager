@@ -11,6 +11,7 @@ import {
   colourStateRed,
   colourTextPrimary,
 } from "../ui/styles/colourTokens";
+import { uiLayerBackdrop } from "../ui/styles/layerStyles";
 
 interface Props {
   children: ReactNode;
@@ -84,7 +85,9 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
   const isDev = import.meta.env.DEV;
 
   return (
-    <div className={`fixed inset-0 z-40 flex overflow-y-auto ${colourPageBackground} p-4 pt-14`}>
+    <div
+      className={`fixed inset-0 ${uiLayerBackdrop} flex overflow-y-auto ${colourPageBackground} p-4 pt-14`}
+    >
       <div className="m-auto w-full max-w-md space-y-4">
         {/* Error Icon */}
         <div className="flex justify-center">

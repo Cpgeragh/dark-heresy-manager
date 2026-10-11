@@ -31,6 +31,7 @@ import {
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
+import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 
 export function WeaponQualitySelector({
   selected,
@@ -143,7 +144,7 @@ export function EquipToggle({
       disabled={disabled && !equipped}
       loadingLabel={equipped ? "Unequipping" : "Equipping"}
       title={equipped ? "Click to unequip" : disabled ? "Slots full" : "Click to equip"}
-      className="relative z-10 pointer-events-auto shrink-0"
+      className={`relative ${uiLayerLocal} pointer-events-auto shrink-0`}
       onClick={(event) => {
         event.stopPropagation();
         if (!disabled || equipped) return onChange();

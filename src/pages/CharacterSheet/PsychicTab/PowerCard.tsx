@@ -26,6 +26,7 @@ import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;
@@ -156,7 +157,7 @@ export function PowerCard({
 
         <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
           {editable && (
-            <div className="relative z-20 pointer-events-auto">
+            <div className={`relative ${uiLayerLocal} pointer-events-auto`}>
               <RemoveButton
                 onClick={() => setDeleteArmed(true)}
                 label={`Delete ${power.name || "power"}`}

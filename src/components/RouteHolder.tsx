@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useLocation, type Location } from "react-router-dom";
 import { RouteReadyProvider } from "../context/RouteReadyContext";
 import { PendingOverlay } from "../ui/PendingOverlay";
+import { uiLayerForeground } from "../ui/styles/layerStyles";
 import { SplashScreen } from "./SplashScreen";
 
 interface RouteHolderProps {
@@ -36,7 +37,7 @@ export function RouteHolder({ routes, splashLabel }: RouteHolderProps) {
       ))}
       <PendingOverlay active={shown !== null && waiting} />
       {shown === null && (
-        <div className="fixed inset-0 z-50">
+        <div className={`fixed inset-0 ${uiLayerForeground}`}>
           <SplashScreen label={splashLabel} />
         </div>
       )}

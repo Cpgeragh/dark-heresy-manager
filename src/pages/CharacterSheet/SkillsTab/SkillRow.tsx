@@ -27,6 +27,7 @@ import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { colourAmberPlain, type ChipColour } from "../../../ui/styles/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -165,13 +166,13 @@ export function SkillRow({
               )}
             </div>
             {canDelete && (
-              <div className="relative z-20 shrink-0 pointer-events-auto">
+              <div className={`relative ${uiLayerLocal} shrink-0 pointer-events-auto`}>
                 <RemoveButton onClick={() => setDeleteArmed(true)} label={`Delete ${skill.name}`} />
               </div>
             )}
           </div>
           {hasUpgrade && (
-            <div className="relative z-20 flex justify-end pointer-events-auto">
+            <div className={`relative ${uiLayerLocal} flex justify-end pointer-events-auto`}>
               {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
                 <Button size="xs" onClick={() => setUpgradeArmed(true)}>
                   Upgrade to {nextTierAccess.level}
@@ -244,7 +245,9 @@ export function SkillRow({
               )}
             </div>
             {(hasUpgrade || canDelete) && (
-              <div className="relative z-20 flex shrink-0 items-center gap-3 pointer-events-auto">
+              <div
+                className={`relative ${uiLayerLocal} flex shrink-0 items-center gap-3 pointer-events-auto`}
+              >
                 {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
                   <Button size="xs" onClick={() => setUpgradeArmed(true)}>
                     Upgrade to {nextTierAccess.level}

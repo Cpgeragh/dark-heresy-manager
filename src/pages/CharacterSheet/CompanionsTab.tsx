@@ -34,6 +34,7 @@ import { TALENT_LIST } from "shared-rules";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { GEAR_REFERENCE } from "../../data/reference/gearReference";
 import { colourDivider } from "../../ui/styles/colourTokens";
+import { uiLayerLocal } from "../../ui/styles/layerStyles";
 
 const CHARACTERISTICS: { key: keyof CompanionRef["characteristics"]; label: string }[] = [
   { key: "ws", label: "WS" },
@@ -87,7 +88,10 @@ function CompanionPickerCard({
             </span>
           </div>
           {pending ? (
-            <span className={`${uiSpinner} relative z-10 h-4 w-4 ml-auto`} aria-hidden="true" />
+            <span
+              className={`${uiSpinner} relative ${uiLayerLocal} h-4 w-4 ml-auto`}
+              aria-hidden="true"
+            />
           ) : (
             <ExpandButton
               expanded={expanded}

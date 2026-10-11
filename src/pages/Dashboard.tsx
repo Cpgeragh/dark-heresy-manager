@@ -43,6 +43,7 @@ import { Button } from "../ui/buttons/Button";
 import { EditButton } from "../ui/buttons/EditButton";
 import { ArchiveButton } from "../ui/buttons/ArchiveButton";
 import { RemoveButton } from "../ui/buttons/RemoveButton";
+import { uiLayerLocal } from "../ui/styles/layerStyles";
 import { GearIcon } from "../ui/icons/GearIcon";
 import {
   uiCardLinkFeedback,
@@ -423,7 +424,7 @@ function DmCampaignList({
                 {campaign.name}
               </span>
 
-              <div className="relative z-10 shrink-0">
+              <div className={`relative ${uiLayerLocal} shrink-0`}>
                 <IconButton
                   label={`Manage ${campaign.name}`}
                   aria-haspopup="dialog"

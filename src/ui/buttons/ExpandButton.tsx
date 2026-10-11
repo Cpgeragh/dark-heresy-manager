@@ -3,6 +3,7 @@
 
 import { ExpandChevron } from "../icons/ExpandChevron";
 import { uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
+import { uiLayerLocal } from "../styles/layerStyles";
 
 interface ExpandButtonProps {
   expanded: boolean;
@@ -18,7 +19,7 @@ export function ExpandButton({ expanded, label, onClick, className = "" }: Expan
       onClick={onClick}
       aria-expanded={expanded}
       aria-label={label}
-      className={`relative z-10 pointer-events-auto p-1 -m-1 ${uiPressFeedback()} ${uiFocusRing} ${className}`.trim()}
+      className={`relative ${uiLayerLocal} pointer-events-auto p-1 -m-1 ${uiPressFeedback()} ${uiFocusRing} ${className}`.trim()}
     >
       <ExpandChevron expanded={expanded} />
     </button>
