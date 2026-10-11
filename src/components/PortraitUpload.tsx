@@ -14,7 +14,7 @@ import {
   ACCEPTED_PORTRAIT_MIME_TYPES,
   assertPortraitSource,
 } from "../firestore/firebaseValidation";
-import { uiTextMeta, uiTextPlaceholder } from "../ui/styles/editableStyles";
+import { uiTextMeta, uiTextPlaceholder, uiStackBody } from "../ui/styles/editableStyles";
 import {
   colourHeadingAccent,
   colourControlRaised,
@@ -188,7 +188,7 @@ export function PortraitUpload({
           className="max-w-xs lg:max-w-sm overflow-y-auto"
         >
           <ModalHeader title="Position Portrait" onClose={handleCancel} />
-          <div className="p-4 lg:p-5 space-y-4">
+          <div className={`p-4 lg:p-5 ${uiStackBody}`}>
             {/* Cropper */}
             <div className={`relative h-64 rounded-lg overflow-hidden ${colourFillControl}`}>
               <Cropper

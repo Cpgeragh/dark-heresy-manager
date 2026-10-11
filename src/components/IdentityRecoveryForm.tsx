@@ -5,7 +5,12 @@ import { Button } from "../ui/buttons/Button";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
 import { RequiredMark } from "../ui/forms/RequiredMark";
 import { validateRecoveryCode } from "../utils/validation";
-import { editableInputClass, uiSectionHeader, uiTextBody } from "../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  uiSectionHeader,
+  uiTextBody,
+  uiStackBody,
+} from "../ui/styles/editableStyles";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 interface IdentityRecoveryFormProps {
@@ -52,7 +57,7 @@ export function IdentityRecoveryForm({
 
   return (
     <form
-      className="space-y-4"
+      className={uiStackBody}
       onSubmit={(event) => {
         event.preventDefault();
         void flow.link(onLinked);

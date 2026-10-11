@@ -15,7 +15,12 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import {
+  uiTextPlaceholder,
+  uiStackSection,
+  uiStackPage,
+  uiStackList,
+} from "../../../ui/styles/editableStyles";
 import { colourActiveSky, colourActiveRose } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -611,7 +616,7 @@ export function GearTab({
 
   const visibleGearSectionClass = (section: GearSection) =>
     [
-      "space-y-3",
+      uiStackSection,
       activeGearSection === section
         ? `${uiSwipeableTabPanel} ${transitionClass}`
         : "hidden lg:block",
@@ -622,7 +627,7 @@ export function GearTab({
   }
 
   return (
-    <div ref={containerRef} className="space-y-6">
+    <div ref={containerRef} className={uiStackPage}>
       <div className="lg:hidden">
         <SegmentedTabs
           id={GEAR_TABS_ID}
@@ -654,7 +659,7 @@ export function GearTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No items recorded.</p>
           )}
 
-          <div className="space-y-3">{gearRows}</div>
+          <div className={uiStackList}>{gearRows}</div>
         </section>
         {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
         <section
@@ -676,7 +681,7 @@ export function GearTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No consumables recorded.</p>
           )}
 
-          <div className="space-y-3">{consumableRows}</div>
+          <div className={uiStackList}>{consumableRows}</div>
         </section>
       </div>
 

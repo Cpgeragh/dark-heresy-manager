@@ -40,6 +40,10 @@ import {
   uiCardTitleHover,
   uiRuleName,
   uiTextDescription,
+  uiStackSection,
+  uiStackField,
+  uiStackBody,
+  uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../../ui/buttons/ExpandButton";
@@ -515,7 +519,7 @@ export function RangedCard({
       </div>
 
       {(expanded || forceExpanded) && (
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
+        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && !integrated && (
             <div className="flex justify-end">
               <RemoveButton onClick={onRemove} label="Remove" />
@@ -612,7 +616,7 @@ export function RangedCard({
             </div>
           )}
 
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>
@@ -634,7 +638,7 @@ export function RangedCard({
                   <InfoModal
                     title={`${weapon.name} Rules`}
                     content={
-                      <div className="space-y-3">
+                      <div className={uiStackBody}>
                         <p className={uiRuleName}>Concealed Weapon Bionic</p>
                         {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
                           <p key={rule} className={uiTextDescription}>
@@ -657,7 +661,7 @@ export function RangedCard({
                   title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
                   content={
                     concealedBionicEffect ? (
-                      <div className="space-y-3">
+                      <div className={uiStackBody}>
                         <div>
                           <p className={uiTextDescription}>{concealedBionicEffect}</p>
                         </div>
@@ -697,7 +701,7 @@ export function RangedCard({
 
           {/* Grenade launcher: ammo drawn from grenade inventory */}
           {isGrenadeLauncher && (
-            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
+            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
               <span className={uiTextLabel}>Grenades</span>
               {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 &&
               (archeotechGrenades ?? []).length === 0 ? (
@@ -705,7 +709,7 @@ export function RangedCard({
                   No grenades — add via the Grenades & Mines section below.
                 </p>
               ) : (
-                <div className="space-y-1.5">
+                <div className={uiStackList}>
                   {(grenades ?? [])
                     .filter((g) => g.type !== "Mine")
                     .map((g) => (
@@ -745,7 +749,7 @@ export function RangedCard({
           )}
 
           {usesMagazineSlots && (
-            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
+            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
               <span className={uiTextLabel}>Magazines</span>
               {activeAmmoFamily && (
                 <div className={`${uiChipRow} items-center`}>
@@ -754,7 +758,7 @@ export function RangedCard({
                   </Chip>
                 </div>
               )}
-              <div className="space-y-1.5">
+              <div className={uiStackList}>
                 {magazineSlots.map((slot, index) => {
                   const ammoRef = slot.referenceId
                     ? AMMO_REFERENCE.find((ammo) => ammo.id === slot.referenceId)
@@ -770,7 +774,7 @@ export function RangedCard({
                   return (
                     <div
                       key={slot.id}
-                      className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5`}
+                      className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 ${uiStackField}`}
                     >
                       <div className={`${uiSplitRow} flex-wrap`}>
                         <div className={`${uiChipRow} items-center min-w-0`}>
@@ -855,7 +859,7 @@ export function RangedCard({
 
           {/* Regular weapon: ammo entries */}
           {hasAmmo && !usesMagazineSlots && (
-            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
+            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Ammo</span>
                 {editable ? (
@@ -876,7 +880,7 @@ export function RangedCard({
               {visibleAmmoEntries.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>
               ) : (
-                <div className="space-y-1.5">
+                <div className={uiStackList}>
                   {visibleAmmoEntries.map((entry) => {
                     const entryAmmoRef = entry.referenceId
                       ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
@@ -925,7 +929,7 @@ export function RangedCard({
 
           {/* Upgrades */}
           {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-            <div className={`border-t ${colourDivider} pt-2 space-y-1.5`}>
+            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Upgrades</span>
                 {(editable
@@ -948,7 +952,7 @@ export function RangedCard({
               {upgradeRefs.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
               ) : (
-                <div className="space-y-1.5">
+                <div className={uiStackList}>
                   {upgradeRefs.map((upgrade) => (
                     <UpgradeCard
                       key={upgrade.id}

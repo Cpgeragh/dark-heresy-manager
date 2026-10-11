@@ -10,6 +10,8 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextDescription,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -27,11 +29,11 @@ function InfoSection({ title, content }: { title: string; content: string }) {
 
 export function HomeworldInfoContent({ homeworld }: { homeworld: HomeworldData }) {
   return (
-    <div className="space-y-4">
+    <div className={uiStackBody}>
       <p className={uiTextDescription}>{homeworld.description}</p>
 
       {homeworld.skills && (
-        <section className="space-y-2">
+        <section className={uiStackList}>
           <p className={`${uiTextLabel} font-semibold`}>Skills</p>
           {homeworld.skills.map((skill) => (
             <div key={skill.name} className="flex items-center justify-between gap-3">
@@ -53,7 +55,7 @@ export function HomeworldInfoContent({ homeworld }: { homeworld: HomeworldData }
         </section>
       )}
 
-      <section className="space-y-2">
+      <section className={uiStackList}>
         <p className={`${uiTextLabel} font-semibold`}>Traits</p>
         {homeworld.traits.map((trait) => {
           const traitData = TRAIT_LIST.find(

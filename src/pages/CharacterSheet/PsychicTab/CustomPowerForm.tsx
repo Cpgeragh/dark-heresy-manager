@@ -22,6 +22,7 @@ import {
   uiTextError,
   uiFormLabelHint,
   uiTextMeta,
+  uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { chipColours, colourToggleSelectedRed } from "../../../ui/styles/colourTokens";
 import { disciplineColours } from "./psychicStyles";
@@ -165,7 +166,7 @@ export function CustomPowerForm({
       isEmpty={false}
     >
       <PickerBody>
-        <div className="space-y-1">
+        <div className={uiStackField}>
           <label className={uiFormLabel}>
             Name <RequiredMark />
           </label>
@@ -185,7 +186,7 @@ export function CustomPowerForm({
           )}
         </div>
 
-        <div className="space-y-1">
+        <div className={uiStackField}>
           <label className={uiFormLabel}>
             Discipline <RequiredMark />
           </label>
@@ -217,7 +218,7 @@ export function CustomPowerForm({
         </div>
 
         <div className={`${uiFieldGrid}`}>
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <label className={uiFormLabel}>
               PT <RequiredMark />
             </label>
@@ -232,7 +233,7 @@ export function CustomPowerForm({
             />
           </div>
 
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <label className={uiFormLabel}>
               Action <RequiredMark />
             </label>
@@ -252,7 +253,7 @@ export function CustomPowerForm({
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className={uiStackField}>
           <label className={uiFormLabel}>
             Range <RequiredMark />
           </label>
@@ -297,7 +298,7 @@ export function CustomPowerForm({
         </div>
 
         <div className={`${uiFieldGrid}`}>
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <label className={uiFormLabel}>
               Sustained <RequiredMark />
             </label>
@@ -319,7 +320,7 @@ export function CustomPowerForm({
           <OriginSelector name="custom-power-origin" value={origin} onChange={setOrigin} />
         </div>
 
-        <div className="space-y-1">
+        <div className={uiStackField}>
           <label className={uiFormLabel}>
             Description <span className={uiFormLabelHint}>(optional)</span>
           </label>

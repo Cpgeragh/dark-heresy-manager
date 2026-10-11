@@ -11,7 +11,13 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { uiNoticeBox, uiTextBody, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import {
+  uiNoticeBox,
+  uiTextBody,
+  uiTextPlaceholder,
+  uiStackPage,
+  uiStackSection,
+} from "../../../ui/styles/editableStyles";
 import { colourNoticeViolet, colourDrugNoticeText } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -266,7 +272,7 @@ export function DrugsTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className={uiStackPage}>
       {/* Excessive Drug Use rule */}
       <div
         className={`${uiNoticeBox} ${colourNoticeViolet} p-3 lg:p-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}
@@ -282,7 +288,7 @@ export function DrugsTab({
       </div>
 
       {/* Carried drugs */}
-      <section className="space-y-3">
+      <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Carried</SectionHeader>
           {editable ? (

@@ -4,7 +4,7 @@ import { Button } from "../../../ui/buttons/Button";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
-import { editableInputColour, uiTextBody } from "../../../ui/styles/editableStyles";
+import { editableInputColour, uiTextBody, uiStackList } from "../../../ui/styles/editableStyles";
 
 // ─── Ammo Picker ──────────────────────────────────────────────────────────────
 
@@ -50,7 +50,7 @@ export function AmmoPicker({
       isEmpty={options.length === 0}
       footer={
         editable && showCustom ? (
-          <div className="space-y-2">
+          <div className={uiStackList}>
             <p className={`text-xs lg:text-sm ${uiTextBody}`}>Custom / unlisted ammo</p>
             <div className="flex gap-2">
               <input

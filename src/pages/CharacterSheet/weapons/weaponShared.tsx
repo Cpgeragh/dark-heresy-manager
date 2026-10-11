@@ -27,6 +27,8 @@ import {
   uiRuleName,
   uiTextDescription,
   uiTextBody,
+  uiStackField,
+  uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
@@ -55,7 +57,7 @@ export function WeaponQualitySelector({
   onRemove: (quality: string) => void;
 }) {
   return (
-    <div className="col-span-2 space-y-2">
+    <div className={`col-span-2 ${uiStackField}`}>
       <label className={uiFormLabel}>Qualities</label>
       <div className="flex gap-2">
         <PickerField
@@ -167,7 +169,7 @@ export function SpecialRulesContent({
   const ruleNames = getKnownSpecialRuleNames(rules);
 
   return (
-    <div className="space-y-4">
+    <div className={uiStackBody}>
       {description && <p className={uiTextDescription}>{description}</p>}
       {ruleNames.map((name) => {
         const desc = WEAPON_SPECIAL_RULES[name];
@@ -222,7 +224,7 @@ export function UpgradeCard({
           <InfoModal
             title={upgrade.name}
             content={
-              <div className="space-y-2">
+              <div className={uiStackBody}>
                 <p className={uiTextDescription}>{upgrade.description}</p>
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
               </div>

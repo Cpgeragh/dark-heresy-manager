@@ -1,4 +1,4 @@
-import { uiChipRow } from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiStackField, uiStackList } from "../../../ui/styles/editableStyles";
 
 // src/pages/CharacterSheet/SkillsTab/SkillGroupRow.tsx
 
@@ -46,7 +46,7 @@ export function SkillGroupRow({
       expanded={expanded}
       onToggle={toggle}
       header={
-        <div className="space-y-1.5">
+        <div className={uiStackField}>
           <span
             className={`block truncate text-sm font-semibold ${colourTextPrimary} lg:text-base`}
           >
@@ -73,7 +73,7 @@ export function SkillGroupRow({
       }
     >
       {expanded && (
-        <div className={`border-t ${colourDivider} space-y-2 p-2`}>
+        <div className={`border-t ${colourDivider} ${uiStackList} p-2`}>
           {skills.map((skill) => (
             <SkillRow
               key={skill.id}

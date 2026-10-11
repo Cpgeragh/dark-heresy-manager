@@ -69,6 +69,21 @@ export const uiSplitRow = "flex items-center justify-between gap-2";
 /** Two-column form field grid which collapses to one column on a phone. */
 export const uiFieldGrid = "grid grid-cols-1 gap-3 sm:grid-cols-2";
 
+/** Gap between the top-level sections of a tab or page. */
+export const uiStackPage = "space-y-6";
+
+/** Gap inside a modal, form, panel or information modal body. */
+export const uiStackBody = "space-y-4";
+
+/** Gap between a section heading and its content, and inside an expanded card body. */
+export const uiStackSection = "space-y-3";
+
+/** Gap between cards in a list, and inside a bordered detail area of a card. */
+export const uiStackList = "space-y-2";
+
+/** Gap between a label and its value or control, and between bullet items. */
+export const uiStackField = "space-y-1";
+
 /** De-emphasised card content that is present but not currently active. */
 export const uiInactiveItem = "opacity-60";
 

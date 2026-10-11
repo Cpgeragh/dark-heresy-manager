@@ -1293,6 +1293,12 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The Share App, Settings and Manage campaign buttons use the red outlined icon button, and the DM read-only toggle on the character sheet matches the other pick-one buttons, with an amber selected look (`IconButton`, `ToggleButton`)
 - [ ] The selected red toggles in the Psychic power, Archeotech and Armour piece forms share one look, and the violet and fuchsia filter pills in Skills and Talents match each other
 - [ ] The Insanity and Corruption timelines and steppers use the same degree colours, and damage type letters, toasts and the splash screen show their usual colours
+- [ ] The space between the big sections of every tab, such as Gear and Consumables, Worn and Stowed armour, or Minor and Major powers on desktop, is the same on every tab (`uiStackPage`)
+- [ ] The space between a section heading and what sits under it, and between the parts inside an opened card, is the same in every tab (`uiStackSection`)
+- [ ] Cards in a list, such as Gear rows, Companions, Notes, Skills, Talents, Traits, sessions and campaign characters, have the same space between them, and the two columns of a card grid are the same distance apart as the cards inside each column (`uiStackList`, `IndependentCardGrid`)
+- [ ] The body of every modal and form, including the information modals, has the same space between its parts (`uiStackBody`)
+- [ ] A label and its input or value sit the same distance apart in every form, and bullet lists in information modals use the same small gap (`uiStackField`)
+- [ ] On a phone, the Skills and Psychic power panels use the same space as the same sections on desktop
 
 ## Coverage notes
 

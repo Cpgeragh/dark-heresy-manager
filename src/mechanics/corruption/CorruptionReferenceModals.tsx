@@ -1,4 +1,9 @@
-import { uiRuleName, uiTextLabel, uiTextDescription } from "../../ui/styles/editableStyles";
+import {
+  uiRuleName,
+  uiTextLabel,
+  uiTextDescription,
+  uiStackBody,
+} from "../../ui/styles/editableStyles";
 import type { CorruptionMalignancyRef } from "./corruptionReference";
 import type { MutationRef } from "./mutationsReference";
 
@@ -14,7 +19,7 @@ export function MalignancyInfoContent({
   notes?: string;
 }) {
   return (
-    <div className="space-y-3">
+    <div className={uiStackBody}>
       {malignancy.roll && (
         <div>
           <p className={uiRuleName}>{malignancy.roll}</p>
@@ -39,7 +44,7 @@ export function MutationInfoContent({
   notes?: string;
 }) {
   return (
-    <div className="space-y-3">
+    <div className={uiStackBody}>
       {mutation.roll && (
         <div>
           <p className={uiRuleName}>{mutation.roll}</p>

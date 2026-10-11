@@ -15,7 +15,12 @@ import type {
 import { TALENT_LIST, type TalentData } from "shared-rules";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
-import { uiSection, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextPlaceholder,
+  uiStackList,
+  uiStackPage,
+} from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
@@ -116,7 +121,7 @@ function FaithTalentSection({
           <ViewButton label="View Faith Talents" onClick={() => setShowPicker(true)} />
         )}
       </div>
-      <section className={uiSection + " space-y-2"}>
+      <section className={`${uiSection} ${uiStackList}`}>
         {entries.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
         )}
@@ -309,7 +314,7 @@ function RegularTalentSection({
           <ViewButton label="View Talents" onClick={() => setShowPicker(true)} />
         )}
       </div>
-      <section className={uiSection + " space-y-2"}>
+      <section className={`${uiSection} ${uiStackList}`}>
         {entries.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
         )}
@@ -458,7 +463,7 @@ export function TalentsTab({
   const showFaith = editable || faithEntries.length > 0;
 
   return (
-    <div className="space-y-8">
+    <div className={uiStackPage}>
       <div ref={showFaith ? containerRef : undefined} className="lg:hidden">
         {showFaith ? (
           <>
@@ -571,7 +576,7 @@ export function TalentsTab({
               This Talent recorded a one-time change. Choose whether deleting the Talent should also
               restore what that acquisition changed.
             </p>
-            <div className="space-y-2">
+            <div className={uiStackList}>
               <Button
                 fullWidth
                 loading={savingTalentMutation}

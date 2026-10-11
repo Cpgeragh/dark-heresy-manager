@@ -12,6 +12,7 @@ import {
   uiFormLabelSecondary,
   uiSection,
   uiTextMeta,
+  uiStackBody,
 } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 
@@ -75,7 +76,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
   }, [campaignId, date, summary, dmNotes, xpAwarded, attendees, toast, onClose]);
 
   return (
-    <div className={uiSection + " space-y-4"}>
+    <div className={`${uiSection} ${uiStackBody}`}>
       <SectionHeader>New Session</SectionHeader>
 
       <div className="grid grid-cols-2 gap-4">

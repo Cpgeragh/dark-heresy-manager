@@ -20,6 +20,8 @@ import {
   uiInfoModalWrapper,
   uiCardTitleHover,
   uiTextDescription,
+  uiStackSection,
+  uiStackField,
 } from "../../../ui/styles/editableStyles";
 import {
   colourAmberPlain,
@@ -165,7 +167,7 @@ export function GrenadeCard({
       </div>
 
       {expanded && (
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
+        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && (
             <div className="flex justify-end">
               <RemoveButton onClick={onRemove} label="Remove" />
@@ -212,7 +214,7 @@ export function GrenadeCard({
           </div>
 
           {/* Qualities / Rules */}
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>

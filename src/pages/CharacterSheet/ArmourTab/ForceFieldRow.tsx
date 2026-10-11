@@ -10,6 +10,7 @@ import {
   uiInactiveItem,
   uiRuleName,
   uiTextDescription,
+  uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -34,7 +35,7 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
 
 function ForceFieldQualitiesContent({ qualities }: { qualities: string[] }) {
   return (
-    <div className="space-y-4">
+    <div className={uiStackBody}>
       {qualities.map((name) => {
         const desc = ARMOUR_SPECIAL_RULES[name];
         if (!desc) return null;

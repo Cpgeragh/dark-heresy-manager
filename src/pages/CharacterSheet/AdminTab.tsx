@@ -12,6 +12,9 @@ import {
   uiTextPlaceholder,
   uiTextMeta,
   uiTextBody,
+  uiStackPage,
+  uiStackField,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
 import {
@@ -63,7 +66,7 @@ export function AdminTab({
   const latestActorLabel = (character.userId && ownerName) || latest?.actorUid;
 
   return (
-    <div className="relative space-y-6">
+    <div className={`relative ${uiStackPage}`}>
       {/* CONTEXT NOTE */}
       <p className={uiTextMeta}>DM-only controls. Changes here immediately affect player access.</p>
 
@@ -84,7 +87,7 @@ export function AdminTab({
           <span className={readOnlyBadgeClass}>DM authority</span>
         </div>
 
-        <div className="space-y-1 text-sm lg:text-base">
+        <div className={`${uiStackField} text-sm lg:text-base`}>
           <div>
             Current owner:{" "}
             <span className={colourTextPrimary}>
@@ -175,7 +178,7 @@ export function AdminTab({
                 No claim events recorded yet.
               </p>
             ) : (
-              <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              <ul className={`${uiStackList} max-h-64 overflow-y-auto pr-1`}>
                 {claimLog.map((entry, index) => (
                   <li key={entry.id ?? index} className={uiSection + " text-xs lg:text-sm"}>
                     <div className={`font-code ${colourTextPrimary}`}>

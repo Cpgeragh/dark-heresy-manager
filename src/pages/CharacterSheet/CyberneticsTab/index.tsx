@@ -31,6 +31,8 @@ import {
   uiItemName,
   uiSection,
   uiTextPlaceholder,
+  uiStackPage,
+  uiStackSection,
 } from "../../../ui/styles/editableStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { sourceChipColour } from "../../../ui/styles/sourceStyles";
@@ -940,9 +942,9 @@ export function CyberneticsTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className={uiStackPage}>
       {/* ── INTEGRATED WEAPONS ────────────────────────────────────────────── */}
-      <section className="space-y-3">
+      <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Integrated Weapons</SectionHeader>
           <Button size="sm" onClick={() => setShowIntegratedPicker(true)}>
@@ -963,7 +965,7 @@ export function CyberneticsTab({
 
       {/* ── INSTALLED IMPLANTS ────────────────────────────────────────────── */}
       {career === "Tech-Priest" && (
-        <section className="space-y-3">
+        <section className={uiStackSection}>
           <SectionHeader>Mechanicus Implants</SectionHeader>
           <div className={`${uiFieldGrid}`}>
             {[
@@ -988,7 +990,7 @@ export function CyberneticsTab({
         </section>
       )}
 
-      <section className="space-y-3">
+      <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Installed Implants</SectionHeader>
           <Button size="sm" onClick={() => setShowPicker(true)}>

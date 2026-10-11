@@ -29,6 +29,11 @@ import {
   uiTextLabel,
   uiTextDescription,
   uiThresholdValue,
+  uiStackSection,
+  uiStackField,
+  uiStackPage,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import { SegmentedTimeline } from "../../ui/SegmentedTimeline";
@@ -87,7 +92,7 @@ function InsanityStatusChips({ points }: { points: number }) {
   const nextDegree = getNextInsanityDegreeEntry(safePoints);
 
   return (
-    <div className="w-full max-w-md space-y-3">
+    <div className={`w-full max-w-md ${uiStackSection}`}>
       <SegmentedTimeline
         value={safePoints}
         segments={INSANITY_TIMELINE_SEGMENTS}
@@ -114,7 +119,7 @@ function InsanityStatusChips({ points }: { points: number }) {
         </p>
       ) : (
         <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${colourDivider}`}>
-          <div className="flex flex-col items-center space-y-1.5">
+          <div className={`flex flex-col items-center ${uiStackField}`}>
             <span className={uiTextLabel}>Status</span>
             <div className={`${uiChipRow} justify-center`}>
               <Chip size="sm" colour={insanityDegreeChipColour(entry)}>
@@ -133,7 +138,9 @@ function InsanityStatusChips({ points }: { points: number }) {
               </span>
             </div>
           </div>
-          <div className={`flex flex-col items-center space-y-1.5 border-l ${colourDivider} pl-3`}>
+          <div
+            className={`flex flex-col items-center ${uiStackField} border-l ${colourDivider} pl-3`}
+          >
             <span className={uiTextLabel}>Thresholds</span>
             <div className="flex flex-col items-center gap-1">
               {next && (
@@ -283,8 +290,8 @@ export function InsanityPanel({
   );
 
   return (
-    <div className="space-y-6">
-      <div className={`${sectionClassName} flex flex-col items-center space-y-3`}>
+    <div className={uiStackPage}>
+      <div className={`${sectionClassName} flex flex-col items-center ${uiStackSection}`}>
         <div className="inline-flex flex-col items-center gap-2">
           <span className="inline-flex items-center gap-1">
             <span className={uiFormLabel}>Points</span>
@@ -293,7 +300,7 @@ export function InsanityPanel({
                 <InfoModal
                   title="Insanity Point Adjustments"
                   content={
-                    <ul className={`space-y-1 ${uiTextDescription}`}>
+                    <ul className={`${uiStackField} ${uiTextDescription}`}>
                       {recordedSources.map((source, index) => (
                         <li key={index}>
                           {source.name} ({source.type}): +{source.amount}
@@ -317,7 +324,7 @@ export function InsanityPanel({
       </div>
 
       {/* Mobile: tab switcher between Temporary Trauma and Disorders */}
-      <div ref={containerRef} className="lg:hidden space-y-4">
+      <div ref={containerRef} className={`lg:hidden ${uiStackBody}`}>
         <SegmentedTabs
           id={INSANITY_TABS_ID}
           ariaLabel="Insanity entry groups"
@@ -330,7 +337,7 @@ export function InsanityPanel({
           key={activeGroup}
           id={segmentedTabPanelId(INSANITY_TABS_ID, activeGroup)}
           aria-labelledby={segmentedTabId(INSANITY_TABS_ID, activeGroup)}
-          className={["space-y-2", uiSwipeableTabPanel, transitionClass].join(" ")}
+          className={[uiStackList, uiSwipeableTabPanel, transitionClass].join(" ")}
           role="tabpanel"
         >
           {activeGroup === "trauma" ? (
@@ -360,12 +367,12 @@ export function InsanityPanel({
 
       {/* Desktop: side by side */}
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-        <section className={`${sectionClassName} space-y-2`}>
+        <section className={`${sectionClassName} ${uiStackList}`}>
           <TraumaHeader editable={editable} onAdd={() => setShowTraumaPicker(true)} />
           <TraumaList trauma={structuredTrauma} editable={editable} onRemove={handleRemoveTrauma} />
         </section>
 
-        <section className={`${sectionClassName} space-y-2`}>
+        <section className={`${sectionClassName} ${uiStackList}`}>
           <DisordersHeader editable={editable} onAdd={() => setShowDisorderPicker(true)} />
           <DisordersList
             disorders={structuredDisorders}

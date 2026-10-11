@@ -215,7 +215,7 @@ describe("SkillsTab", () => {
     const categoryName = screen.getByText("Ciphers");
     const contentBlock = categoryName.parentElement;
 
-    expect(contentBlock).toHaveClass("space-y-1.5");
+    expect(contentBlock).toHaveClass("space-y-1");
     expect(contentBlock?.children[0]).toBe(categoryName);
     expect(contentBlock?.children[1]).toHaveTextContent("Int");
     expect(contentBlock?.children[1]).toHaveTextContent("Advanced");
@@ -318,7 +318,7 @@ describe("SkillsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Add basic skill" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Available Untrained Basic Skills" });
     const list = within(dialog).getByTestId("skill-picker-card-list");
-    expect(list).toHaveClass("space-y-3", "p-3");
+    expect(list).toHaveClass("space-y-2", "p-3");
     const selectAwareness = within(dialog).getByRole("button", { name: "Select Awareness" });
     expect(selectAwareness.parentElement).toHaveClass("hover:bg-slate-800");
     const awarenessCard = selectAwareness.closest("div.rounded-lg");

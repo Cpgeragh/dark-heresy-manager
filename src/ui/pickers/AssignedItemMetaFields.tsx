@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import { sanitizeMoneyInput } from "../format/moneyFormat";
-import { editableInputClass, uiTextBody, uiTextError } from "../styles/editableStyles";
+import {
+  editableInputClass,
+  uiTextBody,
+  uiTextError,
+  uiStackField,
+} from "../styles/editableStyles";
 import { RequiredFormLabel } from "../forms/RequiredFormLabel";
 import { PickerField } from "./PickerField";
 import { colourTextPrimary } from "../styles/colourTokens";
@@ -42,7 +47,7 @@ export function AssignedItemMetaFields({
       </p>
 
       {requiresCost && (
-        <div className="space-y-1">
+        <div className={uiStackField}>
           <RequiredFormLabel htmlFor={costId}>Cost (Thrones)</RequiredFormLabel>
           <input
             id={costId}

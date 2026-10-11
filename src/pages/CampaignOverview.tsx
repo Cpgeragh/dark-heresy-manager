@@ -28,6 +28,7 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiStackList,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { PageShell } from "../ui/PageShell";
@@ -250,7 +251,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       return;
     }
     setKebabContent(
-      <div className="space-y-2">
+      <div className={uiStackList}>
         <p className={uiSubheading}>Character Data</p>
         <input
           ref={importInputRef}
@@ -402,7 +403,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                 </Button>
               </div>
 
-              <div className="space-y-3">
+              <div className={uiStackList}>
                 {filteredCharacters.length === 0 ? (
                   <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
                     {search.trim() ? `No characters match "${search}".` : "No characters yet."}
@@ -433,7 +434,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                   You haven't claimed a character in this campaign yet.
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className={uiStackList}>
                   {characters.map((c) => (
                     <MyCharacterCard key={c.id} character={c} campaignId={campaignId} />
                   ))}
@@ -453,7 +454,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                   No one else has joined yet.
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className={uiStackList}>
                   {partyMembers.map((s) => (
                     <PartyRosterTile key={s.id} summary={s} />
                   ))}
@@ -500,7 +501,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                 No sessions recorded yet.
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className={uiStackList}>
                 {sessions.map((session) => (
                   <SessionCard
                     key={session.id}

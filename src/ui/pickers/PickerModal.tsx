@@ -10,6 +10,8 @@ import {
   uiSectionShell,
   uiSpinner,
   uiTextPlaceholder,
+  uiStackBody,
+  uiStackList,
 } from "../styles/editableStyles";
 import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
@@ -29,12 +31,12 @@ import {
 } from "../styles/colourTokens";
 
 export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={`p-4 lg:p-5 space-y-4 ${className}`.trim()} {...props} />;
+  return <div className={`p-4 lg:p-5 ${uiStackBody} ${className}`.trim()} {...props} />;
 }
 
 /** The padded stack that holds a picker's rows. */
 export function PickerList({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={`space-y-3 p-3 lg:p-4 ${className}`.trim()} {...props} />;
+  return <div className={`${uiStackList} p-3 lg:p-4 ${className}`.trim()} {...props} />;
 }
 
 export type PickerRowProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {

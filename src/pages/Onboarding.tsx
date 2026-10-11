@@ -18,6 +18,8 @@ import {
   uiSectionHeader,
   uiTextBody,
   uiTextMeta,
+  uiStackBody,
+  uiStackList,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { TitleHeaderActionButton } from "../ui/buttons/TitleHeaderActionButton";
@@ -294,7 +296,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
               <CenteredTitleHeader as="h1" size="page" title="Create Your Account" />
 
               <form
-                className="space-y-4 p-4 lg:p-5"
+                className={`${uiStackBody} p-4 lg:p-5`}
                 onSubmit={(event) => {
                   event.preventDefault();
                   void handleGetStarted();
@@ -401,7 +403,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                 }
               />
 
-              <div className="space-y-4 p-4 lg:p-5">
+              <div className={`${uiStackBody} p-4 lg:p-5`}>
                 <IdentityRecoveryForm
                   flow={recoveryFlow}
                   deviceNoun="device"
@@ -453,7 +455,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                     if (savedConfirmed && !busy) void handleFinish();
                   }}
                 >
-                  <div className="space-y-4 p-4 lg:p-5">
+                  <div className={`${uiStackBody} p-4 lg:p-5`}>
                     <p className={`text-center text-sm lg:text-base ${colourTextPrimary}`}>
                       Use this code to connect another device or recover your account.
                     </p>
@@ -495,7 +497,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   </div>
 
                   <div className={`border-t ${colourDivider} px-4 py-3 lg:px-5 lg:py-4`}>
-                    <div className="space-y-2">
+                    <div className={uiStackList}>
                       <Button
                         type="submit"
                         fullWidth
@@ -533,7 +535,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
           className="max-w-lg overflow-y-auto"
         >
           <ModalHeader title="Cancel New Account Setup" onClose={closeCancelSetup} />
-          <div className="space-y-4 p-4 lg:p-5">
+          <div className={`${uiStackBody} p-4 lg:p-5`}>
             <p className={`text-sm ${uiTextBody} lg:text-base`}>
               Cancel new account setup? This recovery code will no longer work.
             </p>

@@ -3,7 +3,13 @@
 import { useCallback } from "react";
 import type { OwnershipState } from "../../types/Recovery";
 import { Button } from "../../ui/buttons/Button";
-import { uiSection, uiTextBody, uiTextError } from "../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextBody,
+  uiTextError,
+  uiStackBody,
+  uiStackField,
+} from "../../ui/styles/editableStyles";
 import {
   colourAmberPlain,
   colourSuccessPlain,
@@ -54,10 +60,10 @@ export function ClaimPreview({
   }, [ownership, onClaim]);
 
   return (
-    <div className={`${uiSection} space-y-4`}>
+    <div className={`${uiSection} ${uiStackBody}`}>
       <h2 className={`text-xl lg:text-2xl font-semibold ${colourTextPrimary}`}>Character Found</h2>
 
-      <div className={`${uiTextBody} text-sm lg:text-base space-y-1`}>
+      <div className={`${uiTextBody} text-sm lg:text-base ${uiStackField}`}>
         <p>
           <span className={colourMetadataLabelText}>Character:</span>{" "}
           <span className="font-semibold">{characterName}</span>

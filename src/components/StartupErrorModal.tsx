@@ -2,6 +2,7 @@ import { Button } from "../ui/buttons/Button";
 import { CenteredTitleHeader } from "../ui/CenteredTitleHeader";
 import { ErrorState } from "../ui/ErrorState";
 import { ModalShell } from "../ui/modals/ModalShell";
+import { uiStackBody } from "../ui/styles/editableStyles";
 
 export function StartupErrorModal() {
   return (
@@ -13,7 +14,7 @@ export function StartupErrorModal() {
       className="max-w-md"
     >
       <CenteredTitleHeader title="Unable to load" />
-      <div className="space-y-4 px-4 py-5 text-center lg:px-5">
+      <div className={`${uiStackBody} px-4 py-5 text-center lg:px-5`}>
         <ErrorState>
           Your account could not be loaded. There may be a temporary connection problem.
         </ErrorState>

@@ -3,6 +3,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import type { CustomItemLibraryAction } from "../../../types/CustomItemActions";
 import { PowerCard } from "./PowerCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { uiStackList } from "../../../ui/styles/editableStyles";
 
 export function PowerGrid({
   powers,
@@ -43,7 +44,7 @@ export function PowerGrid({
   const sortedPowers = [...powers].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="space-y-3">
+    <div className={uiStackList}>
       {sortedPowers.map((power) => {
         const linkedTalentUid = power.talentEntryUid ?? power.psyRatingTalentEntryUid;
         const talentSourceName = linkedTalentUid

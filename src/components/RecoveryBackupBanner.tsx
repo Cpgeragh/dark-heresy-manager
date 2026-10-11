@@ -15,7 +15,7 @@ import {
   colourNoticeAmberTitle,
   colourNoticeAmberText,
 } from "../ui/styles/colourTokens";
-import { uiCodeBox, uiCodeText, uiNoticeBox } from "../ui/styles/editableStyles";
+import { uiCodeBox, uiCodeText, uiNoticeBox, uiStackSection } from "../ui/styles/editableStyles";
 
 interface Props {
   ownUid: string;
@@ -69,7 +69,7 @@ export function RecoveryBackupBanner({
   }
 
   return (
-    <div className={`${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4 space-y-3`}>
+    <div className={`${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4 ${uiStackSection}`}>
       <p
         className={`inline-flex items-center gap-1.5 text-sm lg:text-base font-semibold ${colourNoticeAmberTitle}`}
       >

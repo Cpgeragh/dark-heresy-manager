@@ -7,7 +7,7 @@ import { InfoIcon } from "../ui/icons/InfoIcon";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { uiInfoButton } from "../ui/styles/buttonStyles";
-import { uiTextBody } from "../ui/styles/editableStyles";
+import { uiTextBody, uiStackBody } from "../ui/styles/editableStyles";
 import { colourFillPanel } from "../ui/styles/colourTokens";
 
 interface InfoModalProps {
@@ -73,7 +73,7 @@ export function InfoModal({ title, content, hideTitle = false, as = "button" }: 
             />
           )}
           <div
-            className={`px-4 lg:px-5 py-3 lg:py-4 text-sm lg:text-base ${uiTextBody} space-y-1.5 lg:space-y-2`}
+            className={`px-4 lg:px-5 py-3 lg:py-4 text-sm lg:text-base ${uiTextBody} ${uiStackBody}`}
           >
             {hideTitle && (
               <CloseButton onClick={() => setOpen(false)} className="float-right ml-3 mb-1" />

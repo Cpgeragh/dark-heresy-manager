@@ -29,6 +29,8 @@ import {
   uiTextBody,
   uiTextError,
   uiTextPlaceholder,
+  uiStackList,
+  uiStackField,
 } from "../../ui/styles/editableStyles";
 import { colourAmberPlain } from "../../ui/styles/colourTokens";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
@@ -568,7 +570,7 @@ export function TalentAcquisitionModal({
       maxWidth="max-w-lg"
       scrollPositionRef={acquisitionScrollPositionRef}
       footer={
-        <div className="space-y-2">
+        <div className={uiStackList}>
           <RequiredFieldsNote />
           <Button
             fullWidth
@@ -730,7 +732,7 @@ export function TalentAcquisitionModal({
                 No removable items are currently installed.
               </p>
             ) : (
-              <div className={`space-y-2 ${uiCell} p-3`}>
+              <div className={`${uiStackList} ${uiCell} p-3`}>
                 {purityInventory.map((item) => (
                   <div key={item.key} className="flex items-start justify-between gap-3 text-sm">
                     <div className="min-w-0">
@@ -778,7 +780,7 @@ export function TalentAcquisitionModal({
               Record one immediate Reformed Skin replacement for each life-critical removal.
             </p>
             {fatalRemovalItems.map((item) => (
-              <div key={item.key} className={`space-y-1.5 ${uiCell} p-3`}>
+              <div key={item.key} className={`${uiStackField} ${uiCell} p-3`}>
                 <label className={uiFormLabel}>{item.name}</label>
                 <input
                   className={editableInputClass(true)}
@@ -838,7 +840,7 @@ export function TalentAcquisitionModal({
             {disorders.map((disorder) => {
               const selected = removedDisorderIds.includes(disorder.id);
               return (
-                <div key={disorder.id} className={`space-y-2 ${uiCell} p-3`}>
+                <div key={disorder.id} className={`${uiStackList} ${uiCell} p-3`}>
                   <label className={`flex items-center gap-3 text-sm ${uiTextBody}`}>
                     <input
                       type="checkbox"

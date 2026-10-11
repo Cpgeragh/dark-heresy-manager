@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from "react";
 import { CustomFormFooter } from "./CustomFormFooter";
 import { PickerBody, PickerModal } from "../pickers/PickerModal";
+import { uiStackBody } from "../styles/editableStyles";
 
 interface CustomFormShellProps {
   title: string;
@@ -67,7 +68,7 @@ export function CustomFormShell({
       <PickerBody className={bodyClassName}>
         <form
           id={formId}
-          className="space-y-4"
+          className={uiStackBody}
           onSubmit={(event) => {
             event.preventDefault();
             if (canSubmit && !saving) void onSubmit();

@@ -1,6 +1,7 @@
 import { ROUTES } from "../constants/routes";
 import { Button } from "./buttons/Button";
 import { ErrorState } from "./ErrorState";
+import { uiStackBody } from "./styles/editableStyles";
 
 interface RouteLoadErrorProps {
   resource: "campaign" | "character";
@@ -8,7 +9,7 @@ interface RouteLoadErrorProps {
 
 export function RouteLoadError({ resource }: RouteLoadErrorProps) {
   return (
-    <div className="space-y-4 py-10 text-center">
+    <div className={`${uiStackBody} py-10 text-center`}>
       <ErrorState>
         Unable to load this {resource}. You may no longer have access, or there may be a temporary
         connection problem.

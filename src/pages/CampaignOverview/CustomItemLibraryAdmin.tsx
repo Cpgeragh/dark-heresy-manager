@@ -13,7 +13,12 @@ import {
   CUSTOM_ITEM_STATUS_ORDER,
 } from "../../constants/customItems";
 import { recordComponentRender } from "../../performance/performanceMetrics";
-import { uiChipRow, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  uiChipRow,
+  uiTextPlaceholder,
+  uiStackSection,
+  uiStackList,
+} from "../../ui/styles/editableStyles";
 
 export function CustomItemLibraryAdmin({
   campaignId,
@@ -44,7 +49,7 @@ export function CustomItemLibraryAdmin({
     .filter((i) => filterStatus === "all" || i.status === filterStatus);
 
   return (
-    <div className="space-y-3">
+    <div className={uiStackSection}>
       <div className={`${uiChipRow}`}>
         <Chip
           as="button"
@@ -86,7 +91,7 @@ export function CustomItemLibraryAdmin({
       {filtered.length === 0 ? (
         <p className={`text-sm ${uiTextPlaceholder}`}>No custom items match the current filter.</p>
       ) : (
-        <div className="space-y-2">
+        <div className={uiStackList}>
           {filtered.map((item) => (
             <CustomItemAdminRow key={item.id} item={item} campaignId={campaignId} userId={userId} />
           ))}

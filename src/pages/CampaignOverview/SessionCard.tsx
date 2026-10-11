@@ -23,6 +23,8 @@ import {
   uiTextBody,
   uiTextError,
   uiTextMeta,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { colourDivider } from "../../ui/styles/colourTokens";
 
@@ -157,7 +159,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
 
   if (mode === "edit") {
     return (
-      <div className={`${uiSection} space-y-4`}>
+      <div className={`${uiSection} ${uiStackBody}`}>
         <SectionHeader as="h3">Edit Session</SectionHeader>
 
         <div className="grid grid-cols-2 gap-4">
@@ -240,7 +242,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   }
 
   return (
-    <div className={uiSection + " space-y-2"}>
+    <div className={`${uiSection} ${uiStackList}`}>
       <div className="flex items-center justify-between">
         <span className="font-semibold lg:text-lg">{dateStr}</span>
         <div className={`${uiInlineRow}`}>

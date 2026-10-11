@@ -9,6 +9,8 @@ import {
   uiSubheading,
   uiTextError,
   uiTextMeta,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { QrModal } from "../../ui/modals/QrModal";
 
@@ -78,12 +80,12 @@ export function CharacterKebabContent({
   }, [onRevokeRecoveryCode]);
 
   return (
-    <div className="space-y-4">
+    <div className={uiStackBody}>
       {/* Recovery Code */}
       {recoveryCode ? (
-        <div className="space-y-2">
+        <div className={uiStackList}>
           <p className={uiSubheading}>Recovery Code</p>
-          <div className="space-y-2">
+          <div className={uiStackList}>
             <code className={`block w-full ${uiCodeBox} ${uiCodeText}`}>{recoveryCode}</code>
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" size="sm" onClick={copyCode}>
@@ -109,7 +111,7 @@ export function CharacterKebabContent({
         </div>
       ) : (
         canManageRecoveryCode && (
-          <div className="space-y-2">
+          <div className={uiStackList}>
             <p className={uiSubheading}>Recovery Code</p>
             <p className={uiTextMeta}>This character has no Recovery Code yet.</p>
             <Button
@@ -130,7 +132,7 @@ export function CharacterKebabContent({
 
       {/* Export */}
       {canExport && (
-        <div className="space-y-2">
+        <div className={uiStackList}>
           <p className={uiSubheading}>Character Data</p>
           <Button variant="secondary" size="sm" onClick={onExport}>
             Export JSON
@@ -140,7 +142,7 @@ export function CharacterKebabContent({
 
       {/* Release */}
       {canPlayerRelease && (
-        <div className="space-y-2">
+        <div className={uiStackList}>
           <p className={uiSubheading}>Release Character</p>
           <p className={uiTextMeta}>
             Unlinks this character from your account. To move devices, connect the new device with

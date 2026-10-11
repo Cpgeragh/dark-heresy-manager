@@ -3,7 +3,7 @@ import type { HomeworldTraitChoices } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { RequiredMark } from "../../ui/forms/RequiredMark";
-import { editableInputClass, uiFormLabel } from "../../ui/styles/editableStyles";
+import { editableInputClass, uiFormLabel, uiStackBody } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { PickerField } from "../../ui/pickers/PickerField";
@@ -96,7 +96,7 @@ export function HomeworldTraitAcquisitionModal({
       maxWidth="max-w-lg"
     >
       <PickerBody>
-        <div className="space-y-3">
+        <div className={uiStackBody}>
           {homeworldId === "noble-born" && (
             <PickerField
               id="noble-peer-group"

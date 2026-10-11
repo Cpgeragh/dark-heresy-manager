@@ -81,7 +81,13 @@ import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import { TitleToolbar } from "../ui/TitleToolbar";
 import { ChevronUpIcon } from "../ui/icons/ChevronUpIcon";
 import { MessageIcon } from "../ui/icons/MessageIcon";
-import { uiSectionShell, uiTextBody, uiTextError, uiTextMeta } from "../ui/styles/editableStyles";
+import {
+  uiSectionShell,
+  uiTextBody,
+  uiTextError,
+  uiTextMeta,
+  uiStackBody,
+} from "../ui/styles/editableStyles";
 import { ErrorState } from "../ui/ErrorState";
 import {
   CampaignCustomItemsScope,
@@ -602,7 +608,7 @@ export default function CharacterSheet({
 
   if (!character) {
     return (
-      <div className="py-10 text-center space-y-4">
+      <div className={`py-10 text-center ${uiStackBody}`}>
         <p className={`text-lg font-semibold ${uiTextError}`}>Character not found.</p>
         <p className={`text-sm lg:text-base ${uiTextBody}`}>
           This character may have been deleted or the link is invalid.
@@ -717,7 +723,7 @@ export default function CharacterSheet({
         >
           <ErrorBoundary
             fallback={
-              <div className="p-6 text-center space-y-4">
+              <div className={`p-6 text-center ${uiStackBody}`}>
                 <div>
                   <p className="text-lg font-semibold mb-2">Failed to load this tab</p>
                   <p className={`text-sm lg:text-base ${uiTextError}`}>

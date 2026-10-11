@@ -12,6 +12,7 @@ import {
   uiItemName,
   uiInfoModalWrapper,
   uiTextGMNote,
+  uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
@@ -77,7 +78,7 @@ export function ItemCard({
 
       {/* Expanded body */}
       {expanded && (
-        <div className="space-y-1.5">
+        <div className={uiStackField}>
           {specialRules && (
             <p className={`text-xs lg:text-sm ${uiTextBody}`}>
               <span className={`${uiTextLabel} mr-1`}>Special</span>

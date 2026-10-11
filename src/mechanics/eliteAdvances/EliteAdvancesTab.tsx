@@ -45,6 +45,9 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiStackBody,
+  uiStackField,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
@@ -126,7 +129,7 @@ function nextSkillLevel(level: SkillAdvanceLevel): PurchasedSkillLevel | undefin
 
 function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
   return (
-    <div className={`space-y-4 ${uiTextBody}`}>
+    <div className={`${uiStackBody} ${uiTextBody}`}>
       <p>{advance.description}</p>
       {advance.downtime && (
         <p>
@@ -137,7 +140,7 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
       {advance.grantedSkills && advance.grantedSkills.length > 0 && (
         <div>
           <p className={uiTextLabel}>Granted skills</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
             {advance.grantedSkills.map((skill) => (
               <li key={`${skill.skillId}-${skill.level}`}>{getSkillName(skill.skillId)}</li>
             ))}
@@ -147,7 +150,7 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
       {advance.grantedTalents && advance.grantedTalents.length > 0 && (
         <div>
           <p className={uiTextLabel}>Granted talents</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
             {advance.grantedTalents.map((talentId) => (
               <li key={talentId}>{getTalentName(talentId)}</li>
             ))}
@@ -157,7 +160,7 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
       {advance.grantedTraits && advance.grantedTraits.length > 0 && (
         <div>
           <p className={uiTextLabel}>Granted traits</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
             {advance.grantedTraits.map((traitId) => (
               <li key={traitId}>{getTraitName(traitId)}</li>
             ))}
@@ -167,7 +170,7 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
       {(advance.grantedMinorPsychicPowers ?? 0) > 0 && (
         <div>
           <p className={uiTextLabel}>Granted psychic powers</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
             <li>
               {advance.grantedMinorPsychicPowers} random permanent Minor Psychic Power
               {advance.grantedMinorPsychicPowers === 1 ? "" : "s"}
@@ -178,7 +181,7 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
       {advance.unlockedAdvances && advance.unlockedAdvances.length > 0 && (
         <div>
           <p className={uiTextLabel}>Unlocked advances</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
             {advance.unlockedAdvances.map((unlocked, index) => (
               <li key={`${unlocked.kind}-${unlocked.skillId ?? unlocked.talentId}-${index}`}>
                 {getUnlockedAdvanceName(unlocked)} — {unlocked.cost} XP
@@ -191,7 +194,7 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
       {advance.consequences && advance.consequences.length > 0 && (
         <div>
           <p className={uiTextLabel}>Consequences</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
             {advance.consequences.map((consequence) => (
               <li key={consequence}>{consequence}</li>
             ))}
@@ -201,7 +204,7 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
       {advance.effects && advance.effects.length > 0 && (
         <div>
           <p className={uiTextLabel}>Effects</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
             {advance.effects.map((effect) => (
               <li key={effect}>{effect}</li>
             ))}
@@ -336,9 +339,7 @@ function SpecialAdvancePicker({
                 <Chip colour={sourceChipColour(advance.source)} className="font-code">
                   {advance.source}
                 </Chip>
-                <Chip colour="amber">
-                  {advance.cost} XP
-                </Chip>
+                <Chip colour="amber">{advance.cost} XP</Chip>
               </PickerRowChips>
               {advance.prerequisites && (
                 <PickerRowText>
@@ -609,11 +610,7 @@ function SkillAdvancePicker({
                   {skill.source}
                 </Chip>
                 <Chip colour="sky">{level}</Chip>
-                {option && (
-                  <Chip colour="amber">
-                    {option.cost} XP
-                  </Chip>
-                )}
+                {option && <Chip colour="amber">{option.cost} XP</Chip>}
               </PickerRowChips>
               {option?.eliteAdvanceId && (
                 <PickerRowText>
@@ -742,9 +739,7 @@ function TalentAdvancePicker({
                     {source}
                   </Chip>
                 ))}
-                <Chip colour="amber">
-                  {option.cost} XP
-                </Chip>
+                <Chip colour="amber">{option.cost} XP</Chip>
               </PickerRowChips>
               {option.eliteAdvanceId ? (
                 <PickerRowText>
@@ -992,7 +987,7 @@ export function EliteAdvancesTab({
           <ViewButton label="View Elite Advances" onClick={() => setShowPicker(true)} />
         )}
       </div>
-      <section className={`${uiSection} space-y-2`}>
+      <section className={`${uiSection} ${uiStackList}`}>
         {entries.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
             No standalone Elite Advances purchased.

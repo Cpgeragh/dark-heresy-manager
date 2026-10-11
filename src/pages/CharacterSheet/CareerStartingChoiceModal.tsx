@@ -6,7 +6,7 @@ import { Button } from "../../ui/buttons/Button";
 import { ToggleButton } from "../../ui/buttons/ToggleButton";
 import { colourToggleSelectedSky } from "../../ui/styles/colourTokens";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { uiFormLabel } from "../../ui/styles/editableStyles";
+import { uiFormLabel, uiStackBody, uiStackField } from "../../ui/styles/editableStyles";
 
 const skillNameById = new Map(DEFAULT_SKILLS.map((skill) => [skill.id, skill.name]));
 const talentNameById = new Map(TALENT_LIST.map((talent) => [talent.id, talent.name]));
@@ -59,9 +59,9 @@ export function CareerStartingChoiceModal({
       }
     >
       <PickerBody>
-        <div className="space-y-4">
+        <div className={uiStackBody}>
           {skillGrants.map(({ grant, index }) => (
-            <div key={`skill-${index}`} className="space-y-1.5">
+            <div key={`skill-${index}`} className={uiStackField}>
               <label className={uiFormLabel}>Starting Skill</label>
               <div className="flex flex-wrap gap-2">
                 {grant.options.map((option, optionIndex) => (
@@ -79,7 +79,7 @@ export function CareerStartingChoiceModal({
             </div>
           ))}
           {talentGrants.map(({ grant, index }) => (
-            <div key={`talent-${index}`} className="space-y-1.5">
+            <div key={`talent-${index}`} className={uiStackField}>
               <label className={uiFormLabel}>Starting Talent</label>
               <div className="flex flex-wrap gap-2">
                 {grant.options.map((option, optionIndex) => (

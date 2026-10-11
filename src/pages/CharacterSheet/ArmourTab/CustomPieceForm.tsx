@@ -10,6 +10,7 @@ import {
   editableTextareaClass,
   uiFormLabel,
   uiInfoModalWrapper,
+  uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
@@ -191,7 +192,7 @@ export function CustomPieceForm({
       </CustomFormSection>
 
       <CustomFormSection title="Craftsmanship">
-        <fieldset aria-required="true" className="space-y-1">
+        <fieldset aria-required="true" className={uiStackField}>
           <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
@@ -211,7 +212,7 @@ export function CustomPieceForm({
 
       <CustomFormSection title="Stats">
         {!forceField && (
-          <fieldset aria-required="true" className="space-y-1">
+          <fieldset aria-required="true" className={uiStackField}>
             <RequiredFormLabel as="legend">Locations</RequiredFormLabel>
             <div className="grid grid-cols-3 gap-1.5">
               {(
@@ -315,7 +316,7 @@ export function CustomPieceForm({
 
       <CustomFormSection title="Rules and Qualities">
         <div
-          className="space-y-1"
+          className={uiStackField}
           role={forceField ? undefined : "group"}
           aria-labelledby={forceField ? undefined : "custom-armour-qualities-label"}
         >

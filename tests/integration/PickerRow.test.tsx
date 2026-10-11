@@ -97,7 +97,7 @@ describe("PickerList", () => {
       </PickerList>
     );
 
-    expect(screen.getByTestId("list")).toHaveClass("space-y-3", "p-3", "lg:p-4", "extra");
+    expect(screen.getByTestId("list")).toHaveClass("space-y-2", "p-3", "lg:p-4", "extra");
     expect(screen.getAllByRole("button")).toHaveLength(2);
   });
 });

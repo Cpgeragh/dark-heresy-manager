@@ -27,6 +27,10 @@ import {
   uiCardTitleHover,
   uiRuleName,
   uiTextDescription,
+  uiStackSection,
+  uiStackField,
+  uiStackBody,
+  uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../../ui/buttons/ExpandButton";
@@ -390,7 +394,7 @@ export function MeleeCard({
       </div>
 
       {(expanded || forceExpanded) && (
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
+        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && !integrated && (
             <div className="flex justify-end">
               <RemoveButton onClick={onRemove} label="Remove" />
@@ -479,7 +483,7 @@ export function MeleeCard({
             </div>
           )}
 
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>
@@ -501,7 +505,7 @@ export function MeleeCard({
                   <InfoModal
                     title={`${weapon.name} Rules`}
                     content={
-                      <div className="space-y-3">
+                      <div className={uiStackBody}>
                         <p className={uiRuleName}>Concealed Weapon Bionic</p>
                         {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
                           <p key={rule} className={uiTextDescription}>
@@ -524,7 +528,7 @@ export function MeleeCard({
                   title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
                   content={
                     concealedBionicEffect ? (
-                      <div className="space-y-3">
+                      <div className={uiStackBody}>
                         <div>
                           <p
                             className={`text-sm lg:text-base ${colourTextPrimary} leading-relaxed`}
@@ -552,7 +556,7 @@ export function MeleeCard({
           />
 
           {isPistolProfile && pistolProfile && (
-            <div className={`border-t ${colourDivider} pt-2 space-y-2`}>
+            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
               <div className={`${uiSplitRow}`}>
                 <span className={uiTextLabel}>Ammo</span>
                 {editable && (
@@ -569,7 +573,7 @@ export function MeleeCard({
               {pistolAmmoEntries.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>
               ) : (
-                <div className="space-y-1.5">
+                <div className={uiStackList}>
                   {pistolAmmoEntries.map((entry) => (
                     <AmmoEntryRow
                       key={entry.id}
@@ -612,7 +616,7 @@ export function MeleeCard({
 
           {/* Upgrades */}
           {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-            <div className={`border-t ${colourDivider} pt-2 space-y-1.5`}>
+            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Upgrades</span>
                 {(editable
@@ -635,7 +639,7 @@ export function MeleeCard({
               {upgradeRefs.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
               ) : (
-                <div className="space-y-1.5">
+                <div className={uiStackList}>
                   {upgradeRefs.map((upgrade) => (
                     <UpgradeCard
                       key={upgrade.id}

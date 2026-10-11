@@ -16,6 +16,7 @@ import {
   uiTextError,
   uiTextPlaceholder,
   uiTextMeta,
+  uiStackField,
 } from "../../ui/styles/editableStyles";
 import { uiCardLinkFeedback } from "../../ui/styles/buttonStyles";
 import {
@@ -212,7 +213,7 @@ export function CharacterRow({
           className="max-w-xs lg:max-w-sm overflow-y-auto"
         >
           <ModalHeader title="History" onClose={() => setHistoryRequested(false)} />
-          <div className="p-4 lg:p-5 space-y-1">
+          <div className={`p-4 lg:p-5 ${uiStackField}`}>
             {logsError ? (
               <p className={`text-xs lg:text-sm ${uiTextError}`}>
                 Unable to load character history.

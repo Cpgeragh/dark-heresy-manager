@@ -16,7 +16,13 @@ import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { AccordionCard } from "../../ui/AccordionCard";
-import { uiItemName, uiSection, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  uiItemName,
+  uiSection,
+  uiTextPlaceholder,
+  uiStackList,
+  uiStackPage,
+} from "../../ui/styles/editableStyles";
 import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
 import { CustomTraitForm } from "./CustomTraitForm";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
@@ -102,7 +108,7 @@ function UnnaturalCharacteristicCards({
       header={<span className={`block truncate ${uiItemName}`}>Unnatural Characteristic</span>}
     >
       {expanded && (
-        <div className={`border-t ${colourDivider} space-y-2 p-2`}>
+        <div className={`border-t ${colourDivider} ${uiStackList} p-2`}>
           {groups.map(renderCharacteristic)}
         </div>
       )}
@@ -367,7 +373,7 @@ export function TraitsTab({
   const cardColumns = [cards.slice(0, columnSplit), cards.slice(columnSplit)];
 
   return (
-    <div className="space-y-8">
+    <div className={uiStackPage}>
       <div>
         <div className="mb-3 flex items-center justify-between">
           <SectionHeader>Traits</SectionHeader>
@@ -377,7 +383,7 @@ export function TraitsTab({
             <ViewButton label="View Traits" onClick={() => setShowPicker(true)} />
           )}
         </div>
-        <section className={`${uiSection} space-y-2`}>
+        <section className={`${uiSection} ${uiStackList}`}>
           {displayTraits.length === 0 && (
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
           )}
@@ -386,7 +392,7 @@ export function TraitsTab({
             data-testid="trait-card-list"
           >
             {cardColumns.map((column, index) => (
-              <div key={index} className="space-y-2" data-testid="trait-card-column">
+              <div key={index} className={uiStackList} data-testid="trait-card-column">
                 {column.map((card) => (
                   <div key={card.key}>{card.node}</div>
                 ))}

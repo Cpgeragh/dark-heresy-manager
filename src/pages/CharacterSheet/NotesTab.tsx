@@ -19,6 +19,8 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiTextDescription,
+  uiStackSection,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import { uiLayerLocal } from "../../ui/styles/layerStyles";
@@ -123,7 +125,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
     : sorted;
 
   return (
-    <div className="space-y-3">
+    <div className={uiStackSection}>
       {(editable || entries.length > 0) && (
         <div className={`${uiInlineRow} justify-end`}>
           {entries.length > 0 && (
@@ -155,7 +157,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
             filtered.slice(0, Math.ceil(filtered.length / 2)),
             filtered.slice(Math.ceil(filtered.length / 2)),
           ].map((column, index) => (
-            <div key={index} className="space-y-3">
+            <div key={index} className={uiStackList}>
               {column.map((entry) => (
                 <div
                   key={entry.id}

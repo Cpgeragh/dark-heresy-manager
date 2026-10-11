@@ -48,7 +48,7 @@ import {
   meleeDamageForCraftsmanship,
 } from "../weapons/weaponHelpers";
 import { SectionHeader } from "../../../ui/SectionHeader";
-import { uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { uiTextPlaceholder, uiStackSection, uiStackPage } from "../../../ui/styles/editableStyles";
 import {
   colourActiveEmerald,
   colourActiveOrange,
@@ -1069,7 +1069,7 @@ export function WeaponsTab({
 
   const visibleWeaponSectionClass = (section: WeaponMobileSection) =>
     [
-      "space-y-3",
+      uiStackSection,
       activeWeaponSection === section
         ? `${uiSwipeableTabPanel} ${mobileSectionTransition}`
         : "hidden lg:block",
@@ -1549,7 +1549,7 @@ export function WeaponsTab({
   }
 
   return (
-    <div ref={containerRef} className="space-y-8">
+    <div ref={containerRef} className={uiStackPage}>
       <div className="lg:hidden">
         <SegmentedTabs
           id={WEAPON_TABS_ID}

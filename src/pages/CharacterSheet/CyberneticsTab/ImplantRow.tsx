@@ -10,6 +10,7 @@ import {
   uiItemName,
   uiInfoModalWrapper,
   uiTextDescription,
+  uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { colourAmberPlain } from "../../../ui/styles/colourTokens";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -82,7 +83,7 @@ export function ImplantRow({
               <InfoModal
                 title={item.name}
                 content={
-                  <div className="space-y-3">
+                  <div className={uiStackBody}>
                     {ref?.notes && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>

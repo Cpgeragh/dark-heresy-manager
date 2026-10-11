@@ -28,6 +28,7 @@ import {
   uiTextGMNote,
   uiTextDescription,
   uiDescriptionBox,
+  uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
@@ -147,7 +148,7 @@ export function ImplantPicker({
     finalizeSelection(ref, nextValue, nextRarity);
   };
   const implantInfo = (ref: CyberneticRef) => (
-    <div className="space-y-3">
+    <div className={uiStackBody}>
       {ref.notes && (
         <div>
           <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>

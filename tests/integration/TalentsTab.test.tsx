@@ -416,7 +416,7 @@ describe("TalentsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Add Talent" });
     const list = within(dialog).getByTestId("talent-picker-card-list");
-    expect(list).toHaveClass("space-y-3", "p-3");
+    expect(list).toHaveClass("space-y-2", "p-3");
     const card = within(dialog).getByText("Plain Talent").closest("button");
     expect(card).toHaveClass("rounded-lg", "border-slate-500", "p-3");
     expect(within(card!).getByText("CR")).toBeInTheDocument();

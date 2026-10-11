@@ -30,6 +30,8 @@ import {
   uiSection,
   uiTextBody,
   uiTextMeta,
+  uiStackBody,
+  uiStackList,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { ManageDevicesButton } from "../ui/buttons/ManageDevicesButton";
@@ -558,7 +560,7 @@ export default function Settings({
                 </p>
               )}
               <form
-                className="space-y-3"
+                className={uiStackBody}
                 onSubmit={(event) => {
                   event.preventDefault();
                   void handleRenameDevice();
@@ -636,7 +638,7 @@ export default function Settings({
             }
           >
             <PickerBody>
-              <dl className="space-y-3 text-sm lg:text-base">
+              <dl className={`${uiStackList} text-sm lg:text-base`}>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
                   <dd className={uiTextBody}>{remoteDisconnectTarget.name ?? "Unnamed device"}</dd>
@@ -698,7 +700,7 @@ export default function Settings({
             }
           >
             <PickerBody>
-              <dl className="space-y-3 text-sm lg:text-base">
+              <dl className={`${uiStackList} text-sm lg:text-base`}>
                 <div>
                   <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
                   <dd className={uiTextBody}>{currentDeviceName}</dd>
@@ -759,7 +761,7 @@ export default function Settings({
             hideSearch
             maxWidth="max-w-sm"
             footer={
-              <div className="space-y-2">
+              <div className={uiStackList}>
                 <p className={`text-xs lg:text-sm ${colourAmberPlain} text-center`}>
                   Type DELETE to permanently delete this account
                 </p>
@@ -820,8 +822,8 @@ export default function Settings({
             title="Unlink Last Device"
             onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
           />
-          <div className="space-y-4 p-4 lg:p-5">
-            <dl className="space-y-3 text-sm lg:text-base">
+          <div className={`${uiStackBody} p-4 lg:p-5`}>
+            <dl className={`${uiStackList} text-sm lg:text-base`}>
               <div>
                 <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
                 <dd className={uiTextBody}>{currentDeviceName}</dd>

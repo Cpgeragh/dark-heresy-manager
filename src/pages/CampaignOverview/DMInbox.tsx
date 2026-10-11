@@ -19,6 +19,7 @@ import {
   uiSectionShell,
   uiTextPlaceholder,
   uiTextMeta,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { useRouteLoading } from "../../context/useRouteReady";
 import { PendingOverlay } from "../../ui/PendingOverlay";
@@ -150,7 +151,7 @@ export function DMInbox({
   }
 
   return (
-    <div className="space-y-2">
+    <div className={uiStackList}>
       {threads.map((thread) => {
         const label = getCharacterLabel(thread.characterId, characters);
         const isExpanded = expandedId === thread.characterId;

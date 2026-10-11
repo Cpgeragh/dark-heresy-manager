@@ -24,6 +24,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiTextDescription,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
@@ -287,7 +288,7 @@ export function TraumaList({
     );
   }
   return (
-    <div className="space-y-2">
+    <div className={uiStackList}>
       {[...trauma]
         .sort((a, b) => traumaDisplayName(a).localeCompare(traumaDisplayName(b)))
         .map((entry) => (
@@ -332,7 +333,7 @@ export function DisordersList({
 }) {
   if (disorders.length > 0) {
     return (
-      <div className="space-y-2">
+      <div className={uiStackList}>
         {[...disorders]
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((disorder) => (

@@ -22,6 +22,8 @@ import {
   uiFormLabel,
   uiTextBody,
   uiTextError,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
@@ -270,12 +272,12 @@ export function TraitAcquisitionModal({
         isEmpty={false}
       >
         <PickerBody>
-          <div className="space-y-3">
+          <div className={uiStackBody}>
             <p className={uiTextBody}>
               Choose exactly three Lore or Trade Skills. The selected Skills count as Trained and
               gain +10 while this imprint remains active.
             </p>
-            <div className="space-y-3">
+            <div className={uiStackList}>
               {eligibleBlankSkills.map((skill) => {
                 const selected = blankSkills.includes(skill.id);
                 return (
@@ -342,7 +344,7 @@ export function TraitAcquisitionModal({
         maxWidth="max-w-lg"
       >
         <PickerBody>
-          <div className="space-y-3">
+          <div className={uiStackBody}>
             <div>
               <label htmlFor="soul-bound-entity" className={uiFormLabel}>
                 Bound entity <RequiredMark />
@@ -466,7 +468,7 @@ export function TraitAcquisitionModal({
         maxWidth="max-w-lg"
       >
         <PickerBody>
-          <div className="space-y-3">
+          <div className={uiStackBody}>
             <PickerField
               id="sanctioning-result"
               label="Sanctioning side effect"
@@ -614,7 +616,7 @@ export function TraitAcquisitionModal({
       maxWidth="max-w-lg"
     >
       <PickerBody>
-        <div className="space-y-3">
+        <div className={uiStackBody}>
           {ownedTraitEntries.length === 0 ? (
             <p className={uiTextBody}>
               Choose the Common-Quality cybernetic gained when this Trait is acquired.

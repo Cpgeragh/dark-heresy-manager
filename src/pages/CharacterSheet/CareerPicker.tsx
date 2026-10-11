@@ -8,6 +8,8 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextDescription,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -35,7 +37,7 @@ export function CareerInfoContent({
   );
 
   return (
-    <div className="space-y-4">
+    <div className={uiStackBody}>
       <blockquote className={`border-l-2 ${colourAccentBar} pl-3`}>
         <p className={`${uiTextBody} leading-relaxed`}>“{career.quote}”</p>
         <footer className={`mt-1 text-xs lg:text-sm ${uiTextBody}`}>— {career.attribution}</footer>
@@ -68,7 +70,7 @@ export function CareerInfoContent({
       )}
 
       {career.traits?.map((trait) => (
-        <section key={trait.name} className="space-y-3">
+        <section key={trait.name} className={uiStackBody}>
           <InfoSection title={`Trait: ${trait.name}`} content={trait.description} />
           {trait.sections?.map((section) => (
             <InfoSection key={section.title} title={section.title} content={section.content} />
@@ -79,7 +81,7 @@ export function CareerInfoContent({
       {career.specialTable && (
         <section>
           <p className={`${uiTextLabel} font-semibold mb-2`}>{career.specialTable.title}</p>
-          <div className="space-y-2">
+          <div className={uiStackList}>
             {career.specialTable.rows.map((row) => (
               <div key={row.result} className={`${uiSectionShell} px-3 py-2`}>
                 <p className={`text-xs lg:text-sm font-code ${colourMetadataLabelText} mb-1`}>
@@ -97,7 +99,7 @@ export function CareerInfoContent({
 
 export function RankInfoContent({ career, rank }: { career: CareerData; rank: CareerRankData }) {
   return (
-    <div className="space-y-3">
+    <div className={uiStackBody}>
       <InfoSection title="Career" content={career.name} />
       <InfoSection title="Rank" content={`Rank ${rank.tier}`} />
       <InfoSection title="XP Level" content={rank.xpLevel} />

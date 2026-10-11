@@ -1,4 +1,9 @@
-import { uiRuleName, uiTextLabel, uiTextDescription } from "../../ui/styles/editableStyles";
+import {
+  uiRuleName,
+  uiTextLabel,
+  uiTextDescription,
+  uiStackBody,
+} from "../../ui/styles/editableStyles";
 
 function RuleParagraph({ children }: { children: React.ReactNode }) {
   return <p className={uiTextDescription}>{children}</p>;
@@ -18,7 +23,7 @@ export function DisorderInfoContent({
   notes?: string;
 }) {
   return (
-    <div className="space-y-3">
+    <div className={uiStackBody}>
       {(type !== name || typeDescription) && (
         <div>
           <p className={uiRuleName}>{type}</p>

@@ -10,6 +10,7 @@ import {
   uiTextError,
   uiTextLabel,
   uiTextPlaceholder,
+  uiStackBody,
 } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
@@ -562,7 +563,7 @@ export function TalentPickerModal({
         scrollPositionRef={detailScrollPositionRef}
       >
         <PickerBody>
-          <div className="space-y-2">
+          <div className={uiStackBody}>
             {choiceOptions.length > 0 && !detailChoice ? (
               <PickerField
                 id="talent-choice-picker"

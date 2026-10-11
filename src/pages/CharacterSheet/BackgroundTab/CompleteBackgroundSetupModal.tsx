@@ -6,7 +6,7 @@ import type {
 } from "../../../types/Character";
 import { Button } from "../../../ui/buttons/Button";
 import { ModalShell } from "../../../ui/modals/ModalShell";
-import { uiModalTitle } from "../../../ui/styles/editableStyles";
+import { uiModalTitle, uiStackBody } from "../../../ui/styles/editableStyles";
 import {
   colourAmberPlain,
   colourTextPrimary,
@@ -58,7 +58,7 @@ export function CompleteBackgroundSetupModal({
         <h2 className={`${uiModalTitle} text-base lg:text-lg`}>Complete Background</h2>
       </div>
 
-      <div className="space-y-4 px-4 py-4 lg:px-6 lg:py-5">
+      <div className={`${uiStackBody} px-4 py-4 lg:px-6 lg:py-5`}>
         <p className={`text-sm ${colourTextPrimary} lg:text-base`}>
           Choose your Homeworld and Career before entering the character sheet. Your starting Rank
           is assigned automatically by your Career.

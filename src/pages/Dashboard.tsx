@@ -38,6 +38,10 @@ import {
   uiTextError,
   uiTextPlaceholder,
   uiInactiveItem,
+  uiStackSection,
+  uiStackBody,
+  uiStackList,
+  uiStackPage,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { EditButton } from "../ui/buttons/EditButton";
@@ -396,7 +400,7 @@ function DmCampaignList({
     !editInquisitorName.trim() || validateInquisitorName(editInquisitorName.trim()).isValid;
 
   return (
-    <section className="space-y-3">
+    <section className={uiStackSection}>
       {/* Active campaigns */}
       <SectionHeader>Your Campaigns</SectionHeader>
 
@@ -670,7 +674,7 @@ function DmCampaignList({
           <PickerBody>
             <form
               id="edit-campaign-form"
-              className="space-y-3"
+              className={uiStackBody}
               onSubmit={(event) => {
                 event.preventDefault();
                 void handleEditSave();
@@ -737,7 +741,7 @@ function DmCampaignList({
           hideSearch
           maxWidth="max-w-sm"
           footer={
-            <div className="space-y-2">
+            <div className={uiStackList}>
               {pendingCampaignAction.kind === "delete" && (
                 <>
                   <label
@@ -952,7 +956,7 @@ function PlayerCampaignSection({
   error: Error | null;
 }) {
   return (
-    <section className="space-y-3">
+    <section className={uiStackSection}>
       <SectionHeader>Campaigns You Play In</SectionHeader>
 
       {error ? <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState> : null}
@@ -964,7 +968,7 @@ function PlayerCampaignSection({
       )}
 
       {!error && campaigns.length > 0 && (
-        <div className="space-y-4">
+        <div className={uiStackList}>
           {campaigns.map((campaign) => (
             <PlayerCampaignRow
               key={campaign.id}
@@ -996,7 +1000,7 @@ export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
   } = useSwipeableTabs(CAMPAIGN_GROUPS, activeCampaignGroup, setActiveCampaignGroup);
 
   const yourCampaignsSection = (
-    <div className="min-w-0 space-y-6">
+    <div className={`min-w-0 ${uiStackPage}`}>
       <DmCampaignList campaigns={dmCampaigns} error={dmError} />
     </div>
   );
@@ -1019,7 +1023,7 @@ export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
         </div>
       ) : (
         <Panel>
-          <div ref={containerRef} className="space-y-4">
+          <div ref={containerRef} className={uiStackBody}>
             <SegmentedTabs
               id={CAMPAIGN_GROUP_TABS_ID}
               ariaLabel="Campaign groups"

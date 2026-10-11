@@ -10,7 +10,12 @@ import type { CharacterListItem } from "../../types/Firestore";
 import { RevealCodeButton } from "../../ui/buttons/RevealCodeButton";
 import { ExperienceIcon } from "../../ui/icons/ExperienceIcon";
 import { HeartIcon } from "../../ui/icons/HeartIcon";
-import { uiSection, uiTextMeta, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextMeta,
+  uiTextPlaceholder,
+  uiStackField,
+} from "../../ui/styles/editableStyles";
 import {
   colourMetadataLabelText,
   colourTextPrimary,
@@ -62,7 +67,7 @@ export function MyCharacterCard({
             canEdit={true}
           />
         </div>
-        <div className="flex-1 space-y-1">
+        <div className={`flex-1 ${uiStackField}`}>
           <div className={`font-semibold ${colourTextPrimary} leading-tight lg:text-lg`}>
             {name}
           </div>

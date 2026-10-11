@@ -19,6 +19,8 @@ import {
   uiItemName,
   uiTextLabel,
   uiTextDescription,
+  uiStackField,
+  uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import type { AmmoTrackingMode } from "./weaponHelpers";
@@ -75,7 +77,7 @@ export function AmmoEntryRow({
   const visibleClipSizeLabel = ammoTracking === "clip" ? clipSizeLabel : undefined;
 
   return (
-    <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5`}>
+    <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 ${uiStackField}`}>
       {/* Name row */}
       <div className={`${uiSplitRow}`}>
         <div className="flex items-center gap-1.5 min-w-0">
@@ -137,12 +139,12 @@ export function AmmoEntryRow({
             <InfoModal
               title={displayName}
               content={
-                <div className="space-y-2">
+                <div className={uiStackBody}>
                   {ammoRef?.description && (
                     <p className={uiTextDescription}>{ammoRef.description}</p>
                   )}
                   {isChargePack && (
-                    <div className="space-y-1">
+                    <div className={uiStackField}>
                       <p className={`text-sm lg:text-base font-semibold ${colourTextPrimary}`}>
                         Recharging Power Packs
                       </p>

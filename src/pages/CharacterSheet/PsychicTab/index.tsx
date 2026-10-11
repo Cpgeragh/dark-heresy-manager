@@ -15,6 +15,10 @@ import {
   uiFormLabel,
   uiTextPlaceholder,
   uiTextDescription,
+  uiStackPage,
+  uiStackSection,
+  uiStackBody,
+  uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { colourGlowActive, colourPsychicText } from "../../../ui/styles/colourTokens";
 import { AddButton } from "../../../ui/buttons/AddButton";
@@ -555,9 +559,9 @@ export function PsychicTab({
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className={uiStackPage}>
       {/* PSY RATING & DISCIPLINES ────────────────────────────────────────── */}
-      <div className={uiSection + " flex flex-col items-center space-y-3"}>
+      <div className={`${uiSection} flex flex-col items-center ${uiStackSection}`}>
         {/* Psy Rating: derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-2">
           <span className={uiFormLabel}>Psy Rating</span>
@@ -613,7 +617,7 @@ export function PsychicTab({
       </div>
 
       {!isDesktopLayout ? (
-        <div ref={containerRef} className="space-y-4">
+        <div ref={containerRef} className={uiStackBody}>
           <SegmentedTabs
             id={PSYCHIC_POWER_TABS_ID}
             ariaLabel="Psychic power groups"
@@ -626,7 +630,7 @@ export function PsychicTab({
             key={activePowerGroup}
             id={segmentedTabPanelId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
             aria-labelledby={segmentedTabId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
-            className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
+            className={[uiStackSection, uiSwipeableTabPanel, transitionClass].join(" ")}
             role="tabpanel"
           >
             <div className="flex items-center justify-between">
@@ -686,7 +690,7 @@ export function PsychicTab({
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-6 items-start">
-          <section className={uiSection + " space-y-4"}>
+          <section className={`${uiSection} ${uiStackSection}`}>
             <div className="flex items-center justify-between">
               <PowerSectionHeading
                 title="Minor Powers"
@@ -725,7 +729,7 @@ export function PsychicTab({
           </section>
 
           {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
-          <section className={uiSection + " space-y-4"}>
+          <section className={`${uiSection} ${uiStackSection}`}>
             <div className="flex items-center justify-between">
               <PowerSectionHeading
                 title="Major Powers"
@@ -785,7 +789,7 @@ export function PsychicTab({
           suspended={pickerTarget !== null}
         >
           <PickerBody>
-            <div className="space-y-2">
+            <div className={uiStackList}>
               {(purchaseChoiceTarget === "minor"
                 ? availableMinorPurchases
                 : availableMajorPurchases

@@ -1,4 +1,4 @@
-import { uiTextDescription } from "../../../ui/styles/editableStyles";
+import { uiTextDescription, uiStackBody } from "../../../ui/styles/editableStyles";
 import {
   uiTable,
   uiTableBody,
@@ -9,7 +9,7 @@ import {
 
 export function ExplosiveMishapsContent() {
   return (
-    <div className="space-y-3">
+    <div className={uiStackBody}>
       <p className={uiTextDescription}>
         Whenever a jam results from throwing a grenade or firing a grenade, something unfortunate
         has happened. Roll on the table below to find out the results.

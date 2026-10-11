@@ -11,6 +11,9 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextDescription,
+  uiStackField,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { Button } from "../../ui/buttons/Button";
@@ -89,7 +92,7 @@ export function EntryCard({
 
   return (
     <div className={uiSection + " flex items-start justify-between gap-2 text-sm lg:text-base"}>
-      <div className="min-w-0 space-y-1.5">
+      <div className={`min-w-0 ${uiStackField}`}>
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} break-words`}>{shownName}</span>
           {(infoContent || description || entry.notes) && (
@@ -98,12 +101,12 @@ export function EntryCard({
                 title={shownName}
                 content={
                   infoContent ?? (
-                    <div className="space-y-3">
+                    <div className={uiStackBody}>
                       {description && <p className={uiTextDescription}>{description}</p>}
                       {entry.notes && (
                         <div>
                           <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                          <div className="space-y-2">
+                          <div className={uiStackList}>
                             {entry.notes.split("\n\n").map((group, index) => {
                               const breakAt = group.indexOf("\n");
                               const heading = breakAt === -1 ? group : group.slice(0, breakAt);
@@ -256,7 +259,7 @@ export function TalentGroupCard({
       }
     >
       {expanded && (
-        <div className={`border-t ${colourDivider} space-y-2 p-2`}>
+        <div className={`border-t ${colourDivider} ${uiStackList} p-2`}>
           {[...entries]
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((entry) => (

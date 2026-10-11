@@ -28,6 +28,9 @@ import {
   uiSection,
   uiTextPlaceholder,
   uiInfoModalWrapper,
+  uiStackPage,
+  uiStackSection,
+  uiStackList,
 } from "../../../ui/styles/editableStyles";
 import {
   uiTable,
@@ -561,7 +564,7 @@ export function ArmourTab({
   const hasMisc = traitArmourBonus > 0 || bionicLocations.length > 0;
 
   return (
-    <div className="space-y-6">
+    <div className={uiStackPage}>
       <section>
         <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>
@@ -643,7 +646,7 @@ export function ArmourTab({
         </div>
       </section>
 
-      <section className="space-y-2">
+      <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Worn</SectionHeader>
           <Button
@@ -660,13 +663,12 @@ export function ArmourTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour worn.</p>
         )}
         {worn.length > 0 && (
-          <IndependentCardGrid
-            items={worn.map((piece) => renderArmourRow(piece, true))}
-            spacing={2}
-          />
+          <IndependentCardGrid items={worn.map((piece) => renderArmourRow(piece, true))} />
         )}
         {archeotechArmourWorn.length > 0 && (
-          <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start">
+          <div
+            className={`${uiStackList} sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start`}
+          >
             {archeotechArmourWorn.map((item) => (
               <ArcheotechArmourRow
                 key={item.id}
@@ -680,7 +682,7 @@ export function ArmourTab({
         )}
       </section>
 
-      <section className="space-y-2">
+      <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Stowed</SectionHeader>
           <Button
@@ -697,13 +699,12 @@ export function ArmourTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour stowed.</p>
         )}
         {stowed.length > 0 && (
-          <IndependentCardGrid
-            items={stowed.map((piece) => renderArmourRow(piece, false))}
-            spacing={2}
-          />
+          <IndependentCardGrid items={stowed.map((piece) => renderArmourRow(piece, false))} />
         )}
         {archeotechArmourStowed.length > 0 && (
-          <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start">
+          <div
+            className={`${uiStackList} sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start`}
+          >
             {archeotechArmourStowed.map((item) => (
               <ArcheotechArmourRow
                 key={item.id}
@@ -717,7 +718,7 @@ export function ArmourTab({
         )}
       </section>
 
-      <section className="space-y-2">
+      <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Force Fields</SectionHeader>
           {editable ? (
@@ -730,7 +731,7 @@ export function ArmourTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No force field equipped.</p>
         )}
         {forceFields.length > 0 && (
-          <IndependentCardGrid items={forceFields.map(renderForceFieldRow)} spacing={2} />
+          <IndependentCardGrid items={forceFields.map(renderForceFieldRow)} />
         )}
         {archeotechForceFieldItems.map((item) => (
           <ArcheotechForceFieldRow

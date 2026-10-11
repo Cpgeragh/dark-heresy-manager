@@ -21,6 +21,9 @@ import {
   uiCellValue,
   uiInfoModalWrapper,
   uiTextDescription,
+  uiStackPage,
+  uiStackField,
+  uiStackBody,
 } from "../../ui/styles/editableStyles";
 import {
   colourSuccessPlain,
@@ -129,7 +132,7 @@ export function VitalsTab({
   }
 
   return (
-    <div className={`space-y-6 ${colourTextPrimary}`}>
+    <div className={`${uiStackPage} ${colourTextPrimary}`}>
       <div>
         <SectionHeader className="mb-2">Combat Status</SectionHeader>
         <section className={uiSection}>
@@ -144,7 +147,7 @@ export function VitalsTab({
                     <InfoModal
                       title="Total Wounds Adjustments"
                       content={
-                        <ul className={`space-y-1 ${uiTextDescription}`}>
+                        <ul className={`${uiStackField} ${uiTextDescription}`}>
                           {woundSources.map((source, index) => (
                             <li key={index}>
                               {source.name} (Talent): {source.amount > 0 ? "+" : ""}
@@ -255,7 +258,7 @@ export function VitalsTab({
             <InfoModal
               title="Using Fate Points"
               content={
-                <div className="space-y-2">
+                <div className={uiStackBody}>
                   <p className={uiTextDescription}>
                     Fate Points allow you to turn luck to your advantage, hitting with that bolter
                     shot when you would have otherwise missed, or cracking the security code on a
@@ -269,7 +272,7 @@ export function VitalsTab({
                     at the start of the next gaming session. Spending a Fate Point allows a
                     character to do one of the following things:
                   </p>
-                  <ul className={`list-disc list-inside ${uiTextDescription} space-y-1`}>
+                  <ul className={`list-disc list-inside ${uiTextDescription} ${uiStackField}`}>
                     <li>Re-roll any one failed Test. The results of the re-roll are final.</li>
                     <li>Count as having rolled a 10 for their Initiative.</li>
                     <li>Add an extra degree of success to a Test.</li>
@@ -293,7 +296,7 @@ export function VitalsTab({
                     <InfoModal
                       title="Total Fate Point Adjustments"
                       content={
-                        <ul className={`space-y-1 ${uiTextDescription}`}>
+                        <ul className={`${uiStackField} ${uiTextDescription}`}>
                           {fateEffects.overrideSource && (
                             <li>
                               {fateEffects.overrideSource} (Talent): set to{" "}

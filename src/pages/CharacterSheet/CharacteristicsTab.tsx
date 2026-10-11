@@ -36,6 +36,9 @@ import {
   uiInfoModalWrapper,
   uiInactivePreview,
   uiTextDescription,
+  uiStackList,
+  uiStackField,
+  uiStackPage,
 } from "../../ui/styles/editableStyles";
 import {
   colourSuccessPlain,
@@ -88,7 +91,7 @@ function StatBlock({
   );
 
   return (
-    <div className={uiSection + " space-y-2"}>
+    <div className={`${uiSection} ${uiStackList}`}>
       {/* Header */}
       <div className="flex items-baseline justify-between">
         <span className="flex items-center gap-1">
@@ -98,7 +101,7 @@ function StatBlock({
               <InfoModal
                 title={`${label} Adjustments`}
                 content={
-                  <ul className={`space-y-1 ${uiTextDescription}`}>
+                  <ul className={`${uiStackField} ${uiTextDescription}`}>
                     {sources.map((source, i) => (
                       <li key={i}>
                         {source.name} ({source.type}): {source.amount > 0 ? "+" : ""}
@@ -404,7 +407,7 @@ export function CharacteristicsTab({
   );
 
   return (
-    <div className={`space-y-6 ${colourTextPrimary}`}>
+    <div className={`${uiStackPage} ${colourTextPrimary}`}>
       {/* Stats */}
       <div>
         <SectionHeader className="mb-2">Stats</SectionHeader>
@@ -477,7 +480,7 @@ export function CharacteristicsTab({
                     Charge, or Run. The number of metres a character may move in his Turn is
                     determined by his Agility Bonus. Traits can modify some or all movement speeds.
                   </p>
-                  <div className="mt-2 space-y-1">
+                  <div className={`mt-2 ${uiStackField}`}>
                     <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
                     <div>Half: AB × {MOVEMENT_HALF_MULTIPLIER}</div>
                     <div>Full: AB × {MOVEMENT_FULL_MULTIPLIER}</div>
@@ -487,7 +490,7 @@ export function CharacteristicsTab({
                   {movementEffects.sources.length > 0 && (
                     <div className={`mt-2 pt-2 border-t ${colourDivider}`}>
                       <div className={`font-semibold ${colourTextPrimary}`}>Movement effects</div>
-                      <ul className="mt-1 space-y-1">
+                      <ul className={`mt-1 ${uiStackField}`}>
                         {movementEffects.sources.map((source, i) => (
                           <li key={i}>{source}</li>
                         ))}
@@ -514,7 +517,7 @@ export function CharacteristicsTab({
           ))}
         </div>
         {movementEffects.modes.length > 0 && (
-          <div className="mt-2 space-y-2">
+          <div className={`mt-2 ${uiStackList}`}>
             <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
               {movementEffects.modes.map((mode) => (
                 <div

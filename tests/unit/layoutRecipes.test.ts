@@ -7,6 +7,11 @@ import {
   uiFieldGrid,
   uiInlineRow,
   uiSplitRow,
+  uiStackBody,
+  uiStackField,
+  uiStackList,
+  uiStackPage,
+  uiStackSection,
 } from "../../src/ui/styles/editableStyles";
 
 function sourceFiles(directory: string): string[] {
@@ -49,6 +54,80 @@ describe("shared layout recipes", () => {
           offenders.push(`${file}:${index + 1}`);
         }
       });
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("defines the standard stack gaps", () => {
+    expect(uiStackPage).toBe("space-y-6");
+    expect(uiStackBody).toBe("space-y-4");
+    expect(uiStackSection).toBe("space-y-3");
+    expect(uiStackList).toBe("space-y-2");
+    expect(uiStackField).toBe("space-y-1");
+  });
+
+  it("leaves no hand-typed stack gap in the source", () => {
+    const stackGap = /(?<![\w-])(?:(?:sm|md|lg|xl):)?space-y-(?!0\b)[\d.]+/;
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (file.endsWith(join("ui", "styles", "editableStyles.ts"))) continue;
+      const lines = readFileSync(file, "utf8").split(/\r?\n/);
+      lines.forEach((line, index) => {
+        if (/^\s*(\/\/|\/\*|\*)/.test(line)) return;
+        if (stackGap.test(line)) offenders.push(`${file}:${index + 1}`);
+      });
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps application layer classes in layerStyles.ts", () => {
+    const layer = /(?<![\w-])(?:(?:sm|md|lg|xl):)?z-(?:\d+|\[[^\]]+\]|auto)(?![\w-])/;
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (file.endsWith(join("ui", "styles", "layerStyles.ts"))) continue;
+      readFileSync(file, "utf8")
+        .split(/\r?\n/)
+        .forEach((line, index) => {
+          if (layer.test(line)) offenders.push(`${file}:${index + 1}`);
+        });
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps focus ring, press scale and disabled opacity in the style files", () => {
+    const state =
+      /(?<![\w-])(?:focus-visible:ring-(?!inset)|focus:ring-|active:scale-|disabled:opacity-)/;
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (file.includes(join("ui", "styles"))) continue;
+      readFileSync(file, "utf8")
+        .split(/\r?\n/)
+        .forEach((line, index) => {
+          if (state.test(line)) offenders.push(`${file}:${index + 1}`);
+        });
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps the drawer backdrop in DrawerBackdrop.tsx", () => {
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (file.endsWith(join("ui", "DrawerBackdrop.tsx"))) continue;
+      readFileSync(file, "utf8")
+        .split(/\r?\n/)
+        .forEach((line, index) => {
+          if (line.includes("fixed inset-0") && line.includes("backdrop-blur")) {
+            offenders.push(`${file}:${index + 1}`);
+          }
+        });
     }
 
     expect(offenders).toEqual([]);

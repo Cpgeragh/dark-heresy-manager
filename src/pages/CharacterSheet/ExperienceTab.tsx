@@ -34,6 +34,11 @@ import {
   uiTextError,
   uiTextPlaceholder,
   uiTextMeta,
+  uiStackBody,
+  uiStackField,
+  uiStackList,
+  uiStackSection,
+  uiStackPage,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/chips/Chip";
@@ -232,7 +237,7 @@ function XpTransactionModal({
         }
         onClose={onClose}
       />
-      <div className="space-y-4 p-4 lg:p-5">
+      <div className={`${uiStackBody} p-4 lg:p-5`}>
         {!isSpend && (
           <p className={`text-sm ${uiTextBody} lg:text-base`}>
             {isRemove
@@ -241,7 +246,7 @@ function XpTransactionModal({
           </p>
         )}
 
-        <div className="block space-y-1">
+        <div className={`block ${uiStackField}`}>
           <RequiredFormLabel htmlFor={`${action}-xp-amount`} tone="blue">
             Amount
           </RequiredFormLabel>
@@ -261,7 +266,7 @@ function XpTransactionModal({
           />
         </div>
 
-        <div className="block space-y-1">
+        <div className={`block ${uiStackField}`}>
           <RequiredFormLabel htmlFor={`${action}-xp-reason`} tone="blue">
             Reason
           </RequiredFormLabel>
@@ -293,7 +298,7 @@ function XpTransactionModal({
           </p>
         )}
 
-        <div className={`space-y-2 border-t ${colourDivider} pt-4`}>
+        <div className={`${uiStackList} border-t ${colourDivider} pt-4`}>
           <RequiredFieldsNote />
           <div className="grid grid-cols-2 gap-3">
             <Button variant="neutral" onClick={onClose} disabled={saving}>
@@ -335,7 +340,7 @@ function RankTitleChoice({
     ...options.map((title) => ({ title, label: title })),
   ];
   return (
-    <div className="space-y-2">
+    <div className={uiStackField}>
       <div className={uiTextLabel}>Rank title</div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {choices.map(({ title, label }) => (
@@ -522,7 +527,7 @@ function RankUpModal({
         suspended={xpAction !== null || rankTypePickerOpen || saving}
       >
         <ModalHeader title="Confirm Rank Up" onClose={cancel} />
-        <div className="space-y-4 p-4 lg:p-5">
+        <div className={`${uiStackBody} p-4 lg:p-5`}>
           <div>
             <div className={uiTextLabel}>Current Rank</div>
             <div className={`mt-1 text-lg ${colourTextPrimary} lg:text-xl`}>
@@ -533,7 +538,7 @@ function RankUpModal({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className={uiStackField}>
             <div className={uiTextLabel}>
               {progression.requiresBranchChoice ? "Choose the next Career path" : "Next Rank"}
             </div>
@@ -564,7 +569,7 @@ function RankUpModal({
           </div>
 
           {availableAlternateRanks.length === 1 && (
-            <div className="space-y-2">
+            <div className={uiStackField}>
               <div className={uiTextLabel}>Rank type</div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Button
@@ -593,7 +598,7 @@ function RankUpModal({
           )}
 
           {availableAlternateRanks.length >= 2 && selectedRankTypeName && (
-            <div className="space-y-2">
+            <div className={uiStackField}>
               <div className={uiTextLabel}>Rank type</div>
               <Button
                 className="w-full"
@@ -618,7 +623,7 @@ function RankUpModal({
           )}
 
           {selectedMeleeWeaponChoice && (
-            <div className="space-y-2">
+            <div className={uiStackField}>
               <div className={uiTextLabel}>Choose {selectedMeleeWeaponChoice.label}</div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {selectedMeleeWeaponChoice.referenceIds.map((referenceId) => {
@@ -646,7 +651,7 @@ function RankUpModal({
           )}
 
           {appliedRankUpCosts.length === 0 ? (
-            <section className={`${uiSectionShell} space-y-3 p-3`}>
+            <section className={`${uiSectionShell} ${uiStackSection} p-3`}>
               <div>
                 <div className={`text-sm font-semibold ${colourHeadingAccent} lg:text-base`}>
                   Final XP adjustments
@@ -665,7 +670,7 @@ function RankUpModal({
               </Button>
             </section>
           ) : (
-            <section className={`${uiSectionShell} space-y-2 p-3`}>
+            <section className={`${uiSectionShell} ${uiStackList} p-3`}>
               <div className={uiTextLabel}>Applied Rank Up XP Cost</div>
               <div
                 className={`flex flex-col gap-3 ${uiSectionShell} px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between lg:text-base`}
@@ -780,7 +785,7 @@ function RankEntryList({
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className={uiStackList}>
       {entries.map((entry) => (
         <li
           key={entry.id}
@@ -790,7 +795,7 @@ function RankEntryList({
               : `flex items-start justify-between gap-3 border-b ${colourDivider} pb-2 last:border-b-0 last:pb-0`
           }
         >
-          <div className="min-w-0 space-y-1">
+          <div className={`min-w-0 ${uiStackField}`}>
             <div className={`text-sm ${colourTextPrimary} lg:text-base`}>{entry.name}</div>
             {showKind && (
               <Chip size="sm" colour={ENTRY_KIND_COLOURS[entry.kind]}>
@@ -824,7 +829,7 @@ function CareerPurchaseGroup({
       header={<span className={`block truncate ${uiCardTitle}`}>{label}</span>}
     >
       {expanded && (
-        <div className={`space-y-2 border-t ${colourDivider} p-2`}>
+        <div className={`${uiStackList} border-t ${colourDivider} p-2`}>
           <RankEntryList entries={entries} emptyText="" showKind={false} boxed />
         </div>
       )}
@@ -844,7 +849,7 @@ function CareerPurchaseList({
   }
 
   return (
-    <div className="space-y-2">
+    <div className={uiStackList}>
       {CAREER_PURCHASE_GROUPS.map(({ kind, label }) => {
         const groupedEntries = entries.filter((entry) => entry.kind === kind);
         return groupedEntries.length > 0 ? (
@@ -871,7 +876,7 @@ function RankLedgerSection({
   groupCareerPurchases?: boolean;
 }) {
   return (
-    <section className={`${uiSectionShell} space-y-3 p-3 lg:p-4 ${className}`.trim()}>
+    <section className={`${uiSectionShell} ${uiStackSection} p-3 lg:p-4 ${className}`.trim()}>
       <div className="flex items-baseline justify-between gap-3">
         <h4
           className={`text-sm font-semibold uppercase tracking-wide ${colourHeadingAccent} lg:text-base`}
@@ -920,7 +925,7 @@ function RankDetailsSwitcher({ card }: { card: RankCard }) {
 
   return (
     <>
-      <div ref={containerRef} className="space-y-3 lg:hidden">
+      <div ref={containerRef} className={`${uiStackBody} lg:hidden`}>
         <SegmentedTabs
           id={tabGroupId}
           ariaLabel={`${card.name} Rank purchase categories`}
@@ -1018,7 +1023,7 @@ export function ExperienceTab({
   };
 
   return (
-    <div className="space-y-6">
+    <div className={uiStackPage}>
       {!editable && <span className={readOnlyBadgeClass}>Read-only</span>}
 
       <section className="grid grid-cols-3 gap-2 sm:gap-4">
@@ -1058,9 +1063,9 @@ export function ExperienceTab({
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className={uiStackSection}>
         <SectionHeader>XP History</SectionHeader>
-        <div className={`${uiSection} space-y-2`}>
+        <div className={`${uiSection} ${uiStackList}`}>
           {xpHistoryError ? (
             <p className={`text-sm ${uiTextError} lg:text-base`}>XP history could not be loaded.</p>
           ) : xpHistory.length === 0 ? (
@@ -1103,9 +1108,9 @@ export function ExperienceTab({
       </section>
 
       {progression && (
-        <section className="space-y-3">
+        <section className={uiStackSection}>
           <SectionHeader>Rank Progression</SectionHeader>
-          <div className={`${uiSection} space-y-4`}>
+          <div className={`${uiSection} ${uiStackBody}`}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className={uiTextLabel}>Current Rank</div>
@@ -1168,7 +1173,7 @@ export function ExperienceTab({
         </section>
       )}
 
-      <section className="space-y-3">
+      <section className={uiStackSection}>
         <SectionHeader>Career Rank Ledger</SectionHeader>
 
         {rankCards.length === 0 ? (
@@ -1178,7 +1183,7 @@ export function ExperienceTab({
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className={uiStackList}>
             {orderedRankCards.map((card) => {
               const expanded = expandedRankIds.has(card.rankId);
               const detailsId = `rank-card-${card.rankId}-details`;
@@ -1226,7 +1231,7 @@ export function ExperienceTab({
                     }
                   >
                     {expanded && (
-                      <div id={detailsId} className="space-y-4 p-3 pt-0 lg:p-4 lg:pt-0">
+                      <div id={detailsId} className={`${uiStackBody} p-3 pt-0 lg:p-4 lg:pt-0`}>
                         {editable && card.titleChoice && (
                           <RankTitleChoice
                             careerName={

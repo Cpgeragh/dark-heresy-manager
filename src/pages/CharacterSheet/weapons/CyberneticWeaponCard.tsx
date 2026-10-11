@@ -15,6 +15,8 @@ import {
   uiTextPlaceholder,
   uiCardTitleHover,
   uiInfoModalWrapper,
+  uiStackSection,
+  uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
@@ -92,7 +94,7 @@ export function CyberneticWeaponCard({
       </div>
 
       {expanded && (
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
+        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           <div className={`${uiChipRow}`}>
             {weapon.type === "ranged" && weapon.range && (
               <StatChip label="Range" value={weapon.range} />
@@ -122,7 +124,7 @@ export function CyberneticWeaponCard({
             )}
           </div>
 
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Gained From</span>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>{cyberneticName}</span>

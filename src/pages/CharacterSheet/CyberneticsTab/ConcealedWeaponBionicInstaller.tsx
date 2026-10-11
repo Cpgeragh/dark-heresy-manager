@@ -4,7 +4,12 @@ import { resolveMeleeWeaponReference } from "../../../data/reference/weaponRefer
 import { Button } from "../../../ui/buttons/Button";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
-import { uiTextBody, uiTextError } from "../../../ui/styles/editableStyles";
+import {
+  uiTextBody,
+  uiTextError,
+  uiStackBody,
+  uiStackList,
+} from "../../../ui/styles/editableStyles";
 import { ImplantRow } from "./ImplantRow";
 import { RangedCard } from "../weapons/RangedCard";
 import { MeleeCard } from "../weapons/MeleeCard";
@@ -48,7 +53,7 @@ export function ConcealedWeaponBionicInstaller({
       className="max-w-md lg:max-w-lg overflow-y-auto"
     >
       <ModalHeader title="Concealed Weapon Bionic" onClose={onClose} />
-      <div className="p-4 lg:p-5 space-y-3">
+      <div className={`p-4 lg:p-5 ${uiStackBody}`}>
         <p className={`text-sm ${uiTextBody}`}>
           {selectingArm
             ? "Choose the existing Bionic Arm that will house the weapon."
@@ -62,7 +67,7 @@ export function ConcealedWeaponBionicInstaller({
         )}
         {selectingArm
           ? arms.map((item) => (
-              <div key={item.id} className="space-y-2">
+              <div key={item.id} className={uiStackList}>
                 <ImplantRow
                   item={item}
                   editable={false}
@@ -84,7 +89,7 @@ export function ConcealedWeaponBionicInstaller({
                   ? meleeWeapons.find((weapon) => weapon.id === item.id)
                   : undefined;
               return (
-                <div key={item.id} className="space-y-2">
+                <div key={item.id} className={uiStackList}>
                   {ranged && (
                     <RangedCard
                       weapon={ranged}

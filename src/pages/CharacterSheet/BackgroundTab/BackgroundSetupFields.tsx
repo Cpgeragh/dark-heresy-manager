@@ -24,6 +24,7 @@ import {
   uiInfoModalWrapper,
   uiItemName,
   uiTextBody,
+  uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { CareerInfoContent, CareerPicker, RankInfoContent } from "../CareerPicker";
@@ -269,7 +270,7 @@ export function BackgroundSetupFields({
 
   return (
     <>
-      <div className="space-y-4">
+      <div className={uiStackBody}>
         <BackgroundPickerField
           label="Homeworld"
           selected={!!selectedHomeworld}

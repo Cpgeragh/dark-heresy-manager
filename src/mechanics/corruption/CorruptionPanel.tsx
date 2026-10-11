@@ -31,6 +31,11 @@ import {
   uiTextPlaceholder,
   uiTextDescription,
   uiThresholdValue,
+  uiStackSection,
+  uiStackField,
+  uiStackList,
+  uiStackPage,
+  uiStackBody,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
@@ -99,7 +104,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
   const nextMalignancyTest = getNextMalignancyTestPoints(safePoints);
 
   return (
-    <div className="w-full max-w-md space-y-3">
+    <div className={`w-full max-w-md ${uiStackSection}`}>
       <SegmentedTimeline
         value={safePoints}
         segments={CORRUPTION_TIMELINE_SEGMENTS}
@@ -126,7 +131,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
         </p>
       ) : (
         <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${colourDivider}`}>
-          <div className="flex flex-col items-center space-y-1.5">
+          <div className={`flex flex-col items-center ${uiStackField}`}>
             <span className={uiTextLabel}>Status</span>
             <div className={`${uiChipRow} justify-center`}>
               <Chip size="sm" colour={corruptionDegreeChipColour(entry)}>
@@ -145,7 +150,9 @@ function CorruptionStatusChips({ points }: { points: number }) {
               </span>
             </div>
           </div>
-          <div className={`flex flex-col items-center space-y-1.5 border-l ${colourDivider} pl-3`}>
+          <div
+            className={`flex flex-col items-center ${uiStackField} border-l ${colourDivider} pl-3`}
+          >
             <span className={uiTextLabel}>Thresholds</span>
             <div className="flex flex-col items-center gap-1">
               {nextMalignancyTest !== undefined && (
@@ -220,7 +227,7 @@ function MalignanciesList({
 }) {
   if (malignancies.length > 0) {
     return (
-      <div className="space-y-2">
+      <div className={uiStackList}>
         {[...malignancies]
           .sort((a, b) => malignancyDisplayName(a).localeCompare(malignancyDisplayName(b)))
           .map((malignancy) => (
@@ -281,7 +288,7 @@ function MutationsList({
     return <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>{emptyLabel}</p>;
   }
   return (
-    <div className="space-y-2">
+    <div className={uiStackList}>
       {[...mutations]
         .sort((a, b) => mutationDisplayName(a).localeCompare(mutationDisplayName(b)))
         .map((mutation) => (
@@ -512,8 +519,8 @@ export function CorruptionPanel({
   }
 
   return (
-    <div className="space-y-6">
-      <div className={`${sectionClassName} flex flex-col items-center space-y-3`}>
+    <div className={uiStackPage}>
+      <div className={`${sectionClassName} flex flex-col items-center ${uiStackSection}`}>
         <div className="inline-flex flex-col items-center gap-2">
           <span className={uiFormLabel}>Points</span>
           <Stepper
@@ -528,7 +535,7 @@ export function CorruptionPanel({
       </div>
 
       {/* Mobile: tab switcher between Malignancies / Minor Mutations / Major Mutations */}
-      <div ref={containerRef} className="lg:hidden space-y-4">
+      <div ref={containerRef} className={`lg:hidden ${uiStackBody}`}>
         <SegmentedTabs
           id={CORRUPTION_TABS_ID}
           ariaLabel="Corruption entry groups"
@@ -541,7 +548,7 @@ export function CorruptionPanel({
           key={activeGroup}
           id={segmentedTabPanelId(CORRUPTION_TABS_ID, activeGroup)}
           aria-labelledby={segmentedTabId(CORRUPTION_TABS_ID, activeGroup)}
-          className={["space-y-2", uiSwipeableTabPanel, transitionClass].join(" ")}
+          className={[uiStackList, uiSwipeableTabPanel, transitionClass].join(" ")}
           role="tabpanel"
         >
           {renderGroup(activeGroup)}
@@ -550,11 +557,13 @@ export function CorruptionPanel({
 
       {/* Desktop: side by side */}
       <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
-        <section className={`${sectionClassName} space-y-2`}>{renderGroup("malignancies")}</section>
-        <section className={`${sectionClassName} space-y-2`}>
+        <section className={`${sectionClassName} ${uiStackList}`}>
+          {renderGroup("malignancies")}
+        </section>
+        <section className={`${sectionClassName} ${uiStackList}`}>
           {renderGroup("minorMutations")}
         </section>
-        <section className={`${sectionClassName} space-y-2`}>
+        <section className={`${sectionClassName} ${uiStackList}`}>
           {renderGroup("majorMutations")}
         </section>
       </div>

@@ -13,7 +13,7 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { uiTextPlaceholder, uiStackPage, uiStackSection } from "../../../ui/styles/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
@@ -302,9 +302,9 @@ export function ArcheotechTab({
   }
 
   return (
-    <div className="space-y-8">
+    <div className={uiStackPage}>
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
-      <section className="space-y-3">
+      <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Inventory ({archeotech.length})</SectionHeader>
           {editable ? (

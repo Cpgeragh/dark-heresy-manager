@@ -27,6 +27,9 @@ import {
   uiTextPlaceholder,
   uiItemNameHover,
   uiRuleName,
+  uiStackSection,
+  uiStackBody,
+  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { SKILL_DESCRIPTIONS } from "../../data/reference/skillDescriptions";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
@@ -105,7 +108,7 @@ function CompanionPickerCard({
 
       {expanded && (
         <div
-          className={`px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t ${colourDivider} space-y-3`}
+          className={`px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t ${colourDivider} ${uiStackSection}`}
         >
           <CompanionProfileDetails
             companionReference={companionReference}
@@ -218,7 +221,7 @@ function ProfileEntries({
           <InfoModal
             title={`${companionName} ${title}`}
             content={
-              <div className="space-y-3">
+              <div className={uiStackBody}>
                 {entries.map((entry, index) => (
                   <div key={entry}>
                     <p className={uiRuleName}>{entry}</p>
@@ -259,7 +262,7 @@ function CompanionProfileDetails({
         <StatChip size={statSize} label="Wounds" value={companionReference.wounds} />
       </div>
 
-      <div className={`space-y-1 border-t ${colourDivider} pt-2 mt-2`}>
+      <div className={`${uiStackList} border-t ${colourDivider} pt-2 mt-2`}>
         <SectionHeader as="h3" className="mb-2">
           Abilities
         </SectionHeader>
@@ -286,7 +289,7 @@ function CompanionProfileDetails({
         />
       </div>
 
-      <div className={`space-y-1 border-t ${colourDivider} pt-2 mt-2`}>
+      <div className={`${uiStackList} border-t ${colourDivider} pt-2 mt-2`}>
         <SectionHeader as="h3" className="mb-2">
           Equipment
         </SectionHeader>
@@ -359,7 +362,7 @@ function CompanionCard({
       </div>
 
       {expanded && (
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
+        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && (
             <div className="flex justify-end">
               <RemoveButton onClick={onRemove} label={`Remove ${companionReference.name}`} />
@@ -384,7 +387,7 @@ export function CompanionsTab({
   const [showPicker, setShowPicker] = useState(false);
 
   return (
-    <div className="space-y-3">
+    <div className={uiStackSection}>
       <div className="flex items-center justify-between">
         <SectionHeader>Companions</SectionHeader>
         {editable ? (
@@ -397,7 +400,7 @@ export function CompanionsTab({
       {companions.length === 0 ? (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No companions recorded.</p>
       ) : (
-        <div className="space-y-3">
+        <div className={uiStackList}>
           {companions.map((companion) => (
             <CompanionCard
               key={companion.id}

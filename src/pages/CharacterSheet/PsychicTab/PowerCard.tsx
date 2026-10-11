@@ -14,6 +14,8 @@ import {
   uiTextBody,
   uiTextPlaceholder,
   uiTextDescription,
+  uiStackField,
+  uiStackSection,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
@@ -138,7 +140,7 @@ export function PowerCard({
           onClick={onSelect ?? (() => setExpanded((value) => !value))}
         />
 
-        <div className="relative pointer-events-none min-w-0 flex-1 space-y-1.5">
+        <div className={`relative pointer-events-none min-w-0 flex-1 ${uiStackField}`}>
           <div className="flex items-center gap-1.5">
             <p className={uiCardTitleHover}>
               {power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
@@ -178,7 +180,7 @@ export function PowerCard({
       </div>
 
       {expanded && (
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
+        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           <PowerStats power={power} />
 
           {onLinkPurchase && (

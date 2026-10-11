@@ -21,6 +21,9 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextDescription,
+  uiStackBody,
+  uiStackField,
+  uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
@@ -88,12 +91,12 @@ export function SkillRow({
   const skillDescription = SKILL_DESCRIPTIONS[skill.name];
   const hasSkillInfo = Boolean(skillDescription) || talentSources.length > 0;
   const skillInfoContent = (
-    <div className="space-y-3">
+    <div className={uiStackBody}>
       {skillDescription && <p className={uiTextDescription}>{skillDescription}</p>}
       {talentSources.length > 0 && (
         <div>
           <p className={`${uiFormLabel} mb-1`}>Effects</p>
-          <ul className={`space-y-1 ${uiTextDescription}`}>
+          <ul className={`${uiStackField} ${uiTextDescription}`}>
             {talentSources.map((source, index) => (
               <li key={index}>
                 {source.name} ({source.type})
@@ -155,7 +158,7 @@ export function SkillRow({
           <CardOverlayButton label={`Select ${skill.name}`} onClick={() => onSelect(skill.id)} />
         )}
         {/* Mobile: header, right-aligned upgrade, metadata with an isolated Total, then the full-width effect. */}
-        <div className="relative pointer-events-none lg:hidden space-y-2.5">
+        <div className={`relative pointer-events-none lg:hidden ${uiStackList}`}>
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className={`${uiItemNameHover} break-words`}>{displayName}</span>
@@ -234,7 +237,7 @@ export function SkillRow({
         </div>
 
         {/* Desktop uses its extra width to keep Upgrade immediately left of Delete. */}
-        <div className="relative pointer-events-none hidden lg:block lg:space-y-2.5">
+        <div className={`relative pointer-events-none hidden lg:block ${uiStackList}`}>
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className={`${uiItemNameHover} truncate`}>{displayName}</span>

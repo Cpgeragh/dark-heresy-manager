@@ -27,6 +27,7 @@ import {
   editableInputClass,
   uiFormLabel,
   uiTextBody,
+  uiStackPage,
 } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
@@ -276,7 +277,7 @@ export function WeaponTrainingTab({
   }, [pendingExoticPurchase, weaponTraining, onUpdate]);
 
   return (
-    <div className="space-y-6 text-center">
+    <div className={`${uiStackPage} text-center`}>
       {WEAPON_TRAINING_GROUPS.map((group) => (
         <div key={group.label}>
           <p className={`${uiFormLabel} mb-1.5`}>{group.label}</p>

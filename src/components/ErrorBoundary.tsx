@@ -4,7 +4,14 @@ import React, { Component } from "react";
 import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
 import { WarningIcon } from "../ui/icons/WarningIcon";
-import { uiSection, uiTextError, uiTextBody, uiTextPlaceholder } from "../ui/styles/editableStyles";
+import {
+  uiSection,
+  uiTextError,
+  uiTextBody,
+  uiTextPlaceholder,
+  uiStackBody,
+  uiStackList,
+} from "../ui/styles/editableStyles";
 import {
   colourHoverTextBody,
   colourPageBackground,
@@ -88,7 +95,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
     <div
       className={`fixed inset-0 ${uiLayerBackdrop} flex overflow-y-auto ${colourPageBackground} p-4 pt-14`}
     >
-      <div className="m-auto w-full max-w-md space-y-4">
+      <div className={`m-auto w-full max-w-md ${uiStackBody}`}>
         {/* Error Icon */}
         <div className="flex justify-center">
           <div
@@ -99,14 +106,14 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
         </div>
 
         {/* Error Message */}
-        <div className="text-center space-y-2">
+        <div className={`text-center ${uiStackList}`}>
           <h1 className={`text-2xl font-bold ${colourTextPrimary}`}>Something went wrong</h1>
           <p className={uiTextError}>The application encountered an unexpected error.</p>
         </div>
 
         {/* Error Details (Dev Only) */}
         {isDev && error && (
-          <div className={`${uiSection} space-y-2`}>
+          <div className={`${uiSection} ${uiStackList}`}>
             <div className={`text-xs font-mono ${uiTextError} font-semibold`}>{error.name}</div>
             <div className={`text-xs font-mono ${uiTextBody}`}>{error.message}</div>
             {error.stack && (

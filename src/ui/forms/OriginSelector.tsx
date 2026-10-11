@@ -4,6 +4,7 @@ import { toggleButtonClass } from "../buttons/ToggleButton";
 import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
 import { colourFillSelected } from "../styles/colourTokens";
 import { uiDisabledLook, uiFocusWithinRing } from "../styles/buttonStyles";
+import { uiStackField } from "../styles/editableStyles";
 
 interface OriginSelectorProps {
   name: string;
@@ -24,7 +25,10 @@ export function OriginSelector({
   className = "",
 }: OriginSelectorProps) {
   return (
-    <fieldset className={`${hideLabel ? "" : "space-y-1"} ${className}`.trim()} disabled={disabled}>
+    <fieldset
+      className={`${hideLabel ? "" : uiStackField} ${className}`.trim()}
+      disabled={disabled}
+    >
       <RequiredFormLabel as="legend" className={hideLabel ? "sr-only" : ""}>
         Origin
       </RequiredFormLabel>

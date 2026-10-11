@@ -11,6 +11,9 @@ import {
   uiInactiveItem,
   uiRuleName,
   uiTextDescription,
+  uiStackBody,
+  uiStackField,
+  uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -48,7 +51,7 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
 
 function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
   return (
-    <div className="space-y-4">
+    <div className={uiStackBody}>
       {qualities.map((name) => {
         const desc = ARMOUR_SPECIAL_RULES[name];
         if (!desc) return null;
@@ -101,7 +104,7 @@ export function PieceRow({
           {libraryItem && <StatusBadge status={libraryItem.status} />}
         </div>
 
-        <div className="mt-1 space-y-1">
+        <div className={`mt-1 ${uiStackField}`}>
           <div className={`${uiChipRow}`}>
             <StatChip label="Location" value={locationLabel(piece.locations)} />
             <StatChip label="AP" value={apDesc} />
@@ -150,7 +153,7 @@ export function PieceRow({
         </div>
 
         {(upgradeRefs.length > 0 || addableCompatible.length > 0) && (
-          <div className={`border-t ${colourDivider} pt-2 mt-2 space-y-1.5`}>
+          <div className={`border-t ${colourDivider} pt-2 mt-2 ${uiStackList}`}>
             <div className="flex items-center justify-between">
               <span className={uiTextLabel}>Upgrades</span>
               {editable ? (
@@ -170,7 +173,7 @@ export function PieceRow({
             {upgradeRefs.length === 0 ? (
               <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
             ) : (
-              <div className="space-y-1.5">
+              <div className={uiStackList}>
                 {upgradeRefs.map((upgrade) => (
                   <ArmourUpgradeCard
                     key={upgrade.id}

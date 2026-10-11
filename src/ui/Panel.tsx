@@ -1,9 +1,9 @@
 // src/ui/Panel.tsx
 // The standard bordered content card used at page level (Dashboard, Settings,
-// CampaignOverview). Defaults to space-y-6; pass className to extend.
+// CampaignOverview). Defaults to the page stack; pass className to extend.
 
 import type { ReactNode } from "react";
-import { uiSectionShell } from "./styles/editableStyles";
+import { uiSectionShell, uiStackBody, uiStackPage } from "./styles/editableStyles";
 
 export function Panel({
   className = "",
@@ -16,7 +16,7 @@ export function Panel({
   padding?: "default" | "none";
   children: ReactNode;
 }) {
-  const spacingClass = spacing === "none" ? "" : spacing === "compact" ? "space-y-4" : "space-y-6";
+  const spacingClass = spacing === "none" ? "" : spacing === "compact" ? uiStackBody : uiStackPage;
   const paddingClass = padding === "none" ? "" : "p-3 lg:p-4";
 
   return (

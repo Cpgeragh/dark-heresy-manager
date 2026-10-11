@@ -22,6 +22,9 @@ import {
   uiSection,
   uiTextPlaceholder,
   uiTextMeta,
+  uiStackBody,
+  uiStackField,
+  uiStackPage,
 } from "../../../ui/styles/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import {
@@ -247,9 +250,9 @@ export function BackgroundTab({
   const appearanceSection = (
     <div>
       <SectionHeader className="mb-3">Appearance</SectionHeader>
-      <section className={uiSection + " space-y-4"}>
+      <section className={`${uiSection} ${uiStackBody}`}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <label className={uiFormLabel}>
               <span className="flex items-center gap-1.5">
                 Age
@@ -260,7 +263,7 @@ export function BackgroundTab({
                       content={
                         <div>
                           <div className={`font-semibold ${colourTextPrimary}`}>Modifiers</div>
-                          <ul className="mt-1 space-y-1">
+                          <ul className={`mt-1 ${uiStackField}`}>
                             <li>Sanctioned Psyker: +{sanctioningAgeIncrease}</li>
                           </ul>
                         </div>
@@ -313,7 +316,7 @@ export function BackgroundTab({
               </button>
             )}
           </div>
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <label className={uiFormLabel}>Height</label>
             <div className={`${uiInlineRow}`}>
               <input
@@ -334,7 +337,7 @@ export function BackgroundTab({
               <span className={uiTextMeta}>m</span>
             </div>
           </div>
-          <div className="space-y-1">
+          <div className={uiStackField}>
             <label className={uiFormLabel}>Weight</label>
             <div className={`${uiInlineRow}`}>
               <input
@@ -464,7 +467,7 @@ export function BackgroundTab({
   const backgroundSection = (
     <div>
       <SectionHeader className="mb-3">Background</SectionHeader>
-      <section className={uiSection + " space-y-4"}>
+      <section className={`${uiSection} ${uiStackBody}`}>
         <BackgroundSetupFields
           header={header}
           talents={talents}
@@ -532,11 +535,11 @@ export function BackgroundTab({
   );
 
   return (
-    <div className={`space-y-6 ${colourTextPrimary}`}>
+    <div className={`${uiStackPage} ${colourTextPrimary}`}>
       {/* IDENTITY */}
       <div>
         <SectionHeader className="mb-3">Identity</SectionHeader>
-        <section className={uiSection + " space-y-3"}>
+        <section className={`${uiSection} ${uiStackBody}`}>
           <FormField
             label="Character Name"
             value={header.characterName ?? ""}
@@ -557,7 +560,7 @@ export function BackgroundTab({
       </div>
 
       {/* Mobile: tab switcher between Appearance and Background */}
-      <div ref={containerRef} className="lg:hidden space-y-4">
+      <div ref={containerRef} className={`lg:hidden ${uiStackBody}`}>
         <SegmentedTabs
           id={BACKGROUND_TABS_ID}
           ariaLabel="Background section groups"
@@ -570,7 +573,7 @@ export function BackgroundTab({
           key={activeSectionGroup}
           id={segmentedTabPanelId(BACKGROUND_TABS_ID, activeSectionGroup)}
           aria-labelledby={segmentedTabId(BACKGROUND_TABS_ID, activeSectionGroup)}
-          className={["space-y-6", uiSwipeableTabPanel, transitionClass].join(" ")}
+          className={[uiStackPage, uiSwipeableTabPanel, transitionClass].join(" ")}
           role="tabpanel"
         >
           {activeSectionGroup === "appearance" ? appearanceSection : backgroundSection}

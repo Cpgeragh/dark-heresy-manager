@@ -38,6 +38,10 @@ import {
   uiSection,
   uiTextPlaceholder,
   uiTextDescription,
+  uiStackBody,
+  uiStackList,
+  uiStackPage,
+  uiStackSection,
 } from "../../../ui/styles/editableStyles";
 import { SkillRow } from "./SkillRow";
 import { SkillGroupRow } from "./SkillGroupRow";
@@ -86,7 +90,7 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
   const basic = type === "basic";
   const title = basic ? "Basic Skills" : "Advanced Skills";
   const content = basic ? (
-    <div className={`space-y-3 ${uiTextDescription}`}>
+    <div className={`${uiStackBody} ${uiTextDescription}`}>
       <p>
         Basic Skills can be attempted while Untrained using half the relevant Characteristic,
         rounded down.
@@ -97,7 +101,7 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
       </p>
     </div>
   ) : (
-    <div className={`space-y-3 ${uiTextDescription}`}>
+    <div className={`${uiStackBody} ${uiTextDescription}`}>
       <p>
         Advanced Skills cannot be attempted while Untrained. The displayed Total shows the
         Characteristic value the Skill will use once it becomes Trained.
@@ -364,12 +368,12 @@ export function SkillsTab({
       )
     );
 
-  const renderBasicSection = () => <div className="space-y-2">{renderItems(basicItems)}</div>;
+  const renderBasicSection = () => <div className={uiStackList}>{renderItems(basicItems)}</div>;
 
   return (
-    <div className={`space-y-4 ${colourTextPrimary}`}>
+    <div className={`${uiStackPage} ${colourTextPrimary}`}>
       {!isDesktopLayout ? (
-        <div ref={containerRef} className="space-y-4">
+        <div ref={containerRef} className={uiStackBody}>
           <SegmentedTabs
             id={SKILLS_TABS_ID}
             ariaLabel="Skill type"
@@ -383,7 +387,7 @@ export function SkillsTab({
             id={segmentedTabPanelId(SKILLS_TABS_ID, activeView)}
             aria-labelledby={segmentedTabId(SKILLS_TABS_ID, activeView)}
             role="tabpanel"
-            className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
+            className={[uiStackSection, uiSwipeableTabPanel, transitionClass].join(" ")}
           >
             <div className="flex items-center justify-between">
               <SkillTypeHeading type={activeView} />
@@ -412,13 +416,13 @@ export function SkillsTab({
                 No advanced skills trained yet.
               </p>
             ) : (
-              <div className="space-y-2">{renderItems(activeItems)}</div>
+              <div className={uiStackList}>{renderItems(activeItems)}</div>
             )}
           </section>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 items-start">
-          <section className={uiSection + " space-y-3"}>
+          <section className={`${uiSection} ${uiStackSection}`}>
             <div className="flex items-center justify-between">
               <SkillTypeHeading type="basic" />
               {editable ? (
@@ -432,7 +436,7 @@ export function SkillsTab({
             </div>
             {renderBasicSection()}
           </section>
-          <section className={uiSection + " space-y-3"}>
+          <section className={`${uiSection} ${uiStackSection}`}>
             <div className="flex items-center justify-between">
               <SkillTypeHeading type="advanced" />
               {editable ? (
@@ -444,7 +448,7 @@ export function SkillsTab({
             {advancedItems.length === 0 ? (
               <p className={`text-sm ${uiTextPlaceholder}`}>No advanced skills trained yet.</p>
             ) : (
-              <div className="space-y-2">{renderItems(advancedItems)}</div>
+              <div className={uiStackList}>{renderItems(advancedItems)}</div>
             )}
           </section>
         </div>

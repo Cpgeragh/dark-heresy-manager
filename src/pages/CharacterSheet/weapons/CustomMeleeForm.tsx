@@ -6,6 +6,7 @@ import {
   editableInputClass,
   editableTextareaClass,
   uiFormLabel,
+  uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
@@ -237,7 +238,7 @@ export function CustomMeleeForm({
       </CustomFormSection>
 
       <CustomFormSection title="Craftsmanship & Origin">
-        <fieldset aria-required="true" className="space-y-1">
+        <fieldset aria-required="true" className={uiStackField}>
           <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
