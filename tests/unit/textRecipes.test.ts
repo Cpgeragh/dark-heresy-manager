@@ -152,4 +152,32 @@ describe("shared text recipes", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("writes each raw colour class once in the style files", () => {
+    const colourClass =
+      /(?<![\w!:-])((?:[a-z-]+:)*!?(?:bg|text|border(?:-[trblxy])?|divide|ring|placeholder|from|to|via|fill|stroke|shadow)-(?:slate|gray|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(?:-\d{2,3})?(?:\/\d+)?)(?![\w-])/g;
+    const styleDirectory = join(__dirname, "../../src/ui/styles");
+    const definitions = new Map<string, Set<string>>();
+
+    for (const file of sourceFiles(styleDirectory)) {
+      const declarations = readFileSync(file, "utf8").split(
+        /\r?\n(?=export (?:const|function) |const )/
+      );
+      for (const declaration of declarations) {
+        const name = /^(?:export )?(?:const|function) (\w+)/.exec(declaration)?.[1];
+        if (!name) continue;
+        for (const match of declaration.matchAll(colourClass)) {
+          const owners = definitions.get(match[1]) ?? new Set<string>();
+          owners.add(`${file.split(/[\\/]/).pop()}:${name}`);
+          definitions.set(match[1], owners);
+        }
+      }
+    }
+
+    const repeated = [...definitions.entries()]
+      .filter(([, owners]) => owners.size > 1)
+      .map(([className, owners]) => `${className}: ${[...owners].join(", ")}`);
+
+    expect(repeated).toEqual([]);
+  });
 });

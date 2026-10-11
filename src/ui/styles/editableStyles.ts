@@ -6,7 +6,10 @@ import {
   chipColours,
   colourAccentBar,
   colourAmberPlain,
+  colourBorderSurface,
+  colourFillCard,
   colourFillInset,
+  colourSplashRule,
   colourErrorText,
   colourHeadingAccent,
   colourMetadataLabelText,
@@ -50,12 +53,12 @@ export function editableTextareaClass(isEditable: boolean, resize: FieldResize =
 export const uiSectionHeader = `border-l-2 ${colourAccentBar} pl-2 text-xs lg:text-sm font-cinzel font-semibold uppercase tracking-widest ${colourHeadingAccent}`;
 
 /** Standard card shell: bright border and semi-transparent background, without padding. */
-export const uiSectionShell = "rounded-lg border border-slate-500 bg-slate-900/60";
+export const uiSectionShell = `rounded-lg border ${colourBorderSurface} ${colourFillCard}`;
 
 /** Standard padded section card. */
 export const uiSection = `${uiSectionShell} p-3 lg:p-4`;
 
-export const uiCell = "rounded border border-slate-500 bg-slate-900/60";
+export const uiCell = `rounded border ${colourBorderSurface} ${colourFillCard}`;
 
 /** Wrapping row of compact chips or chip-shaped controls. */
 export const uiChipRow = "flex flex-wrap gap-1.5";
@@ -173,7 +176,7 @@ export const uiFormLabelHint = `ml-1 normal-case tracking-normal ${colourMetadat
 export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]";
 
 /** Small circular loading spinner. Set its size with width and height classes where it is used. */
-export const uiSpinner = "rounded-full border-2 border-slate-800 border-t-red-600 animate-spin";
+export const uiSpinner = `rounded-full border-2 ${colourSplashRule} border-t-red-600 animate-spin`;
 export const uiSubheading = `text-xs lg:text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`;
 export const uiItemName = `text-sm lg:text-base font-medium ${colourTextPrimary}`;
 export const uiItemNameHover = `${uiItemName} ${colourGroupHoverTextStrong}`;

@@ -1,6 +1,8 @@
 // src/ui/styles/buttonStyles.ts
 
 import {
+  colourBorderFuchsia,
+  colourBorderRed,
   colourControlRaised,
   colourCustomEntryText,
   colourEnabledHoverFuchsiaTint,
@@ -69,11 +71,11 @@ export const uiCardTapHeader = `group transition ${colourHoverSurface}`;
 /** Icon size inside an icon button, matched to the button's own size. */
 export const uiIconButtonIconSize = { md: "w-[18px] h-[18px]", sm: "w-4 h-4" } as const;
 
-const uiIconButtonBase = `inline-flex items-center justify-center rounded-lg border border-red-500 ${colourHeadingAccent} ${colourEnabledHoverRedTint} transition shrink-0 ${uiFocusRing}`;
+const uiIconButtonBase = `inline-flex items-center justify-center rounded-lg border ${colourBorderRed} ${colourHeadingAccent} ${colourEnabledHoverRedTint} transition shrink-0 ${uiFocusRing}`;
 
 export const uiIconButtonCompact = `${uiIconButtonBase} p-1`;
 
 export const uiIconButton = `${uiIconButtonBase} p-1.5`;
 
 /** Same shape as uiIconButton, fuchsia instead of red, for a DM's off-catalog custom-entry action. */
-export const uiIconButtonCustom = `inline-flex items-center justify-center rounded-lg border border-fuchsia-500 ${colourCustomEntryText} ${colourEnabledHoverFuchsiaTint} ${uiPressFeedback()} transition p-1.5 shrink-0 ${uiFocusRing}`;
+export const uiIconButtonCustom = `inline-flex items-center justify-center rounded-lg border ${colourBorderFuchsia} ${colourCustomEntryText} ${colourEnabledHoverFuchsiaTint} ${uiPressFeedback()} transition p-1.5 shrink-0 ${uiFocusRing}`;

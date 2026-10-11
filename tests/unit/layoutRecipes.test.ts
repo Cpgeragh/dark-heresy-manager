@@ -39,6 +39,7 @@ describe("shared layout recipes", () => {
     const recipes = [
       ["flex", "flex-wrap", "gap-1.5"],
       ["flex", "items-center", "gap-2"],
+      ["flex", "items-center", "justify-between", "gap-2"],
       ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2"],
     ];
     const offenders: string[] = [];
@@ -110,6 +111,24 @@ describe("shared layout recipes", () => {
         .split(/\r?\n/)
         .forEach((line, index) => {
           if (state.test(line)) offenders.push(`${file}:${index + 1}`);
+        });
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps the table look in tableStyles.ts", () => {
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (file.endsWith(join("ui", "styles", "tableStyles.ts"))) continue;
+      readFileSync(file, "utf8")
+        .split(/\r?\n/)
+        .forEach((line, index) => {
+          if (line.includes("border-collapse")) offenders.push(`${file}:${index + 1}`);
+          if (line.includes("<table") && !line.includes("uiTable")) {
+            offenders.push(`${file}:${index + 1}`);
+          }
         });
     }
 

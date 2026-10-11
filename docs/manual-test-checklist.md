@@ -1291,7 +1291,10 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The plus and minus buttons on the wounds, fate and similar counters match the ones on Gear, Drugs and ammo quantities, and every info button in a modal uses the same raised style (`uiStepButtonColour`, `uiInfoButton`)
 - [ ] The "Select installation side" options in the implant picker look like the other picker rows (`ImplantPicker.tsx`)
 - [ ] The Share App, Settings and Manage campaign buttons use the red outlined icon button, and the DM read-only toggle on the character sheet matches the other pick-one buttons, with an amber selected look (`IconButton`, `ToggleButton`)
-- [ ] The selected red toggles in the Psychic power, Archeotech and Armour piece forms share one look, and the violet and fuchsia filter pills in Skills and Talents match each other
+- [ ] Every selected pick-one button shows the soft look of its colour in semi-bold text, including the Psychic power, Archeotech and Armour piece form rows, the Melee and Ranged card profile buttons, the Career starting choices, the craftsmanship rows and the Origin selector (`colourToggleSelected`)
+- [ ] The Remove, Claim This Character, Archive, Publish and DM override buttons use the same outlined design as the other buttons, in red, emerald or amber, with no solid fill (`Button`)
+- [ ] Outline buttons such as Add XP, Remove XP, Spend XP and the Career path and branch buttons show their text at the same strength as their border
+- [ ] The Skills and Talents filter tabs, and the section switcher tabs on a phone, keep their strong filled look
 - [ ] The Insanity and Corruption timelines and steppers use the same degree colours, and damage type letters, toasts and the splash screen show their usual colours
 - [ ] The space between the big sections of every tab, such as Gear and Consumables, Worn and Stowed armour, or Minor and Major powers on desktop, is the same on every tab (`uiStackPage`)
 - [ ] The space between a section heading and what sits under it, and between the parts inside an opened card, is the same in every tab (`uiStackSection`)
