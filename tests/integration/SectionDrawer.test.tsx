@@ -33,6 +33,48 @@ describe("SectionDrawer", () => {
     expect(onTabChange).toHaveBeenCalledWith("elite-advances");
   });
 
+  it("uses one row style for categories, back navigation and pages", async () => {
+    const user = userEvent.setup();
+
+    render(<SectionDrawer activeTab="psychic" onTabChange={vi.fn()} isDM={false} />);
+
+    await user.click(screen.getByRole("button", { name: "Open section navigation" }));
+    const categoryRow = screen.getByRole("button", { name: "Abilities" });
+
+    await user.click(categoryRow);
+
+    const backRow = screen.getByRole("button", { name: "Back to categories from Abilities" });
+    const activePageRow = screen.getByRole("button", { name: "Psychic" });
+    const inactivePageRow = screen.getByRole("button", { name: "Skills" });
+    const sharedClasses = [
+      "flex",
+      "items-center",
+      "gap-2",
+      "w-full",
+      "px-4",
+      "py-3",
+      "text-left",
+      "text-sm",
+      "transition",
+      "hover:bg-slate-800",
+      "active:scale-[0.98]",
+      "focus-visible:ring-2",
+      "focus-visible:ring-red-500",
+    ];
+
+    for (const row of [categoryRow, backRow, activePageRow, inactivePageRow]) {
+      expect(row).toHaveClass(...sharedClasses);
+    }
+
+    expect(categoryRow.lastElementChild).toHaveAttribute("data-picker-arrow", "right");
+    expect(backRow.lastElementChild).toHaveAttribute("data-picker-arrow", "left");
+    expect(activePageRow).toHaveAttribute("aria-current", "page");
+    expect(activePageRow).toHaveClass("text-red-500");
+    expect(activePageRow).not.toHaveClass("font-semibold", "border-l-2");
+    expect(inactivePageRow).toHaveClass("text-slate-200");
+    expect(inactivePageRow).not.toHaveAttribute("aria-current");
+  });
+
   it("opens directly on an externally requested category and retains local navigation", async () => {
     const user = userEvent.setup();
     const onExternalClose = vi.fn();

@@ -7,14 +7,8 @@ import { IconButton } from "../ui/buttons/IconButton";
 import { MenuIcon } from "../ui/icons/MenuIcon";
 import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
 import { DrawerBackdrop } from "../ui/DrawerBackdrop";
-import {
-  colourTextPrimary,
-  colourPopoverSurface,
-  colourDivider,
-  colourHeadingAccent,
-  colourBorderRed,
-} from "../ui/styles/colourTokens";
-import { uiFocusRing, uiHoverSurface, uiPressFeedback } from "../ui/styles/buttonStyles";
+import { SectionDrawerRow } from "../ui/SectionDrawerRow";
+import { colourTextPrimary, colourPopoverSurface, colourDivider } from "../ui/styles/colourTokens";
 import { uiLayerForeground } from "../ui/styles/layerStyles";
 
 // ================================================================
@@ -210,14 +204,9 @@ function SectionDrawerContent({
             <ul className="py-2">
               {visibleCategories.map((cat, index) => (
                 <li key={cat.label}>
-                  <button
-                    type="button"
-                    onClick={() => openCategory(index)}
-                    className={`w-full flex items-center justify-between px-4 py-3 text-sm ${colourTextPrimary} ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} transition text-left`}
-                  >
-                    <span>{cat.label}</span>
-                    <ArrowRight />
-                  </button>
+                  <SectionDrawerRow onClick={() => openCategory(index)} trailing={<ArrowRight />}>
+                    {cat.label}
+                  </SectionDrawerRow>
                 </li>
               ))}
             </ul>
@@ -232,33 +221,26 @@ function SectionDrawerContent({
             {activeCategory && (
               <>
                 {/* Back button */}
-                <button
-                  type="button"
-                  onClick={goBack}
-                  aria-label={`Back to categories from ${activeCategory.label}`}
-                  className={`flex items-center gap-2 px-4 py-3 w-full text-sm ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} transition border-b ${colourDivider}`}
-                >
-                  <ArrowLeft />
-                  <span className={`font-semibold ${colourTextPrimary}`}>
+                <div className={`border-b ${colourDivider}`}>
+                  <SectionDrawerRow
+                    onClick={goBack}
+                    aria-label={`Back to categories from ${activeCategory.label}`}
+                    trailing={<ArrowLeft />}
+                  >
                     {activeCategory.label}
-                  </span>
-                </button>
+                  </SectionDrawerRow>
+                </div>
 
                 {/* Page list */}
                 <ul className="py-2">
                   {activeCategory.tabs.map((tab) => (
                     <li key={tab.id}>
-                      <button
-                        type="button"
+                      <SectionDrawerRow
                         onClick={() => selectTab(tab.id)}
-                        className={`w-full px-4 py-3 text-sm text-left transition ${
-                          activeTab === tab.id
-                            ? `${colourHeadingAccent} font-semibold border-l-2 ${colourBorderRed}`
-                            : `${colourTextPrimary} ${uiHoverSurface}`
-                        } ${uiPressFeedback()} ${uiFocusRing}`}
+                        active={activeTab === tab.id}
                       >
                         {tab.label}
-                      </button>
+                      </SectionDrawerRow>
                     </li>
                   ))}
                 </ul>

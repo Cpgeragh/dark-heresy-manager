@@ -57,6 +57,7 @@ export const colourHoverLoadedDot = "hover:bg-green-500";
 export const colourTextGMNote = "text-amber-400/70";
 export const colourCustomEntryText = "text-fuchsia-400";
 export const colourHeadingAccent = "text-red-500";
+export const colourNavigationActiveText = colourHeadingAccent;
 export const colourNoticeAmberTitle = "text-amber-200";
 export const colourNoticeAmberText = "text-amber-100/80";
 export const colourAmberFill = "bg-amber-500 text-slate-900";
