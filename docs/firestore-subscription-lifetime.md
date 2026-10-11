@@ -14,7 +14,6 @@ Subscriptions belong to the narrowest component or provider that needs their liv
 | --------------------------------- | --------------------------: |
 | Active or archived campaign query |                         100 |
 | Campaign character query          |                         100 |
-| Owned-character collection group  |                       1,000 |
 | Session query                     |                         200 |
 | Thread summary query              |                         100 |
 | Message page                      |                         100 |

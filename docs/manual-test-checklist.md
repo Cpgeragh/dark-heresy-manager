@@ -1170,7 +1170,6 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Seed more than 100 character documents in a campaign: custom-item propagation and removal complete successfully via the resumable job, rather than being disabled above the old 100-character ceiling
 - [ ] Permanently delete an archived custom item: the read-only preflight includes its definition and every version, the callable removes them, and a forced callable failure leaves all documents intact
 - [ ] Sign in as a player belonging to one active and one archived campaign: the Dashboard membership query returns the active campaign only and does not display an index-required error
-- [ ] Give the same player characters in two different campaigns: the Dashboard collection-group ownership query returns both owned characters and no character owned by another user
 - [ ] Before an approved production index deployment, confirm `firebase.json` points to `firestore.indexes.json`, the reviewed file contains `memberIds CONTAINS` plus `archivedAt ASC`, and the deployment is limited to indexes rather than rules or hosting
 
 ## 32. Local Deployment Safety
@@ -1288,7 +1287,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The box around each character sheet tab has the standard card border and fill, and shows an amber outline while the DM editing override is on (`CharacterSheet.tsx`)
 - [ ] The expand chevron on the Companion, Psychic power, Melee and Ranged cards expands and collapses the card, and the Cybernetic weapon card header, each note preview and each DM inbox thread open or expand from anywhere on the card with the hover tint and press effect (`ExpandButton.tsx`, `CardOverlayButton`)
 - [ ] The Reveal link on a character row and on a My Character card looks and behaves the same (`RevealCodeButton.tsx`)
-- [ ] The plus and minus buttons on the wounds, fate and similar counters match the ones on Gear, Drugs and ammo quantities, and the info buttons in modals and tooltips match each other (`uiStepButtonColour`, `uiInfoButton`)
+- [ ] The plus and minus buttons on the wounds, fate and similar counters match the ones on Gear, Drugs and ammo quantities, and every info button in a modal uses the same raised style (`uiStepButtonColour`, `uiInfoButton`)
 - [ ] The "Select installation side" options in the implant picker look like the other picker rows (`ImplantPicker.tsx`)
 - [ ] The Share App, Settings and Manage campaign buttons use the red outlined icon button, and the DM read-only toggle on the character sheet matches the other pick-one buttons, with an amber selected look (`IconButton`, `ToggleButton`)
 - [ ] The selected red toggles in the Psychic power, Archeotech and Armour piece forms share one look, and the violet and fuchsia filter pills in Skills and Talents match each other
@@ -1303,8 +1302,7 @@ tab component, picker, custom-item form, and the shared hooks and helpers
 behind them:
 `useCharacterSheet` and its five constituent hooks (`useCharacterPermissions`,
 `useCharacterMutations`, `useCharacterData`, `useCharacterHelpers`,
-`useDMOverride`), `useSkillComputation`/`useSkillFiltering`/
-`useSkillSorting`/`useSkillGroupCollapse`, `useSwipeableTabs`,
+`useDMOverride`), `useSkillComputation`, `useSwipeableTabs`,
 `useQuantityEdit`, `useAssignedItemMeta`, all of
 `pages/CharacterSheet/WeaponsTab/index.tsx` end to end (including the handler
 bodies, slot-counting
@@ -1329,15 +1327,15 @@ includes `App.tsx` (route shell, auth gate and onboarding/profile-integrity gate
 sub-components, `CampaignOverview.tsx` plus every file under
 `pages/CampaignOverview/` (`SessionForm`, `SessionCard`, `CharacterRow`,
 `CustomItemLibraryAdmin`, `CustomItemAdminRow`), the `ClaimCharacter/` flow
-(`ClaimForm`, `ClaimPreview`, `useRecoveryLookup`, `useClaimActions`),
+(`ClaimPreview`, `useRecoveryLookup`),
 `characterService.ts`, `campaignService.ts`, `sessionService.ts`,
 `recoveryLookupService.ts`, the propagation and removal logic in
 `customItemService.ts`, `useCustomItemLibraryActions`,
 `MessageDrawer.tsx`, `DMInbox.tsx`, `MessageThread.tsx`, `MessageInput.tsx`,
 `messageService.ts`, `useThreads`, `useThreadMessages`, `useClaimLogs`,
 `AppHeader.tsx`, `SectionDrawer.tsx`, `RecoveryBackupBanner.tsx`,
-`useInstallMode`, `CampaignsContext.tsx`, `useCampaign`, `usePlayerCharacters`,
-`useArchivedCampaigns`, `useCampaignCharacters`, `useUserProfile`,
+`useInstallMode`, `CampaignsContext.tsx`, `useCampaign`, `useArchivedCampaigns`,
+`useCampaignCharacters`, `useUserProfile`,
 `firestore.rules` in full (the source for the permission-boundary checks in
 §29), `firebase.ts`
 (including explicit multi-tab persistent offline-cache configuration),
@@ -1346,8 +1344,8 @@ behind §23), `PortraitUpload.tsx`/`portraitService.ts` (crop to 256 px and
 base64 storage on the character document), the Toast system
 (`ToastProvider`/`ToastItem`/`ToastContainer`/`ToastContext`), and the
 shared form primitives containing application logic:
-`CharacteristicField.tsx`, `FormField.tsx`, `Tooltip.tsx`,
-plus `validation.ts`, `recoveryCode.ts`, `claimLog.ts`,
+`CharacteristicField.tsx`, `FormField.tsx`, plus `validation.ts`,
+`recoveryCode.ts`, `claimLog.ts`,
 `characterFactory.ts`, `pages/CharacterSheet/weapons/weaponHelpers.ts`,
 `stats.ts`, `skillUtils.ts`,
 `exportCharacter.ts`, `armourLocations.ts`, `createLocalId.ts`,

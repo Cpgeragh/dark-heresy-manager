@@ -59,17 +59,6 @@ describe("reviewed Firestore index configuration", () => {
     );
   });
 
-  it("enables the userId single-field index for collection-group ownership lookups", () => {
-    expect(indexes.fieldOverrides).toContainEqual({
-      collectionGroup: "characters",
-      fieldPath: "userId",
-      indexes: [
-        { order: "ASCENDING", queryScope: "COLLECTION" },
-        { order: "ASCENDING", queryScope: "COLLECTION_GROUP" },
-      ],
-    });
-  });
-
   it("enables TTL cleanup for expired idempotency records", () => {
     expect(indexes.fieldOverrides).toContainEqual({
       collectionGroup: "idempotencyKeys",

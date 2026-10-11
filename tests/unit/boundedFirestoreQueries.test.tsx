@@ -57,7 +57,6 @@ vi.mock("../../src/services/customItemService", () => ({
 }));
 
 vi.mock("../../src/firebase/converters", () => ({
-  charactersCollectionGroupRef: () => ({ type: "characters-collection-group" }),
   charactersCollectionRef: (campaignId: string) => ({
     type: "characters-collection",
     campaignId,
@@ -80,7 +79,6 @@ import { useClaimLogs } from "../../src/hooks/useClaimLogs";
 import { useCampaignCharacters } from "../../src/hooks/useCampaignCharacters";
 import { useCampaignCharacterSummaries } from "../../src/hooks/useCampaignCharacterSummaries";
 import { useCampaignCustomItems } from "../../src/hooks/useCampaignCustomItems";
-import { usePlayerCharacters } from "../../src/hooks/usePlayerCharacters";
 import { useSessions } from "../../src/hooks/useSessions";
 import { useThreadMessages } from "../../src/hooks/useThreadMessages";
 
@@ -163,18 +161,6 @@ describe("bounded Firestore hooks", () => {
 
     expect(mockQuery).not.toHaveBeenCalled();
     expect(mockUseQuerySubscription).toHaveBeenCalledWith(null, null, expect.any(Function));
-  });
-
-  it("filters a player's characters on the server and caps the result", () => {
-    renderHook(() => usePlayerCharacters("user-1"));
-
-    expect(mockWhere).toHaveBeenCalledWith("userId", "==", "user-1");
-    expect(mockLimit).toHaveBeenCalledWith(1_000);
-    expect(mockUseQuerySubscription).toHaveBeenCalledWith(
-      expect.anything(),
-      "player-characters:user-1",
-      expect.any(Function)
-    );
   });
 
   it("loads only the latest page of thread messages", () => {

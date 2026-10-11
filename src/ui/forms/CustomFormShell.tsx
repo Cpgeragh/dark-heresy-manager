@@ -13,7 +13,6 @@ interface CustomFormShellProps {
   saving?: boolean;
   savingLabel?: string;
   scrollPositionRef: { current: number };
-  titleClassName?: string;
   closeLabel?: ReactNode;
   closeAriaLabel?: string;
   maxHeight?: string;
@@ -33,7 +32,6 @@ export function CustomFormShell({
   saving = false,
   savingLabel,
   scrollPositionRef,
-  titleClassName,
   closeLabel,
   closeAriaLabel,
   maxHeight = "max-h-[92vh]",
@@ -44,7 +42,6 @@ export function CustomFormShell({
   return (
     <PickerModal
       title={title}
-      titleClassName={titleClassName}
       closeLabel={closeLabel}
       closeAriaLabel={closeAriaLabel}
       scrollPositionRef={scrollPositionRef}

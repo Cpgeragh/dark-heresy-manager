@@ -2,7 +2,6 @@
 
 import {
   collection,
-  collectionGroup,
   doc,
   type FirestoreDataConverter,
   type QueryDocumentSnapshot,
@@ -43,10 +42,6 @@ export function characterDocRef(campaignId: string, characterId: string) {
 
 export function charactersCollectionRef(campaignId: string) {
   return collection(db, "campaigns", campaignId, "characters").withConverter(characterConverter);
-}
-
-export function charactersCollectionGroupRef() {
-  return collectionGroup(db, "characters").withConverter(characterConverter);
 }
 
 /**

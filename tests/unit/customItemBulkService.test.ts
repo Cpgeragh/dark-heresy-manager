@@ -1,14 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  mockAtomicDelete,
   mockGetDoc,
   mockGetDocs,
   mockCallStartCustomItemMutationJob,
   mockCallProcessCustomItemMutationChunk,
   mockCallMutateCustomItem,
 } = vi.hoisted(() => ({
-  mockAtomicDelete: vi.fn().mockResolvedValue(undefined),
   mockGetDoc: vi.fn(),
   mockGetDocs: vi.fn(),
   mockCallStartCustomItemMutationJob: vi.fn(),
@@ -44,10 +42,6 @@ vi.mock("../../src/firebase", () => ({ db: "mock-db", functions: "mock-functions
 vi.mock("../../src/firebase/converters", () => ({
   charactersCollectionRef: (campaignId: string) => `campaigns/${campaignId}/characters`,
 }));
-vi.mock("../../src/firestore/firestoreBatchDelete", () => ({
-  deleteRefsAtomically: (...args: unknown[]) => mockAtomicDelete(...args),
-}));
-
 import {
   archiveAndRemoveAllCustomItemCopies,
   permanentlyDeleteCustomItem,
@@ -73,7 +67,6 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockGetDoc.mockResolvedValue(itemSnapshot());
   mockGetDocs.mockResolvedValue({ docs: [], empty: true });
-  mockAtomicDelete.mockResolvedValue(undefined);
 });
 
 describe("permanentlyDeleteCustomItem", () => {
@@ -95,7 +88,6 @@ describe("permanentlyDeleteCustomItem", () => {
       campaignId: "camp-1",
       customItemId: "item-1",
     });
-    expect(mockAtomicDelete).not.toHaveBeenCalled();
   });
 });
 

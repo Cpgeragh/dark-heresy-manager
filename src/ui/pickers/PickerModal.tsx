@@ -122,7 +122,6 @@ export function PickerCustomAction({
 
 interface Props {
   title: string;
-  titleClassName?: string;
   placeholder?: string;
   query: string;
   onQueryChange: (q: string) => void;
@@ -174,7 +173,6 @@ export function PickerModal({
   onClose,
   isEmpty,
   emptyMessage = "No matches.",
-  titleClassName,
   closeLabel,
   closeAriaLabel = "Close",
   hideSearch = false,
@@ -205,7 +203,6 @@ export function PickerModal({
     >
       <ModalHeader
         title={title}
-        titleClassName={titleClassName}
         onClose={onClose}
         action={closeAriaLabel === "Close" ? undefined : closeLabel}
         actionAriaLabel={closeAriaLabel}
