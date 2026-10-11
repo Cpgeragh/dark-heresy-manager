@@ -10,6 +10,7 @@ import {
   uiThresholdValue,
 } from "../../src/ui/styles/editableStyles";
 import {
+  chipColours,
   colourAmberPlain,
   colourMetadataLabelText,
   colourTextPrimary,
@@ -21,6 +22,11 @@ function sourceFiles(dir: string): string[] {
     if (entry.isDirectory()) return sourceFiles(path);
     return /\.(ts|tsx)$/.test(entry.name) ? [path] : [];
   });
+}
+
+function hasClass(line: string, className: string) {
+  const escaped = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:^|[\\s"'\\x60])${escaped}(?=$|[\\s"'\\x60])`).test(line);
 }
 
 describe("shared text recipes", () => {
@@ -54,20 +60,14 @@ describe("shared text recipes", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("keeps text colours in tokens, apart from the files other items still own", () => {
+  it("keeps text colours outside their shared style owners in tokens", () => {
     const owned = [
       join("ui", "styles", "colourTokens.ts"),
       join("ui", "styles", "sourceStyles.ts"),
       join("ui", "styles", "craftsmanship.ts"),
-      join("ui", "chips"),
-      join("ui", "buttons", "Button.tsx"),
-      join("pages", "CharacterSheet", "ArmourTab", "index.tsx"),
-      join("ui", "icons", "ExpandChevron.tsx"),
-      join("ui", "icons", "PickerArrows.tsx"),
-      join("ui", "pickers", "PickerModal.tsx"),
     ];
     const handTyped =
-      /(^|[^:\w-])text-(slate|gray|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(-\d{2,3})?(\/\d+)?(?![\w-])/;
+      /(^|[^:\w-])text-(slate|gray|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(-\d{2,3})?(\/\d+)?(?![\w-])/;
     const offenders: string[] = [];
 
     for (const file of sourceFiles(join(__dirname, "../../src"))) {
@@ -79,25 +79,33 @@ describe("shared text recipes", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("keeps backgrounds and borders in tokens, apart from the files other items still own", () => {
-    const owned = [
-      join("ui", "styles"),
-      join("ui", "chips"),
-      join("ui", "buttons", "Button.tsx"),
-      join("pages", "CharacterSheet", "ArmourTab", "index.tsx"),
-      join("pages", "CharacterSheet", "weapons", "ExplosiveMishapsContent.tsx"),
-      join("components", "MessageDrawer.tsx"),
-      join("components", "SectionDrawer.tsx"),
-      join("ui", "pickers", "PickerModal.tsx"),
-    ];
+  it("keeps backgrounds and borders outside shared style definitions in tokens", () => {
+    const owned = [join("ui", "styles")];
     const handTyped =
-      /(^|[^:\w-])(bg|border(-[trblxy])?|divide)-(slate|gray|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(-\d{2,3})?(\/\d+)?(?![\w-])/;
+      /(^|[^:\w-])(bg|border(-[trblxy])?|divide)-(slate|gray|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(-\d{2,3})?(\/\d+)?(?![\w-])/;
     const offenders: string[] = [];
 
     for (const file of sourceFiles(join(__dirname, "../../src"))) {
       if (owned.some((part) => file.includes(part))) continue;
       const text = readFileSync(file, "utf8");
       if (handTyped.test(text)) offenders.push(file);
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps complete chip palette recipes in the colour token owner", () => {
+    const recipes = Object.values(chipColours).map((recipe) => recipe.split(" "));
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (file.endsWith(join("ui", "styles", "colourTokens.ts"))) continue;
+      const lines = readFileSync(file, "utf8").split(/\r?\n/);
+      lines.forEach((line, index) => {
+        if (recipes.some((recipe) => recipe.every((className) => hasClass(line, className)))) {
+          offenders.push(`${file}:${index + 1}`);
+        }
+      });
     }
 
     expect(offenders).toEqual([]);

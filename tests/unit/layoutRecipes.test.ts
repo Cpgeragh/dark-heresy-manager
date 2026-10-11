@@ -30,18 +30,16 @@ describe("shared layout recipes", () => {
     expect(uiFieldGrid).toBe("grid grid-cols-1 gap-3 sm:grid-cols-2");
   });
 
-  it("leaves no hand-written copy outside the later drawer item", () => {
+  it("leaves no hand-written copy in the source", () => {
     const recipes = [
       ["flex", "flex-wrap", "gap-1.5"],
       ["flex", "items-center", "gap-2"],
       ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2"],
     ];
-    const exceptions = [join("components", "SectionDrawer.tsx")];
     const offenders: string[] = [];
 
     for (const file of sourceFiles(join(__dirname, "../../src"))) {
       if (file.endsWith(join("ui", "styles", "editableStyles.ts"))) continue;
-      if (exceptions.some((exception) => file.endsWith(exception))) continue;
       const lines = readFileSync(file, "utf8").split(/\r?\n/);
       lines.forEach((line, index) => {
         if (

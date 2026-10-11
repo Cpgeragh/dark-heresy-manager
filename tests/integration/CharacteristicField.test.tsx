@@ -33,7 +33,7 @@ describe("CharacteristicField", () => {
     expect(screen.getByText("45")).toBeInTheDocument();
   });
 
-  it("keeps advance colours at full opacity in read-only mode", () => {
+  it("uses the standard disabled appearance in read-only mode", () => {
     render(
       <CharacteristicField
         label="Weapon Skill"
@@ -46,7 +46,7 @@ describe("CharacteristicField", () => {
 
     for (const advance of screen.getAllByRole("button")) {
       expect(advance).toBeDisabled();
-      expect(advance).not.toHaveClass("opacity-50");
+      expect(advance).toHaveClass("opacity-50");
     }
   });
 
