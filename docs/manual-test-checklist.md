@@ -1303,6 +1303,26 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] A label and its input or value sit the same distance apart in every form, and bullet lists in information modals use the same small gap (`uiStackField`)
 - [ ] On a phone, the Skills and Psychic power panels use the same space as the same sections on desktop
 
+## 36. Waiting and Instant Saves
+
+A purchase waits on screen and a removal or downgrade is instant.
+
+### How to test this system
+
+Use an editable character with a career, and slow the network in the browser's developer tools to make the wait easy to see.
+
+- [ ] Upgrading a Skill, adding a Skill from the picker, and adding or upgrading with a manual cost as the DM show waiting dots on the button or the tapped row until the save finishes, and the dialog closes only then (`SkillRow.tsx`, `AddSkillModal.tsx`)
+- [ ] Confirming a Characteristic Upgrade shows waiting dots on the Upgrade button and closes the dialog when the save finishes (`CharacteristicField.tsx`)
+- [ ] Training a weapon group, training with a manual cost, buying a career exotic weapon and adding an exotic weapon as the DM show waiting dots on the confirm button and close the dialog when the save finishes (`WeaponTrainingTab.tsx`)
+- [ ] Deleting a Skill, downgrading a Skill, downgrading a Characteristic and removing weapon training or an exotic weapon close the dialog at once and change the sheet at once
+- [ ] Adding a Talent from the picker, including one with a choice or a manual cost, shows waiting dots on the tapped row or the Buy button and returns to the list only when the save finishes; removing a Talent shows waiting dots on its Remove or Delete button (`TalentPickerModal.tsx`, `TalentEntryCards.tsx`)
+- [ ] Adding, removing or finishing the acquisition of a Trait, and saving a custom Trait, show waiting dots and change talents, cybernetics and gear together in one save, so a refused change leaves all three as they were (`TraitsTab.tsx`)
+- [ ] Buying a special Elite Advance, a skill, a fixed-package talent or a manual talent shows waiting dots and closes the dialog only when the save finishes, and removing a special Elite Advance shows waiting dots on its Delete button (`EliteAdvancesTab.tsx`)
+- [ ] Choosing a Homeworld or a Career, an Advance Scheme row, an Insanity roll for an Advance Scheme, or finishing a Homeworld, Career or Imperial Psyker choice modal shows waiting dots on the tapped row or button and closes the picker only when the save finishes; a Career change saves the header, talents, experience, insanity and cybernetics together (`BackgroundSetupFields.tsx`)
+- [ ] Creating or editing a custom ranged, melee, grenade or shield definition, and creating a custom integrated ranged or melee weapon, keeps the form in its saving state until the character has the item, and only then closes it and shows the success message
+- [ ] A purchase the server refuses, such as one that would spend more than the character's Total XP, leaves the dialog open with the error message and without waiting dots
+- [ ] A removal the server refuses puts the sheet back to how it was and shows the error message
+
 ## Coverage notes
 
 This checklist covers the 21 character-sheet sections, the cross-cutting systems, and the app-shell pages outside the character sheet. Sections 21–33 cover systems and pages such as Dashboard, Onboarding, Settings, Campaign Overview and Messages. Section 34 covers the added Elite Advance and Alternate Rank flow.

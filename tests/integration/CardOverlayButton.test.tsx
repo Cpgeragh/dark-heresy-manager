@@ -1,5 +1,5 @@
 // tests/integration/CardOverlayButton.test.tsx
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -42,5 +42,28 @@ describe("CardOverlayButton", () => {
     expect(button).toHaveClass("cursor-wait");
     await userEvent.click(button);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("waits by itself while a returned promise is unsettled", async () => {
+    let settle: () => void = () => {};
+    const onClick = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(<CardOverlayButton label="Select Grenade" onClick={onClick} />);
+
+    const button = screen.getByRole("button", { name: "Select Grenade" });
+    await userEvent.click(button);
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
+    expect(button).toHaveClass("cursor-wait");
+
+    await act(async () => {
+      settle();
+    });
+    expect(button).toBeEnabled();
+    expect(button).not.toHaveAttribute("aria-busy");
   });
 });

@@ -215,6 +215,30 @@ describe("useCharacterMutations: updateCharacteristic", () => {
 
     expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("permission-denied"));
   });
+
+  it("reports whether the save was accepted", async () => {
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+      })
+    );
+
+    let accepted: boolean | undefined;
+    mockPatchCharacterField.mockResolvedValueOnce(undefined);
+    await act(async () => {
+      accepted = await result.current.updateCharacteristic("ws", { base: 30, advances: 2 });
+    });
+    expect(accepted).toBe(true);
+
+    mockPatchCharacterField.mockRejectedValueOnce(new Error("permission-denied"));
+    await act(async () => {
+      accepted = await result.current.updateCharacteristic("ws", { base: 30, advances: 3 });
+    });
+    expect(accepted).toBe(false);
+  });
 });
 
 describe("useCharacterMutations: patchFields", () => {

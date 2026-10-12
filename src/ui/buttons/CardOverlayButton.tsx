@@ -5,6 +5,7 @@
 
 import type { ButtonHTMLAttributes } from "react";
 import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
+import { usePendingClick } from "../usePendingClick";
 
 type CardOverlayButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -13,17 +14,20 @@ type CardOverlayButtonProps = Omit<
   label: string;
   /** Expanded state for a card that expands; leave it out for a card that chooses. */
   expanded?: boolean;
-  /** Blocks taps and shows the waiting cursor while the card's action is saving. */
+  /** Blocks taps and shows the waiting cursor while the card's action is saving. A click handler that returns a promise does this by itself until it settles. */
   pending?: boolean;
 };
 
 export function CardOverlayButton({
   label,
   expanded,
-  pending = false,
+  pending: pendingProp = false,
   disabled,
+  onClick,
   ...rest
 }: CardOverlayButtonProps) {
+  const { pending: clickPending, handleClick } = usePendingClick(onClick);
+  const pending = pendingProp || clickPending;
   return (
     <button
       type="button"
@@ -34,6 +38,7 @@ export function CardOverlayButton({
       className={`absolute inset-0 w-full rounded focus-visible:ring-inset ${uiFocusRing} ${uiPressFeedback(
         !disabled && !pending
       )} ${pending ? "cursor-wait" : uiDisabledControl}`.trim()}
+      onClick={handleClick}
       {...rest}
     />
   );

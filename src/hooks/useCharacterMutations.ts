@@ -272,26 +272,19 @@ export function useCharacterMutations({
   // UPDATE CHARACTERISTIC
   // ================================================================
   const updateCharacteristic = useCallback(
-    async (statKey: keyof Characteristics, value: CharField): Promise<void> => {
-      if (!allowedToEdit || !characteristics) return;
-
-      setPendingUpdateCount((count) => count + 1);
-      try {
-        const updated = stripUndefined({
-          ...characteristics,
-          [statKey]: value,
-        });
-
-        await patchCharacterField(campaignId, characterId, "characteristics", updated);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to update characteristic";
-        toast.error(`Update failed: ${message}`);
-        console.error("Failed to update characteristic:", err);
-      } finally {
-        setPendingUpdateCount((count) => Math.max(0, count - 1));
-      }
+    (
+      statKey: keyof Characteristics,
+      value: CharField,
+      options?: PatchOptions
+    ): Promise<boolean> => {
+      if (!characteristics) return Promise.resolve(false);
+      return patchFieldWithResult(
+        "characteristics",
+        { ...characteristics, [statKey]: value },
+        options
+      );
     },
-    [allowedToEdit, characteristics, campaignId, characterId, toast]
+    [characteristics, patchFieldWithResult]
   );
 
   // ================================================================
