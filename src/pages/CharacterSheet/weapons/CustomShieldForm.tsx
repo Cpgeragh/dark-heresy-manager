@@ -47,10 +47,11 @@ export function CustomShieldForm({
   title?: string;
   submitLabel?: string;
   initialShield?: ShieldItem;
-  onAdd: (item: ShieldItem) => void;
+  onAdd: (item: ShieldItem) => void | Promise<void>;
   onCancel: () => void;
 }) {
   const formScrollPositionRef = useRef(0);
+  const [saving, setSaving] = useState(false);
   const initialDamage = parseInitialShieldDamage(initialShield?.damage);
   const [name, setName] = useState(initialShield?.name ?? "");
   const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
@@ -94,26 +95,31 @@ export function CustomShieldForm({
     Boolean(weight.trim()) &&
     Boolean(value);
 
-  const addShield = () => {
+  const addShield = async () => {
     if (!canAdd || !origin) return;
-    onAdd({
-      id: initialShield?.id ?? crypto.randomUUID(),
-      custom: true,
-      name: name.trim(),
-      ap: Number(ap),
-      locations: locations.trim(),
-      damage: formatDamageInput(damageBase, damagePlus, damageType),
-      pen,
-      specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
-      notes: notes.trim() || undefined,
-      weight: formatWeightInput(weight),
-      value: formatMoneyInput(value),
-      availability,
-      source: origin,
-      equipped: initialShield?.equipped,
-      customLibraryId: initialShield?.customLibraryId,
-      customLibraryVersionId: initialShield?.customLibraryVersionId,
-    });
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialShield?.id ?? crypto.randomUUID(),
+        custom: true,
+        name: name.trim(),
+        ap: Number(ap),
+        locations: locations.trim(),
+        damage: formatDamageInput(damageBase, damagePlus, damageType),
+        pen,
+        specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
+        notes: notes.trim() || undefined,
+        weight: formatWeightInput(weight),
+        value: formatMoneyInput(value),
+        availability,
+        source: origin,
+        equipped: initialShield?.equipped,
+        customLibraryId: initialShield?.customLibraryId,
+        customLibraryVersionId: initialShield?.customLibraryVersionId,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (qualityPicker.showPicker) {
@@ -163,6 +169,7 @@ export function CustomShieldForm({
       canSubmit={canAdd}
       submitLabel={submitLabel}
       onSubmit={addShield}
+      saving={saving}
     >
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">

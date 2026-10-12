@@ -1,6 +1,6 @@
 // tests/integration/CustomGrenadeForm.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -21,6 +21,22 @@ function submitButton(): HTMLElement {
   return buttons.find((b) => b !== cancelBtn)!;
 }
 
+async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
+  const textboxes = () => screen.getAllByRole("textbox");
+
+  await user.type(textboxes()[0], "Custom Grenade"); // Name
+  await user.click(screen.getByText("Choose type")); // Type
+  await user.click(screen.getByText("Grenade"));
+  await user.type(textboxes()[1], "3"); // Quantity
+  await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
+  // damageMode stays at its default "none"
+  await user.type(textboxes()[2], "0"); // Pen
+  await user.type(textboxes()[3], "0.5"); // Weight
+  await user.type(textboxes()[4], "10"); // Cost
+  await user.click(screen.getByText("Choose availability")); // Availability
+  await user.click(screen.getByText("Common"));
+}
+
 describe("CustomGrenadeForm", () => {
   it("disables submit and shows a Required hint when required fields are missing", () => {
     renderForm();
@@ -32,19 +48,7 @@ describe("CustomGrenadeForm", () => {
     const user = userEvent.setup();
     const { onAdd } = renderForm();
 
-    const textboxes = () => screen.getAllByRole("textbox");
-
-    await user.type(textboxes()[0], "Custom Grenade"); // Name
-    await user.click(screen.getByText("Choose type")); // Type
-    await user.click(screen.getByText("Grenade"));
-    await user.type(textboxes()[1], "3"); // Quantity
-    await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
-    // damageMode stays at its default "none"
-    await user.type(textboxes()[2], "0"); // Pen
-    await user.type(textboxes()[3], "0.5"); // Weight
-    await user.type(textboxes()[4], "10"); // Cost
-    await user.click(screen.getByText("Choose availability")); // Availability
-    await user.click(screen.getByText("Common"));
+    await fillRequiredFields(user);
 
     expect(submitButton()).toBeEnabled();
     await user.click(submitButton());
@@ -147,6 +151,31 @@ describe("CustomGrenadeForm", () => {
     });
     expect(screen.getByRole("button", { name: "special" })).toHaveClass("border-slate-500/50");
   });
+
+  it("shows a Saving button and ignores a second press until onAdd settles", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => {};
+    const onAdd = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    renderForm({ onAdd });
+
+    await fillRequiredFields(user);
+    await user.click(submitButton());
+
+    expect(submitButton()).toHaveTextContent("Saving");
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+
+    await user.click(submitButton());
+    expect(onAdd).toHaveBeenCalledTimes(1);
+
+    finish();
+    await waitFor(() => expect(submitButton()).not.toHaveTextContent("Saving"));
+    expect(submitButton()).toHaveTextContent("Add");
+  }, 15_000);
 
   it("calls onCancel when Cancel is clicked", async () => {
     const user = userEvent.setup();

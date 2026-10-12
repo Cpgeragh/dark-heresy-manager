@@ -72,10 +72,11 @@ export function CustomGrenadeForm({
   title?: string;
   submitLabel?: string;
   initialGrenade?: GrenadeItem;
-  onAdd: (item: GrenadeItem) => void;
+  onAdd: (item: GrenadeItem) => void | Promise<void>;
   onCancel: () => void;
 }) {
   const formScrollPositionRef = useRef(0);
+  const [saving, setSaving] = useState(false);
   const initialDamage = parseInitialGrenadeDamage(initialGrenade?.damage);
   const [name, setName] = useState(initialGrenade?.name ?? "");
   const [type, setType] = useState<"" | (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]>(
@@ -131,27 +132,32 @@ export function CustomGrenadeForm({
     Boolean(weight.trim()) &&
     Boolean(value);
 
-  const addGrenade = () => {
+  const addGrenade = async () => {
     if (!canAdd || !type || !origin) return;
-    onAdd({
-      id: initialGrenade?.id ?? crypto.randomUUID(),
-      custom: true,
-      name: name.trim(),
-      quantity: Number(quantity),
-      type,
-      class: type === "Mine" ? "Mine" : "Thrown",
-      damage,
-      pen,
-      specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
-      weight: formatWeightInput(weight),
-      value: formatMoneyInput(value),
-      availability,
-      source: origin,
-      description: description.trim() || undefined,
-      equipped: initialGrenade?.equipped,
-      customLibraryId: initialGrenade?.customLibraryId,
-      customLibraryVersionId: initialGrenade?.customLibraryVersionId,
-    });
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialGrenade?.id ?? crypto.randomUUID(),
+        custom: true,
+        name: name.trim(),
+        quantity: Number(quantity),
+        type,
+        class: type === "Mine" ? "Mine" : "Thrown",
+        damage,
+        pen,
+        specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
+        weight: formatWeightInput(weight),
+        value: formatMoneyInput(value),
+        availability,
+        source: origin,
+        description: description.trim() || undefined,
+        equipped: initialGrenade?.equipped,
+        customLibraryId: initialGrenade?.customLibraryId,
+        customLibraryVersionId: initialGrenade?.customLibraryVersionId,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (qualityPicker.showPicker) {
@@ -215,6 +221,7 @@ export function CustomGrenadeForm({
       canSubmit={canAdd}
       submitLabel={submitLabel}
       onSubmit={addGrenade}
+      saving={saving}
     >
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
