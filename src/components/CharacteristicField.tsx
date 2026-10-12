@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { CharField } from "../types/Character";
+import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import {
   MAX_CHARACTERISTIC_ADVANCES,
   CHARACTERISTIC_ADVANCE_INCREMENT,
@@ -30,7 +31,7 @@ interface Props {
   label: string;
   value: CharField;
   editable: boolean;
-  onChange: (newValue: CharField) => void;
+  onChange: (newValue: CharField, options?: PatchOptions) => void | Promise<boolean | void>;
   hideLabel?: boolean;
   /** XP cost of each of the 4 advance tiers, in order. Undefined entries show no cost. */
   tierCosts?: (number | null | undefined)[];
@@ -148,11 +149,17 @@ export function CharacteristicField({
     ? changedTierCosts.reduce((sum, cost) => sum + cost, 0)
     : undefined;
 
-  const confirmAdvanceChange = useCallback(() => {
+  const confirmAdvanceChange = useCallback(async () => {
     if (pendingAdvances === null) return;
-    onChange({ base, advances: pendingAdvances });
-    setPendingAdvances(null);
-  }, [base, onChange, pendingAdvances]);
+    const next = { base, advances: pendingAdvances };
+    if (pendingAdvances < advances) {
+      void onChange(next, { optimistic: true });
+      setPendingAdvances(null);
+      return;
+    }
+    const saved = await onChange(next);
+    if (saved !== false) setPendingAdvances(null);
+  }, [advances, base, onChange, pendingAdvances]);
 
   return (
     <>

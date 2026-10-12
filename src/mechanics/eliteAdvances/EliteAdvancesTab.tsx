@@ -370,7 +370,7 @@ function SpecialAdvancePurchaseModal({
   onBuy: (rolls: {
     insanityGained?: number;
     characteristicReductions?: Partial<Record<"t" | "fel", number>>;
-  }) => void;
+  }) => void | Promise<boolean | void>;
   onBack: () => void;
 }) {
   const [insanity, setInsanity] = useState("");
@@ -470,7 +470,7 @@ function SkillAdvancePicker({
     level: PurchasedSkillLevel,
     cost: number,
     purchase: EliteAdvancePurchase
-  ) => void;
+  ) => void | Promise<boolean | void>;
   onBack: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -518,12 +518,13 @@ function SkillAdvancePicker({
           <Button
             fullWidth
             disabled={manualCost.trim() === ""}
-            onClick={() => {
-              onBuy(manualSkill.skill.id, manualSkill.level, cost, {
+            onClick={async () => {
+              const saved = await onBuy(manualSkill.skill.id, manualSkill.level, cost, {
                 source: "gm-approved",
                 cost,
                 sourceName: "GM-approved Skill",
               });
+              if (saved === false) return;
               setManualSkill(null);
               setManualCost("");
             }}
@@ -583,7 +584,7 @@ function SkillAdvancePicker({
                   return;
                 }
                 if (!option) return;
-                onBuy(
+                return onBuy(
                   skill.id,
                   level,
                   option.cost,
@@ -651,8 +652,8 @@ function TalentAdvancePicker({
   editable: boolean;
   isDM: boolean;
   suspended: boolean;
-  onBuyFixed: (option: MissedRankTalentOption) => void;
-  onBuyManual: (entry: TalentEntry) => void;
+  onBuyFixed: (option: MissedRankTalentOption) => void | Promise<boolean | void>;
+  onBuyManual: (entry: TalentEntry) => void | Promise<boolean | void>;
   onBack: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -848,6 +849,7 @@ export function EliteAdvancesTab({
         : {}),
     });
     if (saved !== false) setPendingSpecial(null);
+    return saved;
   };
 
   const purchaseSkill = async (
@@ -875,7 +877,7 @@ export function EliteAdvancesTab({
         [level]: eliteAdvancePurchase,
       },
     };
-    await onUpdateCharacter({
+    return onUpdateCharacter({
       skills: owned
         ? skills.map((skill) => (skill.id === skillId ? updated : skill))
         : [...skills, updated],
@@ -891,7 +893,7 @@ export function EliteAdvancesTab({
         sourceName: option.eliteAdvanceName ?? option.eliteAdvanceId ?? "Elite Advance Package",
         eliteAdvanceId: option.eliteAdvanceId,
       };
-      void onUpdateCharacter({
+      return onUpdateCharacter({
         weaponTraining: {
           ...weaponTraining,
           trained: [...weaponTraining.trained, id],
@@ -905,7 +907,6 @@ export function EliteAdvancesTab({
           },
         },
       });
-      return;
     }
     const reference = TALENT_LIST.find((talent) => talent.id === option.talentId);
     if (!reference) return;
@@ -931,7 +932,7 @@ export function EliteAdvancesTab({
       xpPurchase: makeCurrentRankPurchase(career, rank, option.cost),
       eliteAdvancePurchase,
     };
-    addTalentThroughAcquisition(entry);
+    return addTalentThroughAcquisition(entry);
   };
 
   const purchaseManualTalent = (entry: TalentEntry) => {
@@ -944,14 +945,14 @@ export function EliteAdvancesTab({
       cost,
       sourceName: reference?.faithGroup ? "GM-approved Faith Talent" : "GM-approved Talent",
     };
-    addTalentThroughAcquisition({ ...entry, eliteAdvancePurchase });
+    return addTalentThroughAcquisition({ ...entry, eliteAdvancePurchase });
   };
 
   const removeSpecial = async (uid: string) => {
     const removed = entries.find((entry) => entry.uid === uid);
     if (!removed) return;
     const psychicGrantPrefix = `elite-advance:${removed.uid}:minor-psychic-power:`;
-    await onUpdateCharacter({
+    return onUpdateCharacter({
       talentsAndTraits: {
         ...talents,
         eliteAdvances: entries.filter((entry) => entry.uid !== uid),
@@ -1017,7 +1018,7 @@ export function EliteAdvancesTab({
                   key={entry.uid}
                   entry={displayEntry}
                   editable={editable}
-                  onRemove={(uid) => void removeSpecial(uid)}
+                  onRemove={(uid) => removeSpecial(uid)}
                   confirmDeletion
                   deletionNoun="Elite Advance"
                   statusChip={
@@ -1054,7 +1055,7 @@ export function EliteAdvancesTab({
       {showPicker && pickerKind === "special" && pendingSpecial && (
         <SpecialAdvancePurchaseModal
           advance={pendingSpecial}
-          onBuy={(rolls) => void purchaseSpecial(pendingSpecial, rolls)}
+          onBuy={(rolls) => purchaseSpecial(pendingSpecial, rolls)}
           onBack={() => setPendingSpecial(null)}
         />
       )}
@@ -1065,7 +1066,7 @@ export function EliteAdvancesTab({
           career={career}
           editable={editable}
           isDM={isDM}
-          onBuy={(...args) => void purchaseSkill(...args)}
+          onBuy={(...args) => purchaseSkill(...args)}
           onBack={() => setPickerKind("choose")}
         />
       )}
@@ -1078,8 +1079,8 @@ export function EliteAdvancesTab({
           editable={editable}
           isDM={isDM}
           suspended={acquisitionPending}
-          onBuyFixed={(option) => void purchaseFixedTalent(option)}
-          onBuyManual={(entry) => void purchaseManualTalent(entry)}
+          onBuyFixed={(option) => purchaseFixedTalent(option)}
+          onBuyManual={(entry) => purchaseManualTalent(entry)}
           onBack={() => setPickerKind("choose")}
         />
       )}

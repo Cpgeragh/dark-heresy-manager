@@ -1,6 +1,6 @@
 // tests/integration/AddSkillModal.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -42,6 +42,29 @@ describe("AddSkillModal skill row", () => {
     const { onAdd } = setup();
     await user.click(screen.getAllByRole("button", { name: /Awareness/ })[0]);
     expect(onAdd).toHaveBeenCalledWith("s1");
+  });
+
+  it("shows the row as waiting while the add is saving", async () => {
+    const user = userEvent.setup();
+    let settle: () => void = () => {};
+    const onAdd = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = () => resolve(true);
+        })
+    );
+    setup({ onAdd });
+
+    const row = screen.getAllByRole("button", { name: /Awareness/ })[0];
+    await user.click(row);
+    expect(row).toBeDisabled();
+    expect(row).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => {
+      settle();
+    });
+    expect(row).toBeEnabled();
+    expect(row).not.toHaveAttribute("aria-busy");
   });
 
   it("ignores leading and trailing spaces in search", async () => {

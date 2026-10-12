@@ -14,6 +14,7 @@ import {
   type CharacteristicTotals,
 } from "../../../mechanics/corruption/characteristicModifierTotals";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
+import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import {
   getNextSkillTierAccess,
@@ -56,7 +57,7 @@ import {
 interface SkillsTabProps {
   skills: SkillEntry[];
   editable: boolean;
-  onUpdate: (next: SkillEntry[]) => void;
+  onUpdate: (next: SkillEntry[], options?: PatchOptions) => void | Promise<boolean | void>;
   getCharField: (statKey: keyof Characteristics) => CharField;
   modifierTotals?: CharacteristicTotals;
   corruption?: CorruptionBlock;
@@ -232,7 +233,10 @@ export function SkillsTab({
   const updateLevel = useCallback(
     (id: string, level: SkillEntry["level"]) => {
       if (level === "untrained") {
-        onUpdate(skills.filter((skill) => skill.id !== id));
+        void onUpdate(
+          skills.filter((skill) => skill.id !== id),
+          { optimistic: true }
+        );
         return;
       }
 
@@ -268,7 +272,10 @@ export function SkillsTab({
         !xpPurchases.trained &&
         manualCosts.trained === undefined;
       if (returnsToUnpaidGrantedTraining) {
-        onUpdate(skills.filter((skill) => skill.id !== id));
+        void onUpdate(
+          skills.filter((skill) => skill.id !== id),
+          { optimistic: true }
+        );
         return;
       }
 
@@ -281,9 +288,14 @@ export function SkillsTab({
         eliteAdvancePurchases:
           Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
       };
-      onUpdate(
-        owned ? skills.map((skill) => (skill.id === id ? updated : skill)) : [...skills, updated]
-      );
+      const next = owned
+        ? skills.map((skill) => (skill.id === id ? updated : skill))
+        : [...skills, updated];
+      if (nextIndex < currentIndex) {
+        void onUpdate(next, { optimistic: true });
+        return;
+      }
+      return onUpdate(next);
     },
     [alternateRanks, career, computedSkills, onUpdate, rank, skills]
   );
@@ -301,7 +313,7 @@ export function SkillsTab({
           : access.status === "unlocked"
             ? access.purchase
             : undefined;
-      onUpdate([
+      return onUpdate([
         ...skills,
         {
           ...definition,
@@ -335,7 +347,7 @@ export function SkillsTab({
           [level]: makeCurrentRankPurchase(career, rank, cost),
         },
       };
-      onUpdate(
+      return onUpdate(
         owned ? skills.map((skill) => (skill.id === id ? updated : skill)) : [...skills, updated]
       );
     },

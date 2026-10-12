@@ -62,13 +62,13 @@ export function useTalentAcquisitionFlow({
   const [pendingAcquisition, setPendingAcquisition] = useState<TalentEntry | null>(null);
 
   const addTalent = useCallback(
-    (entry: TalentEntry) => {
+    (entry: TalentEntry): Promise<boolean> | undefined => {
       const preparedEntry = prepareTalentEntry(entry, willpowerBonus);
       if (needsTalentAcquisition(preparedEntry, talents)) {
         setPendingAcquisition(preparedEntry);
-        return;
+        return undefined;
       }
-      void onSave({
+      return onSave({
         talentsAndTraits: { ...talents, talents: [...talents.talents, preparedEntry] },
       });
     },

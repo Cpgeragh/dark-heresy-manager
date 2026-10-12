@@ -1,6 +1,6 @@
 // tests/integration/WeaponTrainingTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -189,7 +189,72 @@ describe("WeaponTrainingTab", () => {
     await user.click(screen.getAllByRole("button", { name: /^Bolt/ })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ trained: [] }));
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ trained: [] }), {
+      optimistic: true,
+    });
+  });
+
+  it("keeps the train dialog open with waiting dots until the save settles", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <WeaponTrainingTab
+        weaponTraining={makeBlock()}
+        editable
+        onUpdate={onUpdate}
+        career="Guardsman"
+        rank="Conscript"
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: /^Las/ })[0]);
+    await user.click(screen.getByRole("button", { name: "Train" }));
+
+    expect(onUpdate.mock.calls[0]).toHaveLength(1);
+    const dialog = screen.getByRole("dialog", { name: "Train Weapon Group" });
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
+
+    await act(async () => {
+      settle(true);
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Train Weapon Group" })).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the train dialog open when the server refuses the save", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <WeaponTrainingTab
+        weaponTraining={makeBlock()}
+        editable
+        onUpdate={onUpdate}
+        career="Guardsman"
+        rank="Conscript"
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: /^Las/ })[0]);
+    await user.click(screen.getByRole("button", { name: "Train" }));
+    await act(async () => {
+      settle(false);
+    });
+
+    const dialog = screen.getByRole("dialog", { name: "Train Weapon Group" });
+    expect(dialog.querySelector('[aria-busy="true"]')).toBeNull();
   });
 
   it("shows exotic weapons as chips", () => {

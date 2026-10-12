@@ -103,12 +103,12 @@ interface WeaponsTabProps {
   editable: boolean;
   strengthBonus: number;
   knaveOfPistols?: boolean;
-  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void;
-  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void;
-  onUpdateGrenades: (next: GrenadeItem[], options?: PatchOptions) => void;
+  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateGrenades: (next: GrenadeItem[], options?: PatchOptions) => void | Promise<void>;
   cybernetics?: CyberneticItem[];
   shields?: ShieldItem[];
-  onUpdateShields?: (next: ShieldItem[], options?: PatchOptions) => void;
+  onUpdateShields?: (next: ShieldItem[], options?: PatchOptions) => void | Promise<void>;
   archeotech?: ArcheotechItem[];
   onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void;
 }
@@ -338,7 +338,7 @@ export function WeaponsTab({
           data,
         });
 
-        onUpdateGrenades([
+        await onUpdateGrenades([
           ...grenades,
           buildGrenadeSnapshot(item.id, item, data, customItemId, versionId),
         ]);
@@ -431,7 +431,7 @@ export function WeaponsTab({
           data,
         });
 
-        onUpdateRanged([
+        await onUpdateRanged([
           ...rangedWeapons,
           buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);
@@ -596,7 +596,7 @@ export function WeaponsTab({
           data,
         });
 
-        onUpdateMelee([
+        await onUpdateMelee([
           ...meleeWeapons,
           buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);
@@ -732,7 +732,7 @@ export function WeaponsTab({
         });
 
         if (editingWeaponDefinition.kind === "ranged" && data.weaponKind === "ranged") {
-          onUpdateRanged(
+          await onUpdateRanged(
             rangedWeapons.map((rangedWeapon) =>
               rangedWeapon.id === editingWeaponDefinition.weapon.id
                 ? buildRangedWeaponSnapshot(
@@ -746,7 +746,7 @@ export function WeaponsTab({
             )
           );
         } else if (editingWeaponDefinition.kind === "melee" && data.weaponKind === "melee") {
-          onUpdateMelee(
+          await onUpdateMelee(
             meleeWeapons.map((meleeWeapon) =>
               meleeWeapon.id === editingWeaponDefinition.weapon.id
                 ? buildMeleeWeaponSnapshot(
@@ -760,7 +760,7 @@ export function WeaponsTab({
             )
           );
         } else if (editingWeaponDefinition.kind === "grenade" && data.weaponKind === "grenade") {
-          onUpdateGrenades(
+          await onUpdateGrenades(
             grenades.map((grenade) =>
               grenade.id === editingWeaponDefinition.weapon.id
                 ? buildGrenadeSnapshot(
@@ -812,7 +812,7 @@ export function WeaponsTab({
           data,
         });
 
-        onUpdateShields(
+        await onUpdateShields(
           (shields ?? []).map((currentShield) =>
             currentShield.id === editingShieldDefinition.shield.id
               ? buildShieldSnapshot(
@@ -971,7 +971,7 @@ export function WeaponsTab({
           data,
         });
 
-        onUpdateShields([
+        await onUpdateShields([
           ...(shields ?? []),
           buildShieldSnapshot(item.id, item, data, customItemId, versionId),
         ]);

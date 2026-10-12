@@ -22,6 +22,7 @@ import {
   RANGED_WEAPON_REFERENCE,
 } from "../../data/reference/weaponReference";
 import { Button } from "../../ui/buttons/Button";
+import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import {
   uiChipRow,
   editableInputClass,
@@ -88,7 +89,7 @@ function weaponTrainingPulseVars(rgb: string): CSSProperties {
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
   editable: boolean;
-  onUpdate: (next: WeaponTrainingBlock) => void;
+  onUpdate: (next: WeaponTrainingBlock, options?: PatchOptions) => void | Promise<boolean | void>;
   talents?: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
@@ -154,14 +155,17 @@ export function WeaponTrainingTab({
       delete xpPurchases[id];
       delete manualCosts[id];
       delete eliteAdvancePurchases[id];
-      onUpdate({
-        ...weaponTraining,
-        trained: weaponTraining.trained.filter((t) => t !== id),
-        xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
-        manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
-        eliteAdvancePurchases:
-          Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
-      });
+      void onUpdate(
+        {
+          ...weaponTraining,
+          trained: weaponTraining.trained.filter((t) => t !== id),
+          xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
+          manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
+          eliteAdvancePurchases:
+            Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
+        },
+        { optimistic: true }
+      );
     },
     [weaponTraining, onUpdate]
   );
@@ -172,9 +176,9 @@ export function WeaponTrainingTab({
     setPendingRemoveTraining(null);
   }, [pendingRemoveTraining, handleRemoveTraining, setPendingRemoveTraining]);
 
-  const confirmTrain = useCallback(() => {
+  const confirmTrain = useCallback(async () => {
     if (!pendingTrain) return;
-    onUpdate({
+    const saved = await onUpdate({
       ...weaponTraining,
       trained: [...weaponTraining.trained, pendingTrain.id],
       xpPurchases: {
@@ -182,15 +186,15 @@ export function WeaponTrainingTab({
         [pendingTrain.id]: pendingTrain.purchase,
       },
     });
-    setPendingTrain(null);
+    if (saved !== false) setPendingTrain(null);
   }, [pendingTrain, weaponTraining, onUpdate, setPendingTrain]);
 
   const manualTrainCostNumber = Number(manualTrainCost);
   const canConfirmManualTrain = manualTrainCost.trim() !== "";
 
-  const confirmManualTrain = useCallback(() => {
+  const confirmManualTrain = useCallback(async () => {
     if (!pendingManualTrain || !canConfirmManualTrain) return;
-    onUpdate({
+    const saved = await onUpdate({
       ...weaponTraining,
       trained: [...weaponTraining.trained, pendingManualTrain.id],
       manualCosts: {
@@ -202,6 +206,7 @@ export function WeaponTrainingTab({
         [pendingManualTrain.id]: makeCurrentRankPurchase(career, rank, manualTrainCostNumber),
       },
     });
+    if (saved === false) return;
     setPendingManualTrain(null);
     setManualTrainCost("");
   }, [
@@ -230,7 +235,7 @@ export function WeaponTrainingTab({
     setNewExoticCost("");
   }, [setShowExoticForm, setNewExoticName, setNewExoticCost]);
 
-  const confirmAddExotic = useCallback(() => {
+  const confirmAddExotic = useCallback(async () => {
     if (!canConfirmExotic) return;
     const entry: WeaponTrainingExoticEntry = {
       name: newExoticName.trim(),
@@ -238,8 +243,11 @@ export function WeaponTrainingTab({
       xpPurchase: makeCurrentRankPurchase(career, rank, Number(newExoticCost)),
       bonus: true,
     };
-    onUpdate({ ...weaponTraining, exoticWeapons: [...weaponTraining.exoticWeapons, entry] });
-    closeExoticForm();
+    const saved = await onUpdate({
+      ...weaponTraining,
+      exoticWeapons: [...weaponTraining.exoticWeapons, entry],
+    });
+    if (saved !== false) closeExoticForm();
   }, [
     canConfirmExotic,
     newExoticName,
@@ -253,10 +261,13 @@ export function WeaponTrainingTab({
 
   const handleRemoveExotic = useCallback(
     (index: number) => {
-      onUpdate({
-        ...weaponTraining,
-        exoticWeapons: weaponTraining.exoticWeapons.filter((_, i) => i !== index),
-      });
+      void onUpdate(
+        {
+          ...weaponTraining,
+          exoticWeapons: weaponTraining.exoticWeapons.filter((_, i) => i !== index),
+        },
+        { optimistic: true }
+      );
     },
     [weaponTraining, onUpdate]
   );
@@ -267,15 +278,18 @@ export function WeaponTrainingTab({
     setPendingRemoveExotic(null);
   }, [pendingRemoveExotic, handleRemoveExotic, setPendingRemoveExotic]);
 
-  const confirmExoticPurchase = useCallback(() => {
+  const confirmExoticPurchase = useCallback(async () => {
     if (!pendingExoticPurchase) return;
     const entry: WeaponTrainingExoticEntry = {
       name: pendingExoticPurchase.name,
       cost: pendingExoticPurchase.purchase.cost,
       xpPurchase: pendingExoticPurchase.purchase,
     };
-    onUpdate({ ...weaponTraining, exoticWeapons: [...weaponTraining.exoticWeapons, entry] });
-    setPendingExoticPurchase(null);
+    const saved = await onUpdate({
+      ...weaponTraining,
+      exoticWeapons: [...weaponTraining.exoticWeapons, entry],
+    });
+    if (saved !== false) setPendingExoticPurchase(null);
   }, [pendingExoticPurchase, weaponTraining, onUpdate, setPendingExoticPurchase]);
 
   return (

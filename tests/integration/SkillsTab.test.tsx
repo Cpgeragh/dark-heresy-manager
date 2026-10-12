@@ -1,6 +1,6 @@
 // tests/integration/SkillsTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
@@ -500,6 +500,81 @@ describe("SkillsTab", () => {
     });
   });
 
+  it("keeps the upgrade dialog open with waiting dots until the save settles", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <SkillsTab
+        skills={[skill()]}
+        editable
+        onUpdate={onUpdate}
+        getCharField={getCharField}
+        corruption={{ points: 0, malignancies: [] }}
+        isDM
+      />
+    );
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
+    await user.type(screen.getByRole("textbox"), "150");
+    await user.click(screen.getByRole("button", { name: "Upgrade" }));
+
+    expect(onUpdate.mock.calls[0]).toHaveLength(1);
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Skill" });
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
+
+    await act(async () => {
+      settle(true);
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Upgrade Skill" })).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the upgrade dialog open when the server refuses the save", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdate = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <SkillsTab
+        skills={[skill()]}
+        editable
+        onUpdate={onUpdate}
+        getCharField={getCharField}
+        corruption={{ points: 0, malignancies: [] }}
+        isDM
+      />
+    );
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
+    await user.type(screen.getByRole("textbox"), "150");
+    await user.click(screen.getByRole("button", { name: "Upgrade" }));
+    await act(async () => {
+      settle(false);
+    });
+
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Skill" });
+    expect(dialog.querySelector('[aria-busy="true"]')).toBeNull();
+  });
+
+  it("sends a delete as an instant update", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onUpdate.mock.calls[0][1]).toEqual({ optimistic: true });
+  });
+
   it("accepts 0 as a valid manual upgrade cost, blocking only a blank field", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ isDM: true });
@@ -741,7 +816,7 @@ describe("SkillsTab", () => {
       })
     );
 
-    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
 
   it("hides redundant Cult Briefing training until it actually supplies the Skill", async () => {

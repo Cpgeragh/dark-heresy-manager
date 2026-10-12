@@ -94,17 +94,21 @@ describe("CharacteristicsTab", () => {
     await user.click(advance!);
     await user.click(screen.getByRole("button", { name: "Upgrade" }));
 
-    expect(updateCharacteristic).toHaveBeenCalledWith("ws", {
-      base: 30,
-      advances: 1,
-      advancePurchases: {
-        simple: {
-          cost: 100,
-          careerId: "guardsman",
-          purchasedAtRankId: "conscript",
+    expect(updateCharacteristic).toHaveBeenCalledWith(
+      "ws",
+      {
+        base: 30,
+        advances: 1,
+        advancePurchases: {
+          simple: {
+            cost: 100,
+            careerId: "guardsman",
+            purchasedAtRankId: "conscript",
+          },
         },
       },
-    });
+      undefined
+    );
   });
 
   it("removes the purchase record entirely when the final Advance is downgraded", async () => {
@@ -151,10 +155,14 @@ describe("CharacteristicsTab", () => {
     await user.click(advance!);
     await user.click(screen.getByRole("button", { name: "Downgrade" }));
 
-    expect(updateCharacteristic).toHaveBeenCalledWith("ws", {
-      base: 30,
-      advances: 0,
-    });
+    expect(updateCharacteristic).toHaveBeenCalledWith(
+      "ws",
+      {
+        base: 30,
+        advances: 0,
+      },
+      { optimistic: true }
+    );
   });
 
   it("renders all nine characteristic labels", () => {

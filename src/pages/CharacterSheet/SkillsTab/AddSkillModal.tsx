@@ -28,7 +28,7 @@ interface AddSkillModalProps {
   editable?: boolean;
   onClose: () => void;
   untrainedSkills: SkillWithComputed[];
-  onAdd: (id: string, manualCost?: number) => void;
+  onAdd: (id: string, manualCost?: number) => void | Promise<boolean | void>;
   hideLevelChip?: boolean;
   /** Real training cost for whichever skills are unlocked for this character. When omitted, every skill shows with no restriction. */
   unlockedCosts?: Map<string, number>;
@@ -100,9 +100,7 @@ export function AddSkillModal({
     onClose();
   };
 
-  const handleSelect = (skill: SkillWithComputed) => {
-    onAdd(skill.id);
-  };
+  const handleSelect = (skill: SkillWithComputed) => onAdd(skill.id);
 
   const attemptOverflowAdd = (skill: SkillWithComputed) => {
     setPendingManualSkill(skill);
@@ -145,10 +143,12 @@ export function AddSkillModal({
           <Button
             className="w-full"
             disabled={!canConfirm}
-            onClick={() => {
-              onAdd(pendingManualSkill.id, cost);
-              setPendingManualSkill(null);
-              setManualCost("");
+            onClick={async () => {
+              const saved = await onAdd(pendingManualSkill.id, cost);
+              if (saved !== false) {
+                setPendingManualSkill(null);
+                setManualCost("");
+              }
             }}
           >
             Train {pendingManualSkill.name}

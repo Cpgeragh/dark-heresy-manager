@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import type {
+  Character,
   CharacterHeader,
   CyberneticItem,
   ExperienceBlock,
@@ -51,6 +52,8 @@ export interface BackgroundSetupFieldsProps {
   onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
   insanity?: InsanityBlock;
   onUpdateInsanity?: (next: InsanityBlock) => void | Promise<void>;
+  /** Saves several character fields in one step, so a pick that changes the header, talents, experience, insanity and cybernetics is accepted or refused as a whole. */
+  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
 }
 
 export function BackgroundSetupFields({
@@ -67,6 +70,7 @@ export function BackgroundSetupFields({
   onUpdateExperience,
   insanity,
   onUpdateInsanity,
+  onUpdateCharacter,
 }: BackgroundSetupFieldsProps) {
   const [showHomeworldPicker, setShowHomeworldPicker] = useState(false);
   const [showCareerPicker, setShowCareerPicker] = useState(false);
@@ -101,55 +105,85 @@ export function BackgroundSetupFields({
   );
   const selectedAdvanceSchemeSource = selectedAdvanceScheme?.source ?? selectedCareer?.source;
 
-  const clearCharacterCreationAdvanceScheme = useCallback(() => {
-    if (!experience || !onUpdateExperience) return;
+  const canSaveExperience = Boolean(onUpdateCharacter || onUpdateExperience);
+  const canSaveInsanity = Boolean(onUpdateCharacter || onUpdateInsanity);
+  const canSaveCybernetics = Boolean(onUpdateCharacter || onUpdateCybernetics);
+  const canSaveGear = Boolean(onUpdateCharacter || onUpdateGear);
+
+  const saveCharacter = useCallback(
+    async (partial: Partial<Character>): Promise<boolean> => {
+      if (onUpdateCharacter) return onUpdateCharacter(partial);
+      if (partial.header) onUpdateHeader(partial.header);
+      if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
+      if (partial.experience) void onUpdateExperience?.(partial.experience);
+      if (partial.insanity) void onUpdateInsanity?.(partial.insanity);
+      if (partial.cybernetics) void onUpdateCybernetics?.(partial.cybernetics);
+      if (partial.gear) void onUpdateGear?.(partial.gear);
+      return true;
+    },
+    [
+      onUpdateCharacter,
+      onUpdateHeader,
+      onUpdateTalents,
+      onUpdateExperience,
+      onUpdateInsanity,
+      onUpdateCybernetics,
+      onUpdateGear,
+    ]
+  );
+
+  const buildAdvanceSchemeClear = useCallback((): Partial<Character> => {
+    if (!experience || !canSaveExperience) return {};
     const nextAlternateRanks = (experience.alternateRanks ?? []).filter(
       (selection) => selection.takenAtTier !== 1
     );
-    if (nextAlternateRanks.length === (experience.alternateRanks ?? []).length) return;
-    void onUpdateExperience({ ...experience, alternateRanks: nextAlternateRanks });
+    if (nextAlternateRanks.length === (experience.alternateRanks ?? []).length) return {};
     const insanityGained = Number(
       selectedAdvanceSchemeSelection?.grantSelections?.["insanity-gained"] ?? 0
     );
-    if (insanity && onUpdateInsanity && insanityGained > 0) {
-      void onUpdateInsanity({
-        ...insanity,
-        points: Math.max(0, insanity.points - insanityGained),
-      });
-    }
-  }, [experience, insanity, onUpdateExperience, onUpdateInsanity, selectedAdvanceSchemeSelection]);
+    return {
+      experience: { ...experience, alternateRanks: nextAlternateRanks },
+      ...(insanity && canSaveInsanity && insanityGained > 0
+        ? { insanity: { ...insanity, points: Math.max(0, insanity.points - insanityGained) } }
+        : {}),
+    };
+  }, [canSaveExperience, canSaveInsanity, experience, insanity, selectedAdvanceSchemeSelection]);
 
-  function commitAdvanceSchemeSelect(alternateRankId?: string, insanityGained?: number) {
-    if (!experience || !onUpdateExperience || !selectedRank) return;
+  async function commitAdvanceSchemeSelect(alternateRankId?: string, insanityGained?: number) {
+    if (!experience || !canSaveExperience || !selectedRank) return;
     const retained = (experience.alternateRanks ?? []).filter(
       (selection) => selection.takenAtTier !== 1
     );
-    void onUpdateExperience({
-      ...experience,
-      alternateRanks: alternateRankId
-        ? [
-            ...retained,
-            {
-              alternateRankId,
-              replacedRankId: selectedRank.id,
-              takenAtTier: 1,
-              ...(insanityGained
-                ? { grantSelections: { "insanity-gained": String(insanityGained) } }
-                : {}),
-            },
-          ]
-        : retained,
-    });
+    const partial: Partial<Character> = {
+      experience: {
+        ...experience,
+        alternateRanks: alternateRankId
+          ? [
+              ...retained,
+              {
+                alternateRankId,
+                replacedRankId: selectedRank.id,
+                takenAtTier: 1,
+                ...(insanityGained
+                  ? { grantSelections: { "insanity-gained": String(insanityGained) } }
+                  : {}),
+              },
+            ]
+          : retained,
+      },
+    };
     const previousInsanityGained = Number(
       selectedAdvanceSchemeSelection?.grantSelections?.["insanity-gained"] ?? 0
     );
-    if (insanity && onUpdateInsanity && previousInsanityGained !== (insanityGained ?? 0)) {
-      void onUpdateInsanity({
+    if (insanity && canSaveInsanity && previousInsanityGained !== (insanityGained ?? 0)) {
+      partial.insanity = {
         ...insanity,
         points: Math.max(0, insanity.points - previousInsanityGained + (insanityGained ?? 0)),
-      });
+      };
     }
-    setShowAdvanceSchemePicker(false);
+    const saved = await saveCharacter(partial);
+    if (saved !== false) setShowAdvanceSchemePicker(false);
+    return saved;
   }
 
   function handleAdvanceSchemeSelect(alternateRankId?: string) {
@@ -159,7 +193,7 @@ export function BackgroundSetupFields({
       setPendingAdvanceSchemeId(alternateRank.id);
       return;
     }
-    commitAdvanceSchemeSelect(alternateRankId);
+    return commitAdvanceSchemeSelect(alternateRankId);
   }
 
   const headerForCareer = useCallback(
@@ -179,7 +213,7 @@ export function BackgroundSetupFields({
   );
 
   const handleHomeworldSelect = useCallback(
-    (value: string) => {
+    async (value: string) => {
       if (homeworldNeedsTraitAcquisition(value)) {
         setShowHomeworldPicker(false);
         setPendingHomeworldId(value);
@@ -190,38 +224,32 @@ export function BackgroundSetupFields({
         !header.career ||
         homeworld?.careers.some((career) => (career.careerName ?? career.name) === header.career);
 
-      onUpdateTalents({
-        ...talents,
-        homeworld: value,
-        homeworldTraitChoices: undefined,
-        ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
-      });
+      const partial: Partial<Character> = {
+        talentsAndTraits: {
+          ...talents,
+          homeworld: value,
+          homeworldTraitChoices: undefined,
+          ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
+        },
+      };
       if (!currentCareerIsAllowed) {
-        clearCharacterCreationAdvanceScheme();
-        onUpdateHeader({ ...header, career: "", rank: "", careerPath: undefined });
-        if (onUpdateCybernetics) {
-          void onUpdateCybernetics(
-            cybernetics.filter(
-              (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-            )
+        Object.assign(partial, buildAdvanceSchemeClear());
+        partial.header = { ...header, career: "", rank: "", careerPath: undefined };
+        if (canSaveCybernetics) {
+          partial.cybernetics = cybernetics.filter(
+            (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
           );
         }
       }
-      setShowHomeworldPicker(false);
+      const saved = await saveCharacter(partial);
+      if (saved !== false) setShowHomeworldPicker(false);
+      return saved;
     },
-    [
-      clearCharacterCreationAdvanceScheme,
-      cybernetics,
-      header,
-      onUpdateCybernetics,
-      talents,
-      onUpdateHeader,
-      onUpdateTalents,
-    ]
+    [buildAdvanceSchemeClear, canSaveCybernetics, cybernetics, header, saveCharacter, talents]
   );
 
   const handleCareerSelect = useCallback(
-    (career: CareerData) => {
+    async (career: CareerData) => {
       if (career.name === "Imperial Psyker") {
         setShowCareerPicker(false);
         setPendingCareer(career);
@@ -232,33 +260,34 @@ export function BackgroundSetupFields({
         setPendingStartingChoiceCareer(career);
         return;
       }
-      if (header.career !== career.name) clearCharacterCreationAdvanceScheme();
-      onUpdateHeader(headerForCareer(career));
-      onUpdateTalents({
-        ...talents,
-        careerTraitAcquisition: undefined,
-        careerStartingChoices: undefined,
-      });
-      if (onUpdateCybernetics) {
-        void onUpdateCybernetics(
-          applyTechPriestImplants(
-            cybernetics.filter(
-              (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-            ),
-            career.name
-          )
+      const partial: Partial<Character> = {
+        ...(header.career !== career.name ? buildAdvanceSchemeClear() : {}),
+        header: headerForCareer(career),
+        talentsAndTraits: {
+          ...talents,
+          careerTraitAcquisition: undefined,
+          careerStartingChoices: undefined,
+        },
+      };
+      if (canSaveCybernetics) {
+        partial.cybernetics = applyTechPriestImplants(
+          cybernetics.filter(
+            (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+          ),
+          career.name
         );
       }
-      setShowCareerPicker(false);
+      const saved = await saveCharacter(partial);
+      if (saved !== false) setShowCareerPicker(false);
+      return saved;
     },
     [
-      clearCharacterCreationAdvanceScheme,
+      buildAdvanceSchemeClear,
+      canSaveCybernetics,
       cybernetics,
       header.career,
       headerForCareer,
-      onUpdateCybernetics,
-      onUpdateHeader,
-      onUpdateTalents,
+      saveCharacter,
       talents,
     ]
   );
@@ -504,9 +533,9 @@ export function BackgroundSetupFields({
                 key={value}
                 selected={false}
                 aria-pressed={false}
-                onClick={() => {
-                  commitAdvanceSchemeSelect(pendingAdvanceSchemeId, value);
-                  setPendingAdvanceSchemeId(null);
+                onClick={async () => {
+                  const saved = await commitAdvanceSchemeSelect(pendingAdvanceSchemeId, value);
+                  if (saved !== false) setPendingAdvanceSchemeId(null);
                 }}
               >
                 <PickerRowName name={`${value} Insanity ${value === 1 ? "Point" : "Points"}`} />
@@ -519,31 +548,33 @@ export function BackgroundSetupFields({
       {pendingHomeworldId && (
         <HomeworldTraitAcquisitionModal
           homeworldId={pendingHomeworldId}
-          onComplete={(choices) => {
+          onComplete={async (choices) => {
             const homeworld = HOMEWORLD_LIST.find((entry) => entry.id === pendingHomeworldId);
             const currentCareerIsAllowed =
               !header.career ||
               homeworld?.careers.some(
                 (career) => (career.careerName ?? career.name) === header.career
               );
-            onUpdateTalents({
-              ...talents,
-              homeworld: pendingHomeworldId,
-              homeworldTraitChoices: choices,
-              ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
-            });
+            const partial: Partial<Character> = {
+              talentsAndTraits: {
+                ...talents,
+                homeworld: pendingHomeworldId,
+                homeworldTraitChoices: choices,
+                ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
+              },
+            };
             if (!currentCareerIsAllowed) {
-              onUpdateHeader({ ...header, career: "", rank: "", careerPath: undefined });
-              if (onUpdateCybernetics) {
-                void onUpdateCybernetics(
-                  cybernetics.filter(
-                    (item) =>
-                      item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-                  )
+              partial.header = { ...header, career: "", rank: "", careerPath: undefined };
+              if (canSaveCybernetics) {
+                partial.cybernetics = cybernetics.filter(
+                  (item) =>
+                    item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
                 );
               }
             }
-            setPendingHomeworldId(null);
+            const saved = await saveCharacter(partial);
+            if (saved !== false) setPendingHomeworldId(null);
+            return saved;
           }}
           onClose={() => {
             setPendingHomeworldId(null);
@@ -566,25 +597,26 @@ export function BackgroundSetupFields({
               }}
               cybernetics={cybernetics}
               gear={gear}
-              onComplete={(result) => {
-                if (header.career !== pendingCareer.name) {
-                  clearCharacterCreationAdvanceScheme();
-                }
-                onUpdateHeader(headerForCareer(pendingCareer));
-                onUpdateTalents({
-                  ...talents,
-                  careerTraitAcquisition: result.entry.acquisition?.trait,
-                  careerStartingChoices: undefined,
-                });
-                if (onUpdateCybernetics) {
-                  void onUpdateCybernetics(
-                    applyTechPriestImplants(result.cybernetics ?? cybernetics, pendingCareer.name)
+              onComplete={async (result) => {
+                const partial: Partial<Character> = {
+                  ...(header.career !== pendingCareer.name ? buildAdvanceSchemeClear() : {}),
+                  header: headerForCareer(pendingCareer),
+                  talentsAndTraits: {
+                    ...talents,
+                    careerTraitAcquisition: result.entry.acquisition?.trait,
+                    careerStartingChoices: undefined,
+                  },
+                };
+                if (canSaveCybernetics) {
+                  partial.cybernetics = applyTechPriestImplants(
+                    result.cybernetics ?? cybernetics,
+                    pendingCareer.name
                   );
                 }
-                if (result.gear && onUpdateGear) {
-                  void onUpdateGear(result.gear);
-                }
-                setPendingCareer(null);
+                if (result.gear && canSaveGear) partial.gear = result.gear;
+                const saved = await saveCharacter(partial);
+                if (saved !== false) setPendingCareer(null);
+                return saved;
               }}
               onClose={() => {
                 setPendingCareer(null);
@@ -597,28 +629,30 @@ export function BackgroundSetupFields({
       {pendingStartingChoiceCareer && (
         <CareerStartingChoiceModal
           career={pendingStartingChoiceCareer}
-          onComplete={(choices) => {
-            if (header.career !== pendingStartingChoiceCareer.name) {
-              clearCharacterCreationAdvanceScheme();
-            }
-            onUpdateHeader(headerForCareer(pendingStartingChoiceCareer));
-            onUpdateTalents({
-              ...talents,
-              careerTraitAcquisition: undefined,
-              careerStartingChoices: choices,
-            });
-            if (onUpdateCybernetics) {
-              void onUpdateCybernetics(
-                applyTechPriestImplants(
-                  cybernetics.filter(
-                    (item) =>
-                      item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-                  ),
-                  pendingStartingChoiceCareer.name
-                )
+          onComplete={async (choices) => {
+            const partial: Partial<Character> = {
+              ...(header.career !== pendingStartingChoiceCareer.name
+                ? buildAdvanceSchemeClear()
+                : {}),
+              header: headerForCareer(pendingStartingChoiceCareer),
+              talentsAndTraits: {
+                ...talents,
+                careerTraitAcquisition: undefined,
+                careerStartingChoices: choices,
+              },
+            };
+            if (canSaveCybernetics) {
+              partial.cybernetics = applyTechPriestImplants(
+                cybernetics.filter(
+                  (item) =>
+                    item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+                ),
+                pendingStartingChoiceCareer.name
               );
             }
-            setPendingStartingChoiceCareer(null);
+            const saved = await saveCharacter(partial);
+            if (saved !== false) setPendingStartingChoiceCareer(null);
+            return saved;
           }}
           onClose={() => {
             setPendingStartingChoiceCareer(null);

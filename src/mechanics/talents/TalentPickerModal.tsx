@@ -87,11 +87,11 @@ export function TalentPickerModal({
   useTalentBehaviours?: boolean;
   editable?: boolean;
   isDM?: boolean;
-  onAdd: (entry: TalentEntry) => void;
+  onAdd: (entry: TalentEntry) => void | Promise<boolean | void>;
   onClose: () => void;
   suspended?: boolean;
   customItems?: readonly CampaignCustomItem<"trait">[];
-  onSelectCustomItem?: (item: CampaignCustomItem<"trait">) => void;
+  onSelectCustomItem?: (item: CampaignCustomItem<"trait">) => void | Promise<boolean | void>;
   onCustomAction?: () => void;
   customActionLabel?: string;
   showAllLabel?: string;
@@ -312,13 +312,14 @@ export function TalentPickerModal({
     setManualCostInput("");
   };
 
-  const attemptRealAdd = (
+  const attemptRealAdd = async (
     item: AnyListItem,
     itemSpecialisation?: string,
     shouldReturnToChoicePicker = false
   ) => {
     if (!career) {
-      onAdd(makeTalentEntry(item as TalentData, itemSpecialisation));
+      const saved = await onAdd(makeTalentEntry(item as TalentData, itemSpecialisation));
+      if (saved === false) return saved;
       if (shouldReturnToChoicePicker) returnToChoicePicker();
       else resetPicked();
       return;
@@ -332,10 +333,11 @@ export function TalentPickerModal({
       alternateRanks
     );
     if (!purchase) return;
-    onAdd({
+    const saved = await onAdd({
       ...makeTalentEntry(item as TalentData, itemSpecialisation),
       xpPurchase: purchase,
     });
+    if (saved === false) return saved;
     if (shouldReturnToChoicePicker) returnToChoicePicker();
     else resetPicked();
   };
@@ -343,7 +345,7 @@ export function TalentPickerModal({
   const handleSpecAdd = () => {
     if (!talentData || !canAdd) return;
     const shouldReturnToChoicePicker = behaviour?.kind === "hybrid" && detailChoice !== null;
-    (showOverflow ? attemptOverflowAdd : attemptRealAdd)(
+    return (showOverflow ? attemptOverflowAdd : attemptRealAdd)(
       talentData,
       composedSpecialisation,
       shouldReturnToChoicePicker
@@ -357,8 +359,7 @@ export function TalentPickerModal({
       const option = behaviour.options.find((entry) => entry.label === value);
       if (!option) return;
       if ("value" in option) {
-        add(talentData, option.value, true);
-        return;
+        return add(talentData, option.value, true);
       }
       setDetailChoice({
         detailLabel: option.detailLabel,
@@ -368,7 +369,7 @@ export function TalentPickerModal({
       setShowChoicePicker(false);
       return;
     }
-    add(talentData, value, true);
+    return add(talentData, value, true);
   };
 
   if (pendingManualCost && canMakeManualPurchase) {
@@ -388,9 +389,9 @@ export function TalentPickerModal({
           <Button
             className="w-full"
             disabled={!canConfirm}
-            onClick={() => {
+            onClick={async () => {
               const shouldReturnToChoicePicker = pendingManualCost.returnToChoicePicker === true;
-              onAdd({
+              const saved = await onAdd({
                 ...makeTalentEntry(
                   pendingManualCost.talent as TalentData,
                   pendingManualCost.specialisation,
@@ -398,6 +399,7 @@ export function TalentPickerModal({
                 ),
                 xpPurchase: makeCurrentRankPurchase(career, rank, cost),
               });
+              if (saved === false) return;
               setPendingManualCost(null);
               if (shouldReturnToChoicePicker) returnToChoicePicker();
               else resetPicked();
@@ -450,7 +452,7 @@ export function TalentPickerModal({
               key={item.id}
               interactive={editable}
               onClick={() => {
-                if (editable) onSelectCustomItem?.(item);
+                if (editable) return onSelectCustomItem?.(item);
               }}
             >
               <PickerRowName name={item.name} />
@@ -722,7 +724,7 @@ export function TalentPickerModal({
                 } else if (usesTextEntry) {
                   setPicked(item);
                 } else {
-                  attemptRealAdd(itemTalent);
+                  return attemptRealAdd(itemTalent);
                 }
               }}
             >

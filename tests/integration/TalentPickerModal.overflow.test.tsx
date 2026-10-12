@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
@@ -108,6 +108,29 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
       })
     );
     expect(screen.queryByText("XP Cost")).not.toBeInTheDocument();
+  });
+
+  it("shows the row as waiting until the add is saved", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onAdd = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    renderPicker({ onAdd });
+
+    const row = screen.getByText("Sound Constitution").closest("button")!;
+    await user.click(row);
+    expect(row).toBeDisabled();
+    expect(row).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => {
+      settle(true);
+    });
+    expect(row).toBeEnabled();
+    expect(row).not.toHaveAttribute("aria-busy");
   });
 
   it("reveals everything, including off-career talents, on the overflow screen", async () => {

@@ -89,7 +89,7 @@ export function TraitAcquisitionModal({
   cybernetics: CyberneticItem[];
   gear?: GearItem[];
   ownedTraitEntries?: TalentEntry[];
-  onComplete: (result: TraitAcquisitionResult) => void;
+  onComplete: (result: TraitAcquisitionResult) => void | Promise<boolean | void>;
   onClose: () => void;
 }) {
   const [picker, setPicker] = useState<PickerKind | null>(null);
@@ -576,7 +576,7 @@ export function TraitAcquisitionModal({
                       },
                     ]
                   : [];
-                onComplete({
+                return onComplete({
                   entry: {
                     ...entry,
                     notes: notesForSanctioning(sanctioning),
@@ -691,7 +691,7 @@ export function TraitAcquisitionModal({
             onClick={() => {
               if (skinKind === "upgrade") {
                 if (!selectedUpgrade) return;
-                onComplete({
+                return onComplete({
                   entry: {
                     ...entry,
                     notes: `${selectedUpgrade.name} upgraded from ${selectedUpgrade.craftsmanship} to Good.`,
@@ -730,7 +730,7 @@ export function TraitAcquisitionModal({
                 grantedByTalentName: "Skin of Iron",
                 grantedByType: "Trait",
               };
-              onComplete({
+              return onComplete({
                 entry: {
                   ...entry,
                   notes: `Common ${selectedCybernetic.name} gained at Rank ${skinRank}.`,

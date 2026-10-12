@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import type {
+  Character,
   CharacterHeader,
   CyberneticItem,
   ExperienceBlock,
@@ -76,6 +77,7 @@ interface BackgroundTabProps {
   onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
   insanity?: InsanityBlock;
   onUpdateInsanity?: (next: InsanityBlock) => void | Promise<void>;
+  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
 }
 
 type BackgroundSectionGroup = "appearance" | "background";
@@ -114,6 +116,7 @@ export function BackgroundTab({
   onUpdateExperience,
   insanity,
   onUpdateInsanity,
+  onUpdateCharacter,
 }: BackgroundTabProps) {
   const [showDivinationPicker, setShowDivinationPicker] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
@@ -482,6 +485,7 @@ export function BackgroundTab({
           onUpdateExperience={onUpdateExperience}
           insanity={insanity}
           onUpdateInsanity={onUpdateInsanity}
+          onUpdateCharacter={onUpdateCharacter}
         />
 
         <div className={`border-t ${colourDivider}`} />

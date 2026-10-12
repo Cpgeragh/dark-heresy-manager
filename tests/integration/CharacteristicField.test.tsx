@@ -1,6 +1,6 @@
 // tests/integration/CharacteristicField.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import { CharacteristicField } from "../../src/components/CharacteristicField";
@@ -150,7 +150,74 @@ describe("CharacteristicField", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Downgrade" }));
-    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 0 });
+    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 0 }, { optimistic: true });
+    expect(
+      screen.queryByRole("dialog", { name: "Downgrade Characteristic" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the upgrade dialog open with waiting dots until the save settles", async () => {
+    let settle: (saved: boolean) => void = () => {};
+    const onChange = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <CharacteristicField
+        label="Ballistic Skill"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={onChange}
+        tierCosts={[100, 200, 300, 400]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /ballistic skill advance 1 of 4/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Upgrade" }));
+
+    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 1 });
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Characteristic" });
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
+
+    await act(async () => {
+      settle(true);
+    });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Upgrade Characteristic" })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the upgrade dialog open when the server refuses the save", async () => {
+    let settle: (saved: boolean) => void = () => {};
+    const onChange = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <CharacteristicField
+        label="Ballistic Skill"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={onChange}
+        tierCosts={[100, 200, 300, 400]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /ballistic skill advance 1 of 4/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Upgrade" }));
+    await act(async () => {
+      settle(false);
+    });
+
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Characteristic" });
+    expect(dialog.querySelector('[aria-busy="true"]')).toBeNull();
+    expect(screen.getByRole("button", { name: "Upgrade" })).toBeEnabled();
   });
 
   it("shows no cost labels when tierCosts is omitted", () => {

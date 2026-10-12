@@ -103,8 +103,8 @@ function FaithTalentSection({
   psychic: PsychicBlock;
   editable: boolean;
   isDM: boolean;
-  onAdd: (entry: TalentEntry) => void;
-  onRemove: (uid: string) => void;
+  onAdd: (entry: TalentEntry) => void | Promise<boolean | void>;
+  onRemove: (uid: string) => void | Promise<unknown>;
   pickerSuspended?: boolean;
   career?: string;
   rank?: string;
@@ -165,7 +165,7 @@ const TalentCards = memo(function TalentCards({
   entries: TalentEntry[];
   psychic: PsychicBlock;
   editable: boolean;
-  onRemove: (uid: string) => void;
+  onRemove: (uid: string) => void | Promise<unknown>;
   getStatusChip?: (talentId: string) => FaithTalentGroupChip | undefined;
 }) {
   recordComponentRender("TalentCards");
@@ -295,8 +295,8 @@ function RegularTalentSection({
   psychic: PsychicBlock;
   editable: boolean;
   isDM: boolean;
-  onAdd: (entry: TalentEntry) => void;
-  onRemove: (uid: string) => void;
+  onAdd: (entry: TalentEntry) => void | Promise<boolean | void>;
+  onRemove: (uid: string) => void | Promise<unknown>;
   columns?: 1 | 2;
   pickerSuspended?: boolean;
   career?: string;
@@ -436,7 +436,7 @@ export function TalentsTab({
         setPendingEffectDeletion(entry);
         return;
       }
-      applyTalentRemoval(entry, false);
+      return applyTalentRemoval(entry, false);
     },
     [talents.talents, applyTalentRemoval]
   );

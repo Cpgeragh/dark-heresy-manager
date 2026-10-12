@@ -1,6 +1,6 @@
 // tests/integration/TraitsTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
@@ -209,6 +209,100 @@ describe("TraitsTab", () => {
     expect(onUpdateCybernetics).toHaveBeenCalledWith([
       expect.objectContaining({ id: "lungs", craftsmanship: "Common" }),
     ]);
+  });
+
+  it("saves a Trait removal and its cybernetic restore as one combined save", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(true);
+    const onUpdateCybernetics = vi.fn();
+    const entries: TalentEntry[] = [
+      { uid: "skin-1", talentId: "skin-of-iron", name: "Skin of Iron" },
+      {
+        uid: "skin-3",
+        talentId: "skin-of-iron",
+        name: "Skin of Iron",
+        acquisition: {
+          trait: {
+            skinOfIronGrants: [
+              { rank: 3, kind: "upgrade", cyberneticId: "lungs", previousCraftsmanship: "Common" },
+            ],
+          },
+        },
+      },
+    ];
+    const { onUpdateTalents } = renderTab({
+      talents: makeTalents({ traits: entries }),
+      cybernetics: [{ id: "lungs", name: "Bionic Respiratory System", craftsmanship: "Good" }],
+      onUpdateCybernetics,
+      onUpdateCharacter,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Delete Skin of Iron" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Delete Trait" })).getByRole("button", {
+        name: "Delete",
+      })
+    );
+
+    expect(onUpdateCharacter).toHaveBeenCalledTimes(1);
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      talentsAndTraits: expect.objectContaining({
+        traits: [expect.objectContaining({ uid: "skin-1" })],
+      }),
+      cybernetics: [expect.objectContaining({ id: "lungs", craftsmanship: "Common" })],
+    });
+    expect(onUpdateTalents).not.toHaveBeenCalled();
+    expect(onUpdateCybernetics).not.toHaveBeenCalled();
+  });
+
+  it("keeps the Delete button waiting until a Trait removal is saved", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdateCharacter = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
+    renderTab({ talents: makeTalents({ traits: [entry] }), onUpdateCharacter });
+
+    await user.click(screen.getByRole("button", { name: "Delete Plain Trait" }));
+    const dialog = screen.getByRole("dialog", { name: "Delete Trait" });
+    await user.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
+    await act(async () => {
+      settle(true);
+    });
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).toBeNull());
+  });
+
+  it("shows the picker row as waiting until a Trait add is saved", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdateCharacter = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    renderTab({ onUpdateCharacter });
+    await user.click(screen.getByRole("button", { name: "Add Trait" }));
+    await user.click(await screen.findByText("Plain Trait"));
+
+    const row = screen.getByText("Plain Trait").closest("button")!;
+    expect(row).toHaveAttribute("aria-busy", "true");
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      talentsAndTraits: expect.objectContaining({
+        traits: [expect.objectContaining({ name: "Plain Trait" })],
+      }),
+    });
+
+    await act(async () => {
+      settle(true);
+    });
+    expect(row).not.toHaveAttribute("aria-busy");
   });
 
   it("adds a trait into the traits array rather than talents", async () => {

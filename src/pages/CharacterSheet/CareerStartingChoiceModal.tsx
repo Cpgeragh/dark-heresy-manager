@@ -22,7 +22,7 @@ export function CareerStartingChoiceModal({
   onClose,
 }: {
   career: CareerData;
-  onComplete: (choices: CareerStartingChoices) => void;
+  onComplete: (choices: CareerStartingChoices) => void | Promise<boolean | void>;
   onClose: () => void;
 }) {
   const skillGrants = (career.startingSkillGrants ?? [])

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
@@ -79,6 +79,82 @@ describe("EliteAdvancesTab", () => {
     expect(screen.getByText("Encarta Maleficarum")).toBeInTheDocument();
   });
 
+  it("keeps the purchase dialog open with waiting dots until the save settles", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdateCharacter = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <EliteAdvancesTab
+        talents={EMPTY_TALENTS}
+        skills={[]}
+        experience={EXPERIENCE}
+        insanity={INSANITY}
+        career="Cleric"
+        rank="Preacher"
+        editable
+        onUpdateCharacter={onUpdateCharacter}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
+    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByText("The Cult of the Red Redemption"));
+    const purchase = screen.getByRole("dialog", { name: "Buy The Cult of the Red Redemption" });
+    await user.click(within(purchase).getByRole("button", { name: "Buy for 150 XP" }));
+
+    await waitFor(() => expect(purchase.querySelector('[aria-busy="true"]')).not.toBeNull());
+    await act(async () => {
+      settle(true);
+    });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Buy The Cult of the Red Redemption" })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the purchase dialog open when the server refuses the save", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdateCharacter = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(
+      <EliteAdvancesTab
+        talents={EMPTY_TALENTS}
+        skills={[]}
+        experience={EXPERIENCE}
+        insanity={INSANITY}
+        career="Cleric"
+        rank="Preacher"
+        editable
+        onUpdateCharacter={onUpdateCharacter}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
+    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByText("The Cult of the Red Redemption"));
+    const purchase = screen.getByRole("dialog", { name: "Buy The Cult of the Red Redemption" });
+    await user.click(within(purchase).getByRole("button", { name: "Buy for 150 XP" }));
+    await act(async () => {
+      settle(false);
+    });
+
+    expect(
+      screen.getByRole("dialog", { name: "Buy The Cult of the Red Redemption" })
+    ).toBeInTheDocument();
+    expect(purchase.querySelector('[aria-busy="true"]')).toBeNull();
+  });
+
   it("purchases the Cult of the Red Redemption as a general package", async () => {
     const user = userEvent.setup();
     render(<EditableHarness />);
@@ -104,7 +180,9 @@ describe("EliteAdvancesTab", () => {
     await user.click(screen.getByText("Special"));
     await user.click(screen.getByText("Nascent Psyker"));
     const purchase = screen.getByRole("dialog", { name: "Buy Nascent Psyker" });
-    expect(within(purchase).getByText("1 random permanent Minor Psychic Power")).toBeInTheDocument();
+    expect(
+      within(purchase).getByText("1 random permanent Minor Psychic Power")
+    ).toBeInTheDocument();
     await user.click(within(purchase).getByRole("button", { name: "Buy for 0 XP" }));
     await user.click(screen.getByRole("button", { name: "Back" }));
     await user.click(screen.getByRole("button", { name: "Close" }));

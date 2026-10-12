@@ -1,4 +1,5 @@
 import type {
+  Character,
   CharacterHeader,
   CyberneticItem,
   GearItem,
@@ -25,6 +26,7 @@ interface CompleteBackgroundSetupModalProps {
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
   gear?: GearItem[];
   onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
   onReturnToDashboard: () => void;
   onComplete: () => void;
 }
@@ -40,6 +42,7 @@ export function CompleteBackgroundSetupModal({
   onUpdateCybernetics,
   gear = [],
   onUpdateGear,
+  onUpdateCharacter,
   onReturnToDashboard,
   onComplete,
 }: CompleteBackgroundSetupModalProps) {
@@ -74,6 +77,7 @@ export function CompleteBackgroundSetupModal({
           onUpdateCybernetics={onUpdateCybernetics}
           gear={gear}
           onUpdateGear={onUpdateGear}
+          onUpdateCharacter={onUpdateCharacter}
         />
 
         {!editable && (

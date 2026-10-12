@@ -89,7 +89,7 @@ export function HomeworldPicker({
   onClose,
 }: {
   selected?: string;
-  onSelect: (homeworld: HomeworldData) => void;
+  onSelect: (homeworld: HomeworldData) => void | Promise<boolean | void>;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");

@@ -664,7 +664,7 @@ export function CyberneticsTab({
           creator: { userId, characterId, characterName },
           data,
         });
-        onUpdateRanged([
+        await onUpdateRanged([
           ...rangedWeapons,
           buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);
@@ -691,7 +691,7 @@ export function CyberneticsTab({
           creator: { userId, characterId, characterName },
           data,
         });
-        onUpdateMelee([
+        await onUpdateMelee([
           ...meleeWeapons,
           buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);

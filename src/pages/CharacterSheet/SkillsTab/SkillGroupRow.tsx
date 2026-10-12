@@ -21,9 +21,13 @@ interface SkillGroupRowProps {
   category: string;
   skills: SkillWithComputed[];
   editable: boolean;
-  updateLevel: (id: string, level: SkillAdvanceLevel) => void;
+  updateLevel: (id: string, level: SkillAdvanceLevel) => void | Promise<boolean | void>;
   getNextTierAccess?: (skillId: string, level: SkillAdvanceLevel) => SkillTierAccess;
-  onManualUpgrade?: (id: string, level: SkillAdvanceLevel, cost: number) => void;
+  onManualUpgrade?: (
+    id: string,
+    level: SkillAdvanceLevel,
+    cost: number
+  ) => void | Promise<boolean | void>;
   isDM?: boolean;
 }
 

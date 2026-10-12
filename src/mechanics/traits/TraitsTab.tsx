@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type {
   AlternateRankSelection,
+  Character,
   CyberneticItem,
   GearItem,
   TalentsAndTraitsBlock,
@@ -44,6 +45,8 @@ interface TraitsTabProps {
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
   onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  /** Saves several character fields in one step, so a Trait change that touches talents, cybernetics and gear is accepted or refused as a whole. */
+  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
   campaignId?: string;
   characterId?: string;
   userId?: string | null;
@@ -127,6 +130,7 @@ export function TraitsTab({
   onUpdateTalents,
   onUpdateCybernetics,
   onUpdateGear,
+  onUpdateCharacter,
   campaignId,
   characterId,
   userId,
@@ -157,6 +161,17 @@ export function TraitsTab({
       itemLabel: "trait",
     });
 
+  const saveCharacter = useCallback(
+    async (partial: Partial<Character>): Promise<boolean> => {
+      if (onUpdateCharacter) return onUpdateCharacter(partial);
+      if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
+      if (partial.cybernetics) void onUpdateCybernetics?.(partial.cybernetics);
+      if (partial.gear) void onUpdateGear?.(partial.gear);
+      return true;
+    },
+    [onUpdateCharacter, onUpdateTalents, onUpdateCybernetics, onUpdateGear]
+  );
+
   const addCustomTrait = useCallback(
     async (data: CustomTraitData) => {
       if (!userId || !campaignId) {
@@ -169,27 +184,30 @@ export function TraitsTab({
         creator: { userId, characterId, characterName },
         data,
       });
-      onUpdateTalents({
-        ...talents,
-        traits: [
-          ...talents.traits,
-          buildTraitSnapshot(
-            crypto.randomUUID(),
-            `custom-trait:${customItemId}`,
-            data,
-            customItemId,
-            versionId
-          ),
-        ],
+      const saved = await saveCharacter({
+        talentsAndTraits: {
+          ...talents,
+          traits: [
+            ...talents.traits,
+            buildTraitSnapshot(
+              crypto.randomUUID(),
+              `custom-trait:${customItemId}`,
+              data,
+              customItemId,
+              versionId
+            ),
+          ],
+        },
       });
+      if (saved === false) return;
       setCustomTraitOpen(false);
       toast.success("Custom trait saved as a campaign draft.");
     },
-    [userId, campaignId, characterId, characterName, talents, onUpdateTalents, toast]
+    [userId, campaignId, characterId, characterName, talents, saveCharacter, toast]
   );
 
   const fromCustomLibrary = useCallback(
-    (item: CampaignCustomItem<"trait">) => {
+    async (item: CampaignCustomItem<"trait">) => {
       const versionId =
         item.status === "published"
           ? item.publishedVersionId
@@ -198,22 +216,24 @@ export function TraitsTab({
         toast.error("This custom trait has no usable version.");
         return;
       }
-      onUpdateTalents({
-        ...talents,
-        traits: [
-          ...talents.traits,
-          buildTraitSnapshot(
-            crypto.randomUUID(),
-            `custom-trait:${item.id}`,
-            item.data,
-            item.id,
-            versionId
-          ),
-        ],
+      const saved = await saveCharacter({
+        talentsAndTraits: {
+          ...talents,
+          traits: [
+            ...talents.traits,
+            buildTraitSnapshot(
+              crypto.randomUUID(),
+              `custom-trait:${item.id}`,
+              item.data,
+              item.id,
+              versionId
+            ),
+          ],
+        },
       });
-      setShowPicker(false);
+      if (saved !== false) setShowPicker(false);
     },
-    [talents, onUpdateTalents, toast]
+    [talents, saveCharacter, toast]
   );
 
   const updateCustomTrait = useCallback(
@@ -227,14 +247,17 @@ export function TraitsTab({
           editor: { userId, characterId, characterName },
           data,
         });
-        onUpdateTalents({
-          ...talents,
-          traits: talents.traits.map((entry) =>
-            entry.uid === editingCustomTrait.uid
-              ? { ...entry, ...data, customLibraryVersionId: versionId }
-              : entry
-          ),
+        const saved = await saveCharacter({
+          talentsAndTraits: {
+            ...talents,
+            traits: talents.traits.map((entry) =>
+              entry.uid === editingCustomTrait.uid
+                ? { ...entry, ...data, customLibraryVersionId: versionId }
+                : entry
+            ),
+          },
         });
+        if (saved === false) return;
         setEditingCustomTrait(null);
         toast.success("Custom trait draft updated.");
       } catch (err) {
@@ -249,7 +272,7 @@ export function TraitsTab({
       characterName,
       editingCustomTrait,
       talents,
-      onUpdateTalents,
+      saveCharacter,
       toast,
     ]
   );
@@ -273,15 +296,23 @@ export function TraitsTab({
         setPendingAcquisition(entry);
         return;
       }
-      onUpdateTalents({ ...talents, traits: [...talents.traits, entry] });
+      return saveCharacter({
+        talentsAndTraits: { ...talents, traits: [...talents.traits, entry] },
+      });
     },
-    [talents, onUpdateTalents]
+    [talents, saveCharacter]
   );
 
   const handleRemoveTrait = useCallback(
     (uid: string) => {
       const removed = talents.traits.find((entry) => entry.uid === uid);
-      if (onUpdateCybernetics) {
+      const partial: Partial<Character> = {
+        talentsAndTraits: {
+          ...talents,
+          traits: talents.traits.filter((trait) => trait.uid !== uid),
+        },
+      };
+      if (onUpdateCharacter || onUpdateCybernetics) {
         let nextCybernetics = cybernetics.filter((item) => item.grantedByTalentEntryUid !== uid);
         for (const grant of removed?.acquisition?.trait?.skinOfIronGrants ?? []) {
           if (grant.kind === "upgrade" && grant.previousCraftsmanship) {
@@ -293,15 +324,12 @@ export function TraitsTab({
           }
         }
         if (JSON.stringify(nextCybernetics) !== JSON.stringify(cybernetics)) {
-          void onUpdateCybernetics(nextCybernetics);
+          partial.cybernetics = nextCybernetics;
         }
       }
-      onUpdateTalents({
-        ...talents,
-        traits: talents.traits.filter((trait) => trait.uid !== uid),
-      });
+      return saveCharacter(partial);
     },
-    [cybernetics, onUpdateCybernetics, talents, onUpdateTalents]
+    [cybernetics, onUpdateCharacter, onUpdateCybernetics, talents, saveCharacter]
   );
 
   const cards = [
@@ -454,18 +482,17 @@ export function TraitsTab({
                   ownedTraitEntries={talents.traits.filter(
                     (entry) => entry.talentId === pendingAcquisition.talentId
                   )}
-                  onComplete={(result) => {
-                    onUpdateTalents({
-                      ...talents,
-                      traits: [...talents.traits, result.entry],
+                  onComplete={async (result) => {
+                    const saved = await saveCharacter({
+                      talentsAndTraits: {
+                        ...talents,
+                        traits: [...talents.traits, result.entry],
+                      },
+                      ...(result.cybernetics ? { cybernetics: result.cybernetics } : {}),
+                      ...(result.gear ? { gear: result.gear } : {}),
                     });
-                    if (result.cybernetics && onUpdateCybernetics) {
-                      void onUpdateCybernetics(result.cybernetics);
-                    }
-                    if (result.gear && onUpdateGear) {
-                      void onUpdateGear(result.gear);
-                    }
-                    setPendingAcquisition(null);
+                    if (saved !== false) setPendingAcquisition(null);
+                    return saved;
                   }}
                   onClose={() => setPendingAcquisition(null)}
                 />

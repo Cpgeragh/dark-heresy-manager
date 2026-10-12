@@ -34,7 +34,7 @@ export function HomeworldTraitAcquisitionModal({
   onClose,
 }: {
   homeworldId: string;
-  onComplete: (choices: HomeworldTraitChoices) => void;
+  onComplete: (choices: HomeworldTraitChoices) => void | Promise<boolean | void>;
   onClose: () => void;
 }) {
   const [picker, setPicker] = useState<ChoicePicker>(null);

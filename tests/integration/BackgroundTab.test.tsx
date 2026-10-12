@@ -1,6 +1,6 @@
 // tests/integration/BackgroundTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { act, render, screen, within, fireEvent } from "@testing-library/react";
+import { act, render, screen, within, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -376,6 +376,103 @@ describe("BackgroundTab", () => {
   it("shows a placeholder when no homeworld is selected", () => {
     renderTab();
     expect(screen.getByText("— Select homeworld —")).toBeInTheDocument();
+  });
+
+  it("saves a Homeworld change that removes the Career as one combined save", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(true);
+    const onUpdateCybernetics = vi.fn();
+    const { onUpdateHeader, onUpdateTalents } = renderTab({
+      header: { characterName: "Brother Corvus", career: "Imperial Psyker", rank: "Sanctionite" },
+      talents: {
+        homeworld: "feral-world",
+        talents: [],
+        traits: [],
+        careerTraitAcquisition: {
+          sanctioning: { resultId: "optical-rupture", resultName: "Optical Rupture" },
+        },
+      },
+      cybernetics: [
+        {
+          id: "sanctioned-eyes",
+          name: "Cybernetic Senses",
+          craftsmanship: "Common",
+          grantedByTalentEntryUid: "career:imperial-psyker:sanctioned-psyker",
+        },
+        { id: "independent", name: "Bionic Arm", craftsmanship: "Common" },
+      ],
+      onUpdateCybernetics,
+      onUpdateCharacter,
+    });
+    await user.click(screen.getByRole("button", { name: "Change Homeworld" }));
+    await user.click(screen.getByText("Forge World"));
+
+    expect(onUpdateCharacter).toHaveBeenCalledTimes(1);
+    expect(onUpdateCharacter).toHaveBeenCalledWith({
+      talentsAndTraits: expect.objectContaining({ careerTraitAcquisition: undefined }),
+      header: expect.objectContaining({ career: "", rank: "", careerPath: undefined }),
+      cybernetics: [expect.objectContaining({ id: "independent" })],
+    });
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+    expect(onUpdateTalents).not.toHaveBeenCalled();
+    expect(onUpdateCybernetics).not.toHaveBeenCalled();
+  });
+
+  it("keeps the Career picker open with a waiting row until the pick is saved", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdateCharacter = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    renderTab({
+      talents: { homeworld: "hive-world", talents: [], traits: [] },
+      onUpdateCharacter,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Select Career" }));
+    await user.click(screen.getByText("Arbitrator"));
+
+    const row = screen.getByText("Arbitrator").closest("button")!;
+    expect(row).toHaveAttribute("aria-busy", "true");
+    expect(onUpdateCharacter).toHaveBeenCalledTimes(1);
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        header: expect.objectContaining({ career: "Arbitrator", rank: "Trooper" }),
+      })
+    );
+
+    await act(async () => {
+      settle(true);
+    });
+    await waitFor(() => expect(screen.queryByText("Arbitrator")).not.toBeInTheDocument());
+  });
+
+  it("keeps the Career picker open when the server refuses the pick", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onUpdateCharacter = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    renderTab({
+      talents: { homeworld: "hive-world", talents: [], traits: [] },
+      onUpdateCharacter,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Select Career" }));
+    await user.click(screen.getByText("Arbitrator"));
+    await act(async () => {
+      settle(false);
+    });
+
+    const row = screen.getByText("Arbitrator").closest("button")!;
+    expect(row).not.toHaveAttribute("aria-busy");
+    expect(row).toBeEnabled();
   });
 
   it("selects a homeworld via its picker", async () => {

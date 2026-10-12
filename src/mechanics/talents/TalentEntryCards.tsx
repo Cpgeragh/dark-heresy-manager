@@ -38,7 +38,7 @@ import { recordComponentRender } from "../../performance/performanceMetrics";
 interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
   editable: boolean;
-  onRemove: (uid: string) => void;
+  onRemove: (uid: string) => void | Promise<unknown>;
   confirmDeletion?: boolean;
   displayName?: string;
   secondaryText?: string;
@@ -240,7 +240,7 @@ export function TalentGroupCard({
   name: string;
   entries: readonly TalentEntry[];
   editable: boolean;
-  onRemove: (uid: string) => void;
+  onRemove: (uid: string) => void | Promise<unknown>;
   statusAfterSource?: boolean;
   statusChip?: string;
   statusChipColour?: ChipColour;

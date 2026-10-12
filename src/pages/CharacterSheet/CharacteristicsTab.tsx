@@ -13,6 +13,7 @@ import {
   type CharacteristicModifierSource,
 } from "../../mechanics/corruption/characteristicModifierTotals";
 import { CharacteristicField } from "../../components/CharacteristicField";
+import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import { InfoModal } from "../../components/InfoModal";
 import {
   CHARACTERISTIC_BONUS_DIVISOR,
@@ -65,7 +66,11 @@ interface StatBlockProps {
   sources: CharacteristicModifierSource[];
   tierCosts: (number | null | undefined)[];
   getCharField: (statKey: keyof Characteristics) => CharField;
-  updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
+  updateCharacteristic: (
+    statKey: keyof Characteristics,
+    value: CharField,
+    options?: PatchOptions
+  ) => void | Promise<boolean | void>;
 }
 
 function StatBlock({
@@ -84,9 +89,7 @@ function StatBlock({
   const effectiveTotal = Math.max(1, statTotal + adjustment);
 
   const handleChange = useCallback(
-    (v: CharField) => {
-      updateCharacteristic(statKey, v);
-    },
+    (v: CharField, options?: PatchOptions) => updateCharacteristic(statKey, v, options),
     [statKey, updateCharacteristic]
   );
 
@@ -183,7 +186,11 @@ interface CharacteristicsTabProps {
   career?: string;
   rank?: string;
   alternateRanks?: readonly AlternateRankSelection[];
-  updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
+  updateCharacteristic: (
+    statKey: keyof Characteristics,
+    value: CharField,
+    options?: PatchOptions
+  ) => void | Promise<boolean | void>;
 }
 
 export function CharacteristicsTab({
@@ -379,7 +386,7 @@ export function CharacteristicsTab({
   const waryInitiative = talents ? getWaryInitiativeBonus(talents, career) : 0;
 
   const updateCharacteristicWithPurchase = useCallback(
-    (statKey: keyof Characteristics, next: CharField) => {
+    (statKey: keyof Characteristics, next: CharField, options?: PatchOptions) => {
       const current = getCharField(statKey);
       const purchases = { ...current.advancePurchases };
       const tierCosts = getCharacteristicTierCosts(career, statKey, alternateRanks);
@@ -398,9 +405,10 @@ export function CharacteristicsTab({
         }
       }
 
-      updateCharacteristic(
+      return updateCharacteristic(
         statKey,
-        Object.keys(purchases).length > 0 ? { ...next, advancePurchases: purchases } : next
+        Object.keys(purchases).length > 0 ? { ...next, advancePurchases: purchases } : next,
+        options
       );
     },
     [alternateRanks, career, getCharField, rank, updateCharacteristic]

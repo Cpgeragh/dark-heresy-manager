@@ -35,16 +35,20 @@ import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 interface SkillRowProps {
   skill: SkillWithComputed;
   editable: boolean;
-  updateLevel: (id: string, level: SkillAdvanceLevel) => void;
+  updateLevel: (id: string, level: SkillAdvanceLevel) => void | Promise<boolean | void>;
   previewMode?: boolean;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string) => void | Promise<boolean | void>;
   indented?: boolean;
   hideLevelChip?: boolean;
   /** Real XP cost to train this skill, shown as a chip in previewMode when known. */
   cost?: number;
   /** What buying this skill's next tier looks like right now. Owned rows only, not previewMode. */
   nextTierAccess?: SkillTierAccess;
-  onManualUpgrade?: (id: string, level: SkillAdvanceLevel, cost: number) => void;
+  onManualUpgrade?: (
+    id: string,
+    level: SkillAdvanceLevel,
+    cost: number
+  ) => void | Promise<boolean | void>;
   isDM?: boolean;
 }
 
@@ -327,9 +331,9 @@ export function SkillRow({
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="primary"
-                onClick={() => {
-                  updateLevel(skill.id, nextTierAccess.level);
-                  setUpgradeArmed(false);
+                onClick={async () => {
+                  const saved = await updateLevel(skill.id, nextTierAccess.level);
+                  if (saved !== false) setUpgradeArmed(false);
                 }}
               >
                 Upgrade
@@ -362,10 +366,16 @@ export function SkillRow({
               <Button
                 variant="primary"
                 disabled={!canConfirmManualUpgrade}
-                onClick={() => {
-                  onManualUpgrade?.(skill.id, nextTierAccess.level, manualUpgradeCostNumber);
-                  setManualUpgradeArmed(false);
-                  setManualUpgradeCost("");
+                onClick={async () => {
+                  const saved = await onManualUpgrade?.(
+                    skill.id,
+                    nextTierAccess.level,
+                    manualUpgradeCostNumber
+                  );
+                  if (saved !== false) {
+                    setManualUpgradeArmed(false);
+                    setManualUpgradeCost("");
+                  }
                 }}
               >
                 Upgrade

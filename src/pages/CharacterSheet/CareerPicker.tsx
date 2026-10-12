@@ -121,7 +121,7 @@ export function CareerPicker({
 }: {
   selected?: string;
   homeworld: HomeworldData;
-  onSelect: (career: CareerData) => void;
+  onSelect: (career: CareerData) => void | Promise<boolean | void>;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");

@@ -481,8 +481,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateSkills = useCallback(
-    (next: SkillEntry[]) => patchField("skills", next),
-    [patchField]
+    (next: SkillEntry[], options?: PatchOptions) => patchFieldWithResult("skills", next, options),
+    [patchFieldWithResult]
   );
 
   const handleUpdateTalents = useCallback(
@@ -491,8 +491,9 @@ export default function CharacterSheet({
   );
 
   const handleUpdateWeaponTraining = useCallback(
-    (next: WeaponTrainingBlock) => patchField("weaponTraining", next),
-    [patchField]
+    (next: WeaponTrainingBlock, options?: PatchOptions) =>
+      patchFieldWithResult("weaponTraining", next, options),
+    [patchFieldWithResult]
   );
 
   const handleUpdateRangedWeapons = useCallback(
@@ -630,6 +631,7 @@ export default function CharacterSheet({
         onUpdateCybernetics={handleUpdateCybernetics}
         gear={character.gear ?? EMPTY_GEAR}
         onUpdateGear={handleUpdateGear}
+        onUpdateCharacter={patchFieldsWithResult}
         onReturnToDashboard={() => navigate(ROUTES.DASHBOARD)}
         onComplete={() => {
           void updateField("backgroundComplete", true);
@@ -864,6 +866,7 @@ export default function CharacterSheet({
                   onUpdateTalents={handleUpdateTalents}
                   onUpdateCybernetics={handleUpdateCybernetics}
                   onUpdateGear={handleUpdateGear}
+                  onUpdateCharacter={patchFieldsWithResult}
                   campaignId={path.campaignId}
                   characterId={character.id}
                   userId={effectiveUserId}
@@ -1028,6 +1031,7 @@ export default function CharacterSheet({
                   onUpdateExperience={handleUpdateExperience}
                   insanity={character.insanity}
                   onUpdateInsanity={handleUpdateInsanity}
+                  onUpdateCharacter={patchFieldsWithResult}
                 />
               )}
 

@@ -7,7 +7,7 @@
 // concealed-weapon-bionic install flow, quality-cycling and its weapon-link side
 // effect, the custom/library implant flows, and integrated-weapon wiring.
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import type {
@@ -547,5 +547,31 @@ describe("CyberneticsTab", () => {
         integrated: true,
       }),
     ]);
+  });
+
+  it("keeps the custom integrated ranged form open until the character save settles", async () => {
+    const user = userEvent.setup();
+    createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-4", versionId: "v4" });
+    let settle: () => void = () => {};
+    const onUpdateRanged = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          settle = resolve;
+        })
+    );
+    renderTab({ onUpdateRanged });
+
+    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+    await user.click(screen.getByText("Mock Add Custom Integrated Ranged Trigger"));
+    await user.click(screen.getByText("Mock Submit Custom Integrated Ranged"));
+
+    expect(onUpdateRanged).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Mock Submit Custom Integrated Ranged")).toBeInTheDocument();
+
+    await act(async () => {
+      settle();
+    });
+    expect(screen.queryByText("Mock Submit Custom Integrated Ranged")).not.toBeInTheDocument();
+    expect(screen.getByText("Mock Select Integrated Ranged")).toBeInTheDocument();
   });
 });
