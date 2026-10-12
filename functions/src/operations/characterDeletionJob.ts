@@ -1,18 +1,16 @@
 // functions/src/operations/characterDeletionJob.ts
 //
-// A resumable bulk job, replacing the client's "fits in
-// one 440-document atomic batch, or the operation is refused" ceiling for
-// character deletion (src/services/characterService.ts,
-// src/utils/firestoreBatchDelete.ts) with a chunked, checkpointed job that
-// can finish a deletion of any size.
+// A resumable bulk job that deletes a character in checkpointed chunks, so a
+// deletion of any size can finish.
 //
-// Mirrors the client's dependent-document set exactly: claimLog, xpHistory, xpProposals,
-// the character's thread and its messages, the recoveryIndex entry, then the
-// character document itself, deleted last so nothing is ever left pointing
-// at a character that no longer exists. Unlike the client, the Recovery Code
-// used to find the recoveryIndex entry is read from the character document
-// server-side rather than accepted as a caller-supplied field. Only its
-// HMAC-derived lookup ID is stored with the resumable job.
+// The dependent documents are deleted in this order: claimLog, xpHistory,
+// xpProposals, the character's thread and its messages, the recoveryIndex
+// entry, the character summary, then the character document itself, deleted
+// last so nothing is ever left pointing at a character that no longer
+// exists. The Recovery Code used to find the recoveryIndex entry is read from
+// the character document server-side rather than accepted as a
+// caller-supplied field. Only its HMAC-derived lookup ID is stored with the
+// resumable job.
 
 import { FieldPath, getFirestore, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";

@@ -13,6 +13,7 @@ import {
   type UpdateData,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
+import { computeCharacterSummaryFields, isSummaryRelevantField } from "shared-rules";
 
 import { db, auth, functions } from "../firebase";
 import {
@@ -68,23 +69,15 @@ export function computeCharacterSummary(
   character: Character,
   livePlayerName?: string | null
 ): CharacterSummaryWithId {
-  const profileName = livePlayerName?.trim() ?? "";
-  const storedName = character.header.playerName?.trim() ?? "";
-  return stripUndefined({
+  return {
     id: character.id,
-    campaignId: character.campaignId,
-    characterName: character.header.characterName,
-    playerName: profileName || storedName || undefined,
-    career: character.header.career,
-    rank: character.header.rank,
-    portraitUrl: character.portraitUrl,
-    userId: character.userId,
-  }) as CharacterSummaryWithId;
+    ...computeCharacterSummaryFields(character, livePlayerName),
+  } as CharacterSummaryWithId;
 }
 
 /** True when a partial character write touches a field the summary carries. */
 function touchesCharacterSummary(partial: Partial<Character>): boolean {
-  return "header" in partial || "portraitUrl" in partial;
+  return Object.keys(partial).some(isSummaryRelevantField);
 }
 
 /**

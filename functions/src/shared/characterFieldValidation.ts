@@ -1,15 +1,13 @@
 // functions/src/shared/characterFieldValidation.ts
 //
 // Server-side validators for individual Character document fields, used by
-// patchCharacterField. functions/ cannot import from src/, so these limits
-// are deliberately duplicated from src/constants/productLimits.ts and must
-// be kept in sync by hand, the same coupling already accepted for the
-// Recovery Code format (recoveryCode.ts) and the custom-item copy-mutation
-// logic (customItemCopyMutation.ts).
+// patchCharacterField. The nested size limits come from shared-rules, the
+// same values the browser uses.
 
 import { HttpsError } from "firebase-functions/v2/https";
 import {
   ALTERNATE_RANKS,
+  CHARACTER_DOCUMENT_LIMITS,
   CHARACTERISTIC_ADVANCE_TIERS,
   ELITE_ADVANCES,
   findCareerByName,
@@ -32,11 +30,11 @@ import {
   type WeaponTrainingTalentId,
 } from "shared-rules";
 
-const CHARACTER_FIELD_BYTES = 900_000; // matches PRODUCT_LIMITS.characterDocumentBytes
-const CHARACTER_FIELD_ARRAY_ENTRIES = 200; // matches PRODUCT_LIMITS.characterArrayEntries
-const CHARACTER_FIELD_OBJECT_KEYS = 100; // matches PRODUCT_LIMITS.characterObjectKeys
-const CHARACTER_FIELD_NESTING_DEPTH = 8; // matches PRODUCT_LIMITS.characterNestingDepth
-const CHARACTER_FIELD_STRING_CHARACTERS = 4_000; // matches PRODUCT_LIMITS.characterFieldCharacters
+const CHARACTER_FIELD_BYTES = CHARACTER_DOCUMENT_LIMITS.documentBytes;
+const CHARACTER_FIELD_ARRAY_ENTRIES = CHARACTER_DOCUMENT_LIMITS.arrayEntries;
+const CHARACTER_FIELD_OBJECT_KEYS = CHARACTER_DOCUMENT_LIMITS.objectKeys;
+const CHARACTER_FIELD_NESTING_DEPTH = CHARACTER_DOCUMENT_LIMITS.nestingDepth;
+const CHARACTER_FIELD_STRING_CHARACTERS = CHARACTER_DOCUMENT_LIMITS.fieldCharacters;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

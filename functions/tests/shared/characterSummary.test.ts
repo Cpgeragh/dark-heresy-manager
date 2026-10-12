@@ -1,6 +1,6 @@
 // functions/tests/shared/characterSummary.test.ts
 import { describe, it, expect } from "vitest";
-import { computeCharacterSummary, isSummaryRelevantField } from "../../src/shared/characterSummary";
+import { computeCharacterSummaryFields, isSummaryRelevantField } from "shared-rules";
 
 describe("isSummaryRelevantField", () => {
   it("treats header as summary-relevant", () => {
@@ -16,10 +16,10 @@ describe("isSummaryRelevantField", () => {
   });
 });
 
-describe("computeCharacterSummary", () => {
+describe("computeCharacterSummaryFields", () => {
   it("derives the restricted fields from a full character record", () => {
     expect(
-      computeCharacterSummary({
+      computeCharacterSummaryFields({
         campaignId: "camp-1",
         header: {
           characterName: "Brother Corvus",
@@ -43,13 +43,16 @@ describe("computeCharacterSummary", () => {
 
   it("omits optional fields that aren't set", () => {
     expect(
-      computeCharacterSummary({ campaignId: "camp-1", header: { characterName: "Brother Corvus" } })
+      computeCharacterSummaryFields({
+        campaignId: "camp-1",
+        header: { characterName: "Brother Corvus" },
+      })
     ).toEqual({ campaignId: "camp-1", characterName: "Brother Corvus" });
   });
 
   it("uses a live profile name before the stored fallback", () => {
     expect(
-      computeCharacterSummary(
+      computeCharacterSummaryFields(
         {
           campaignId: "camp-1",
           userId: "player-1",
@@ -67,7 +70,7 @@ describe("computeCharacterSummary", () => {
 
   it("uses the stored name when no live profile name exists", () => {
     expect(
-      computeCharacterSummary({
+      computeCharacterSummaryFields({
         campaignId: "camp-1",
         userId: null,
         header: { characterName: "Brother Corvus", playerName: " Temporary Name " },
@@ -81,7 +84,7 @@ describe("computeCharacterSummary", () => {
   });
 
   it("never includes the Recovery Code or any other sheet data", () => {
-    const summary = computeCharacterSummary({
+    const summary = computeCharacterSummaryFields({
       campaignId: "camp-1",
       header: { characterName: "Brother Corvus" },
       recoveryCode: "DH-TEST-0001",

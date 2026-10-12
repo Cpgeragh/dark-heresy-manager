@@ -109,6 +109,13 @@ export {
   RECOVERY_CODE_SEGMENTS,
   isRecoveryCodeFormat,
 } from "./recoveryCodeFormat.js";
+export {
+  computeCharacterSummaryFields,
+  isSummaryRelevantField,
+  type CharacterSummaryFields,
+  type CharacterSummarySource,
+} from "./characterSummary.js";
+export { CHARACTER_DOCUMENT_LIMITS } from "./characterLimits.js";
 export type {
   CharacteristicAdvanceTier,
   Characteristics,

@@ -8,13 +8,13 @@
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { computeCharacterSummaryFields, isSummaryRelevantField } from "shared-rules";
 import { assertCanEditCharacter } from "../shared/characterAuthorization.js";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import {
   assertValidCharacterFieldValue,
   assertValidCharacterFieldTransition,
 } from "../shared/characterFieldValidation.js";
-import { computeCharacterSummary, isSummaryRelevantField } from "../shared/characterSummary.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 import { assertCharacterXpBudget } from "../shared/spentXp.js";
 
@@ -131,7 +131,7 @@ export async function patchCharacterField(
       if (updatesSummary) {
         const merged = { ...characterData, ...patch };
         const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
-        transaction.set(summaryRef, computeCharacterSummary(merged, livePlayerName));
+        transaction.set(summaryRef, computeCharacterSummaryFields(merged, livePlayerName));
       }
     },
     { maxAttempts: 5 }

@@ -625,7 +625,7 @@ export default function Settings({
                   loadingLabel="Unlinking"
                   onClick={() => void handleDisconnectOtherDevice()}
                 >
-                  Yes, unlink
+                  Unlink
                 </Button>
                 <Button
                   variant="neutral"
@@ -687,7 +687,7 @@ export default function Settings({
                     if (result !== "failed") setDisconnectConfirmOpen(false);
                   }}
                 >
-                  Yes, unlink
+                  Unlink
                 </Button>
                 <Button
                   variant="neutral"

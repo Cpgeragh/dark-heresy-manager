@@ -1,10 +1,8 @@
 // functions/src/shared/customItemCopyMutation.ts
 //
-// Duplicates the per-character custom-item copy update/removal
-// logic from src/services/customItemService.ts (buildCharacterCopyUpdate,
-// buildCharacterCopyRemoval, updateLinkedArray). functions/ cannot import
-// from src/, so this is a deliberate, minimal, structurally-typed copy.
-// Keep it in sync with the client version if that logic ever changes.
+// The per-character custom-item copy update and removal logic used by
+// customItemMutationJob.ts. It is structurally typed so it does not depend
+// on the full Character type.
 
 export type CustomItemCategory =
   | "gear"

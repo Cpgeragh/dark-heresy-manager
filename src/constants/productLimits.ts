@@ -1,4 +1,4 @@
-import { CUSTOM_ITEM_VALIDATION_LIMITS } from "shared-rules";
+import { CHARACTER_DOCUMENT_LIMITS, CUSTOM_ITEM_VALIDATION_LIMITS } from "shared-rules";
 
 /**
  * Authoritative product ceilings for user-created and stored Firebase data.
@@ -45,11 +45,11 @@ export const PRODUCT_LIMITS = {
   customItemNestingDepth: CUSTOM_ITEM_VALIDATION_LIMITS.nestingDepth,
 
   characterImportBytes: 750_000,
-  characterDocumentBytes: 900_000,
-  characterArrayEntries: 200,
-  characterObjectKeys: 100,
-  characterNestingDepth: 8,
-  characterFieldCharacters: 4_000,
+  characterDocumentBytes: CHARACTER_DOCUMENT_LIMITS.documentBytes,
+  characterArrayEntries: CHARACTER_DOCUMENT_LIMITS.arrayEntries,
+  characterObjectKeys: CHARACTER_DOCUMENT_LIMITS.objectKeys,
+  characterNestingDepth: CHARACTER_DOCUMENT_LIMITS.nestingDepth,
+  characterFieldCharacters: CHARACTER_DOCUMENT_LIMITS.fieldCharacters,
 
   portraitInputBytes: 5_000_000,
   portraitEncodedBytes: 350_000,

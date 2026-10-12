@@ -311,7 +311,7 @@ describe("Settings linked device", () => {
 
     await user.click(screen.getByRole("button", { name: "Manage devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Old laptop" }));
-    await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
+    await user.click(screen.getByRole("button", { name: "Unlink" }));
 
     expect(disconnectOtherDeviceMock).toHaveBeenCalledWith("device-2");
     const manageDevices = screen.getByRole("dialog", { name: "Manage Devices" });
@@ -332,7 +332,7 @@ describe("Settings linked device", () => {
 
     await user.click(screen.getByRole("button", { name: "Manage devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Phone" }));
-    await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
+    await user.click(screen.getByRole("button", { name: "Unlink" }));
 
     expect(disconnect).toHaveBeenCalledWith(false);
   });
@@ -344,7 +344,7 @@ describe("Settings linked device", () => {
 
     await user.click(screen.getByRole("button", { name: "Manage devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Phone" }));
-    await user.click(screen.getByRole("button", { name: "Yes, unlink" }));
+    await user.click(screen.getByRole("button", { name: "Unlink" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("Failed to disconnect device. Please try again.")

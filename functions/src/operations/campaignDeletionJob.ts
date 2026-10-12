@@ -1,20 +1,16 @@
 // functions/src/operations/campaignDeletionJob.ts
 //
-// A resumable bulk job, replacing the client's "fits in
-// one 440-document atomic batch, or the operation is refused" ceiling for
-// campaign deletion (src/services/campaignService.ts's
-// buildCampaignDeletionPlan) with a chunked, checkpointed job that can
-// finish a deletion of any size.
+// A resumable bulk job that deletes a campaign in checkpointed chunks, so a
+// deletion of any size can finish.
 //
-// Mirrors the client's dependent-document tree exactly: every character's
-// claimLog and xpProposals subcollections plus its derived recoveryIndex
-// entry, every thread's messages, every custom item's versions, the flat
-// sessions and member-safe sessionSummaries collections, then the
-// character/thread/customItem documents
-// themselves, then the campaign document last. Like the client, the whole
-// deletion is refused upfront if any character lacks a valid-format
-// Recovery Code, since that's the only way its recoveryIndex entry can be
-// found and removed safely.
+// The phases run in this order: every character's claimLog, xpHistory and
+// xpProposals subcollections, its derived recoveryIndex entry and its
+// summary, the characters, the flat sessions and member-safe
+// sessionSummaries collections, every thread's messages and the threads,
+// every custom item's versions and the custom items, then the campaign
+// document last. The whole deletion is refused upfront if any character
+// lacks a valid-format Recovery Code, since that is the only way its
+// recoveryIndex entry can be found and removed safely.
 
 import {
   FieldPath,

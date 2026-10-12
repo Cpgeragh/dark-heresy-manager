@@ -149,6 +149,7 @@ import {
   revokeRecoveryCode,
   updateCharacter,
 } from "../../src/services/characterService";
+import { computeCharacterSummaryFields } from "shared-rules";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
 
@@ -539,6 +540,34 @@ describe("updateCharacter", () => {
     );
 
     expect(summary.playerName).toBe("Iris");
+  });
+
+  it("derives the browser summary from the shared fields plus the id, and never carries sheet data", () => {
+    const character = {
+      id: "char-1",
+      campaignId: "camp-1",
+      userId: "player-1",
+      recoveryCode: "DH-TEST-0001",
+      notes: "private",
+      header: { characterName: "Corvus", career: "Guardsman", rank: "Conscript" },
+    } as unknown as Character;
+
+    const summary = computeCharacterSummary(character);
+
+    expect(summary).toEqual({
+      id: "char-1",
+      ...computeCharacterSummaryFields(character),
+    });
+    expect(summary).toEqual({
+      id: "char-1",
+      campaignId: "camp-1",
+      characterName: "Corvus",
+      career: "Guardsman",
+      rank: "Conscript",
+      userId: "player-1",
+    });
+    expect(summary).not.toHaveProperty("recoveryCode");
+    expect(summary).not.toHaveProperty("notes");
   });
 
   it("writes non-summary fields directly, without touching the summary", async () => {
