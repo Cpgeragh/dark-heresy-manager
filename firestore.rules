@@ -510,11 +510,6 @@ service cloud.firestore {
         return camp != null && dmOwnsOrLinked(camp.data.dmId);
       }
 
-      function campaignMember(uid) {
-        let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
-        return camp != null && uid in camp.data.get('memberIds', []);
-      }
-
       function ownsCharacter() {
         let char = get(
           /databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)
@@ -540,9 +535,9 @@ service cloud.firestore {
                (data.userId == null || data.userId is string);
       }
 
-      allow get: if dmOwnsCampaign() || (request.auth != null && campaignMember(request.auth.uid));
+      allow get: if dmOwnsCampaign() || campaignMemberOrLinked(campaignId);
       allow list:
-        if (dmOwnsCampaign() || (request.auth != null && campaignMember(request.auth.uid))) &&
+        if (dmOwnsCampaign() || campaignMemberOrLinked(campaignId)) &&
            boundedQuery(100);
 
       allow create, update:
