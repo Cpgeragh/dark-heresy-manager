@@ -7,6 +7,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
+import { closeChats, findChatsToClose } from "../shared/chatClosure.js";
 import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 
@@ -51,6 +52,15 @@ export async function forceReleaseCharacter(
       const storedPlayerName =
         typeof header.playerName === "string" ? header.playerName.trim() || null : null;
 
+      const chatsToClose = await findChatsToClose(
+        transaction,
+        db,
+        input.campaignId,
+        input.characterId,
+        campaignSnapshot.data()?.dmId,
+        currentOwner
+      );
+
       await applyOwnershipTransition(
         transaction,
         campaignRef,
@@ -61,13 +71,12 @@ export async function forceReleaseCharacter(
         null,
         {
           previousRecoveryCode:
-            typeof characterData.recoveryCode === "string"
-              ? characterData.recoveryCode
-              : undefined,
+            typeof characterData.recoveryCode === "string" ? characterData.recoveryCode : undefined,
           recoveryCodeHmacSecret: hmacSecret,
           playerName: storedPlayerName,
         }
       );
+      closeChats(transaction, chatsToClose);
       // See releaseCharacter.ts: the membership-removal check there widens this
       // transaction's read set, so it gets the same extra retry headroom.
     },

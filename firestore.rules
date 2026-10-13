@@ -861,6 +861,31 @@ service cloud.firestore {
       allow list: if playerOwnsOrLinked(resource.data.userId) && boundedQuery(1000);
     }
 
+    // ============================
+    // CHATS
+    // Each person's copy of a conversation lives under their own account. Only
+    // trusted Cloud Functions create chats and messages. The owner, or a linked
+    // device of the owner, can read their copy, mark it read and delete it.
+    // ============================
+    match /users/{accountId}/chats/{chatId} {
+      allow get: if playerOwnsOrLinked(accountId);
+      allow list: if playerOwnsOrLinked(accountId) && boundedQuery(200);
+
+      allow update:
+        if playerOwnsOrLinked(accountId) &&
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unreadCount']) &&
+           request.resource.data.unreadCount == 0 &&
+           resource.data.unreadCount > 0;
+
+      allow delete: if playerOwnsOrLinked(accountId);
+
+      match /messages/{messageId} {
+        allow get: if playerOwnsOrLinked(accountId);
+        allow list: if playerOwnsOrLinked(accountId) && boundedQuery(100);
+        allow delete: if playerOwnsOrLinked(accountId);
+      }
+    }
+
     // All unlisted paths are denied by default.
   }
 }

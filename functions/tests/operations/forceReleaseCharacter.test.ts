@@ -43,8 +43,17 @@ const mockUserLinkGet = vi.fn();
 const mockRecoveryIndexDoc = vi.fn((id: string) => ({ kind: "recovery-index", id }));
 const mockRecoveryIndexCollection = { doc: mockRecoveryIndexDoc };
 
+const mockUsersCollection = {
+  doc: (accountId: string) => ({
+    collection: (name: string) => ({
+      doc: (chatId: string) => ({ kind: "chat", path: `users/${accountId}/${name}/${chatId}` }),
+    }),
+  }),
+};
+
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
+  if (name === "users") return mockUsersCollection;
   if (name === "userLinks") return { doc: vi.fn(() => ({ get: mockUserLinkGet })) };
   if (name === "recoveryIndex") return mockRecoveryIndexCollection;
   throw new Error(`Unexpected collection: ${name}`);
@@ -73,11 +82,15 @@ function setupTransactionGet(
     recoveryCode?: string;
     header?: Record<string, unknown>;
   },
-  otherOwnedCharacterIds: string[] = []
+  otherOwnedCharacterIds: string[] = [],
+  existingChats: string[] = []
 ) {
   mockTransactionGet.mockImplementation((ref: unknown) => {
     if (ref === mockMembershipQuery) {
       return Promise.resolve({ docs: otherOwnedCharacterIds.map((id) => ({ id })) });
+    }
+    if ((ref as { kind?: string }).kind === "chat") {
+      return Promise.resolve({ exists: existingChats.includes((ref as { path: string }).path) });
     }
     return Promise.resolve({
       exists: character.exists,
@@ -123,16 +136,9 @@ describe("forceReleaseCharacter", () => {
 
   it("clears ownership, removes membership when this was their last character, and logs the force-release", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
-    setupTransactionGet(
-      { exists: true, userId: "player-1", recoveryCode: "DH-OLDC-ODE1" },
-      []
-    );
+    setupTransactionGet({ exists: true, userId: "player-1", recoveryCode: "DH-OLDC-ODE1" }, []);
 
-    await forceReleaseCharacter(
-      { campaignId: "c1", characterId: "char-1" },
-      "dm-1",
-      "secret"
-    );
+    await forceReleaseCharacter({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret");
 
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
       userId: null,
@@ -164,11 +170,7 @@ describe("forceReleaseCharacter", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     setupTransactionGet({ exists: true, userId: "player-1" }, ["char-2"]);
 
-    await forceReleaseCharacter(
-      { campaignId: "c1", characterId: "char-1" },
-      "dm-1",
-      "secret"
-    );
+    await forceReleaseCharacter({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret");
 
     expect(mockTransactionUpdate).not.toHaveBeenCalledWith(
       mockCampaignRef,
@@ -187,5 +189,83 @@ describe("forceReleaseCharacter", () => {
       mockCampaignRef,
       expect.objectContaining({ memberIds: expect.anything() })
     );
+  });
+
+  describe("chats", () => {
+    const DM_COPY = "users/dm-1/chats/c1__char-1__player-1";
+    const PLAYER_COPY = "users/player-1/chats/c1__char-1__player-1";
+
+    it("closes both copies of the chat in the same transaction as the release", async () => {
+      mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+      setupTransactionGet({ exists: true, userId: "player-1" }, [], [DM_COPY, PLAYER_COPY]);
+
+      await forceReleaseCharacter({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret");
+
+      expect(mockTransactionUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ path: DM_COPY }),
+        { closed: true }
+      );
+      expect(mockTransactionUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ path: PLAYER_COPY }),
+        { closed: true }
+      );
+      expect(mockRunTransaction).toHaveBeenCalledTimes(1);
+    });
+
+    it("reads every document before the first write", async () => {
+      mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+      setupTransactionGet({ exists: true, userId: "player-1" }, [], [DM_COPY, PLAYER_COPY]);
+
+      await forceReleaseCharacter({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret");
+
+      const lastRead = Math.max(...mockTransactionGet.mock.invocationCallOrder);
+      const firstWrite = Math.min(
+        ...[mockTransactionUpdate, mockTransactionSet, mockTransactionDelete].flatMap(
+          (mock) => mock.mock.invocationCallOrder
+        )
+      );
+      expect(lastRead).toBeLessThan(firstWrite);
+    });
+
+    it("closes only the copies that exist", async () => {
+      mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+      setupTransactionGet({ exists: true, userId: "player-1" }, [], [DM_COPY]);
+
+      await forceReleaseCharacter({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret");
+
+      expect(mockTransactionUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ path: DM_COPY }),
+        { closed: true }
+      );
+      expect(mockTransactionUpdate).not.toHaveBeenCalledWith(
+        expect.objectContaining({ path: PLAYER_COPY }),
+        expect.anything()
+      );
+    });
+
+    it("reads no chats when the character was already unclaimed", async () => {
+      mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+      setupTransactionGet({ exists: true, userId: null }, [], [DM_COPY, PLAYER_COPY]);
+
+      await forceReleaseCharacter({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret");
+
+      const chatReads = mockTransactionGet.mock.calls.filter(
+        ([ref]) => (ref as { kind?: string }).kind === "chat"
+      );
+      expect(chatReads).toHaveLength(0);
+      expect(mockTransactionUpdate).not.toHaveBeenCalledWith(expect.anything(), {
+        closed: true,
+      });
+    });
+
+    it("closes nothing when the release is refused", async () => {
+      mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "other-dm" }) });
+      setupTransactionGet({ exists: true, userId: "player-1" }, [], [DM_COPY, PLAYER_COPY]);
+
+      await expect(
+        forceReleaseCharacter({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret")
+      ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
+      expect(mockTransactionUpdate).not.toHaveBeenCalled();
+    });
   });
 });

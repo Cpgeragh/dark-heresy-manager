@@ -74,6 +74,12 @@ import {
   forceAssignCharacter as runForceAssignCharacter,
   type ForceAssignCharacterInput,
 } from "./operations/forceAssignCharacter.js";
+import { CHAT_LIMITS } from "shared-rules";
+import {
+  sendChatMessage as runSendChatMessage,
+  type SendChatMessageInput,
+  type SendChatMessageResult,
+} from "./operations/sendChatMessage.js";
 import { linkDevice as runLinkDevice, type LinkDeviceInput } from "./operations/linkDevice.js";
 import {
   disconnectDevice as runDisconnectDevice,
@@ -402,6 +408,27 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
     });
   }
 );
+
+export const sendChatMessage = onCall<SendChatMessageInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  const operationId = request.data?.operationId;
+  return protectedCallable<SendChatMessageInput, SendChatMessageResult>({
+    request,
+    operation: "send-chat-message",
+    allowedFields: ["campaignId", "characterId", "text", "operationId"],
+    requiredFields: ["campaignId", "characterId", "text"],
+    fieldShapes: {
+      campaignId: "string",
+      characterId: "string",
+      text: "string",
+      operationId: "string",
+    },
+    payloadBounds: { maxBytes: 8_000, maxStringCharacters: CHAT_LIMITS.messageCharacters },
+    rateLimits: [{ key: `send-chat-message:${callerUid}`, limit: 60, windowMs: 10 * 60 * 1000 }],
+    idempotencyKey: buildOperationIdempotencyKey("send-chat-message", callerUid, operationId),
+    handler: ({ uid, data, idempotency }) => runSendChatMessage(data, uid, idempotency),
+  });
+});
 
 export const linkDevice = onCall<LinkDeviceInput>(
   { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },

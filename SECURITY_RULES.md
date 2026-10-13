@@ -12,15 +12,16 @@ The `playerOwnsOrLinked` and `dmOwnsOrLinked` helpers resolve a device through `
 
 ## Top-level collections
 
-| Path                           | Client read access                                                                                         | Client write access                                                                             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `users/{uid}`                  | Exact authenticated UID                                                                                    | Exact UID may create or update under the recognized field and type contract; deletion is denied |
-| `userProfiles/{accountId}`     | Authenticated single-document reads; collection listing denied                                             | Denied; display-name changes use the protected backend                                          |
-| `accounts/{accountId}`         | Denied                                                                                                     | Denied                                                                                          |
-| `userLinks/{uid}`              | A device may get its own link; an account may list its bounded device set with the required account filter | Denied; linking and disconnecting use protected backend operations                              |
-| `recoveryIndex/{hash}`         | Denied                                                                                                     | Denied                                                                                          |
-| `identityRecoveryIndex/{hash}` | Denied                                                                                                     | Denied                                                                                          |
-| `identitySecret/{accountId}`   | Denied                                                                                                     | Denied                                                                                          |
+| Path                                                  | Client read access                                                                                         | Client write access                                                                                                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `users/{uid}`                                         | Exact authenticated UID                                                                                    | Exact UID may create or update under the recognized field and type contract; deletion is denied                                                                 |
+| `userProfiles/{accountId}`                            | Authenticated single-document reads; collection listing denied                                             | Denied; display-name changes use the protected backend                                                                                                          |
+| `accounts/{accountId}`                                | Denied                                                                                                     | Denied                                                                                                                                                          |
+| `userLinks/{uid}`                                     | A device may get its own link; an account may list its bounded device set with the required account filter | Denied; linking and disconnecting use protected backend operations                                                                                              |
+| `recoveryIndex/{hash}`                                | Denied                                                                                                     | Denied                                                                                                                                                          |
+| `identityRecoveryIndex/{hash}`                        | Denied                                                                                                     | Denied                                                                                                                                                          |
+| `identitySecret/{accountId}`                          | Denied                                                                                                     | Denied                                                                                                                                                          |
+| `users/{accountId}/chats/{chatId}` and its `messages` | The owning account or a device linked to it; lists are limited to 200 chats and 100 messages               | Only the owner may set the unread count to zero or delete their copy; creation and message edits are denied, and `sendChatMessage` writes through the Admin SDK |
 
 Recovery lookups, rotation, revocation, linking, and account lifecycle operations must use the callable functions under `functions/src/operations/`.
 
@@ -61,6 +62,8 @@ Threads and messages are visible only to the campaign DM and the effective owner
 | Session XP award         | 100,000 whole XP per attendee |
 
 A player send must increment the DM unread count by exactly one. A message sender must resolve to the authenticated effective account. Messages cannot be edited; only the DM may clear thread messages or delete their summary.
+
+Each person's copy of a chat lives under their own account at `users/{accountId}/chats/{chatId}`. A DM never reads a player's copy and a player never reads the DM's. Only `sendChatMessage` in `functions/src/operations/sendChatMessage.ts` creates chats and messages, through the Admin SDK, and the release operations mark chats closed through `findChatsToClose` and `closeChats` in `functions/src/shared/chatClosure.ts`.
 
 ## Enforcement and verification
 

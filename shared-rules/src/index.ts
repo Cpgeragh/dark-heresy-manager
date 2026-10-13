@@ -116,6 +116,7 @@ export {
   type CharacterSummarySource,
 } from "./characterSummary.js";
 export { CHARACTER_DOCUMENT_LIMITS } from "./characterLimits.js";
+export { CHAT_LIMITS, buildChatId } from "./chatLimits.js";
 export type {
   CharacteristicAdvanceTier,
   Characteristics,

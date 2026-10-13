@@ -9,6 +9,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
 import { resolvePrimaryUid } from "../shared/linkedIdentity.js";
+import { closeChats, findChatsToClose } from "../shared/chatClosure.js";
 
 export interface ReleaseCharacterInput {
   campaignId: string;
@@ -44,6 +45,16 @@ export async function releaseCharacter(
       const storedPlayerName =
         typeof header.playerName === "string" ? header.playerName.trim() || null : null;
 
+      const campaignSnapshot = await transaction.get(campaignRef);
+      const chatsToClose = await findChatsToClose(
+        transaction,
+        db,
+        input.campaignId,
+        input.characterId,
+        campaignSnapshot.data()?.dmId,
+        currentOwner
+      );
+
       await applyOwnershipTransition(
         transaction,
         campaignRef,
@@ -54,13 +65,12 @@ export async function releaseCharacter(
         null,
         {
           previousRecoveryCode:
-            typeof characterData.recoveryCode === "string"
-              ? characterData.recoveryCode
-              : undefined,
+            typeof characterData.recoveryCode === "string" ? characterData.recoveryCode : undefined,
           recoveryCodeHmacSecret: hmacSecret,
           playerName: storedPlayerName,
         }
       );
+      closeChats(transaction, chatsToClose);
       // The membership-removal check below queries the characters subcollection,
       // widening this transaction's read set beyond the single document it used
       // to touch, and racing against another ownership-transition on the same
