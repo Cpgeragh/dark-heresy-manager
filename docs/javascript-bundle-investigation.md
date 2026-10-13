@@ -6,7 +6,7 @@ Repository paths in this document refer to the checked-out commit.
 
 `src/App.tsx` lazy-loads the Dashboard, Campaign Overview, Character Sheet, and Onboarding routes. The application shell and Settings remain in the entry graph because they coordinate global startup and account state.
 
-`src/pages/CharacterSheet.tsx` separately lazy-loads substantial feature tabs for talents, weapons, cybernetics, psychic powers, gear, and Archeotech. The sheet may prefetch selected heavy tabs after initial usability.
+`src/pages/CharacterSheet.tsx` separately lazy-loads substantial feature tabs for talents, elite advances, weapons, weapon training, cybernetics, psychic powers, gear, Archeotech, and experience. `ExperienceTab` and `WeaponTrainingTab` load on demand because they import the weapon reference table, which stays out of the always-loaded sheet chunk. The sheet prefetches every deferred tab after initial usability.
 
 ## Build acceptance
 

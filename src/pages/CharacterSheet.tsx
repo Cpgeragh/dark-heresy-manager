@@ -28,12 +28,10 @@ import { SkillsTab } from "./CharacterSheet/SkillsTab";
 import { TraitsTab } from "../mechanics/traits/TraitsTab";
 import { ArmourTab } from "./CharacterSheet/ArmourTab";
 import { DrugsTab } from "./CharacterSheet/DrugsTab";
-import { ExperienceTab } from "./CharacterSheet/ExperienceTab";
 import { NotesTab } from "./CharacterSheet/NotesTab";
 import { AdminTab } from "./CharacterSheet/AdminTab";
 import { BackgroundTab } from "./CharacterSheet/BackgroundTab";
 import { CompleteBackgroundSetupModal } from "./CharacterSheet/BackgroundTab/CompleteBackgroundSetupModal";
-import { WeaponTrainingTab } from "./CharacterSheet/WeaponTrainingTab";
 import { CompanionsTab } from "./CharacterSheet/CompanionsTab";
 
 import { isTabId, type TabId } from "./CharacterSheet/types";
@@ -137,6 +135,16 @@ const GearTab = memo(
 const ArcheotechTab = lazy(() =>
   import("./CharacterSheet/ArcheotechTab").then(({ ArcheotechTab }) => ({
     default: ArcheotechTab,
+  }))
+);
+const ExperienceTab = lazy(() =>
+  import("./CharacterSheet/ExperienceTab").then(({ ExperienceTab }) => ({
+    default: ExperienceTab,
+  }))
+);
+const WeaponTrainingTab = lazy(() =>
+  import("./CharacterSheet/WeaponTrainingTab").then(({ WeaponTrainingTab }) => ({
+    default: WeaponTrainingTab,
   }))
 );
 
@@ -272,6 +280,8 @@ export default function CharacterSheet({
       import("../mechanics/talents/TalentsTab"),
       import("../mechanics/eliteAdvances/EliteAdvancesTab"),
       import("./CharacterSheet/PsychicTab"),
+      import("./CharacterSheet/ExperienceTab"),
+      import("./CharacterSheet/WeaponTrainingTab"),
     ]);
   }, [params.campaignId, params.characterId]);
 

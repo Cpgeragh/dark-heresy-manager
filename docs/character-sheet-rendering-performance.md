@@ -8,14 +8,17 @@ Repository paths in this document refer to the checked-out commit.
 
 The initial route loads the sheet shell and current content. These substantial domains are lazy-loaded:
 
-| Lazy domain | Owning module |
-| --- | --- |
-| Talents | `TalentsTab` |
-| Weapons | `WeaponsTab` |
-| Cybernetics | `CyberneticsTab` |
-| Psychic powers | `PsychicTab` |
-| Gear | `GearTab` |
-| Archeotech | `ArcheotechTab` |
+| Lazy domain     | Owning module       |
+| --------------- | ------------------- |
+| Talents         | `TalentsTab`        |
+| Elite Advances  | `EliteAdvancesTab`  |
+| Weapons         | `WeaponsTab`        |
+| Weapon training | `WeaponTrainingTab` |
+| Experience      | `ExperienceTab`     |
+| Cybernetics     | `CyberneticsTab`    |
+| Psychic powers  | `PsychicTab`        |
+| Gear            | `GearTab`           |
+| Archeotech      | `ArcheotechTab`     |
 
 Prefetching may begin after the route is usable, but it must not block the initial sheet.
 
