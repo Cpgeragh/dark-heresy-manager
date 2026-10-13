@@ -10,7 +10,12 @@ import {
 
 import { db } from "../firebase";
 import type { Character } from "../types/Character";
-import type { CampaignWithId, CharacterSummaryWithId, UserDocument } from "../types/Firestore";
+import type {
+  CampaignWithId,
+  CharacterSummaryWithId,
+  ChatSummaryWithId,
+  UserDocument,
+} from "../types/Firestore";
 
 /**
  * CHARACTER CONVERTER
@@ -90,6 +95,24 @@ export function characterSummariesCollectionRef(campaignId: string) {
   return collection(db, "campaigns", campaignId, "characterSummaries").withConverter(
     characterSummaryConverter
   );
+}
+
+/**
+ * CHAT SUMMARY CONVERTER
+ * - Strips `id` on write
+ * - Injects `id` from document path on read
+ */
+export const chatSummaryConverter: FirestoreDataConverter<ChatSummaryWithId> = {
+  toFirestore({ id: _id, ...rest }: ChatSummaryWithId) {
+    return rest;
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions) {
+    return { ...snapshot.data(options), id: snapshot.id } as ChatSummaryWithId;
+  },
+};
+
+export function chatsCollectionRef(accountId: string) {
+  return collection(db, "users", accountId, "chats").withConverter(chatSummaryConverter);
 }
 
 /**

@@ -171,3 +171,32 @@ export interface ThreadSummary {
   lastTimestamp: Timestamp | null;
   unreadForDM: number;
 }
+
+/**
+ * One person's copy of a chat, stored in /users/{accountId}/chats/{chatId}.
+ * A chat is one DM, one player and one character, and both people hold a copy.
+ */
+export interface ChatSummaryDocument {
+  campaignId: string;
+  characterId: string;
+  playerAccountId: string;
+  role: "dm" | "player";
+  otherAccountId: string;
+  otherName: string;
+  campaignName: string;
+  characterName: string;
+  lastMessage: string;
+  lastTimestamp: Timestamp | null;
+  unreadCount: number;
+  closed: boolean;
+}
+
+export type ChatSummaryWithId = ChatSummaryDocument & { id: string };
+
+/** A message in one person's copy of a chat, in /users/{accountId}/chats/{chatId}/messages. */
+export interface ChatMessage {
+  id: string;
+  fromAccountId: string;
+  text: string;
+  timestamp: Timestamp | null; // null briefly before serverTimestamp resolves
+}
