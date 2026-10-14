@@ -13,8 +13,6 @@ export const FIRESTORE_QUERY_LIMITS = {
   archivedCampaigns: PRODUCT_LIMITS.campaignsPerAccount,
   charactersPerCampaign: PRODUCT_LIMITS.charactersPerCampaign,
   sessionsPerCampaign: 200,
-  threadSummariesPerCampaign: 100,
-  messagesPerThread: PRODUCT_LIMITS.messagesPerPage,
   chatsPerAccount: 200,
   chatMessagesPerPage: PRODUCT_LIMITS.messagesPerPage,
   claimLogEntries: PRODUCT_LIMITS.claimHistoryEntriesPerPage,

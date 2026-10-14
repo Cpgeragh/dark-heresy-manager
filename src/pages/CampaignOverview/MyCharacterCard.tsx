@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { buildRoute } from "../../constants/routes";
+import { ChatMessageButton } from "../../components/chat/ChatMessageButton";
 import { PortraitUpload } from "../../components/PortraitUpload";
 import { revealRecoveryCode } from "../../services/characterService";
 import { useToast } from "../../components/Toast";
@@ -110,6 +111,16 @@ export function MyCharacterCard({
           <div className={`${uiTextMeta} font-code`} onClick={(e) => e.stopPropagation()}>
             Recovery:{" "}
             {revealedCode ?? <RevealCodeButton revealing={revealing} onReveal={handleReveal} />}
+          </div>
+          <div>
+            <ChatMessageButton
+              target={{
+                campaignId,
+                characterId: character.id,
+                playerAccountId: character.userId,
+                characterName: name,
+              }}
+            />
           </div>
         </div>
       </div>

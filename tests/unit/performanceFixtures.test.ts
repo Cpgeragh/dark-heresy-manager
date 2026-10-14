@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { buildChatId } from "shared-rules";
 import { PRODUCT_LIMITS } from "../../src/constants/productLimits";
 import { assertCharacterPayload } from "../../src/firestore/firebaseValidation";
 import {
@@ -105,6 +106,49 @@ describe("performance fixture profiles", () => {
     expect(
       longThread.writes.filter((write) => /\/messages\/[^/]+$/u.test(write.path))
     ).toHaveLength(300);
+  });
+
+  it("puts the large-DM and long-thread messages in the DM's own chat copies", () => {
+    const largeDm = buildPerformanceProfile("large-dm", "performance-user");
+    const longThread = buildPerformanceProfile("long-thread", "performance-user");
+
+    const dmChats = largeDm.writes.filter((write) =>
+      /^users\/performance-user\/chats\/[^/]+$/u.test(write.path)
+    );
+    expect(dmChats).toHaveLength(90);
+    expect(dmChats[0].path).toBe(
+      `users/performance-user/chats/${buildChatId("perf-large-dm", "dm-character-001", "fixture-player-001")}`
+    );
+    expect(dmChats.some((write) => (write.data as { unreadCount: number }).unreadCount > 0)).toBe(
+      true
+    );
+
+    const threadChatId = buildChatId(
+      "perf-long-thread",
+      "thread-character-001",
+      "performance-user"
+    );
+    const threadChat = longThread.writes.find(
+      (write) => write.path === `users/performance-user/chats/${threadChatId}`
+    );
+    expect(threadChat).toBeDefined();
+    expect(
+      longThread.writes.filter((write) =>
+        write.path.startsWith(`users/performance-user/chats/${threadChatId}/messages/`)
+      )
+    ).toHaveLength(300);
+
+    const small = buildPerformanceProfile("small", "performance-user");
+    const smallChatId = buildChatId("perf-small", "small-character-001", "performance-user");
+    expect(
+      small.writes.filter((write) =>
+        write.path.startsWith(`users/performance-user/chats/${smallChatId}/messages/`)
+      )
+    ).toHaveLength(30);
+
+    for (const profile of [largeDm, longThread, small]) {
+      expect(profile.writes.some((write) => write.path.includes("/threads/"))).toBe(false);
+    }
   });
 
   it("creates a near-limit picker profile without changing the historical character fixture", () => {

@@ -6,15 +6,15 @@ Repository paths and documentation links refer to the checked-out commit.
 
 ## Product capabilities
 
-| Area         | Current capability                                                                                                                                       |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Accounts     | Anonymous Firebase Authentication backed by permanent application accounts, Recovery Codes, and up to 10 connected devices                               |
-| Campaigns    | Game Master campaign administration, active and archived campaigns, and bounded membership                                                               |
-| Characters   | Twenty-one character-sheet sections, portrait storage in the character document, JSON export and import, ownership claims, and controlled player editing |
-| Sessions     | Private Game Master notes, member-safe summaries, attendance, XP awards, reversal, and repair tooling                                                    |
-| Messaging    | One private thread per character with 100-message pages and a bounded Game Master inbox                                                                  |
-| Custom items | Draft, publish, archive, restore, version, propagate, and remove workflows                                                                               |
-| Offline use  | Installable PWA shell and persistent multi-tab Firestore cache; callable mutations require a network connection                                          |
+| Area         | Current capability                                                                                                                                                    |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accounts     | Anonymous Firebase Authentication backed by permanent application accounts, Recovery Codes, and up to 10 connected devices                                            |
+| Campaigns    | Game Master campaign administration, active and archived campaigns, and bounded membership                                                                            |
+| Characters   | Twenty-one character-sheet sections, portrait storage in the character document, JSON export and import, ownership claims, and controlled player editing              |
+| Sessions     | Private Game Master notes, member-safe summaries, attendance, XP awards, reversal, and repair tooling                                                                 |
+| Messaging    | One private chat per Game Master, player and character, each person holding their own copy, with a header inbox, a 7 day recycle bin, text export and release prompts |
+| Custom items | Draft, publish, archive, restore, version, propagate, and remove workflows                                                                                            |
+| Offline use  | Installable PWA shell and persistent multi-tab Firestore cache; callable mutations require a network connection                                                       |
 
 ## Technology
 

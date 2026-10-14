@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import "@testing-library/jest-dom";
 
 vi.mock("../../src/components/PortraitUpload", () => ({
@@ -22,6 +22,8 @@ vi.mock("../../src/components/Toast", () => ({
 }));
 
 import { MyCharacterCard } from "../../src/pages/CampaignOverview/MyCharacterCard";
+import { ChatInboxProvider } from "../../src/context/ChatInboxProvider";
+import { useChatInbox } from "../../src/context/useChatInbox";
 import type { CharacterListItem } from "../../src/types/Firestore";
 
 function character(over: Partial<CharacterListItem> = {}): CharacterListItem {
@@ -40,10 +42,24 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+function InboxProbe() {
+  const { view } = useChatInbox();
+  const location = useLocation();
+  return (
+    <>
+      <p data-testid="inbox-view">{JSON.stringify(view)}</p>
+      <p data-testid="path">{location.pathname}</p>
+    </>
+  );
+}
+
 function renderCard(over: Partial<CharacterListItem> = {}) {
   render(
-    <MemoryRouter>
-      <MyCharacterCard character={character(over)} campaignId="campaign-1" />
+    <MemoryRouter initialEntries={["/campaign/campaign-1"]}>
+      <ChatInboxProvider>
+        <MyCharacterCard character={character(over)} campaignId="campaign-1" />
+        <InboxProbe />
+      </ChatInboxProvider>
     </MemoryRouter>
   );
 }
@@ -102,5 +118,29 @@ describe("MyCharacterCard", () => {
       "href",
       "/campaign/campaign-1/character/char-1"
     );
+  });
+
+  it("shows a Message button that opens the chat with the DM without following the card link", async () => {
+    const user = userEvent.setup();
+    renderCard();
+
+    await user.click(screen.getByRole("button", { name: "Message" }));
+
+    expect(JSON.parse(screen.getByTestId("inbox-view").textContent ?? "")).toEqual({
+      kind: "chat",
+      target: {
+        campaignId: "campaign-1",
+        characterId: "char-1",
+        playerAccountId: "player-1",
+        characterName: "Vex",
+      },
+    });
+    expect(screen.getByTestId("path")).toHaveTextContent("/campaign/campaign-1");
+  });
+
+  it("shows no Message button when the card has no owner", () => {
+    renderCard({ userId: null });
+
+    expect(screen.queryByRole("button", { name: "Message" })).not.toBeInTheDocument();
   });
 });

@@ -45,13 +45,18 @@ confusing output:
 - [ ] `OfflineIndicator.tsx`'s offline banner has no `role="status"` or `aria-live`:
       confirm whether a screen reader announces anything when connectivity drops,
       given the banner just appears/disappears with no live-region wiring.
-- [ ] `SectionDrawer.tsx` and `MessageDrawer.tsx` (the app's only two drawer surfaces)
-      correctly set `role="dialog"`, `aria-modal`, and `inert` when closed, but neither
-      moves focus into the drawer on open, traps Tab while it's open, or restores focus
+- [ ] `SectionDrawer.tsx` (the app's only drawer surface)
+      correctly sets `role="dialog"`, `aria-modal`, and `inert` when closed, but it does not
+      move focus into the drawer on open, trap Tab while it's open, or restore focus
       to the trigger button on close: confirm with a keyboard-only pass whether Tab
       can leave the open drawer into the page behind it, unlike a modal via
       `ModalShell.tsx`'s native `<dialog>`, which gets all three behaviours from the
       browser automatically.
+- [ ] `HeaderMessagesButton.tsx` puts the unread count in its accessible name
+      ("Messages, 3 unread"): confirm a screen reader announces it, and that nothing
+      announces a change in the count while the button is not focused.
+- [ ] `ChatInboxModal.tsx` is a native dialog: confirm focus moves in on open, Escape
+      closes it, and the back arrow, the tabs and the Restore buttons have clear names.
 - [ ] `MessageInput.tsx`'s message text field has no `aria-label` or associated
       `<label>`, only `placeholder="Message…"`: confirm whether a screen reader
       announces anything meaningful when the field receives focus.

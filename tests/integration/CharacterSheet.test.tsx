@@ -20,6 +20,17 @@ vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
   CampaignCustomItemsScope: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+const chatsState = vi.hoisted(() => ({
+  value: { chats: [] as unknown[], loading: false, error: null as Error | null },
+}));
+vi.mock("../../src/context/useChatsContext", () => ({
+  useChatsContext: () => chatsState.value,
+}));
+vi.mock("../../src/services/chatService", () => ({ clearChat: vi.fn() }));
+vi.mock("../../src/components/Toast", () => ({
+  useToast: () => ({ error: vi.fn(), success: vi.fn() }),
+}));
+
 const useCharacterSheetMock = vi.fn();
 vi.mock("../../src/pages/CharacterSheet/useCharacterSheet", () => ({
   useCharacterSheet: (...args: unknown[]) => useCharacterSheetMock(...args),
@@ -29,12 +40,16 @@ const setBackHrefMock = vi.fn();
 const clearBackHrefMock = vi.fn();
 const setKebabContentMock = vi.fn();
 const clearKebabContentMock = vi.fn();
+const setChatTargetMock = vi.fn();
+const clearChatTargetMock = vi.fn();
 vi.mock("../../src/context/useHeaderExtension", () => ({
   useHeaderExtensionSetters: () => ({
     setBackHref: setBackHrefMock,
     clearBackHref: clearBackHrefMock,
     setKebabContent: setKebabContentMock,
     clearKebabContent: clearKebabContentMock,
+    setChatTarget: setChatTargetMock,
+    clearChatTarget: clearChatTargetMock,
   }),
 }));
 
@@ -135,7 +150,12 @@ vi.mock("../../src/pages/CharacterSheet/NotesTab", () => ({
   NotesTab: () => <div>Mock NotesTab</div>,
 }));
 vi.mock("../../src/pages/CharacterSheet/AdminTab", () => ({
-  AdminTab: () => <div>Mock AdminTab</div>,
+  AdminTab: (props: Record<string, unknown>) => (
+    <div>
+      Mock AdminTab
+      <button onClick={() => (props.onDMForceRelease as () => void)()}>Mock Force Release</button>
+    </div>
+  ),
 }));
 vi.mock("../../src/pages/CharacterSheet/ArcheotechTab", () => ({
   ArcheotechTab: () => <div>Mock ArcheotechTab</div>,
@@ -210,22 +230,16 @@ beforeEach(() => {
   reconcileCharacterSpentXpMock.mockResolvedValue(undefined);
   useCharacterSheetMock.mockReturnValue(baseSheetResult());
   useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: false, error: null });
+  chatsState.value = { chats: [], loading: false, error: null };
 });
 
 function renderSheet(initialPath = "/campaign/campaign-1/character/char-1?tab=stats") {
-  const onOpenMessages = vi.fn();
   const renderRoutes = () => (
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
         <Route
           path="/campaign/:campaignId/character/:characterId"
-          element={
-            <CharacterSheet
-              effectiveUserId="player-1"
-              effectiveUserFirstName="Iris"
-              onOpenMessages={onOpenMessages}
-            />
-          }
+          element={<CharacterSheet effectiveUserId="player-1" effectiveUserFirstName="Iris" />}
         />
         <Route path="/" element={<div>Mock Shared Dashboard</div>} />
       </Routes>
@@ -234,7 +248,6 @@ function renderSheet(initialPath = "/campaign/campaign-1/character/char-1?tab=st
   const view = render(renderRoutes());
   return {
     ...view,
-    onOpenMessages,
     rerenderSheet: () => view.rerender(renderRoutes()),
   };
 }
@@ -456,12 +469,48 @@ describe("CharacterSheet tabs", () => {
     expect(await screen.findByText("Mock CharacteristicsTab")).toBeInTheDocument();
   });
 
-  it("calls onOpenMessages from the Messages button", async () => {
-    const user = userEvent.setup();
-    const { onOpenMessages } = renderSheet();
+  it("has no Messages button of its own, because the header carries it", () => {
+    renderSheet();
 
-    await user.click(screen.getByRole("button", { name: "Messages" }));
-    expect(onOpenMessages).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Messages" })).not.toBeInTheDocument();
+  });
+
+  it("publishes the character's chat for the header Messages button", () => {
+    renderSheet();
+
+    expect(setChatTargetMock).toHaveBeenCalledWith({
+      campaignId: "campaign-1",
+      characterId: "char-1",
+      playerAccountId: "player-1",
+      characterName: "Vex",
+    });
+  });
+
+  it("publishes no player for an unclaimed character", () => {
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ character: character({ userId: null }) })
+    );
+    renderSheet();
+
+    expect(setChatTargetMock).toHaveBeenCalledWith(
+      expect.objectContaining({ playerAccountId: null })
+    );
+  });
+
+  it("publishes nothing while the character is still loading", () => {
+    useCharacterSheetMock.mockReturnValue(baseSheetResult({ character: null }));
+    renderSheet();
+
+    expect(setChatTargetMock).not.toHaveBeenCalled();
+  });
+
+  it("clears the chat target when the sheet closes", () => {
+    const view = renderSheet();
+    expect(clearChatTargetMock).not.toHaveBeenCalled();
+
+    view.unmount();
+
+    expect(clearChatTargetMock).toHaveBeenCalled();
   });
 });
 
@@ -512,6 +561,7 @@ describe("CharacterSheet kebab content", () => {
     await waitFor(() => expect(setKebabContentMock).toHaveBeenCalled());
     render(setKebabContentMock.mock.calls.at(-1)?.[0]);
     await user.click(screen.getByText("Mock Release"));
+    await user.click(screen.getByRole("button", { name: "Release" }));
 
     expect(releaseCharacter).toHaveBeenCalledOnce();
     expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
@@ -528,10 +578,156 @@ describe("CharacterSheet kebab content", () => {
     await waitFor(() => expect(setKebabContentMock).toHaveBeenCalled());
     render(setKebabContentMock.mock.calls.at(-1)?.[0]);
     await user.click(screen.getByText("Mock Release"));
+    await user.click(screen.getByRole("button", { name: "Release" }));
 
     expect(releaseCharacter).toHaveBeenCalledOnce();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
     expect(screen.getByText("Mock CharacteristicsTab")).toBeInTheDocument();
+  });
+});
+
+const RELEASE_CHAT = {
+  id: "campaign-1__char-1__player-1",
+  campaignId: "campaign-1",
+  characterId: "char-1",
+  playerAccountId: "player-1",
+  role: "player",
+  otherAccountId: "dm-1",
+  otherName: "Marcus",
+  campaignName: "Calixis",
+  characterName: "Vex",
+  lastMessage: "Hello",
+  lastTimestamp: null,
+  unreadCount: 0,
+  closed: false,
+};
+
+async function openPlayerRelease(user: ReturnType<typeof userEvent.setup>) {
+  await waitFor(() => expect(setKebabContentMock).toHaveBeenCalled());
+  render(setKebabContentMock.mock.calls.at(-1)?.[0]);
+  await user.click(screen.getByText("Mock Release"));
+}
+
+describe("CharacterSheet release pop-ups", () => {
+  it("asks before releasing and releases nothing until the player confirms", async () => {
+    const user = userEvent.setup();
+    const releaseCharacter = vi.fn().mockResolvedValue(true);
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ canPlayerRelease: true, releaseCharacter })
+    );
+    renderSheet();
+
+    await openPlayerRelease(user);
+
+    expect(screen.getByRole("dialog", { name: "Release this character?" })).toBeInTheDocument();
+    expect(releaseCharacter).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when the player cancels the confirmation", async () => {
+    const user = userEvent.setup();
+    const releaseCharacter = vi.fn().mockResolvedValue(true);
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ canPlayerRelease: true, releaseCharacter })
+    );
+    renderSheet();
+
+    await openPlayerRelease(user);
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(releaseCharacter).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("asks whether to keep the chat, and only leaves the sheet once the player has chosen", async () => {
+    const user = userEvent.setup();
+    chatsState.value = { chats: [RELEASE_CHAT], loading: false, error: null };
+    const releaseCharacter = vi.fn().mockResolvedValue(true);
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ canPlayerRelease: true, releaseCharacter })
+    );
+    renderSheet();
+
+    await openPlayerRelease(user);
+    await user.click(screen.getByRole("button", { name: "Release" }));
+
+    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+
+    expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
+  });
+
+  it("keeps the question open when the release has already cost the player access to the character", async () => {
+    const user = userEvent.setup();
+    chatsState.value = { chats: [RELEASE_CHAT], loading: false, error: null };
+    const releaseCharacter = vi.fn(async () => {
+      useCharacterSheetMock.mockReturnValue(
+        baseSheetResult({
+          canPlayerRelease: true,
+          releaseCharacter,
+          characterError: Object.assign(new Error("denied"), { code: "permission-denied" }),
+        })
+      );
+      return true;
+    });
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ canPlayerRelease: true, releaseCharacter })
+    );
+    renderSheet();
+
+    await openPlayerRelease(user);
+    await user.click(screen.getByRole("button", { name: "Release" }));
+
+    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+
+    expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
+  });
+
+  it("asks the DM to confirm a force release before it runs, and the DM stays on the sheet", async () => {
+    const user = userEvent.setup();
+    const dmForceRelease = vi.fn().mockResolvedValue(true);
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ isDM: true, dmReadOnly: true, dmForceRelease })
+    );
+    renderSheet("/campaign/campaign-1/character/char-1?tab=admin");
+
+    await user.click(screen.getByText("Mock Force Release"));
+
+    expect(
+      screen.getByRole("dialog", { name: "Force release this character?" })
+    ).toBeInTheDocument();
+    expect(dmForceRelease).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Force release" }));
+
+    await waitFor(() => expect(dmForceRelease).toHaveBeenCalledOnce());
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByText("Mock AdminTab")).toBeInTheDocument();
+  });
+
+  it("asks the DM whether to keep their chat after a force release", async () => {
+    const user = userEvent.setup();
+    chatsState.value = { chats: [{ ...RELEASE_CHAT, role: "dm" }], loading: false, error: null };
+    const dmForceRelease = vi.fn().mockResolvedValue(true);
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ isDM: true, dmReadOnly: true, dmForceRelease })
+    );
+    renderSheet("/campaign/campaign-1/character/char-1?tab=admin");
+
+    await user.click(screen.getByText("Mock Force Release"));
+    await user.click(screen.getByRole("button", { name: "Force release" }));
+
+    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByText("Mock AdminTab")).toBeInTheDocument();
   });
 });
 

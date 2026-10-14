@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -80,7 +80,6 @@ import { useCampaignCharacters } from "../../src/hooks/useCampaignCharacters";
 import { useCampaignCharacterSummaries } from "../../src/hooks/useCampaignCharacterSummaries";
 import { useCampaignCustomItems } from "../../src/hooks/useCampaignCustomItems";
 import { useSessions } from "../../src/hooks/useSessions";
-import { useThreadMessages } from "../../src/hooks/useThreadMessages";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -161,55 +160,6 @@ describe("bounded Firestore hooks", () => {
 
     expect(mockQuery).not.toHaveBeenCalled();
     expect(mockUseQuerySubscription).toHaveBeenCalledWith(null, null, expect.any(Function));
-  });
-
-  it("loads only the latest page of thread messages", () => {
-    renderHook(() => useThreadMessages("campaign-1", "character-1"));
-
-    expect(mockOrderBy).toHaveBeenCalledWith("timestamp", "desc");
-    expect(mockOrderBy).toHaveBeenCalledWith("__name__", "desc");
-    expect(mockLimit).toHaveBeenCalledWith(100);
-  });
-
-  it("loads older thread messages only after an explicit request", async () => {
-    const latestMessages = Array.from({ length: 100 }, (_, index) => ({
-      id: `message-${index + 100}`,
-      fromUid: "user-1",
-      text: `Message ${index + 100}`,
-      timestamp: { marker: index + 100 },
-      read: true,
-    }));
-    mockUseQuerySubscription.mockReturnValue({
-      data: latestMessages,
-      loading: false,
-      error: null,
-    });
-    mockGetDocs.mockResolvedValue({
-      docs: [
-        {
-          id: "message-99",
-          data: () => ({
-            fromUid: "user-1",
-            text: "Message 99",
-            timestamp: { marker: 99 },
-            read: true,
-          }),
-        },
-      ],
-    });
-
-    const { result } = renderHook(() => useThreadMessages("campaign-1", "character-1"));
-
-    expect(mockGetDocs).not.toHaveBeenCalled();
-    expect(result.current.hasOlderMessages).toBe(true);
-
-    await act(async () => {
-      await result.current.loadOlder();
-    });
-
-    expect(mockStartAfter).toHaveBeenCalledWith({ marker: 100 }, "message-100");
-    expect(result.current.messages[0].id).toBe("message-99");
-    expect(result.current.hasOlderMessages).toBe(false);
   });
 
   it("does not construct a claim-log query until it is enabled", () => {

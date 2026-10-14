@@ -31,6 +31,7 @@ import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
 import { ModalShell } from "../../ui/modals/ModalShell";
 import type { ClaimLogAction } from "shared-rules";
+import { ChatMessageButton } from "../../components/chat/ChatMessageButton";
 import { PortraitUpload } from "../../components/PortraitUpload";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 
@@ -69,6 +70,7 @@ export function CharacterRow({
   userId,
   portraitUrl,
   isDM,
+  onDeleted,
 }: {
   campaignId: string;
   characterId: string;
@@ -76,6 +78,8 @@ export function CharacterRow({
   userId: string | null;
   portraitUrl?: string;
   isDM: boolean;
+  /** Called once the character has been deleted, so the page can ask about the DM's chats. */
+  onDeleted?: (characterId: string) => void;
 }) {
   recordComponentRender("CharacterRow");
   const [historyRequested, setHistoryRequested] = useState(false);
@@ -98,11 +102,12 @@ export function CharacterRow({
     if (!deletePreflight.result) return;
     try {
       await deleteCharacter(deletePreflight.result.jobId);
+      onDeleted?.(characterId);
     } catch (err) {
       console.error("Character deletion error:", err);
       toast.error(err instanceof Error ? err.message : "Failed to delete character.");
     }
-  }, [deletePreflight.result, toast]);
+  }, [deletePreflight.result, characterId, onDeleted, toast]);
 
   const handleReveal = useCallback(async () => {
     setRevealing(true);
@@ -173,6 +178,12 @@ export function CharacterRow({
           </div>
 
           <div className={`${uiInlineRow} flex-wrap sm:shrink-0 justify-center sm:justify-start`}>
+            {isDM && (
+              <ChatMessageButton
+                target={{ campaignId, characterId, playerAccountId: userId, characterName }}
+              />
+            )}
+
             {isDM && (
               <Button
                 variant="secondary"

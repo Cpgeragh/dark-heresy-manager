@@ -62,7 +62,8 @@ import type {
 
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
-import { getSpentXp } from "shared-rules";
+import { buildChatId, getSpentXp } from "shared-rules";
+import { useReleaseFlow } from "../components/chat/useReleaseFlow";
 import {
   reconcileCharacterSpentXp,
   registerRecoveryCode,
@@ -78,7 +79,6 @@ import { recordComponentRender } from "../performance/performanceMetrics";
 import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import { TitleToolbar } from "../ui/TitleToolbar";
 import { ChevronUpIcon } from "../ui/icons/ChevronUpIcon";
-import { MessageIcon } from "../ui/icons/MessageIcon";
 import {
   uiSectionShell,
   uiTextBody,
@@ -195,11 +195,9 @@ function isPermissionDenied(error: Error | null): boolean {
 export default function CharacterSheet({
   effectiveUserId,
   effectiveUserFirstName,
-  onOpenMessages,
 }: {
   effectiveUserId: string;
   effectiveUserFirstName: string;
-  onOpenMessages: () => void;
 }) {
   recordComponentRender("CharacterSheet");
   const params = useParams<{ campaignId: string; characterId: string }>();
@@ -379,8 +377,14 @@ export default function CharacterSheet({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const { setBackHref, clearBackHref, setKebabContent, clearKebabContent } =
-    useHeaderExtensionSetters();
+  const {
+    setBackHref,
+    clearBackHref,
+    setKebabContent,
+    clearKebabContent,
+    setChatTarget,
+    clearChatTarget,
+  } = useHeaderExtensionSetters();
 
   const characterRouteKey = path ? `${path.campaignId}/${path.characterId}` : null;
   const [loadedCharacterRouteKey, setLoadedCharacterRouteKey] = useState<string | null>(null);
@@ -398,11 +402,45 @@ export default function CharacterSheet({
   const routeTimedOut = useRouteLoadTimedOut();
   useRouteLoading(characterLoading || isDMLoading || customItemsLoading);
 
+  // A release closes the chat, so the player is asked what to do with it before the page moves.
+  const chatOwnerId = character?.userId ?? null;
+  const releaseChatId =
+    path && chatOwnerId ? buildChatId(path.campaignId, path.characterId, chatOwnerId) : null;
+
+  const playerRelease = useReleaseFlow({
+    accountId: effectiveUserId,
+    chatId: releaseChatId,
+    release: releaseCharacter,
+    onFinished: () => {
+      clearKebabContent();
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    },
+    confirm: {
+      title: "Release this character?",
+      message:
+        "Unlinks this character from your account. To move devices, connect the new device with your account recovery code instead.",
+      confirmLabel: "Release",
+    },
+  });
+
+  const dmRelease = useReleaseFlow({
+    accountId: effectiveUserId,
+    chatId: releaseChatId,
+    release: dmForceRelease,
+    onFinished: () => undefined,
+    confirm: {
+      title: "Force release this character?",
+      message:
+        "This removes the player's ownership at once. They lose access to the character and your chat with them is closed, but the messages stay.",
+      confirmLabel: "Force release",
+    },
+  });
+
   useEffect(() => {
-    if (!accessWasRevoked) return;
+    if (!accessWasRevoked || playerRelease.active) return;
     if (routeActive) clearKebabContent();
     navigate(ROUTES.DASHBOARD, { replace: true });
-  }, [accessWasRevoked, routeActive, clearKebabContent, navigate]);
+  }, [accessWasRevoked, playerRelease.active, routeActive, clearKebabContent, navigate]);
 
   const handleGenerateRecoveryCode = useCallback(async () => {
     if (!params.campaignId || !params.characterId) return;
@@ -413,13 +451,6 @@ export default function CharacterSheet({
     if (!params.campaignId || !params.characterId) return;
     await revokeRecoveryCode(params.campaignId, params.characterId);
   }, [params.campaignId, params.characterId]);
-
-  const handlePlayerRelease = useCallback(async () => {
-    const released = await releaseCharacter();
-    if (!released) return;
-    clearKebabContent();
-    navigate(ROUTES.DASHBOARD, { replace: true });
-  }, [releaseCharacter, clearKebabContent, navigate]);
 
   useEffect(() => {
     if (!routeActive || !character || isDMLoading) return;
@@ -435,7 +466,7 @@ export default function CharacterSheet({
         canExport={isDM || isOwner}
         onExport={() => exportCharacterJson(character)}
         canPlayerRelease={canPlayerRelease}
-        onPlayerRelease={handlePlayerRelease}
+        onPlayerRelease={playerRelease.begin}
         isReleasing={isReleasing}
       />
     );
@@ -451,7 +482,7 @@ export default function CharacterSheet({
     isDMLoading,
     isOwner,
     canPlayerRelease,
-    handlePlayerRelease,
+    playerRelease.begin,
     handleGenerateRecoveryCode,
     handleRevokeRecoveryCode,
     isReleasing,
@@ -459,6 +490,29 @@ export default function CharacterSheet({
     clearBackHref,
     setKebabContent,
     clearKebabContent,
+  ]);
+
+  // The header Messages button opens this character's chat while the sheet is showing.
+  const characterOwnerId = character?.userId ?? null;
+  const characterDisplayName = character?.header?.characterName;
+  const characterLoaded = Boolean(character);
+  useEffect(() => {
+    if (!routeActive || !path || !characterLoaded) return;
+    setChatTarget({
+      campaignId: path.campaignId,
+      characterId: path.characterId,
+      playerAccountId: characterOwnerId,
+      characterName: characterDisplayName,
+    });
+    return () => clearChatTarget();
+  }, [
+    routeActive,
+    path,
+    characterLoaded,
+    characterOwnerId,
+    characterDisplayName,
+    setChatTarget,
+    clearChatTarget,
   ]);
 
   // ================================================================
@@ -605,8 +659,20 @@ export default function CharacterSheet({
     return <ErrorState className="py-10 text-center">Invalid character route.</ErrorState>;
   }
 
+  const releaseModals = (
+    <>
+      {playerRelease.modals}
+      {dmRelease.modals}
+    </>
+  );
+
   if (isReleasing || accessWasRevoked) {
-    return <ReleasingFrame />;
+    return (
+      <>
+        <ReleasingFrame />
+        {releaseModals}
+      </>
+    );
   }
 
   if (characterLoading || isDMLoading || customItemsLoading) {
@@ -717,14 +783,6 @@ export default function CharacterSheet({
           className="mb-4"
           title={TAB_TITLES[activeTab]}
           left={<SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />}
-          right={
-            <IconButton
-              label="Messages"
-              onClick={onOpenMessages}
-              className="h-10 w-10 justify-self-end"
-              icon={<MessageIcon className="h-5 w-5" />}
-            />
-          }
         />
 
         {/* CONTENT CONTAINER */}
@@ -1063,7 +1121,7 @@ export default function CharacterSheet({
                   campaignId={path.campaignId}
                   character={character}
                   ownerName={ownerName}
-                  onDMForceRelease={dmForceRelease}
+                  onDMForceRelease={dmRelease.begin}
                   onDMForceAssign={dmForceAssign}
                   onDMToggleEdit={dmToggleEdit}
                   isDmForceReleasing={isDmForceReleasing}
@@ -1085,6 +1143,8 @@ export default function CharacterSheet({
             icon={<ChevronUpIcon className="h-5 w-5" />}
           />
         )}
+
+        {releaseModals}
       </div>
     </CampaignCustomItemsScope>
   );

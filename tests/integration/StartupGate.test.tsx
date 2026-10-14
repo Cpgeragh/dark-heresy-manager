@@ -8,10 +8,17 @@ const campaignsState = vi.hoisted(() => ({
   error: null as Error | null,
   archivedError: null as Error | null,
 }));
+const chatsState = vi.hoisted(() => ({
+  loading: false,
+  error: null as Error | null,
+}));
 const needsRecoveryCodeBackupMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../../src/context/useCampaignsContext", () => ({
   useCampaignsContext: () => campaignsState,
+}));
+vi.mock("../../src/context/useChatsContext", () => ({
+  useChatsContext: () => chatsState,
 }));
 vi.mock("../../src/services/userAccountService", () => ({
   needsRecoveryCodeBackup: (...args: unknown[]) => needsRecoveryCodeBackupMock(...args),
@@ -51,6 +58,8 @@ beforeEach(() => {
   campaignsState.archivedLoading = false;
   campaignsState.error = null;
   campaignsState.archivedError = null;
+  chatsState.loading = false;
+  chatsState.error = null;
   needsRecoveryCodeBackupMock.mockReset();
   needsRecoveryCodeBackupMock.mockResolvedValue(false);
 });
@@ -85,6 +94,32 @@ describe("StartupGate", () => {
     expectLogoScreen();
   });
 
+  it("keeps the logo screen while the chats list is loading", async () => {
+    chatsState.loading = true;
+    renderGate();
+
+    await act(async () => {});
+    expectLogoScreen();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("opens the app once the chats list has arrived", async () => {
+    chatsState.loading = true;
+    const view = renderGate();
+    await act(async () => {});
+    expectLogoScreen();
+
+    chatsState.loading = false;
+    view.rerender(
+      <StartupGate ownUid="user-1" splashLabel="Loading…">
+        <div>Main app</div>
+        <BackupProbe />
+      </StartupGate>
+    );
+
+    expect(await screen.findByText("Main app")).toBeInTheDocument();
+  });
+
   it("keeps the logo screen until the backup check has answered", async () => {
     needsRecoveryCodeBackupMock.mockReturnValue(new Promise(() => undefined));
     renderGate();
@@ -110,6 +145,14 @@ describe("StartupGate", () => {
 
   it("shows the error modal when the archived list fails", async () => {
     campaignsState.archivedError = new Error("permission-denied");
+    renderGate();
+
+    await act(async () => {});
+    expectErrorModal();
+  });
+
+  it("shows the error modal when the chats list fails", async () => {
+    chatsState.error = new Error("permission-denied");
     renderGate();
 
     await act(async () => {});

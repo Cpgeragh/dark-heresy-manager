@@ -4,7 +4,7 @@
 // character, ask whether to keep it. The chat is looked up before the release, so the release
 // closing it cannot change the answer.
 
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { CHAT_LIMITS } from "shared-rules";
 import { useChatsContext } from "../../context/useChatsContext";
 import { clearChat } from "../../services/chatService";
@@ -30,7 +30,7 @@ export function useReleaseFlow({
   release,
   onFinished,
   confirm,
-}: UseReleaseFlowOptions): { begin: () => void; modals: ReactNode } {
+}: UseReleaseFlowOptions): { begin: () => void; active: boolean; modals: ReactNode } {
   const { chats } = useChatsContext();
   const toast = useToast();
   const [step, setStep] = useState<Step>("idle");
@@ -99,5 +99,7 @@ export function useReleaseFlow({
     </>
   );
 
-  return { begin: () => setStep("confirm"), modals };
+  const begin = useCallback(() => setStep("confirm"), []);
+
+  return { begin, active: step !== "idle", modals };
 }

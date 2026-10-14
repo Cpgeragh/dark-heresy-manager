@@ -1,7 +1,7 @@
 // src/App.tsx
 
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
-import { Routes, Route, Navigate, useLocation, useMatch } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
 import { useDeviceLink } from "./hooks/useDeviceLink";
@@ -9,11 +9,14 @@ import { useLinkedDevices } from "./hooks/useLinkedDevices";
 import { useUserProfile } from "./hooks/useUserProfile";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
-import { MessageDrawer } from "./components/MessageDrawer";
+import { ChatInboxModal } from "./components/chat/ChatInboxModal";
+import { CloseChatInboxOnNavigation } from "./components/chat/CloseChatInboxOnNavigation";
 import { SplashScreen } from "./components/SplashScreen";
 import { StartupErrorModal } from "./components/StartupErrorModal";
 import { StartupGate } from "./components/StartupGate";
 import { CampaignsProvider } from "./context/CampaignsContext";
+import { ChatInboxProvider } from "./context/ChatInboxProvider";
+import { ChatsProvider } from "./context/ChatsContext";
 import { HeaderExtensionProvider } from "./context/HeaderExtensionContext";
 import { ToastProvider, ToastContainer, useToast } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
@@ -44,11 +47,7 @@ function UpdateStallNotice() {
 function AppContent() {
   const [isPostUpgrade] = useState(() => consumePostUpgrade());
   const location = useLocation();
-  const [messagesOpen, setMessagesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const characterSheetMatch = useMatch(ROUTE_PATTERNS.CHARACTER_SHEET);
-  const contextCampaignId = characterSheetMatch?.params?.campaignId ?? null;
-  const contextCharacterId = characterSheetMatch?.params?.characterId ?? null;
 
   // -------------------------------------------------
   // AUTH & USER STATE
@@ -78,12 +77,13 @@ function AppContent() {
     error: profileError,
   } = useUserProfile(effectiveUserId);
 
-  // Keep the same provider mounted through the existing splash and route changes.
-  // Once the device link resolves, campaign reads can run beside the remaining
+  // Keep the same providers mounted through the existing splash and route changes.
+  // Once the device link resolves, campaign and chat reads can run beside the remaining
   // account work rather than waiting for Dashboard to mount.
-  const withCampaigns = (content: ReactNode) => (
-    <CampaignsProvider uid={currentUser && !linkLoading ? effectiveUserId : ""}>
-      {content}
+  const listsAccountId = currentUser && !linkLoading ? effectiveUserId : "";
+  const withAccountLists = (content: ReactNode) => (
+    <CampaignsProvider uid={listsAccountId}>
+      <ChatsProvider accountId={listsAccountId}>{content}</ChatsProvider>
     </CampaignsProvider>
   );
 
@@ -91,11 +91,11 @@ function AppContent() {
   // LOADING STATES
   // -------------------------------------------------
   if (loading || linkLoading || (onboarded && devicesLoading)) {
-    return withCampaigns(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
+    return withAccountLists(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
   }
 
   if (authError || linkError || (onboarded && devicesError)) {
-    return withCampaigns(
+    return withAccountLists(
       <>
         <SplashScreen label="Loading…" />
         <StartupErrorModal />
@@ -104,12 +104,12 @@ function AppContent() {
   }
 
   if (!currentUser) {
-    return withCampaigns(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
+    return withAccountLists(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
   }
 
   // First-launch: user hasn't completed onboarding yet.
   if (!onboarded) {
-    return withCampaigns(
+    return withAccountLists(
       <Suspense fallback={<SplashScreen label="Loading…" />}>
         <Onboarding
           user={currentUser}
@@ -122,11 +122,11 @@ function AppContent() {
   }
 
   if (profileLoading) {
-    return withCampaigns(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
+    return withAccountLists(<SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />);
   }
 
   if (profileError) {
-    return withCampaigns(
+    return withAccountLists(
       <>
         <SplashScreen label="Loading…" />
         <StartupErrorModal />
@@ -139,7 +139,7 @@ function AppContent() {
   // its own permanent id), send it back through the same onboarding flow any
   // other unconnected device uses, rather than a separate recovery screen.
   if (!firstName) {
-    return withCampaigns(
+    return withAccountLists(
       <Suspense fallback={<SplashScreen label="Loading…" />}>
         <Onboarding
           user={currentUser}
@@ -159,78 +159,77 @@ function AppContent() {
   // -------------------------------------------------
   // MAIN APP UI
   // -------------------------------------------------
-  return withCampaigns(
+  return withAccountLists(
     <StartupGate ownUid={currentUser.uid} splashLabel={isPostUpgrade ? "Updating…" : "Loading…"}>
       <HeaderExtensionProvider>
-        <UpdateStallNotice />
-        <div className={`min-h-screen ${colourPageBackground} ${colourTextPrimary}`}>
-          {/* HEADER */}
-          <AppHeader currentPath={location.pathname} onOpenSettings={() => setSettingsOpen(true)} />
-
-          {/* ROUTES */}
-          <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
-            <ErrorBoundary>
-              <RouteHolder
-                splashLabel={isPostUpgrade ? "Updating…" : "Loading…"}
-                routes={(routeLocation) => (
-                  <Suspense fallback={<RouteLoadingHold />}>
-                    <Routes location={routeLocation}>
-                      <Route
-                        path={ROUTES.DASHBOARD}
-                        element={
-                          <Dashboard
-                            user={currentUser}
-                            effectiveUserId={effectiveUserId}
-                            firstName={firstName}
-                          />
-                        }
-                      />
-
-                      <Route
-                        path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                        element={
-                          <CharacterSheet
-                            effectiveUserId={effectiveUserId}
-                            effectiveUserFirstName={firstName}
-                            onOpenMessages={() => setMessagesOpen(true)}
-                          />
-                        }
-                      />
-
-                      <Route
-                        path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
-                        element={<CampaignOverview effectiveUserId={effectiveUserId} />}
-                      />
-
-                      <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-                    </Routes>
-                  </Suspense>
-                )}
-              />
-            </ErrorBoundary>
-          </main>
-
-          <MessageDrawer
-            accountId={effectiveUserId}
-            isOpen={messagesOpen}
-            onClose={() => setMessagesOpen(false)}
-            campaignId={contextCampaignId}
-            characterId={contextCharacterId}
-          />
-
-          {settingsOpen && (
-            <Settings
-              effectiveUserId={effectiveUserId}
-              firstName={firstName}
-              devices={devices}
-              deviceListError={devicesError}
-              disconnect={handleDeviceDisconnect}
-              onClose={() => setSettingsOpen(false)}
+        <ChatInboxProvider>
+          <UpdateStallNotice />
+          <CloseChatInboxOnNavigation />
+          <div className={`min-h-screen ${colourPageBackground} ${colourTextPrimary}`}>
+            {/* HEADER */}
+            <AppHeader
+              currentPath={location.pathname}
+              onOpenSettings={() => setSettingsOpen(true)}
             />
-          )}
 
-          <OfflineIndicator />
-        </div>
+            {/* ROUTES */}
+            <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+              <ErrorBoundary>
+                <RouteHolder
+                  splashLabel={isPostUpgrade ? "Updating…" : "Loading…"}
+                  routes={(routeLocation) => (
+                    <Suspense fallback={<RouteLoadingHold />}>
+                      <Routes location={routeLocation}>
+                        <Route
+                          path={ROUTES.DASHBOARD}
+                          element={
+                            <Dashboard
+                              user={currentUser}
+                              effectiveUserId={effectiveUserId}
+                              firstName={firstName}
+                            />
+                          }
+                        />
+
+                        <Route
+                          path={ROUTE_PATTERNS.CHARACTER_SHEET}
+                          element={
+                            <CharacterSheet
+                              effectiveUserId={effectiveUserId}
+                              effectiveUserFirstName={firstName}
+                            />
+                          }
+                        />
+
+                        <Route
+                          path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                          element={<CampaignOverview effectiveUserId={effectiveUserId} />}
+                        />
+
+                        <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+                      </Routes>
+                    </Suspense>
+                  )}
+                />
+              </ErrorBoundary>
+            </main>
+
+            <ChatInboxModal accountId={effectiveUserId} />
+
+            {settingsOpen && (
+              <Settings
+                effectiveUserId={effectiveUserId}
+                firstName={firstName}
+                devices={devices}
+                deviceListError={devicesError}
+                disconnect={handleDeviceDisconnect}
+                onClose={() => setSettingsOpen(false)}
+              />
+            )}
+
+            <OfflineIndicator />
+          </div>
+        </ChatInboxProvider>
       </HeaderExtensionProvider>
     </StartupGate>
   );

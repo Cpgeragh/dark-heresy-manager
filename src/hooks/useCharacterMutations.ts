@@ -312,17 +312,19 @@ export function useCharacterMutations({
   // ================================================================
   // DM FORCE RELEASE
   // ================================================================
-  const dmForceRelease = useCallback(async (): Promise<void> => {
-    if (!character) return;
+  const dmForceRelease = useCallback(async (): Promise<boolean> => {
+    if (!character) return false;
 
     setIsDmForceReleasing(true);
     try {
       await forceReleaseCharacter(campaignId, characterId);
       toast.success("Character force-released");
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to force release";
       toast.error(`Force release failed: ${message}`);
       console.error("Failed to force release:", err);
+      return false;
     } finally {
       setIsDmForceReleasing(false);
     }

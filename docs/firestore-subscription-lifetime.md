@@ -8,6 +8,8 @@ Subscriptions belong to the narrowest component or provider that needs their liv
 
 `CampaignsProvider` is global in `src/App.tsx`. After authentication it keeps the active DM, active member and archived campaign queries alive across routes, including startup states, and `StartupGate` waits for all three before the application opens. Route pages add only the scoped listeners required by the mounted and enabled surface.
 
+`ChatsProvider` is also global in `src/App.tsx`. It keeps one live listener on the account's own chats, newest first, and `StartupGate` waits for it. Only an open conversation adds a message listener, and closing the Messages pop-up removes it.
+
 ## Query windows
 
 | Data                              | Maximum requested documents |
@@ -15,8 +17,8 @@ Subscriptions belong to the narrowest component or provider that needs their liv
 | Active or archived campaign query |                         100 |
 | Campaign character query          |                         100 |
 | Session query                     |                         200 |
-| Thread summary query              |                         100 |
-| Message page                      |                         100 |
+| Chat list query                   |                         200 |
+| Chat message page                 |                         100 |
 | Claim-history page                |                          50 |
 | Custom-item query                 |                         200 |
 

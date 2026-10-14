@@ -19,7 +19,7 @@ Warm each scenario once, reset instrumentation, and then repeat open-close or na
 
 - Dashboard to campaign and back;
 - campaign to character and back;
-- message drawer open, page, and close;
+- Messages pop-up open, page older messages, and close;
 - searchable picker open, filter, select or cancel;
 - portrait chooser open and cancel;
 - Settings open and close; and
@@ -31,13 +31,13 @@ After each cycle, record active listener identities, DOM node count, pending vis
 
 A memory or lifecycle defect requires repeatable post-warm-up growth and an identified owner or structural symptom.
 
-| Acceptable retained state | Boundary |
-| --- | --- |
-| Loaded JavaScript modules | One loaded instance per module graph |
-| Canonical reference data | Bounded by the shipped data set |
-| Decoded reusable assets | Browser-managed and stable after warm-up |
-| Firestore caches | Bounded by configured cache behaviour |
-| Global provider state | Owned for the authenticated application lifetime |
+| Acceptable retained state | Boundary                                         |
+| ------------------------- | ------------------------------------------------ |
+| Loaded JavaScript modules | One loaded instance per module graph             |
+| Canonical reference data  | Bounded by the shipped data set                  |
+| Decoded reusable assets   | Browser-managed and stable after warm-up         |
+| Firestore caches          | Bounded by configured cache behaviour            |
+| Global provider state     | Owned for the authenticated application lifetime |
 
 Quantitative heap and DOM baselines are `Pending re-measurement`. Do not use a single heap sample as proof of a leak.
 

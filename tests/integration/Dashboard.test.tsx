@@ -34,6 +34,14 @@ vi.mock("../../src/context/useCampaignsContext", () => ({
   },
 }));
 
+const chatsState = vi.hoisted(() => ({
+  value: { chats: [] as unknown[], loading: false, error: null as Error | null },
+}));
+vi.mock("../../src/context/useChatsContext", () => ({
+  useChatsContext: () => chatsState.value,
+}));
+vi.mock("../../src/services/chatService", () => ({ clearChat: vi.fn() }));
+
 const useRecoveryLookupMock = vi.fn();
 const resetRecoveryLookupMock = vi.fn();
 vi.mock("../../src/hooks/useRecoveryLookup", () => ({
@@ -122,6 +130,7 @@ beforeEach(() => {
     playerError: null,
   });
   archivedStateMock.mockReturnValue({ campaigns: [], loading: false, error: null });
+  chatsState.value = { chats: [], loading: false, error: null };
   useRecoveryLookupMock.mockReturnValue({
     loading: false,
     error: null,
@@ -484,6 +493,129 @@ describe("Dashboard DM campaign list", () => {
     await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
     expect(preflightCampaignDeletionMock).toHaveBeenCalledWith("campaign-2");
     expect(deleteCampaignMock).toHaveBeenCalledWith("archived-job");
+  });
+
+  describe("chats after a campaign is deleted", () => {
+    const campaignChat = (campaignId: string, characterId: string) => ({
+      id: `${campaignId}__${characterId}__player-1`,
+      campaignId,
+      characterId,
+      playerAccountId: "player-1",
+      role: "dm",
+      otherAccountId: "player-1",
+      otherName: "Anna",
+      campaignName: "Calixis",
+      characterName: characterId,
+      lastMessage: "Hello",
+      lastTimestamp: null,
+      unreadCount: 0,
+      closed: true,
+    });
+
+    async function deleteActiveCampaign(user: ReturnType<typeof userEvent.setup>) {
+      preflightCampaignDeletionMock.mockResolvedValue({ jobId: "job-1", totalCount: 5 });
+      useCampaignsContextMock.mockReturnValue({
+        dmCampaigns: [dmCampaign()],
+        playerCampaigns: [],
+        dmLoading: false,
+        playerLoading: false,
+        dmError: null,
+        playerError: null,
+      });
+      renderDashboard();
+      await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
+      await user.click(
+        within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
+          name: "Delete campaign",
+        })
+      );
+      const deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
+      await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
+      await waitFor(() =>
+        expect(
+          within(deleteDialog).getByRole("button", { name: "Delete permanently" })
+        ).toBeEnabled()
+      );
+      await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
+    }
+
+    it("asks about the DM's chats once a campaign that has chats is deleted", async () => {
+      const user = userEvent.setup();
+      deleteCampaignMock.mockResolvedValue(undefined);
+      chatsState.value = {
+        chats: [campaignChat("campaign-1", "c1"), campaignChat("campaign-1", "c2")],
+        loading: false,
+        error: null,
+      };
+
+      await deleteActiveCampaign(user);
+
+      expect(await screen.findByRole("dialog", { name: "Keep your chats?" })).toBeInTheDocument();
+      expect(screen.getByText(/You have 2 chats about this campaign/)).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Keep my chats" }));
+      expect(screen.queryByRole("dialog", { name: "Keep your chats?" })).not.toBeInTheDocument();
+    });
+
+    it("asks nothing when the deleted campaign has no chats, or only other campaigns do", async () => {
+      const user = userEvent.setup();
+      deleteCampaignMock.mockResolvedValue(undefined);
+      chatsState.value = {
+        chats: [campaignChat("campaign-9", "c1")],
+        loading: false,
+        error: null,
+      };
+
+      await deleteActiveCampaign(user);
+
+      await waitFor(() => expect(deleteCampaignMock).toHaveBeenCalledWith("job-1"));
+      expect(screen.queryByRole("dialog", { name: /Keep your chat/ })).not.toBeInTheDocument();
+    });
+
+    it("asks nothing when the delete fails", async () => {
+      const user = userEvent.setup();
+      vi.spyOn(console, "error").mockImplementation(() => undefined);
+      deleteCampaignMock.mockRejectedValue(new Error("Chunk failed"));
+      chatsState.value = {
+        chats: [campaignChat("campaign-1", "c1")],
+        loading: false,
+        error: null,
+      };
+
+      await deleteActiveCampaign(user);
+
+      await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Chunk failed"));
+      expect(screen.queryByRole("dialog", { name: /Keep your chat/ })).not.toBeInTheDocument();
+    });
+
+    it("also asks after an archived campaign is deleted", async () => {
+      const user = userEvent.setup();
+      preflightCampaignDeletionMock.mockResolvedValue({ jobId: "archived-job", totalCount: 5 });
+      deleteCampaignMock.mockResolvedValue(undefined);
+      archivedStateMock.mockReturnValue({
+        campaigns: [dmCampaign({ id: "campaign-2", name: "Retired Crusade" })],
+        loading: false,
+        error: null,
+      });
+      chatsState.value = {
+        chats: [campaignChat("campaign-2", "c1")],
+        loading: false,
+        error: null,
+      };
+      renderDashboard();
+
+      await user.click(screen.getByRole("button", { name: /Archived/ }));
+      await user.click(screen.getByRole("button", { name: "Delete" }));
+      const deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
+      await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
+      await waitFor(() =>
+        expect(
+          within(deleteDialog).getByRole("button", { name: "Delete permanently" })
+        ).toBeEnabled()
+      );
+      await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
+
+      expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    });
   });
 
   it("shows archived campaigns behind a toggle, with a working restore action", async () => {

@@ -12,6 +12,9 @@ const authState = vi.hoisted(() => ({
 }));
 
 const campaignProviderRenderMock = vi.hoisted(() => vi.fn());
+const chatsProviderRenderMock = vi.hoisted(() => vi.fn());
+const chatInboxModalRenderMock = vi.hoisted(() => vi.fn());
+const chatsState = vi.hoisted(() => ({ loading: false, error: null as Error | null }));
 
 const campaignsState = vi.hoisted(() => ({
   loading: false,
@@ -23,6 +26,21 @@ const needsRecoveryCodeBackupMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../../src/context/useCampaignsContext", () => ({
   useCampaignsContext: () => campaignsState,
+}));
+vi.mock("../../src/context/useChatsContext", () => ({
+  useChatsContext: () => chatsState,
+}));
+vi.mock("../../src/context/ChatsContext", () => ({
+  ChatsProvider: ({ accountId, children }: { accountId: string; children: ReactNode }) => {
+    chatsProviderRenderMock(accountId);
+    return children;
+  },
+}));
+vi.mock("../../src/components/chat/ChatInboxModal", () => ({
+  ChatInboxModal: ({ accountId }: { accountId: string }) => {
+    chatInboxModalRenderMock(accountId);
+    return <div>Messages modal</div>;
+  },
 }));
 vi.mock("../../src/services/userAccountService", () => ({
   needsRecoveryCodeBackup: (...args: unknown[]) => needsRecoveryCodeBackupMock(...args),
@@ -49,7 +67,6 @@ vi.mock("../../src/hooks/useUserProfile", () => ({
 vi.mock("../../src/components/AppHeader", () => ({
   AppHeader: () => <header>Application header</header>,
 }));
-vi.mock("../../src/components/MessageDrawer", () => ({ MessageDrawer: () => null }));
 vi.mock("../../src/components/OfflineIndicator", () => ({ OfflineIndicator: () => null }));
 vi.mock("../../src/context/CampaignsContext", () => ({
   CampaignsProvider: ({ children }: { children: ReactNode }) => {
@@ -85,6 +102,10 @@ describe("App loading boundaries", () => {
     campaignsState.archivedLoading = false;
     campaignsState.error = null;
     campaignsState.archivedError = null;
+    chatsState.loading = false;
+    chatsState.error = null;
+    chatsProviderRenderMock.mockClear();
+    chatInboxModalRenderMock.mockClear();
     needsRecoveryCodeBackupMock.mockReset();
     needsRecoveryCodeBackupMock.mockResolvedValue(false);
     campaignProviderRenderMock.mockClear();
@@ -139,5 +160,27 @@ describe("App loading boundaries", () => {
 
     expect(await screen.findByText("Dashboard")).toBeInTheDocument();
     expect(campaignProviderRenderMock).toHaveBeenCalled();
+  });
+
+  it("starts the chats list for the signed-in account before rendering the dashboard", async () => {
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Dashboard")).toBeInTheDocument();
+    expect(chatsProviderRenderMock).toHaveBeenCalledWith("user-1");
+  });
+
+  it("mounts the Messages modal in the main app for the signed-in account", async () => {
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Messages modal")).toBeInTheDocument();
+    expect(chatInboxModalRenderMock).toHaveBeenCalledWith("user-1");
   });
 });

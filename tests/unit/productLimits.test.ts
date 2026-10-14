@@ -18,7 +18,6 @@ describe("hard product limits", () => {
       linkedDevicesPerQuery: 200,
       inquisitorNameCharacters: 100,
       messageCharacters: 2_000,
-      threadSummaryPreviewCharacters: 500,
       messagesPerPage: 100,
       claimHistoryEntriesPerPage: 50,
       xpHistoryEntriesPerPage: 100,
@@ -60,7 +59,6 @@ describe("hard product limits", () => {
     expect(FIRESTORE_QUERY_LIMITS.charactersPerCampaign).toBe(PRODUCT_LIMITS.charactersPerCampaign);
     expect(FIRESTORE_QUERY_LIMITS.activeCampaignsPerRole).toBe(PRODUCT_LIMITS.campaignsPerAccount);
     expect(FIRESTORE_QUERY_LIMITS.archivedCampaigns).toBe(PRODUCT_LIMITS.campaignsPerAccount);
-    expect(FIRESTORE_QUERY_LIMITS.messagesPerThread).toBe(PRODUCT_LIMITS.messagesPerPage);
     expect(FIRESTORE_QUERY_LIMITS.claimLogEntries).toBe(PRODUCT_LIMITS.claimHistoryEntriesPerPage);
     expect(FIRESTORE_QUERY_LIMITS.xpHistoryEntries).toBe(PRODUCT_LIMITS.xpHistoryEntriesPerPage);
     expect(FIRESTORE_QUERY_LIMITS.customItemsPerQuery).toBe(PRODUCT_LIMITS.customItemsPerCampaign);

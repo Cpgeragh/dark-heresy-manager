@@ -8,8 +8,8 @@ import { useSessions } from "../hooks/useSessions";
 import { useCampaignCharacters } from "../hooks/useCampaignCharacters";
 import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
+import { useDeletionChatChoice } from "../components/chat/useDeletionChatChoice";
 import { CharacterRow } from "./CampaignOverview/CharacterRow";
-import { DMInbox } from "./CampaignOverview/DMInbox";
 import { CustomItemLibraryAdmin } from "./CampaignOverview/CustomItemLibraryAdmin";
 import { applySessionXp, repairSessionSummaries } from "../services/sessionService";
 import {
@@ -60,6 +60,10 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     error: campaignError,
   } = useCampaign(campaignId ?? null);
   const isDM = campaign?.dmId === effectiveUserId;
+  const { ask: askAboutChats, modals: deletionChatModals } = useDeletionChatChoice({
+    accountId: effectiveUserId,
+    about: "character",
+  });
   const knownRole = campaign
     ? isDM
       ? "admin"
@@ -418,6 +422,9 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                       userId={char.userId}
                       portraitUrl={char.portraitUrl}
                       isDM={isDM}
+                      onDeleted={(deletedId) =>
+                        void askAboutChats({ campaignId, characterId: deletedId })
+                      }
                     />
                   ))
                 )}
@@ -460,18 +467,6 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                   ))}
                 </div>
               )}
-            </div>
-          )}
-
-          {/* MESSAGES: DM only */}
-          {isDM && (
-            <div>
-              <SectionHeader className="mb-3">Messages</SectionHeader>
-              <DMInbox
-                campaignId={campaignId}
-                dmUid={campaign?.dmId ?? ""}
-                characters={characters}
-              />
             </div>
           )}
 
@@ -529,6 +524,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             )}
           </div>
         </Panel>
+        {deletionChatModals}
       </PageShell>
     </CampaignCustomItemsScope>
   );

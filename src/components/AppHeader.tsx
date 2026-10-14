@@ -11,6 +11,7 @@ import { QrCodeIcon } from "../ui/icons/QrCodeIcon";
 import { QrModal } from "../ui/modals/QrModal";
 import { uiIconButton, uiIconButtonIconSize, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { AppHeaderShell } from "./AppHeaderShell";
+import { HeaderMessagesButton } from "./chat/HeaderMessagesButton";
 import { colourPopoverSurface } from "../ui/styles/colourTokens";
 import { uiLayerForeground } from "../ui/styles/layerStyles";
 
@@ -75,7 +76,9 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
         }
         right={
           <>
-            {/* Settings + kebab */}
+            {/* Messages, then settings or the page options */}
+            <HeaderMessagesButton />
+
             {/* Settings: dashboard only */}
             {isOnDashboard && (
               <IconButton label="Settings" onClick={onOpenSettings} icon={<GearIcon />} />

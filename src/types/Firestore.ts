@@ -150,29 +150,6 @@ export interface SessionDocument extends SessionSummaryDocument {
 export type SessionListDocument = SessionSummaryDocument & { dmNotes?: string };
 
 /**
- * A single message in a player-DM thread.
- * Stored in /campaigns/{campaignId}/threads/{playerUid}/messages/{messageId}
- */
-export interface ThreadMessage {
-  id: string;
-  fromUid: string;
-  text: string;
-  timestamp: Timestamp | null; // null briefly before serverTimestamp resolves
-  read: boolean;
-}
-
-/**
- * Thread summary doc: one per player per campaign.
- * Stored in /campaigns/{campaignId}/threads/{playerUid}
- */
-export interface ThreadSummary {
-  characterId: string;
-  lastMessage: string | null;
-  lastTimestamp: Timestamp | null;
-  unreadForDM: number;
-}
-
-/**
  * One person's copy of a chat, stored in /users/{accountId}/chats/{chatId}.
  * A chat is one DM, one player and one character, and both people hold a copy.
  */

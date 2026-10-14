@@ -1,6 +1,6 @@
 // tests/integration/CampaignOverview.test.tsx
 //
-// CharacterRow, SessionForm, SessionCard, DMInbox, and CustomItemLibraryAdmin are
+// CharacterRow, SessionForm, SessionCard, and CustomItemLibraryAdmin are
 // all mocked — each already has its own dedicated test file. This file is
 // scoped to CampaignOverview's own orchestration:
 // character creation/import, the repair-summaries action, search filtering, and
@@ -84,9 +84,28 @@ vi.mock("../../src/firestore/firebaseValidation", async () => {
   };
 });
 
+const chatsState = vi.hoisted(() => ({
+  value: { chats: [] as unknown[], loading: false, error: null as Error | null },
+}));
+vi.mock("../../src/context/useChatsContext", () => ({
+  useChatsContext: () => chatsState.value,
+}));
+vi.mock("../../src/services/chatService", () => ({ clearChat: vi.fn() }));
+
 vi.mock("../../src/pages/CampaignOverview/CharacterRow", () => ({
-  CharacterRow: ({ characterName }: { characterName: string }) => (
-    <div>Mock CharacterRow: {characterName}</div>
+  CharacterRow: ({
+    characterId,
+    characterName,
+    onDeleted,
+  }: {
+    characterId: string;
+    characterName: string;
+    onDeleted?: (characterId: string) => void;
+  }) => (
+    <div>
+      Mock CharacterRow: {characterName}
+      <button onClick={() => onDeleted?.(characterId)}>Mock Delete {characterName}</button>
+    </div>
   ),
 }));
 
@@ -144,10 +163,6 @@ vi.mock("../../src/pages/CampaignOverview/SessionCard", () => ({
       {onApplyXp && <button onClick={onApplyXp}>Mock Apply XP</button>}
     </div>
   ),
-}));
-
-vi.mock("../../src/pages/CampaignOverview/DMInbox", () => ({
-  DMInbox: () => <div>Mock DMInbox</div>,
 }));
 
 vi.mock("../../src/pages/CampaignOverview/CustomItemLibraryAdmin", () => ({
@@ -347,14 +362,12 @@ describe("CampaignOverview", () => {
       error: null,
     });
     renderPage("player-1");
-    expect(screen.queryByText("Mock DMInbox")).not.toBeInTheDocument();
     expect(screen.queryByText("Mock CustomItemLibraryAdmin")).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Character Name")).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Search…")).not.toBeInTheDocument();
     expect(screen.queryByText("Mock CharacterRow: Vex")).not.toBeInTheDocument();
 
     renderPage("dm-1");
-    expect(screen.getByText("Mock DMInbox")).toBeInTheDocument();
     expect(screen.getByText("Mock CustomItemLibraryAdmin")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Character Name")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Search…")).toBeInTheDocument();
@@ -565,5 +578,70 @@ describe("CampaignOverview — player-facing My Characters and Party", () => {
     renderPage("dm-1");
     expect(screen.queryByText("My Characters")).not.toBeInTheDocument();
     expect(screen.queryByText("Party")).not.toBeInTheDocument();
+  });
+});
+
+describe("CampaignOverview — messages", () => {
+  it("has no Messages section for the DM, because messages live in the header now", () => {
+    useCampaignCharactersMock.mockReturnValue({
+      characters: [character({ id: "c1", header: { characterName: "Vex" } })],
+      loading: false,
+      error: null,
+    });
+    renderPage("dm-1");
+
+    expect(screen.queryByText("Messages")).not.toBeInTheDocument();
+  });
+});
+
+describe("CampaignOverview — chats after a character is deleted", () => {
+  const chatFor = (characterId: string) => ({
+    id: `campaign-1__${characterId}__player-1`,
+    campaignId: "campaign-1",
+    characterId,
+    playerAccountId: "player-1",
+    role: "dm",
+    otherAccountId: "player-1",
+    otherName: "Anna",
+    campaignName: "Calixis",
+    characterName: characterId,
+    lastMessage: "Hello",
+    lastTimestamp: null,
+    unreadCount: 0,
+    closed: true,
+  });
+
+  function renderAsDm() {
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [
+        { id: "c1", campaignId: "campaign-1", characterName: "Vex", userId: "player-1" },
+        { id: "c2", campaignId: "campaign-1", characterName: "Thrun", userId: "player-2" },
+      ],
+      loading: false,
+      error: null,
+    });
+    renderPage("dm-1");
+  }
+
+  it("asks the DM whether to keep their chat once a character with a chat is deleted", async () => {
+    const user = userEvent.setup();
+    chatsState.value = { chats: [chatFor("c1")], loading: false, error: null };
+    renderAsDm();
+
+    await user.click(screen.getByRole("button", { name: "Mock Delete Vex" }));
+
+    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    expect(screen.queryByRole("dialog", { name: "Keep your chat?" })).not.toBeInTheDocument();
+  });
+
+  it("asks nothing when the deleted character had no chat", async () => {
+    const user = userEvent.setup();
+    chatsState.value = { chats: [chatFor("c1")], loading: false, error: null };
+    renderAsDm();
+
+    await user.click(screen.getByRole("button", { name: "Mock Delete Thrun" }));
+
+    expect(screen.queryByRole("dialog", { name: /Keep your chat/ })).not.toBeInTheDocument();
   });
 });

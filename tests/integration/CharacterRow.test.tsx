@@ -3,7 +3,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import { Timestamp } from "firebase/firestore";
 import "@testing-library/jest-dom";
 
@@ -36,19 +36,35 @@ vi.mock("../../src/components/Toast", () => ({
 }));
 
 import { CharacterRow } from "../../src/pages/CampaignOverview/CharacterRow";
+import { ChatInboxProvider } from "../../src/context/ChatInboxProvider";
+import { useChatInbox } from "../../src/context/useChatInbox";
 import type { ClaimLogEntry } from "../../src/utils/claimLog";
+
+function InboxProbe() {
+  const { view } = useChatInbox();
+  const location = useLocation();
+  return (
+    <>
+      <p data-testid="inbox-view">{JSON.stringify(view)}</p>
+      <p data-testid="path">{location.pathname}</p>
+    </>
+  );
+}
 
 function renderRow(overrides: Partial<React.ComponentProps<typeof CharacterRow>> = {}) {
   render(
-    <MemoryRouter>
-      <CharacterRow
-        campaignId="campaign-1"
-        characterId="char-1"
-        characterName="Vex"
-        userId="uid-1"
-        isDM={true}
-        {...overrides}
-      />
+    <MemoryRouter initialEntries={["/campaign/campaign-1"]}>
+      <ChatInboxProvider>
+        <CharacterRow
+          campaignId="campaign-1"
+          characterId="char-1"
+          characterName="Vex"
+          userId="uid-1"
+          isDM={true}
+          {...overrides}
+        />
+        <InboxProbe />
+      </ChatInboxProvider>
     </MemoryRouter>
   );
 }
@@ -83,6 +99,41 @@ describe("CharacterRow display", () => {
     renderRow({ isDM: true });
     expect(screen.getByRole("button", { name: "History" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+  });
+});
+
+describe("CharacterRow Message button", () => {
+  it("shows a Message button to the DM for a claimed character", () => {
+    renderRow();
+    expect(screen.getByRole("button", { name: "Message" })).toBeInTheDocument();
+  });
+
+  it("hides the Message button on an unclaimed character", () => {
+    renderRow({ userId: null });
+    expect(screen.queryByRole("button", { name: "Message" })).not.toBeInTheDocument();
+  });
+
+  it("hides the Message button from non-DM viewers", () => {
+    renderRow({ isDM: false });
+    expect(screen.queryByRole("button", { name: "Message" })).not.toBeInTheDocument();
+  });
+
+  it("opens that character's chat with its player without following the card link", async () => {
+    const user = userEvent.setup();
+    renderRow();
+
+    await user.click(screen.getByRole("button", { name: "Message" }));
+
+    expect(JSON.parse(screen.getByTestId("inbox-view").textContent ?? "")).toEqual({
+      kind: "chat",
+      target: {
+        campaignId: "campaign-1",
+        characterId: "char-1",
+        playerAccountId: "uid-1",
+        characterName: "Vex",
+      },
+    });
+    expect(screen.getByTestId("path")).toHaveTextContent("/campaign/campaign-1");
   });
 });
 
@@ -204,6 +255,51 @@ describe("CharacterRow delete flow", () => {
     await user.click(screen.getByRole("button", { name: "Yes" }));
 
     await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Chunk failed"));
+  });
+});
+
+describe("CharacterRow after a delete", () => {
+  async function confirmDelete(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Yes" })).toBeEnabled());
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+  }
+
+  it("tells the page which character was deleted once the delete job has finished", async () => {
+    const user = userEvent.setup();
+    const onDeleted = vi.fn();
+    mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 3 });
+    mockDeleteCharacter.mockResolvedValue(undefined);
+    renderRow({ onDeleted });
+
+    await confirmDelete(user);
+
+    await waitFor(() => expect(onDeleted).toHaveBeenCalledWith("char-1"));
+  });
+
+  it("does not tell the page anything when the delete job fails", async () => {
+    const user = userEvent.setup();
+    const onDeleted = vi.fn();
+    mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 3 });
+    mockDeleteCharacter.mockRejectedValue(new Error("Chunk failed"));
+    renderRow({ onDeleted });
+
+    await confirmDelete(user);
+
+    await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Chunk failed"));
+    expect(onDeleted).not.toHaveBeenCalled();
+  });
+
+  it("still deletes when the page gives no callback", async () => {
+    const user = userEvent.setup();
+    mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 3 });
+    mockDeleteCharacter.mockResolvedValue(undefined);
+    renderRow();
+
+    await confirmDelete(user);
+
+    await waitFor(() => expect(mockDeleteCharacter).toHaveBeenCalledWith("job-1"));
+    expect(mockToastError).not.toHaveBeenCalled();
   });
 });
 

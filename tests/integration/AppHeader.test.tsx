@@ -11,6 +11,13 @@ vi.mock("../../src/context/useHeaderExtension", () => ({
 }));
 
 import { AppHeader } from "../../src/components/AppHeader";
+import { ChatInboxProvider } from "../../src/context/ChatInboxProvider";
+import { useChatInbox } from "../../src/context/useChatInbox";
+
+function InboxViewProbe() {
+  const { view } = useChatInbox();
+  return <p>Inbox view: {view.kind}</p>;
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -103,5 +110,42 @@ describe("AppHeader", () => {
     await user.keyboard("{Escape}");
 
     expect(screen.queryByText("Kebab options here")).not.toBeInTheDocument();
+  });
+
+  it("shows the Messages button on the dashboard and off it", () => {
+    renderHeader("/");
+    expect(screen.getByRole("button", { name: "Messages" })).toBeInTheDocument();
+  });
+
+  it("shows the Messages button on a page that has no settings button", () => {
+    renderHeader("/settings", "/settings");
+    expect(screen.getByRole("button", { name: "Messages" })).toBeInTheDocument();
+  });
+
+  it("places the Messages button before the Settings button", () => {
+    renderHeader("/");
+    const messages = screen.getByRole("button", { name: "Messages" });
+    const settings = screen.getByRole("button", { name: "Settings" });
+
+    expect(
+      messages.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("opens the inbox list when the Messages button is pressed", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <ChatInboxProvider>
+          <AppHeader currentPath="/" onOpenSettings={vi.fn()} />
+          <InboxViewProbe />
+        </ChatInboxProvider>
+      </MemoryRouter>
+    );
+    expect(screen.getByText("Inbox view: closed")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Messages" }));
+
+    expect(screen.getByText("Inbox view: list")).toBeInTheDocument();
   });
 });

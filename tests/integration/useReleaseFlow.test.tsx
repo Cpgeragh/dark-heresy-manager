@@ -1,5 +1,6 @@
 // tests/integration/useReleaseFlow.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { useEffect } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -66,7 +67,7 @@ function Harness({
   onFinished: () => void;
   chatId?: string | null;
 }) {
-  const { begin, modals } = useReleaseFlow({
+  const { begin, active, modals } = useReleaseFlow({
     accountId: "player-1",
     chatId,
     release,
@@ -80,6 +81,7 @@ function Harness({
   return (
     <>
       <button onClick={begin}>start</button>
+      <p>{active ? "flow active" : "flow idle"}</p>
       {modals}
     </>
   );
@@ -255,5 +257,53 @@ describe("useReleaseFlow", () => {
 
     await waitFor(() => expect(onFinished).toHaveBeenCalledOnce());
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("reports that the flow is in progress from the confirmation until the last choice", async () => {
+    const user = userEvent.setup();
+    setup();
+    expect(screen.getByText("flow idle")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "start" }));
+    expect(screen.getByText("flow active")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByText("flow idle")).toBeInTheDocument();
+
+    await startAndConfirm(user);
+    await screen.findByRole("dialog", { name: "Keep your chat?" });
+    expect(screen.getByText("flow active")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    expect(screen.getByText("flow idle")).toBeInTheDocument();
+  });
+
+  it("gives the same begin function on every render", async () => {
+    const user = userEvent.setup();
+    const seen: unknown[] = [];
+    function Recorder() {
+      const { begin, modals } = useReleaseFlow({
+        accountId: "player-1",
+        chatId: CHAT_ID,
+        release: async () => true,
+        onFinished: () => undefined,
+        confirm: { title: "Release?", message: "Message.", confirmLabel: "Release" },
+      });
+      useEffect(() => {
+        seen.push(begin);
+      });
+      return (
+        <>
+          <button onClick={begin}>open</button>
+          {modals}
+        </>
+      );
+    }
+    render(<Recorder />);
+
+    await user.click(screen.getByRole("button", { name: "open" }));
+
+    expect(seen.length).toBeGreaterThan(1);
+    expect(new Set(seen).size).toBe(1);
   });
 });

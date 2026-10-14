@@ -28,7 +28,6 @@ const browserUnitTests = [
   "tests/unit/gearSnapshotHelpers.test.ts",
   "tests/unit/identityService.test.ts",
   "tests/unit/indexSplash.test.ts",
-  "tests/unit/messageDrawer.test.tsx",
   "tests/unit/performanceMetrics.test.ts",
   "tests/unit/portraitService.test.ts",
   "tests/unit/psychicPowers.test.ts",

@@ -4,6 +4,7 @@ import { renderHook, act } from "@testing-library/react";
 import { useCharacterMutations } from "../../src/hooks/useCharacterMutations";
 import {
   adjustCharacterXp as adjustCharacterXpService,
+  forceReleaseCharacter as forceReleaseCharacterService,
   patchCharacterField as patchCharacterFieldService,
   patchCharacterFields as patchCharacterFieldsService,
   patchCharacterCollectionField as patchCharacterCollectionFieldService,
@@ -29,6 +30,7 @@ vi.mock("../../src/components/Toast", () => ({
 }));
 
 const mockPatchCharacterField = vi.mocked(patchCharacterFieldService);
+const mockForceReleaseCharacter = vi.mocked(forceReleaseCharacterService);
 const mockAdjustCharacterXp = vi.mocked(adjustCharacterXpService);
 const mockPatchCharacterFields = vi.mocked(patchCharacterFieldsService);
 const mockPatchCharacterCollectionField = vi.mocked(patchCharacterCollectionFieldService);
@@ -651,5 +653,62 @@ describe("useCharacterMutations: grouped counter saves", () => {
       total: 3,
       current: 2,
     });
+  });
+});
+
+describe("useCharacterMutations: dmForceRelease", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function renderForceRelease(character: Character | null = baseCharacter) {
+    return renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character,
+        allowedToEdit: true,
+      })
+    );
+  }
+
+  it("returns true and confirms with a message when the force release works", async () => {
+    mockForceReleaseCharacter.mockResolvedValue(undefined);
+    const { result } = renderForceRelease();
+
+    let outcome: boolean | undefined;
+    await act(async () => {
+      outcome = await result.current.dmForceRelease();
+    });
+
+    expect(outcome).toBe(true);
+    expect(mockForceReleaseCharacter).toHaveBeenCalledWith("camp-1", "char-1");
+    expect(mockToastSuccess).toHaveBeenCalledWith("Character force-released");
+  });
+
+  it("returns false and shows the error when the force release fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mockForceReleaseCharacter.mockRejectedValue(new Error("Not allowed."));
+    const { result } = renderForceRelease();
+
+    let outcome: boolean | undefined;
+    await act(async () => {
+      outcome = await result.current.dmForceRelease();
+    });
+
+    expect(outcome).toBe(false);
+    expect(mockToastError).toHaveBeenCalledWith("Force release failed: Not allowed.");
+  });
+
+  it("returns false and calls nothing before the character has loaded", async () => {
+    const { result } = renderForceRelease(null);
+
+    let outcome: boolean | undefined;
+    await act(async () => {
+      outcome = await result.current.dmForceRelease();
+    });
+
+    expect(outcome).toBe(false);
+    expect(mockForceReleaseCharacter).not.toHaveBeenCalled();
   });
 });

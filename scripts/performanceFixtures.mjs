@@ -236,28 +236,47 @@ function addCustomItems(writes, campaignId, uid, count, characterId, characterNa
   }
 }
 
-function addThread(writes, campaignId, characterId, uid, count) {
+// A chat id is campaignId__characterId__playerAccountId, the same format as buildChatId in
+// shared-rules; a test keeps the two in step.
+function chatIdFor(campaignId, characterId, playerAccountId) {
+  return `${campaignId}__${characterId}__${playerAccountId}`;
+}
+
+// The DM's own copy of a chat, which is what the Messages list and badge read.
+function addChat(writes, dmUid, chat) {
+  const id = chatIdFor(chat.campaignId, chat.characterId, chat.playerAccountId);
+  writes.push({
+    path: `users/${dmUid}/chats/${id}`,
+    data: {
+      campaignId: chat.campaignId,
+      characterId: chat.characterId,
+      playerAccountId: chat.playerAccountId,
+      role: "dm",
+      otherAccountId: chat.playerAccountId,
+      otherName: "Fixture Player",
+      campaignName: chat.campaignName,
+      characterName: chat.characterName,
+      lastMessage: chat.lastMessage,
+      lastTimestamp: chat.lastTimestamp,
+      unreadCount: chat.unreadCount,
+      closed: false,
+    },
+  });
+  return id;
+}
+
+function addChatMessages(writes, dmUid, chatId, count) {
   for (let index = 0; index < count; index += 1) {
     const id = numbered("message", index);
     writes.push({
-      path: `campaigns/${campaignId}/threads/${characterId}/messages/${id}`,
+      path: `users/${dmUid}/chats/${chatId}/messages/${id}`,
       data: {
-        fromUid: index % 2 === 0 ? uid : "fixture-player",
+        fromAccountId: index % 2 === 0 ? dmUid : "fixture-player",
         text: `Deterministic message ${index + 1}`,
         timestamp: new Date(FIXED_NOW.getTime() - (count - index) * 60_000),
-        read: true,
       },
     });
   }
-  writes.push({
-    path: `campaigns/${campaignId}/threads/${characterId}`,
-    data: {
-      characterId,
-      lastMessage: `Deterministic message ${count}`,
-      lastTimestamp: FIXED_NOW,
-      unreadForDM: 0,
-    },
-  });
 }
 
 function largeCharacter(campaignId, uid) {
@@ -421,7 +440,17 @@ function buildSmallProfile(uid) {
   }
   addSessions(writes, campaignId, 8, ["small-character-001"]);
   addCustomItems(writes, campaignId, uid, 12, "small-character-001", "Small Acolyte 1");
-  addThread(writes, campaignId, "small-character-001", uid, 30);
+  const smallChatId = addChat(writes, uid, {
+    campaignId,
+    campaignName: "Small Baseline",
+    characterId: "small-character-001",
+    characterName: "Small Acolyte 1",
+    playerAccountId: uid,
+    lastMessage: "Deterministic message 30",
+    lastTimestamp: FIXED_NOW,
+    unreadCount: 0,
+  });
+  addChatMessages(writes, uid, smallChatId, 30);
   writes.push({
     path: "campaigns/perf-small-player",
     data: { ...campaignData("fixture-other-dm", "Joined Small Campaign", [uid]) },
@@ -486,14 +515,15 @@ export function buildPerformanceProfile(profileName, uid) {
       const id = numbered("dm-character", index);
       const name = `DM Acolyte ${index + 1}`;
       addCharacter(writes, campaignId, id, emptyCharacter(campaignId, name), name);
-      writes.push({
-        path: `campaigns/${campaignId}/threads/${id}`,
-        data: {
-          characterId: id,
-          lastMessage: `Thread preview ${index + 1}`,
-          lastTimestamp: new Date(FIXED_NOW.getTime() - index * 60_000),
-          unreadForDM: index % 4,
-        },
+      addChat(writes, uid, {
+        campaignId,
+        campaignName: "DM Campaign 1",
+        characterId: id,
+        characterName: name,
+        playerAccountId: numbered("fixture-player", index),
+        lastMessage: `Chat preview ${index + 1}`,
+        lastTimestamp: new Date(FIXED_NOW.getTime() - index * 60_000),
+        unreadCount: index % 4,
       });
     }
     addSessions(writes, campaignId, 180);
@@ -511,7 +541,17 @@ export function buildPerformanceProfile(profileName, uid) {
     emptyCharacter(campaignId, "Thread Acolyte", uid),
     "Thread Acolyte"
   );
-  addThread(writes, campaignId, characterId, uid, 300);
+  const chatId = addChat(writes, uid, {
+    campaignId,
+    campaignName: "Long Thread",
+    characterId,
+    characterName: "Thread Acolyte",
+    playerAccountId: uid,
+    lastMessage: "Deterministic message 300",
+    lastTimestamp: FIXED_NOW,
+    unreadCount: 0,
+  });
+  addChatMessages(writes, uid, chatId, 300);
   return {
     writes,
     route: `/campaign/${campaignId}/character/${characterId}`,

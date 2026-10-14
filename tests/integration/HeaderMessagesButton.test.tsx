@@ -4,10 +4,16 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-const { useChatsContextMock } = vi.hoisted(() => ({ useChatsContextMock: vi.fn() }));
+const { useChatsContextMock, useHeaderExtensionMock } = vi.hoisted(() => ({
+  useChatsContextMock: vi.fn(),
+  useHeaderExtensionMock: vi.fn(),
+}));
 
 vi.mock("../../src/context/useChatsContext", () => ({
   useChatsContext: () => useChatsContextMock(),
+}));
+vi.mock("../../src/context/useHeaderExtension", () => ({
+  useHeaderExtension: () => useHeaderExtensionMock(),
 }));
 
 import { HeaderMessagesButton } from "../../src/components/chat/HeaderMessagesButton";
@@ -35,6 +41,7 @@ function renderButton() {
 beforeEach(() => {
   vi.clearAllMocks();
   useChatsContextMock.mockReturnValue(chatsState(0));
+  useHeaderExtensionMock.mockReturnValue({ backHref: null, kebabContent: null, chatTarget: null });
 });
 
 describe("HeaderMessagesButton", () => {
@@ -67,5 +74,47 @@ describe("HeaderMessagesButton", () => {
     await user.click(screen.getByRole("button", { name: "Messages" }));
 
     expect(JSON.parse(screen.getByTestId("view").textContent ?? "{}")).toEqual({ kind: "list" });
+  });
+
+  it("opens the list when no chat target is published", async () => {
+    const user = userEvent.setup();
+    renderButton();
+
+    await user.click(screen.getByRole("button", { name: "Messages" }));
+
+    expect(screen.getByTestId("view")).toHaveTextContent('{"kind":"list"}');
+  });
+
+  it("opens the character's chat straight away on a sheet whose character has a player", async () => {
+    const user = userEvent.setup();
+    const chatTarget = {
+      campaignId: "c1",
+      characterId: "char-1",
+      playerAccountId: "player-1",
+      characterName: "Vex",
+    };
+    useHeaderExtensionMock.mockReturnValue({ backHref: null, kebabContent: null, chatTarget });
+    renderButton();
+
+    await user.click(screen.getByRole("button", { name: "Messages" }));
+
+    expect(JSON.parse(screen.getByTestId("view").textContent ?? "")).toEqual({
+      kind: "chat",
+      target: chatTarget,
+    });
+  });
+
+  it("opens the list when the sheet's character has no player", async () => {
+    const user = userEvent.setup();
+    useHeaderExtensionMock.mockReturnValue({
+      backHref: null,
+      kebabContent: null,
+      chatTarget: { campaignId: "c1", characterId: "char-1", playerAccountId: null },
+    });
+    renderButton();
+
+    await user.click(screen.getByRole("button", { name: "Messages" }));
+
+    expect(screen.getByTestId("view")).toHaveTextContent('{"kind":"list"}');
   });
 });

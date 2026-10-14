@@ -37,14 +37,14 @@ npm run performance:seed -- --profile long-thread
 
 Reload the route printed by the seeder.
 
-| Profile           | Intended scenario                                                |
-| ----------------- | ---------------------------------------------------------------- |
-| `new-account`     | Authenticated user without application records                   |
-| `empty`           | Completed account without campaigns                              |
-| `small`           | Ordinary mixed DM and player data                                |
-| `large-character` | Dense character-sheet collections and long notes                 |
-| `large-dm`        | Campaign, roster, session, custom-item, and inbox query pressure |
-| `long-thread`     | Current message window plus older pages                          |
+| Profile           | Intended scenario                                                    |
+| ----------------- | -------------------------------------------------------------------- |
+| `new-account`     | Authenticated user without application records                       |
+| `empty`           | Completed account without campaigns                                  |
+| `small`           | Ordinary mixed DM and player data                                    |
+| `large-character` | Dense character-sheet collections and long notes                     |
+| `large-dm`        | Campaign, roster, session, custom-item, and chat list query pressure |
+| `long-thread`     | Current chat message window plus older pages                         |
 
 Fixture sizes are defined by `scripts/seedPerformanceFixtures.mjs`; do not duplicate their numeric contents here.
 

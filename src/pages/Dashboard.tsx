@@ -60,6 +60,7 @@ import { ExpandChevron } from "../ui/icons/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
+import { useDeletionChatChoice } from "../components/chat/useDeletionChatChoice";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 import { InfoModal } from "../components/InfoModal";
@@ -177,11 +178,17 @@ function PlayerCampaignRow({
 function DmCampaignList({
   campaigns,
   error,
+  accountId,
 }: {
   campaigns: CampaignWithId[];
   error: Error | null;
+  accountId: string;
 }) {
   const { archivedCampaigns, archivedError } = useCampaignsContext();
+  const { ask: askAboutChats, modals: deletionChatModals } = useDeletionChatChoice({
+    accountId,
+    about: "campaign",
+  });
   const [newCampaignName, setNewCampaignName] = useState("");
   const [newInquisitorName, setNewInquisitorName] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -779,9 +786,12 @@ function DmCampaignList({
                         ? await handleArchive(pendingCampaignAction.campaignId)
                         : await handleDeleteConfirm(pendingCampaignAction.campaignId);
                     if (succeeded) {
+                      const deletedCampaignId = pendingCampaignAction.campaignId;
+                      const wasDelete = pendingCampaignAction.kind === "delete";
                       setPendingCampaignAction(null);
                       setDeleteConfirmText("");
                       setOpenActionsId(null);
+                      if (wasDelete) await askAboutChats({ campaignId: deletedCampaignId });
                     }
                   }}
                 >
@@ -816,6 +826,8 @@ function DmCampaignList({
           </PickerBody>
         </PickerModal>
       )}
+
+      {deletionChatModals}
     </section>
   );
 }
@@ -1001,7 +1013,7 @@ export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
 
   const yourCampaignsSection = (
     <div className={`min-w-0 ${uiStackPage}`}>
-      <DmCampaignList campaigns={dmCampaigns} error={dmError} />
+      <DmCampaignList campaigns={dmCampaigns} error={dmError} accountId={effectiveUserId} />
     </div>
   );
   const playingCampaignsSection = (

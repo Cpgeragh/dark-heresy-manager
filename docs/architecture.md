@@ -80,7 +80,7 @@ Every text, textarea, number, date and search input sets `autoComplete="off"`, b
 
 ### Pending overlay
 
-`src/ui/PendingOverlay.tsx` is the shared loading indicator. It is a dimmed layer with the loading dots that covers the area that is waiting, and it appears only after `PENDING_OVERLAY_DELAY_MS` (200 milliseconds, `src/constants/ui.ts`) and disappears when the wait ends. A wait shorter than the delay shows nothing. `src/pages/CharacterSheet.tsx` switches tabs inside a React transition, so the previous tab stays on screen while a tab that has not downloaded loads, and the overlay covers the tab area for a slow switch. The sheet downloads the code for all nine on-demand tabs in the background when it opens, and those downloads read no data. Panels that load when pressed stay closed until their data is complete: the Admin tab's claim history (`AdminTab.tsx`), a character's History pop-up (`CharacterRow.tsx`), a DM inbox conversation (`DMInbox.tsx`) and the force-assign player picker (`PlayerPicker.tsx`). The player Messages drawer opens at once and shows the overlay in place of its messages until they arrive (`MessageDrawer.tsx`). A Delete confirmation (`ConfirmInline.tsx`) stays closed until the count of affected documents has loaded, with the overlay over the row or window that was pressed (`CharacterRow.tsx`, `CustomItemAdminRow.tsx`, `Dashboard.tsx`). A character release or loss of access shows the overlay over an empty frame until the Dashboard replaces the page (`CharacterSheet.tsx`). The Experience tab reads its XP history from `src/hooks/xpHistoryStore.ts`, which owns one live listener per character and suspends the first read until the first snapshot arrives, so the tab switch waits for the history like any other tab; the listener is released `XP_HISTORY_RELEASE_MS` (30 seconds) after the last reader leaves.
+`src/ui/PendingOverlay.tsx` is the shared loading indicator. It is a dimmed layer with the loading dots that covers the area that is waiting, and it appears only after `PENDING_OVERLAY_DELAY_MS` (200 milliseconds, `src/constants/ui.ts`) and disappears when the wait ends. A wait shorter than the delay shows nothing. `src/pages/CharacterSheet.tsx` switches tabs inside a React transition, so the previous tab stays on screen while a tab that has not downloaded loads, and the overlay covers the tab area for a slow switch. The sheet downloads the code for all nine on-demand tabs in the background when it opens, and those downloads read no data. Panels that load when pressed stay closed until their data is complete: the Admin tab's claim history (`AdminTab.tsx`), a character's History pop-up (`CharacterRow.tsx`), a conversation in the Messages pop-up (`ChatConversation.tsx`) and the force-assign player picker (`PlayerPicker.tsx`). The Messages pop-up opens at once and shows the overlay in place of a conversation's messages until they arrive (`ChatConversation.tsx`). A Delete confirmation (`ConfirmInline.tsx`) stays closed until the count of affected documents has loaded, with the overlay over the row or window that was pressed (`CharacterRow.tsx`, `CustomItemAdminRow.tsx`, `Dashboard.tsx`). A character release or loss of access shows the overlay over an empty frame until the Dashboard replaces the page (`CharacterSheet.tsx`). The Experience tab reads its XP history from `src/hooks/xpHistoryStore.ts`, which owns one live listener per character and suspends the first read until the first snapshot arrives, so the tab switch waits for the history like any other tab; the listener is released `XP_HISTORY_RELEASE_MS` (30 seconds) after the last reader leaves.
 
 ### Page switching
 
@@ -147,7 +147,7 @@ Every picker row builds its inside from the four row content pieces, and these g
 
 The Armour Location Summary and Explosive Mishaps tables use the shared styles from `tableStyles.ts`. Both use slate-200 body text, the compact label style for headings, a slate-700 line below the headings and slate-700 lines between rows. Their column widths, alignment and code-font cells remain local. Table rows are passive and do not show a hover state.
 
-`DrawerBackdrop` owns the backdrop behind `SectionDrawer` and `MessageDrawer`. It stays mounted while closed so its 300 millisecond fade completes with the drawer slide, blocks pointer input only while open, uses the shared black/50 colour and backdrop blur, and closes its drawer when pressed. `ModalShell` remains a separate native-dialog kind with its darker black/70 backdrop and uses the browser top layer. `PendingOverlay` remains a local slate loading cover rather than a page backdrop.
+`DrawerBackdrop` owns the backdrop behind `SectionDrawer`. It stays mounted while closed so its 300 millisecond fade completes with the drawer slide, blocks pointer input only while open, uses the shared black/50 colour and backdrop blur, and closes its drawer when pressed. `ModalShell` remains a separate native-dialog kind with its darker black/70 backdrop and uses the browser top layer. `PendingOverlay` remains a local slate loading cover rather than a page backdrop.
 
 `buttonStyles.ts` owns the shared interaction states. `uiPressFeedback` shrinks an interactive control to 98 per cent while it is pressed and returns it to full size when the device requests reduced motion. `uiFocusRing` gives controls the red keyboard focus ring, while `uiFocusWithinRing` gives the same ring to a label that contains the focused control. `uiDisabledControl` covers native disabled controls and `uiDisabledLook` covers a disabled state applied conditionally to another element. Loading controls use their waiting state instead of the disabled look so their progress remains readable. Hover colours and semantic button variants have one definition in `colourTokens.ts`.
 
@@ -218,18 +218,20 @@ Settings is a modal owned by the application shell. Legacy path constants such a
 
 `src/constants/firestoreLimits.ts` is authoritative for live query windows.
 
-| Query                             | Maximum requested documents |
-| --------------------------------- | --------------------------: |
-| Active DM campaigns               |                         100 |
-| Active member campaigns           |                         100 |
-| Archived campaigns                |                         100 |
-| Campaign characters               |                         100 |
-| Session records or summaries      |                         200 |
-| Thread summaries                  |                         100 |
-| Current or requested message page |                         100 |
-| Claim history page                |                          50 |
-| XP history page                   |                         100 |
-| Custom-item query                 |                         200 |
+| Query                                  | Maximum requested documents |
+| -------------------------------------- | --------------------------: |
+| Active DM campaigns                    |                         100 |
+| Active member campaigns                |                         100 |
+| Archived campaigns                     |                         100 |
+| Campaign characters                    |                         100 |
+| Session records or summaries           |                         200 |
+| Chats per account                      |                         200 |
+| Current or requested chat message page |                         100 |
+| Claim history page                     |                          50 |
+| XP history page                        |                         100 |
+| Custom-item query                      |                         200 |
+
+Messaging keeps one copy of each chat per person under `users/{accountId}/chats`. `ChatsProvider` keeps one live listener on the signed-in account's chats from startup, and `StartupGate` waits for it. `ChatInboxProvider` holds which part of the Messages pop-up is showing, and `ChatInboxModal` is mounted once in `src/App.tsx`. The header button, the Message buttons and the character sheet open it through that context, and the sheet publishes its chat target through the header extension. Writes go through the `sendChatMessage` and `exportChat` callables, the release and deletion operations, or a few owner-only field changes that the rules allow.
 
 These values limit reads; they do not prove collection-size enforcement. `src/constants/productLimits.ts` declares product policy, while the enforcement layer differs by value.
 

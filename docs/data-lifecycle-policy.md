@@ -49,7 +49,7 @@ The DM-only summary repair operation validates its entire source page before wri
 
 ## Messages and claim history
 
-Messages remain until the DM clears a thread or its character or campaign is deleted. Clearing runs in bounded pages and resets the thread summary after message removal. No automatic age-based or count-based retention is promised.
+Messages in the earlier per-character threads remain until their character or campaign is deleted. The app no longer reads or writes them, and a later deploy removes their rules. Messages in the current chats follow the Chats section below.
 
 Claim logs remain until their character or campaign is deleted. The 50-entry client value is a read-page limit, not a retention limit.
 

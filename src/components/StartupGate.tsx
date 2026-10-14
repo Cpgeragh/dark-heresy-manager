@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { STARTUP_LOAD_TIMEOUT_MS } from "../constants/ui";
 import { useCampaignsContext } from "../context/useCampaignsContext";
+import { useChatsContext } from "../context/useChatsContext";
 import { StartupStatusContext } from "../context/useStartupStatus";
 import { needsRecoveryCodeBackup } from "../services/userAccountService";
 import { SplashScreen } from "./SplashScreen";
@@ -14,6 +15,7 @@ interface StartupGateProps {
 
 export function StartupGate({ ownUid, splashLabel, children }: StartupGateProps) {
   const campaigns = useCampaignsContext();
+  const chats = useChatsContext();
   const [needsBackup, setNeedsBackup] = useState<boolean | null>(null);
   const [backupFailed, setBackupFailed] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
@@ -34,8 +36,13 @@ export function StartupGate({ ownUid, splashLabel, children }: StartupGateProps)
     };
   }, [ownUid]);
 
-  const failed = Boolean(campaigns.error || campaigns.archivedError) || backupFailed;
-  const ready = !failed && !campaigns.loading && !campaigns.archivedLoading && needsBackup !== null;
+  const failed = Boolean(campaigns.error || campaigns.archivedError || chats.error) || backupFailed;
+  const ready =
+    !failed &&
+    !campaigns.loading &&
+    !campaigns.archivedLoading &&
+    !chats.loading &&
+    needsBackup !== null;
 
   useEffect(() => {
     if (ready) setOpened(true);

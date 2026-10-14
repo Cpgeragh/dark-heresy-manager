@@ -23,7 +23,6 @@ export const PRODUCT_LIMITS = {
   inquisitorNameCharacters: 100,
 
   messageCharacters: 2_000,
-  threadSummaryPreviewCharacters: 500,
   messagesPerPage: 100,
   claimHistoryEntriesPerPage: 50,
   xpHistoryEntriesPerPage: 100,
