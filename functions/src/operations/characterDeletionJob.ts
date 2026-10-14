@@ -5,15 +5,18 @@
 //
 // The dependent documents are deleted in this order: claimLog, xpHistory,
 // xpProposals, the character's thread and its messages, the recoveryIndex
-// entry, the character summary, then the character document itself, deleted
-// last so nothing is ever left pointing at a character that no longer
-// exists. The Recovery Code used to find the recoveryIndex entry is read from
+// entry, the character summary, then the character document itself, so
+// nothing is ever left pointing at a character that no longer exists. The
+// last phase marks every copy of the character's chats closed. Sends are
+// refused once the character is gone, so no new chat can open in between,
+// and the messages stay. The Recovery Code used to find the recoveryIndex entry is read from
 // the character document server-side rather than accepted as a
 // caller-supplied field. Only its HMAC-derived lookup ID is stored with the
 // resumable job.
 
 import { FieldPath, getFirestore, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { closeChatCopiesPage } from "../shared/chatClosure.js";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
@@ -37,7 +40,8 @@ type Phase =
   | "thread"
   | "recoveryIndex"
   | "characterSummary"
-  | "character";
+  | "character"
+  | "chats";
 const PHASE_ORDER: readonly Phase[] = [
   "claimLog",
   "xpHistory",
@@ -47,6 +51,7 @@ const PHASE_ORDER: readonly Phase[] = [
   "recoveryIndex",
   "characterSummary",
   "character",
+  "chats",
 ];
 
 interface Checkpoint {
@@ -243,7 +248,20 @@ async function processPhase(
     }
     case "character": {
       await characterRef.delete();
-      return { processed: 1, nextCheckpoint: null };
+      return { processed: 1, nextCheckpoint: { phase: nextPhase("character")!, cursor: null } };
+    }
+    case "chats": {
+      const { nextCursor } = await closeChatCopiesPage(
+        db,
+        { campaignId, characterId },
+        checkpoint.cursor,
+        CHUNK_SIZE
+      );
+      // Nothing is deleted, so these updates do not count toward the job's total.
+      return {
+        processed: 0,
+        nextCheckpoint: nextCursor ? { phase: "chats", cursor: nextCursor } : null,
+      };
     }
   }
 }

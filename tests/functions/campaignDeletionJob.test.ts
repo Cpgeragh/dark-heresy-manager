@@ -101,6 +101,61 @@ describe("Functions: campaign deletion job", () => {
     expect((await campaignRef.collection("sessionSummaries").get()).empty).toBe(true);
   }, 20000);
 
+  it("closes every copy of the campaign's chats, keeps their messages and leaves other campaigns alone", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const otherCampaignId = "other-campaign";
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    const registerRecoveryCode = httpsCallable<
+      { campaignId: string; characterId: string },
+      { code: string }
+    >(getTestFunctions(), "registerRecoveryCode");
+
+    const copies: FirebaseFirestore.DocumentReference[] = [];
+    for (const player of ["player-1", "player-2"]) {
+      const characterRef = campaignRef.collection("characters").doc();
+      await characterRef.set({ campaignId: campaignRef.id });
+      await registerRecoveryCode({ campaignId: campaignRef.id, characterId: characterRef.id });
+      const chatId = `${campaignRef.id}__${characterRef.id}__${player}`;
+      for (const account of [dmUid, player]) {
+        const copyRef = adminDb.collection("users").doc(account).collection("chats").doc(chatId);
+        await copyRef.set({
+          campaignId: campaignRef.id,
+          characterId: characterRef.id,
+          closed: false,
+          lastMessage: "hello",
+        });
+        await copyRef.collection("messages").add({ text: "hello" });
+        copies.push(copyRef);
+      }
+    }
+    const otherChatRef = adminDb
+      .collection("users")
+      .doc(dmUid)
+      .collection("chats")
+      .doc(`${otherCampaignId}__character__player-1`);
+    await otherChatRef.set({
+      campaignId: otherCampaignId,
+      characterId: "character",
+      closed: false,
+    });
+
+    const startJob = httpsCallable<{ campaignId: string }, { jobId: string; totalCount: number }>(
+      getTestFunctions(),
+      "startCampaignDeletionJob"
+    );
+    const { data: started } = await startJob({ campaignId: campaignRef.id });
+    const final = await drainJob(started.jobId);
+
+    expect(final.done).toBe(true);
+    expect((await campaignRef.get()).exists).toBe(false);
+    for (const copyRef of copies) {
+      expect((await copyRef.get()).get("closed")).toBe(true);
+      expect((await copyRef.collection("messages").get()).size).toBe(1);
+    }
+    expect((await otherChatRef.get()).get("closed")).toBe(false);
+  }, 30000);
+
   it("rejects starting a deletion job for a caller who is not the campaign DM", async () => {
     const dmUid = await signInTestUser();
     const campaignRef = adminDb.collection("campaigns").doc();

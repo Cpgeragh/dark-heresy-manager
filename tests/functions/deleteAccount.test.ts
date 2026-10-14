@@ -71,6 +71,44 @@ describe("Functions: deleteAccount", () => {
     });
   }, 20000);
 
+  it("removes the account's own chats, closes the DM's copy and keeps the DM's messages", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({ campaignId: campaignRef.id });
+    const registerRecoveryCode = httpsCallable<
+      { campaignId: string; characterId: string },
+      { code: string }
+    >(getTestFunctions(), "registerRecoveryCode");
+    const { data: registered } = await registerRecoveryCode({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+    });
+
+    const playerUid = await signInTestUser();
+    await adminDb.collection("userProfiles").doc(playerUid).set({ firstName: "Player" });
+    await httpsCallable<{ code: string }, void>(
+      getTestFunctions(),
+      "claimCharacter"
+    )({ code: registered.code });
+
+    const chatId = `${campaignRef.id}__${characterRef.id}__${playerUid}`;
+    const dmCopy = adminDb.collection("users").doc(dmUid).collection("chats").doc(chatId);
+    const playerCopy = adminDb.collection("users").doc(playerUid).collection("chats").doc(chatId);
+    await dmCopy.set({ otherAccountId: playerUid, closed: false, lastMessage: "hello" });
+    await playerCopy.set({ otherAccountId: dmUid, closed: false, lastMessage: "hello" });
+    await dmCopy.collection("messages").add({ text: "hello", timestamp: new Date() });
+    await playerCopy.collection("messages").add({ text: "hello", timestamp: new Date() });
+
+    await httpsCallable(getTestFunctions(), "deleteAccount")({});
+
+    expect((await playerCopy.get()).exists).toBe(false);
+    expect((await playerCopy.collection("messages").get()).empty).toBe(true);
+    expect((await dmCopy.get()).get("closed")).toBe(true);
+    expect((await dmCopy.collection("messages").get()).size).toBe(1);
+  }, 30000);
+
   it("blocks deletion while the caller still owns a campaign", async () => {
     const dmUid = await signInTestUser();
     const campaignRef = adminDb.collection("campaigns").doc();

@@ -20,6 +20,7 @@ const {
   mockCompleteJob,
   mockFailJob,
   mockHandleChunkFailure,
+  mockCloseChatCopiesPage,
   mockCollection,
   mockBatch,
   mockBatchDelete,
@@ -138,6 +139,7 @@ const {
     mockCompleteJob,
     mockFailJob,
     mockHandleChunkFailure,
+    mockCloseChatCopiesPage: vi.fn(),
     mockCollection,
     mockBatch,
     mockBatchDelete,
@@ -170,6 +172,10 @@ vi.mock("../../src/shared/bulkJobs", () => ({
   failJob: mockFailJob,
   handleChunkFailure: mockHandleChunkFailure,
   MAX_JOB_TOTAL_COUNT: 10_000,
+}));
+
+vi.mock("../../src/shared/chatClosure", () => ({
+  closeChatCopiesPage: mockCloseChatCopiesPage,
 }));
 
 vi.mock("firebase-admin/firestore", () => ({
@@ -574,6 +580,82 @@ describe("processCampaignDeletionChunk", () => {
     expect(mockCampaignDelete).toHaveBeenCalled();
     expect(mockCompleteJob).toHaveBeenCalledWith("job-1", "lease-1", 1);
     expect(result).toEqual({ done: true, processedCount: 1, totalCount: 10 });
+  });
+
+  it("moves to the chats phase after the characters are deleted", async () => {
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({
+        checkpoint: JSON.stringify({ phase: "characters", parentCursor: null, cursor: null }),
+      }),
+      leaseId: "lease-1",
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    characters.pageGet.mockResolvedValue({ empty: false, docs: [{ id: "char-1", ref: {} }] });
+
+    await processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
+
+    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
+      "job-1",
+      "lease-1",
+      JSON.stringify({ phase: "chats", parentCursor: null, cursor: null }),
+      1
+    );
+  });
+
+  it("closes a page of chats and moves to sessions when it was the last page", async () => {
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({
+        checkpoint: JSON.stringify({ phase: "chats", parentCursor: null, cursor: null }),
+      }),
+      leaseId: "lease-1",
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockCloseChatCopiesPage.mockResolvedValue({ closed: 3, nextCursor: null });
+
+    await processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
+
+    expect(mockCloseChatCopiesPage).toHaveBeenCalledWith(
+      expect.anything(),
+      { campaignId: CAMPAIGN_ID },
+      null,
+      400
+    );
+    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
+      "job-1",
+      "lease-1",
+      JSON.stringify({ phase: "sessions", parentCursor: null, cursor: null }),
+      0
+    );
+  });
+
+  it("carries on the chats phase from its stored cursor when more remain", async () => {
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({
+        checkpoint: JSON.stringify({
+          phase: "chats",
+          parentCursor: null,
+          cursor: "users/a/chats/x",
+        }),
+      }),
+      leaseId: "lease-1",
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockCloseChatCopiesPage.mockResolvedValue({ closed: 400, nextCursor: "users/b/chats/y" });
+
+    await processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
+
+    expect(mockCloseChatCopiesPage).toHaveBeenCalledWith(
+      expect.anything(),
+      { campaignId: CAMPAIGN_ID },
+      "users/a/chats/x",
+      400
+    );
+    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
+      "job-1",
+      "lease-1",
+      JSON.stringify({ phase: "chats", parentCursor: null, cursor: "users/b/chats/y" }),
+      0
+    );
   });
 
   it("deletes a flat sessions page and moves to the next phase when short", async () => {

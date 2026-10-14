@@ -59,6 +59,38 @@ describe("KeepOrDeleteChatModal", () => {
     expect(onDelete).not.toHaveBeenCalled();
   });
 
+  it("uses the plural title, count and buttons when there are several chats", () => {
+    render(<KeepOrDeleteChatModal busy={false} count={3} onKeep={vi.fn()} onDelete={vi.fn()} />);
+
+    expect(screen.getByRole("dialog", { name: "Keep your chats?" })).toBeInTheDocument();
+    expect(screen.getByText(/You have 3 chats about this character/)).toBeInTheDocument();
+    expect(screen.getByText(/restore them for 7 days/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Keep my chats" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete my chats" })).toBeInTheDocument();
+  });
+
+  it("names the campaign when the chats are about a campaign", () => {
+    render(
+      <KeepOrDeleteChatModal
+        busy={false}
+        count={2}
+        about="campaign"
+        onKeep={vi.fn()}
+        onDelete={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText(/You have 2 chats about this campaign/)).toBeInTheDocument();
+  });
+
+  it("names the campaign for a single chat too", () => {
+    render(
+      <KeepOrDeleteChatModal busy={false} about="campaign" onKeep={vi.fn()} onDelete={vi.fn()} />
+    );
+
+    expect(screen.getByText(/You have a chat about this campaign/)).toBeInTheDocument();
+  });
+
   it("disables Keep and shows the deleting label while the delete runs", () => {
     renderModal(true);
 

@@ -79,6 +79,19 @@ describe("reviewed Firestore index configuration", () => {
     });
   });
 
+  it("indexes the campaign and character of a chat across every account for deletion", () => {
+    for (const fieldPath of ["campaignId", "characterId"]) {
+      expect(indexes.fieldOverrides).toContainEqual({
+        collectionGroup: "chats",
+        fieldPath,
+        indexes: [
+          { order: "ASCENDING", queryScope: "COLLECTION" },
+          { order: "ASCENDING", queryScope: "COLLECTION_GROUP" },
+        ],
+      });
+    }
+  });
+
   it("does not contain duplicate composite definitions", () => {
     const signatures = indexes.indexes.map(compositeSignature);
     expect(new Set(signatures).size).toBe(signatures.length);

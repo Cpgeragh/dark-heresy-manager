@@ -1,6 +1,6 @@
 // functions/tests/operations/purgeBinnedChats.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { purgeBinnedChats } from "../../src/operations/purgeBinnedChats";
+import { purgeAccountChats, purgeBinnedChats } from "../../src/operations/purgeBinnedChats";
 
 const { FakeTimestamp, DELETE_FIELD } = vi.hoisted(() => {
   class FakeTimestamp {
@@ -313,5 +313,78 @@ describe("purgeBinnedChats", () => {
     expect(result).toMatchObject({ chatsProcessed: 1, entriesDeleted: 1, moreToDo: true });
     expect(has(chatPath("acc-1", "earlier"))).toBe(false);
     expect(has(chatPath("acc-1", "later"))).toBe(true);
+  });
+});
+
+describe("purgeAccountChats", () => {
+  const refsFor = (accountId: string, chatIds: string[]) =>
+    chatIds.map((chatId) => makeRef(chatPath(accountId, chatId)));
+
+  it("deletes the messages and entry of each given chat", async () => {
+    seedChat("acc-1", "chat-1", 0);
+    seedMessage("acc-1", "chat-1", "m1", 3);
+    seedChat("acc-1", "chat-2", 0);
+    seedMessage("acc-1", "chat-2", "m1", 2);
+
+    const result = await purgeAccountChats(db, refsFor("acc-1", ["chat-1", "chat-2"]) as never);
+
+    expect(result).toEqual({ deleted: 2, left: 0 });
+    expect([...documents.keys()]).toEqual([]);
+  });
+
+  it("does not touch the other person's copy", async () => {
+    seedChat("acc-1", "chat-1", 0);
+    seedMessage("acc-1", "chat-1", "m1", 3);
+    seedChat("dm-1", "chat-1", null);
+    seedMessage("dm-1", "chat-1", "m1", 3);
+
+    await purgeAccountChats(db, refsFor("acc-1", ["chat-1"]) as never);
+
+    expect(has(chatPath("dm-1", "chat-1"))).toBe(true);
+    expect(has(`${chatPath("dm-1", "chat-1")}/messages/m1`)).toBe(true);
+  });
+
+  it("stops at the deadline and leaves the rest for the daily purge", async () => {
+    seedChat("acc-1", "chat-1", 0);
+    seedChat("acc-1", "chat-2", 0);
+
+    const result = await purgeAccountChats(db, refsFor("acc-1", ["chat-1", "chat-2"]) as never, {
+      deadline: Date.now() - 1,
+    });
+
+    expect(result).toEqual({ deleted: 0, left: 2 });
+    expect(has(chatPath("acc-1", "chat-1"))).toBe(true);
+  });
+
+  it("stops at the message budget and leaves the unfinished chat in the bin", async () => {
+    seedChat("acc-1", "chat-1", 0);
+    for (let index = 1; index <= 5; index += 1) {
+      seedMessage("acc-1", "chat-1", `m${index}`, 9 + index);
+    }
+    seedChat("acc-1", "chat-2", 0);
+
+    const result = await purgeAccountChats(db, refsFor("acc-1", ["chat-1", "chat-2"]) as never, {
+      limits: { messagesPerRun: 2, pageSize: 2 },
+    });
+
+    expect(result).toEqual({ deleted: 0, left: 2 });
+    expect(has(chatPath("acc-1", "chat-1"))).toBe(true);
+    expect(has(chatPath("acc-1", "chat-2"))).toBe(true);
+  });
+
+  it("leaves a chat that is no longer in the bin", async () => {
+    seedChat("acc-1", "chat-1", null);
+    seedMessage("acc-1", "chat-1", "m1", 3);
+
+    const result = await purgeAccountChats(db, refsFor("acc-1", ["chat-1"]) as never);
+
+    expect(result).toEqual({ deleted: 0, left: 1 });
+    expect(has(`${chatPath("acc-1", "chat-1")}/messages/m1`)).toBe(true);
+  });
+
+  it("counts an entry that is already gone as done", async () => {
+    const result = await purgeAccountChats(db, refsFor("acc-1", ["missing"]) as never);
+
+    expect(result).toEqual({ deleted: 1, left: 0 });
   });
 });

@@ -144,3 +144,33 @@ export async function purgeBinnedChats(
 
   return result;
 }
+
+export const ACCOUNT_DELETION_CHAT_BUDGET_MS = 30_000;
+
+// Deletes the messages and entries of a deleted account's own chats straight away. Whatever does
+// not fit in the time or message budget stays in the bin, and the daily purge removes it later.
+export async function purgeAccountChats(
+  db: Firestore,
+  chatRefs: readonly DocumentReference[],
+  options: { deadline?: number; limits?: Partial<PurgeLimits> } = {}
+): Promise<{ deleted: number; left: number }> {
+  const deadline = options.deadline ?? Date.now() + ACCOUNT_DELETION_CHAT_BUDGET_MS;
+  const pageSize = options.limits?.pageSize ?? PURGE_PAGE_SIZE;
+  let budget = options.limits?.messagesPerRun ?? PURGE_MESSAGES_PER_RUN;
+  let deleted = 0;
+
+  for (const ref of chatRefs) {
+    if (Date.now() > deadline || budget <= 0) break;
+    const entry = await ref.get();
+    if (!entry.exists) {
+      deleted += 1;
+      continue;
+    }
+    const clearedAt = entry.get("clearedAt") as Timestamp | undefined;
+    if (!clearedAt) continue;
+    const outcome = await purgeChat(db, ref, clearedAt, pageSize, budget);
+    budget -= outcome.messages;
+    if (outcome.outcome === "deleted") deleted += 1;
+  }
+  return { deleted, left: chatRefs.length - deleted };
+}

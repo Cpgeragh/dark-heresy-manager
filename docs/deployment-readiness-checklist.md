@@ -23,6 +23,9 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 - [ ] `purgeBinnedChatsDaily` is listed as a scheduled function in `europe-west2`, its Cloud Scheduler job exists and is enabled, and the runtime service account can invoke it (the billing guard needed a manual `run.invoker` grant for its own account, so check this one too)
 - [ ] The `chats` collection group index on `clearedAt` shows as Ready before the first scheduled run
 - [ ] One manual run of the purge on staging deletes only chats that have been in the bin for more than 7 days
+- [ ] The `chats` collection group indexes on `campaignId` and `characterId` show as Ready before the first character or campaign deletion, because those jobs query across every account
+- [ ] On staging, deleting a character that has a chat closes both people's copies and keeps their messages
+- [ ] On staging, deleting an account that has a chat removes the account's own copy and closes the other person's copy
 
 ## Observability
 

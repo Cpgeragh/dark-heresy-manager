@@ -13,11 +13,12 @@ The protected account-deletion operation performs a bounded Firestore transactio
 - deletes the identity recovery index and plaintext identity secret;
 - deletes every `userLinks` document whose `primaryUid` points to the account;
 - deletes the account record and public profile; and
-- resets linked-device onboarding documents where applicable.
+- resets linked-device onboarding documents where applicable; and
+- moves the account's own copies of its chats to the bin, and marks the other person's copy of each chat closed.
 
-The operation rejects the request before writing if cleanup would exceed the 440-write transaction ceiling. It does not delete the primary `users/{accountId}` document as part of that transaction.
+The operation rejects the request before writing if cleanup would exceed the 440-write transaction ceiling, or if the account has more than 200 chats. It does not delete the primary `users/{accountId}` document as part of that transaction.
 
-After Firestore cleanup, the function asks Firebase Authentication to delete the collected linked-device UIDs. Authentication identity coverage when linked-device records exist is `Pending verification`; do not promise deletion of every historical Authentication UID until an integration test proves the exact set.
+After the transaction, the function deletes the messages and entries of the account's own chats for up to 30 seconds or 10,000 messages, reusing the purge's restore-safe page step. Whatever is left stays in the bin and the daily purge removes it, so a slow or failed cleanup is logged by error code and never blocks the deletion. After that cleanup, the function asks Firebase Authentication to delete the collected linked-device UIDs. Authentication identity coverage when linked-device records exist is `Pending verification`; do not promise deletion of every historical Authentication UID until an integration test proves the exact set.
 
 Claim history remains with each character. Protected-operation audit records use a stable SHA-256 actor identifier for new entries; older records may contain the earlier identifier format. Backups and exports are unaffected by online account deletion.
 
@@ -29,6 +30,8 @@ Campaign and character deletion use protected resumable jobs. The protected pref
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Character       | Claim logs, legacy XP proposals, messages, thread summary, recovery index, and character summary                                |
 | Campaign        | Characters and their descendants, sessions and summaries, threads and messages, custom items and versions, and recovery indexes |
+
+Deleting a character or a campaign does not delete chats. A last phase marks every copy of the affected chats closed, for the DM and for each past or current player, and the messages stay. It runs after the character documents are gone, so no new chat can open in between, and it reports no processed documents, so the progress count stays within the total shown at confirmation. The DM's own copies can then be kept or moved to the bin from the browser.
 
 Preflight fails with `failed-precondition` when a target character lacks a valid Recovery Code because its Recovery Index entry cannot be located safely. It fails with `resource-exhausted` above 100,000 affected documents. If processing stops, the job can resume. The UI must not claim completion until the backend reports the terminal completed state.
 
@@ -60,7 +63,7 @@ The scheduled function `purgeBinnedChatsDaily` runs at 03:00 Europe/London. It f
 
 An export saves a text file for the person who asked and keeps a receipt under `users/{accountId}/exportReceipts` with no message text. Receipts have no automatic removal.
 
-Deleting a character, a campaign or an account does not yet close or remove chats. Online deletion does not rewrite existing backups.
+Releasing a character, deleting a character or a campaign, and deleting an account only ever close the other people's copies. A copy is deleted only by its owner through the bin, by the daily purge, or by the owner's account deletion. Online deletion does not rewrite existing backups.
 
 ## Custom-item versions
 

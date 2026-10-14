@@ -5,8 +5,9 @@
 //
 // The phases run in this order: every character's claimLog, xpHistory and
 // xpProposals subcollections, its derived recoveryIndex entry and its
-// summary, the characters, the flat sessions and member-safe
-// sessionSummaries collections, every thread's messages and the threads,
+// summary, the characters, every copy of the campaign's chats marked closed
+// (sends are refused once the characters are gone, and the messages stay),
+// the flat sessions and member-safe sessionSummaries collections, every thread's messages and the threads,
 // every custom item's versions and the custom items, then the campaign
 // document last. The whole deletion is refused upfront if any character
 // lacks a valid-format Recovery Code, since that is the only way its
@@ -20,6 +21,7 @@ import {
 } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { isRecoveryCodeFormat } from "shared-rules";
+import { closeChatCopiesPage } from "../shared/chatClosure.js";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
@@ -42,6 +44,7 @@ type Phase =
   | "characterRecoveryIndex"
   | "characterSummaries"
   | "characters"
+  | "chats"
   | "sessions"
   | "sessionSummaries"
   | "threadMessages"
@@ -57,6 +60,7 @@ const PHASE_ORDER: readonly Phase[] = [
   "characterRecoveryIndex",
   "characterSummaries",
   "characters",
+  "chats",
   "sessions",
   "sessionSummaries",
   "threadMessages",
@@ -377,6 +381,23 @@ async function processPhase(
       );
     case "characters":
       return deleteFlatPage(campaignRef.collection("characters"), checkpoint, "characters");
+    case "chats": {
+      const { nextCursor } = await closeChatCopiesPage(
+        db,
+        { campaignId },
+        checkpoint.cursor,
+        CHUNK_SIZE
+      );
+      // Nothing is deleted, so these updates do not count toward the job's total.
+      return {
+        processed: 0,
+        nextCheckpoint: {
+          phase: nextCursor ? "chats" : nextPhase("chats")!,
+          parentCursor: null,
+          cursor: nextCursor,
+        },
+      };
+    }
     case "sessions":
       return deleteFlatPage(campaignRef.collection("sessions"), checkpoint, "sessions");
     case "sessionSummaries":

@@ -8,28 +8,40 @@ import { uiStackBody, uiTextBody } from "../../ui/styles/editableStyles";
 
 interface KeepOrDeleteChatModalProps {
   busy: boolean;
+  count?: number;
+  about?: "character" | "campaign";
   onKeep: () => void;
   onDelete: () => void;
 }
 
-export function KeepOrDeleteChatModal({ busy, onKeep, onDelete }: KeepOrDeleteChatModalProps) {
+export function KeepOrDeleteChatModal({
+  busy,
+  count = 1,
+  about = "character",
+  onKeep,
+  onDelete,
+}: KeepOrDeleteChatModalProps) {
+  const many = count > 1;
+  const title = many ? "Keep your chats?" : "Keep your chat?";
+  const days = CHAT_LIMITS.binRetentionDays;
+  const message = many
+    ? `You have ${count} chats about this ${about}. You can keep them, or move them to Recently deleted, where you can restore them for ${days} days.`
+    : `You have a chat about this ${about}. You can keep it, or move it to Recently deleted, where you can restore it for ${days} days.`;
+
   return (
     <ModalShell
-      ariaLabel="Keep your chat?"
+      ariaLabel={title}
       onClose={() => undefined}
       closeOnBackdrop={false}
       closeOnEscape={false}
       className="max-w-xs lg:max-w-sm"
     >
-      <CenteredTitleHeader title="Keep your chat?" />
+      <CenteredTitleHeader title={title} />
       <div className={`p-4 lg:p-5 ${uiStackBody}`}>
-        <p className={`text-sm lg:text-base ${uiTextBody}`}>
-          You have a chat about this character. You can keep it, or move it to Recently deleted,
-          where you can restore it for {CHAT_LIMITS.binRetentionDays} days.
-        </p>
+        <p className={`text-sm lg:text-base ${uiTextBody}`}>{message}</p>
         <div className="flex gap-2">
           <Button variant="neutral" className="flex-1" onClick={onKeep} disabled={busy}>
-            Keep my chat
+            {many ? "Keep my chats" : "Keep my chat"}
           </Button>
           <Button
             variant="danger"
@@ -38,7 +50,7 @@ export function KeepOrDeleteChatModal({ busy, onKeep, onDelete }: KeepOrDeleteCh
             loading={busy}
             loadingLabel="Deleting"
           >
-            Delete my chat
+            {many ? "Delete my chats" : "Delete my chat"}
           </Button>
         </div>
       </div>
