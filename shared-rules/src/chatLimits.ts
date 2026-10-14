@@ -5,6 +5,7 @@
 export const CHAT_LIMITS = {
   messageCharacters: 2_000,
   previewCharacters: 500,
+  binRetentionDays: 7,
 } as const;
 
 export function buildChatId(

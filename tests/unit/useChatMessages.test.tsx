@@ -5,6 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import type { Timestamp } from "firebase/firestore";
 import { useChatMessages } from "../../src/hooks/useChatMessages";
 
 const {
@@ -16,6 +17,7 @@ const {
   mockQuery,
   mockStartAfter,
   mockUnsubscribe,
+  mockWhere,
 } = vi.hoisted(() => ({
   mockCollection: vi.fn((..._args: unknown[]) => "messages-ref"),
   mockGetDocs: vi.fn(),
@@ -25,6 +27,7 @@ const {
   mockQuery: vi.fn((..._args: unknown[]) => "query-ref"),
   mockStartAfter: vi.fn((...args: unknown[]) => ({ type: "startAfter", args })),
   mockUnsubscribe: vi.fn(),
+  mockWhere: vi.fn((...args: unknown[]) => ({ type: "where", args })),
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -36,6 +39,7 @@ vi.mock("firebase/firestore", () => ({
   onSnapshot: (...args: unknown[]) => mockOnSnapshot(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   startAfter: (...args: unknown[]) => mockStartAfter(...args),
+  where: (...args: unknown[]) => mockWhere(...args),
 }));
 
 vi.mock("../../src/firebase", () => ({ db: "mock-db" }));
@@ -170,6 +174,50 @@ describe("useChatMessages", () => {
 
     expect(result.current.messages).toEqual([]);
     expect(result.current.olderError).toBeNull();
+  });
+
+  const at = (millis: number) => ({ toMillis: () => millis }) as unknown as Timestamp;
+
+  it("shows only messages after the time the chat was moved to the bin", () => {
+    const after = at(5000);
+    renderHook(() => useChatMessages("acc-1", "chat-1", after));
+
+    expect(mockWhere).toHaveBeenCalledWith("timestamp", ">", after);
+  });
+
+  it("applies no time filter when the chat is not in the bin", () => {
+    renderHook(() => useChatMessages("acc-1", "chat-1"));
+
+    expect(mockWhere).not.toHaveBeenCalled();
+  });
+
+  it("applies the same time filter when loading older messages", async () => {
+    const after = at(5000);
+    const { result } = renderHook(() => useChatMessages("acc-1", "chat-1", after));
+    act(() => {
+      onNext?.(page(200, 101));
+    });
+    mockGetDocs.mockResolvedValue({ docs: [...page(100, 98).docs] });
+    mockWhere.mockClear();
+
+    await act(async () => {
+      await result.current.loadOlder();
+    });
+
+    expect(mockWhere).toHaveBeenCalledWith("timestamp", ">", after);
+  });
+
+  it("follows the chat again from the start when the bin time changes", () => {
+    const { rerender } = renderHook(
+      ({ millis }: { millis: number | null }) =>
+        useChatMessages("acc-1", "chat-1", millis === null ? null : at(millis)),
+      { initialProps: { millis: null as number | null } }
+    );
+    expect(mockOnSnapshot).toHaveBeenCalledTimes(1);
+
+    rerender({ millis: 5000 });
+
+    expect(mockOnSnapshot).toHaveBeenCalledTimes(2);
   });
 
   it("does nothing without a chat", () => {

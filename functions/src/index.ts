@@ -9,7 +9,9 @@ import { initializeApp } from "firebase-admin/app";
 initializeApp();
 
 import { onCall } from "firebase-functions/v2/https";
-import { setGlobalOptions } from "firebase-functions/v2";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { logger, setGlobalOptions } from "firebase-functions/v2";
+import { getFirestore } from "firebase-admin/firestore";
 import { expr, projectID } from "firebase-functions/params";
 import { protectedCallable } from "./shared/protectedCallable.js";
 import { withMinimumDuration } from "./shared/timingSafety.js";
@@ -155,6 +157,12 @@ import {
   type RepairSessionSummariesInput,
   type RepairSessionSummariesResult,
 } from "./operations/repairSessionSummaries.js";
+import { purgeBinnedChats } from "./operations/purgeBinnedChats.js";
+import {
+  exportChat as runExportChat,
+  type ExportChatInput,
+  type ExportChatResult,
+} from "./operations/exportChat.js";
 
 const functionsRuntimeServiceAccount = expr`dh-functions-runtime@${projectID}.iam.gserviceaccount.com`;
 const accountDeletionServiceAccount = expr`dh-account-deletion@${projectID}.iam.gserviceaccount.com`;
@@ -1048,5 +1056,35 @@ export const reconcileCharacterSpentXp = onCall<ReconcileCharacterSpentXpInput>(
       ),
       handler: ({ uid, data, idempotency }) => runReconcileCharacterSpentXp(data, uid, idempotency),
     });
+  }
+);
+
+export const exportChat = onCall<ExportChatInput>(
+  { timeoutSeconds: 120, ...heavyWorkOptions },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<ExportChatInput, ExportChatResult>({
+      request,
+      operation: "export-chat",
+      allowedFields: ["chatId", "timeZone"],
+      requiredFields: ["chatId", "timeZone"],
+      fieldShapes: { chatId: "string", timeZone: "string" },
+      rateLimits: [{ key: `export-chat:${callerUid}`, limit: 10, windowMs: 60 * 60 * 1000 }],
+      handler: ({ uid, data }) => runExportChat(data, uid),
+    });
+  }
+);
+
+export const purgeBinnedChatsDaily = onSchedule(
+  {
+    schedule: "0 3 * * *",
+    timeZone: "Europe/London",
+    timeoutSeconds: 300,
+    retryCount: 0,
+    maxInstances: 1,
+  },
+  async () => {
+    const result = await purgeBinnedChats(getFirestore());
+    logger.info("Purged chats that had been in the bin for too long.", { ...result });
   }
 );

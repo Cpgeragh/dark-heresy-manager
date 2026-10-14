@@ -38,6 +38,20 @@ function makeChat(id: string, unreadCount: number, closed = false) {
   return { data: () => ({ id, unreadCount, closed }) };
 }
 
+const at = (millis: number) => ({ toMillis: () => millis });
+
+function makeBinnedChat(id: string, unreadCount: number, clearedAt: number, lastTimestamp: number) {
+  return {
+    data: () => ({
+      id,
+      unreadCount,
+      closed: false,
+      clearedAt: at(clearedAt),
+      lastTimestamp: at(lastTimestamp),
+    }),
+  };
+}
+
 function makeWrapper(accountId: string) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return <ChatsProvider accountId={accountId}>{children}</ChatsProvider>;
@@ -85,6 +99,33 @@ describe("ChatsProvider", () => {
     expect(result.current.error).toBeNull();
     expect(result.current.chats.map((chat) => chat.id)).toEqual(["a", "b", "c"]);
     expect(result.current.unreadTotal).toBe(5);
+  });
+
+  it("keeps binned chats out of the active list and the unread total", () => {
+    const { result } = renderHook(() => useChatsContext(), { wrapper: makeWrapper("acc-1") });
+
+    act(() => {
+      onNext?.({
+        docs: [makeChat("a", 2), makeBinnedChat("b", 4, 2000, 1000), makeChat("c", 1)],
+      });
+    });
+
+    expect(result.current.chats.map((chat) => chat.id)).toEqual(["a", "b", "c"]);
+    expect(result.current.activeChats.map((chat) => chat.id)).toEqual(["a", "c"]);
+    expect(result.current.clearedChats.map((chat) => chat.id)).toEqual(["b"]);
+    expect(result.current.unreadTotal).toBe(3);
+  });
+
+  it("treats a binned chat with a newer message as active again", () => {
+    const { result } = renderHook(() => useChatsContext(), { wrapper: makeWrapper("acc-1") });
+
+    act(() => {
+      onNext?.({ docs: [makeBinnedChat("a", 1, 2000, 3000)] });
+    });
+
+    expect(result.current.activeChats.map((chat) => chat.id)).toEqual(["a"]);
+    expect(result.current.clearedChats.map((chat) => chat.id)).toEqual(["a"]);
+    expect(result.current.unreadTotal).toBe(1);
   });
 
   it("returns an empty list and the error when the listener fails", () => {

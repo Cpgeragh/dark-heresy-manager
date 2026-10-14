@@ -1,8 +1,9 @@
 // tests/unit/chatService.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockCallSend, mockDoc, mockUpdateDoc } = vi.hoisted(() => ({
+const { mockCallSend, mockCallExport, mockDoc, mockUpdateDoc } = vi.hoisted(() => ({
   mockCallSend: vi.fn(),
+  mockCallExport: vi.fn(),
   mockDoc: vi.fn((...args: unknown[]) => ({ path: args.slice(1).join("/") })),
   mockUpdateDoc: vi.fn(),
 }));
@@ -10,10 +11,14 @@ const { mockCallSend, mockDoc, mockUpdateDoc } = vi.hoisted(() => ({
 vi.mock("firebase/firestore", () => ({
   doc: (...args: unknown[]) => mockDoc(...args),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
+  serverTimestamp: () => "SERVER_TIME",
+  deleteField: () => "DELETE_FIELD",
 }));
 
 vi.mock("firebase/functions", () => ({
-  httpsCallable: vi.fn(() => mockCallSend),
+  httpsCallable: vi.fn((_functions: unknown, name: string) =>
+    name === "exportChat" ? mockCallExport : mockCallSend
+  ),
 }));
 
 vi.mock("../../src/firebase", () => ({ db: "mock-db", functions: "mock-functions" }));
@@ -22,7 +27,13 @@ vi.mock("../../src/performance/performanceMetrics", () => ({
   measurePerformanceMutation: <T>(_name: string, operation: () => Promise<T>) => operation(),
 }));
 
-import { markChatRead, sendChatMessage } from "../../src/services/chatService";
+import {
+  clearChat,
+  exportChat,
+  markChatRead,
+  restoreChat,
+  sendChatMessage,
+} from "../../src/services/chatService";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -105,5 +116,69 @@ describe("markChatRead", () => {
     await expect(markChatRead("a/b", "chat-1", 1)).rejects.toThrow("invalid");
     await expect(markChatRead("acc-1", "", 1)).rejects.toThrow("invalid");
     expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+});
+
+describe("clearChat", () => {
+  it("moves this account's own copy to the bin with the server time and a zero unread count", async () => {
+    await clearChat("acc-1", "chat-1");
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      { path: "users/acc-1/chats/chat-1" },
+      { clearedAt: "SERVER_TIME", unreadCount: 0 }
+    );
+  });
+
+  it("rejects an invalid id without writing", async () => {
+    await expect(clearChat("", "chat-1")).rejects.toThrow("invalid");
+    await expect(clearChat("acc-1", "")).rejects.toThrow("invalid");
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+});
+
+describe("restoreChat", () => {
+  it("takes this account's own copy out of the bin", async () => {
+    await restoreChat("acc-1", "chat-1");
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      { path: "users/acc-1/chats/chat-1" },
+      { clearedAt: "DELETE_FIELD" }
+    );
+  });
+
+  it("rejects an invalid id without writing", async () => {
+    await expect(restoreChat("acc-1", "")).rejects.toThrow("invalid");
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+});
+
+describe("exportChat", () => {
+  const file = {
+    exportId: "e1",
+    fileName: "kael-chat-2026-10-14.txt",
+    text: "export text",
+    fingerprint: "abc",
+    messageCount: 3,
+  };
+
+  it("asks for the chat in the browser's own time zone and returns the file", async () => {
+    mockCallExport.mockResolvedValue({ data: file });
+
+    await expect(exportChat("chat-1")).resolves.toEqual(file);
+    expect(mockCallExport).toHaveBeenCalledWith({
+      chatId: "chat-1",
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+  });
+
+  it("rejects an invalid chat id without calling the function", async () => {
+    await expect(exportChat("")).rejects.toThrow("invalid");
+    expect(mockCallExport).not.toHaveBeenCalled();
+  });
+
+  it("passes the server's own message through when the export is refused", async () => {
+    mockCallExport.mockRejectedValue(new Error("This chat is too large to export in one file."));
+
+    await expect(exportChat("chat-1")).rejects.toThrow("too large");
   });
 });

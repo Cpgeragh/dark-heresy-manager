@@ -19,7 +19,10 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 - [ ] App Check confirmed wired in monitoring mode, deliberately not blocking requests for the target environment
 - [ ] Rate limits, idempotency, and audit logging confirmed working against a real deployed callable, not only the emulator
 - [ ] Every deployed Function uses the service account declared in `functions/src/index.ts`; only after that check, the old default Compute service account has its project-wide `Editor` role and both Recovery Code secret-access grants removed
-- [ ] `firebase functions:list --project <alias> --json` shows the runtime limits declared in `functions/src/index.ts`: ordinary callables use a 30-second timeout, five instances and concurrency 40; bulk, deletion and repair callables use two instances and concurrency 5; only `deleteAccount` uses a 60-second timeout
+- [ ] `firebase functions:list --project <alias> --json` shows the runtime limits declared in `functions/src/index.ts`: ordinary callables use a 30-second timeout, five instances and concurrency 40; bulk, deletion and repair callables use two instances and concurrency 5; only `deleteAccount` uses a 60-second timeout and only `exportChat` uses a 120-second timeout
+- [ ] `purgeBinnedChatsDaily` is listed as a scheduled function in `europe-west2`, its Cloud Scheduler job exists and is enabled, and the runtime service account can invoke it (the billing guard needed a manual `run.invoker` grant for its own account, so check this one too)
+- [ ] The `chats` collection group index on `clearedAt` shows as Ready before the first scheduled run
+- [ ] One manual run of the purge on staging deletes only chats that have been in the bin for more than 7 days
 
 ## Observability
 

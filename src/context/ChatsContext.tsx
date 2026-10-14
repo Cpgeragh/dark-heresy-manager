@@ -8,6 +8,8 @@ import { limit, orderBy, query } from "firebase/firestore";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { chatsCollectionRef } from "../firebase/converters";
 import { useQuerySubscription } from "../hooks/useFirestoreSubscription";
+import type { ChatSummaryWithId } from "../types/Firestore";
+import { isChatBinned } from "../utils/chatBin";
 import { ChatsContext } from "./useChatsContext";
 
 export function ChatsProvider({
@@ -33,13 +35,25 @@ export function ChatsProvider({
     (snapshot) => snapshot.docs.map((chatDocument) => chatDocument.data())
   );
 
+  const { activeChats, clearedChats } = useMemo(() => {
+    const active: ChatSummaryWithId[] = [];
+    const cleared: ChatSummaryWithId[] = [];
+    for (const chat of chats) {
+      if (!isChatBinned(chat)) active.push(chat);
+      if (chat.clearedAt) cleared.push(chat);
+    }
+    return { activeChats: active, clearedChats: cleared };
+  }, [chats]);
+
   const unreadTotal = useMemo(
-    () => chats.reduce((total, chat) => total + chat.unreadCount, 0),
-    [chats]
+    () => activeChats.reduce((total, chat) => total + chat.unreadCount, 0),
+    [activeChats]
   );
 
   return (
-    <ChatsContext.Provider value={{ chats, loading, error, unreadTotal }}>
+    <ChatsContext.Provider
+      value={{ chats, activeChats, clearedChats, loading, error, unreadTotal }}
+    >
       {children}
     </ChatsContext.Provider>
   );

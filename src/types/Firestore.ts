@@ -189,6 +189,7 @@ export interface ChatSummaryDocument {
   lastTimestamp: Timestamp | null;
   unreadCount: number;
   closed: boolean;
+  clearedAt?: Timestamp;
 }
 
 export type ChatSummaryWithId = ChatSummaryDocument & { id: string };

@@ -68,6 +68,17 @@ describe("reviewed Firestore index configuration", () => {
     });
   });
 
+  it("indexes the bin time of a chat across every account for the daily purge", () => {
+    expect(indexes.fieldOverrides).toContainEqual({
+      collectionGroup: "chats",
+      fieldPath: "clearedAt",
+      indexes: [
+        { order: "ASCENDING", queryScope: "COLLECTION" },
+        { order: "ASCENDING", queryScope: "COLLECTION_GROUP" },
+      ],
+    });
+  });
+
   it("does not contain duplicate composite definitions", () => {
     const signatures = indexes.indexes.map(compositeSignature);
     expect(new Set(signatures).size).toBe(signatures.length);

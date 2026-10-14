@@ -860,7 +860,8 @@ service cloud.firestore {
     // CHATS
     // Each person's copy of a conversation lives under their own account. Only
     // trusted Cloud Functions create chats and messages. The owner, or a linked
-    // device of the owner, can read their copy, mark it read and delete it.
+    // device of the owner, can read their copy, mark it read, move it to the bin,
+    // restore it and delete it.
     // ============================
     match /users/{accountId}/chats/{chatId} {
       allow get: if playerOwnsOrLinked(accountId);
@@ -868,9 +869,24 @@ service cloud.firestore {
 
       allow update:
         if playerOwnsOrLinked(accountId) &&
-           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unreadCount']) &&
-           request.resource.data.unreadCount == 0 &&
-           resource.data.unreadCount > 0;
+           (
+             (
+               request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unreadCount']) &&
+               request.resource.data.unreadCount == 0 &&
+               resource.data.unreadCount > 0
+             ) ||
+             (
+               request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['clearedAt', 'unreadCount']) &&
+               request.resource.data.clearedAt == request.time &&
+               request.resource.data.unreadCount == 0
+             ) ||
+             (
+               request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clearedAt']) &&
+               'clearedAt' in resource.data &&
+               !('clearedAt' in request.resource.data)
+             )
+           );
 
       allow delete: if playerOwnsOrLinked(accountId);
 

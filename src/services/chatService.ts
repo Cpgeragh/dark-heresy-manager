@@ -1,6 +1,6 @@
 // src/services/chatService.ts
 
-import { doc, updateDoc } from "firebase/firestore";
+import { deleteField, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { CHAT_LIMITS } from "shared-rules";
 import { db, functions } from "../firebase";
@@ -13,6 +13,19 @@ const callSendChatMessage = httpsCallable<
   { campaignId: string; characterId: string; text: string; operationId: string },
   { chatId: string; messageId: string }
 >(functions, "sendChatMessage");
+
+export interface ChatExportFile {
+  exportId: string;
+  fileName: string;
+  text: string;
+  fingerprint: string;
+  messageCount: number;
+}
+
+const callExportChat = httpsCallable<{ chatId: string; timeZone: string }, ChatExportFile>(
+  functions,
+  "exportChat"
+);
 
 export async function sendChatMessage(
   campaignId: string,
@@ -55,4 +68,35 @@ export async function markChatRead(
   await measurePerformanceMutation("chat:mark-read", () =>
     updateDoc(doc(db, "users", accountId, "chats", chatId), { unreadCount: 0 })
   );
+}
+
+/** Moves this account's copy of a chat to the bin. The other person's copy is untouched. */
+export async function clearChat(accountId: string, chatId: string): Promise<void> {
+  assertFirestoreDocumentId(accountId, "Account ID");
+  assertFirestoreDocumentId(chatId, "Chat ID");
+  await measurePerformanceMutation("chat:clear", () =>
+    updateDoc(doc(db, "users", accountId, "chats", chatId), {
+      clearedAt: serverTimestamp(),
+      unreadCount: 0,
+    })
+  );
+}
+
+/** Takes this account's copy of a chat out of the bin, bringing its history back. */
+export async function restoreChat(accountId: string, chatId: string): Promise<void> {
+  assertFirestoreDocumentId(accountId, "Account ID");
+  assertFirestoreDocumentId(chatId, "Chat ID");
+  await measurePerformanceMutation("chat:restore", () =>
+    updateDoc(doc(db, "users", accountId, "chats", chatId), { clearedAt: deleteField() })
+  );
+}
+
+/** Asks the server for a text export of this account's copy of a chat, in the browser's time zone. */
+export async function exportChat(chatId: string): Promise<ChatExportFile> {
+  assertFirestoreDocumentId(chatId, "Chat ID");
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return measurePerformanceMutation("chat:export", async () => {
+    const result = await callExportChat({ chatId, timeZone });
+    return result.data;
+  });
 }

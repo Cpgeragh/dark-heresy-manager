@@ -1,6 +1,8 @@
 // tests/firestore/rules/chatRules.test.ts
 
 import { describe, it, expect, afterEach } from "vitest";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
 import { dbAs, dbAnon } from "../helpers";
@@ -186,5 +188,122 @@ describe("Firestore Rules: Chats", () => {
     await expect(
       chatMessages(env, "player-1", "player-1").doc("m1").update({ text: "changed" })
     ).rejects.toThrow();
+  });
+});
+
+describe("Firestore Rules: the bin for a chat copy", () => {
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
+
+  const serverTime = () => firebase.firestore.FieldValue.serverTimestamp();
+  const removeField = () => firebase.firestore.FieldValue.delete();
+
+  async function seedBinnedChat(env: RulesTestEnvironment, accountId: string) {
+    await seedChat(env, accountId);
+    await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
+      await ctx
+        .firestore()
+        .doc(`users/${accountId}/chats/${CHAT_ID}`)
+        .update({ clearedAt: new Date(), unreadCount: 0 });
+    });
+  }
+
+  it("the owner can move their copy to the bin with the server time and a zero unread count", async () => {
+    const env = await getTestEnv();
+    await seedChat(env, "player-1");
+
+    await expect(
+      chatDoc(env, "player-1", "player-1").update({ clearedAt: serverTime(), unreadCount: 0 })
+    ).resolves.toBeUndefined();
+  });
+
+  it("the owner can move an already read copy to the bin", async () => {
+    const env = await getTestEnv();
+    await seedChat(env, "player-1");
+    const chat = chatDoc(env, "player-1", "player-1");
+    await chat.update({ unreadCount: 0 });
+
+    await expect(chat.update({ clearedAt: serverTime() })).resolves.toBeUndefined();
+  });
+
+  it("refuses a bin time that did not come from the server", async () => {
+    const env = await getTestEnv();
+    await seedChat(env, "player-1");
+
+    await expect(
+      chatDoc(env, "player-1", "player-1").update({ clearedAt: new Date(), unreadCount: 0 })
+    ).rejects.toThrow();
+  });
+
+  it("refuses to move a copy to the bin without zeroing its unread count", async () => {
+    const env = await getTestEnv();
+    await seedChat(env, "player-1");
+
+    await expect(
+      chatDoc(env, "player-1", "player-1").update({ clearedAt: serverTime() })
+    ).rejects.toThrow();
+  });
+
+  it("refuses to change anything else while moving a copy to the bin", async () => {
+    const env = await getTestEnv();
+    await seedChat(env, "player-1");
+
+    await expect(
+      chatDoc(env, "player-1", "player-1").update({
+        clearedAt: serverTime(),
+        unreadCount: 0,
+        closed: true,
+      })
+    ).rejects.toThrow();
+  });
+
+  it("the owner can restore a binned copy", async () => {
+    const env = await getTestEnv();
+    await seedBinnedChat(env, "player-1");
+
+    await expect(
+      chatDoc(env, "player-1", "player-1").update({ clearedAt: removeField() })
+    ).resolves.toBeUndefined();
+  });
+
+  it("refuses to change anything else while restoring", async () => {
+    const env = await getTestEnv();
+    await seedBinnedChat(env, "player-1");
+
+    await expect(
+      chatDoc(env, "player-1", "player-1").update({
+        clearedAt: removeField(),
+        lastMessage: "edited",
+      })
+    ).rejects.toThrow();
+  });
+
+  it("the other participant and strangers cannot bin or restore the owner's copy", async () => {
+    const env = await getTestEnv();
+    await seedChat(env, "player-1");
+
+    await expect(
+      chatDoc(env, "dm-1", "player-1").update({ clearedAt: serverTime(), unreadCount: 0 })
+    ).rejects.toThrow();
+
+    await seedBinnedChat(env, "player-1");
+    await expect(
+      chatDoc(env, "dm-1", "player-1").update({ clearedAt: removeField() })
+    ).rejects.toThrow();
+    await expect(
+      dbAnon(env).doc(`users/player-1/chats/${CHAT_ID}`).update({ clearedAt: removeField() })
+    ).rejects.toThrow();
+  });
+
+  it("a device linked to the owner can bin and restore the copy", async () => {
+    const env = await getTestEnv();
+    await seedChat(env, "player-1");
+    await linkDevice(env, "device-1", "player-1");
+    const chat = chatDoc(env, "device-1", "player-1");
+
+    await expect(chat.update({ clearedAt: serverTime(), unreadCount: 0 })).resolves.toBeUndefined();
+    await expect(chat.update({ clearedAt: removeField() })).resolves.toBeUndefined();
   });
 });

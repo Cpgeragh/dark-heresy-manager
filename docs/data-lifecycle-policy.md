@@ -25,10 +25,10 @@ Claim history remains with each character. Protected-operation audit records use
 
 Campaign and character deletion use protected resumable jobs. The protected preflight authorizes the caller, counts affected documents, and stores a job without deleting descendants. The client displays that count; user confirmation starts bounded chunk processing. The server reauthorizes processing but does not compare a new count at confirmation time. Parent documents are deleted last.
 
-| Deletion target | Descendant data removed before the parent                                                                                                                           |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Character       | Claim logs, legacy XP proposals, messages, thread summary, recovery index, and character summary                                                                    |
-| Campaign        | Characters and their descendants, sessions and summaries, threads and messages, custom items and versions, and recovery indexes                                         |
+| Deletion target | Descendant data removed before the parent                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Character       | Claim logs, legacy XP proposals, messages, thread summary, recovery index, and character summary                                |
+| Campaign        | Characters and their descendants, sessions and summaries, threads and messages, custom items and versions, and recovery indexes |
 
 Preflight fails with `failed-precondition` when a target character lacks a valid Recovery Code because its Recovery Index entry cannot be located safely. It fails with `resource-exhausted` above 100,000 affected documents. If processing stops, the job can resume. The UI must not claim completion until the backend reports the terminal completed state.
 
@@ -49,6 +49,18 @@ The DM-only summary repair operation validates its entire source page before wri
 Messages remain until the DM clears a thread or its character or campaign is deleted. Clearing runs in bounded pages and resets the thread summary after message removal. No automatic age-based or count-based retention is promised.
 
 Claim logs remain until their character or campaign is deleted. The 50-entry client value is a read-page limit, not a retention limit.
+
+## Chats
+
+Each person keeps their own copy of a chat under their own account, and nothing a person does to their copy touches the other person's copy. Releasing a character marks both copies closed, and the messages stay.
+
+Deleting a chat moves the owner's copy to a bin by setting `clearedAt`. The chat leaves the inbox and the unread total at once, only messages newer than `clearedAt` show, and restoring removes `clearedAt` so the old messages return in time order. `CHAT_LIMITS.binRetentionDays` in `shared-rules/src/chatLimits.ts` sets the retention at 7 days.
+
+The scheduled function `purgeBinnedChatsDaily` runs at 03:00 Europe/London. It finds copies whose `clearedAt` is more than 7 days old and deletes their messages up to `clearedAt` in pages of 400. Each page runs in a transaction that first re-reads the chat entry and skips the chat if `clearedAt` changed, so a restore during a purge wins. When no old messages remain it deletes the entry, or only removes `clearedAt` if newer messages exist. One run handles at most 100 chats and 10,000 messages, and the rest wait for the next day. A Firestore time to live policy cannot do this job because it does not delete sub-collections.
+
+An export saves a text file for the person who asked and keeps a receipt under `users/{accountId}/exportReceipts` with no message text. Receipts have no automatic removal.
+
+Deleting a character, a campaign or an account does not yet close or remove chats. Online deletion does not rewrite existing backups.
 
 ## Custom-item versions
 

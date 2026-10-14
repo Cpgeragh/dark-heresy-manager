@@ -7,6 +7,11 @@ type ExportedCallable = {
     timeoutSeconds?: number | null;
     maxInstances?: number | null;
     concurrency?: number | null;
+    scheduleTrigger?: {
+      schedule?: string;
+      timeZone?: string;
+      retryConfig?: { retryCount?: number | null };
+    };
   };
 };
 
@@ -19,6 +24,11 @@ const heavyCallables = new Map<string, number>([
   ["processCustomItemMutationChunk", 30],
   ["repairSessionSummaries", 30],
   ["deleteAccount", 60],
+  ["exportChat", 120],
+]);
+
+const scheduledFunctions = new Map<string, { schedule: string; timeoutSeconds: number }>([
+  ["purgeBinnedChatsDaily", { schedule: "0 3 * * *", timeoutSeconds: 300 }],
 ]);
 
 let exportedFunctions: Record<string, ExportedCallable>;
@@ -30,7 +40,7 @@ beforeAll(async () => {
 describe("Cloud Function runtime limits", () => {
   it("gives every ordinary callable the shared capacity and timeout limits", () => {
     const ordinaryCallables = Object.entries(exportedFunctions).filter(
-      ([name]) => !heavyCallables.has(name)
+      ([name]) => !heavyCallables.has(name) && !scheduledFunctions.has(name)
     );
 
     expect(ordinaryCallables.length).toBeGreaterThan(0);
@@ -55,6 +65,24 @@ describe("Cloud Function runtime limits", () => {
       expect(callable.__endpoint?.timeoutSeconds, name).toBe(timeoutSeconds);
       expect(callable.__endpoint?.maxInstances, name).toBe(2);
       expect(callable.__endpoint?.concurrency, name).toBe(5);
+    }
+  });
+
+  it("runs each scheduled function once a day, with one instance and no retries", () => {
+    expect([...scheduledFunctions.keys()].sort()).toEqual(
+      Object.keys(exportedFunctions)
+        .filter((name) => scheduledFunctions.has(name))
+        .sort()
+    );
+
+    for (const [name, expected] of scheduledFunctions) {
+      const endpoint = exportedFunctions[name].__endpoint;
+
+      expect(endpoint?.scheduleTrigger?.schedule, name).toBe(expected.schedule);
+      expect(endpoint?.scheduleTrigger?.timeZone, name).toBe("Europe/London");
+      expect(endpoint?.scheduleTrigger?.retryConfig?.retryCount, name).toBe(0);
+      expect(endpoint?.timeoutSeconds, name).toBe(expected.timeoutSeconds);
+      expect(endpoint?.maxInstances, name).toBe(1);
     }
   });
 });

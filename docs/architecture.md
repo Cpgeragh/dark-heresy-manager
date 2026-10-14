@@ -333,13 +333,15 @@ Preconditions and failure behaviour are part of each operation's contract:
 
 ## Cloud runtime
 
-| Functions workload          | Region         |    Timeout | Maximum instances | Concurrency per instance |
-| --------------------------- | -------------- | ---------: | ----------------: | -----------------------: |
-| Ordinary protected callable | `europe-west2` | 30 seconds |       5 instances |              40 requests |
-| Heavy protected callable    | `europe-west2` | 30 seconds |       2 instances |               5 requests |
-| Account deletion            | `europe-west2` | 60 seconds |       5 instances |              40 requests |
+| Functions workload          | Region         |     Timeout | Maximum instances | Concurrency per instance |
+| --------------------------- | -------------- | ----------: | ----------------: | -----------------------: |
+| Ordinary protected callable | `europe-west2` |  30 seconds |       5 instances |              40 requests |
+| Heavy protected callable    | `europe-west2` |  30 seconds |       2 instances |               5 requests |
+| Account deletion            | `europe-west2` |  60 seconds |       5 instances |              40 requests |
+| Chat export                 | `europe-west2` | 120 seconds |       2 instances |               5 requests |
+| Scheduled chat purge        | `europe-west2` | 300 seconds |        1 instance |        One run at a time |
 
-All three workloads target Node.js 22. Account deletion uses its dedicated runtime service account.
+All five workloads target Node.js 22. Account deletion uses its dedicated runtime service account. The scheduled purge runs at 03:00 Europe/London without retries and logs only counts.
 
 HMAC material is supplied through the deployed Functions secrets `RECOVERY_CODE_HMAC_SECRET` and `IDENTITY_CODE_HMAC_SECRET`, declared in `functions/src/shared/secrets.ts`. Secret values must never enter browser configuration or repository files.
 

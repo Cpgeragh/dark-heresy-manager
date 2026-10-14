@@ -10,14 +10,25 @@ import {
   orderBy,
   query,
   startAfter,
+  where,
+  type Timestamp,
 } from "firebase/firestore";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { db } from "../firebase";
 import type { ChatMessage } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
 
-export function useChatMessages(accountId: string | null, chatId: string | null) {
-  const source = accountId && chatId ? `${accountId}:${chatId}` : null;
+function afterConstraints(after: Timestamp | null) {
+  return after ? [where("timestamp", ">", after)] : [];
+}
+
+export function useChatMessages(
+  accountId: string | null,
+  chatId: string | null,
+  after: Timestamp | null = null
+) {
+  const afterKey = after ? after.toMillis() : "all";
+  const source = accountId && chatId ? `${accountId}:${chatId}:${afterKey}` : null;
   const {
     data: latestMessages,
     loading,
@@ -26,12 +37,13 @@ export function useChatMessages(accountId: string | null, chatId: string | null)
     accountId && chatId
       ? query(
           collection(db, "users", accountId, "chats", chatId, "messages"),
+          ...afterConstraints(after),
           orderBy("timestamp", "desc"),
           orderBy(documentId(), "desc"),
           limit(FIRESTORE_QUERY_LIMITS.chatMessagesPerPage)
         )
       : null,
-    accountId && chatId ? `chat-messages:${accountId}:${chatId}` : null,
+    accountId && chatId ? `chat-messages:${accountId}:${chatId}:${afterKey}` : null,
     (snapshot) =>
       snapshot.docs
         .map(
@@ -96,6 +108,7 @@ export function useChatMessages(accountId: string | null, chatId: string | null)
       const snapshot = await getDocs(
         query(
           collection(db, "users", accountId, "chats", chatId, "messages"),
+          ...afterConstraints(after),
           orderBy("timestamp", "desc"),
           orderBy(documentId(), "desc"),
           startAfter(oldestMessage.timestamp, oldestMessage.id),
@@ -132,7 +145,7 @@ export function useChatMessages(accountId: string | null, chatId: string | null)
           : current
       );
     }
-  }, [accountId, chatId, hasOlderMessages, messages, olderState.loading, source]);
+  }, [accountId, chatId, after, hasOlderMessages, messages, olderState.loading, source]);
 
   return {
     messages,

@@ -13,14 +13,24 @@ vi.mock("../../src/hooks/useChatMessages", () => ({
 
 const sendChatMessageMock = vi.fn();
 const markChatReadMock = vi.fn();
+const clearChatMock = vi.fn();
+const exportChatMock = vi.fn();
 vi.mock("../../src/services/chatService", () => ({
   sendChatMessage: (...args: unknown[]) => sendChatMessageMock(...args),
   markChatRead: (...args: unknown[]) => markChatReadMock(...args),
+  clearChat: (...args: unknown[]) => clearChatMock(...args),
+  exportChat: (...args: unknown[]) => exportChatMock(...args),
+}));
+
+const downloadTextFileMock = vi.fn();
+vi.mock("../../src/utils/downloadTextFile", () => ({
+  downloadTextFile: (...args: unknown[]) => downloadTextFileMock(...args),
 }));
 
 const mockToastError = vi.fn();
+const mockToastSuccess = vi.fn();
 vi.mock("../../src/components/Toast", () => ({
-  useToast: () => ({ error: mockToastError, success: vi.fn() }),
+  useToast: () => ({ error: mockToastError, success: mockToastSuccess }),
 }));
 
 import { ChatConversation } from "../../src/components/chat/ChatConversation";
@@ -37,6 +47,14 @@ beforeEach(() => {
   useChatMessagesMock.mockReturnValue(messagesState());
   sendChatMessageMock.mockResolvedValue({ chatId: CHAT_ID, messageId: "m9" });
   markChatReadMock.mockResolvedValue(undefined);
+  clearChatMock.mockResolvedValue(undefined);
+  exportChatMock.mockResolvedValue({
+    exportId: "e1",
+    fileName: "kael-chat.txt",
+    text: "export text",
+    fingerprint: "abc",
+    messageCount: 3,
+  });
 });
 
 function messagesState(over: Record<string, unknown> = {}) {
@@ -99,7 +117,16 @@ describe("ChatConversation", () => {
   it("reads the messages of this account's copy of the chat", () => {
     renderConversation();
 
-    expect(useChatMessagesMock).toHaveBeenCalledWith("player-1", CHAT_ID);
+    expect(useChatMessagesMock).toHaveBeenCalledWith("player-1", CHAT_ID, null);
+  });
+
+  it("hides the history that was moved to the bin", () => {
+    const clearedAt = Timestamp.fromDate(new Date(2026, 9, 10));
+    renderConversation({
+      chat: chat({ clearedAt, lastTimestamp: Timestamp.fromDate(new Date(2026, 9, 12)) }),
+    });
+
+    expect(useChatMessagesMock).toHaveBeenCalledWith("player-1", CHAT_ID, clearedAt);
   });
 
   it("shows the messages and a reply box addressed to the other person", () => {
@@ -196,7 +223,7 @@ describe("ChatConversation", () => {
 
     expect(screen.getByText(/Nobody has claimed this character yet/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument();
-    expect(useChatMessagesMock).toHaveBeenCalledWith("dm-1", null);
+    expect(useChatMessagesMock).toHaveBeenCalledWith("dm-1", null, null);
   });
 
   it("shows an error when the conversation cannot be loaded", () => {
@@ -224,5 +251,100 @@ describe("ChatConversation", () => {
     await user.click(screen.getByRole("button", { name: "Load older messages" }));
 
     expect(loadOlder).toHaveBeenCalled();
+  });
+
+  it("offers Delete chat for a chat that has an entry", () => {
+    renderConversation();
+
+    expect(screen.getByRole("button", { name: "Delete chat" })).toBeInTheDocument();
+  });
+
+  it("does not offer Delete chat before the chat has started", () => {
+    renderConversation({ chat: null });
+
+    expect(screen.queryByRole("button", { name: "Delete chat" })).not.toBeInTheDocument();
+  });
+
+  it("still offers Delete chat for a closed chat", () => {
+    renderConversation({ chat: chat({ closed: true }) });
+
+    expect(screen.getByRole("button", { name: "Delete chat" })).toBeInTheDocument();
+  });
+
+  it("moves the chat to Recently deleted after a Yes, tells the user and calls back", async () => {
+    const user = userEvent.setup();
+    const onCleared = vi.fn();
+    renderConversation({ onCleared });
+
+    await user.click(screen.getByRole("button", { name: "Delete chat" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+
+    expect(clearChatMock).toHaveBeenCalledWith("player-1", CHAT_ID);
+    expect(mockToastSuccess).toHaveBeenCalledWith(expect.stringContaining("Recently deleted"));
+    expect(onCleared).toHaveBeenCalledOnce();
+  });
+
+  it("does nothing when the user answers No", async () => {
+    const user = userEvent.setup();
+    const onCleared = vi.fn();
+    renderConversation({ onCleared });
+
+    await user.click(screen.getByRole("button", { name: "Delete chat" }));
+    await user.click(screen.getByRole("button", { name: "No" }));
+
+    expect(clearChatMock).not.toHaveBeenCalled();
+    expect(onCleared).not.toHaveBeenCalled();
+  });
+
+  it("shows an error and stays in the chat when deleting fails", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    clearChatMock.mockRejectedValue(new Error("offline"));
+    const onCleared = vi.fn();
+    renderConversation({ onCleared });
+
+    await user.click(screen.getByRole("button", { name: "Delete chat" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+
+    expect(mockToastError).toHaveBeenCalledWith("Failed to delete the chat. Please try again.");
+    expect(onCleared).not.toHaveBeenCalled();
+  });
+
+  it("offers Export chat for a chat that has an entry, including a closed one", () => {
+    const { unmount } = renderConversation();
+    expect(screen.getByRole("button", { name: "Export chat" })).toBeInTheDocument();
+    unmount();
+
+    renderConversation({ chat: chat({ closed: true }) });
+    expect(screen.getByRole("button", { name: "Export chat" })).toBeInTheDocument();
+  });
+
+  it("does not offer Export chat before the chat has started", () => {
+    renderConversation({ chat: null });
+
+    expect(screen.queryByRole("button", { name: "Export chat" })).not.toBeInTheDocument();
+  });
+
+  it("downloads the exported file and says how many messages it holds", async () => {
+    const user = userEvent.setup();
+    renderConversation();
+
+    await user.click(screen.getByRole("button", { name: "Export chat" }));
+
+    expect(exportChatMock).toHaveBeenCalledWith(CHAT_ID);
+    expect(downloadTextFileMock).toHaveBeenCalledWith("kael-chat.txt", "export text");
+    expect(mockToastSuccess).toHaveBeenCalledWith("Chat exported with 3 messages.");
+  });
+
+  it("shows the server's message and downloads nothing when the export fails", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    exportChatMock.mockRejectedValue(new Error("This chat is too large to export in one file."));
+    renderConversation();
+
+    await user.click(screen.getByRole("button", { name: "Export chat" }));
+
+    expect(mockToastError).toHaveBeenCalledWith("This chat is too large to export in one file.");
+    expect(downloadTextFileMock).not.toHaveBeenCalled();
   });
 });
