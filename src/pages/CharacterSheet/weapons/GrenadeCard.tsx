@@ -43,6 +43,7 @@ import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { uiCorner } from "../../../ui/styles/shapeStyles";
 
 export function GrenadeCard({
   item,
@@ -202,7 +203,7 @@ export function GrenadeCard({
             )}
             {item.damage === "Special" && (
               <div
-                className={`flex flex-col items-center ${colourFillInset} rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]`}
+                className={`flex flex-col items-center ${colourFillInset} ${uiCorner} px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]`}
               >
                 <span className={uiTextLabel}>Damage</span>
                 <span className={`text-sm lg:text-base font-code ${colourAmberPlain} mt-0.5`}>

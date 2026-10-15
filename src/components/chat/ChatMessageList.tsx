@@ -23,6 +23,7 @@ import {
   colourTextPrimary,
 } from "../../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../../ui/styles/buttonStyles";
+import { uiCorner } from "../../ui/styles/shapeStyles";
 
 interface ChatMessageListProps {
   messages: ChatMessage[];
@@ -102,7 +103,7 @@ export function ChatMessageList({
             className={`flex ${isOwn ? "justify-end" : "justify-start"} ${isPending ? uiInactiveItem : ""}`}
           >
             <div
-              className={`max-w-[75%] px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg text-sm lg:text-base ${
+              className={`max-w-[75%] px-3 lg:px-4 py-2 lg:py-2.5 ${uiCorner} text-sm lg:text-base ${
                 isOwn ? colourAmberFill : `${colourFillRaised} ${colourTextPrimary}`
               }`}
             >

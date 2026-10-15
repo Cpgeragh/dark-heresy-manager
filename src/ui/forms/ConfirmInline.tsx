@@ -135,7 +135,7 @@ export function ConfirmInline({
             placeholder={requireText}
             autoFocus
             disabled={effectiveBusy}
-            className={`w-24 lg:w-32 rounded border px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm font-code ${editableInputColour(
+            className={`w-24 lg:w-32 border px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm font-code ${editableInputColour(
               !effectiveBusy
             )}`}
             autoComplete="off"

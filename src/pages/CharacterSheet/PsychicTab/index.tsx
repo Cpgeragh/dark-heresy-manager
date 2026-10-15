@@ -64,6 +64,7 @@ import { PowerPicker } from "./PowerPicker";
 import { normalisePowerName, toCustomPowerData } from "./psychicPowerHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../../hooks/useMediaQuery";
+import { uiCorner, uiCornerSmall } from "../../../ui/styles/shapeStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -567,7 +568,7 @@ export function PsychicTab({
           <span className={uiFormLabel}>Psy Rating</span>
           <div className="relative inline-flex">
             <div
-              className={`w-[26px] h-[26px] flex items-center justify-center rounded border ${colourGlowActive.indigo} transition-shadow${
+              className={`w-[26px] h-[26px] flex items-center justify-center ${uiCornerSmall} border ${colourGlowActive.indigo} transition-shadow${
                 psyRating > 0 ? " animate-psy-pulse" : ""
               }`}
               style={psyRatingPulseVars(psyRating)}
@@ -602,7 +603,7 @@ export function PsychicTab({
                   key={d}
                   aria-label={`${d}: ${active ? "known" : "not known"}`}
                   className={[
-                    "px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition",
+                    `px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm transition`,
                     active
                       ? (disciplineActiveColours[d] ?? disciplineActiveColours.default)
                       : (disciplineInactiveColours[d] ?? disciplineInactiveColours.default),

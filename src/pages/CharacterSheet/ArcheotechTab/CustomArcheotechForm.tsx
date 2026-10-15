@@ -38,6 +38,7 @@ import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
 import { uiFocusRing, uiPressFeedback } from "../../../ui/styles/buttonStyles";
+import { uiCornerSmall } from "../../../ui/styles/shapeStyles";
 
 const TYPE_DESCRIPTIONS: Record<ItemType, string> = {
   Weapon: "Ranged or melee weapon",
@@ -508,7 +509,7 @@ export function CustomArcheotechForm({
                 type="button"
                 onClick={() => setStacks(!stacks)}
                 className={[
-                  `w-4 h-4 rounded border flex items-center justify-center transition shrink-0 ${uiPressFeedback()} ${uiFocusRing}`,
+                  `w-4 h-4 ${uiCornerSmall} border flex items-center justify-center transition shrink-0 ${uiPressFeedback()} ${uiFocusRing}`,
                   stacks ? colourStateRed : colourControlSurface,
                 ].join(" ")}
                 aria-label="Stacks with worn armour"

@@ -5,8 +5,9 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { colourToggleUnselected, colourToggleUnselectedHover } from "../styles/colourTokens";
 import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
+import { uiCorner } from "../styles/shapeStyles";
 
-const TOGGLE_BASE = `rounded border transition ${uiFocusRing} ${uiDisabledControl}`;
+const TOGGLE_BASE = `${uiCorner} border transition ${uiFocusRing} ${uiDisabledControl}`;
 
 const TOGGLE_UNSELECTED = colourToggleUnselected;
 

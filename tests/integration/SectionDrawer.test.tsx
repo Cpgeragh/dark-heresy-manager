@@ -2,13 +2,20 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { SectionDrawer } from "../../src/components/SectionDrawer";
+import { getSheetNavigation } from "../../src/pages/CharacterSheet/sectionNavigation";
 
 describe("SectionDrawer", () => {
   it("includes Elite Advances under Abilities", async () => {
     const user = userEvent.setup();
-    const onTabChange = vi.fn();
+    const onPageChange = vi.fn();
 
-    render(<SectionDrawer activeTab="stats" onTabChange={onTabChange} isDM={false} />);
+    render(
+      <SectionDrawer
+        navigation={getSheetNavigation(false)}
+        activePage="stats"
+        onPageChange={onPageChange}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Open section navigation" }));
     await user.click(screen.getByRole("button", { name: "Abilities" }));
@@ -30,13 +37,19 @@ describe("SectionDrawer", () => {
 
     await user.click(screen.getByRole("button", { name: "Elite Advances" }));
 
-    expect(onTabChange).toHaveBeenCalledWith("elite-advances");
+    expect(onPageChange).toHaveBeenCalledWith("elite-advances");
   });
 
   it("uses one row style for categories, back navigation and pages", async () => {
     const user = userEvent.setup();
 
-    render(<SectionDrawer activeTab="psychic" onTabChange={vi.fn()} isDM={false} />);
+    render(
+      <SectionDrawer
+        navigation={getSheetNavigation(false)}
+        activePage="psychic"
+        onPageChange={vi.fn()}
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Open section navigation" }));
     const categoryRow = screen.getByRole("button", { name: "Abilities" });
@@ -81,9 +94,9 @@ describe("SectionDrawer", () => {
 
     render(
       <SectionDrawer
-        activeTab="stats"
-        onTabChange={vi.fn()}
-        isDM={false}
+        navigation={getSheetNavigation(false)}
+        activePage="stats"
+        onPageChange={vi.fn()}
         externalOpen
         externalCategoryLabel="Equipment"
         onExternalClose={onExternalClose}
@@ -101,5 +114,66 @@ describe("SectionDrawer", () => {
 
     await user.click(screen.getByRole("button", { name: "Close navigation" }));
     expect(onExternalClose).toHaveBeenCalledOnce();
+  });
+
+  it("lists a plain set of pages with no category level and marks the active page", async () => {
+    const user = userEvent.setup();
+    const onPageChange = vi.fn();
+
+    render(
+      <SectionDrawer
+        navigation={{
+          pages: [
+            { id: "party", label: "Party" },
+            { id: "custom-items", label: "Custom Item Library" },
+            { id: "sessions", label: "Session History" },
+          ],
+        }}
+        activePage="party"
+        onPageChange={onPageChange}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open section navigation" }));
+
+    expect(screen.queryByRole("button", { name: /Back to categories/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Party" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: "Session History" })).not.toHaveAttribute(
+      "aria-current"
+    );
+
+    await user.click(screen.getByRole("button", { name: "Custom Item Library" }));
+
+    expect(onPageChange).toHaveBeenCalledWith("custom-items");
+    expect(document.querySelector('[aria-label="Section navigation"]')).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
+  });
+
+  it("shows the Admin category only to the DM", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(
+      <SectionDrawer
+        navigation={getSheetNavigation(true)}
+        activePage="stats"
+        onPageChange={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open section navigation" }));
+    expect(screen.getByRole("button", { name: "Admin" })).toBeInTheDocument();
+    unmount();
+
+    render(
+      <SectionDrawer
+        navigation={getSheetNavigation(false)}
+        activePage="stats"
+        onPageChange={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open section navigation" }));
+    expect(screen.queryByRole("button", { name: "Admin" })).not.toBeInTheDocument();
   });
 });

@@ -2,6 +2,7 @@ import { useRef, type KeyboardEvent } from "react";
 import { segmentedTabId, segmentedTabPanelId } from "./styles/segmentedTabStyles";
 import { colourSegmentedTabInactive, colourTabTrackSurface } from "./styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "./styles/buttonStyles";
+import { uiCorner } from "./styles/shapeStyles";
 
 export interface SegmentedTabOption<T extends string> {
   value: T;
@@ -19,11 +20,9 @@ interface SegmentedTabsProps<T extends string> {
   className?: string;
 }
 
-const tabButtonBase =
-  "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border";
-const tabButtonBaseNarrow =
-  "rounded-md px-2 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border";
-const tabButtonBaseCompact = "rounded-md px-1 py-1.5 text-[11px] font-semibold transition border";
+const tabButtonBase = `${uiCorner} px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border`;
+const tabButtonBaseNarrow = `${uiCorner} px-2 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border`;
+const tabButtonBaseCompact = `${uiCorner} px-1 py-1.5 text-[11px] font-semibold transition border`;
 const tabButtonInactive = colourSegmentedTabInactive;
 
 function tabButtonClass(optionCount: number) {
@@ -65,7 +64,7 @@ export function SegmentedTabs<T extends string>({
   return (
     <div
       className={[
-        `grid rounded-lg border ${colourTabTrackSurface} p-1`,
+        `grid ${uiCorner} border ${colourTabTrackSurface} p-1`,
         options.length >= 4 ? "gap-1" : "",
         className,
       ].join(" ")}

@@ -5,6 +5,7 @@ import type { ButtonHTMLAttributes } from "react";
 import { CloseIcon } from "../icons/CloseIcon";
 import { colourHoverTextPrimary, colourTextMuted } from "../styles/colourTokens";
 import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
+import { uiCorner } from "../styles/shapeStyles";
 
 export type CloseButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -25,7 +26,7 @@ export function CloseButton({
       type={type}
       aria-label={ariaLabel}
       disabled={disabled}
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg lg:text-xl ${colourTextMuted} ${
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center ${uiCorner} text-lg lg:text-xl ${colourTextMuted} ${
         disabled ? "" : colourHoverTextPrimary
       } transition ${uiPressFeedback(!disabled)} ${uiFocusRing} ${uiDisabledControl} ${className}`.trim()}
       {...props}

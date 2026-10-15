@@ -98,6 +98,7 @@ import { AmmoEntryRow } from "./AmmoEntryRow";
 import { AmmoPicker } from "./AmmoPicker";
 import { formatAmmoWeight } from "./formatAmmoWeight";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { uiCorner } from "../../../ui/styles/shapeStyles";
 
 // ─── Ranged Card ──────────────────────────────────────────────────────────────
 
@@ -715,7 +716,7 @@ export function RangedCard({
                     .map((g) => (
                       <div
                         key={g.id}
-                        className={`rounded ${colourFillInset} px-2.5 lg:px-3 py-2 lg:py-2.5 ${uiSplitRow}`}
+                        className={`${uiCorner} ${colourFillInset} px-2.5 lg:px-3 py-2 lg:py-2.5 ${uiSplitRow}`}
                       >
                         <span className={`${uiItemName} truncate`}>{g.name}</span>
                         <QuantityControl

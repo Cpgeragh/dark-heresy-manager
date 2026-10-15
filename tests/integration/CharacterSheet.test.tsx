@@ -92,8 +92,8 @@ vi.mock("../../src/pages/CharacterSheet/BackgroundTab/CompleteBackgroundSetupMod
 }));
 
 vi.mock("../../src/components/SectionDrawer", () => ({
-  SectionDrawer: ({ onTabChange }: { onTabChange: (tab: string) => void }) => (
-    <button onClick={() => onTabChange("skills")}>Mock Switch To Skills</button>
+  SectionDrawer: ({ onPageChange }: { onPageChange: (id: string) => void }) => (
+    <button onClick={() => onPageChange("skills")}>Mock Switch To Skills</button>
   ),
 }));
 

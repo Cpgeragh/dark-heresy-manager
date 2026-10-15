@@ -50,7 +50,7 @@ interface VitalsTabProps {
   talents?: TalentsAndTraitsBlock;
 }
 
-const totalInputClass = `w-full rounded border px-2 lg:px-3 py-1.5 lg:py-2 text-center text-xl lg:text-2xl font-semibold font-code ${editableInputColour(true)}`;
+const totalInputClass = `w-full border px-2 lg:px-3 py-1.5 lg:py-2 text-center text-xl lg:text-2xl font-semibold font-code ${editableInputColour(true)}`;
 
 export function VitalsTab({
   character,

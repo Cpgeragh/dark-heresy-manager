@@ -54,6 +54,7 @@ import {
 } from "../../mechanics/traits/traitEffects";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
+import { uiCorner } from "../../ui/styles/shapeStyles";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -567,7 +568,7 @@ export function CharacteristicsTab({
               />
             </div>
             <div
-              className="rounded-lg shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]"
+              className={`${uiCorner} shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]`}
               style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
             >
               <StatBlock

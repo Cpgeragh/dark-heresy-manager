@@ -23,6 +23,7 @@ import {
   colourHoverAccentTint,
 } from "../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
+import { uiCorner } from "../ui/styles/shapeStyles";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 
@@ -190,7 +191,7 @@ export function PortraitUpload({
           <ModalHeader title="Position Portrait" onClose={handleCancel} />
           <div className={`p-4 lg:p-5 ${uiStackBody}`}>
             {/* Cropper */}
-            <div className={`relative h-64 rounded-lg overflow-hidden ${colourFillControl}`}>
+            <div className={`relative h-64 ${uiCorner} overflow-hidden ${colourFillControl}`}>
               <Cropper
                 image={imageSrc}
                 crop={crop}

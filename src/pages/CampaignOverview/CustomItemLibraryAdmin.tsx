@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CustomItemCategory, CustomItemStatus } from "../../types/CustomItems";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import { CustomItemAdminRow } from "./CustomItemAdminRow";
+import { SectionPending } from "./SectionPending";
 import { Chip } from "../../ui/chips/Chip";
 import { ErrorState } from "../../ui/ErrorState";
 import { useRouteLoading } from "../../context/useRouteReady";
@@ -42,7 +43,7 @@ export function CustomItemLibraryAdmin({
     return <ErrorState>Unable to load custom items.</ErrorState>;
   }
 
-  if (loading) return null;
+  if (loading) return <SectionPending />;
 
   const filtered = items
     .filter((i) => filterCategory === "all" || i.category === filterCategory)

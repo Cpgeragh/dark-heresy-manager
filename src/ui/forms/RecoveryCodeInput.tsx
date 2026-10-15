@@ -95,7 +95,7 @@ export function RecoveryCodeInput({
       className={
         appearance === "form"
           ? `${editableInputClass(!disabled)} font-code [font-feature-settings:'zero']`
-          : `w-full rounded-lg border font-code [font-feature-settings:'zero'] ${editableInputColour(!disabled)} ${sizing}`
+          : `w-full border font-code [font-feature-settings:'zero'] ${editableInputColour(!disabled)} ${sizing}`
       }
     />
   );

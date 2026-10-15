@@ -26,6 +26,7 @@ import {
 } from "../ui/styles/colourTokens";
 import { uiDisabledLook, uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { recordComponentRender } from "../performance/performanceMetrics";
+import { uiCornerSmall } from "../ui/styles/shapeStyles";
 
 interface Props {
   label: string;
@@ -181,7 +182,7 @@ export function CharacteristicField({
             aria-label={`${label} base value`}
             aria-invalid={!!error}
             aria-describedby={error ? `${label}-error` : undefined}
-            className={`w-20 lg:w-24 rounded border px-2 lg:px-3 py-1 lg:py-1.5 text-sm lg:text-base ${editableInputColour(editable, !!error)}`}
+            className={`w-20 lg:w-24 border px-2 lg:px-3 py-1 lg:py-1.5 text-sm lg:text-base ${editableInputColour(editable, !!error)}`}
             autoComplete="off"
           />
         </div>
@@ -212,7 +213,7 @@ export function CharacteristicField({
                     }`}
                     aria-pressed={filled}
                     tabIndex={clickable ? 0 : -1}
-                    className={`aspect-square w-full max-w-7 sm:max-w-6 lg:max-w-8 border rounded flex items-center justify-center
+                    className={`aspect-square w-full max-w-7 sm:max-w-6 lg:max-w-8 border ${uiCornerSmall} flex items-center justify-center
                       ${filled ? colourAdvanceFilled : colourAdvanceEmpty}
                       ${
                         clickable

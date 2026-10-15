@@ -94,6 +94,7 @@ import {
   uiSwipeableTabPanel,
 } from "../ui/styles/segmentedTabStyles";
 import { createLocalId } from "../utils/createLocalId";
+import { uiCorner } from "../ui/styles/shapeStyles";
 
 interface Props {
   user: User;
@@ -427,7 +428,7 @@ function DmCampaignList({
               <Link
                 to={buildRoute.campaignOverview(campaign.id)}
                 aria-label={campaign.name}
-                className={`absolute inset-0 rounded-lg focus-visible:ring-inset ${uiFocusRing}`}
+                className={`absolute inset-0 ${uiCorner} focus-visible:ring-inset ${uiFocusRing}`}
               />
               <span
                 className={`pointer-events-none min-w-0 flex-1 font-medium ${colourTextPrimary} lg:text-lg`}
@@ -588,9 +589,9 @@ function DmCampaignList({
           >
             <section className={campaignActionRowClass}>
               <span className="flex items-center gap-1.5">
-                <span className={campaignActionLabelClass}>Edit Campaign</span>
+                <span className={campaignActionLabelClass}>Edit Campaign Details</span>
                 <InfoModal
-                  title="Edit Campaign"
+                  title="Edit Campaign Details"
                   content="Change this campaign's name and Inquisitor name."
                 />
               </span>

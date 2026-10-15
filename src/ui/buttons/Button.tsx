@@ -23,6 +23,7 @@ import {
 import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 import { LoadingDots } from "../LoadingDots";
 import { usePendingClick } from "../usePendingClick";
+import { uiCorner } from "../styles/shapeStyles";
 
 export type ButtonVariant =
   | "primary"
@@ -103,7 +104,7 @@ export function Button({
       aria-busy={busy || undefined}
       disabled={disabled || busy}
       className={[
-        "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-lg font-semibold transition",
+        `inline-flex items-center justify-center gap-1 whitespace-nowrap ${uiCorner} font-semibold transition`,
         busy ? "cursor-wait" : uiDisabledControl,
         uiPressFeedback(!disabled && !busy),
         uiFocusRing,

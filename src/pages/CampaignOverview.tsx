@@ -1,58 +1,43 @@
 // src/pages/CampaignOverview.tsx
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { useCampaign } from "../hooks/useCampaign";
-import { useSessions } from "../hooks/useSessions";
-import { useCampaignCharacters } from "../hooks/useCampaignCharacters";
-import { SessionForm } from "./CampaignOverview/SessionForm";
-import { SessionCard } from "./CampaignOverview/SessionCard";
-import { useDeletionChatChoice } from "../components/chat/useDeletionChatChoice";
-import { CharacterRow } from "./CampaignOverview/CharacterRow";
 import { CustomItemLibraryAdmin } from "./CampaignOverview/CustomItemLibraryAdmin";
-import { applySessionXp, repairSessionSummaries } from "../services/sessionService";
+import { PartySection } from "./CampaignOverview/PartySection";
+import { RolePlaque } from "./CampaignOverview/RolePlaque";
+import { SessionHistorySection } from "./CampaignOverview/SessionHistorySection";
 import {
-  createNewCharacter,
-  importCharacter,
-  repairCharacterSummaries,
-} from "../services/characterService";
-import { validateCharacterName } from "../utils/validation";
+  DEFAULT_CAMPAIGN_SECTION,
+  getCampaignNavigation,
+  getCampaignSectionLabel,
+  isCampaignSectionAllowed,
+  type CampaignSectionId,
+} from "./CampaignOverview/sections";
+import { importCharacter, repairCharacterSummaries } from "../services/characterService";
+import { repairSessionSummaries } from "../services/sessionService";
 import { readCharacterImportFile } from "../firestore/firebaseValidation";
 import { useToast } from "../components/Toast";
+import { SectionDrawer } from "../components/SectionDrawer";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
-import { PRODUCT_LIMITS } from "../constants/productLimits";
-import {
-  editableInputClass,
-  uiSubheading,
-  uiTextBody,
-  uiTextLabel,
-  uiTextPlaceholder,
-  uiStackList,
-} from "../ui/styles/editableStyles";
+import { uiSubheading, uiStackList } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
-import { SectionHeader } from "../ui/SectionHeader";
+import { TitleToolbar } from "../ui/TitleToolbar";
 import { ErrorState } from "../ui/ErrorState";
 import { useRouteActive, useRouteLoading, useRouteLoadTimedOut } from "../context/useRouteReady";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
-import { useCampaignCharacterSummaries } from "../hooks/useCampaignCharacterSummaries";
-import { MyCharacterCard } from "./CampaignOverview/MyCharacterCard";
-import { PartyRosterTile } from "./CampaignOverview/PartyRosterTile";
 import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
-import {
-  CampaignCustomItemsScope,
-  useCampaignCustomItemsRaw,
-} from "../hooks/useCampaignCustomItems";
-import { useCampaignsContext } from "../context/useCampaignsContext";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
   recordComponentRender("CampaignOverview");
   const params = useParams<{ campaignId: string }>();
   const campaignId = params.campaignId;
-  const { dmCampaigns, playerCampaigns } = useCampaignsContext();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const {
     campaign,
@@ -60,94 +45,31 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     error: campaignError,
   } = useCampaign(campaignId ?? null);
   const isDM = campaign?.dmId === effectiveUserId;
-  const { ask: askAboutChats, modals: deletionChatModals } = useDeletionChatChoice({
-    accountId: effectiveUserId,
-    about: "character",
-  });
-  const knownRole = campaign
-    ? isDM
-      ? "admin"
-      : "picker"
-    : dmCampaigns.some((item) => item.id === campaignId)
-      ? "admin"
-      : playerCampaigns.some((item) => item.id === campaignId)
-        ? "picker"
-        : null;
-  const {
-    items: customItems,
-    loading: customItemsLoading,
-    error: customItemsError,
-  } = useCampaignCustomItemsRaw({
-    campaignId,
-    mode: knownRole ?? "picker",
-    userId: effectiveUserId,
-  });
-  const {
-    sessions,
-    loading: sessionsLoading,
-    error: sessionsError,
-    deleteSession,
-    updateSession,
-  } = useSessions(campaignId, campaign ? isDM : null);
-  const {
-    characters,
-    loading: charactersLoading,
-    error: charactersError,
-  } = useCampaignCharacters(campaignId ?? null, effectiveUserId);
-  const {
-    summaries: partySummaries,
-    loading: partySummariesLoading,
-    error: partySummariesError,
-  } = useCampaignCharacterSummaries(campaign && campaignId ? campaignId : null);
-  const pageLoading =
-    campaignLoading ||
-    charactersLoading ||
-    customItemsLoading ||
-    sessionsLoading ||
-    partySummariesLoading;
-  useRouteLoading(pageLoading);
+  useRouteLoading(campaignLoading);
   const routeActive = useRouteActive();
   const routeTimedOut = useRouteLoadTimedOut();
-  const ownCharacterIds = useMemo(() => new Set(characters.map((c) => c.id)), [characters]);
-  const partyMembers = useMemo(
-    () => partySummaries.filter((s) => !ownCharacterIds.has(s.id)),
-    [partySummaries, ownCharacterIds]
-  );
-  const summaries = useMemo(
-    () =>
-      characters.map((character) => ({
-        id: character.id,
-        characterName: character.header?.characterName ?? "Unnamed Character",
-        userId: character.userId ?? null,
-      })),
-    [characters]
-  );
-  const sessionCharacters = useMemo(
-    () =>
-      isDM
-        ? partySummaries.map((summary) => ({
-            id: summary.id,
-            characterName: summary.characterName,
-            userId: summary.userId,
-          }))
-        : [
-            ...summaries,
-            ...partyMembers.map((summary) => ({
-              id: summary.id,
-              characterName: summary.characterName,
-              userId: null,
-            })),
-          ],
-    [isDM, partySummaries, partyMembers, summaries]
-  );
   const toast = useToast();
   const { setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
 
-  const [showSessionForm, setShowSessionForm] = useState(false);
-  const [search, setSearch] = useState("");
-  const [newCharacterName, setNewCharacterName] = useState("");
-  const [creatingCharacter, setCreatingCharacter] = useState(false);
-  const creatingCharacterRef = useRef(false);
+  const requestedSection = searchParams.get("section");
+  const requestedSectionIsAllowed = isCampaignSectionAllowed(requestedSection, isDM);
+  const activeSection: CampaignSectionId = requestedSectionIsAllowed
+    ? requestedSection
+    : DEFAULT_CAMPAIGN_SECTION;
+
+  useEffect(() => {
+    if (!campaign || requestedSection === null || requestedSectionIsAllowed) return;
+    navigate(`?section=${DEFAULT_CAMPAIGN_SECTION}`, { replace: true });
+  }, [campaign, navigate, requestedSection, requestedSectionIsAllowed]);
+
+  const handleSectionChange = useCallback(
+    (id: string) => {
+      navigate(`?section=${id}`);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    },
+    [navigate]
+  );
+
   const [importingCharacter, setImportingCharacter] = useState(false);
   const importingCharacterRef = useRef(false);
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -155,34 +77,6 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   const repairingSummariesRef = useRef(false);
   const [repairingSessionSummaries, setRepairingSessionSummaries] = useState(false);
   const repairingSessionSummariesRef = useRef(false);
-
-  const handleCreate = useCallback(async () => {
-    if (creatingCharacterRef.current) return;
-    const name = newCharacterName.trim();
-    const validation = validateCharacterName(name);
-    if (!validation.isValid) {
-      toast.warning(validation.error ?? "Invalid character name");
-      return;
-    }
-    if (!campaignId) return;
-    creatingCharacterRef.current = true;
-    setCreatingCharacter(true);
-    try {
-      const recoveryCode = await createNewCharacter(campaignId, name);
-      toast.success(
-        `Character created!\n\nRecovery Code: ${recoveryCode}\n\n(Click the copy button to save this code)`,
-        IMPORTANT_TOAST_DURATION,
-        recoveryCode
-      );
-      setNewCharacterName("");
-    } catch (err) {
-      console.error("Character creation error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to create character.");
-    } finally {
-      creatingCharacterRef.current = false;
-      setCreatingCharacter(false);
-    }
-  }, [campaignId, newCharacterName, toast]);
 
   const handleImport = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -315,11 +209,11 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <ErrorState className="py-10 text-center">No campaign selected.</ErrorState>;
   }
 
-  if (campaignError || charactersError || (campaign && customItemsError)) {
+  if (campaignError) {
     return <RouteLoadError resource="campaign" />;
   }
 
-  if (pageLoading) {
+  if (campaignLoading) {
     return routeTimedOut ? <RouteLoadError resource="campaign" /> : null;
   }
 
@@ -327,205 +221,39 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <ErrorState className="py-10 text-center">Campaign not found.</ErrorState>;
   }
 
-  const filteredCharacters = search.trim()
-    ? partySummaries.filter((c) =>
-        c.characterName.toLowerCase().includes(search.trim().toLowerCase())
-      )
-    : partySummaries;
-
   return (
-    <CampaignCustomItemsScope
-      campaignId={campaignId}
-      userId={effectiveUserId}
-      mode={isDM ? "admin" : "picker"}
-      result={{ items: customItems, loading: customItemsLoading, error: customItemsError }}
-    >
-      <PageShell title={campaign?.name ?? "Campaign Overview"}>
-        <Panel>
-          {/* GM / Inquisitor name: shown to everyone */}
-          {(campaign.gmName || campaign.inquisitorName) && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {campaign.gmName && (
-                <span className={`text-sm lg:text-base ${uiTextBody}`}>
-                  <span className={uiTextLabel}>GM</span> {campaign.gmName}
-                </span>
-              )}
-              {campaign.inquisitorName && (
-                <span className={`text-sm lg:text-base ${uiTextBody}`}>
-                  <span className={uiTextLabel}>Inquisitor</span> {campaign.inquisitorName}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Session form: shown inline when creating */}
-          {isDM && showSessionForm && (
-            <SessionForm
-              campaignId={campaignId}
-              characters={sessionCharacters}
-              onClose={() => setShowSessionForm(false)}
-            />
-          )}
-
-          {/* CHARACTERS: DM admin view */}
-          {isDM && (
-            <div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                <SectionHeader>Characters</SectionHeader>
-                <input
-                  type="search"
-                  name="character-search"
-                  placeholder="Search…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className={
-                    editableInputClass(true) +
-                    " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"
-                  }
-                  autoComplete="off"
-                  enterKeyHint="search"
-                  autoCorrect="off"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                <input
-                  className={editableInputClass(true) + " flex-1"}
-                  placeholder="Character Name"
-                  value={newCharacterName}
-                  maxLength={PRODUCT_LIMITS.characterNameCharacters}
-                  onChange={(e) => setNewCharacterName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") void handleCreate();
-                  }}
-                  autoComplete="off"
-                />
-                <Button onClick={handleCreate} loading={creatingCharacter} loadingLabel="Creating">
-                  Create
-                </Button>
-              </div>
-
-              <div className={uiStackList}>
-                {filteredCharacters.length === 0 ? (
-                  <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
-                    {search.trim() ? `No characters match "${search}".` : "No characters yet."}
-                  </p>
-                ) : (
-                  filteredCharacters.map((char) => (
-                    <CharacterRow
-                      key={char.id}
-                      campaignId={campaignId}
-                      characterId={char.id}
-                      characterName={char.characterName}
-                      userId={char.userId}
-                      portraitUrl={char.portraitUrl}
-                      isDM={isDM}
-                      onDeleted={(deletedId) =>
-                        void askAboutChats({ campaignId, characterId: deletedId })
-                      }
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* MY CHARACTERS: player view */}
-          {!isDM && (
-            <div>
-              <SectionHeader className="mb-3">My Characters</SectionHeader>
-              {characters.length === 0 ? (
-                <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
-                  You haven't claimed a character in this campaign yet.
-                </p>
-              ) : (
-                <div className={uiStackList}>
-                  {characters.map((c) => (
-                    <MyCharacterCard key={c.id} character={c} campaignId={campaignId} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* PARTY: player view */}
-          {!isDM && (
-            <div>
-              <SectionHeader className="mb-3">Party</SectionHeader>
-              {partySummariesError ? (
-                <ErrorState>Unable to load the party roster. Please refresh the page.</ErrorState>
-              ) : partyMembers.length === 0 ? (
-                <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
-                  No one else has joined yet.
-                </p>
-              ) : (
-                <div className={uiStackList}>
-                  {partyMembers.map((s) => (
-                    <PartyRosterTile key={s.id} summary={s} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* CUSTOM ITEM LIBRARY: DM only */}
-          {isDM && (
-            <div>
-              <SectionHeader className="mb-3">Custom Item Library</SectionHeader>
-              <CustomItemLibraryAdmin campaignId={campaignId} userId={effectiveUserId} />
-            </div>
-          )}
-
-          {/* SESSION HISTORY */}
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-              <SectionHeader>Session History</SectionHeader>
-              {isDM && !showSessionForm && (
-                <Button className="w-full sm:w-auto" onClick={() => setShowSessionForm(true)}>
-                  New Session
-                </Button>
-              )}
-            </div>
-
-            {sessionsError ? (
-              <ErrorState>Unable to load sessions. Please refresh the page.</ErrorState>
-            ) : sessions.length === 0 ? (
-              <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
-                No sessions recorded yet.
-              </p>
-            ) : (
-              <div className={uiStackList}>
-                {sessions.map((session) => (
-                  <SessionCard
-                    key={session.id}
-                    session={session}
-                    characters={sessionCharacters}
-                    isDM={isDM}
-                    onDelete={
-                      isDM ? (reverseXp) => deleteSession(session.id, reverseXp) : undefined
-                    }
-                    onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
-                    onApplyXp={
-                      isDM
-                        ? () =>
-                            applySessionXp(
-                              campaignId,
-                              session.id,
-                              session.attendees,
-                              session.xpAwarded
-                            )
-                        : undefined
-                    }
-                  />
-                ))}
-              </div>
+    <PageShell title={campaign.name}>
+      <TitleToolbar
+        title={getCampaignSectionLabel(activeSection)}
+        left={
+          <SectionDrawer
+            navigation={getCampaignNavigation(isDM)}
+            activePage={activeSection}
+            onPageChange={handleSectionChange}
+          />
+        }
+      />
+      <Panel>
+        {/* GM / Inquisitor name: shown to everyone */}
+        {(campaign.gmName || campaign.inquisitorName) && (
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
+            {campaign.gmName && <RolePlaque role="Game Master" name={campaign.gmName} />}
+            {campaign.inquisitorName && (
+              <RolePlaque role="Inquisitor" name={campaign.inquisitorName} />
             )}
           </div>
-        </Panel>
-        {deletionChatModals}
-      </PageShell>
-    </CampaignCustomItemsScope>
+        )}
+
+        {activeSection === "party" && (
+          <PartySection campaignId={campaignId} isDM={isDM} effectiveUserId={effectiveUserId} />
+        )}
+        {activeSection === "custom-items" && isDM && (
+          <CustomItemLibraryAdmin campaignId={campaignId} userId={effectiveUserId} />
+        )}
+        {activeSection === "sessions" && (
+          <SessionHistorySection campaignId={campaignId} isDM={isDM} />
+        )}
+      </Panel>
+    </PageShell>
   );
 }

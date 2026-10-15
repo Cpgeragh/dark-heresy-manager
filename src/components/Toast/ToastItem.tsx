@@ -11,6 +11,7 @@ import { InfoIcon } from "../../ui/icons/InfoIcon";
 import { WarningIcon } from "../../ui/icons/WarningIcon";
 import { colourHoverToastControl, toastColours } from "../../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../../ui/styles/buttonStyles";
+import { uiCorner } from "../../ui/styles/shapeStyles";
 
 interface ToastItemProps {
   toast: Toast;
@@ -51,7 +52,7 @@ export function ToastItem({ toast }: ToastItemProps) {
       aria-atomic="true"
       className={`
         ${toastColours[toast.type]}
-        border rounded-lg p-4 shadow-lg
+        border ${uiCorner} p-4 shadow-lg
         backdrop-blur-sm
         animate-slide-in-right
         grid ${gridColumns} items-center gap-3 overflow-hidden
@@ -74,7 +75,7 @@ export function ToastItem({ toast }: ToastItemProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className={`inline-flex h-8 w-8 items-center justify-center rounded text-xs transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing}`}
+            className={`inline-flex h-8 w-8 items-center justify-center ${uiCorner} text-xs transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing}`}
             aria-label="Copy message to clipboard"
             title="Copy to clipboard"
           >
@@ -85,7 +86,7 @@ export function ToastItem({ toast }: ToastItemProps) {
         <button
           type="button"
           onClick={handleDismiss}
-          className={`inline-flex h-8 w-8 items-center justify-center rounded text-xl transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing} lg:h-9 lg:w-9 lg:text-2xl`}
+          className={`inline-flex h-8 w-8 items-center justify-center ${uiCorner} text-xl transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing} lg:h-9 lg:w-9 lg:text-2xl`}
           aria-label="Dismiss notification"
           title="Dismiss"
         >

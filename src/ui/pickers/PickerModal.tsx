@@ -29,6 +29,7 @@ import {
   colourPickerCustomAction,
   colourPickerSelected,
 } from "../styles/colourTokens";
+import { uiCorner } from "../styles/shapeStyles";
 
 export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`p-4 lg:p-5 ${uiStackBody} ${className}`.trim()} {...props} />;
@@ -111,7 +112,7 @@ export function PickerCustomAction({
   return (
     <button
       type={type}
-      className={`group ${uiInlineRow} w-full justify-center rounded border ${colourPickerCustomAction} py-2.5 text-sm transition ${uiDisabledControl} lg:text-base ${uiPressFeedback(!props.disabled)} ${uiFocusRing} ${className}`.trim()}
+      className={`group ${uiInlineRow} w-full justify-center ${uiCorner} border ${colourPickerCustomAction} py-2.5 text-sm transition ${uiDisabledControl} lg:text-base ${uiPressFeedback(!props.disabled)} ${uiFocusRing} ${className}`.trim()}
       {...props}
     >
       <PlusIcon className="h-4 w-4 shrink-0" />

@@ -1,7 +1,6 @@
 // src/components/SectionDrawer.tsx
 
 import { useState, useEffect, useCallback } from "react";
-import type { TabId } from "../pages/CharacterSheet/types";
 import { CloseButton } from "../ui/buttons/CloseButton";
 import { IconButton } from "../ui/buttons/IconButton";
 import { MenuIcon } from "../ui/icons/MenuIcon";
@@ -15,76 +14,28 @@ import { uiLayerForeground } from "../ui/styles/layerStyles";
 // NAVIGATION STRUCTURE
 // ================================================================
 
-interface SectionTab {
-  id: TabId;
+export interface SectionDrawerPage {
+  id: string;
   label: string;
 }
 
-function alphabetiseTabs(tabs: readonly SectionTab[]): SectionTab[] {
-  return [...tabs].sort((left, right) => left.label.localeCompare(right.label, "en-GB"));
+export interface SectionDrawerCategory {
+  label: string;
+  pages: readonly SectionDrawerPage[];
 }
 
-const CATEGORIES: {
-  label: string;
-  dmOnly?: boolean;
-  tabs: SectionTab[];
-}[] = [
-  {
-    label: "Abilities",
-    tabs: alphabetiseTabs([
-      { id: "elite-advances", label: "Elite Advances" },
-      { id: "psychic", label: "Psychic" },
-      { id: "skills", label: "Skills" },
-      { id: "talents", label: "Talents" },
-      { id: "traits", label: "Traits" },
-      { id: "training", label: "Weapon Training" },
-    ]),
-  },
-  {
-    label: "Admin",
-    dmOnly: true,
-    tabs: [{ id: "admin", label: "Admin" }],
-  },
-  {
-    label: "Character",
-    tabs: [
-      { id: "background", label: "Background" },
-      { id: "stats", label: "Characteristics" },
-      { id: "corruption", label: "Corruption & Mutations" },
-      { id: "insanity", label: "Insanity" },
-      { id: "notes", label: "Notes" },
-      { id: "xp", label: "XP" },
-    ],
-  },
-  {
-    label: "Combat",
-    tabs: [{ id: "vitals", label: "Vitals" }],
-  },
-  {
-    label: "Companions",
-    tabs: [{ id: "companions", label: "Companions" }],
-  },
-  {
-    label: "Equipment",
-    tabs: [
-      { id: "archeotech", label: "Archeotech" },
-      { id: "armour", label: "Armour" },
-      { id: "cybernetics", label: "Cybernetics" },
-      { id: "drugs", label: "Drugs" },
-      { id: "gear", label: "Gear" },
-      { id: "weapons", label: "Weapons" },
-    ],
-  },
-];
+export type SectionNavigation =
+  | { categories: readonly SectionDrawerCategory[] }
+  | { pages: readonly SectionDrawerPage[] };
 
 // ================================================================
 // COMPONENT
 // ================================================================
 
 interface SectionDrawerProps {
-  activeTab: TabId;
-  onTabChange: (tab: TabId) => void;
-  isDM: boolean;
+  navigation: SectionNavigation;
+  activePage: string;
+  onPageChange: (id: string) => void;
   externalOpen?: boolean;
   externalCategoryLabel?: string | null;
   onExternalClose?: () => void;
@@ -93,23 +44,49 @@ interface SectionDrawerProps {
 export function SectionDrawer({ ...props }: SectionDrawerProps) {
   const externalRequest =
     props.externalOpen && props.externalCategoryLabel ? props.externalCategoryLabel : "local";
-  const drawerStateKey = `${props.isDM ? "dm" : "player"}:${externalRequest}`;
+  const navigationKey =
+    "categories" in props.navigation
+      ? props.navigation.categories.map((category) => category.label).join("|")
+      : "pages";
 
-  return <SectionDrawerContent key={drawerStateKey} {...props} />;
+  return <SectionDrawerContent key={`${navigationKey}:${externalRequest}`} {...props} />;
+}
+
+function PageList({
+  pages,
+  activePage,
+  onSelect,
+}: {
+  pages: readonly SectionDrawerPage[];
+  activePage: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <ul className="py-2">
+      {pages.map((page) => (
+        <li key={page.id}>
+          <SectionDrawerRow onClick={() => onSelect(page.id)} active={activePage === page.id}>
+            {page.label}
+          </SectionDrawerRow>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function SectionDrawerContent({
-  activeTab,
-  onTabChange,
-  isDM,
+  navigation,
+  activePage,
+  onPageChange,
   externalOpen,
   externalCategoryLabel,
   onExternalClose,
 }: SectionDrawerProps) {
-  const visibleCategories = CATEGORIES.filter((c) => !c.dmOnly || isDM);
+  const categories = "categories" in navigation ? navigation.categories : null;
+  const flatPages = "pages" in navigation ? navigation.pages : null;
   const externalCategoryIndex =
-    externalOpen && externalCategoryLabel
-      ? visibleCategories.findIndex((category) => category.label === externalCategoryLabel)
+    categories && externalOpen && externalCategoryLabel
+      ? categories.findIndex((category) => category.label === externalCategoryLabel)
       : -1;
   const hasExternalCategory = externalCategoryIndex >= 0;
 
@@ -122,7 +99,7 @@ function SectionDrawerContent({
   );
 
   const activeCategory =
-    activeCategoryIndex !== null ? visibleCategories[activeCategoryIndex] : null;
+    categories && activeCategoryIndex !== null ? categories[activeCategoryIndex] : null;
 
   const open = useCallback(() => {
     setIsOpen(true);
@@ -144,12 +121,12 @@ function SectionDrawerContent({
     setLevel("categories");
   }, []);
 
-  const selectTab = useCallback(
-    (tabId: TabId) => {
-      onTabChange(tabId);
+  const selectPage = useCallback(
+    (id: string) => {
+      onPageChange(id);
       close();
     },
-    [onTabChange, close]
+    [onPageChange, close]
   );
 
   // Escape key closes drawer
@@ -193,61 +170,60 @@ function SectionDrawerContent({
           <CloseButton onClick={close} ariaLabel="Close navigation" />
         </div>
 
-        {/* Sliding panels */}
-        <div className="relative overflow-hidden flex-1">
-          {/* Level 1: Categories */}
-          <div
-            className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
-              level === "categories" ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
-            <ul className="py-2">
-              {visibleCategories.map((cat, index) => (
-                <li key={cat.label}>
-                  <SectionDrawerRow onClick={() => openCategory(index)} trailing={<ArrowRight />}>
-                    {cat.label}
-                  </SectionDrawerRow>
-                </li>
-              ))}
-            </ul>
+        {flatPages ? (
+          <div className="relative overflow-hidden flex-1">
+            <div className="absolute inset-0 overflow-y-auto">
+              <PageList pages={flatPages} activePage={activePage} onSelect={selectPage} />
+            </div>
           </div>
+        ) : (
+          <div className="relative overflow-hidden flex-1">
+            {/* Level 1: Categories */}
+            <div
+              className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
+                level === "categories" ? "translate-x-0" : "-translate-x-full"
+              }`}
+            >
+              <ul className="py-2">
+                {categories?.map((cat, index) => (
+                  <li key={cat.label}>
+                    <SectionDrawerRow onClick={() => openCategory(index)} trailing={<ArrowRight />}>
+                      {cat.label}
+                    </SectionDrawerRow>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Level 2: Pages */}
-          <div
-            className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
-              level === "pages" ? "translate-x-0" : "translate-x-full"
-            }`}
-          >
-            {activeCategory && (
-              <>
-                {/* Back button */}
-                <div className={`border-b ${colourDivider}`}>
-                  <SectionDrawerRow
-                    onClick={goBack}
-                    aria-label={`Back to categories from ${activeCategory.label}`}
-                    trailing={<ArrowLeft />}
-                  >
-                    {activeCategory.label}
-                  </SectionDrawerRow>
-                </div>
+            {/* Level 2: Pages */}
+            <div
+              className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
+                level === "pages" ? "translate-x-0" : "translate-x-full"
+              }`}
+            >
+              {activeCategory && (
+                <>
+                  {/* Back button */}
+                  <div className={`border-b ${colourDivider}`}>
+                    <SectionDrawerRow
+                      onClick={goBack}
+                      aria-label={`Back to categories from ${activeCategory.label}`}
+                      trailing={<ArrowLeft />}
+                    >
+                      {activeCategory.label}
+                    </SectionDrawerRow>
+                  </div>
 
-                {/* Page list */}
-                <ul className="py-2">
-                  {activeCategory.tabs.map((tab) => (
-                    <li key={tab.id}>
-                      <SectionDrawerRow
-                        onClick={() => selectTab(tab.id)}
-                        active={activeTab === tab.id}
-                      >
-                        {tab.label}
-                      </SectionDrawerRow>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+                  <PageList
+                    pages={activeCategory.pages}
+                    activePage={activePage}
+                    onSelect={selectPage}
+                  />
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

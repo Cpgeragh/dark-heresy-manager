@@ -59,6 +59,7 @@ import { CloseIcon } from "../../../ui/icons/CloseIcon";
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";
+import { uiCorner } from "../../../ui/styles/shapeStyles";
 
 interface BackgroundTabProps {
   header: CharacterHeader;
@@ -433,7 +434,7 @@ export function BackgroundTab({
               .map((quirk) => (
                 <span
                   key={quirk}
-                  className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${chipColours.slate}`}
+                  className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm ${chipColours.slate}`}
                 >
                   {quirk}
                   {editable && (

@@ -1,24 +1,21 @@
 // tests/integration/CampaignOverview.test.tsx
 //
-// CharacterRow, SessionForm, SessionCard, and CustomItemLibraryAdmin are
-// all mocked, each already has its own dedicated test file. This file is
-// scoped to CampaignOverview's own orchestration:
-// character creation/import, the repair-summaries action, search filtering, and
-// DM-only wiring (including the kebab-menu content, which isn't rendered inside
-// this component's own tree: it's handed to a header-extension setter to be
-// displayed elsewhere, so those two tests capture and separately render it).
+// CharacterRow, MyCharacterCard, PartyRosterTile, SessionForm, SessionCard,
+// CustomItemLibraryAdmin and the section drawer are all mocked, each already
+// has its own dedicated test file. This file is scoped to the campaign page's
+// own orchestration: which section opens from the link, the section menu for
+// each role, character creation/import, the repair-summaries actions, search
+// filtering, and DM-only wiring (including the kebab-menu content, which isn't
+// rendered inside this component's own tree: it's handed to a header-extension
+// setter to be displayed elsewhere, so those tests capture and separately
+// render it).
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { MemoryRouter } from "react-router-dom";
 import { IMPORTANT_TOAST_DURATION } from "../../src/constants/ui";
 import type { CampaignWithId, CharacterListItem } from "../../src/types/Firestore";
-
-const useCampaignCustomItemsRawMock = vi.fn();
-vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
-  useCampaignCustomItemsRaw: (...args: unknown[]) => useCampaignCustomItemsRawMock(...args),
-  CampaignCustomItemsScope: ({ children }: { children: React.ReactNode }) => children,
-}));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
@@ -91,6 +88,24 @@ vi.mock("../../src/context/useChatsContext", () => ({
   useChatsContext: () => chatsState.value,
 }));
 vi.mock("../../src/services/chatService", () => ({ clearChat: vi.fn() }));
+
+vi.mock("../../src/components/SectionDrawer", () => ({
+  SectionDrawer: ({
+    navigation,
+    onPageChange,
+  }: {
+    navigation: { pages: { id: string; label: string }[] };
+    onPageChange: (id: string) => void;
+  }) => (
+    <div>
+      {navigation.pages.map((page) => (
+        <button key={page.id} onClick={() => onPageChange(page.id)}>
+          Go to {page.label}
+        </button>
+      ))}
+    </div>
+  ),
+}));
 
 vi.mock("../../src/pages/CampaignOverview/CharacterRow", () => ({
   CharacterRow: ({
@@ -187,40 +202,60 @@ function campaign(over: Partial<CampaignWithId> = {}): CampaignWithId {
   return { id: "campaign-1", name: "The Lathe Run", dmId: "dm-1", ...over } as CampaignWithId;
 }
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  useParamsMock.mockReturnValue({ campaignId: "campaign-1" });
-  useCampaignMock.mockReturnValue({ campaign: campaign(), loading: false, error: null });
-  useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: false, error: null });
-  useSessionsMock.mockReturnValue({
+function sessionsResult(over: Record<string, unknown> = {}) {
+  return {
     sessions: [],
     loading: false,
     error: null,
     deleteSession: vi.fn(),
     updateSession: vi.fn(),
-  });
+    ...over,
+  };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+  useParamsMock.mockReturnValue({ campaignId: "campaign-1" });
+  useCampaignMock.mockReturnValue({ campaign: campaign(), loading: false, error: null });
+  useSessionsMock.mockReturnValue(sessionsResult());
   useCampaignCharactersMock.mockReturnValue({ characters: [], loading: false, error: null });
   useCampaignCharacterSummariesMock.mockReturnValue({ summaries: [], loading: false, error: null });
 });
 
-function renderPage(effectiveUserId = "player-1") {
-  render(<CampaignOverview effectiveUserId={effectiveUserId} />);
+function renderPage(effectiveUserId = "player-1", section?: string) {
+  const search = section ? `?section=${section}` : "";
+  render(
+    <MemoryRouter initialEntries={[`/campaign/campaign-1${search}`]}>
+      <CampaignOverview effectiveUserId={effectiveUserId} />
+    </MemoryRouter>
+  );
 }
 
-describe("CampaignOverview: character query role", () => {
-  it("requests only the current player's own character documents", () => {
+describe("CampaignOverview: what each section requests", () => {
+  it("requests only the current player's own character documents on the Party section", () => {
     renderPage("player-1");
 
-    expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", false);
     expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "player-1");
+    expect(useCampaignCharacterSummariesMock).toHaveBeenCalledWith("campaign-1");
+    expect(useSessionsMock).not.toHaveBeenCalled();
   });
 
-  it("requests the campaign's character summaries for the campaign DM", () => {
+  it("requests only the character summaries for the campaign DM on the Party section", () => {
     renderPage("dm-1");
 
-    expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", true);
-    expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "dm-1");
+    expect(useCampaignCharactersMock).toHaveBeenCalledWith(null, "dm-1");
     expect(useCampaignCharacterSummariesMock).toHaveBeenCalledWith("campaign-1");
+    expect(useSessionsMock).not.toHaveBeenCalled();
+  });
+
+  it("requests the sessions only on the Session History section, with the viewer's role", () => {
+    renderPage("player-1", "sessions");
+    expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", false);
+    expect(useCampaignCharactersMock).not.toHaveBeenCalled();
+
+    renderPage("dm-1", "sessions");
+    expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", true);
   });
 });
 
@@ -231,7 +266,7 @@ describe("CampaignOverview", () => {
     expect(screen.getByText("No campaign selected.")).toBeInTheDocument();
   });
 
-  it("shows safe recovery actions when campaign or character data fails to load", () => {
+  it("shows safe recovery actions when campaign data fails to load", () => {
     useCampaignMock.mockReturnValue({ campaign: undefined, loading: false, error: new Error("x") });
     renderPage();
     expect(
@@ -241,7 +276,17 @@ describe("CampaignOverview", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Return to Dashboard" })).toBeInTheDocument();
-    expect(useCampaignCharacterSummariesMock).toHaveBeenLastCalledWith(null);
+    expect(useCampaignCharacterSummariesMock).not.toHaveBeenCalled();
+  });
+
+  it("shows safe recovery actions when the player's characters fail to load", () => {
+    useCampaignCharactersMock.mockReturnValue({
+      characters: [],
+      loading: false,
+      error: new Error("x"),
+    });
+    renderPage("player-1");
+    expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
   });
 
   function expectNothingShown() {
@@ -256,28 +301,11 @@ describe("CampaignOverview", () => {
     expectNothingShown();
   });
 
-  it("shows nothing while characters are still loading", () => {
+  it("shows nothing while the player's characters are still loading", () => {
     useCampaignCharactersMock.mockReturnValue({ characters: [], loading: true, error: null });
-    renderPage();
+    renderPage("player-1");
     expectNothingShown();
-  });
-
-  it("shows nothing while custom items are still loading", () => {
-    useCampaignCustomItemsRawMock.mockReturnValue({ items: [], loading: true, error: null });
-    renderPage();
-    expectNothingShown();
-  });
-
-  it("shows nothing while sessions are still loading", () => {
-    useSessionsMock.mockReturnValue({
-      sessions: [],
-      loading: true,
-      error: null,
-      deleteSession: vi.fn(),
-      updateSession: vi.fn(),
-    });
-    renderPage();
-    expectNothingShown();
+    expect(screen.queryByText("No one else has joined yet.")).not.toBeInTheDocument();
   });
 
   it("shows nothing while the party roster is still loading, for a player", () => {
@@ -288,6 +316,14 @@ describe("CampaignOverview", () => {
     });
     renderPage("player-1");
     expectNothingShown();
+    expect(screen.queryByText("No one else has joined yet.")).not.toBeInTheDocument();
+  });
+
+  it("shows nothing while sessions are still loading", () => {
+    useSessionsMock.mockReturnValue(sessionsResult({ loading: true }));
+    renderPage("dm-1", "sessions");
+    expectNothingShown();
+    expect(screen.queryByText("No sessions recorded yet.")).not.toBeInTheDocument();
   });
 
   it("shows Campaign not found once loading finishes with no campaign", () => {
@@ -295,7 +331,71 @@ describe("CampaignOverview", () => {
     renderPage();
     expect(screen.getByText("Campaign not found.")).toBeInTheDocument();
   });
+});
 
+describe("CampaignOverview: sections and the section menu", () => {
+  it("opens on Party by default, with the campaign name as the page title", () => {
+    renderPage("dm-1");
+    expect(screen.getByRole("heading", { name: "The Lathe Run" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Party" })).toBeInTheDocument();
+  });
+
+  it("lists Party, Custom Item Library and Session History for the DM", () => {
+    renderPage("dm-1");
+    expect(screen.getByRole("button", { name: "Go to Party" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go to Custom Item Library" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go to Session History" })).toBeInTheDocument();
+  });
+
+  it("lists only Party and Session History for a player", () => {
+    renderPage("player-1");
+    expect(screen.getByRole("button", { name: "Go to Party" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go to Session History" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Go to Custom Item Library" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("switches sections from the menu and updates the title", async () => {
+    const user = userEvent.setup();
+    renderPage("dm-1");
+
+    await user.click(screen.getByRole("button", { name: "Go to Session History" }));
+    expect(screen.getByRole("heading", { name: "Session History" })).toBeInTheDocument();
+    expect(screen.getByText("No sessions recorded yet.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create character" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Go to Custom Item Library" }));
+    expect(screen.getByRole("heading", { name: "Custom Item Library" })).toBeInTheDocument();
+    expect(screen.getByText("Mock CustomItemLibraryAdmin")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Go to Party" }));
+    expect(screen.getByRole("button", { name: "Create character" })).toBeInTheDocument();
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" });
+  });
+
+  it("opens the Custom Item Library section for the DM", () => {
+    renderPage("dm-1", "custom-items");
+    expect(screen.getByRole("heading", { name: "Custom Item Library" })).toBeInTheDocument();
+    expect(screen.getByText("Mock CustomItemLibraryAdmin")).toBeInTheDocument();
+  });
+
+  it("falls back to Party when a player asks for the Custom Item Library", async () => {
+    renderPage("player-1", "custom-items");
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Party" })).toBeInTheDocument());
+    expect(screen.queryByText("Mock CustomItemLibraryAdmin")).not.toBeInTheDocument();
+  });
+
+  it("falls back to Party when the section in the link is not one of the sections", async () => {
+    renderPage("dm-1", "nonsense");
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Party" })).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Create character" })).toBeInTheDocument();
+  });
+});
+
+describe("CampaignOverview: the DM's Party section", () => {
   it("renders characters and filters them by search", async () => {
     const user = userEvent.setup();
     useCampaignCharacterSummariesMock.mockReturnValue({
@@ -317,13 +417,19 @@ describe("CampaignOverview", () => {
     expect(screen.queryByText("Mock CharacterRow: Thrun")).not.toBeInTheDocument();
   });
 
-  it("creates a character and shows a success toast with the recovery code", async () => {
+  async function openCreateWindow(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole("button", { name: "Create character" }));
+    return screen.findByRole("dialog", { name: "Create Character" });
+  }
+
+  it("creates a character from the plus window, shows the recovery code and closes it", async () => {
     const user = userEvent.setup();
     createNewCharacterMock.mockResolvedValue("DH-CCCC-DDDD");
     renderPage("dm-1");
 
-    await user.type(screen.getByPlaceholderText("Character Name"), "Marcus");
-    await user.click(screen.getByRole("button", { name: "Create" }));
+    const dialog = await openCreateWindow(user);
+    await user.type(within(dialog).getByRole("textbox", { name: "Character name" }), "Marcus");
+    await user.click(within(dialog).getByRole("button", { name: "Create" }));
 
     expect(createNewCharacterMock).toHaveBeenCalledWith("campaign-1", "Marcus");
     expect(mockToastSuccess).toHaveBeenCalledWith(
@@ -331,61 +437,95 @@ describe("CampaignOverview", () => {
       IMPORTANT_TOAST_DURATION,
       "DH-CCCC-DDDD"
     );
-    expect(screen.getByPlaceholderText("Character Name")).toHaveValue("");
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Create Character" })).not.toBeInTheDocument()
+    );
   });
 
-  it("shows a warning toast and does not create a character for an invalid name", async () => {
+  it("keeps Create disabled until a name is typed, so nothing is created without one", async () => {
     const user = userEvent.setup();
     renderPage("dm-1");
 
-    await user.click(screen.getByRole("button", { name: "Create" }));
+    const dialog = await openCreateWindow(user);
+    const createButton = within(dialog).getByRole("button", { name: "Create" });
+    expect(createButton).toBeDisabled();
 
+    await user.click(createButton);
     expect(createNewCharacterMock).not.toHaveBeenCalled();
-    expect(mockToastWarning).toHaveBeenCalled();
+
+    await user.type(within(dialog).getByRole("textbox", { name: "Character name" }), "Marcus");
+    expect(createButton).toBeEnabled();
   });
 
-  it("shows an error toast when character creation fails", async () => {
+  it("shows an error toast and keeps the window open when character creation fails", async () => {
     const user = userEvent.setup();
     createNewCharacterMock.mockRejectedValue(new Error("Name already taken"));
     renderPage("dm-1");
 
-    await user.type(screen.getByPlaceholderText("Character Name"), "Marcus");
-    await user.click(screen.getByRole("button", { name: "Create" }));
+    const dialog = await openCreateWindow(user);
+    await user.type(within(dialog).getByRole("textbox", { name: "Character name" }), "Marcus");
+    await user.click(within(dialog).getByRole("button", { name: "Create" }));
 
     expect(mockToastError).toHaveBeenCalledWith("Name already taken");
+    expect(screen.getByRole("dialog", { name: "Create Character" })).toBeInTheDocument();
   });
 
-  it("only shows DM-only sections and the Create-character controls for the DM", () => {
+  it("clears the typed name when the window is cancelled", async () => {
+    const user = userEvent.setup();
+    renderPage("dm-1");
+
+    const dialog = await openCreateWindow(user);
+    await user.type(within(dialog).getByRole("textbox", { name: "Character name" }), "Marcus");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog", { name: "Create Character" })).not.toBeInTheDocument();
+
+    const reopened = await openCreateWindow(user);
+    expect(within(reopened).getByRole("textbox", { name: "Character name" })).toHaveValue("");
+    expect(createNewCharacterMock).not.toHaveBeenCalled();
+  });
+
+  it("only shows the search and Create-character controls to the DM", () => {
     useCampaignCharactersMock.mockReturnValue({
       characters: [character({ id: "c1", header: { characterName: "Vex" } })],
       loading: false,
       error: null,
     });
     renderPage("player-1");
-    expect(screen.queryByText("Mock CustomItemLibraryAdmin")).not.toBeInTheDocument();
-    expect(screen.queryByPlaceholderText("Character Name")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create character" })).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Search…")).not.toBeInTheDocument();
     expect(screen.queryByText("Mock CharacterRow: Vex")).not.toBeInTheDocument();
 
     renderPage("dm-1");
-    expect(screen.getByText("Mock CustomItemLibraryAdmin")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Character Name")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create character" })).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Search…")).toBeInTheDocument();
   });
 
-  it("wires SessionCard's delete/save/apply-XP handlers only for the DM", () => {
-    useSessionsMock.mockReturnValue({
-      sessions: [{ id: "s1", attendees: [], xpAwarded: 0 }],
+  it("lists every character equally, with no player style card", () => {
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [{ id: "c1", campaignId: "campaign-1", characterName: "Vex", userId: "dm-1" }],
       loading: false,
       error: null,
-      deleteSession: vi.fn(),
-      updateSession: vi.fn(),
     });
-
-    renderPage("player-1");
-    expect(screen.queryByText("Mock Delete Session")).not.toBeInTheDocument();
-
     renderPage("dm-1");
+
+    expect(screen.getByText("Mock CharacterRow: Vex")).toBeInTheDocument();
+    expect(screen.queryByText(/Mock MyCharacterCard/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Mock PartyRosterTile/)).not.toBeInTheDocument();
+  });
+});
+
+describe("CampaignOverview: the Session History section", () => {
+  it("wires SessionCard's delete/save/apply-XP handlers only for the DM", () => {
+    useSessionsMock.mockReturnValue(
+      sessionsResult({ sessions: [{ id: "s1", attendees: [], xpAwarded: 0 }] })
+    );
+
+    renderPage("player-1", "sessions");
+    expect(screen.getByText("Mock SessionCard: s1")).toBeInTheDocument();
+    expect(screen.queryByText("Mock Delete Session")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "New Session" })).not.toBeInTheDocument();
+
+    renderPage("dm-1", "sessions");
     expect(screen.getByText("Mock Delete Session")).toBeInTheDocument();
     expect(screen.getByText("Mock Save Session")).toBeInTheDocument();
     expect(screen.getByText("Mock Apply XP")).toBeInTheDocument();
@@ -401,14 +541,27 @@ describe("CampaignOverview", () => {
       loading: false,
       error: null,
     });
-    renderPage("dm-1");
+    renderPage("dm-1", "sessions");
 
     await user.click(screen.getByRole("button", { name: "New Session" }));
 
     expect(screen.getByText("Session attendee: Vex")).toBeInTheDocument();
     expect(screen.getByText("Session attendee: Thrun")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Mock Close Session Form" }));
+    expect(screen.getByRole("button", { name: "New Session" })).toBeInTheDocument();
   });
 
+  it("shows an error state when the sessions fail to load", () => {
+    useSessionsMock.mockReturnValue(sessionsResult({ error: new Error("x") }));
+    renderPage("player-1", "sessions");
+    expect(
+      screen.getByText("Unable to load sessions. Please refresh the page.")
+    ).toBeInTheDocument();
+  });
+});
+
+describe("CampaignOverview: the header options menu", () => {
   it("clears the kebab content for a non-DM and sets it for the DM", () => {
     renderPage("player-1");
     expect(clearKebabContentMock).toHaveBeenCalled();
@@ -511,14 +664,27 @@ describe("CampaignOverview: GM and Inquisitor name", () => {
     expect(screen.getAllByText("Inquisitor Vail")).toHaveLength(2);
   });
 
+  it("shows the GM and Inquisitor name on every section", async () => {
+    const user = userEvent.setup();
+    useCampaignMock.mockReturnValue({
+      campaign: campaign({ gmName: "Cain" }),
+      loading: false,
+      error: null,
+    });
+    renderPage("dm-1");
+
+    await user.click(screen.getByRole("button", { name: "Go to Session History" }));
+    expect(screen.getByText("Cain")).toBeInTheDocument();
+  });
+
   it("shows neither line when both are unset", () => {
     renderPage("dm-1");
-    expect(screen.queryByText("GM")).not.toBeInTheDocument();
+    expect(screen.queryByText("Game Master")).not.toBeInTheDocument();
   });
 });
 
-describe("CampaignOverview: player-facing My Characters and Party", () => {
-  it("shows My Characters instead of the DM Characters admin view, for a player", () => {
+describe("CampaignOverview: the player's Party section", () => {
+  it("shows the player's own character as a card, with no My Characters heading", () => {
     useCampaignCharactersMock.mockReturnValue({
       characters: [character({ id: "c1", header: { characterName: "Vex" } })],
       loading: false,
@@ -527,6 +693,7 @@ describe("CampaignOverview: player-facing My Characters and Party", () => {
     renderPage("player-1");
 
     expect(screen.getByText("Mock MyCharacterCard: Vex")).toBeInTheDocument();
+    expect(screen.queryByText("My Characters")).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Search…")).not.toBeInTheDocument();
   });
 
@@ -537,7 +704,7 @@ describe("CampaignOverview: player-facing My Characters and Party", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the party roster, excluding the viewer's own character", () => {
+  it("shows the player's own card first, then the others as simple rows without it repeated", () => {
     useCampaignCharactersMock.mockReturnValue({
       characters: [character({ id: "c1", header: { characterName: "Vex" } })],
       loading: false,
@@ -554,7 +721,9 @@ describe("CampaignOverview: player-facing My Characters and Party", () => {
     renderPage("player-1");
 
     expect(screen.queryByText("Mock PartyRosterTile: Vex")).not.toBeInTheDocument();
-    expect(screen.getByText("Mock PartyRosterTile: Thrun")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(/Mock (MyCharacterCard|PartyRosterTile)/).map((node) => node.textContent)
+    ).toEqual(["Mock MyCharacterCard: Vex", "Mock PartyRosterTile: Thrun"]);
   });
 
   it("shows an empty state when no one else has joined", () => {
@@ -572,12 +741,6 @@ describe("CampaignOverview: player-facing My Characters and Party", () => {
     expect(
       screen.getByText("Unable to load the party roster. Please refresh the page.")
     ).toBeInTheDocument();
-  });
-
-  it("does not show My Characters or Party for the DM", () => {
-    renderPage("dm-1");
-    expect(screen.queryByText("My Characters")).not.toBeInTheDocument();
-    expect(screen.queryByText("Party")).not.toBeInTheDocument();
   });
 });
 

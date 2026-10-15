@@ -78,7 +78,7 @@ export function WeaponQualitySelector({
             }
             aria-label={`${pendingQuality} value`}
             placeholder="Value"
-            className={`w-20 rounded border px-2 py-1 text-sm lg:text-base ${editableInputColour(true)}`}
+            className={`w-20 border px-2 py-1 text-sm lg:text-base ${editableInputColour(true)}`}
             autoComplete="off"
           />
         )}

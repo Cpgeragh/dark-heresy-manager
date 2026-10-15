@@ -82,6 +82,7 @@ import {
 import { MELEE_WEAPON_REFERENCE } from "../../data/reference/weaponReference";
 import { useXpHistory } from "../../hooks/useXpHistory";
 import { xpHistoryDate } from "../../utils/xpHistory";
+import { uiCorner } from "../../ui/styles/shapeStyles";
 
 interface ExperienceTabProps {
   campaignId: string;
@@ -131,7 +132,7 @@ const CAREER_PURCHASE_GROUPS: readonly {
 type XpAction = XpTransaction["type"];
 
 const XP_SUMMARY_LABEL_CLASS = `whitespace-nowrap text-[10px] uppercase tracking-wide ${colourMetadataLabelText} sm:text-sm lg:text-base`;
-const ACTIVE_RANK_CHOICE_CLASS = `inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold lg:text-base ${colourCareerPathOutline}`;
+const ACTIVE_RANK_CHOICE_CLASS = `inline-flex w-full items-center justify-center ${uiCorner} px-4 py-2 text-sm font-semibold lg:text-base ${colourCareerPathOutline}`;
 const RANK_DETAIL_KEYS = ["career", "additional"] as const;
 type RankDetailKey = (typeof RANK_DETAIL_KEYS)[number];
 const RANK_DETAIL_OPTIONS = [
@@ -1194,7 +1195,7 @@ export function ExperienceTab({
                   className={card.isCurrent ? `${uiNoticeBox} ${colourNoticeRed}` : uiSectionShell}
                 >
                   <AccordionCard
-                    shellClassName="rounded-lg"
+                    shellClassName={uiCorner}
                     showChevron={false}
                     expanded={expanded}
                     onToggle={() => toggleRankCard(card.rankId)}

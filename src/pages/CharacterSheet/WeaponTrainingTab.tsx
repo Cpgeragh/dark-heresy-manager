@@ -51,6 +51,7 @@ import {
   uiHoverSurface,
   uiPressFeedback,
 } from "../../ui/styles/buttonStyles";
+import { uiCorner } from "../../ui/styles/shapeStyles";
 
 const EXOTIC_WEAPON_TRAINING_OPTIONS = Array.from(
   new Set(
@@ -344,7 +345,7 @@ export function WeaponTrainingTab({
                       ? weaponTrainingPulseVars(WEAPON_TRAINING_GROUP_RGB[group.label])
                       : undefined
                   }
-                  className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${uiPressFeedback(
+                  className={`px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm transition ${uiPressFeedback(
                     clickable
                   )} ${uiFocusRing} ${uiDisabledControl} ${pulsing ? "animate-psy-pulse" : ""} ${
                     active
@@ -387,7 +388,7 @@ export function WeaponTrainingTab({
               disabled={!editable}
               onClick={() => setPendingRemoveExotic({ index, name: weapon.name })}
               aria-label={`Remove ${weapon.name}`}
-              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${
+              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${
                 editable ? uiHoverSurface : ""
               } ${uiPressFeedback(editable)} ${uiFocusRing} ${uiDisabledControl}`}
             >
@@ -399,7 +400,7 @@ export function WeaponTrainingTab({
               key={`granted:${index}:${weapon}`}
               type="button"
               disabled
-              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${uiFocusRing} ${uiDisabledControl}`}
+              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${uiFocusRing} ${uiDisabledControl}`}
             >
               {weapon}
             </button>
@@ -413,7 +414,7 @@ export function WeaponTrainingTab({
               aria-pressed="false"
               aria-label={`${entry.name}, ${entry.purchase.cost} XP`}
               style={weaponTrainingPulseVars(EXOTIC_WEAPON_TRAINING_RGB)}
-              className={`animate-psy-pulse px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${colourGlowInactive.fuchsia} ${
+              className={`animate-psy-pulse px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm transition ${colourGlowInactive.fuchsia} ${
                 editable ? uiHoverSurface : ""
               } ${uiPressFeedback(editable)} ${uiFocusRing} ${uiDisabledControl}`}
             >

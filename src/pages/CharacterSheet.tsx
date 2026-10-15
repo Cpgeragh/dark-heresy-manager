@@ -70,6 +70,7 @@ import {
   revokeRecoveryCode,
 } from "../services/characterService";
 import { SectionDrawer } from "../components/SectionDrawer";
+import { getSheetNavigation } from "./CharacterSheet/sectionNavigation";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useRouteActive, useRouteLoading, useRouteLoadTimedOut } from "../context/useRouteReady";
 import { PendingOverlay } from "../ui/PendingOverlay";
@@ -99,6 +100,7 @@ import {
   colourToggleSelected,
   colourFillFloating,
 } from "../ui/styles/colourTokens";
+import { uiCorner } from "../ui/styles/shapeStyles";
 
 const TalentsTab = memo(
   lazy(() =>
@@ -744,7 +746,7 @@ export default function CharacterSheet({
   };
 
   const containerClass = dmOverrideActive
-    ? `rounded-lg border p-4 lg:p-5 transition-colors ${colourEditOverrideSurface}`
+    ? `${uiCorner} border p-4 lg:p-5 transition-colors ${colourEditOverrideSurface}`
     : `${uiSectionShell} p-4 lg:p-5 transition-colors`;
 
   return (
@@ -782,7 +784,15 @@ export default function CharacterSheet({
         <TitleToolbar
           className="mb-4"
           title={TAB_TITLES[activeTab]}
-          left={<SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />}
+          left={
+            <SectionDrawer
+              navigation={getSheetNavigation(isDM)}
+              activePage={activeTab}
+              onPageChange={(id) => {
+                if (isTabId(id)) handleTabChange(id);
+              }}
+            />
+          }
         />
 
         {/* CONTENT CONTAINER */}

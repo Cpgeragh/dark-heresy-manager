@@ -7,6 +7,7 @@ import { PlusIcon } from "./icons/PlusIcon";
 import { uiEditableValueHover, uiStepButtonColour } from "./styles/buttonStyles";
 import { editableInputColour } from "./styles/editableStyles";
 import { colourTextPrimary } from "./styles/colourTokens";
+import { uiCornerSmall } from "./styles/shapeStyles";
 
 interface Props {
   quantity: number;
@@ -58,7 +59,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           type="button"
           onClick={() => onUpdate(Math.max(0, quantity - 1))}
           aria-label="Decrease quantity"
-          className={`${sizeStyles.btn} rounded ${uiStepButtonColour} leading-none flex items-center justify-center`}
+          className={`${sizeStyles.btn} ${uiCornerSmall} ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
           <MinusIcon className="h-[1em] w-[1em]" />
         </button>
@@ -73,7 +74,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className={`${sizeStyles.input} rounded border text-center font-code ${editableInputColour(true)}`}
+          className={`${sizeStyles.input} border text-center font-code ${editableInputColour(true)}`}
           autoComplete="off"
         />
       ) : (
@@ -93,7 +94,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           type="button"
           onClick={() => onUpdate(quantity + 1)}
           aria-label="Increase quantity"
-          className={`${sizeStyles.btn} rounded ${uiStepButtonColour} leading-none flex items-center justify-center`}
+          className={`${sizeStyles.btn} ${uiCornerSmall} ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
           <PlusIcon className="h-[1em] w-[1em]" />
         </button>
