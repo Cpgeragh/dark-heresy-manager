@@ -170,7 +170,7 @@ function assertHeaderValue(value: unknown): void {
   assertFieldNestedBounds(value, "Character header");
 }
 
-const PORTRAIT_ENCODED_BYTES = 350_000; // matches PRODUCT_LIMITS.portraitEncodedBytes
+export const PORTRAIT_ENCODED_BYTES = 350_000; // matches PRODUCT_LIMITS.portraitEncodedBytes
 const PORTRAIT_DATA_URL_PATTERN = /^data:image\/(jpeg|png|webp);base64,/;
 
 function assertPortraitUrlValue(value: unknown): void {

@@ -54,6 +54,40 @@ describe("Functions: patchCharacterField", () => {
     expect(snapshot.data()?.notes).toEqual(notes);
   }, 15000);
 
+  it("accepts a large portrait through the callable and refuses one over the limit", async () => {
+    const dmUid = await signInTestUser();
+    const campaignRef = adminDb.collection("campaigns").doc();
+    const characterRef = campaignRef.collection("characters").doc();
+    await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+    await characterRef.set({
+      campaignId: campaignRef.id,
+      userId: null,
+      isEditableByPlayer: false,
+      header: { characterName: "Portrait Test" },
+    });
+
+    const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+    const largePortrait = `data:image/png;base64,${"A".repeat(300_000)}`;
+    await patchCharacterField({
+      campaignId: campaignRef.id,
+      characterId: characterRef.id,
+      field: "portraitUrl",
+      value: largePortrait,
+    });
+
+    expect((await characterRef.get()).data()?.portraitUrl).toBe(largePortrait);
+
+    await expect(
+      patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field: "portraitUrl",
+        value: `data:image/png;base64,${"A".repeat(360_000)}`,
+      })
+    ).rejects.toMatchObject({ code: "functions/invalid-argument" });
+    expect((await characterRef.get()).data()?.portraitUrl).toBe(largePortrait);
+  }, 30000);
+
   it("lets the DM patch a character's header", async () => {
     const dmUid = await signInTestUser();
     const campaignRef = adminDb.collection("campaigns").doc();

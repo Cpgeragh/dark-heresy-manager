@@ -77,6 +77,7 @@ import {
   type ForceAssignCharacterInput,
 } from "./operations/forceAssignCharacter.js";
 import { CHAT_LIMITS } from "shared-rules";
+import { PORTRAIT_ENCODED_BYTES } from "./shared/characterFieldValidation.js";
 import {
   sendChatMessage as runSendChatMessage,
   type SendChatMessageInput,
@@ -900,7 +901,7 @@ export const patchCharacterField = onCall<PatchCharacterFieldInput>(
         },
         operationId: "string",
       },
-      payloadBounds: { maxBytes: 900_000, maxStringCharacters: 4_000 },
+      payloadBounds: { maxBytes: 900_000, maxStringCharacters: PORTRAIT_ENCODED_BYTES },
       rateLimits: [
         { key: `patch-character-field:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
       ],
