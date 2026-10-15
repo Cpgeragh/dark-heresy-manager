@@ -1,7 +1,7 @@
 // tests/integration/CharacterRow.test.tsx
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { Timestamp } from "firebase/firestore";
@@ -12,13 +12,17 @@ const {
   mockPreflightCharacterDeletion,
   mockDeleteCharacter,
   mockRevealRecoveryCode,
+  mockRegisterRecoveryCode,
   mockToastError,
+  mockToastSuccess,
 } = vi.hoisted(() => ({
   mockUseClaimLogs: vi.fn(() => ({ logs: [], loading: false, error: null })),
   mockPreflightCharacterDeletion: vi.fn(),
   mockDeleteCharacter: vi.fn(),
   mockRevealRecoveryCode: vi.fn(),
+  mockRegisterRecoveryCode: vi.fn(),
   mockToastError: vi.fn(),
+  mockToastSuccess: vi.fn(),
 }));
 
 vi.mock("../../src/hooks/useClaimLogs", () => ({
@@ -29,10 +33,11 @@ vi.mock("../../src/services/characterService", () => ({
   preflightCharacterDeletion: mockPreflightCharacterDeletion,
   deleteCharacter: mockDeleteCharacter,
   revealRecoveryCode: mockRevealRecoveryCode,
+  registerRecoveryCode: mockRegisterRecoveryCode,
 }));
 
 vi.mock("../../src/components/Toast", () => ({
-  useToast: () => ({ error: mockToastError, success: vi.fn() }),
+  useToast: () => ({ error: mockToastError, success: mockToastSuccess }),
 }));
 
 import { CharacterRow } from "../../src/pages/CampaignOverview/CharacterRow";
@@ -69,36 +74,61 @@ function renderRow(overrides: Partial<React.ComponentProps<typeof CharacterRow>>
   );
 }
 
+async function openManage(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Manage Vex" }));
+  return screen.findByRole("dialog", { name: "Manage Vex" });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockUseClaimLogs.mockReturnValue({ logs: [], loading: false, error: null });
 });
 
 describe("CharacterRow display", () => {
-  it("shows the character name, claimed status, and a Reveal control instead of the code itself", () => {
+  it("shows the character name and claimed status, with the actions behind a Manage button", () => {
     renderRow();
     expect(screen.getByText("Vex")).toBeInTheDocument();
     expect(screen.getByText("Claimed")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reveal" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Manage Vex" })).toBeInTheDocument();
     expect(screen.queryByText(/DH-/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "View history" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Delete character" })).not.toBeInTheDocument();
   });
 
-  it("shows Unclaimed when unowned, still behind a Reveal control", () => {
+  it("shows Unclaimed when unowned", () => {
     renderRow({ userId: null });
     expect(screen.getByText("Unclaimed")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reveal" })).toBeInTheDocument();
   });
 
-  it("hides History and Delete for non-DM viewers", () => {
+  it("hides the Manage button for non-DM viewers", () => {
     renderRow({ isDM: false });
-    expect(screen.queryByRole("button", { name: "History" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Manage Vex" })).not.toBeInTheDocument();
   });
 
-  it("shows History and Delete for the DM", () => {
-    renderRow({ isDM: true });
-    expect(screen.getByRole("button", { name: "History" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+  it("opens a Manage Character window with Recovery Code, History and Delete Character rows", async () => {
+    const user = userEvent.setup();
+    renderRow();
+
+    const dialog = await openManage(user);
+
+    expect(within(dialog).getByText("Manage Character")).toBeInTheDocument();
+    expect(within(dialog).getByText("Recovery Code")).toBeInTheDocument();
+    expect(within(dialog).getByText("History")).toBeInTheDocument();
+    expect(within(dialog).getByText("Delete Character")).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("button", { name: "Reveal recovery code" })
+    ).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "View history" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Delete character" })).toBeInTheDocument();
+  });
+
+  it("does not follow the card link when the Manage button is pressed", async () => {
+    const user = userEvent.setup();
+    renderRow();
+
+    await openManage(user);
+
+    expect(screen.getByTestId("path")).toHaveTextContent("/campaign/campaign-1");
   });
 });
 
@@ -138,7 +168,13 @@ describe("CharacterRow Message button", () => {
 });
 
 describe("CharacterRow reveal flow", () => {
-  it("fetches and shows the code only after Reveal is clicked", async () => {
+  async function revealCode(user: ReturnType<typeof userEvent.setup>) {
+    const dialog = await openManage(user);
+    await user.click(within(dialog).getByRole("button", { name: "Reveal recovery code" }));
+    return screen.findByRole("dialog", { name: "Reveal Code" });
+  }
+
+  it("fetches the code only after Reveal is pressed and shows it in the Reveal Code window", async () => {
     const user = userEvent.setup();
     let resolveReveal: (code: string) => void;
     mockRevealRecoveryCode.mockReturnValue(
@@ -147,29 +183,115 @@ describe("CharacterRow reveal flow", () => {
       })
     );
     renderRow();
+    const manage = await openManage(user);
 
     expect(mockRevealRecoveryCode).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Reveal" }));
+    await user.click(within(manage).getByRole("button", { name: "Reveal recovery code" }));
 
     expect(mockRevealRecoveryCode).toHaveBeenCalledWith("campaign-1", "char-1");
-    expect(screen.getByRole("button", { name: "Revealing" })).toBeDisabled();
+    expect(within(manage).getByRole("button", { name: "Reveal recovery code" })).toBeDisabled();
 
     resolveReveal!("DH-AAAA-BBBB");
-    await waitFor(() => expect(screen.getByText("Recovery: DH-AAAA-BBBB")).toBeInTheDocument());
-    expect(screen.queryByRole("button", { name: "Reveal" })).not.toBeInTheDocument();
+    const reveal = await screen.findByRole("dialog", { name: "Reveal Code" });
+    expect(within(reveal).getByText("DH-AAAA-BBBB")).toBeInTheDocument();
+    expect(within(reveal).getByRole("button", { name: "Copy code" })).toBeInTheDocument();
+    expect(within(reveal).getByRole("button", { name: "Rotate Code" })).toBeInTheDocument();
+    expect(
+      within(reveal).getByText(
+        "If anyone else may have seen this code, rotate it now to invalidate it."
+      )
+    ).toBeInTheDocument();
   });
 
-  it("shows an error via toast and leaves the Reveal button available again on failure", async () => {
+  it("shows an error via toast and opens no window on failure", async () => {
     const user = userEvent.setup();
     mockRevealRecoveryCode.mockRejectedValue(new Error("Network unreachable"));
     renderRow();
+    const manage = await openManage(user);
 
-    await user.click(screen.getByRole("button", { name: "Reveal" }));
+    await user.click(within(manage).getByRole("button", { name: "Reveal recovery code" }));
 
     await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Network unreachable"));
-    expect(screen.getByRole("button", { name: "Reveal" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Reveal Code" })).not.toBeInTheDocument();
+    expect(within(manage).getByRole("button", { name: "Reveal recovery code" })).toBeEnabled();
+  });
+
+  it("hides the code again when the window is closed", async () => {
+    const user = userEvent.setup();
+    mockRevealRecoveryCode.mockResolvedValue("DH-AAAA-BBBB");
+    renderRow();
+    const reveal = await revealCode(user);
+
+    await user.click(within(reveal).getByRole("button", { name: "Close" }));
+
+    expect(screen.queryByText("DH-AAAA-BBBB")).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Manage Vex" })).toBeInTheDocument();
+  });
+
+  it("copies the code to the clipboard", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    mockRevealRecoveryCode.mockResolvedValue("DH-AAAA-BBBB");
+    renderRow();
+    const reveal = await revealCode(user);
+
+    await user.click(within(reveal).getByRole("button", { name: "Copy code" }));
+
+    expect(writeText).toHaveBeenCalledWith("DH-AAAA-BBBB");
+    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Recovery code copied."));
+  });
+
+  it("rotates the code after a confirmation and shows the new one", async () => {
+    const user = userEvent.setup();
+    mockRevealRecoveryCode.mockResolvedValue("DH-AAAA-BBBB");
+    mockRegisterRecoveryCode.mockResolvedValue("DH-CCCC-DDDD");
+    renderRow();
+    const reveal = await revealCode(user);
+
+    await user.click(within(reveal).getByRole("button", { name: "Rotate Code" }));
+    const confirm = await screen.findByRole("dialog", { name: "Rotate Code" });
+    expect(
+      within(confirm).getByText(
+        "Rotate code? A new one is generated and the old one stops working immediately."
+      )
+    ).toBeInTheDocument();
+    expect(mockRegisterRecoveryCode).not.toHaveBeenCalled();
+
+    await user.click(within(confirm).getByRole("button", { name: "Rotate" }));
+
+    expect(mockRegisterRecoveryCode).toHaveBeenCalledWith("campaign-1", "char-1");
+    await waitFor(() => expect(screen.getByText("DH-CCCC-DDDD")).toBeInTheDocument());
+    expect(screen.queryByText("DH-AAAA-BBBB")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Rotate Code" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the confirmation open and reports the error when rotating fails", async () => {
+    const user = userEvent.setup();
+    mockRevealRecoveryCode.mockResolvedValue("DH-AAAA-BBBB");
+    mockRegisterRecoveryCode.mockRejectedValue(new Error("Rotate failed"));
+    renderRow();
+    const reveal = await revealCode(user);
+    await user.click(within(reveal).getByRole("button", { name: "Rotate Code" }));
+    const confirm = await screen.findByRole("dialog", { name: "Rotate Code" });
+
+    await user.click(within(confirm).getByRole("button", { name: "Rotate" }));
+
+    await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Rotate failed"));
+    expect(screen.getByRole("dialog", { name: "Rotate Code" })).toBeInTheDocument();
+    expect(screen.getByText("DH-AAAA-BBBB")).toBeInTheDocument();
   });
 });
+
+async function startDelete(user: ReturnType<typeof userEvent.setup>) {
+  const dialog = await openManage(user);
+  await user.click(within(dialog).getByRole("button", { name: "Delete character" }));
+  return screen.findByRole("dialog", { name: "Delete Character" });
+}
+
+async function typeDelete(user: ReturnType<typeof userEvent.setup>, confirm: HTMLElement) {
+  await user.type(within(confirm).getByPlaceholderText("DELETE"), "DELETE");
+}
 
 describe("CharacterRow delete flow", () => {
   it("keeps the confirmation closed until the affected documents have been counted", async () => {
@@ -181,43 +303,64 @@ describe("CharacterRow delete flow", () => {
       })
     );
     renderRow();
+    const dialog = await openManage(user);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(within(dialog).getByRole("button", { name: "Delete character" }));
 
     expect(screen.queryByText("Checking affected documents…")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Yes" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Delete Character" })).not.toBeInTheDocument();
 
     resolvePreflight!({ jobId: "job-1", totalCount: 7 });
-    await waitFor(() =>
-      expect(screen.getByText("This permanently deletes 7 documents.")).toBeInTheDocument()
-    );
-    expect(screen.getByRole("button", { name: "Yes" })).toBeEnabled();
+    const confirm = await screen.findByRole("dialog", { name: "Delete Character" });
+    expect(
+      within(confirm).getByText(
+        "This permanently deletes this character: Vex. This cannot be undone."
+      )
+    ).toBeInTheDocument();
   });
 
-  it("uses singular wording for exactly one affected document", async () => {
+  it("asks for DELETE to be typed before Delete permanently is available", async () => {
     const user = userEvent.setup();
-    mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 1 });
+    mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 3 });
     renderRow();
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    const confirm = await startDelete(user);
+    const button = within(confirm).getByRole("button", { name: "Delete permanently" });
+    expect(
+      within(confirm).getByText("Type DELETE to permanently delete this character")
+    ).toBeInTheDocument();
+    expect(button).toBeDisabled();
 
-    await waitFor(() =>
-      expect(screen.getByText("This permanently deletes 1 document.")).toBeInTheDocument()
-    );
+    await typeDelete(user, confirm);
+
+    expect(button).toBeEnabled();
   });
 
-  it("shows an error and keeps confirm disabled when the preflight check fails", async () => {
+  it("shows an error and never enables Delete permanently when the preflight check fails", async () => {
     const user = userEvent.setup();
     mockPreflightCharacterDeletion.mockRejectedValue(new Error("Network unreachable"));
     renderRow();
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    const confirm = await startDelete(user);
+    await typeDelete(user, confirm);
 
-    await waitFor(() => expect(screen.getByText("Network unreachable")).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Yes" })).toBeDisabled();
+    expect(within(confirm).getByText("Network unreachable")).toBeInTheDocument();
+    expect(within(confirm).getByRole("button", { name: "Delete permanently" })).toBeDisabled();
   });
 
-  it("drives the delete job and shows a loading confirm button without a count", async () => {
+  it("closes the confirmation again when Cancel is pressed", async () => {
+    const user = userEvent.setup();
+    mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 4 });
+    renderRow();
+    const confirm = await startDelete(user);
+
+    await user.click(within(confirm).getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog", { name: "Delete Character" })).not.toBeInTheDocument();
+    expect(mockDeleteCharacter).not.toHaveBeenCalled();
+  });
+
+  it("drives the delete job and shows a loading confirm button", async () => {
     const user = userEvent.setup();
     mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 10 });
     let resolveDelete: () => void;
@@ -228,19 +371,19 @@ describe("CharacterRow delete flow", () => {
         })
     );
     renderRow();
+    const confirm = await startDelete(user);
+    await typeDelete(user, confirm);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
-    await waitFor(() => expect(screen.getByRole("button", { name: "Yes" })).toBeEnabled());
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(within(confirm).getByRole("button", { name: "Delete permanently" }));
 
     expect(mockDeleteCharacter).toHaveBeenCalledWith("job-1");
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Deleting" })).toBeInTheDocument()
+      expect(within(confirm).getByRole("button", { name: /Deleting/ })).toBeInTheDocument()
     );
 
     resolveDelete!();
     await waitFor(() =>
-      expect(screen.queryByRole("button", { name: /Deleting/ })).not.toBeInTheDocument()
+      expect(within(confirm).queryByRole("button", { name: /Deleting/ })).not.toBeInTheDocument()
     );
   });
 
@@ -249,10 +392,10 @@ describe("CharacterRow delete flow", () => {
     mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 3 });
     mockDeleteCharacter.mockRejectedValue(new Error("Chunk failed"));
     renderRow();
+    const confirm = await startDelete(user);
+    await typeDelete(user, confirm);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
-    await waitFor(() => expect(screen.getByRole("button", { name: "Yes" })).toBeEnabled());
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(within(confirm).getByRole("button", { name: "Delete permanently" }));
 
     await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Chunk failed"));
   });
@@ -260,9 +403,9 @@ describe("CharacterRow delete flow", () => {
 
 describe("CharacterRow after a delete", () => {
   async function confirmDelete(user: ReturnType<typeof userEvent.setup>) {
-    await user.click(screen.getByRole("button", { name: "Delete" }));
-    await waitFor(() => expect(screen.getByRole("button", { name: "Yes" })).toBeEnabled());
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    const confirm = await startDelete(user);
+    await typeDelete(user, confirm);
+    await user.click(within(confirm).getByRole("button", { name: "Delete permanently" }));
   }
 
   it("tells the page which character was deleted once the delete job has finished", async () => {
@@ -304,13 +447,18 @@ describe("CharacterRow after a delete", () => {
 });
 
 describe("CharacterRow history modal", () => {
+  async function openHistory(user: ReturnType<typeof userEvent.setup>) {
+    const dialog = await openManage(user);
+    await user.click(within(dialog).getByRole("button", { name: "View history" }));
+  }
+
   it("only subscribes to claim logs once the DM opens History", async () => {
     const user = userEvent.setup();
     renderRow();
 
     expect(mockUseClaimLogs).toHaveBeenLastCalledWith("campaign-1", "char-1", false);
 
-    await user.click(screen.getByRole("button", { name: "History" }));
+    await openHistory(user);
 
     expect(mockUseClaimLogs).toHaveBeenLastCalledWith("campaign-1", "char-1", true);
   });
@@ -319,7 +467,7 @@ describe("CharacterRow history modal", () => {
     mockUseClaimLogs.mockReturnValue({ logs: [], loading: true, error: null });
     const user = userEvent.setup();
     renderRow();
-    await user.click(screen.getByRole("button", { name: "History" }));
+    await openHistory(user);
     expect(screen.queryByRole("dialog", { name: "Character history" })).not.toBeInTheDocument();
     expect(screen.queryByText("Loading history…")).not.toBeInTheDocument();
   });
@@ -328,14 +476,14 @@ describe("CharacterRow history modal", () => {
     mockUseClaimLogs.mockReturnValue({ logs: [], loading: false, error: new Error("boom") });
     const user = userEvent.setup();
     renderRow();
-    await user.click(screen.getByRole("button", { name: "History" }));
+    await openHistory(user);
     expect(screen.getByText("Unable to load character history.")).toBeInTheDocument();
   });
 
   it("shows an empty state", async () => {
     const user = userEvent.setup();
     renderRow();
-    await user.click(screen.getByRole("button", { name: "History" }));
+    await openHistory(user);
     expect(screen.getByText("No history yet.")).toBeInTheDocument();
   });
 
@@ -376,7 +524,7 @@ describe("CharacterRow history modal", () => {
     // Unclaimed so the row's own status text doesn't collide with the "Claimed" log entry below.
     renderRow({ userId: null });
 
-    await user.click(screen.getByRole("button", { name: "History" }));
+    await openHistory(user);
 
     expect(screen.getByText("Claimed")).toBeInTheDocument();
     expect(screen.getByText("4 Mar 2026", { exact: false })).toBeInTheDocument();
@@ -408,7 +556,7 @@ describe("CharacterRow history modal", () => {
     const user = userEvent.setup();
     renderRow();
 
-    await user.click(screen.getByRole("button", { name: "History" }));
+    await openHistory(user);
 
     expect(screen.getByText("2 Jan 2026", { exact: false })).toBeInTheDocument();
     // log-2 has no timestamp at all, so its line must not render the " · " separator.
@@ -418,14 +566,16 @@ describe("CharacterRow history modal", () => {
     );
   });
 
-  it("closes the history modal", async () => {
+  it("closes the history modal and returns to the Manage window", async () => {
     const user = userEvent.setup();
     renderRow();
-    await user.click(screen.getByRole("button", { name: "History" }));
-    expect(screen.getByText("No history yet.")).toBeInTheDocument();
+    await openHistory(user);
+    const history = screen.getByRole("dialog", { name: "Character history" });
+    expect(within(history).getByText("No history yet.")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(within(history).getByRole("button", { name: "Close" }));
 
     expect(screen.queryByText("No history yet.")).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Manage Vex" })).toBeInTheDocument();
   });
 });

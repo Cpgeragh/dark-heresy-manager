@@ -8,6 +8,7 @@ import { useToast } from "../../components/Toast";
 import {
   deleteCharacter,
   preflightCharacterDeletion,
+  registerRecoveryCode,
   revealRecoveryCode,
 } from "../../services/characterService";
 import {
@@ -19,17 +20,18 @@ import {
   uiStackField,
 } from "../../ui/styles/editableStyles";
 import { uiCardLinkFeedback } from "../../ui/styles/buttonStyles";
-import {
-  colourSuccessPlain,
-  colourMetadataLabelText,
-  colourTextPrimary,
-} from "../../ui/styles/colourTokens";
-import { Button } from "../../ui/buttons/Button";
-import { RevealCodeButton } from "../../ui/buttons/RevealCodeButton";
-import { PendingOverlay } from "../../ui/PendingOverlay";
-import { ConfirmInline } from "../../ui/forms/ConfirmInline";
+import { colourSuccessPlain, colourTextPrimary } from "../../ui/styles/colourTokens";
+import { HistoryButton } from "../../ui/buttons/HistoryButton";
+import { IconButton } from "../../ui/buttons/IconButton";
+import { RemoveButton } from "../../ui/buttons/RemoveButton";
+import { ViewButton } from "../../ui/buttons/ViewButton";
+import { GearIcon } from "../../ui/icons/GearIcon";
+import { DeleteConfirmModal } from "../../ui/modals/DeleteConfirmModal";
+import { ManageActionRow } from "../../ui/modals/ManageActionRow";
+import { ManageModal } from "../../ui/modals/ManageModal";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
 import { ModalShell } from "../../ui/modals/ModalShell";
+import { RevealCodeModal } from "../../ui/modals/RevealCodeModal";
 import type { ClaimLogAction } from "shared-rules";
 import { ChatMessageButton } from "../../components/chat/ChatMessageButton";
 import { PortraitUpload } from "../../components/PortraitUpload";
@@ -82,9 +84,12 @@ export function CharacterRow({
   onDeleted?: (characterId: string) => void;
 }) {
   recordComponentRender("CharacterRow");
+  const [manageOpen, setManageOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [historyRequested, setHistoryRequested] = useState(false);
   const [revealedCode, setRevealedCode] = useState<string | null>(null);
-  const [revealing, setRevealing] = useState(false);
+  const [rotating, setRotating] = useState(false);
   const [deletePreflight, setDeletePreflight] = useState<{
     loading: boolean;
     result?: { jobId: string; totalCount: number };
@@ -98,27 +103,62 @@ export function CharacterRow({
   const showHistory = historyRequested && !logsLoading;
   const toast = useToast();
 
+  const closeManage = useCallback(() => {
+    setManageOpen(false);
+    setRevealedCode(null);
+    setDeleteConfirmOpen(false);
+    setDeletePreflight({ loading: false });
+  }, []);
+
   const handleDelete = useCallback(async () => {
     if (!deletePreflight.result) return;
+    setDeleting(true);
     try {
       await deleteCharacter(deletePreflight.result.jobId);
       onDeleted?.(characterId);
     } catch (err) {
       console.error("Character deletion error:", err);
       toast.error(err instanceof Error ? err.message : "Failed to delete character.");
+    } finally {
+      setDeleting(false);
     }
   }, [deletePreflight.result, characterId, onDeleted, toast]);
 
   const handleReveal = useCallback(async () => {
-    setRevealing(true);
     try {
       const code = await revealRecoveryCode(campaignId, characterId);
       setRevealedCode(code);
     } catch (err) {
       console.error("Failed to reveal recovery code:", err);
       toast.error(err instanceof Error ? err.message : "Failed to load recovery code.");
+    }
+  }, [campaignId, characterId, toast]);
+
+  const handleCopyCode = useCallback(async () => {
+    if (!revealedCode) return;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard access is unavailable.");
+      await navigator.clipboard.writeText(revealedCode);
+      toast.success("Recovery code copied.");
+    } catch (err) {
+      console.error("Failed to copy recovery code:", err);
+      toast.error("Failed to copy recovery code. Please copy it manually.");
+    }
+  }, [revealedCode, toast]);
+
+  const handleRotate = useCallback(async (): Promise<boolean> => {
+    setRotating(true);
+    try {
+      const newCode = await registerRecoveryCode(campaignId, characterId);
+      setRevealedCode(newCode);
+      toast.success("Recovery code rotated. Share the new code with the player.");
+      return true;
+    } catch (err) {
+      console.error("Failed to rotate recovery code:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to rotate recovery code.");
+      return false;
     } finally {
-      setRevealing(false);
+      setRotating(false);
     }
   }, [campaignId, characterId, toast]);
 
@@ -133,15 +173,8 @@ export function CharacterRow({
         error: error instanceof Error ? error.message : "Unable to check this deletion.",
       });
     }
+    setDeleteConfirmOpen(true);
   }, [campaignId, characterId]);
-
-  const deleteDetails = deletePreflight.error ? (
-    <span className={`text-xs ${uiTextError}`}>{deletePreflight.error}</span>
-  ) : deletePreflight.result ? (
-    <span className={`text-xs ${colourMetadataLabelText}`}>
-      {`This permanently deletes ${deletePreflight.result.totalCount} document${deletePreflight.result.totalCount === 1 ? "" : "s"}.`}
-    </span>
-  ) : null;
 
   return (
     <>
@@ -149,24 +182,20 @@ export function CharacterRow({
         to={`/campaign/${campaignId}/character/${characterId}`}
         className={`${uiSection} relative block ${uiCardLinkFeedback}`}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <PortraitUpload
               campaignId={campaignId}
               characterId={characterId}
               currentPortraitUrl={portraitUrl}
               canEdit={false}
             />
-            <div>
+            <div className="min-w-0">
               <span
                 className={`font-semibold ${colourTextPrimary} text-sm lg:text-base leading-tight`}
               >
                 {characterName}
               </span>
-              <p className={`${uiTextMeta} font-code [font-feature-settings:'zero'] mt-0.5`}>
-                Recovery:{" "}
-                {revealedCode ?? <RevealCodeButton revealing={revealing} onReveal={handleReveal} />}
-              </p>
               <p className="text-xs lg:text-sm mt-0.5">
                 {userId ? (
                   <span className={colourSuccessPlain}>Claimed</span>
@@ -177,44 +206,77 @@ export function CharacterRow({
             </div>
           </div>
 
-          <div className={`${uiInlineRow} flex-wrap sm:shrink-0 justify-center sm:justify-start`}>
-            {isDM && (
+          {isDM && (
+            <div className={`${uiInlineRow} shrink-0`}>
               <ChatMessageButton
                 target={{ campaignId, characterId, playerAccountId: userId, characterName }}
               />
-            )}
-
-            {isDM && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setHistoryRequested(true);
+              <IconButton
+                label={`Manage ${characterName}`}
+                aria-haspopup="dialog"
+                aria-expanded={manageOpen}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setManageOpen(true);
                 }}
-              >
-                History
-              </Button>
-            )}
-
-            {isDM && (
-              <>
-                <ConfirmInline
-                  triggerLabel="Delete"
-                  question="Delete?"
-                  size="sm"
-                  onArm={loadDeletePreflight}
-                  details={deleteDetails}
-                  confirmDisabled={deletePreflight.loading || !deletePreflight.result}
-                  onConfirm={handleDelete}
-                  busyLabel="Deleting"
-                />
-              </>
-            )}
-          </div>
+                icon={<GearIcon />}
+              />
+            </div>
+          )}
         </div>
-        <PendingOverlay active={(historyRequested && logsLoading) || deletePreflight.loading} />
       </Link>
+
+      {isDM && manageOpen && (
+        <ManageModal
+          title="Manage Character"
+          ariaLabel={`Manage ${characterName}`}
+          onClose={closeManage}
+          suspended={showHistory || deleteConfirmOpen || revealedCode !== null}
+          pending={(historyRequested && logsLoading) || deletePreflight.loading}
+        >
+          <ManageActionRow
+            label="Recovery Code"
+            info="Show this character's Recovery Code so its player can claim it."
+          >
+            <ViewButton label="Reveal recovery code" onClick={handleReveal} />
+          </ManageActionRow>
+          <ManageActionRow
+            label="History"
+            info="See when this character was claimed, released or reassigned."
+          >
+            <HistoryButton label="View history" onClick={() => setHistoryRequested(true)} />
+          </ManageActionRow>
+          <ManageActionRow
+            label="Delete Character"
+            info="Permanently delete this character and its data. This cannot be undone."
+          >
+            <RemoveButton label="Delete character" onClick={loadDeletePreflight} />
+          </ManageActionRow>
+        </ManageModal>
+      )}
+
+      {isDM && revealedCode && (
+        <RevealCodeModal
+          code={revealedCode}
+          rotating={rotating}
+          onCopy={handleCopyCode}
+          onRotate={handleRotate}
+          onClose={() => setRevealedCode(null)}
+        />
+      )}
+
+      {isDM && deleteConfirmOpen && (
+        <DeleteConfirmModal
+          title="Delete Character"
+          message={`This permanently deletes this character: ${characterName}. This cannot be undone.`}
+          typedLabel="Type DELETE to permanently delete this character"
+          error={deletePreflight.error}
+          ready={Boolean(deletePreflight.result)}
+          deleting={deleting}
+          onCancel={() => setDeleteConfirmOpen(false)}
+          onConfirm={handleDelete}
+        />
+      )}
 
       {/* History modal */}
       {showHistory && (

@@ -23,8 +23,6 @@ import {
 } from "../ui/styles/colourTokens";
 import {
   editableInputClass,
-  uiCodeBox,
-  uiCodeText,
   uiInfoModalWrapper,
   uiActionRowLabel,
   uiSection,
@@ -40,6 +38,7 @@ import { RemoveButton } from "../ui/buttons/RemoveButton";
 import { EditButton } from "../ui/buttons/EditButton";
 import { UnlinkButton } from "../ui/buttons/UnlinkButton";
 import { PickerModal, PickerBody } from "../ui/pickers/PickerModal";
+import { RevealCodeModal } from "../ui/modals/RevealCodeModal";
 import { formatFirstNameInput } from "../utils/firstName";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
@@ -78,7 +77,6 @@ export default function Settings({
   const revealingRef = useRef(false);
   const [rotating, setRotating] = useState(false);
   const rotatingRef = useRef(false);
-  const [rotateConfirmOpen, setRotateConfirmOpen] = useState(false);
 
   // ── Device link state ────────────────────────────────────────────────────
   const [disconnectingDevice, setDisconnectingDevice] = useState(false);
@@ -390,74 +388,13 @@ export default function Settings({
         </section>
 
         {revealedCode && (
-          <PickerModal
-            title="Reveal Code"
-            query=""
-            onQueryChange={() => undefined}
+          <RevealCodeModal
+            code={revealedCode}
+            rotating={rotating}
+            onCopy={handleCopyRecoveryCode}
+            onRotate={handleRotate}
             onClose={() => setRevealedCode(null)}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-sm"
-            suspended={rotateConfirmOpen}
-            footer={
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="primary" onClick={() => void handleCopyRecoveryCode()}>
-                  Copy code
-                </Button>
-                <Button variant="neutral" onClick={() => setRotateConfirmOpen(true)}>
-                  Rotate Code
-                </Button>
-              </div>
-            }
-          >
-            <PickerBody>
-              <div className={uiCodeBox}>
-                <span className={uiCodeText}>{revealedCode}</span>
-              </div>
-              <p className={`text-xs lg:text-sm ${colourAmberPlain} text-center`}>
-                If anyone else may have seen this code, rotate it now to invalidate it.
-              </p>
-            </PickerBody>
-          </PickerModal>
-        )}
-
-        {rotateConfirmOpen && (
-          <PickerModal
-            title="Rotate Code"
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => !rotating && setRotateConfirmOpen(false)}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-sm"
-            footer={
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="primary"
-                  loading={rotating}
-                  loadingLabel="Rotating"
-                  onClick={async () => {
-                    if (await handleRotate()) setRotateConfirmOpen(false);
-                  }}
-                >
-                  Rotate
-                </Button>
-                <Button
-                  variant="neutral"
-                  disabled={rotating}
-                  onClick={() => setRotateConfirmOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            }
-          >
-            <PickerBody>
-              <p className={`text-sm lg:text-base ${uiTextBody}`}>
-                Rotate code? A new one is generated and the old one stops working immediately.
-              </p>
-            </PickerBody>
-          </PickerModal>
+          />
         )}
 
         {/* ── Manage Devices ──────────────────────────────────────────────── */}
