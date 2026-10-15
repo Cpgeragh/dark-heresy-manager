@@ -1006,18 +1006,20 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] Player: the Party section shows your own character as a tappable card first, then everyone else as plain rows that do not open anything, with no My Characters heading (`PartySection.tsx`)
 - [ ] DM: the Party section lists every character in the same rows, with the search box and the Create box above them and no character set apart
 - [ ] Character search box filters the character list live, by name substring
-- [ ] DM: the character list shows a Reveal control instead of the recovery code itself; clicking it fetches and shows that one character's code, and the code is not present anywhere in the page before it's clicked
+- [ ] DM: each character row has a gear button that opens the Manage Character window, with Recovery Code, History and Delete Character rows laid out like the Manage Campaign window on the Dashboard (`ManageModal.tsx`, `ManageActionRow.tsx`, `CharacterRow.tsx`)
+- [ ] DM: the recovery code is not in the page until the eye button is pressed; pressing it fetches that one character's code and opens the same Reveal Code window as the account recovery code in Settings, with Copy code and Rotate Code, and Rotate Code asks for confirmation and then shows the new code (`RevealCodeModal.tsx`)
 - [ ] Player: their own character card on the campaign page shows the same Reveal control for their own recovery code, and clicking it works the same way
 - [ ] DM: press the plus button beside the search box, enter a name in the Create Character window and press Create: the window closes and you get back a recovery code in a toast that includes a copy button, distinct from the normal toast style; Cancel closes the window and clears the name
 - [ ] Character names stop at 100 characters, and rapidly pressing Create still produces only one character
 - [ ] DM: Import JSON (header kebab menu): rejects any file missing `recoveryCode` or `isEditableByPlayer` with an error toast rather than importing a malformed character; a valid import is issued a **fresh** recovery code, it does not reuse whatever was in the file
 - [ ] Export JSON from a character sheet's kebab menu (available to the DM or the owning player), then re-import that same file: confirm the re-imported copy gets its own new recovery code rather than colliding with the original's
 - [ ] There is no Clone Character action; export and import remain available for deliberate copying, and an imported character receives a fresh recovery code
+- [ ] DM: Delete Character in the Manage Character window counts the affected documents, then opens a Delete Character window that asks for DELETE to be typed, exactly like Delete Campaign; Delete permanently stays disabled until DELETE is typed (`DeleteConfirmModal.tsx`)
 - [ ] DM: Delete a character: confirm the old recovery code genuinely stops resolving anywhere afterwards, not just that the character vanishes from this list
-- [ ] With a deliberately seeded character with far more claim-log and XP-proposal documents than a single batch could hold, deletion still succeeds: it runs as a resumable job with live chunk progress shown on the confirm button, rather than refusing above a fixed document ceiling
+- [ ] With a deliberately seeded character with far more claim-log and XP-proposal documents than a single batch could hold, deletion still succeeds: it runs as a resumable job with the Delete permanently button showing its waiting state, rather than refusing above a fixed document ceiling
 - [ ] Per-character "History" modal lists claim/release/force-assign/force-release events newest-first, with a readable date on each
-- [ ] Only the DM sees the per-character History action; opening and closing it repeatedly loads normally each time without leaving a stale loading or error state
-- [ ] Pressing History opens the pop-up only once the history has loaded, with no loading text; on a slow connection a dimmed overlay with dots covers the character row until the pop-up opens (`CharacterRow.tsx`)
+- [ ] Only the DM sees the History row in Manage Character; opening and closing it repeatedly loads normally each time without leaving a stale loading or error state
+- [ ] Pressing History opens the pop-up only once the history has loaded, with no loading text; on a slow connection a dimmed overlay with dots covers the Manage Character window until the pop-up opens (`CharacterRow.tsx`)
 - [ ] Leave Campaign Overview open while another profile edits a character: the roster and session attendee names all update together from the same roster state
 - [ ] Session History: create a session with a date, XP awarded, a public summary, and private DM-only notes, plus an attendee checklist: XP is **not** applied automatically on save
 - [ ] Session summary and DM notes stop at 4,000 characters, XP accepts only a whole number from 0 to 100,000, and an attendee cannot appear twice
