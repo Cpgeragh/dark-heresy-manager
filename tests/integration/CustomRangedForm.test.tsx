@@ -20,7 +20,7 @@ function textboxAt(index: number): HTMLElement {
 }
 
 // The submit button shares its default "Add" label with the Qualities selector's
-// own "Add" button, so it can't be located by accessible name alone — find it by
+// own "Add" button, so it can't be located by accessible name alone, find it by
 // its fixed position next to the unambiguous Cancel button instead.
 function submitButton(): HTMLElement {
   const cancelBtn = screen.getByRole("button", { name: "Cancel" });

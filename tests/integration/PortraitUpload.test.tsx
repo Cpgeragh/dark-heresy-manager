@@ -3,7 +3,7 @@
 // Scoped to what jsdom can reliably verify: rendering, the canEdit gate, file
 // validation, and opening/closing the crop modal. The actual crop-to-blob-to-
 // upload pipeline (canvas 2D context, decoded <img> dimensions) needs real
-// browser APIs jsdom doesn't implement and isn't polyfilled in this project —
+// browser APIs jsdom doesn't implement and isn't polyfilled in this project,
 // that pixel pipeline is better verified by hand than faked through mocks here.
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
@@ -55,7 +55,7 @@ describe("PortraitUpload", () => {
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const badFile = new File(["not an image"], "notes.txt", { type: "text/plain" });
     // userEvent.upload enforces the input's `accept` filter and silently
-    // refuses a mismatched file before any change event fires — fireEvent
+    // refuses a mismatched file before any change event fires, fireEvent
     // bypasses that so the component's own validation is what gets exercised.
     fireEvent.change(input, { target: { files: [badFile] } });
 

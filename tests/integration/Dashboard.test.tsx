@@ -1,7 +1,7 @@
 // tests/integration/Dashboard.test.tsx
 //
 // PortraitUpload, RecoveryBackupBanner, and ClaimPreview are
-// all mocked — each already has its own dedicated test file. useRecoveryLookup
+// all mocked, each already has its own dedicated test file. useRecoveryLookup
 // and the claim service are also mocked directly, same reasoning. This file is
 // scoped to Dashboard's own orchestration: DM campaign
 // CRUD (create/edit/archive/delete-with-preflight-progress/restore), the player

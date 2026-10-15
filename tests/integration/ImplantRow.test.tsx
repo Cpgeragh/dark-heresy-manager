@@ -8,7 +8,7 @@ import type { CyberneticItem } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 // Real reference entry with poor/common/good craftsmanship tiers, so the
-// quality chip is genuinely clickable — not fabricated, checked against
+// quality chip is genuinely clickable, not fabricated, checked against
 // src/data/reference/cyberneticsReference.ts directly.
 const CONCEALED_WEAPON_BIONIC_ID = "ih-concealed-weapon-bionic";
 

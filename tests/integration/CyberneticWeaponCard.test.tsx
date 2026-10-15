@@ -9,7 +9,7 @@ import type { CyberneticWeapon } from "../../src/data/reference/cyberneticsRefer
 import type { WeaponCraftsmanship } from "../../src/types/Character";
 
 // The Qualities InfoModal is always mounted (closed) into the DOM, and its
-// own heading repeats the exact quality name — filter for whichever match is
+// own heading repeats the exact quality name, filter for whichever match is
 // NOT inside a <dialog>, i.e. the actual visible text.
 function visibleText(text: string): HTMLElement {
   const match = screen.getAllByText(text).find((el) => !el.closest("dialog"));

@@ -12,7 +12,7 @@ import {
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 // Real weapons with a description have their own Rules InfoModal titled with
-// the bare item name, always mounted (closed) into the DOM — filter for
+// the bare item name, always mounted (closed) into the DOM, filter for
 // whichever match has a button row as an ancestor.
 function row(name: string): HTMLButtonElement {
   const match = screen

@@ -4,7 +4,7 @@
 // deletion of any size can finish.
 //
 // The dependent documents are deleted in this order: claimLog, xpHistory,
-// xpProposals, the character's thread and its messages, the recoveryIndex
+// xpProposals, the recoveryIndex
 // entry, the character summary, then the character document itself, so
 // nothing is ever left pointing at a character that no longer exists. The
 // last phase marks every copy of the character's chats closed. Sends are
@@ -36,8 +36,6 @@ type Phase =
   | "claimLog"
   | "xpHistory"
   | "xpProposals"
-  | "messages"
-  | "thread"
   | "recoveryIndex"
   | "characterSummary"
   | "character"
@@ -46,8 +44,6 @@ const PHASE_ORDER: readonly Phase[] = [
   "claimLog",
   "xpHistory",
   "xpProposals",
-  "messages",
-  "thread",
   "recoveryIndex",
   "characterSummary",
   "character",
@@ -106,34 +102,22 @@ export async function startCharacterDeletionJob(
   }
 
   const recoveryIndexId = hashRecoveryCode(recoveryCode, hmacSecret);
-  const threadRef = campaignRef.collection("threads").doc(input.characterId);
   const recoveryRef = db.collection("recoveryIndex").doc(recoveryIndexId);
   const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
 
-  const [
-    claimLogCount,
-    xpHistoryCount,
-    xpProposalsCount,
-    messagesCount,
-    threadSnapshot,
-    recoverySnapshot,
-    summarySnapshot,
-  ] = await Promise.all([
-    characterRef.collection("claimLog").count().get(),
-    characterRef.collection("xpHistory").count().get(),
-    characterRef.collection("xpProposals").count().get(),
-    threadRef.collection("messages").count().get(),
-    threadRef.get(),
-    recoveryRef.get(),
-    summaryRef.get(),
-  ]);
+  const [claimLogCount, xpHistoryCount, xpProposalsCount, recoverySnapshot, summarySnapshot] =
+    await Promise.all([
+      characterRef.collection("claimLog").count().get(),
+      characterRef.collection("xpHistory").count().get(),
+      characterRef.collection("xpProposals").count().get(),
+      recoveryRef.get(),
+      summaryRef.get(),
+    ]);
 
   const totalCount =
     claimLogCount.data().count +
     xpHistoryCount.data().count +
     xpProposalsCount.data().count +
-    messagesCount.data().count +
-    (threadSnapshot.exists ? 1 : 0) +
     (recoverySnapshot.exists ? 1 : 0) +
     (summarySnapshot.exists ? 1 : 0) +
     1;
@@ -189,12 +173,8 @@ async function processPhase(
   switch (checkpoint.phase) {
     case "claimLog":
     case "xpHistory":
-    case "xpProposals":
-    case "messages": {
-      const collectionRef =
-        checkpoint.phase === "messages"
-          ? campaignRef.collection("threads").doc(characterId).collection("messages")
-          : characterRef.collection(checkpoint.phase);
+    case "xpProposals": {
+      const collectionRef = characterRef.collection(checkpoint.phase);
 
       let pageQuery = collectionRef.orderBy(FieldPath.documentId()).limit(CHUNK_SIZE);
       if (checkpoint.cursor) pageQuery = pageQuery.startAfter(checkpoint.cursor);
@@ -217,15 +197,6 @@ async function processPhase(
         nextCheckpoint: isLastPage
           ? { phase: nextPhase(checkpoint.phase)!, cursor: null }
           : { phase: checkpoint.phase, cursor: snapshot.docs[snapshot.docs.length - 1].id },
-      };
-    }
-    case "thread": {
-      const threadRef = campaignRef.collection("threads").doc(characterId);
-      const threadSnapshot = await threadRef.get();
-      if (threadSnapshot.exists) await threadRef.delete();
-      return {
-        processed: threadSnapshot.exists ? 1 : 0,
-        nextCheckpoint: { phase: nextPhase("thread")!, cursor: null },
       };
     }
     case "recoveryIndex": {

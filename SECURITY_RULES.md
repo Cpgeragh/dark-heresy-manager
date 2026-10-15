@@ -51,18 +51,16 @@ Creators may create validated drafts and edit only the permitted draft fields. T
 
 Full session documents, including private DM notes, are DM-only. Member-readable session summaries exclude DM notes. Both query types are limited to 200 documents. The DM may create sessions and edit ordinary session fields. Once `xpApplied` is true, the awarded XP and attendees are immutable. Direct changes to `xpApplied` and direct session deletion are denied. `applySessionXp` and `deleteSession` in `functions/src/operations/sessionXp.ts` own those changes through the Admin SDK.
 
-The earlier per-character threads and their messages are no longer used by the app. Their rules stay until a later deploy removes them, and until then they are visible only to the campaign DM and the effective owner of the thread's character, with queries limited to 100 documents.
+The earlier per-character thread documents have no rules, so every client read and write on them is denied.
 
 | Field                    |              Enforced maximum |
 | ------------------------ | ----------------------------: |
-| Chat or thread preview   |                500 characters |
+| Chat preview             |                500 characters |
 | Message body             |              2,000 characters |
 | Session summary          |              4,000 characters |
 | Private DM session notes |              4,000 characters |
 | Session attendees        |             100 character IDs |
 | Session XP award         | 100,000 whole XP per attendee |
-
-Legacy thread rules: a player send must increment the DM unread count by exactly one. A message sender must resolve to the authenticated effective account. Messages cannot be edited; only the DM may clear thread messages or delete their summary.
 
 Each person's copy of a chat lives under their own account at `users/{accountId}/chats/{chatId}`. A DM never reads a player's copy and a player never reads the DM's. Only `sendChatMessage` in `functions/src/operations/sendChatMessage.ts` creates chats and messages, through the Admin SDK, and the release operations mark chats closed through `findChatsToClose` and `closeChats` in `functions/src/shared/chatClosure.ts`. The character and campaign deletion jobs mark every copy closed through `closeChatCopiesPage` in the same file, and `deleteAccount` marks the other person's copy closed and puts the account's own copies in the bin, all through the Admin SDK. A copy with `clearedAt` is in its owner's bin.
 

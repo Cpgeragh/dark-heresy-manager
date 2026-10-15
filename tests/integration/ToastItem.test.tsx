@@ -3,7 +3,7 @@
 // Real gotcha: @testing-library/user-event's setup() installs its own native-
 // like Clipboard stub onto navigator.clipboard the first time it runs. Any
 // clipboard mock/spy set up *before* calling userEvent.setup() gets clobbered
-// by that install — the spy has to be created *after* setup(), on whatever
+// by that install, the spy has to be created *after* setup(), on whatever
 // object userEvent just installed.
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";

@@ -2,7 +2,7 @@
 //
 // ImplantPicker, ImplantRow, IntegratedWeaponPicker, CustomImplantForm,
 // CustomRangedForm, CustomMeleeForm, and ConcealedWeaponBionicInstaller are all
-// mocked here — each already has its own dedicated test file. This file is
+// mocked here, each already has its own dedicated test file. This file is
 // scoped to CyberneticsTab's own orchestration: the
 // concealed-weapon-bionic install flow, quality-cycling and its weapon-link side
 // effect, the custom/library implant flows, and integrated-weapon wiring.

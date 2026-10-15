@@ -12,7 +12,7 @@ function MaybeThrows({ shouldThrow }: { shouldThrow: boolean }) {
 }
 
 // Real recovery means the underlying cause is fixed first, then Try Again
-// re-attempts rendering — not that the throw magically stops on retry. A
+// re-attempts rendering, not that the throw magically stops on retry. A
 // prop-driven condition (rather than a mutable counter inside the throwing
 // component) also sidesteps React 19's automatic single retry after a
 // render-time error, which would otherwise silently consume a "throw once"
@@ -74,7 +74,7 @@ describe("ErrorBoundary", () => {
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
 
-    // Fix the underlying cause first — the boundary still shows the fallback
+    // Fix the underlying cause first, the boundary still shows the fallback
     // until it's explicitly reset, same as real usage (Try Again is meant to
     // be clicked after whatever caused the error is actually resolved).
     await user.click(screen.getByRole("button", { name: "Fix the underlying issue" }));

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { stripUndefined } from "../../src/utils/stripUndefined";
 
-describe("stripUndefined — primitives", () => {
+describe("stripUndefined: primitives", () => {
   it("passes a string through unchanged", () => {
     expect(stripUndefined("hello")).toBe("hello");
   });
@@ -27,7 +27,7 @@ describe("stripUndefined — primitives", () => {
   });
 });
 
-describe("stripUndefined — objects", () => {
+describe("stripUndefined: objects", () => {
   it("removes top-level undefined values", () => {
     const input = { a: 1, b: undefined, c: "x" };
     expect(stripUndefined(input)).toEqual({ a: 1, c: "x" });
@@ -91,7 +91,7 @@ describe("stripUndefined — objects", () => {
   });
 });
 
-describe("stripUndefined — arrays", () => {
+describe("stripUndefined: arrays", () => {
   it("returns empty array unchanged", () => {
     expect(stripUndefined([])).toEqual([]);
   });

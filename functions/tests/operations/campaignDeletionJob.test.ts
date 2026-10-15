@@ -28,7 +28,6 @@ const {
   mockCampaignGet,
   mockCampaignDelete,
   characters,
-  threads,
   customItems,
   sessions,
   sessionSummaries,
@@ -61,7 +60,6 @@ const {
   const claimLogChild = makeCollectionMock();
   const xpHistoryChild = makeCollectionMock();
   const xpProposalsChild = makeCollectionMock();
-  const messagesChild = makeCollectionMock();
   const versionsChild = makeCollectionMock();
 
   const characters = makeCollectionMock();
@@ -71,14 +69,6 @@ const {
       if (name === "xpHistory") return xpHistoryChild.ref;
       if (name === "xpProposals") return xpProposalsChild.ref;
       throw new Error(`Unexpected character subcollection: ${name}`);
-    },
-  }));
-
-  const threads = makeCollectionMock();
-  (threads.docMock as ReturnType<typeof vi.fn>).mockImplementation(() => ({
-    collection: (name: string) => {
-      if (name === "messages") return messagesChild.ref;
-      throw new Error(`Unexpected thread subcollection: ${name}`);
     },
   }));
 
@@ -101,7 +91,6 @@ const {
     delete: mockCampaignDelete,
     collection: vi.fn((name: string) => {
       if (name === "characters") return characters.ref;
-      if (name === "threads") return threads.ref;
       if (name === "customItems") return customItems.ref;
       if (name === "sessions") return sessions.ref;
       if (name === "sessionSummaries") return sessionSummaries.ref;
@@ -147,7 +136,6 @@ const {
     mockCampaignGet,
     mockCampaignDelete,
     characters,
-    threads,
     customItems,
     sessions,
     sessionSummaries,
@@ -155,7 +143,6 @@ const {
     claimLogChild,
     xpHistoryChild,
     xpProposalsChild,
-    messagesChild,
     versionsChild,
     mockRecoveryDoc,
     mockRecoveryGetImpl,
@@ -282,17 +269,6 @@ describe("startCampaignDeletionJob", () => {
         makeCharacterDoc("char-2", "DH-BBBB-2222", 0, 0, 0),
       ],
     });
-    threads.pageGet.mockResolvedValue({
-      docs: [
-        {
-          ref: {
-            collection: () => ({
-              count: () => ({ get: () => Promise.resolve({ data: () => ({ count: 5 }) }) }),
-            }),
-          },
-        },
-      ],
-    });
     customItems.pageGet.mockResolvedValue({
       docs: [
         {
@@ -321,14 +297,14 @@ describe("startCampaignDeletionJob", () => {
 
     // 2 characters + (2+3+1 claimLog/history/proposals for char-1) + 0 for char-2
     // + 1 recoveryIndex entry (only char-1's exists) + 2 characterSummaries
-    // + 1 thread + 5 messages + 1 customItem + 3 versions + 4 sessions
-    // + 4 member-safe session summaries + 1 campaign = 30
-    expect(result).toEqual({ jobId: "job-1", totalCount: 30 });
+    // + 1 customItem + 3 versions + 4 sessions
+    // + 4 member-safe session summaries + 1 campaign = 24
+    expect(result).toEqual({ jobId: "job-1", totalCount: 24 });
     expect(mockCreateBulkJob).toHaveBeenCalledWith(
       "campaign-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID },
-      30,
+      24,
       "idem-key"
     );
   });
@@ -336,7 +312,6 @@ describe("startCampaignDeletionJob", () => {
   it("rejects starting a deletion job whose preflight total exceeds the size ceiling", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     characters.pageGet.mockResolvedValue({ docs: [] });
-    threads.pageGet.mockResolvedValue({ docs: [] });
     customItems.pageGet.mockResolvedValue({ docs: [] });
     sessions.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
     sessionSummaries.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
@@ -678,7 +653,7 @@ describe("processCampaignDeletionChunk", () => {
     );
   });
 
-  it("deletes a flat sessionSummaries page and then advances to thread messages", async () => {
+  it("deletes a flat sessionSummaries page and then advances to custom item versions", async () => {
     mockAcquireJobLease.mockResolvedValue({
       job: makeJob({
         checkpoint: JSON.stringify({
@@ -700,7 +675,7 @@ describe("processCampaignDeletionChunk", () => {
     expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
-      JSON.stringify({ phase: "threadMessages", parentCursor: null, cursor: null }),
+      JSON.stringify({ phase: "customItemVersions", parentCursor: null, cursor: null }),
       1
     );
   });

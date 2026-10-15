@@ -26,7 +26,7 @@ export default defineConfig([
         varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^_',
       }],
-      // These fire on normal, working React patterns — keep them visible as
+      // These fire on normal, working React patterns, keep them visible as
       // warnings rather than failing the build.
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/exhaustive-deps': 'warn',

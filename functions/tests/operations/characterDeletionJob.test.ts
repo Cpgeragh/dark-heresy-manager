@@ -25,8 +25,6 @@ const {
   mockCampaignGet,
   mockCharacterGet,
   mockCharacterDelete,
-  mockThreadGet,
-  mockThreadDelete,
   mockRecoveryGet,
   mockRecoveryDelete,
   mockRecoveryDoc,
@@ -38,7 +36,6 @@ const {
   claimLog,
   xpHistory,
   xpProposals,
-  messages,
 } = vi.hoisted(() => {
   function makeCollectionMock() {
     const countGet = vi.fn();
@@ -55,13 +52,10 @@ const {
   const claimLog = makeCollectionMock();
   const xpHistory = makeCollectionMock();
   const xpProposals = makeCollectionMock();
-  const messages = makeCollectionMock();
 
   const mockCampaignGet = vi.fn();
   const mockCharacterGet = vi.fn();
   const mockCharacterDelete = vi.fn();
-  const mockThreadGet = vi.fn();
-  const mockThreadDelete = vi.fn();
   const mockRecoveryGet = vi.fn();
   const mockRecoveryDelete = vi.fn();
   const mockRecoveryDoc = vi.fn(() => ({ get: mockRecoveryGet, delete: mockRecoveryDelete }));
@@ -82,19 +76,10 @@ const {
       throw new Error(`Unexpected character subcollection: ${name}`);
     }),
   };
-  const mockThreadRef = {
-    get: mockThreadGet,
-    delete: mockThreadDelete,
-    collection: vi.fn((name: string) => {
-      if (name === "messages") return messages.ref;
-      throw new Error(`Unexpected thread subcollection: ${name}`);
-    }),
-  };
   const mockCampaignRef = {
     get: mockCampaignGet,
     collection: vi.fn((name: string) => {
       if (name === "characters") return { doc: vi.fn(() => mockCharacterRef) };
-      if (name === "threads") return { doc: vi.fn(() => mockThreadRef) };
       if (name === "characterSummaries") return { doc: mockSummaryDoc };
       throw new Error(`Unexpected campaign subcollection: ${name}`);
     }),
@@ -120,8 +105,6 @@ const {
     mockCampaignGet,
     mockCharacterGet,
     mockCharacterDelete,
-    mockThreadGet,
-    mockThreadDelete,
     mockRecoveryGet,
     mockRecoveryDelete,
     mockRecoveryDoc,
@@ -134,7 +117,6 @@ const {
     claimLog,
     xpHistory,
     xpProposals,
-    messages,
   };
 });
 
@@ -258,8 +240,6 @@ describe("startCharacterDeletionJob", () => {
     claimLog.countGet.mockResolvedValue({ data: () => ({ count: 3 }) });
     xpHistory.countGet.mockResolvedValue({ data: () => ({ count: 4 }) });
     xpProposals.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
-    messages.countGet.mockResolvedValue({ data: () => ({ count: 250 }) });
-    mockThreadGet.mockResolvedValue({ exists: true });
     mockRecoveryGet.mockResolvedValue({ exists: true });
     mockSummaryGet.mockResolvedValue({ exists: true });
     mockCreateBulkJob.mockResolvedValue("job-1");
@@ -271,12 +251,12 @@ describe("startCharacterDeletionJob", () => {
       "secret"
     );
 
-    expect(result).toEqual({ jobId: "job-1", totalCount: 261 });
+    expect(result).toEqual({ jobId: "job-1", totalCount: 10 });
     expect(mockCreateBulkJob).toHaveBeenCalledWith(
       "character-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID, recoveryIndexId: RECOVERY_INDEX_ID },
-      261,
+      10,
       "idem-key"
     );
   });
@@ -289,9 +269,7 @@ describe("startCharacterDeletionJob", () => {
     });
     claimLog.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     xpHistory.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
-    xpProposals.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
-    messages.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
-    mockThreadGet.mockResolvedValue({ exists: false });
+    xpProposals.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
     mockRecoveryGet.mockResolvedValue({ exists: false });
 
     await expect(
@@ -395,42 +373,10 @@ describe("processCharacterDeletionChunk", () => {
     expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
-      JSON.stringify({ phase: "messages", cursor: null }),
+      JSON.stringify({ phase: "recoveryIndex", cursor: null }),
       0
     );
     expect(result.processedCount).toBe(0);
-  });
-
-  it("deletes the thread document when reaching the thread phase", async () => {
-    mockAcquireJobLease.mockResolvedValue({
-      job: makeJob({ checkpoint: JSON.stringify({ phase: "thread", cursor: null }) }),
-      leaseId: "lease-1",
-    });
-    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
-    mockThreadGet.mockResolvedValue({ exists: true });
-
-    await processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID);
-
-    expect(mockThreadDelete).toHaveBeenCalled();
-    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
-      "job-1",
-      "lease-1",
-      JSON.stringify({ phase: "recoveryIndex", cursor: null }),
-      1
-    );
-  });
-
-  it("skips deleting the thread when none exists", async () => {
-    mockAcquireJobLease.mockResolvedValue({
-      job: makeJob({ checkpoint: JSON.stringify({ phase: "thread", cursor: null }) }),
-      leaseId: "lease-1",
-    });
-    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
-    mockThreadGet.mockResolvedValue({ exists: false });
-
-    await processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID);
-
-    expect(mockThreadDelete).not.toHaveBeenCalled();
   });
 
   it("deletes the recoveryIndex entry using the job's stored lookup ID", async () => {

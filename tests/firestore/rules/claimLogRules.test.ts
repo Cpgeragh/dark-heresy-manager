@@ -42,7 +42,7 @@ describe("Firestore Rules: ClaimLog Rules", () => {
     await expect(playerDb.collection(logPath).doc("log1").get()).rejects.toThrow();
   });
 
-  it("rejects any claimLog create — writes are server-side only now", async () => {
+  it("rejects any claimLog create: writes are server-side only now", async () => {
     const env = await getTestEnv();
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, { userId: null });

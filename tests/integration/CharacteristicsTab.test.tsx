@@ -174,7 +174,7 @@ describe("CharacteristicsTab", () => {
     }
   });
 
-  it("uses the passed-in getEffectiveCharTotal/getCharBonus for each characteristic — not a local reimplementation", () => {
+  it("uses the passed-in getEffectiveCharTotal/getCharBonus for each characteristic: not a local reimplementation", () => {
     const effectiveSpy = vi.fn((k: keyof Characteristics) => TOTALS[k]);
     const bonusSpy = vi.fn((k: keyof Characteristics) =>
       Math.floor(TOTALS[k] / CHARACTERISTIC_BONUS_DIVISOR)

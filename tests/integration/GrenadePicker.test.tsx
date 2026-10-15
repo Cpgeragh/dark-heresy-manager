@@ -14,7 +14,7 @@ const GRENADE_NAME = "Frag Grenade";
 const MINE_NAME = "Empyrian Brain Mines";
 
 // Real grenades have their own Rules InfoModal titled with the bare item name,
-// which always mounts its (closed) dialog into the DOM (outside any row) — so
+// which always mounts its (closed) dialog into the DOM (outside any row), so
 // the name can match both the row and that hidden, button-less title. Filter
 // for whichever match actually has a button row as an ancestor.
 function row(name: string): HTMLButtonElement {

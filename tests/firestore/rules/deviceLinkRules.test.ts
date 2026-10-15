@@ -13,7 +13,7 @@ async function createUserLink(env: RulesTestEnvironment, uid: string, primaryUid
 }
 
 // ============================================================
-// linkProofs/{uid} — retired collection, nothing writes to it anymore
+// linkProofs/{uid}, retired collection, nothing writes to it anymore
 // ============================================================
 describe("Firestore Rules: linkProofs (retired collection)", () => {
   afterEach(async () => {
@@ -21,7 +21,7 @@ describe("Firestore Rules: linkProofs (retired collection)", () => {
     await env.clearFirestore();
   });
 
-  it("cannot create a linkProofs document at all — collection is sealed", async () => {
+  it("cannot create a linkProofs document at all: collection is sealed", async () => {
     const env = await getTestEnv();
     await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
 
@@ -35,7 +35,7 @@ describe("Firestore Rules: linkProofs (retired collection)", () => {
 });
 
 // ============================================================
-// userLinks/{uid} — create/update retired, linking goes through linkDevice
+// userLinks/{uid}, create/update retired, linking goes through linkDevice
 // ============================================================
 describe("Firestore Rules: userLinks", () => {
   afterEach(async () => {
@@ -43,7 +43,7 @@ describe("Firestore Rules: userLinks", () => {
     await env.clearFirestore();
   });
 
-  it("cannot create a link directly — device linking goes through the linkDevice Function", async () => {
+  it("cannot create a link directly: device linking goes through the linkDevice Function", async () => {
     const env = await getTestEnv();
 
     await expect(
@@ -97,7 +97,7 @@ describe("Firestore Rules: userLinks", () => {
 });
 
 // ============================================================
-// Character claim — ownership = account (self or linked primary)
+// Character claim, ownership = account (self or linked primary)
 // ============================================================
 describe("Firestore Rules: character claim ownership", () => {
   afterEach(async () => {
@@ -105,7 +105,7 @@ describe("Firestore Rules: character claim ownership", () => {
     await env.clearFirestore();
   });
 
-  it("cannot claim an unclaimed character via direct update — claiming goes through the claimCharacter Function", async () => {
+  it("cannot claim an unclaimed character via direct update: claiming goes through the claimCharacter Function", async () => {
     const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: null });
@@ -120,7 +120,7 @@ describe("Firestore Rules: character claim ownership", () => {
 });
 
 // ============================================================
-// Campaign membership — self-add is retired, claiming goes through Functions
+// Campaign membership, self-add is retired, claiming goes through Functions
 // ============================================================
 describe("Firestore Rules: campaign membership (claim)", () => {
   afterEach(async () => {
@@ -128,7 +128,7 @@ describe("Firestore Rules: campaign membership (claim)", () => {
     await env.clearFirestore();
   });
 
-  it("cannot self-add to memberIds via direct update — claiming goes through the claimCharacter Function", async () => {
+  it("cannot self-add to memberIds via direct update: claiming goes through the claimCharacter Function", async () => {
     const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: [] });
 

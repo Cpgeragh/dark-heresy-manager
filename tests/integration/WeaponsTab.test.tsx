@@ -367,7 +367,7 @@ describe("WeaponsTab", () => {
 });
 
 // Real reference rows have their own Rules InfoModal titled with the bare
-// item name, always mounted (closed) into the DOM — filter for whichever
+// item name, always mounted (closed) into the DOM, filter for whichever
 // match has a button row as an ancestor.
 function row(name: string): HTMLButtonElement {
   const match = screen
@@ -380,7 +380,7 @@ function row(name: string): HTMLButtonElement {
 
 function addButtonIn(sectionHeading: string): HTMLElement {
   // The mobile tab bar also has a button with the same text as each section
-  // heading — find the match that's inside an actual <section> (the desktop
+  // heading, find the match that's inside an actual <section> (the desktop
   // heading), not the tablist button.
   const heading = screen
     .getAllByText(sectionHeading)

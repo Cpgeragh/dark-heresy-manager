@@ -264,7 +264,7 @@ describe("Psychic Talent purchase links", () => {
 });
 
 describe("Psy Rating acquisition grants", () => {
-  it("matches the exact Psy Rating 3–6 grant table", () => {
+  it("matches the exact Psy Rating 3-6 grant table", () => {
     expect(getPsyRatingAcquisitionGrants(3, 5, "new")).toEqual({
       minor: 3,
       major: 1,

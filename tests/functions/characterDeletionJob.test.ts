@@ -51,10 +51,6 @@ describe("Functions: character deletion job", () => {
     });
     const recoveryCode = registered.code;
     await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
-    const threadRef = campaignRef.collection("threads").doc(characterRef.id);
-    await threadRef.set({ characterId: characterRef.id });
-    await threadRef.collection("messages").add({ text: "hello" });
-    await threadRef.collection("messages").add({ text: "world" });
     const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
     await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
 
@@ -67,22 +63,20 @@ describe("Functions: character deletion job", () => {
       characterId: characterRef.id,
     });
 
-    expect(started.totalCount).toBe(7);
+    expect(started.totalCount).toBe(4);
 
     const final = await drainJob(started.jobId);
     expect(final.done).toBe(true);
-    expect(final.processedCount).toBe(7);
+    expect(final.processedCount).toBe(4);
 
     const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
       getTestFunctions(),
       "lookupRecoveryCode"
     );
     expect((await characterRef.get()).exists).toBe(false);
-    expect((await threadRef.get()).exists).toBe(false);
     expect((await summaryRef.get()).exists).toBe(false);
     expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
     expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
-    expect((await threadRef.collection("messages").get()).empty).toBe(true);
   }, 30000);
 
   it("resumes correctly after being interrupted partway through, leaving a consistent partial state in between", async () => {
@@ -102,9 +96,6 @@ describe("Functions: character deletion job", () => {
     const recoveryCode = registered.code;
     await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
     await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
-    const threadRef = campaignRef.collection("threads").doc(characterRef.id);
-    await threadRef.set({ characterId: characterRef.id });
-    await threadRef.collection("messages").add({ text: "hello" });
     const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
     await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
 
@@ -117,9 +108,9 @@ describe("Functions: character deletion job", () => {
       characterId: characterRef.id,
     });
 
-    // 2 claimLog + 0 xpProposals + 1 message + 1 thread + 1 recoveryIndex
-    // + 1 characterSummary + 1 character = 7
-    expect(started.totalCount).toBe(7);
+    // 2 claimLog + 0 xpProposals + 1 recoveryIndex
+    // + 1 characterSummary + 1 character = 5
+    expect(started.totalCount).toBe(5);
 
     const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
       getTestFunctions(),
@@ -140,8 +131,6 @@ describe("Functions: character deletion job", () => {
     // "eventually converges": claimLog genuinely gone, everything else
     // genuinely untouched.
     expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
-    expect((await threadRef.collection("messages").get()).docs).toHaveLength(1);
-    expect((await threadRef.get()).exists).toBe(true);
     expect((await summaryRef.get()).exists).toBe(true);
     expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("found");
     expect((await characterRef.get()).exists).toBe(true);
@@ -154,12 +143,10 @@ describe("Functions: character deletion job", () => {
       result = response.data;
     }
 
-    expect(result.processedCount).toBe(7);
+    expect(result.processedCount).toBe(5);
     expect((await characterRef.get()).exists).toBe(false);
-    expect((await threadRef.get()).exists).toBe(false);
     expect((await summaryRef.get()).exists).toBe(false);
     expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
-    expect((await threadRef.collection("messages").get()).empty).toBe(true);
   }, 15000);
 
   it("closes both copies of the character's chats, keeps their messages and leaves other chats alone", async () => {

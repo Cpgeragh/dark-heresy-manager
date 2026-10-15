@@ -7,8 +7,8 @@
 // xpProposals subcollections, its derived recoveryIndex entry and its
 // summary, the characters, every copy of the campaign's chats marked closed
 // (sends are refused once the characters are gone, and the messages stay),
-// the flat sessions and member-safe sessionSummaries collections, every thread's messages and the threads,
-// every custom item's versions and the custom items, then the campaign
+// the flat sessions and member-safe sessionSummaries collections, every custom
+// item's versions and the custom items, then the campaign
 // document last. The whole deletion is refused upfront if any character
 // lacks a valid-format Recovery Code, since that is the only way its
 // recoveryIndex entry can be found and removed safely.
@@ -47,8 +47,6 @@ type Phase =
   | "chats"
   | "sessions"
   | "sessionSummaries"
-  | "threadMessages"
-  | "threads"
   | "customItemVersions"
   | "customItems"
   | "campaign";
@@ -63,8 +61,6 @@ const PHASE_ORDER: readonly Phase[] = [
   "chats",
   "sessions",
   "sessionSummaries",
-  "threadMessages",
-  "threads",
   "customItemVersions",
   "customItems",
   "campaign",
@@ -134,12 +130,6 @@ export async function startCampaignDeletionJob(
     ),
   ]);
 
-  const threadsSnapshot = await campaignRef.collection("threads").get();
-  const threads = threadsSnapshot.docs;
-  const messageCounts = await Promise.all(
-    threads.map((t) => t.ref.collection("messages").count().get())
-  );
-
   const customItemsSnapshot = await campaignRef.collection("customItems").get();
   const customItems = customItemsSnapshot.docs;
   const versionCounts = await Promise.all(
@@ -160,8 +150,6 @@ export async function startCampaignDeletionJob(
     sum(xpProposalCounts) +
     recoverySnapshots.filter((s) => s.exists).length +
     characterSummariesCount.data().count +
-    threads.length +
-    sum(messageCounts) +
     customItems.length +
     sum(versionCounts) +
     sessionsCount.data().count +
@@ -406,15 +394,6 @@ async function processPhase(
         checkpoint,
         "sessionSummaries"
       );
-    case "threadMessages":
-      return sweepNestedPhase(
-        campaignRef.collection("threads"),
-        "messages",
-        checkpoint,
-        "threadMessages"
-      );
-    case "threads":
-      return deleteFlatPage(campaignRef.collection("threads"), checkpoint, "threads");
     case "customItemVersions":
       return sweepNestedPhase(
         campaignRef.collection("customItems"),

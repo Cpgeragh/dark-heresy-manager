@@ -108,7 +108,7 @@ beforeEach(() => {
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
-describe("CampaignsProvider — initial state", () => {
+describe("CampaignsProvider: initial state", () => {
   it("starts with loading: true, empty lists, and no error", () => {
     const { result } = renderHook(() => useCampaignsContext(), {
       wrapper: makeWrapper("uid-1"),
@@ -121,7 +121,7 @@ describe("CampaignsProvider — initial state", () => {
   });
 });
 
-describe("CampaignsProvider — Firestore queries", () => {
+describe("CampaignsProvider: Firestore queries", () => {
   it("queries by dmId == uid for the DM listener", () => {
     renderHook(() => useCampaignsContext(), { wrapper: makeWrapper("uid-dm") });
     expect(mockWhere).toHaveBeenCalledWith("dmId", "==", "uid-dm");
@@ -146,7 +146,7 @@ describe("CampaignsProvider — Firestore queries", () => {
   });
 });
 
-describe("CampaignsProvider — snapshot handling", () => {
+describe("CampaignsProvider: snapshot handling", () => {
   it("populates dmCampaigns when the DM snapshot fires", () => {
     const { result } = renderHook(() => useCampaignsContext(), {
       wrapper: makeWrapper("uid-1"),
@@ -240,7 +240,7 @@ describe("CampaignsProvider — snapshot handling", () => {
   });
 });
 
-describe("CampaignsProvider — error handling", () => {
+describe("CampaignsProvider: error handling", () => {
   it("sets error and clears loading when the DM listener throws", () => {
     const { result } = renderHook(() => useCampaignsContext(), {
       wrapper: makeWrapper("uid-1"),
@@ -270,7 +270,7 @@ describe("CampaignsProvider — error handling", () => {
   });
 });
 
-describe("CampaignsProvider — archived campaigns", () => {
+describe("CampaignsProvider: archived campaigns", () => {
   it("asks for the archived campaigns of the same uid", () => {
     renderHook(() => useCampaignsContext(), { wrapper: makeWrapper("uid-9") });
     expect(mockUseArchivedCampaigns).toHaveBeenCalledWith("uid-9");
@@ -293,7 +293,7 @@ describe("CampaignsProvider — archived campaigns", () => {
   });
 });
 
-describe("CampaignsProvider — cleanup", () => {
+describe("CampaignsProvider: cleanup", () => {
   it("calls both unsubscribes when the component unmounts", () => {
     const { unmount } = renderHook(() => useCampaignsContext(), {
       wrapper: makeWrapper("uid-1"),

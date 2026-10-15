@@ -44,7 +44,7 @@ describe("getNextInsanityDegreeEntry", () => {
   });
 
   it("skips the repeated Disturbed band the same way", () => {
-    // At 45 points (Disturbed), 50-59 is also Disturbed — the next different degree is Unhinged at 60.
+    // At 45 points (Disturbed), 50-59 is also Disturbed, the next different degree is Unhinged at 60.
     expect(getNextInsanityDegreeEntry(45)?.pointsLabel).toBe("60-69");
   });
 });

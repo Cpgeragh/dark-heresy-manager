@@ -44,7 +44,7 @@ Insanity Points track, Degree of Madness, Temporary Trauma, and Disorders.
 
 Start at 0 and set Points to one below, exactly on, and one above every documented threshold. At each value compare the chip, bar, counters, and retirement state before moving on. Add one entry of each supported type, refresh, then remove it. For legacy coverage, open or import a fixture containing old free-text disorder notes before adding a structured disorder. Repeat the tab checks at a phone-width viewport using real touch input if possible.
 
-- [ ] Points stepper 0–100; Degree chip and timeline bar move together and land on the right degree at each threshold
+- [ ] Points stepper 0-100; Degree chip and timeline bar move together and land on the right degree at each threshold
 - [ ] "X pts until Trauma Test" and "X pts until [next Degree]" counters show the correct remaining distance and update live
 - [ ] At the top of the track, the page switches to "Character retires from play" and hides the Status/Thresholds grid
 - [ ] Add a Temporary Trauma from the picker: roll chip and rules text match the entry chosen
@@ -71,7 +71,7 @@ Corruption Points track, Malignancies, Minor and Major Mutations.
 
 Use the same boundary method as Insanity: one below, on, and one above every threshold. Add a rollable and non-rollable entry, enter the minimum and maximum permitted physical roll values, refresh, and inspect Characteristics. Then remove each source and confirm only its own modifier disappears. Repeat the three groups on both phone and desktop layouts.
 
-- [ ] Points stepper 0–100; Degree chip, timeline, and "pts until Malignancy Test" / "pts until [Degree]" all track correctly
+- [ ] Points stepper 0-100; Degree chip, timeline, and "pts until Malignancy Test" / "pts until [Degree]" all track correctly
 - [ ] Top of track shows "Character removed from play" and hides the Status/Thresholds grid
 - [ ] Add a Malignancy that rolls a characteristic modifier: "Edit Rolls" button appears, entering values saves them
 - [ ] A Malignancy with no rollable modifiers does _not_ show an "Edit Rolls" button
@@ -105,7 +105,7 @@ Record all nine starting values. For each characteristic, set a simple Base valu
 - [ ] Movement row (Half/Full/Charge/Run) recalculates from Agility Bonus correctly
 - [ ] On phone: swipe carousel moves between all nine stats in order and wraps around at both ends; only the centred card is editable
 - [ ] On desktop: all nine shown as a grid, all editable at once
-- [ ] Advances are 4 click-to-fill pips, not 4 independent toggles: clicking pip 3 when only 1 is currently filled first opens **Upgrade Characteristic** with the combined XP cost for tiers 2–3, and only Confirm fills pips 1–3; clicking an already-filled pip opens **Downgrade Characteristic** with the combined refund for every removed tier, and only Confirm retracts to the selected level: Cancel/close changes nothing in both directions
+- [ ] Advances are 4 click-to-fill pips, not 4 independent toggles: clicking pip 3 when only 1 is currently filled first opens **Upgrade Characteristic** with the combined XP cost for tiers 2-3, and only Confirm fills pips 1-3; clicking an already-filled pip opens **Downgrade Characteristic** with the combined refund for every removed tier, and only Confirm retracts to the selected level: Cancel/close changes nothing in both directions
 - [ ] Typing a Base value, then pressing Escape before it's committed, reverts the field to its last saved value and clears any error state; pressing Enter commits immediately without needing to blur the field
 - [ ] Movement's info icon holds the rules paragraph, the AB formula, and (only when a movement-affecting trait is active) a "Modifiers" list of what's contributing: none of this shows as plain text on the page itself, only inside the modal
 - [ ] With multiple movement-affecting traits active at once (e.g. Size + Quadruped + Unnatural Speed), the multiplying/halving traits (Amorphous, Crawler, Quadruped) apply to the base Agility Bonus first, then Size's flat adjustment, then Unnatural Speed doubles the result last: confirm the displayed Half/Full/Charge/Run numbers reflect that order
@@ -343,7 +343,7 @@ below deliberately change several of those pages.
 - [ ] Mechadendrites are removed but marked as not qualifying for Fate
 - [ ] Mark no life-critical items and complete acquisition: all listed items are removed, concealed-weapon links are cleared, and no Toughness/Wound loss is applied
 - [ ] Repeat on a fresh character with a long inventory; search the Life-Critical Removals picker, select several items, press Back/Done, and confirm the selection count remains
-- [ ] With life-critical removals selected, Permanent Toughness Loss offers only 1–5 and Wounds Lost is exactly 1 regardless of how many items were marked
+- [ ] With life-critical removals selected, Permanent Toughness Loss offers only 1-5 and Wounds Lost is exactly 1 regardless of how many items were marked
 - [ ] Continue to the Reformed Skin stage: every marked item requires its own non-blank replacement before completion
 - [ ] Completion creates one source-noted Reformed Skin entry for every life-critical removal
 - [ ] A later Reformed Skin purchase asks whether its cause is Purity of Flesh or Critical Damage
@@ -440,7 +440,7 @@ cross-checking permanent effects and their named sources.
 - [ ] In view-only mode, picker rows do not activate; in edit mode, each pressed row alone shows the shared touch feedback
 - [ ] Secondary choice screens use a forward arrow to enter and a back arrow to return, preserving the parent picker position; after a purchase they remain open only while another valid choice exists
 - [ ] Fear uses the four labelled ratings; Size uses Minuscule through Massive; selecting either Trait's one permitted choice automatically returns to the main Trait picker and removes that entire Trait from it
-- [ ] Natural Armour accepts digits only and requires 1+; Machine accepts only 1–5; Burrower, Flyer, Hoverer, and Unnatural Senses require a positive whole-number speed/range
+- [ ] Natural Armour accepts digits only and requires 1+; Machine accepts only 1-5; Burrower, Flyer, Hoverer, and Unnatural Senses require a positive whole-number speed/range
 - [ ] Unnatural Characteristic's choice screen remains open after a selection, keeps every repeatable Characteristic available, and updates that option's **Owned: N** immediately; on the main page, different Characteristics group under one expandable card and deleting one acquisition lowers only its count by one
 - [ ] Add 10+ mixed Traits: two natural-height columns remain aligned without stretched cards, blank gaps, overlap, or clipping
 - [ ] Natural Armour and Armour Plating add named Misc AP sources; only the strongest Machine value applies, including Machine granted by The Flesh is Weak
@@ -453,7 +453,7 @@ cross-checking permanent effects and their named sources.
 - [ ] Choosing Imperial Psyker records Sanctioned Psyker as a read-only Career Trait; changing Career removes its derived effects and any Optical Rupture implant without touching independent copies
 - [ ] Choosing Tech-Priest shows Mechanicus Implants as a read-only Career Trait and lists all six granted implants on Cybernetics
 - [ ] Skin of Iron Rank 1 installs one Common cybernetic; Ranks 3, 5, and 7 each allow a new Common cybernetic or an existing implant upgrade to Good; the card shows **Owned: N/4**, disappears at four, and deleting the latest grant removes/restores only that grant
-- [ ] Homeworld Traits appear read-only on Traits. Noble Born records its extra Peer group; Schola records both weapon groups; Mind Cleansed records 3–7 starting Insanity; changing Homeworld removes the old derived effects without removing independent copies
+- [ ] Homeworld Traits appear read-only on Traits. Noble Born records its extra Peer group; Schola records both weapon groups; Mind Cleansed records 3-7 starting Insanity; changing Homeworld removes the old derived effects without removing independent copies
 - [ ] Cult Briefing (Culture) collects the selected Homeworld's required choices and grants the same read-only Traits, Talent/Weapon Training effects, and named sources
 - [ ] Description popups include the audited details for Burrower, Possession, Soul-bound, Stuff of Nightmares, Unnatural Characteristic, Unnatural Senses, and Mechanicus Implants
 - [ ] Opening the Sanctioning side-effect picker shows a Rules button on every result with its full sourcebook effect text, before you've picked one
@@ -1337,9 +1337,9 @@ Use an editable character with a career, and slow the network in the browser's d
 
 ## Coverage notes
 
-This checklist covers the 21 character-sheet sections, the cross-cutting systems, and the app-shell pages outside the character sheet. Sections 21–33 cover systems and pages such as Dashboard, Onboarding, Settings, Campaign Overview and Messages. Section 34 covers the added Elite Advance and Alternate Rank flow.
+This checklist covers the 21 character-sheet sections, the cross-cutting systems, and the app-shell pages outside the character sheet. Sections 21-33 cover systems and pages such as Dashboard, Onboarding, Settings, Campaign Overview and Messages. Section 34 covers the added Elite Advance and Alternate Rank flow.
 
-**Character-sheet source review (§1–20 and §34):** The reviewed scope includes every
+**Character-sheet source review (§1-20 and §34):** The reviewed scope includes every
 tab component, picker, custom-item form, and the shared hooks and helpers
 behind them:
 `useCharacterSheet` and its five constituent hooks (`useCharacterPermissions`,
@@ -1360,7 +1360,7 @@ reference pickers, both row components, and the
 static roll-range label rather than an interactive roller; no
 manual roll-button test is therefore required.
 
-**App-shell and account-system source review (§23–33):** The reviewed scope
+**App-shell and account-system source review (§23-33):** The reviewed scope
 includes `App.tsx` (route shell, auth gate and onboarding/profile-integrity gates),
 `useAuth`, `useDeviceLink`,
 `useLinkDevice`, `identityService.ts`, `deviceLinkService.ts`,

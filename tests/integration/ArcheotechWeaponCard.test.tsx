@@ -24,7 +24,7 @@ describe("ArcheotechWeaponCard weapon-class chip", () => {
   });
 
   it("shows the real Ranged sub-class chip when the reference has one (e.g. Basic)", () => {
-    // Real reference entry: Reclamator Rifle, weaponClass "Basic" — a specific
+    // Real reference entry: Reclamator Rifle, weaponClass "Basic", a specific
     // Ranged sub-class, not just the broad "Ranged" category.
     renderCard({ id: "a2", name: "Reclamator Rifle", referenceId: "lw-reclamator-rifle" });
     expect(screen.getByText("Basic")).toBeInTheDocument();

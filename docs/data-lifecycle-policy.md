@@ -26,10 +26,10 @@ Claim history remains with each character. Protected-operation audit records use
 
 Campaign and character deletion use protected resumable jobs. The protected preflight authorizes the caller, counts affected documents, and stores a job without deleting descendants. The client displays that count; user confirmation starts bounded chunk processing. The server reauthorizes processing but does not compare a new count at confirmation time. Parent documents are deleted last.
 
-| Deletion target | Descendant data removed before the parent                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Character       | Claim logs, legacy XP proposals, messages, thread summary, recovery index, and character summary                                |
-| Campaign        | Characters and their descendants, sessions and summaries, threads and messages, custom items and versions, and recovery indexes |
+| Deletion target | Descendant data removed before the parent                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------- |
+| Character       | Claim logs, legacy XP proposals, recovery index, and character summary                                    |
+| Campaign        | Characters and their descendants, sessions and summaries, custom items and versions, and recovery indexes |
 
 Deleting a character or a campaign does not delete chats. A last phase marks every copy of the affected chats closed, for the DM and for each past or current player, and the messages stay. It runs after the character documents are gone, so no new chat can open in between, and it reports no processed documents, so the progress count stays within the total shown at confirmation. The DM's own copies can then be kept or moved to the bin from the browser.
 
@@ -49,7 +49,7 @@ The DM-only summary repair operation validates its entire source page before wri
 
 ## Messages and claim history
 
-Messages in the earlier per-character threads remain until their character or campaign is deleted. The app no longer reads or writes them, and a later deploy removes their rules. Messages in the current chats follow the Chats section below.
+The earlier per-character threads are not read, written or deleted by the app or by the deletion jobs, and the rules deny every client access to them. Messages in the current chats follow the Chats section below.
 
 Claim logs remain until their character or campaign is deleted. The 50-entry client value is a read-page limit, not a retention limit.
 

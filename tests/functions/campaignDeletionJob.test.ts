@@ -54,11 +54,6 @@ describe("Functions: campaign deletion job", () => {
     await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
     await characterRef.collection("xpProposals").add({ amount: 100 });
 
-    const threadRef = campaignRef.collection("threads").doc(characterRef.id);
-    await threadRef.set({ characterId: characterRef.id });
-    await threadRef.collection("messages").add({ text: "hello" });
-    await threadRef.collection("messages").add({ text: "world" });
-
     const customItemRef = campaignRef.collection("customItems").doc();
     await customItemRef.set({ name: "Custom Blade" });
     await customItemRef.collection("versions").add({ version: 1 });
@@ -77,11 +72,11 @@ describe("Functions: campaign deletion job", () => {
     );
     const { data: started } = await startJob({ campaignId: campaignRef.id });
 
-    expect(started.totalCount).toBe(15);
+    expect(started.totalCount).toBe(12);
 
     const final = await drainJob(started.jobId);
     expect(final.done).toBe(true);
-    expect(final.processedCount).toBe(15);
+    expect(final.processedCount).toBe(12);
 
     const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
       getTestFunctions(),
@@ -89,13 +84,11 @@ describe("Functions: campaign deletion job", () => {
     );
     expect((await campaignRef.get()).exists).toBe(false);
     expect((await characterRef.get()).exists).toBe(false);
-    expect((await threadRef.get()).exists).toBe(false);
     expect((await customItemRef.get()).exists).toBe(false);
     expect((await summaryRef.get()).exists).toBe(false);
     expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
     expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
     expect((await characterRef.collection("xpProposals").get()).empty).toBe(true);
-    expect((await threadRef.collection("messages").get()).empty).toBe(true);
     expect((await customItemRef.collection("versions").get()).empty).toBe(true);
     expect((await campaignRef.collection("sessions").get()).empty).toBe(true);
     expect((await campaignRef.collection("sessionSummaries").get()).empty).toBe(true);

@@ -54,7 +54,7 @@ describe("InsanityDisorderPicker", () => {
     await user.click(rowButton);
     await user.click(screen.getByRole("button", { name: "Add Disorder" }));
 
-    // The Flesh is Weak only offers Severe/Acute — first option is Severe.
+    // The Flesh is Weak only offers Severe/Acute, first option is Severe.
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ severity: "Severe" }));
   });
 

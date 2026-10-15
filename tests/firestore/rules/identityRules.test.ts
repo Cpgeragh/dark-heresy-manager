@@ -19,7 +19,7 @@ describe("Firestore Rules: identityRecovery (retired collection)", () => {
     await env.clearFirestore();
   });
 
-  it("is fully sealed — no get, create, or update", async () => {
+  it("is fully sealed: no get, create, or update", async () => {
     const env = await getTestEnv();
     await createIdentityRecoveryEntry(env, "CODE-123", { uid: "uid-1", role: "dm" });
 
@@ -99,7 +99,7 @@ describe("Firestore Rules: identityReclaims (retired collection)", () => {
     await env.clearFirestore();
   });
 
-  it("is fully sealed — no read or create", async () => {
+  it("is fully sealed: no read or create", async () => {
     const env = await getTestEnv();
     await createIdentitySecretEntry(env, "uid-old", { code: "DH-CORR-0001" });
     await createIdentityReclaimEntry(env, "uid-new", { oldUid: "uid-old", code: "DH-CORR-0001" });

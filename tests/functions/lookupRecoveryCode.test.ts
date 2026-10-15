@@ -75,7 +75,7 @@ describe("Functions: lookupRecoveryCode", () => {
 
     // The per-code limit is 5 attempts per 15 minutes. Each of the first 5
     // calls resolves normally with "not-found" (a real business outcome,
-    // not a rejection) since the code was never registered — it still
+    // not a rejection) since the code was never registered, it still
     // counts as a real attempt against the limit.
     for (let i = 0; i < 5; i++) {
       const result = await lookupRecoveryCode({ code });

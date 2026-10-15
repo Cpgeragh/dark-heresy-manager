@@ -175,7 +175,7 @@ describe("CustomPieceForm editing", () => {
     expect(textboxes[2]).toHaveValue("2 kg");
     expect(textboxes[3]).toHaveValue("10 Thrones");
     expect(textboxes[4]).toHaveValue("Existing notes");
-    // Origin ("2nd Ed") is picked up from initialPiece.source too — confirmed
+    // Origin ("2nd Ed") is picked up from initialPiece.source too, confirmed
     // indirectly since every required field is now satisfied without any
     // further interaction.
     expect(screen.getByRole("button", { name: "Add" })).toBeEnabled();

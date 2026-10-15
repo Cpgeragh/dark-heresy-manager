@@ -20,7 +20,7 @@ describe("CharacteristicField", () => {
 
     expect(screen.getByText("Weapon Skill")).toBeInTheDocument();
 
-    // Component uses type="text" + inputMode="numeric" — role is textbox, not spinbutton
+    // Component uses type="text" + inputMode="numeric", role is textbox, not spinbutton
     const baseInput = screen.getByRole("textbox", { name: /weapon skill base value/i });
     expect(baseInput).toHaveValue("30");
 

@@ -361,7 +361,7 @@ service cloud.firestore {
         }
 
         // Only the owning player (or a linked device) or the campaign's DM can
-        // read a character. A claim preview doesn't need a direct read here —
+        // read a character. A claim preview doesn't need a direct read here,
         // lookupRecoveryCode returns its own minimal preview server-side.
         allow get: if playerOwnsOrLinked(resource.data.userId) || dmOwnsCampaign();
         allow list: if (dmOwnsCampaign() || playerOwnsOrLinked(resource.data.userId)) && boundedQuery(100);
@@ -376,7 +376,7 @@ service cloud.firestore {
         // Fields migrated to patchCharacterField (see functions/src/operations/
         // patchCharacterField.ts) are frozen against direct client writes here.
         // A single MapDiff check keeps this cheap regardless of how many fields
-        // are listed — checking each field individually would cost its own
+        // are listed, checking each field individually would cost its own
         // get()+get()+== triplet, risking Firestore's 1,000-expression
         // evaluation ceiling on a large update.
         function noPatchedFieldsChanged() {
@@ -428,7 +428,7 @@ service cloud.firestore {
           allow update: if false;
 
           // Deletable only as a consequence of the character itself being
-          // deleted in the same atomic write — never on its own.
+          // deleted in the same atomic write, never on its own.
           allow delete:
             if dmOwnsCampaign() &&
                !existsAfter(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId));
@@ -450,7 +450,7 @@ service cloud.firestore {
     }
 
     // ============================
-    // recoveryIndex — top-level
+    // recoveryIndex, top-level
     // ============================
     match /recoveryIndex/{indexId} {
       // HMAC-derived Recovery Index entries are managed exclusively by trusted
@@ -460,7 +460,7 @@ service cloud.firestore {
     }
 
     // ============================
-    // IDENTITY SECRET — proof store (uid → code), rule-side only
+    // IDENTITY SECRET, proof store (uid → code), rule-side only
     // ============================
     // The plain-text copy is never returned by a client Firestore read.
     // Reveal and rotation are server-only.
@@ -477,7 +477,7 @@ service cloud.firestore {
     }
 
     // ============================
-    // USER LINKS — multi-device access
+    // USER LINKS, multi-device access
     // ============================
     // Every device has its own UID as the document key. primaryUid is retained
     // as the stored field name but now points to a permanent account id.
@@ -668,156 +668,6 @@ service cloud.firestore {
     }
 
     // ============================
-    // MESSAGES
-    // Threads are keyed by characterId — one thread per character, not per player.
-    // ============================
-    match /campaigns/{campaignId}/threads/{characterId} {
-
-      function dmOwnsMessagingCampaign() {
-        return dmOwnsOrLinked(
-          get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
-        );
-      }
-
-      // The player who owns this character — or a linked device — can access the thread.
-      function playerOwnsCharacter() {
-        return playerOwnsOrLinked(
-          get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
-            .data.userId
-        );
-      }
-
-
-      function validThreadData(data) {
-        return data.keys().hasOnly([
-                 'characterId',
-                 'lastMessage',
-                 'lastTimestamp',
-                 'unreadForDM'
-               ]) &&
-               data.characterId == characterId &&
-               (data.get('lastMessage', null) == null ||
-                  (data.lastMessage is string && data.lastMessage.size() > 0 &&
-                   data.lastMessage.size() <= 500)) &&
-               (data.get('lastTimestamp', null) == null || data.lastTimestamp is timestamp) &&
-               data.get('unreadForDM', 0) is int &&
-               data.get('unreadForDM', 0) >= 0 &&
-               data.get('unreadForDM', 0) <= 10000;
-      }
-
-      // DM reads all thread summaries; player reads only their own character's thread
-      allow get: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
-      allow list:
-        if (dmOwnsMessagingCampaign() || playerOwnsCharacter()) && boundedQuery(100);
-
-      allow create:
-        if validThreadData(request.resource.data) &&
-           (
-              (dmOwnsMessagingCampaign() &&
-                request.resource.data.get('unreadForDM', 0) == 0 &&
-                request.resource.data.get('lastMessage', null) is string &&
-                request.resource.data.lastTimestamp is timestamp) ||
-              (playerOwnsCharacter() &&
-                request.resource.data.get('unreadForDM', 0) == 1 &&
-                request.resource.data.get('lastMessage', null) is string &&
-                request.resource.data.lastTimestamp is timestamp)
-            );
-
-      allow update:
-        if validThreadData(request.resource.data) &&
-           (
-              (dmOwnsMessagingCampaign() &&
-                (
-                  (
-                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-                      'lastMessage', 'lastTimestamp'
-                    ]) &&
-                    request.resource.data.diff(resource.data).affectedKeys().hasAll([
-                      'lastMessage', 'lastTimestamp'
-                    ]) &&
-                    request.resource.data.lastMessage is string &&
-                    request.resource.data.lastTimestamp is timestamp &&
-                    request.resource.data.get('unreadForDM', 0) ==
-                      resource.data.get('unreadForDM', 0)
-                  ) ||
-                  (
-                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-                      'unreadForDM'
-                    ]) &&
-                    request.resource.data.diff(resource.data).affectedKeys().hasAll([
-                      'unreadForDM'
-                    ]) &&
-                    resource.data.get('unreadForDM', 0) > 0 &&
-                    request.resource.data.unreadForDM == 0
-                  ) ||
-                  (
-                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-                      'lastMessage', 'lastTimestamp', 'unreadForDM'
-                    ]) &&
-                    request.resource.data.get('lastMessage', null) == null &&
-                    request.resource.data.get('lastTimestamp', null) == null &&
-                    request.resource.data.get('unreadForDM', 0) == 0 &&
-                    (
-                      resource.data.get('lastMessage', null) != null ||
-                      resource.data.get('lastTimestamp', null) != null ||
-                      resource.data.get('unreadForDM', 0) > 0
-                    )
-                  )
-                )) ||
-              (
-                playerOwnsCharacter() &&
-                request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-                 'lastMessage',
-                 'lastTimestamp',
-                 'unreadForDM'
-                ]) &&
-                request.resource.data.diff(resource.data).affectedKeys().hasAll([
-                  'lastMessage',
-                  'lastTimestamp',
-                  'unreadForDM'
-                ]) &&
-                request.resource.data.lastMessage is string &&
-                request.resource.data.lastTimestamp is timestamp &&
-                request.resource.data.get('unreadForDM', 0) ==
-                 resource.data.get('unreadForDM', 0) + 1
-             )
-           );
-
-      // Only DM can delete a thread summary (clear chat)
-      allow delete: if dmOwnsMessagingCampaign();
-
-      match /messages/{messageId} {
-        // DM reads all; player reads only their own character's thread messages
-        allow get: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
-        allow list:
-          if (dmOwnsMessagingCampaign() || playerOwnsCharacter()) && boundedQuery(100);
-
-        // DM or the character owner can send messages; fromUid must match sender
-        allow create:
-          if (dmOwnsMessagingCampaign() || playerOwnsCharacter()) &&
-             request.resource.data.keys().hasOnly([
-               'fromUid',
-               'text',
-               'timestamp',
-               'read'
-             ]) &&
-             request.resource.data.fromUid is string &&
-             request.resource.data.fromUid.size() > 0 &&
-             request.resource.data.fromUid.size() <= 1500 &&
-             playerOwnsOrLinked(request.resource.data.fromUid) &&
-             request.resource.data.text is string &&
-             request.resource.data.text.size() > 0 &&
-             request.resource.data.text.size() <= 2000 &&
-             (request.resource.data.timestamp == null || request.resource.data.timestamp is timestamp) &&
-             request.resource.data.read == false;
-
-        // DM can delete messages (clear chat); nobody can edit
-        allow delete: if dmOwnsMessagingCampaign();
-        allow update: if false;
-      }
-    }
-
-    // ============================
     // XP PROPOSALS
     // ============================
     match /campaigns/{campaignId}/characters/{characterId}/xpProposals/{proposalId} {
@@ -850,7 +700,7 @@ service cloud.firestore {
            );
     }
 
-    // Required for collectionGroup("characters") queries — restricted to own characters only.
+    // Required for collectionGroup("characters") queries, restricted to own characters only.
     match /{path=**}/characters/{characterId} {
       allow get: if playerOwnsOrLinked(resource.data.userId);
       allow list: if playerOwnsOrLinked(resource.data.userId) && boundedQuery(1000);

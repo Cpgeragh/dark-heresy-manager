@@ -47,9 +47,6 @@ describe("Functions: bulk job lease recovery", () => {
     const recoveryCode = registered.code;
     await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
     await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
-    const threadRef = campaignRef.collection("threads").doc(characterRef.id);
-    await threadRef.set({ characterId: characterRef.id });
-    await threadRef.collection("messages").add({ text: "hello" });
 
     const startJob = httpsCallable<
       { campaignId: string; characterId: string },
@@ -59,7 +56,7 @@ describe("Functions: bulk job lease recovery", () => {
       campaignId: campaignRef.id,
       characterId: characterRef.id,
     });
-    expect(started.totalCount).toBe(6);
+    expect(started.totalCount).toBe(4);
 
     const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
       getTestFunctions(),
@@ -94,9 +91,8 @@ describe("Functions: bulk job lease recovery", () => {
       getTestFunctions(),
       "lookupRecoveryCode"
     );
-    expect(result.processedCount).toBe(6);
+    expect(result.processedCount).toBe(4);
     expect((await characterRef.get()).exists).toBe(false);
-    expect((await threadRef.get()).exists).toBe(false);
     expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
   }, 15000);
 

@@ -48,7 +48,7 @@ describe("CorruptionMalignancyPicker roll-capture sub-screen", () => {
     );
   });
 
-  it("rejects an out-of-range roll — Add stays disabled", async () => {
+  it("rejects an out-of-range roll: Add stays disabled", async () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 

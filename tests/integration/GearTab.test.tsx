@@ -73,7 +73,7 @@ import { GearTab } from "../../src/pages/CharacterSheet/GearTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { GearItem, ConsumableItem } from "../../src/types/Character";
 
-// Real reference entries, already used by GearPicker's/ConsumablePicker's own test files —
+// Real reference entries, already used by GearPicker's/ConsumablePicker's own test files,
 // both have a fixed cost, so clicking calls onSelect directly with no GM-input sub-step.
 const GEAR_NAME = "Backpack";
 const CONSUMABLE_NAME = "Belly-Churn";

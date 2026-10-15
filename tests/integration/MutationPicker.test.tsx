@@ -71,7 +71,7 @@ describe("MutationPicker roll-capture sub-screen", () => {
     );
   });
 
-  it("rejects an out-of-range roll — Add stays disabled", async () => {
+  it("rejects an out-of-range roll: Add stays disabled", async () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
@@ -89,7 +89,7 @@ describe("MutationPicker roll-capture sub-screen", () => {
 
     await user.click(screen.getByText("Aberration", { selector: "span" }));
 
-    // Strength/Agility/Fellowship are flat and need no input — only Intelligence rolls.
+    // Strength/Agility/Fellowship are flat and need no input, only Intelligence rolls.
     expect(screen.getAllByRole("spinbutton")).toHaveLength(1);
 
     const addButton = screen.getByRole("button", { name: "Add Major Mutation" });

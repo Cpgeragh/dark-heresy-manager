@@ -7,7 +7,7 @@ import { CareerStartingChoiceModal } from "../../src/pages/CharacterSheet/Career
 import { CAREER_LIST } from "shared-rules";
 
 // Real career with genuine "or" starting choices (2 skill grants, 3 talent
-// grants, each with 2 options) — not fabricated, read directly from
+// grants, each with 2 options), not fabricated, read directly from
 // shared-rules/src/careerData.ts.
 const ADEPT = CAREER_LIST.find((c) => c.id === "adept")!;
 
@@ -66,7 +66,7 @@ describe("CareerStartingChoiceModal", () => {
     await user.click(screen.getByRole("button", { name: "Confirm" }));
 
     // Indices are the option's *original* position in the career's full
-    // startingSkillGrants array (filtered after mapping, not renumbered) —
+    // startingSkillGrants array (filtered after mapping, not renumbered),
     // Adept's two multi-option skill grants sit at raw indices 2 and 4.
     expect(onComplete).toHaveBeenCalledWith({
       skillChoices: { 2: 1, 4: 1 },

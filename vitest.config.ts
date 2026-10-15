@@ -11,7 +11,7 @@ export default defineConfig({
     setupFiles: "./tests/setupTests.ts",
     include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     // Firestore rules tests and Functions emulator tests both need a live
-    // emulator — they run separately via `npm run test:rules` and
+    // emulator, they run separately via `npm run test:rules` and
     // `npm run test:functions` (both wrap the run in `firebase emulators:exec`).
     exclude: [...configDefaults.exclude, "tests/firestore/**", "tests/functions/**"],
 
