@@ -6,6 +6,7 @@ import "@testing-library/jest-dom";
 import { Timestamp } from "firebase/firestore";
 import { ChatMessageList } from "../../src/components/chat/ChatMessageList";
 import type { ChatMessage } from "../../src/types/Firestore";
+import { pendingToMessage } from "../../src/utils/chatPending";
 
 const scrollIntoView = vi.fn();
 
@@ -132,5 +133,30 @@ describe("ChatMessageList", () => {
     );
 
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a message that is still being sent dimmed, with no time and marked busy", () => {
+    const sending = pendingToMessage(
+      { localId: "x", text: "Still sending", sentAt: Date.now(), serverId: null },
+      "player-1"
+    );
+    renderList({ messages: [message({ id: "m1", text: "Solid" }), sending] });
+
+    const pendingBubble = screen.getByText("Still sending").closest("[aria-busy]");
+    expect(pendingBubble).toHaveAttribute("aria-busy", "true");
+    expect(pendingBubble?.className).toContain("opacity-60");
+    expect(pendingBubble?.textContent).toBe("Still sending");
+    expect(screen.getByText("Solid").closest("[aria-busy]")).toBeNull();
+  });
+
+  it("does not show the empty state while the first message is being sent", () => {
+    const sending = pendingToMessage(
+      { localId: "x", text: "First one", sentAt: Date.now(), serverId: null },
+      "player-1"
+    );
+    renderList({ messages: [sending] });
+
+    expect(screen.queryByText("No messages yet.")).not.toBeInTheDocument();
+    expect(screen.getByText("First one")).toBeInTheDocument();
   });
 });

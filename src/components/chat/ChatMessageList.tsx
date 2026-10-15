@@ -3,9 +3,11 @@
 import { useEffect, useRef } from "react";
 import type { ChatMessage } from "../../types/Firestore";
 import { buildChatListItems } from "../../utils/chatDayGroups";
+import { isPendingMessage } from "../../utils/chatPending";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { LoadingDots } from "../../ui/LoadingDots";
 import {
+  uiInactiveItem,
   uiInlineRow,
   uiTextError,
   uiTextMeta,
@@ -92,15 +94,20 @@ export function ChatMessageList({
 
         const { message } = item;
         const isOwn = message.fromAccountId === currentAccountId;
+        const isPending = isPendingMessage(message);
         return (
-          <div key={item.key} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+          <div
+            key={item.key}
+            aria-busy={isPending || undefined}
+            className={`flex ${isOwn ? "justify-end" : "justify-start"} ${isPending ? uiInactiveItem : ""}`}
+          >
             <div
               className={`max-w-[75%] px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg text-sm lg:text-base ${
                 isOwn ? colourAmberFill : `${colourFillRaised} ${colourTextPrimary}`
               }`}
             >
               <p className="break-words">{message.text}</p>
-              {message.timestamp && (
+              {message.timestamp && !isPending && (
                 <p
                   className={`text-xs lg:text-sm mt-1 ${isOwn ? colourOnAmberDim : colourMetadataLabelText}`}
                 >

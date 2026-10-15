@@ -10,11 +10,16 @@ import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { ErrorState } from "../../ui/ErrorState";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import { uiTextMeta, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import { pendingToMessage, type PendingChatMessage } from "../../utils/chatPending";
+import { createLocalId } from "../../utils/createLocalId";
 import { downloadTextFile } from "../../utils/downloadTextFile";
 import { MessageInput } from "../MessageInput";
 import { useToast } from "../Toast";
 import { ChatMessageList } from "./ChatMessageList";
 import { getChatId, type ChatTarget } from "./chatTarget";
+
+// If the list never shows the confirmed message, the dimmed copy is dropped after this long.
+const PENDING_FALLBACK_MS = 10_000;
 
 function isRefusal(error: unknown): boolean {
   const code = (error as { code?: unknown } | null)?.code;
@@ -37,6 +42,7 @@ export function ChatConversation({ accountId, target, chat, onCleared }: ChatCon
     useChatMessages(accountId, chatId, chat?.clearedAt ?? null);
   const toast = useToast();
   const [refusedChatId, setRefusedChatId] = useState<string | null>(null);
+  const [pending, setPending] = useState<PendingChatMessage[]>([]);
   const unreadCount = chat?.unreadCount ?? 0;
 
   useEffect(() => {
@@ -48,9 +54,20 @@ export function ChatConversation({ accountId, target, chat, onCleared }: ChatCon
 
   const handleSend = useCallback(
     async (text: string) => {
+      const localId = createLocalId("pending-chat-message");
+      const remove = () =>
+        setPending((current) => current.filter((item) => item.localId !== localId));
+      setPending((current) => [...current, { localId, text, sentAt: Date.now(), serverId: null }]);
       try {
-        await sendChatMessage(target.campaignId, target.characterId, text);
+        const result = await sendChatMessage(target.campaignId, target.characterId, text);
+        setPending((current) =>
+          current.map((item) =>
+            item.localId === localId ? { ...item, serverId: result.messageId } : item
+          )
+        );
+        window.setTimeout(remove, PENDING_FALLBACK_MS);
       } catch (sendError) {
+        remove();
         console.error("Failed to send chat message:", sendError);
         if (isRefusal(sendError)) {
           setRefusedChatId(chatId);
@@ -72,6 +89,14 @@ export function ChatConversation({ accountId, target, chat, onCleared }: ChatCon
   }
 
   const closed = chat?.closed === true || refusedChatId === chatId;
+
+  // A pending message disappears as soon as the real one, with the server's id, is in the list.
+  const arrivedIds = new Set(messages.map((message) => message.id));
+  const stillPending = pending.filter((item) => !(item.serverId && arrivedIds.has(item.serverId)));
+  const shownMessages =
+    stillPending.length > 0
+      ? [...messages, ...stillPending.map((item) => pendingToMessage(item, accountId))]
+      : messages;
 
   const handleDelete = async () => {
     try {
@@ -107,7 +132,7 @@ export function ChatConversation({ accountId, target, chat, onCleared }: ChatCon
           <ErrorState className="py-10 text-center">Unable to load this conversation.</ErrorState>
         ) : loading ? null : (
           <ChatMessageList
-            messages={messages}
+            messages={shownMessages}
             currentAccountId={accountId}
             onLoadOlder={() => void loadOlder()}
             loadingOlder={loadingOlder}

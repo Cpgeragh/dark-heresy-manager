@@ -15,19 +15,22 @@ export function MessageInput({
   placeholder?: string;
 }) {
   const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
 
   const handleSend = async () => {
     const trimmed = text.trim();
-    if (!trimmed || sending) return;
-    setSending(true);
+    if (!trimmed) return;
+    // The box empties at once. The parent shows the message and reports a failure, and then the
+    // text goes back, in front of anything typed in the meantime, so nothing is lost.
+    setText("");
     try {
       await onSend(trimmed);
-      setText("");
     } catch {
-      // The parent reports the error. Keep the draft so the user can retry.
-    } finally {
-      setSending(false);
+      setText((current) =>
+        (current === "" ? trimmed : `${trimmed} ${current}`).slice(
+          0,
+          PRODUCT_LIMITS.messageCharacters
+        )
+      );
     }
   };
 
@@ -35,7 +38,7 @@ export function MessageInput({
     <div className="flex gap-2 lg:gap-3 mt-2">
       <input
         className={`flex-1 rounded border px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base ${editableInputColour(
-          !(disabled || sending)
+          !disabled
         )}`}
         placeholder={placeholder}
         value={text}
@@ -47,15 +50,10 @@ export function MessageInput({
             void handleSend();
           }
         }}
-        disabled={disabled || sending}
+        disabled={disabled}
         autoComplete="off"
       />
-      <Button
-        onClick={handleSend}
-        disabled={disabled || !text.trim()}
-        loading={sending}
-        loadingLabel="Sending"
-      >
+      <Button onClick={handleSend} disabled={disabled || !text.trim()}>
         Send
       </Button>
     </div>

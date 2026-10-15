@@ -1,6 +1,6 @@
 // tests/integration/ChatConversation.test.tsx
 import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { Timestamp } from "firebase/firestore";
@@ -167,6 +167,93 @@ describe("ChatConversation", () => {
 
     expect(mockToastError).toHaveBeenCalledWith("Failed to send message. Please try again.");
     expect(screen.getByPlaceholderText("Message Marcus…")).toHaveValue("On my way");
+  });
+
+  it("shows the message at once, dimmed, while the send is still running", async () => {
+    const user = userEvent.setup();
+    sendChatMessageMock.mockReturnValue(new Promise(() => undefined));
+    renderConversation();
+
+    await user.type(screen.getByPlaceholderText("Message Marcus…"), "On my way");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+
+    const bubble = screen.getByText("On my way").closest("[aria-busy]");
+    expect(bubble).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByPlaceholderText("Message Marcus…")).toHaveValue("");
+    expect(screen.queryByText("No messages yet.")).not.toBeInTheDocument();
+  });
+
+  it("replaces the dimmed message with the real one when it arrives, with no copy left", async () => {
+    const user = userEvent.setup();
+    const view = renderConversation();
+
+    await user.type(screen.getByPlaceholderText("Message Marcus…"), "On my way");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(sendChatMessageMock).toHaveBeenCalled());
+    expect(screen.getAllByText("On my way")).toHaveLength(1);
+    expect(screen.getByText("On my way").closest("[aria-busy]")).not.toBeNull();
+
+    useChatMessagesMock.mockReturnValue(
+      messagesState({
+        messages: [message({ id: "m9", fromAccountId: "player-1", text: "On my way" })],
+      })
+    );
+    view.rerenderWith({});
+
+    expect(screen.getAllByText("On my way")).toHaveLength(1);
+    expect(screen.getByText("On my way").closest("[aria-busy]")).toBeNull();
+  });
+
+  it("removes the dimmed message and puts the text back when the send fails", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    sendChatMessageMock.mockRejectedValue(new Error("network"));
+    renderConversation();
+
+    await user.type(screen.getByPlaceholderText("Message Marcus…"), "On my way");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText("Message Marcus…")).toHaveValue("On my way")
+    );
+    expect(document.querySelector("[aria-busy]")).toBeNull();
+    expect(screen.getByText("No messages yet.")).toBeInTheDocument();
+  });
+
+  it("removes the dimmed message when the send is refused", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    sendChatMessageMock.mockRejectedValue(
+      Object.assign(new Error("denied"), { code: "functions/failed-precondition" })
+    );
+    renderConversation();
+
+    await user.type(screen.getByPlaceholderText("Message Marcus…"), "Hello");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(await screen.findByText(/This chat is closed/)).toBeInTheDocument();
+    expect(document.querySelector("[aria-busy]")).toBeNull();
+  });
+
+  it("drops a confirmed message that never shows up in the list after a while", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      renderConversation();
+
+      await user.type(screen.getByPlaceholderText("Message Marcus…"), "Lost one");
+      await user.click(screen.getByRole("button", { name: "Send" }));
+      await waitFor(() => expect(sendChatMessageMock).toHaveBeenCalled());
+      expect(screen.getByText("Lost one")).toBeInTheDocument();
+
+      await act(async () => {
+        vi.advanceTimersByTime(10_001);
+      });
+
+      expect(screen.queryByText("Lost one")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("treats a refused send as a closed chat", async () => {

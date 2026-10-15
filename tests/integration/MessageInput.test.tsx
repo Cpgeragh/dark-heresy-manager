@@ -54,6 +54,52 @@ describe("MessageInput", () => {
     expect(screen.getByPlaceholderText("Reply to Vex…")).toBeInTheDocument();
   });
 
+  it("empties the box at once, without waiting for the send, and never shows a Sending label", async () => {
+    const user = userEvent.setup();
+    const onSend = vi.fn(() => new Promise<void>(() => undefined));
+    render(<MessageInput onSend={onSend} />);
+
+    await user.type(screen.getByPlaceholderText("Message…"), "Hello");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(screen.getByPlaceholderText("Message…")).toHaveValue("");
+    expect(screen.getByPlaceholderText("Message…")).toBeEnabled();
+    expect(screen.queryByRole("button", { name: /Sending/ })).not.toBeInTheDocument();
+  });
+
+  it("sends nothing on a second Enter while the first send is still pending", async () => {
+    const user = userEvent.setup();
+    const onSend = vi.fn(() => new Promise<void>(() => undefined));
+    render(<MessageInput onSend={onSend} />);
+    const input = screen.getByPlaceholderText("Message…");
+
+    await user.type(input, "Hi");
+    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(onSend).toHaveBeenCalledOnce();
+  });
+
+  it("puts the text in front of anything typed meanwhile when delivery fails", async () => {
+    const user = userEvent.setup();
+    let reject: (error: Error) => void = () => undefined;
+    const onSend = vi.fn(
+      () =>
+        new Promise<void>((_resolve, rejectSend) => {
+          reject = rejectSend;
+        })
+    );
+    render(<MessageInput onSend={onSend} />);
+    const input = screen.getByPlaceholderText("Message…");
+
+    await user.type(input, "First");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await user.type(input, "Second");
+    reject(new Error("offline"));
+
+    await waitFor(() => expect(input).toHaveValue("First Second"));
+  });
+
   it("retains the draft and re-enables sending when delivery fails", async () => {
     const user = userEvent.setup();
     const onSend = vi.fn().mockRejectedValue(new Error("offline"));

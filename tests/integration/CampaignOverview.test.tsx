@@ -1,11 +1,11 @@
 // tests/integration/CampaignOverview.test.tsx
 //
 // CharacterRow, SessionForm, SessionCard, and CustomItemLibraryAdmin are
-// all mocked — each already has its own dedicated test file. This file is
+// all mocked, each already has its own dedicated test file. This file is
 // scoped to CampaignOverview's own orchestration:
 // character creation/import, the repair-summaries action, search filtering, and
 // DM-only wiring (including the kebab-menu content, which isn't rendered inside
-// this component's own tree — it's handed to a header-extension setter to be
+// this component's own tree: it's handed to a header-extension setter to be
 // displayed elsewhere, so those two tests capture and separately render it).
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -207,7 +207,7 @@ function renderPage(effectiveUserId = "player-1") {
   render(<CampaignOverview effectiveUserId={effectiveUserId} />);
 }
 
-describe("CampaignOverview — character query role", () => {
+describe("CampaignOverview: character query role", () => {
   it("requests only the current player's own character documents", () => {
     renderPage("player-1");
 
@@ -495,7 +495,7 @@ describe("CampaignOverview", () => {
   });
 });
 
-describe("CampaignOverview — GM and Inquisitor name", () => {
+describe("CampaignOverview: GM and Inquisitor name", () => {
   it("shows the GM and Inquisitor name when both are set, for DM and player alike", () => {
     useCampaignMock.mockReturnValue({
       campaign: campaign({ gmName: "Cain", inquisitorName: "Inquisitor Vail" }),
@@ -517,7 +517,7 @@ describe("CampaignOverview — GM and Inquisitor name", () => {
   });
 });
 
-describe("CampaignOverview — player-facing My Characters and Party", () => {
+describe("CampaignOverview: player-facing My Characters and Party", () => {
   it("shows My Characters instead of the DM Characters admin view, for a player", () => {
     useCampaignCharactersMock.mockReturnValue({
       characters: [character({ id: "c1", header: { characterName: "Vex" } })],
@@ -581,7 +581,7 @@ describe("CampaignOverview — player-facing My Characters and Party", () => {
   });
 });
 
-describe("CampaignOverview — messages", () => {
+describe("CampaignOverview: messages", () => {
   it("has no Messages section for the DM, because messages live in the header now", () => {
     useCampaignCharactersMock.mockReturnValue({
       characters: [character({ id: "c1", header: { characterName: "Vex" } })],
@@ -594,7 +594,7 @@ describe("CampaignOverview — messages", () => {
   });
 });
 
-describe("CampaignOverview — chats after a character is deleted", () => {
+describe("CampaignOverview: chats after a character is deleted", () => {
   const chatFor = (characterId: string) => ({
     id: `campaign-1__${characterId}__player-1`,
     campaignId: "campaign-1",

@@ -1043,7 +1043,7 @@ Use a disposable campaign with a DM and two players on separate profiles, plus a
 - [ ] The conversation shows messages oldest to newest under Today, Yesterday and full-date dividers in local time, scrolls to the bottom on new arrivals, and shows "No messages yet" for an empty chat
 - [ ] In a chat with more than 200 messages, the latest 100 show first; each Load older messages press prepends at most 100 with no gaps or duplicates and no jump to the bottom
 - [ ] Sending arrives live in the other person's pop-up and raises only their unread count; the sender's own count stays zero
-- [ ] Double-clicking Send writes one message; empty or whitespace messages cannot be sent; entry stops at 2,000 characters; a failed send keeps your draft
+- [ ] Your own message appears at once, dimmed with no time, and turns solid when the server confirms, even for the first message after a quiet spell; a failed send removes it and puts the text back in the box; double-clicking Send writes one message; empty or whitespace messages cannot be sent; entry stops at 2,000 characters
 - [ ] Opening a chat sets its unread count to zero once; opening a chat that is already at zero causes no write
 - [ ] As DM on an unclaimed character, the chat shows a note and no reply box
 - [ ] After a release or force release the chat shows a closed note and no reply box, and the messages stay; the same player reclaiming the character resumes the old chat; a different player gets a fresh empty chat while the old one stays closed in both inboxes
