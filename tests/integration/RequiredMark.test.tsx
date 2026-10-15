@@ -5,7 +5,7 @@ import "@testing-library/jest-dom";
 import { RequiredMark } from "../../src/ui/forms/RequiredMark";
 import { RequiredFieldsNote } from "../../src/ui/forms/CustomFormFooter";
 import { RequiredFormLabel } from "../../src/ui/forms/RequiredFormLabel";
-import { colourErrorText, colourRequiredText } from "../../src/ui/styles/colourTokens";
+import { colourHeadingAccent, colourRequiredText } from "../../src/ui/styles/colourTokens";
 
 describe("RequiredMark", () => {
   it("renders an asterisk in the required colour that screen readers skip", () => {
@@ -17,8 +17,8 @@ describe("RequiredMark", () => {
     expect(mark).toHaveClass(colourRequiredText);
   });
 
-  it("uses the same red as error text", () => {
-    expect(colourRequiredText).toBe(colourErrorText);
+  it("uses the same red as headings", () => {
+    expect(colourRequiredText).toBe(colourHeadingAccent);
   });
 
   it("is the star used by the shared required label and the required note", () => {

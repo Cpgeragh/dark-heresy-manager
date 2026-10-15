@@ -972,7 +972,7 @@ Use a DM with active and archived campaigns, a player who belongs to multiple ca
 
 - [ ] Every campaign the account belongs to appears once as a campaign link; the Dashboard does not render character cards, portraits, stats, or recovery codes in this section
 - [ ] A campaign the account does not belong to never appears in Campaigns You Play In
-- [ ] Selecting a campaign opens Campaign Overview, where the player's own characters and the permitted roster are shown as covered in §26
+- [ ] Selecting a campaign opens the campaign page on its Party section, where the player's own character and the permitted roster are shown as covered in §26
 - [ ] Membership in several campaigns produces one link for each campaign without duplicates
 
 **Claim a Character (button and modal inside Campaigns You Play In):**
@@ -991,17 +991,24 @@ Use a DM with active and archived campaigns, a player who belongs to multiple ca
 
 ## 26. Campaign Overview
 
-The per-campaign hub: characters, sessions, and (DM only) the
-custom item library admin table (§21).
+The per-campaign page, one section at a time through a section menu: Party,
+Custom Item Library (DM only, §21) and Session History.
 
 ### How to test this page
 
 Use a disposable campaign with at least two players, several characters, one applied session, one unapplied session, and custom items. Exercise character operations and JSON import/export before sessions. Refresh after every mutation and verify the owning player's view as well as the DM's.
 
+- [ ] The campaign page opens on Party, with the campaign name as the page title, the section name in the toolbar and the GM and Inquisitor names above the content (`CampaignOverview.tsx`)
+- [ ] The burger menu in the toolbar lists Party, Custom Item Library and Session History for the DM, and only Party and Session History for a player, as a plain list with no categories (`SectionDrawer.tsx`, `sections.ts`)
+- [ ] Choosing a section switches in place, changes the toolbar title, puts `?section=` in the address, scrolls to the top and keeps the header back button going to the Dashboard
+- [ ] Opening the page with `?section=custom-items` as a player, or with an unknown section value as either role, ends up on Party
+- [ ] Each section reads its own data only while it is open: on a slow connection a dimmed overlay with dots covers the section area while it loads, and nothing pops in afterwards (`SectionPending.tsx`)
+- [ ] Player: the Party section shows your own character as a tappable card first, then everyone else as plain rows that do not open anything, with no My Characters heading (`PartySection.tsx`)
+- [ ] DM: the Party section lists every character in the same rows, with the search box and the Create box above them and no character set apart
 - [ ] Character search box filters the character list live, by name substring
 - [ ] DM: the character list shows a Reveal control instead of the recovery code itself; clicking it fetches and shows that one character's code, and the code is not present anywhere in the page before it's clicked
 - [ ] Player: their own character card on the campaign page shows the same Reveal control for their own recovery code, and clicking it works the same way
-- [ ] DM: create a new character: get back a recovery code in a toast that includes a copy button, distinct from the normal toast style
+- [ ] DM: press the plus button beside the search box, enter a name in the Create Character window and press Create: the window closes and you get back a recovery code in a toast that includes a copy button, distinct from the normal toast style; Cancel closes the window and clears the name
 - [ ] Character names stop at 100 characters, and rapidly pressing Create still produces only one character
 - [ ] DM: Import JSON (header kebab menu): rejects any file missing `recoveryCode` or `isEditableByPlayer` with an error toast rather than importing a malformed character; a valid import is issued a **fresh** recovery code, it does not reuse whatever was in the file
 - [ ] Export JSON from a character sheet's kebab menu (available to the DM or the owning player), then re-import that same file: confirm the re-imported copy gets its own new recovery code rather than colliding with the original's
@@ -1021,7 +1028,7 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] Confirm that delete with the checkbox left unchecked: session is removed, every attendee's Remaining XP is unchanged
 - [ ] Confirm that delete with the checkbox checked: session is removed **and** every attendee's XP total drops by the session's XP amount
 - [ ] Cancel out of that confirm after checking the box, then reopen it: the checkbox starts unchecked again rather than remembering the discarded state
-- [ ] **Autofill, Android:** the character search box, the new Character Name field, and Date, XP Awarded, Summary and DM Notes on both the new session form and an edited session each show no autofill suggestion row above the keyboard (`CampaignOverview.tsx`, `SessionForm.tsx`, `SessionCard.tsx`)
+- [ ] **Autofill, Android:** the character search box, the new Character Name field, and Date, XP Awarded, Summary and DM Notes on both the new session form and an edited session each show no autofill suggestion row above the keyboard (`PartySection.tsx`, `SessionForm.tsx`, `SessionCard.tsx`)
 
 ## 27. Messages
 
@@ -1290,6 +1297,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] Choosing a companion in the Companion picker still shows a spinner and the waiting cursor on that card until it saves
 - [ ] No text in the app appears in italics
 - [ ] Every required marker is the same red asterisk, in the custom item forms, the Device Name labels, the Insanity severity label and the Required note, and a screen reader skips it (`RequiredMark.tsx`)
+- [ ] Every card, inner box, text box, button, toggle, chip, pop-up and window has the same rounded corner, including the Create Character window, the character sheet's stat and Vitals boxes and the Messages box; only circles, pills and the very small boxes (info button, quantity step buttons, advance squares, Psy Rating square, the 16px checkbox box) keep their own shape (`shapeStyles.ts`)
 - [ ] Names, values, headings, form labels and XP numbers share one light grey, and the small labels such as Attendees, Current rank and Card spent share one sky blue (`colourTextPrimary`, `uiTextMeta`)
 - [ ] Rule names inside info modals, such as a weapon special rule, an armour rule, a Malignancy roll and an Insanity type, show in sky blue above a description that matches every other description (`uiRuleName`, `uiTextDescription`)
 - [ ] Every divider line inside a card, drawer or modal is the same grey, including the lines inside the Insanity and Corruption panels (`colourDivider`)

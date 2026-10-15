@@ -66,7 +66,7 @@ confusing output:
 - [ ] `PendingOverlay.tsx` is a `role="status"` layer labelled "Loading": confirm a
       screen reader announces it when it appears, and that the page underneath cannot be
       reached by keyboard while it covers the page.
-- [ ] `CampaignOverview.tsx`'s Search input (DM's character list) and Character Name
+- [ ] `PartySection.tsx`'s Search input (DM's character list) and Character Name
       input both rely only on `placeholder` text with no `aria-label`/`<label>`.
 - [ ] `CustomItemLibraryAdmin.tsx`'s category and status filter chips communicate the
       selected filter only through colour (`activeChip`/`inactiveChip`), with no

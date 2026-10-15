@@ -5,6 +5,7 @@ import {
   colourTextPrimary,
 } from "./colourTokens";
 import { uiDisabledLook, uiFocusRing } from "./buttonStyles";
+import { uiCorner } from "./shapeStyles";
 
 export type FieldResize = "none" | "vertical";
 
@@ -16,9 +17,9 @@ interface FieldControlOptions {
 
 type FieldColourOptions = Pick<FieldControlOptions, "editable" | "invalid">;
 
-const fieldControlBase = "w-full rounded border px-2 py-1 text-sm lg:text-base";
+const fieldControlBase = "w-full border px-2 py-1 text-sm lg:text-base";
 
-const fieldColourBase = "transition placeholder:text-slate-500";
+const fieldColourBase = `${uiCorner} transition placeholder:text-slate-500`;
 
 const fieldControlEditable = `${colourFillPanel} ${colourBorderSurface} ${colourTextPrimary} ${uiFocusRing}`;
 
@@ -26,7 +27,7 @@ const fieldControlInvalid = `${colourFillPanel} ${colourBorderRed} ${colourTextP
 
 const fieldControlReadOnly = `${colourFillPanel} ${colourBorderSurface} ${colourTextPrimary} ${uiDisabledLook}`;
 
-/** Fill, border and selected border for a text box, with no size classes. */
+/** Corners, fill, border and selected border for a text box, with no size classes. */
 export function fieldColourClass({ editable, invalid = false }: FieldColourOptions) {
   const stateClass = !editable
     ? fieldControlReadOnly

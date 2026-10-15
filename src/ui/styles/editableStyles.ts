@@ -20,6 +20,7 @@ import {
   colourTextPrimary,
 } from "./colourTokens";
 import { fieldColourClass, fieldControlClass, type FieldResize } from "./fieldStyles";
+import { uiCorner } from "./shapeStyles";
 
 /**
  * Shared UI styles and tokens.
@@ -53,12 +54,12 @@ export function editableTextareaClass(isEditable: boolean, resize: FieldResize =
 export const uiSectionHeader = `border-l-2 ${colourAccentBar} pl-2 text-xs lg:text-sm font-cinzel font-semibold uppercase tracking-widest ${colourHeadingAccent}`;
 
 /** Standard card shell: bright border and semi-transparent background, without padding. */
-export const uiSectionShell = `rounded-lg border ${colourBorderSurface} ${colourFillCard}`;
+export const uiSectionShell = `${uiCorner} border ${colourBorderSurface} ${colourFillCard}`;
 
 /** Standard padded section card. */
 export const uiSection = `${uiSectionShell} p-3 lg:p-4`;
 
-export const uiCell = `rounded border ${colourBorderSurface} ${colourFillCard}`;
+export const uiCell = `${uiCorner} border ${colourBorderSurface} ${colourFillCard}`;
 
 /** Wrapping row of compact chips or chip-shaped controls. */
 export const uiChipRow = "flex flex-wrap gap-1.5";
@@ -94,7 +95,7 @@ export const uiInactiveItem = "opacity-60";
 export const uiInactivePreview = "pointer-events-none opacity-50";
 
 /** Tinted card shape without a colour: pair with a colourNotice token. */
-export const uiNoticeBox = "rounded-lg border";
+export const uiNoticeBox = `${uiCorner} border`;
 
 /** Recovery code display box: the standard cell, padded and centred. */
 export const uiCodeBox = `${uiCell} p-3 text-center`;
@@ -124,6 +125,12 @@ export const uiTextPlaceholder = colourTextPlaceholder;
 /** Tiny uppercase label text used beside values. */
 export const uiTextLabel = `text-[10px] lg:text-xs ${colourMetadataLabelText} uppercase tracking-wide`;
 
+/** Role label on a campaign plaque, such as Game Master. */
+export const uiRoleLabel = `text-sm lg:text-base ${colourMetadataLabelText} uppercase tracking-widest`;
+
+/** Name on a campaign plaque. */
+export const uiRoleName = `text-lg lg:text-xl ${colourTextPrimary}`;
+
 /** Shared error colour. Components retain the size appropriate to their layout. */
 export const uiTextError = colourErrorText;
 export const uiTextGMNote = colourTextGMNote;
@@ -132,7 +139,7 @@ export const uiTextGMNote = colourTextGMNote;
 export const uiTextDescription = `text-sm lg:text-base ${uiTextBody} leading-relaxed`;
 
 /** Filled box that holds the description on an item detail screen. */
-export const uiDescriptionBox = `text-xs lg:text-sm ${uiTextBody} ${colourFillInset} rounded p-3 lg:p-4 leading-relaxed`;
+export const uiDescriptionBox = `text-xs lg:text-sm ${uiTextBody} ${colourFillInset} ${uiCorner} p-3 lg:p-4 leading-relaxed`;
 
 /** Small supporting line, such as a date, a creator, a count or a helper sentence. */
 export const uiTextMeta = `text-xs lg:text-sm ${colourMetadataLabelText}`;

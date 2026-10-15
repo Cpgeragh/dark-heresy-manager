@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 
 import { Chip } from "../../src/ui/chips/Chip";
 import { chipColours, type ChipColour } from "../../src/ui/styles/colourTokens";
+import { uiCorner } from "../../src/ui/styles/shapeStyles";
 
 describe("Chip", () => {
   it.each(Object.keys(chipColours) as ChipColour[])("applies the %s palette classes", (colour) => {
@@ -19,7 +20,7 @@ describe("Chip", () => {
     render(<Chip>Label</Chip>);
 
     const chip = screen.getByText("Label");
-    expect(chip).toHaveClass("rounded", "border");
+    expect(chip).toHaveClass(uiCorner, "border");
     for (const colour of Object.values(chipColours)) {
       expect(chip.className).not.toContain(colour);
     }

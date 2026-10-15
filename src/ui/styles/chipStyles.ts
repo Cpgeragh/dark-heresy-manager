@@ -1,3 +1,4 @@
+import { uiCorner } from "./shapeStyles";
 export type ChipSize = "sm" | "md" | "lg";
 
 const SIZE_CLASSES: Record<ChipSize, string> = {
@@ -6,8 +7,7 @@ const SIZE_CLASSES: Record<ChipSize, string> = {
   sm: "h-5 text-[10px] lg:text-xs px-1 lg:px-1.5",
 };
 
-const BASE_CLASS =
-  "inline-flex items-center justify-center gap-1 rounded border pt-px font-medium leading-none whitespace-nowrap";
+const BASE_CLASS = `inline-flex items-center justify-center gap-1 ${uiCorner} border pt-px font-medium leading-none whitespace-nowrap`;
 
 export interface ChipStyleOptions {
   size?: ChipSize;
