@@ -1328,6 +1328,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The body of every modal and form, including the information modals, has the same space between its parts (`uiStackBody`)
 - [ ] A label and its input or value sit the same distance apart in every form, and bullet lists in information modals use the same small gap (`uiStackField`)
 - [ ] On a phone, the Skills and Psychic power panels use the same space as the same sections on desktop
+- [ ] Every scrollbar, in a long pop-up such as New Session, in a picker list, in the navigation drawer and on the page itself, is thin with a slate grey thumb, a see-through track and no arrow buttons (`src/index.css`)
 
 ## 36. Waiting and Instant Saves
 

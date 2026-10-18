@@ -200,6 +200,8 @@ Each raw colour class is written once, under `src/ui/styles`, and every other st
 
 Hover, focus, press and disabled colours stay inside the style of the control that owns them. `tests/unit/textRecipes.test.ts` fails when a hand-typed text, background, border or divider colour, or a copy of the shared text recipes, appears outside the files listed above and the files that own hover, icon, table and backdrop colours.
 
+Scrollbars are styled once in `src/index.css`: every scrollable area, including pop-ups and the page, uses a thin scrollbar with the thumb colour `--scrollbar-thumb` (slate-600) and a transparent track. No component styles a scrollbar of its own. Browsers that do not support `scrollbar-width` and `scrollbar-color` keep their default scrollbar.
+
 ## Navigation and startup
 
 The routed application exposes these canonical paths:
