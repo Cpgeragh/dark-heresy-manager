@@ -8,6 +8,7 @@ const {
   mockCallRepairSessionSummaries,
   mockCallApplySessionXp,
   mockCallDeleteSession,
+  mockCallAdjustSessionXp,
   mockDoc,
   mockIncrement,
   mockRunTransaction,
@@ -26,6 +27,7 @@ const {
   const mockCallRepairSessionSummaries = vi.fn();
   const mockCallApplySessionXp = vi.fn();
   const mockCallDeleteSession = vi.fn();
+  const mockCallAdjustSessionXp = vi.fn();
   const mockTransaction = {
     get: vi.fn(),
     update: vi.fn(),
@@ -39,6 +41,7 @@ const {
     mockCallRepairSessionSummaries,
     mockCallApplySessionXp,
     mockCallDeleteSession,
+    mockCallAdjustSessionXp,
     mockDoc: vi.fn((...args: unknown[]) => {
       if (args.length === 1) {
         const parent = args[0] as { path: string };
@@ -74,11 +77,13 @@ vi.mock("firebase/functions", () => ({
     if (name === "repairSessionSummaries") return mockCallRepairSessionSummaries;
     if (name === "applySessionXp") return mockCallApplySessionXp;
     if (name === "deleteSession") return mockCallDeleteSession;
+    if (name === "adjustSessionXp") return mockCallAdjustSessionXp;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
 
 import {
+  adjustSessionXp,
   applySessionXp,
   createSession,
   deleteSession,
@@ -283,6 +288,39 @@ describe("applySessionXp", () => {
     await applySessionXp("camp-1", "sess-1", [], 200);
 
     expect(mockCallApplySessionXp).not.toHaveBeenCalled();
+  });
+});
+
+describe("adjustSessionXp", () => {
+  it("calls the protected adjustment operation with the new amount and attendees", async () => {
+    mockCallAdjustSessionXp.mockResolvedValue({ data: undefined });
+    await adjustSessionXp("camp-1", "sess-1", 250, ["char-1", "char-2"]);
+
+    expect(mockCallAdjustSessionXp).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      sessionId: "sess-1",
+      xpAwarded: 250,
+      attendees: ["char-1", "char-2"],
+      operationId: expect.any(String),
+    });
+  });
+
+  it("preserves protected-operation failures", async () => {
+    const error = new Error("Session XP cannot be adjusted below the Spent XP of Vex.");
+    mockCallAdjustSessionXp.mockRejectedValue(error);
+
+    await expect(adjustSessionXp("camp-1", "sess-1", 10, ["char-1"])).rejects.toBe(error);
+  });
+
+  it("rejects a bad amount or duplicate attendees without calling the server", async () => {
+    await expect(adjustSessionXp("camp-1", "sess-1", -5, ["char-1"])).rejects.toThrow(
+      "XP awarded must be a whole number from 0 to 100000."
+    );
+    await expect(adjustSessionXp("camp-1", "sess-1", 5, ["char-1", "char-1"])).rejects.toThrow(
+      "more than once"
+    );
+
+    expect(mockCallAdjustSessionXp).not.toHaveBeenCalled();
   });
 });
 

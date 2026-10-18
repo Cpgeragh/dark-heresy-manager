@@ -68,7 +68,8 @@ export type XpHistorySource =
   | "opening-balance"
   | "manual-adjustment"
   | "session-award"
-  | "session-reversal";
+  | "session-reversal"
+  | "session-adjustment";
 
 export interface XpHistoryDocument {
   amountXp: number;

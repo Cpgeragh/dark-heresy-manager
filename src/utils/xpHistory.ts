@@ -8,6 +8,7 @@ const SOURCES: readonly XpHistorySource[] = [
   "manual-adjustment",
   "session-award",
   "session-reversal",
+  "session-adjustment",
 ];
 
 export function validateXpHistoryPayload(data: unknown): data is XpHistoryDocument {

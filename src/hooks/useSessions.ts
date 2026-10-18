@@ -7,6 +7,7 @@ import { db } from "../firebase";
 import type { SessionListDocument } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
 import {
+  adjustSessionXp as adjustSessionXpDocument,
   deleteSession as deleteSessionDocument,
   updateSession as updateSessionDocument,
   type SessionUpdateData,
@@ -55,9 +56,25 @@ export function useSessions(
   const updateSession = useCallback(
     async (sessionId: string, data: SessionUpdateData) => {
       if (!campaignId) return;
-      await updateSessionDocument(campaignId, sessionId, data);
+      const existing = sessions.find((session) => session.id === sessionId);
+      if (existing?.xpApplied !== true) {
+        await updateSessionDocument(campaignId, sessionId, data);
+        return;
+      }
+
+      // The XP of an applied session is already on the characters, so the server adjusts
+      // each character by the difference and the rest of the edit is saved as usual.
+      const { xpAwarded, attendees, ...rest } = data;
+      const nextXp = xpAwarded ?? existing.xpAwarded;
+      const nextAttendees = attendees ?? existing.attendees;
+      const xpChanged =
+        nextXp !== existing.xpAwarded ||
+        nextAttendees.length !== existing.attendees.length ||
+        nextAttendees.some((id) => !existing.attendees.includes(id));
+      if (xpChanged) await adjustSessionXpDocument(campaignId, sessionId, nextXp, nextAttendees);
+      if (Object.keys(rest).length > 0) await updateSessionDocument(campaignId, sessionId, rest);
     },
-    [campaignId]
+    [campaignId, sessions]
   );
 
   return { sessions, loading, error, deleteSession, updateSession };

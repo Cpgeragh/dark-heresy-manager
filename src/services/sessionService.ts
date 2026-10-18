@@ -54,6 +54,16 @@ const callDeleteSession = httpsCallable<
   { campaignId: string; sessionId: string; reverseXp: boolean; operationId: string },
   void
 >(functions, "deleteSession");
+const callAdjustSessionXp = httpsCallable<
+  {
+    campaignId: string;
+    sessionId: string;
+    xpAwarded: number;
+    attendees: string[];
+    operationId: string;
+  },
+  void
+>(functions, "adjustSessionXp");
 
 /** Rebuilds every safe session summary through the protected DM-only operation. */
 export async function repairSessionSummaries(campaignId: string): Promise<number> {
@@ -283,5 +293,48 @@ export async function applySessionXp(
         operationId: createLocalId("apply-session-xp"),
       });
     })
+  );
+}
+
+/**
+ * Changes the XP amount or the attendees of a session whose XP was already applied. The server
+ * gives or removes the difference for each affected character in one transaction.
+ */
+export async function adjustSessionXp(
+  campaignId: string,
+  sessionId: string,
+  xpAwarded: number,
+  attendees: string[]
+): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(sessionId, "Session ID");
+  if (!Array.isArray(attendees)) throw new Error("Session attendees must be an array.");
+  if (!Number.isInteger(xpAwarded) || xpAwarded < 0 || xpAwarded > PRODUCT_LIMITS.sessionXpAward) {
+    throw new Error(
+      `XP awarded must be a whole number from 0 to ${PRODUCT_LIMITS.sessionXpAward}.`
+    );
+  }
+  if (attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
+    throw new Error(`A session cannot have more than ${SESSION_XP_FAN_OUT_LIMIT} attendees.`);
+  }
+  if (new Set(attendees).size !== attendees.length) {
+    throw new Error("A character cannot be listed as a session attendee more than once.");
+  }
+  attendees.forEach((attendeeId) => assertFirestoreDocumentId(attendeeId, "Session attendee ID"));
+
+  await measurePerformanceMutation("session:adjust-xp", () =>
+    runSingleFlight(
+      "session:adjust-xp",
+      [campaignId, sessionId, xpAwarded, attendees],
+      async () => {
+        await callAdjustSessionXp({
+          campaignId,
+          sessionId,
+          xpAwarded,
+          attendees,
+          operationId: createLocalId("adjust-session-xp"),
+        });
+      }
+    )
   );
 }
