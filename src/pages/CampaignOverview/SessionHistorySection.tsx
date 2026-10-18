@@ -53,7 +53,7 @@ export function SessionHistorySection({ campaignId, isDM }: SessionHistorySectio
         />
       )}
 
-      {isDM && !showSessionForm && (
+      {isDM && (
         <Button className="w-full sm:w-auto sm:self-start" onClick={() => setShowSessionForm(true)}>
           New Session
         </Button>
@@ -68,6 +68,7 @@ export function SessionHistorySection({ campaignId, isDM }: SessionHistorySectio
           {sessions.map((session) => (
             <SessionCard
               key={session.id}
+              campaignId={campaignId}
               session={session}
               characters={sessionCharacters}
               isDM={isDM}

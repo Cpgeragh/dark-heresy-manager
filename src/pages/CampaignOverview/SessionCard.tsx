@@ -1,7 +1,6 @@
 // src/pages/CampaignOverview/SessionCard.tsx
 
 import { useState, useCallback, useRef } from "react";
-import type { Timestamp } from "firebase/firestore";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import type { SessionListDocument } from "../../types/Firestore";
 import {
@@ -12,21 +11,19 @@ import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { CheckIcon } from "../../ui/icons/CheckIcon";
-import { ConfirmInline } from "../../ui/forms/ConfirmInline";
-import { SectionHeader } from "../../ui/SectionHeader";
+import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import {
   uiInlineRow,
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabelSecondary,
   uiSection,
+  uiStackBody,
+  uiStackList,
   uiTextBody,
   uiTextError,
   uiTextMeta,
-  uiStackBody,
-  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { colourDivider } from "../../ui/styles/colourTokens";
+import { toSessionDate } from "../../utils/sessionDate";
+import { SessionForm } from "./SessionForm";
 
 interface Character {
   id: string;
@@ -36,6 +33,7 @@ interface Character {
 type SessionWithId = SessionListDocument & { id: string };
 
 interface Props {
+  campaignId: string;
   session: SessionWithId;
   characters: Character[];
   isDM: boolean;
@@ -44,23 +42,18 @@ interface Props {
   onApplyXp?: () => Promise<void>;
 }
 
-function toDate(value: SessionListDocument["date"]): Date {
-  if (value instanceof Date) return value;
-  if (value && typeof (value as Timestamp).toDate === "function")
-    return (value as Timestamp).toDate();
-  return new Date();
-}
-
-function toInputDate(value: SessionListDocument["date"]): string {
-  return toDate(value).toISOString().split("T")[0];
-}
-
-export function SessionCard({ session, characters, isDM, onDelete, onSave, onApplyXp }: Props) {
+export function SessionCard({
+  campaignId,
+  session,
+  characters,
+  isDM,
+  onDelete,
+  onSave,
+  onApplyXp,
+}: Props) {
   recordComponentRender("SessionCard");
   const toast = useToast();
-  const [mode, setMode] = useState<"view" | "edit">("view");
-  const [saving, setSaving] = useState(false);
-  const savingRef = useRef(false);
+  const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const deletingRef = useRef(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -68,59 +61,19 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   const [applyingXp, setApplyingXp] = useState(false);
   const applyingXpRef = useRef(false);
 
-  const [date, setDate] = useState(toInputDate(session.date));
-  const [summary, setSummary] = useState(session.summary);
-  const [dmNotes, setDmNotes] = useState(session.dmNotes ?? "");
-  const [xpAwarded, setXpAwarded] = useState(session.xpAwarded);
-  const [attendees, setAttendees] = useState<Set<string>>(new Set(session.attendees));
-
   const nameById = Object.fromEntries(characters.map((c) => [c.id, c.characterName]));
-  const dateStr = toDate(session.date).toLocaleDateString(undefined, {
+  const dateStr = toSessionDate(session.date).toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
   const xpAffectedDocuments = getSessionXpAffectedDocumentCount(session.attendees.length);
 
-  const toggleAttendee = useCallback((id: string) => {
-    setAttendees((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const closeDelete = useCallback(() => {
+    if (deletingRef.current) return;
+    setConfirmingDelete(false);
+    setReverseXp(false);
   }, []);
-
-  const handleSave = useCallback(async () => {
-    if (!onSave || savingRef.current) return;
-    savingRef.current = true;
-    setSaving(true);
-    try {
-      await onSave({
-        date: new Date(date),
-        summary,
-        dmNotes,
-        xpAwarded,
-        attendees: [...attendees],
-      });
-      setMode("view");
-    } catch (err) {
-      console.error("Failed to save session:", err);
-      toast.error("Failed to save session. Please try again.");
-    } finally {
-      savingRef.current = false;
-      setSaving(false);
-    }
-  }, [onSave, date, summary, dmNotes, xpAwarded, attendees, toast]);
-
-  const handleCancelEdit = useCallback(() => {
-    setDate(toInputDate(session.date));
-    setSummary(session.summary);
-    setDmNotes(session.dmNotes ?? "");
-    setXpAwarded(session.xpAwarded);
-    setAttendees(new Set(session.attendees));
-    setMode("view");
-  }, [session]);
 
   const handleDelete = useCallback(async () => {
     if (!onDelete || deletingRef.current) return;
@@ -157,90 +110,6 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
     }
   }, [onApplyXp, session.xpAwarded, session.attendees.length, toast]);
 
-  if (mode === "edit") {
-    return (
-      <div className={`${uiSection} ${uiStackBody}`}>
-        <SectionHeader as="h3">Edit Session</SectionHeader>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={uiFormLabelSecondary}>Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className={editableInputClass(true)}
-              autoComplete="off"
-            />
-          </div>
-          <div>
-            <label className={uiFormLabelSecondary}>XP Awarded</label>
-            <input
-              type="number"
-              min={0}
-              value={xpAwarded}
-              onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
-              className={editableInputClass(true)}
-              autoComplete="off"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className={uiFormLabelSecondary}>Summary</label>
-          <textarea
-            value={summary}
-            onChange={(e) => setSummary(e.target.value)}
-            rows={3}
-            className={editableTextareaClass(true, "none")}
-            autoComplete="off"
-          />
-        </div>
-
-        <div>
-          <label className={uiFormLabelSecondary}>DM Notes (private)</label>
-          <textarea
-            value={dmNotes}
-            onChange={(e) => setDmNotes(e.target.value)}
-            rows={2}
-            className={editableTextareaClass(true, "none")}
-            autoComplete="off"
-          />
-        </div>
-
-        <div>
-          <p className={`${uiTextMeta} mb-2`}>Attendees</p>
-          <div className="flex flex-wrap gap-3">
-            {characters.map((char) => (
-              <label
-                key={char.id}
-                className="flex items-center gap-1 text-sm lg:text-base cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={attendees.has(char.id)}
-                  onChange={() => toggleAttendee(char.id)}
-                />
-                {char.characterName}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <p className={uiTextMeta}>Note: XP changes do not retroactively adjust character totals.</p>
-
-        <div className="grid grid-cols-2 gap-2">
-          <Button fullWidth onClick={handleSave} loading={saving} loadingLabel="Saving">
-            Save
-          </Button>
-          <Button variant="neutral" fullWidth onClick={handleCancelEdit} disabled={saving}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`${uiSection} ${uiStackList}`}>
       <div className="flex items-center justify-between">
@@ -267,71 +136,15 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               </Button>
             ))}
           {isDM && onSave && (
-            <Button variant="secondary" size="sm" onClick={() => setMode("edit")}>
+            <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
               Edit
             </Button>
           )}
-          {isDM &&
-            onDelete &&
-            (session.xpApplied === true ? (
-              confirmingDelete ? (
-                <div className="flex flex-col items-start gap-1.5">
-                  <span className={`text-xs lg:text-sm ${uiTextError}`}>
-                    This session's XP was already applied. Deleting it won't remove that XP unless
-                    checked below.
-                  </span>
-                  <label
-                    className={`flex items-center gap-1.5 text-xs lg:text-sm ${uiTextBody} cursor-pointer`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={reverseXp}
-                      onChange={(e) => setReverseXp(e.target.checked)}
-                      disabled={deleting}
-                    />
-                    Also remove {session.xpAwarded} XP from attendees
-                  </label>
-                  <span className={uiTextMeta}>
-                    This will affect {reverseXp ? xpAffectedDocuments : 2} documents.
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      loading={deleting}
-                      loadingLabel="Deleting"
-                      onClick={() => handleDelete()}
-                    >
-                      Yes
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={deleting}
-                      onClick={() => {
-                        setConfirmingDelete(false);
-                        setReverseXp(false);
-                      }}
-                    >
-                      No
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Button variant="dangerGhost" size="sm" onClick={() => setConfirmingDelete(true)}>
-                  Delete
-                </Button>
-              )
-            ) : (
-              <ConfirmInline
-                triggerLabel="Delete"
-                question="Delete?"
-                size="sm"
-                busy={deleting}
-                busyLabel="Deleting"
-                onConfirm={() => handleDelete()}
-              />
-            ))}
+          {isDM && onDelete && (
+            <Button variant="dangerGhost" size="sm" onClick={() => setConfirmingDelete(true)}>
+              Delete
+            </Button>
+          )}
         </div>
       </div>
 
@@ -345,6 +158,73 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
 
       {isDM && session.dmNotes && (
         <p className={`${uiTextMeta} border-t ${colourDivider} pt-2`}>DM: {session.dmNotes}</p>
+      )}
+
+      {editing && onSave && (
+        <SessionForm
+          campaignId={campaignId}
+          characters={characters}
+          session={session}
+          onSave={onSave}
+          onClose={() => setEditing(false)}
+        />
+      )}
+
+      {confirmingDelete && (
+        <PickerModal
+          title="Delete Session"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={closeDelete}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="primary"
+                loading={deleting}
+                loadingLabel="Deleting"
+                onClick={() => handleDelete()}
+              >
+                Delete
+              </Button>
+              <Button variant="neutral" disabled={deleting} onClick={closeDelete}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <div className={uiStackBody}>
+              <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+                Delete the session on {dateStr}?
+              </p>
+              {session.xpApplied === true && (
+                <>
+                  <p className={`text-xs lg:text-sm ${uiTextError}`}>
+                    This session's XP was already applied. Deleting it won't remove that XP unless
+                    checked below.
+                  </p>
+                  <label
+                    className={`flex items-center gap-1.5 text-xs lg:text-sm ${uiTextBody} cursor-pointer`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={reverseXp}
+                      onChange={(e) => setReverseXp(e.target.checked)}
+                      disabled={deleting}
+                    />
+                    Also remove {session.xpAwarded} XP from attendees
+                  </label>
+                  <p className={uiTextMeta}>
+                    This will affect {reverseXp ? xpAffectedDocuments : 2} documents.
+                  </p>
+                </>
+              )}
+            </div>
+          </PickerBody>
+        </PickerModal>
       )}
     </div>
   );

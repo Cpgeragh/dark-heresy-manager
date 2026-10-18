@@ -81,9 +81,7 @@ export async function forceAssignCharacter(
         input.targetUid,
         {
           previousRecoveryCode:
-            typeof characterData.recoveryCode === "string"
-              ? characterData.recoveryCode
-              : undefined,
+            typeof characterData.recoveryCode === "string" ? characterData.recoveryCode : undefined,
           recoveryCodeHmacSecret: hmacSecret,
           newOwnerAlreadyMember: true,
           playerName: livePlayerName ?? storedPlayerName,

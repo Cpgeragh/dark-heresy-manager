@@ -998,7 +998,7 @@ Custom Item Library (DM only, §21) and Session History.
 
 Use a disposable campaign with at least two players, several characters, one applied session, one unapplied session, and custom items. Exercise character operations and JSON import/export before sessions. Refresh after every mutation and verify the owning player's view as well as the DM's.
 
-- [ ] The campaign page opens on Party, with the campaign name as the page title, the section name in the toolbar and the GM and Inquisitor names above the content (`CampaignOverview.tsx`)
+- [ ] The campaign page opens on Party, with the campaign name as the page title, the section name in the toolbar; the GM and Inquisitor plaques sit at the top of the Party section only, and the Custom Item Library and Session History pages start straight under the toolbar (`CampaignOverview.tsx`, `PartySection.tsx`)
 - [ ] The burger menu in the toolbar lists Party, Custom Item Library and Session History for the DM, and only Party and Session History for a player, as a plain list with no categories (`SectionDrawer.tsx`, `sections.ts`)
 - [ ] Choosing a section switches in place, changes the toolbar title, puts `?section=` in the address, scrolls to the top and keeps the header back button going to the Dashboard
 - [ ] Opening the page with `?section=custom-items` as a player, or with an unknown section value as either role, ends up on Party
@@ -1024,29 +1024,33 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] Session History: create a session with a date, XP awarded, a public summary, and private DM-only notes, plus an attendee checklist: XP is **not** applied automatically on save
 - [ ] Session summary and DM notes stop at 4,000 characters, XP accepts only a whole number from 0 to 100,000, and an attendee cannot appear twice
 - [ ] "Apply XP" appears once per session while unapplied; after applying, it becomes a permanent "XP Applied ✓" badge: confirm there's no way to re-apply or undo it from the UI afterwards
-- [ ] Edit a session's XP value after it's already been applied: the in-app note says this does _not_ retroactively adjust characters' totals; confirm that's actually true (Remaining XP on the affected characters shouldn't move just from editing the session record)
-- [ ] Delete a session that has **not** had XP applied: plain Yes/No confirmation, removes it from the list, no XP warning shown
-- [ ] Delete a session that **has** had XP applied: shows a warning ("This session's XP was already applied…") and an "Also remove {N} XP from attendees" checkbox instead of the plain confirm
+- [ ] Edit a session's XP amount after it has been applied: the Edit Session pop-up says the characters' XP will be adjusted by the difference; raise 100 to 150 and confirm each attendee's Total XP goes up by 50 and the XP history shows a session adjustment of +50; lower it and confirm the matching reduction
+- [ ] Edit an applied session to add an attendee (they receive the full amount) and to remove one (they lose it), then try a change that would take a character's Total XP below what they have already spent: the pop-up stays open, the message names the character, and no character's XP changes
+- [ ] Edit a session whose XP has not been applied: no XP note appears, and Apply XP afterwards gives the edited amount (`SessionForm.tsx`, `useSessions.ts`, `adjustSessionXp`)
+- [ ] Delete a session that has **not** had XP applied: the Delete Session pop-up asks "Delete the session on {date}?" with Delete and Cancel buttons, removes it from the list, no XP warning shown (`SessionCard.tsx`)
+- [ ] Delete a session that **has** had XP applied: shows a warning ("This session's XP was already applied…") and an "Also remove {N} XP from attendees" checkbox in the same Delete Session pop-up
 - [ ] Confirm that delete with the checkbox left unchecked: session is removed, every attendee's Remaining XP is unchanged
 - [ ] Confirm that delete with the checkbox checked: session is removed **and** every attendee's XP total drops by the session's XP amount
-- [ ] Cancel out of that confirm after checking the box, then reopen it: the checkbox starts unchecked again rather than remembering the discarded state
+- [ ] Cancel out of that pop-up after checking the box, then reopen it: the checkbox starts unchecked again rather than remembering the discarded state
+- [ ] New Session opens a pop-up titled New Session in the same format as the custom item forms, with its fields in red titled boxes (Session, Notes and Attendees), a required Date, XP Awarded and Summary (XP Awarded starts empty and accepts 0), the red Required note, and Save Session and Cancel buttons in the footer; Save Session is disabled while the Date, XP Awarded or Summary is empty, and the New Session button stays on the page behind it (`SessionForm.tsx`, `CustomFormShell.tsx`)
+- [ ] Edit on a session card opens the same pop-up titled Edit Session, filled in with the session's date, XP, summary, notes and attendees, with a Save button and the note about character totals; Save updates the card and Cancel leaves it unchanged (`SessionCard.tsx`, `SessionForm.tsx`)
 - [ ] **Autofill, Android:** the character search box, the new Character Name field, and Date, XP Awarded, Summary and DM Notes on both the new session form and an edited session each show no autofill suggestion row above the keyboard (`PartySection.tsx`, `SessionForm.tsx`, `SessionCard.tsx`)
 
 ## 27. Messages
 
-One private chat per Game Master, player and character. Each person keeps their own copy, reachable from the Messages button in the header on every page and from a Message button on character rows and cards.
+One private chat per Game Master, player and character. Each person keeps their own copy, reachable from the inbox button in the header and from a message icon button on character rows and cards. On a character sheet the header button is the message icon and opens that character's chat.
 
 ### How to test this page
 
 Use a disposable campaign with a DM and two players on separate profiles, plus a second linked device for one player. Start with no chats, send messages both ways, watch unread counts without refreshing, then try delete, restore, export, release and deletion.
 
-- [ ] The Messages button sits in the header on every page, left of the Settings or Options button, for both DM and player, and opens the Messages pop-up
+- [ ] The inbox button (a tray icon) sits in the header on every page except a character sheet, left of the Settings or Options button, for both DM and player, and opens the Inbox pop-up
 - [ ] The pop-up closes when you move to another page, and stays open when you only switch tabs on a character sheet
 - [ ] With no chats the list says so, with no loading text and no empty-state flash while the list loads
 - [ ] The header button shows the unread total across all chats (99+ above 99), it updates live, and the badge disappears when everything is read
-- [ ] As DM, every claimed character row in Campaign Overview has a Message button that opens that chat; unclaimed characters have none, and neither do players
-- [ ] As a player, each of your character cards has a Message button that opens the chat with your DM; pressing either button does not open the character sheet
-- [ ] On a character sheet the header button opens that character's chat directly; on an unclaimed character, as DM, it opens the list; the sheet has no Messages button of its own
+- [ ] As DM, every claimed character row in Campaign Overview has a message icon button (a speech bubble beside the gear) that opens that chat; unclaimed characters have none, and neither do players
+- [ ] As a player, each of your character cards has a message icon button that opens the chat with your DM; pressing either button does not open the character sheet
+- [ ] On a character sheet the header button is a speech bubble that opens that character's chat directly, and it is already there when the sheet appears, with no switch from the tray icon; on an unclaimed character there is no header button; the sheet has no Messages button of its own
 - [ ] Rows show the character name, an unread badge, the other person and campaign, a preview and a time (clock time today, Yesterday, then a short date), newest first, with a Closed chip on closed chats
 - [ ] The DM's rows show the character's portrait and the player's rows show the DM's initials (DM portraits are not built yet); portraits fade in without pop-in while scrolling a long list, and a missing portrait shows initials
 - [ ] The conversation shows messages oldest to newest under Today, Yesterday and full-date dividers in local time, scrolls to the bottom on new arrivals, and shows "No messages yet" for an empty chat
@@ -1291,7 +1295,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The Campaign options menu rows Import JSON, Repair Character Summaries and Repair Session Summaries are full-width buttons with centred words, show moving dots while they work, and Import JSON opens the file chooser (`CampaignOverview.tsx`)
 - [ ] In every pick-one row, which covers the craftsmanship rows in the weapon, armour, force field, implant and integrated pickers and the custom item forms, the Archeotech and Armour piece location rows, the Psychic power form rows, the Career starting choices and the weapon profile buttons on the Ranged and Melee cards, an unselected button has a dark fill, grey border and dim text that brighten on hover, the selected button shows its own colour, and every button shows a red ring when focused (`ToggleButton.tsx`)
 - [ ] The Origin selector in the custom item forms looks the same as the other pick-one rows (`toggleButtonClass`)
-- [ ] The header Home and Back link, the Options button (a gear picture), the section menu button, the Messages button, and the scroll to top button all have the same red outline and red icon as the Add and Edit buttons, shrink slightly when pressed, and show a red ring when focused (`IconButton`, `uiIconButton`)
+- [ ] The header Home and Back link, the Options button (a gear picture), the section menu button, the inbox button, and the scroll to top button all have the same red outline and red icon as the Add and Edit buttons, shrink slightly when pressed, and show a red ring when focused (`IconButton`, `uiIconButton`)
 - [ ] Every icon button is a square, and the section menu button is a 40px square, a little larger than the 32px others
 - [ ] The scroll to top button keeps its floating position and shadow and shows a dark fill behind its red outline
 - [ ] Every card you tap to open or choose lightens its header and turns its name white on hover, sinks slightly when pressed, and shows a red focus ring, including the Grenade, Shield, Archeotech, Companion, Psychic power, Skill, Melee and Ranged cards and the Ranged picker rows (`CardOverlayButton`)

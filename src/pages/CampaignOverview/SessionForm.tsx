@@ -2,17 +2,19 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useToast } from "../../components/Toast";
-import { createSession } from "../../services/sessionService";
-import { Button } from "../../ui/buttons/Button";
-import { SectionHeader } from "../../ui/SectionHeader";
+import { createSession, type SessionUpdateData } from "../../services/sessionService";
+import type { SessionListDocument } from "../../types/Firestore";
+import { CustomFormSection } from "../../ui/forms/CustomFormSection";
+import { CustomFormShell } from "../../ui/forms/CustomFormShell";
+import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { PRODUCT_LIMITS } from "../../constants/productLimits";
+import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
+import { toSessionInputDate } from "../../utils/sessionDate";
 import {
   editableInputClass,
   editableTextareaClass,
-  uiFormLabelSecondary,
-  uiSection,
+  uiFormLabel,
   uiTextMeta,
-  uiStackBody,
 } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 
@@ -25,16 +27,24 @@ interface Props {
   campaignId: string;
   characters: Character[];
   onClose: () => void;
+  /** An existing session to edit. Without it the form creates a new session. */
+  session?: SessionListDocument;
+  /** Saves the edited session. Required when `session` is given. */
+  onSave?: (data: SessionUpdateData) => Promise<void>;
 }
 
-export function SessionForm({ campaignId, characters, onClose }: Props) {
+export function SessionForm({ campaignId, characters, onClose, session, onSave }: Props) {
   recordComponentRender("SessionForm");
   const toast = useToast();
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [summary, setSummary] = useState("");
-  const [dmNotes, setDmNotes] = useState("");
-  const [xpAwarded, setXpAwarded] = useState(0);
-  const [attendees, setAttendees] = useState<Set<string>>(new Set());
+  const editing = session !== undefined;
+  const scrollPositionRef = useRef(0);
+  const [date, setDate] = useState(
+    session ? toSessionInputDate(session.date) : new Date().toISOString().split("T")[0]
+  );
+  const [summary, setSummary] = useState(session?.summary ?? "");
+  const [dmNotes, setDmNotes] = useState(session?.dmNotes ?? "");
+  const [xpAwarded, setXpAwarded] = useState(session ? String(session.xpAwarded) : "");
+  const [attendees, setAttendees] = useState<Set<string>>(new Set(session?.attendees ?? []));
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false);
 
@@ -57,80 +67,111 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
     savingRef.current = true;
     setSaving(true);
     try {
-      await createSession(campaignId, {
+      const data = {
         date: new Date(date),
         summary,
         dmNotes,
-        xpAwarded,
+        xpAwarded: Number(xpAwarded),
         attendees: [...attendees],
-      });
+      };
+      if (editing && onSave) await onSave(data);
+      else await createSession(campaignId, data);
       toast.success("Session saved");
       onClose();
     } catch (err) {
       console.error("Session save error:", err);
-      toast.error("Failed to save session");
+      toast.error(
+        editing && err instanceof Error && err.message ? err.message : "Failed to save session"
+      );
     } finally {
       savingRef.current = false;
       setSaving(false);
     }
-  }, [campaignId, date, summary, dmNotes, xpAwarded, attendees, toast, onClose]);
+  }, [campaignId, date, summary, dmNotes, xpAwarded, attendees, editing, onSave, toast, onClose]);
 
   return (
-    <div className={`${uiSection} ${uiStackBody}`}>
-      <SectionHeader>New Session</SectionHeader>
+    <CustomFormShell
+      title={editing ? "Edit Session" : "New Session"}
+      scrollPositionRef={scrollPositionRef}
+      onClose={onClose}
+      canSubmit={Boolean(date) && xpAwarded !== "" && Boolean(summary.trim())}
+      submitLabel={editing ? "Save" : "Save Session"}
+      onSubmit={handleSave}
+      saving={saving}
+    >
+      <CustomFormSection title="Session">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="session-date">Date</RequiredFormLabel>
+            <input
+              id="session-date"
+              type="date"
+              required
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={`${editableInputClass(true)} mt-0.5`}
+              autoComplete="off"
+            />
+          </div>
+          <div>
+            <RequiredFormLabel htmlFor="session-xp">XP Awarded</RequiredFormLabel>
+            <input
+              id="session-xp"
+              type="text"
+              inputMode="numeric"
+              required
+              value={xpAwarded}
+              onChange={(e) => {
+                const next = sanitizeNonNegativeIntegerInput(e.target.value);
+                if (next === "" || Number(next) <= PRODUCT_LIMITS.sessionXpAward) {
+                  setXpAwarded(next);
+                }
+              }}
+              className={`${editableInputClass(true)} mt-0.5`}
+              autoComplete="off"
+            />
+          </div>
+        </div>
+        {session?.xpApplied === true && (
+          <p className={uiTextMeta}>
+            XP was already applied. Changing the XP or the attendees adjusts those characters' XP by
+            the difference.
+          </p>
+        )}
+      </CustomFormSection>
 
-      <div className="grid grid-cols-2 gap-4">
+      <CustomFormSection title="Notes">
         <div>
-          <label className={uiFormLabelSecondary}>Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className={editableInputClass(true)}
+          <RequiredFormLabel htmlFor="session-summary">Summary</RequiredFormLabel>
+          <textarea
+            id="session-summary"
+            required
+            value={summary}
+            maxLength={PRODUCT_LIMITS.sessionSummaryCharacters}
+            onChange={(e) => setSummary(e.target.value)}
+            rows={3}
+            className={`${editableTextareaClass(true, "none")} mt-0.5`}
             autoComplete="off"
           />
         </div>
         <div>
-          <label className={uiFormLabelSecondary}>XP Awarded</label>
-          <input
-            type="number"
-            min={0}
-            max={PRODUCT_LIMITS.sessionXpAward}
-            value={xpAwarded}
-            onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
-            className={editableInputClass(true)}
+          <label htmlFor="session-dm-notes" className={uiFormLabel}>
+            DM Notes (private)
+          </label>
+          <textarea
+            id="session-dm-notes"
+            value={dmNotes}
+            maxLength={PRODUCT_LIMITS.sessionDmNotesCharacters}
+            onChange={(e) => setDmNotes(e.target.value)}
+            rows={2}
+            className={`${editableTextareaClass(true, "none")} mt-0.5`}
             autoComplete="off"
           />
         </div>
-      </div>
+      </CustomFormSection>
 
-      <div>
-        <label className={uiFormLabelSecondary}>Summary</label>
-        <textarea
-          value={summary}
-          maxLength={PRODUCT_LIMITS.sessionSummaryCharacters}
-          onChange={(e) => setSummary(e.target.value)}
-          rows={3}
-          className={editableTextareaClass(true, "none")}
-          autoComplete="off"
-        />
-      </div>
-
-      <div>
-        <label className={uiFormLabelSecondary}>DM Notes (private)</label>
-        <textarea
-          value={dmNotes}
-          maxLength={PRODUCT_LIMITS.sessionDmNotesCharacters}
-          onChange={(e) => setDmNotes(e.target.value)}
-          rows={2}
-          className={editableTextareaClass(true, "none")}
-          autoComplete="off"
-        />
-      </div>
-
-      <div>
-        <p className={`${uiTextMeta} mb-2`}>Attendees</p>
-        <div className="flex flex-wrap gap-3">
+      <CustomFormSection title="Attendees">
+        <div className="flex flex-wrap gap-3" role="group" aria-label="Attendees">
           {characters.map((char) => (
             <label
               key={char.id}
@@ -145,16 +186,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
             </label>
           ))}
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <Button fullWidth onClick={handleSave} loading={saving} loadingLabel="Saving">
-          Save Session
-        </Button>
-        <Button variant="neutral" fullWidth onClick={onClose} disabled={saving}>
-          Cancel
-        </Button>
-      </div>
-    </div>
+      </CustomFormSection>
+    </CustomFormShell>
   );
 }

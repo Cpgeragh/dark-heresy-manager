@@ -547,6 +547,7 @@ describe("CampaignOverview: the Session History section", () => {
 
     expect(screen.getByText("Session attendee: Vex")).toBeInTheDocument();
     expect(screen.getByText("Session attendee: Thrun")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "New Session" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Mock Close Session Form" }));
     expect(screen.getByRole("button", { name: "New Session" })).toBeInTheDocument();
@@ -664,7 +665,7 @@ describe("CampaignOverview: GM and Inquisitor name", () => {
     expect(screen.getAllByText("Inquisitor Vail")).toHaveLength(2);
   });
 
-  it("shows the GM and Inquisitor name on every section", async () => {
+  it("shows the GM and Inquisitor name on the Party section only", async () => {
     const user = userEvent.setup();
     useCampaignMock.mockReturnValue({
       campaign: campaign({ gmName: "Cain" }),
@@ -672,9 +673,10 @@ describe("CampaignOverview: GM and Inquisitor name", () => {
       error: null,
     });
     renderPage("dm-1");
+    expect(screen.getByText("Cain")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Go to Session History" }));
-    expect(screen.getByText("Cain")).toBeInTheDocument();
+    expect(screen.queryByText("Cain")).not.toBeInTheDocument();
   });
 
   it("shows neither line when both are unset", () => {

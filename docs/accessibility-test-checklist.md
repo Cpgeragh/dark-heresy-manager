@@ -53,7 +53,7 @@ confusing output:
       `ModalShell.tsx`'s native `<dialog>`, which gets all three behaviours from the
       browser automatically.
 - [ ] `HeaderMessagesButton.tsx` puts the unread count in its accessible name
-      ("Messages, 3 unread"): confirm a screen reader announces it, and that nothing
+      ("Inbox, 3 unread"): confirm a screen reader announces it, and that nothing
       announces a change in the count while the button is not focused.
 - [ ] `ChatInboxModal.tsx` is a native dialog: confirm focus moves in on open, Escape
       closes it, and the back arrow, the tabs and the Restore buttons have clear names.
@@ -71,11 +71,9 @@ confusing output:
 - [ ] `CustomItemLibraryAdmin.tsx`'s category and status filter chips communicate the
       selected filter only through colour (`activeChip`/`inactiveChip`), with no
       `aria-pressed` on the underlying button.
-- [ ] `SessionForm.tsx` (new session) and `SessionCard.tsx` (edit mode) both have Date,
-      XP Awarded, Summary, and DM Notes `<label>` elements with no `htmlFor`, and
-      matching inputs with no `id`: none of the four labels in either file are
-      actually associated with their field. This is an already-known gap that was
-      never added to this checklist until now.
+- [ ] `SessionForm.tsx`, used for new and edited sessions, associates its Date, XP
+      Awarded, Summary and DM Notes labels with their fields: confirm a screen reader
+      announces each field by its label.
 
 - [ ] `NotesTab.tsx`'s note-search input has no `aria-label` or associated `<label>`,
       only `placeholder="Search notes…"`: same gap as the other search boxes above,

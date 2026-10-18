@@ -27,15 +27,24 @@ import { useRouteLoading } from "../../context/useRouteReady";
 import { CharacterRow } from "./CharacterRow";
 import { MyCharacterCard } from "./MyCharacterCard";
 import { PartyRosterTile } from "./PartyRosterTile";
+import { RolePlaque } from "./RolePlaque";
 import { SectionPending } from "./SectionPending";
 
 interface PartySectionProps {
   campaignId: string;
   isDM: boolean;
   effectiveUserId: string;
+  gmName?: string;
+  inquisitorName?: string;
 }
 
-export function PartySection({ campaignId, isDM, effectiveUserId }: PartySectionProps) {
+export function PartySection({
+  campaignId,
+  isDM,
+  effectiveUserId,
+  gmName,
+  inquisitorName,
+}: PartySectionProps) {
   const toast = useToast();
   const { ask: askAboutChats, modals: deletionChatModals } = useDeletionChatChoice({
     accountId: effectiveUserId,
@@ -103,6 +112,14 @@ export function PartySection({ campaignId, isDM, effectiveUserId }: PartySection
   if (charactersError) return <RouteLoadError resource="campaign" />;
   if (loading) return <SectionPending />;
 
+  const plaques =
+    gmName || inquisitorName ? (
+      <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
+        {gmName && <RolePlaque role="Game Master" name={gmName} />}
+        {inquisitorName && <RolePlaque role="Inquisitor" name={inquisitorName} />}
+      </div>
+    ) : null;
+
   if (isDM) {
     const filteredCharacters = search.trim()
       ? partySummaries.filter((c) =>
@@ -112,20 +129,23 @@ export function PartySection({ campaignId, isDM, effectiveUserId }: PartySection
 
     return (
       <div>
+        {plaques}
         <div className={`${uiSplitRow} mb-3`}>
-          <input
-            type="search"
-            name="character-search"
-            placeholder="Search…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={editableInputClass(true) + " h-10 w-44 lg:w-56"}
-            autoComplete="off"
-            enterKeyHint="search"
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck={false}
-          />
+          <div className="w-1/2">
+            <input
+              type="search"
+              name="character-search"
+              placeholder="Search…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={editableInputClass(true) + " h-10"}
+              autoComplete="off"
+              enterKeyHint="search"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+            />
+          </div>
           <AddButton label="Create character" onClick={() => setCreateOpen(true)} />
         </div>
 
@@ -214,6 +234,7 @@ export function PartySection({ campaignId, isDM, effectiveUserId }: PartySection
 
   return (
     <div className={uiStackList}>
+      {plaques}
       {characters.length === 0 && (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
           You haven't claimed a character in this campaign yet.

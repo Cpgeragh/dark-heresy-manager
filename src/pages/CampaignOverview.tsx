@@ -1,12 +1,11 @@
 // src/pages/CampaignOverview.tsx
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { useCampaign } from "../hooks/useCampaign";
 import { CustomItemLibraryAdmin } from "./CampaignOverview/CustomItemLibraryAdmin";
 import { PartySection } from "./CampaignOverview/PartySection";
-import { RolePlaque } from "./CampaignOverview/RolePlaque";
 import { SessionHistorySection } from "./CampaignOverview/SessionHistorySection";
 import {
   DEFAULT_CAMPAIGN_SECTION,
@@ -142,7 +141,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   }, [campaignId, toast]);
 
   // Inject Import JSON into header kebab for DMs
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!routeActive) return;
     if (!isDM) {
       clearKebabContent();
@@ -234,18 +233,14 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         }
       />
       <Panel>
-        {/* GM / Inquisitor name: shown to everyone */}
-        {(campaign.gmName || campaign.inquisitorName) && (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3">
-            {campaign.gmName && <RolePlaque role="Game Master" name={campaign.gmName} />}
-            {campaign.inquisitorName && (
-              <RolePlaque role="Inquisitor" name={campaign.inquisitorName} />
-            )}
-          </div>
-        )}
-
         {activeSection === "party" && (
-          <PartySection campaignId={campaignId} isDM={isDM} effectiveUserId={effectiveUserId} />
+          <PartySection
+            campaignId={campaignId}
+            isDM={isDM}
+            effectiveUserId={effectiveUserId}
+            gmName={campaign.gmName}
+            inquisitorName={campaign.inquisitorName}
+          />
         )}
         {activeSection === "custom-items" && isDM && (
           <CustomItemLibraryAdmin campaignId={campaignId} userId={effectiveUserId} />
