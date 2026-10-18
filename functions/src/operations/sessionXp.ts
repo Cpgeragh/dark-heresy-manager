@@ -207,3 +207,138 @@ export async function deleteSession(
     transaction.delete(summaryRef);
   });
 }
+
+export interface AdjustSessionXpInput extends ApplySessionXpInput {
+  xpAwarded: number;
+  attendees: string[];
+}
+
+function assertValidSessionXpEdit(input: AdjustSessionXpInput): void {
+  if (
+    !Number.isSafeInteger(input.xpAwarded) ||
+    input.xpAwarded < 0 ||
+    input.xpAwarded > SESSION_XP_AWARD_MAX
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      `XP awarded must be a whole number from 0 to ${SESSION_XP_AWARD_MAX}.`
+    );
+  }
+  if (
+    !Array.isArray(input.attendees) ||
+    input.attendees.length > SESSION_ATTENDEES_MAX ||
+    input.attendees.some((id) => typeof id !== "string" || !id || id.includes("/")) ||
+    new Set(input.attendees).size !== input.attendees.length
+  ) {
+    throw new HttpsError("invalid-argument", "Session attendees are invalid.");
+  }
+  if (typeof input.operationId !== "string" || !input.operationId) {
+    throw new HttpsError("invalid-argument", "An operation id is required.");
+  }
+}
+
+function characterLabel(characterData: Record<string, unknown>, id: string): string {
+  const header = characterData.header;
+  const name =
+    typeof header === "object" && header !== null
+      ? (header as Record<string, unknown>).characterName
+      : undefined;
+  return typeof name === "string" && name.trim() ? name.trim() : id;
+}
+
+/**
+ * Changes the XP amount or the attendees of a session whose XP was already applied. Each
+ * character is given or loses the difference, in the same transaction that updates the session.
+ */
+export async function adjustSessionXp(
+  input: AdjustSessionXpInput,
+  callerUid: string,
+  idempotency: IdempotencyExecution<void> | null = null
+): Promise<void> {
+  assertValidSessionXpEdit(input);
+  const { db, campaignRef, dmId } = await authorisedCampaign(input.campaignId, callerUid);
+  const actor = await resolveXpHistoryActor(db, callerUid, dmId);
+  const sessionRef = campaignRef.collection("sessions").doc(input.sessionId);
+  const summaryRef = campaignRef.collection("sessionSummaries").doc(input.sessionId);
+
+  await runOperationTransaction(db, idempotency, async (transaction) => {
+    const sessionSnapshot = await transaction.get(sessionRef);
+    if (!sessionSnapshot.exists) throw new HttpsError("not-found", "Session does not exist.");
+    const sessionData = sessionSnapshot.data() ?? {};
+    if (sessionData.xpApplied !== true) {
+      throw new HttpsError(
+        "failed-precondition",
+        "XP has not been applied for this session yet, so it can be edited directly."
+      );
+    }
+    const previous = sessionValues(sessionData);
+
+    const changes: { id: string; deltaXp: number }[] = [];
+    for (const id of new Set([...previous.attendees, ...input.attendees])) {
+      const before = previous.attendees.includes(id) ? previous.xpAwarded : 0;
+      const after = input.attendees.includes(id) ? input.xpAwarded : 0;
+      if (after !== before) changes.push({ id, deltaXp: after - before });
+    }
+
+    const characterRefs = changes.map(({ id }) => campaignRef.collection("characters").doc(id));
+    const characterSnapshots: DocumentSnapshot[] = [];
+    const openingSnapshots: DocumentSnapshot[] = [];
+    for (const characterRef of characterRefs)
+      characterSnapshots.push(await transaction.get(characterRef));
+    for (const characterRef of characterRefs) {
+      openingSnapshots.push(
+        await transaction.get(characterRef.collection("xpHistory").doc("opening-balance"))
+      );
+    }
+    characterSnapshots.forEach((snapshot) => {
+      if (!snapshot.exists) throw new HttpsError("not-found", "A session attendee was not found.");
+    });
+
+    characterRefs.forEach((characterRef, index) => {
+      const characterData = characterSnapshots[index].data() ?? {};
+      const { experience, totalXp } = readExperience(characterData);
+      const spentXp = calculateCharacterSpentXp(characterData);
+      const balanceXp = totalXp + changes[index].deltaXp;
+      const label = characterLabel(characterData, changes[index].id);
+      if (balanceXp > CHARACTER_XP_TOTAL_MAX) {
+        throw new HttpsError(
+          "failed-precondition",
+          `Total XP for ${label} cannot exceed ${CHARACTER_XP_TOTAL_MAX}.`
+        );
+      }
+      if (balanceXp < spentXp) {
+        throw new HttpsError(
+          "failed-precondition",
+          `Session XP cannot be adjusted below the Spent XP of ${label}.`
+        );
+      }
+      const history = characterRef.collection("xpHistory");
+      stageOpeningBalance(
+        transaction,
+        history.doc("opening-balance"),
+        openingSnapshots[index].exists,
+        totalXp,
+        actor
+      );
+      stageXpHistoryEntry(
+        transaction,
+        history.doc(`session-adjustment-${input.sessionId}-${input.operationId}`),
+        {
+          amountXp: changes[index].deltaXp,
+          balanceXp,
+          reason: previous.summary ?? "Session adjustment",
+          source: "session-adjustment",
+          sessionId: input.sessionId,
+        },
+        actor
+      );
+      transaction.update(characterRef, {
+        experience: { ...experience, total: balanceXp, spent: spentXp },
+      });
+    });
+
+    const edited = { xpAwarded: input.xpAwarded, attendees: input.attendees };
+    transaction.update(sessionRef, edited);
+    transaction.update(summaryRef, edited);
+  });
+}

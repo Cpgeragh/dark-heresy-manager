@@ -50,8 +50,10 @@ import {
   type AdjustCharacterXpInput,
 } from "./operations/adjustCharacterXp.js";
 import {
+  adjustSessionXp as runAdjustSessionXp,
   applySessionXp as runApplySessionXp,
   deleteSession as runDeleteSession,
+  type AdjustSessionXpInput,
   type ApplySessionXpInput,
   type DeleteSessionInput,
 } from "./operations/sessionXp.js";
@@ -1034,6 +1036,25 @@ export const deleteSession = onCall<DeleteSessionInput>({ timeoutSeconds: 30 }, 
       (request.data as DeleteSessionInput | undefined)?.operationId
     ),
     handler: ({ uid, data, idempotency }) => runDeleteSession(data, uid, idempotency),
+  });
+});
+
+export const adjustSessionXp = onCall<AdjustSessionXpInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<AdjustSessionXpInput, void>({
+    request,
+    operation: "adjust-session-xp",
+    allowedFields: ["campaignId", "sessionId", "xpAwarded", "attendees", "operationId"],
+    requiredFields: ["campaignId", "sessionId", "xpAwarded", "attendees", "operationId"],
+    fieldShapes: { campaignId: "string", sessionId: "string", operationId: "string" },
+    payloadBounds: { maxBytes: 8_000, maxStringCharacters: 200 },
+    rateLimits: [{ key: `adjust-session-xp:${callerUid}`, limit: 100, windowMs: 60 * 60 * 1000 }],
+    idempotencyKey: buildOperationIdempotencyKey(
+      "adjust-session-xp",
+      callerUid,
+      (request.data as AdjustSessionXpInput | undefined)?.operationId
+    ),
+    handler: ({ uid, data, idempotency }) => runAdjustSessionXp(data, uid, idempotency),
   });
 });
 

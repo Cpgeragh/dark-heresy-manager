@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { applySessionXp, deleteSession } from "../../src/operations/sessionXp";
+import { adjustSessionXp, applySessionXp, deleteSession } from "../../src/operations/sessionXp";
 
 const {
   campaignGet,
@@ -215,5 +215,155 @@ describe("session XP operations", () => {
       applySessionXp({ campaignId: "campaign-1", sessionId: "session-1" }, "player-1")
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
     expect(runTransaction).not.toHaveBeenCalled();
+  });
+
+  describe("adjusting an applied session", () => {
+    function readsFor(sessionApplied: boolean, character = storedCharacter) {
+      transactionGet.mockImplementation(async (target: { kind: string }) => {
+        if (target.kind === "sessions") {
+          return { exists: true, data: () => storedSession(sessionApplied) };
+        }
+        if (target.kind === "characters") return { exists: true, data: character };
+        if (target.kind === "xpHistory") return { exists: false, data: () => undefined };
+        throw new Error(`Unexpected transaction read: ${target.kind}`);
+      });
+    }
+
+    const base = { campaignId: "campaign-1", sessionId: "session-1", operationId: "op-1" };
+
+    it("gives each attendee the extra XP when the amount is raised", async () => {
+      readsFor(true);
+
+      await adjustSessionXp({ ...base, xpAwarded: 250, attendees: ["character-1"] }, "dm-1");
+
+      expect(transactionSet).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: "xpHistory", id: "session-adjustment-session-1-op-1" }),
+        expect.objectContaining({
+          amountXp: 50,
+          balanceXp: 1_050,
+          reason: "Recovered the relic",
+          source: "session-adjustment",
+          sessionId: "session-1",
+        })
+      );
+      expect(transactionUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: "characters", id: "character-1" }),
+        expect.objectContaining({ experience: expect.objectContaining({ total: 1_050 }) })
+      );
+      for (const kind of ["sessions", "sessionSummaries"]) {
+        expect(transactionUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({ kind, id: "session-1" }),
+          { xpAwarded: 250, attendees: ["character-1"] }
+        );
+      }
+    });
+
+    it("takes the difference back when the amount is lowered", async () => {
+      readsFor(true);
+
+      await adjustSessionXp({ ...base, xpAwarded: 150, attendees: ["character-1"] }, "dm-1");
+
+      expect(transactionSet).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "session-adjustment-session-1-op-1" }),
+        expect.objectContaining({ amountXp: -50, balanceXp: 950 })
+      );
+    });
+
+    it("gives a newly added attendee the full amount", async () => {
+      readsFor(true);
+
+      await adjustSessionXp(
+        { ...base, xpAwarded: 200, attendees: ["character-1", "character-2"] },
+        "dm-1"
+      );
+
+      expect(transactionUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: "characters", id: "character-2" }),
+        expect.objectContaining({ experience: expect.objectContaining({ total: 1_200 }) })
+      );
+      expect(transactionUpdate).not.toHaveBeenCalledWith(
+        expect.objectContaining({ kind: "characters", id: "character-1" }),
+        expect.anything()
+      );
+    });
+
+    it("removes the full amount from a removed attendee", async () => {
+      readsFor(true);
+
+      await adjustSessionXp({ ...base, xpAwarded: 200, attendees: [] }, "dm-1");
+
+      expect(transactionSet).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "session-adjustment-session-1-op-1" }),
+        expect.objectContaining({ amountXp: -200, balanceXp: 800 })
+      );
+    });
+
+    it("writes no history and changes no character when nothing changed", async () => {
+      readsFor(true);
+
+      await adjustSessionXp({ ...base, xpAwarded: 200, attendees: ["character-1"] }, "dm-1");
+
+      expect(transactionSet).not.toHaveBeenCalled();
+      expect(transactionUpdate).not.toHaveBeenCalledWith(
+        expect.objectContaining({ kind: "characters" }),
+        expect.anything()
+      );
+    });
+
+    it("rejects the whole edit when it would take Total XP below Spent XP", async () => {
+      readsFor(true, () => ({
+        ...storedCharacter(),
+        experience: { ...storedCharacter().experience, total: 500 },
+      }));
+
+      await expect(
+        adjustSessionXp({ ...base, xpAwarded: 50, attendees: ["character-1"] }, "dm-1")
+      ).rejects.toThrow("below the Spent XP of character-1");
+      expect(transactionSet).not.toHaveBeenCalled();
+      expect(transactionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("rejects the edit when it would take Total XP above the maximum", async () => {
+      readsFor(true, () => ({
+        ...storedCharacter(),
+        experience: { ...storedCharacter().experience, total: 10_000_000 },
+      }));
+
+      await expect(
+        adjustSessionXp({ ...base, xpAwarded: 250, attendees: ["character-1"] }, "dm-1")
+      ).rejects.toThrow("cannot exceed");
+      expect(transactionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("rejects a session whose XP was never applied", async () => {
+      readsFor(false);
+
+      await expect(
+        adjustSessionXp({ ...base, xpAwarded: 250, attendees: ["character-1"] }, "dm-1")
+      ).rejects.toThrow("not been applied");
+      expect(transactionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("rejects an invalid amount, duplicate attendees and a missing operation id", async () => {
+      await expect(
+        adjustSessionXp({ ...base, xpAwarded: -1, attendees: [] }, "dm-1")
+      ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+      await expect(
+        adjustSessionXp({ ...base, xpAwarded: 10, attendees: ["a", "a"] }, "dm-1")
+      ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+      await expect(
+        adjustSessionXp({ ...base, operationId: "", xpAwarded: 10, attendees: [] }, "dm-1")
+      ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+      expect(runTransaction).not.toHaveBeenCalled();
+    });
+
+    it("allows only the campaign DM to adjust session XP", async () => {
+      callerIsPrimaryOrLinked.mockResolvedValue(false);
+
+      await expect(
+        adjustSessionXp({ ...base, xpAwarded: 250, attendees: ["character-1"] }, "player-1")
+      ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
+      expect(runTransaction).not.toHaveBeenCalled();
+    });
   });
 });
