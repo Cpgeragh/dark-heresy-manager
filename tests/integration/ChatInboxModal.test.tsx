@@ -178,7 +178,7 @@ describe("ChatInboxModal", () => {
 
     await user.click(screen.getByRole("button", { name: "open inbox" }));
 
-    expect(screen.getByRole("dialog", { name: "Messages" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Inbox" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "open Brother Kael" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Back to messages" })).not.toBeInTheDocument();
   });
@@ -257,7 +257,7 @@ describe("ChatInboxModal", () => {
     await user.click(screen.getByRole("button", { name: "open chat" }));
     await user.click(screen.getByRole("button", { name: "Back to messages" }));
 
-    expect(screen.getByRole("dialog", { name: "Messages" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Inbox" })).toBeInTheDocument();
     expect(screen.getByTestId("list")).toBeInTheDocument();
   });
 
@@ -339,7 +339,7 @@ describe("ChatInboxModal", () => {
     await user.click(screen.getByRole("button", { name: "open chat" }));
     await user.click(screen.getByRole("button", { name: "finish delete" }));
 
-    expect(screen.getByRole("dialog", { name: "Messages" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Inbox" })).toBeInTheDocument();
     expect(screen.getByTestId("list")).toBeInTheDocument();
   });
 

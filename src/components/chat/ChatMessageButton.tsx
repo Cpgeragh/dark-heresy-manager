@@ -2,7 +2,9 @@
 
 import type { MouseEvent } from "react";
 import { useChatInbox } from "../../context/useChatInbox";
-import { Button } from "../../ui/buttons/Button";
+import { IconButton } from "../../ui/buttons/IconButton";
+import { MessageIcon } from "../../ui/icons/MessageIcon";
+import { uiIconButtonIconSize } from "../../ui/styles/buttonStyles";
 import type { ChatTarget } from "./chatTarget";
 
 export function ChatMessageButton({ target }: { target: ChatTarget }) {
@@ -16,8 +18,10 @@ export function ChatMessageButton({ target }: { target: ChatTarget }) {
   };
 
   return (
-    <Button variant="secondary" size="sm" onClick={handleClick}>
-      Message
-    </Button>
+    <IconButton
+      label="Message"
+      onClick={handleClick}
+      icon={<MessageIcon className={uiIconButtonIconSize.md} />}
+    />
   );
 }

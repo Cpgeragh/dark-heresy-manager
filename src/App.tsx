@@ -48,6 +48,7 @@ function AppContent() {
   const [isPostUpgrade] = useState(() => consumePostUpgrade());
   const location = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shownPath, setShownPath] = useState<string | null>(null);
 
   // -------------------------------------------------
   // AUTH & USER STATE
@@ -168,7 +169,7 @@ function AppContent() {
           <div className={`min-h-screen ${colourPageBackground} ${colourTextPrimary}`}>
             {/* HEADER */}
             <AppHeader
-              currentPath={location.pathname}
+              currentPath={shownPath ?? location.pathname}
               onOpenSettings={() => setSettingsOpen(true)}
             />
 
@@ -177,6 +178,7 @@ function AppContent() {
               <ErrorBoundary>
                 <RouteHolder
                   splashLabel={isPostUpgrade ? "Updating…" : "Loading…"}
+                  onShownChange={setShownPath}
                   routes={(routeLocation) => (
                     <Suspense fallback={<RouteLoadingHold />}>
                       <Routes location={routeLocation}>

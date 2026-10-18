@@ -48,7 +48,7 @@ describe("HeaderMessagesButton", () => {
   it("has no badge when nothing is unread", () => {
     renderButton();
 
-    expect(screen.getByRole("button", { name: "Messages" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inbox" })).toBeInTheDocument();
     expect(screen.queryByText("0")).not.toBeInTheDocument();
   });
 
@@ -56,7 +56,7 @@ describe("HeaderMessagesButton", () => {
     useChatsContextMock.mockReturnValue(chatsState(3));
     renderButton();
 
-    expect(screen.getByRole("button", { name: "Messages, 3 unread" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inbox, 3 unread" })).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
   });
 
@@ -71,7 +71,7 @@ describe("HeaderMessagesButton", () => {
     const user = userEvent.setup();
     renderButton();
 
-    await user.click(screen.getByRole("button", { name: "Messages" }));
+    await user.click(screen.getByRole("button", { name: "Inbox" }));
 
     expect(JSON.parse(screen.getByTestId("view").textContent ?? "{}")).toEqual({ kind: "list" });
   });
@@ -80,7 +80,7 @@ describe("HeaderMessagesButton", () => {
     const user = userEvent.setup();
     renderButton();
 
-    await user.click(screen.getByRole("button", { name: "Messages" }));
+    await user.click(screen.getByRole("button", { name: "Inbox" }));
 
     expect(screen.getByTestId("view")).toHaveTextContent('{"kind":"list"}');
   });
@@ -96,7 +96,7 @@ describe("HeaderMessagesButton", () => {
     useHeaderExtensionMock.mockReturnValue({ backHref: null, kebabContent: null, chatTarget });
     renderButton();
 
-    await user.click(screen.getByRole("button", { name: "Messages" }));
+    await user.click(screen.getByRole("button", { name: "Message" }));
 
     expect(JSON.parse(screen.getByTestId("view").textContent ?? "")).toEqual({
       kind: "chat",
@@ -104,8 +104,7 @@ describe("HeaderMessagesButton", () => {
     });
   });
 
-  it("opens the list when the sheet's character has no player", async () => {
-    const user = userEvent.setup();
+  it("shows no button when the sheet's character has no player", () => {
     useHeaderExtensionMock.mockReturnValue({
       backHref: null,
       kebabContent: null,
@@ -113,8 +112,6 @@ describe("HeaderMessagesButton", () => {
     });
     renderButton();
 
-    await user.click(screen.getByRole("button", { name: "Messages" }));
-
-    expect(screen.getByTestId("view")).toHaveTextContent('{"kind":"list"}');
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });

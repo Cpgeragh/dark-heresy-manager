@@ -50,7 +50,7 @@ export function ChatInboxModal({ accountId }: { accountId: string }) {
   const target = view.kind === "chat" ? view.target : null;
   const chatId = target ? getChatId(target) : null;
   const chat = chatId ? (chats.find((entry) => entry.id === chatId) ?? null) : null;
-  const title = target ? (chat?.characterName ?? target.characterName ?? "Chat") : "Messages";
+  const title = target ? (chat?.characterName ?? target.characterName ?? "Chat") : "Inbox";
 
   const handleRestore = async (restored: ChatSummaryWithId) => {
     try {

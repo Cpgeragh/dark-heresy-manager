@@ -1,7 +1,7 @@
 // src/components/AppHeader.tsx
 
 import { useEffect, useRef, useState } from "react";
-import { Link, useMatch } from "react-router-dom";
+import { Link, matchPath } from "react-router-dom";
 import { useHeaderExtension } from "../context/useHeaderExtension";
 import { ROUTES } from "../constants/routes";
 import { IconButton } from "../ui/buttons/IconButton";
@@ -26,7 +26,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
   const [kebabOpen, setKebabOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const kebabRef = useRef<HTMLDivElement>(null);
-  const isOnDashboard = !!useMatch(ROUTES.DASHBOARD);
+  const isOnDashboard = !!matchPath(ROUTES.DASHBOARD, currentPath);
 
   useEffect(() => {
     if (!kebabOpen) return;
@@ -87,7 +87,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
 
             {/* Kebab menu */}
             {kebabContent && (
-              <div className="relative" ref={kebabRef}>
+              <div className="relative flex" ref={kebabRef}>
                 <IconButton
                   label="Options"
                   onClick={() => setKebabOpen((v) => !v)}

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useState, type ReactNode } from "react";
 import { useLocation, type Location } from "react-router-dom";
 import { RouteReadyProvider } from "../context/RouteReadyContext";
 import { PendingOverlay } from "../ui/PendingOverlay";
@@ -8,11 +8,17 @@ import { SplashScreen } from "./SplashScreen";
 interface RouteHolderProps {
   routes: (location: Location) => ReactNode;
   splashLabel: string;
+  onShownChange?: (pathname: string) => void;
 }
 
-export function RouteHolder({ routes, splashLabel }: RouteHolderProps) {
+export function RouteHolder({ routes, splashLabel, onShownChange }: RouteHolderProps) {
   const location = useLocation();
   const [shown, setShown] = useState<Location | null>(null);
+  const shownPathname = shown?.pathname ?? null;
+
+  useLayoutEffect(() => {
+    if (shownPathname !== null) onShownChange?.(shownPathname);
+  }, [shownPathname, onShownChange]);
 
   if (shown !== null && shown.pathname === location.pathname && shown !== location) {
     setShown(location);

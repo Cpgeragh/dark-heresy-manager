@@ -69,6 +69,13 @@ describe("AppHeader", () => {
     expect(onOpenSettings).toHaveBeenCalledOnce();
   });
 
+  it("follows the page on screen and not the address while the next page loads", () => {
+    renderHeader("/", "/campaign/c1");
+    expect(screen.getByRole("button", { name: "Settings" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Share App" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Dashboard" })).not.toBeInTheDocument();
+  });
+
   it("hides the Settings button off the dashboard route", () => {
     renderHeader("/settings", "/settings");
     expect(screen.queryByRole("button", { name: "Settings" })).not.toBeInTheDocument();
@@ -112,27 +119,25 @@ describe("AppHeader", () => {
     expect(screen.queryByText("Kebab options here")).not.toBeInTheDocument();
   });
 
-  it("shows the Messages button on the dashboard and off it", () => {
+  it("shows the Inbox button on the dashboard and off it", () => {
     renderHeader("/");
-    expect(screen.getByRole("button", { name: "Messages" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inbox" })).toBeInTheDocument();
   });
 
-  it("shows the Messages button on a page that has no settings button", () => {
+  it("shows the Inbox button on a page that has no settings button", () => {
     renderHeader("/settings", "/settings");
-    expect(screen.getByRole("button", { name: "Messages" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inbox" })).toBeInTheDocument();
   });
 
-  it("places the Messages button before the Settings button", () => {
+  it("places the Inbox button before the Settings button", () => {
     renderHeader("/");
-    const messages = screen.getByRole("button", { name: "Messages" });
+    const inbox = screen.getByRole("button", { name: "Inbox" });
     const settings = screen.getByRole("button", { name: "Settings" });
 
-    expect(
-      messages.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(inbox.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("opens the inbox list when the Messages button is pressed", async () => {
+  it("opens the inbox list when the Inbox button is pressed", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/"]}>
@@ -144,7 +149,7 @@ describe("AppHeader", () => {
     );
     expect(screen.getByText("Inbox view: closed")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Messages" }));
+    await user.click(screen.getByRole("button", { name: "Inbox" }));
 
     expect(screen.getByText("Inbox view: list")).toBeInTheDocument();
   });

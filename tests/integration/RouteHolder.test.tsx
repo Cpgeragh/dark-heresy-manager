@@ -49,11 +49,12 @@ function SlowPage() {
   );
 }
 
-function renderHolder(initialEntry = "/") {
+function renderHolder(initialEntry = "/", onShownChange?: (pathname: string) => void) {
   render(
     <MemoryRouter initialEntries={[initialEntry]}>
       <RouteHolder
         splashLabel="Loading…"
+        onShownChange={onShownChange}
         routes={(location) => (
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
@@ -163,6 +164,24 @@ describe("RouteHolder", () => {
 
     expect(screen.getByText("Slow page timed out")).toBeVisible();
     expect(screen.queryByText("Home page")).not.toBeInTheDocument();
+  });
+
+  it("reports the page on screen and not the address while a new page loads", async () => {
+    const onShownChange = vi.fn();
+    renderHolder("/", onShownChange);
+    await screen.findByText("Home page");
+    expect(onShownChange).toHaveBeenLastCalledWith("/");
+
+    fireEvent.click(screen.getByText("Go to slow page"));
+    await act(async () => {});
+
+    expect(onShownChange).not.toHaveBeenCalledWith("/slow");
+
+    await act(async () => {
+      releaseSlowPage();
+    });
+
+    expect(onShownChange).toHaveBeenLastCalledWith("/slow");
   });
 
   it("does not rebuild the page when only its query string changes", async () => {

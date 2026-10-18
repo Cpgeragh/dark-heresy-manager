@@ -7,6 +7,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useTransition,
 } from "react";
@@ -454,7 +455,7 @@ export default function CharacterSheet({
     await revokeRecoveryCode(params.campaignId, params.characterId);
   }, [params.campaignId, params.characterId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!routeActive || !character || isDMLoading) return;
 
     setBackHref(ROUTES.DASHBOARD);
@@ -498,7 +499,7 @@ export default function CharacterSheet({
   const characterOwnerId = character?.userId ?? null;
   const characterDisplayName = character?.header?.characterName;
   const characterLoaded = Boolean(character);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!routeActive || !path || !characterLoaded) return;
     setChatTarget({
       campaignId: path.campaignId,
