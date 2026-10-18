@@ -143,6 +143,8 @@ export const uiDescriptionBox = `text-xs lg:text-sm ${uiTextBody} ${colourFillIn
 
 /** Small supporting line, such as a date, a creator, a count or a helper sentence. */
 export const uiTextMeta = `text-xs lg:text-sm ${colourMetadataLabelText}`;
+/** Informational note on a page or in a form, in the amber of the app's other notices. */
+export const uiTextNotice = `text-xs lg:text-sm ${colourAmberPlain}`;
 
 /** Bold highlighted number inside a sentence, such as the points left before a test. */
 export const uiThresholdValue = `font-code text-sm lg:text-base font-bold ${colourAmberPlain}`;

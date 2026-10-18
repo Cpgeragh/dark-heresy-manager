@@ -568,7 +568,8 @@ service cloud.firestore {
                  'xpAwarded',
                  'attendees',
                  'createdAt',
-                 'xpApplied'
+                 'xpApplied',
+                 'status'
                ]) &&
                data.date is timestamp &&
                data.summary is string &&
@@ -582,7 +583,8 @@ service cloud.firestore {
                data.attendees.size() <= 100 &&
                data.attendees.toSet().size() == data.attendees.size() &&
                data.createdAt is timestamp &&
-               (!('xpApplied' in data) || data.xpApplied is bool);
+               (!('xpApplied' in data) || data.xpApplied is bool) &&
+               (!('status' in data) || data.status in ['open', 'closed']);
       }
 
       function validSessionXpBoundary() {
@@ -597,15 +599,24 @@ service cloud.firestore {
              request.resource.data.attendees == resource.data.attendees));
       }
 
+      // Only the server opens or closes a session, and an open session has no XP yet.
+      function validSessionStatusBoundary() {
+        let hadStatus = 'status' in resource.data;
+        let hasStatus = 'status' in request.resource.data;
+        let statusRemainsSame = hadStatus == hasStatus &&
+          (!hadStatus || request.resource.data.status == resource.data.status);
+        let isOpen = hadStatus && resource.data.status == 'open';
+        return statusRemainsSame && (!isOpen || request.resource.data.xpAwarded == 0);
+      }
+
       // Full session records contain private DM notes and are DM-only.
       allow get: if dmOwnsCampaign();
       allow list: if dmOwnsCampaign() && boundedQuery(200);
-      allow create: if dmOwnsCampaign() &&
-        validSessionData(request.resource.data) &&
-        (!('xpApplied' in request.resource.data) || request.resource.data.xpApplied == false);
+      allow create: if false;
       allow update: if dmOwnsCampaign() &&
         validSessionData(request.resource.data) &&
-        validSessionXpBoundary();
+        validSessionXpBoundary() &&
+        validSessionStatusBoundary();
       allow delete: if false;
     }
 
@@ -625,7 +636,8 @@ service cloud.firestore {
                  'xpAwarded',
                  'attendees',
                  'createdAt',
-                 'xpApplied'
+                 'xpApplied',
+                 'status'
                ]) &&
                data.date is timestamp &&
                data.summary is string &&
@@ -637,7 +649,8 @@ service cloud.firestore {
                data.attendees.size() <= 100 &&
                data.attendees.toSet().size() == data.attendees.size() &&
                data.createdAt is timestamp &&
-               (!('xpApplied' in data) || data.xpApplied is bool);
+               (!('xpApplied' in data) || data.xpApplied is bool) &&
+               (!('status' in data) || data.status in ['open', 'closed']);
       }
 
       function validSessionXpBoundary() {
@@ -652,18 +665,26 @@ service cloud.firestore {
              request.resource.data.attendees == resource.data.attendees));
       }
 
+      // Only the server opens or closes a session, and an open session has no XP yet.
+      function validSessionStatusBoundary() {
+        let hadStatus = 'status' in resource.data;
+        let hasStatus = 'status' in request.resource.data;
+        let statusRemainsSame = hadStatus == hasStatus &&
+          (!hadStatus || request.resource.data.status == resource.data.status);
+        let isOpen = hadStatus && resource.data.status == 'open';
+        return statusRemainsSame && (!isOpen || request.resource.data.xpAwarded == 0);
+      }
+
       allow get:
         if dmOwnsCampaign() || campaignMemberOrLinked(campaignId);
       allow list:
         if (dmOwnsCampaign() || campaignMemberOrLinked(campaignId)) && boundedQuery(200);
-      allow create:
-        if dmOwnsCampaign() &&
-           validSessionSummaryData(request.resource.data) &&
-           (!('xpApplied' in request.resource.data) || request.resource.data.xpApplied == false);
+      allow create: if false;
       allow update:
         if dmOwnsCampaign() &&
            validSessionSummaryData(request.resource.data) &&
-           validSessionXpBoundary();
+           validSessionXpBoundary() &&
+           validSessionStatusBoundary();
       allow delete: if false;
     }
 

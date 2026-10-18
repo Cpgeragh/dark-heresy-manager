@@ -140,6 +140,8 @@ export interface SessionSummaryDocument {
   attendees: string[];
   createdAt: Timestamp | Date | FieldValue;
   xpApplied?: boolean;
+  /** Open while the DM is running the session; a session without a status counts as closed. */
+  status?: "open" | "closed";
 }
 
 /** Full DM-only document stored in /campaigns/{campaignId}/sessions/{sessionId}. */

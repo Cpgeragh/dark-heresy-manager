@@ -2,10 +2,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 
-const { sessionsData, adjustSessionXp, updateSessionDocument } = vi.hoisted(() => ({
+const {
+  sessionsData,
+  adjustSessionXp,
+  updateSessionDocument,
+  startSessionDocument,
+  closeSessionDocument,
+} = vi.hoisted(() => ({
   sessionsData: { current: [] as Record<string, unknown>[] },
   adjustSessionXp: vi.fn().mockResolvedValue(undefined),
   updateSessionDocument: vi.fn().mockResolvedValue(undefined),
+  startSessionDocument: vi.fn().mockResolvedValue(undefined),
+  closeSessionDocument: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -20,6 +28,8 @@ vi.mock("../../src/hooks/useFirestoreSubscription", () => ({
 }));
 vi.mock("../../src/services/sessionService", () => ({
   adjustSessionXp: (...args: unknown[]) => adjustSessionXp(...args),
+  startSession: (...args: unknown[]) => startSessionDocument(...args),
+  closeSession: (...args: unknown[]) => closeSessionDocument(...args),
   deleteSession: vi.fn(),
   updateSession: (...args: unknown[]) => updateSessionDocument(...args),
 }));
@@ -42,6 +52,51 @@ function session(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   sessionsData.current = [session()];
+});
+
+describe("useSessions open session", () => {
+  it("returns the session whose status is open, or null when none is", () => {
+    sessionsData.current = [
+      session({ id: "closed", status: "closed" }),
+      session({ id: "older" }),
+      session({ id: "live", status: "open", xpApplied: undefined, xpAwarded: 0 }),
+    ];
+    const { result, rerender } = renderHook(() => useSessions("camp-1", true));
+    expect(result.current.openSession?.id).toBe("live");
+
+    sessionsData.current = [session({ id: "closed", status: "closed" })];
+    rerender();
+    expect(result.current.openSession).toBeNull();
+  });
+
+  it("starts and closes a session for the current campaign", async () => {
+    const { result } = renderHook(() => useSessions("camp-1", true));
+    const closeData = { xpAwarded: 150, summary: "Recap", dmNotes: "", attendees: ["c1"] };
+
+    await result.current.startSession("2026-10-17", ["c1"]);
+    await result.current.closeSession("s1", closeData);
+
+    expect(startSessionDocument).toHaveBeenCalledWith("camp-1", "2026-10-17", ["c1"]);
+    expect(closeSessionDocument).toHaveBeenCalledWith("camp-1", "s1", closeData);
+  });
+
+  it("saves the notes of an open session directly, with no XP adjustment", async () => {
+    sessionsData.current = [
+      session({ id: "live", status: "open", xpApplied: undefined, xpAwarded: 0 }),
+    ];
+    const { result } = renderHook(() => useSessions("camp-1", true));
+
+    await result.current.updateSession("live", {
+      summary: "Notes so far",
+      attendees: ["c1", "c2"],
+    });
+
+    expect(adjustSessionXp).not.toHaveBeenCalled();
+    expect(updateSessionDocument).toHaveBeenCalledWith("camp-1", "live", {
+      summary: "Notes so far",
+      attendees: ["c1", "c2"],
+    });
+  });
 });
 
 describe("useSessions updateSession", () => {

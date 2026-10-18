@@ -1,7 +1,7 @@
 // src/services/sessionService.ts
 // Firestore operations for campaign session documents.
 
-import { collection, doc, serverTimestamp, writeBatch } from "firebase/firestore";
+import { doc, writeBatch } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
@@ -15,14 +15,6 @@ import {
 import { runSingleFlight } from "../firestore/singleFlight";
 import { measurePerformanceMutation } from "../performance/performanceMetrics";
 import { createLocalId } from "../utils/createLocalId";
-
-interface SessionData {
-  date: Date;
-  summary: string;
-  dmNotes: string;
-  xpAwarded: number;
-  attendees: string[];
-}
 
 const SESSION_XP_FIXED_DOCUMENTS = 2;
 const SESSION_XP_DOCUMENTS_PER_ATTENDEE = 3;
@@ -64,6 +56,20 @@ const callAdjustSessionXp = httpsCallable<
   },
   void
 >(functions, "adjustSessionXp");
+const callStartSession = httpsCallable<
+  { campaignId: string; date: string; attendees: string[]; operationId: string },
+  void
+>(functions, "startSession");
+const callCloseSession = httpsCallable<
+  {
+    campaignId: string;
+    sessionId: string;
+    xpAwarded: number;
+    attendees: string[];
+    operationId: string;
+  },
+  void
+>(functions, "closeSession");
 
 /** Rebuilds every safe session summary through the protected DM-only operation. */
 export async function repairSessionSummaries(campaignId: string): Promise<number> {
@@ -72,37 +78,6 @@ export async function repairSessionSummaries(campaignId: string): Promise<number
     const response = await callRepairSessionSummaries({ campaignId });
     return response.data.repairedCount;
   });
-}
-
-/** Creates the DM-only session and its member-safe summary atomically. */
-export async function createSession(campaignId: string, session: SessionData): Promise<void> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  validateSessionData(session);
-
-  await measurePerformanceMutation("session:create", () =>
-    runSingleFlight("session:create", [campaignId, session], async () => {
-      const batch = writeBatch(db);
-      const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
-      const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionRef.id);
-      const createdAt = serverTimestamp();
-      const summaryData = {
-        date: session.date,
-        summary: session.summary,
-        xpAwarded: session.xpAwarded,
-        attendees: session.attendees,
-        createdAt,
-        ...(session.xpAwarded > 0 ? { xpApplied: false } : {}),
-      };
-
-      batch.set(sessionRef, {
-        ...summaryData,
-        dmNotes: session.dmNotes,
-      });
-      batch.set(summaryRef, summaryData);
-
-      await batch.commit();
-    })
-  );
 }
 
 /** Updates the editable fields on an existing campaign session. */
@@ -132,46 +107,6 @@ export async function updateSession(
       }
       await batch.commit();
     })
-  );
-}
-
-function validateSessionData(session: SessionData): void {
-  if (typeof session !== "object" || session === null) {
-    throw new Error("Session data must be an object.");
-  }
-  assertString(session.summary, "Session summary");
-  assertString(session.dmNotes, "DM notes");
-  if (!Array.isArray(session.attendees)) throw new Error("Session attendees must be an array.");
-  if (!(session.date instanceof Date) || Number.isNaN(session.date.getTime())) {
-    throw new Error("A valid session date is required.");
-  }
-  if (session.summary.length > PRODUCT_LIMITS.sessionSummaryCharacters) {
-    throw new Error(
-      `Session summary cannot exceed ${PRODUCT_LIMITS.sessionSummaryCharacters} characters.`
-    );
-  }
-  if (session.dmNotes.length > PRODUCT_LIMITS.sessionDmNotesCharacters) {
-    throw new Error(
-      `DM notes cannot exceed ${PRODUCT_LIMITS.sessionDmNotesCharacters} characters.`
-    );
-  }
-  if (
-    !Number.isInteger(session.xpAwarded) ||
-    session.xpAwarded < 0 ||
-    session.xpAwarded > PRODUCT_LIMITS.sessionXpAward
-  ) {
-    throw new Error(
-      `XP awarded must be a whole number from 0 to ${PRODUCT_LIMITS.sessionXpAward}.`
-    );
-  }
-  if (session.attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
-    throw new Error(`A session cannot have more than ${SESSION_XP_FAN_OUT_LIMIT} attendees.`);
-  }
-  if (new Set(session.attendees).size !== session.attendees.length) {
-    throw new Error("A character cannot be listed as a session attendee more than once.");
-  }
-  session.attendees.forEach((attendeeId) =>
-    assertFirestoreDocumentId(attendeeId, "Session attendee ID")
   );
 }
 
@@ -336,5 +271,94 @@ export async function adjustSessionXp(
         });
       }
     )
+  );
+}
+
+function assertSessionAttendees(attendees: string[]): void {
+  if (!Array.isArray(attendees)) throw new Error("Session attendees must be an array.");
+  if (attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
+    throw new Error(`A session cannot have more than ${SESSION_XP_FAN_OUT_LIMIT} attendees.`);
+  }
+  if (new Set(attendees).size !== attendees.length) {
+    throw new Error("A character cannot be listed as a session attendee more than once.");
+  }
+  attendees.forEach((attendeeId) => assertFirestoreDocumentId(attendeeId, "Session attendee ID"));
+}
+
+function assertAtLeastOneAttendee(attendees: string[]): void {
+  if (attendees.length === 0) throw new Error("At least one attendee is required.");
+}
+
+/**
+ * Starts a session that stays open for notes until it is closed. The server allows only one
+ * open session per campaign.
+ */
+export async function startSession(
+  campaignId: string,
+  date: string,
+  attendees: string[]
+): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  if (
+    typeof date !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    Number.isNaN(Date.parse(date))
+  ) {
+    throw new Error("A valid session date is required.");
+  }
+  assertSessionAttendees(attendees);
+  assertAtLeastOneAttendee(attendees);
+
+  await measurePerformanceMutation("session:start", () =>
+    runSingleFlight("session:start", [campaignId, date, attendees], async () => {
+      await callStartSession({
+        campaignId,
+        date,
+        attendees,
+        operationId: createLocalId("start-session"),
+      });
+    })
+  );
+}
+
+export interface CloseSessionData {
+  xpAwarded: number;
+  attendees: string[];
+}
+
+/**
+ * Closes an open session and gives the XP to its attendees in one server transaction. The server
+ * uses the notes already saved on the session.
+ */
+export async function closeSession(
+  campaignId: string,
+  sessionId: string,
+  data: CloseSessionData
+): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(sessionId, "Session ID");
+  if (typeof data !== "object" || data === null) throw new Error("Session data must be an object.");
+  if (
+    !Number.isInteger(data.xpAwarded) ||
+    data.xpAwarded < 0 ||
+    data.xpAwarded > PRODUCT_LIMITS.sessionXpAward
+  ) {
+    throw new Error(
+      `XP awarded must be a whole number from 0 to ${PRODUCT_LIMITS.sessionXpAward}.`
+    );
+  }
+  assertSessionAttendees(data.attendees);
+  assertAtLeastOneAttendee(data.attendees);
+
+  await measurePerformanceMutation("session:close", () =>
+    runSingleFlight("session:close", [campaignId, sessionId, data], async () => {
+      await callCloseSession({
+        campaignId,
+        sessionId,
+        xpAwarded: data.xpAwarded,
+        attendees: data.attendees,
+        operationId: createLocalId("close-session"),
+      });
+    })
   );
 }

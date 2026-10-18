@@ -1,4 +1,9 @@
-import { getFirestore, type DocumentSnapshot } from "firebase-admin/firestore";
+import {
+  getFirestore,
+  type DocumentReference,
+  type DocumentSnapshot,
+  type Transaction,
+} from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { runOperationTransaction, type IdempotencyExecution } from "../shared/idempotency.js";
@@ -8,6 +13,7 @@ import {
   resolveXpHistoryActor,
   stageOpeningBalance,
   stageXpHistoryEntry,
+  type XpHistoryActor,
 } from "../shared/xpHistory.js";
 import { calculateCharacterSpentXp } from "../shared/spentXp.js";
 
@@ -24,7 +30,7 @@ export interface DeleteSessionInput extends ApplySessionXpInput {
   reverseXp: boolean;
 }
 
-function sessionValues(data: Record<string, unknown>) {
+export function sessionValues(data: Record<string, unknown>) {
   const attendees = data.attendees;
   const xpAwarded = data.xpAwarded;
   if (!Array.isArray(attendees) || attendees.some((id) => typeof id !== "string" || !id)) {
@@ -45,7 +51,7 @@ function sessionValues(data: Record<string, unknown>) {
   return { attendees: attendees as string[], xpAwarded: xpAwarded as number, summary };
 }
 
-async function authorisedCampaign(campaignId: string, callerUid: string) {
+export async function authorisedCampaign(campaignId: string, callerUid: string) {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(campaignId);
   const campaignSnapshot = await campaignRef.get();
@@ -55,6 +61,76 @@ async function authorisedCampaign(campaignId: string, callerUid: string) {
     throw new HttpsError("permission-denied", "Only the campaign DM can manage session XP.");
   }
   return { db, campaignRef, dmId };
+}
+
+export interface SessionAward {
+  sessionId: string;
+  attendees: string[];
+  xpAwarded: number;
+  summary: string | null;
+}
+
+/**
+ * Gives every attendee the session's XP inside an open transaction: all reads first, then the
+ * opening balance, history entry and new total for each attendee.
+ */
+export async function stageSessionAward(
+  transaction: Transaction,
+  campaignRef: DocumentReference,
+  award: SessionAward,
+  actor: XpHistoryActor
+): Promise<void> {
+  const { sessionId, attendees, xpAwarded, summary } = award;
+  const characterRefs = attendees.map((id) => campaignRef.collection("characters").doc(id));
+  const characterSnapshots: DocumentSnapshot[] = [];
+  const openingSnapshots: DocumentSnapshot[] = [];
+  for (const characterRef of characterRefs)
+    characterSnapshots.push(await transaction.get(characterRef));
+  for (const characterRef of characterRefs) {
+    openingSnapshots.push(
+      await transaction.get(characterRef.collection("xpHistory").doc("opening-balance"))
+    );
+  }
+
+  characterSnapshots.forEach((snapshot) => {
+    if (!snapshot.exists) throw new HttpsError("not-found", "A session attendee was not found.");
+  });
+
+  characterRefs.forEach((characterRef, index) => {
+    const characterData = characterSnapshots[index].data() ?? {};
+    const { experience, totalXp } = readExperience(characterData);
+    const spentXp = calculateCharacterSpentXp(characterData);
+    const balanceXp = totalXp + xpAwarded;
+    if (balanceXp > CHARACTER_XP_TOTAL_MAX) {
+      throw new HttpsError(
+        "failed-precondition",
+        `Total XP cannot exceed ${CHARACTER_XP_TOTAL_MAX}.`
+      );
+    }
+    const history = characterRef.collection("xpHistory");
+    stageOpeningBalance(
+      transaction,
+      history.doc("opening-balance"),
+      openingSnapshots[index].exists,
+      totalXp,
+      actor
+    );
+    stageXpHistoryEntry(
+      transaction,
+      history.doc(`session-award-${sessionId}`),
+      {
+        amountXp: xpAwarded,
+        balanceXp,
+        reason: summary ?? "Session award",
+        source: "session-award",
+        sessionId,
+      },
+      actor
+    );
+    transaction.update(characterRef, {
+      experience: { ...experience, total: balanceXp, spent: spentXp },
+    });
+  });
 }
 
 export async function applySessionXp(
@@ -75,56 +151,12 @@ export async function applySessionXp(
       throw new HttpsError("already-exists", "XP has already been applied for this session.");
     }
     const { attendees, xpAwarded, summary } = sessionValues(sessionData);
-    const characterRefs = attendees.map((id) => campaignRef.collection("characters").doc(id));
-    const characterSnapshots: DocumentSnapshot[] = [];
-    const openingSnapshots: DocumentSnapshot[] = [];
-    for (const characterRef of characterRefs)
-      characterSnapshots.push(await transaction.get(characterRef));
-    for (const characterRef of characterRefs) {
-      openingSnapshots.push(
-        await transaction.get(characterRef.collection("xpHistory").doc("opening-balance"))
-      );
-    }
-
-    characterSnapshots.forEach((snapshot) => {
-      if (!snapshot.exists) throw new HttpsError("not-found", "A session attendee was not found.");
-    });
-
-    characterRefs.forEach((characterRef, index) => {
-      const characterData = characterSnapshots[index].data() ?? {};
-      const { experience, totalXp } = readExperience(characterData);
-      const spentXp = calculateCharacterSpentXp(characterData);
-      const balanceXp = totalXp + xpAwarded;
-      if (balanceXp > CHARACTER_XP_TOTAL_MAX) {
-        throw new HttpsError(
-          "failed-precondition",
-          `Total XP cannot exceed ${CHARACTER_XP_TOTAL_MAX}.`
-        );
-      }
-      const history = characterRef.collection("xpHistory");
-      stageOpeningBalance(
-        transaction,
-        history.doc("opening-balance"),
-        openingSnapshots[index].exists,
-        totalXp,
-        actor
-      );
-      stageXpHistoryEntry(
-        transaction,
-        history.doc(`session-award-${input.sessionId}`),
-        {
-          amountXp: xpAwarded,
-          balanceXp,
-          reason: summary ?? "Session award",
-          source: "session-award",
-          sessionId: input.sessionId,
-        },
-        actor
-      );
-      transaction.update(characterRef, {
-        experience: { ...experience, total: balanceXp, spent: spentXp },
-      });
-    });
+    await stageSessionAward(
+      transaction,
+      campaignRef,
+      { sessionId: input.sessionId, attendees, xpAwarded, summary },
+      actor
+    );
     transaction.update(sessionRef, { xpApplied: true });
     transaction.update(summaryRef, { xpApplied: true });
   });

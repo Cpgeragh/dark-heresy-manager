@@ -5,13 +5,17 @@ import { recordComponentRender } from "../../performance/performanceMetrics";
 import type { SessionListDocument } from "../../types/Firestore";
 import {
   getSessionXpAffectedDocumentCount,
+  type CloseSessionData,
   type SessionUpdateData,
 } from "../../services/sessionService";
 import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/buttons/Button";
+import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
+import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { Chip } from "../../ui/chips/Chip";
 import { CheckIcon } from "../../ui/icons/CheckIcon";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
+import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import {
   uiInlineRow,
   uiSection,
@@ -19,10 +23,15 @@ import {
   uiStackList,
   uiTextBody,
   uiTextError,
+  uiTextLabel,
   uiTextMeta,
+  uiTextNotice,
 } from "../../ui/styles/editableStyles";
 import { colourDivider } from "../../ui/styles/colourTokens";
+import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { toSessionDate } from "../../utils/sessionDate";
+import { isSessionOpen } from "../../utils/sessionStatus";
+import { CloseSessionConfirmModal } from "./CloseSessionConfirmModal";
 import { SessionForm } from "./SessionForm";
 
 interface Character {
@@ -33,27 +42,30 @@ interface Character {
 type SessionWithId = SessionListDocument & { id: string };
 
 interface Props {
-  campaignId: string;
   session: SessionWithId;
   characters: Character[];
   isDM: boolean;
   onDelete?: (reverseXp: boolean) => Promise<void>;
   onSave?: (data: SessionUpdateData) => Promise<void>;
   onApplyXp?: () => Promise<void>;
+  onCloseSession?: (data: CloseSessionData) => Promise<void>;
 }
 
 export function SessionCard({
-  campaignId,
   session,
   characters,
   isDM,
   onDelete,
   onSave,
   onApplyXp,
+  onCloseSession,
 }: Props) {
   recordComponentRender("SessionCard");
   const toast = useToast();
-  const [editing, setEditing] = useState(false);
+  const [view, setView] = useState<"none" | "notes" | "close" | "edit">("none");
+  const [pendingClose, setPendingClose] = useState<CloseSessionData | null>(null);
+  const [closing, setClosing] = useState(false);
+  const closingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
   const deletingRef = useRef(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -61,7 +73,13 @@ export function SessionCard({
   const [applyingXp, setApplyingXp] = useState(false);
   const applyingXpRef = useRef(false);
 
+  const isOpen = isSessionOpen(session);
+  const tappable = isDM && isOpen && Boolean(onSave);
   const nameById = Object.fromEntries(characters.map((c) => [c.id, c.characterName]));
+  const attendeeNames = session.attendees
+    .map((id) => nameById[id] ?? id)
+    .sort((a, b) => a.localeCompare(b));
+  const hasSavedSummary = Boolean(session.summary.trim());
   const dateStr = toSessionDate(session.date).toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
@@ -110,63 +128,132 @@ export function SessionCard({
     }
   }, [onApplyXp, session.xpAwarded, session.attendees.length, toast]);
 
+  const handleConfirmClose = useCallback(async () => {
+    if (!pendingClose || !onCloseSession || closingRef.current) return;
+    closingRef.current = true;
+    setClosing(true);
+    try {
+      await onCloseSession(pendingClose);
+      toast.success("Session closed");
+      setPendingClose(null);
+      setView("none");
+    } catch (err) {
+      console.error("Failed to close session:", err);
+      toast.error(err instanceof Error && err.message ? err.message : "Failed to close session");
+      setPendingClose(null);
+    } finally {
+      closingRef.current = false;
+      setClosing(false);
+    }
+  }, [pendingClose, onCloseSession, toast]);
+
   return (
-    <div className={`${uiSection} ${uiStackList}`}>
-      <div className="flex items-center justify-between">
-        <span className="font-semibold lg:text-lg">{dateStr}</span>
-        <div className={`${uiInlineRow}`}>
-          {session.xpAwarded > 0 && <Chip colour="amber">+{session.xpAwarded} XP</Chip>}
-          {isDM &&
-            session.xpAwarded > 0 &&
-            session.attendees.length > 0 &&
-            session.xpApplied !== undefined &&
-            (session.xpApplied === true ? (
-              <Chip colour="green">
-                <span>XP Applied</span>
-                <CheckIcon className="h-[1em] w-[1em]" />
-              </Chip>
-            ) : (
-              <Button
-                size="sm"
-                onClick={handleApplyXp}
-                loading={applyingXp}
-                loadingLabel="Applying"
-              >
-                Apply XP
+    <div className={`${uiSection} ${uiStackList}${tappable ? ` ${uiCardTapHeader} relative` : ""}`}>
+      {tappable && (
+        <CardOverlayButton label={`Open session of ${dateStr}`} onClick={() => setView("notes")} />
+      )}
+      <div className={`${uiStackList}${tappable ? " pointer-events-none relative" : ""}`}>
+        <div className="flex items-center justify-between">
+          <span className="font-semibold lg:text-lg">{dateStr}</span>
+          <div
+            className={`${uiInlineRow}${tappable ? ` pointer-events-auto relative ${uiLayerLocal}` : ""}`}
+          >
+            {isOpen && <Chip colour="sky">In progress</Chip>}
+            {!isOpen && session.xpAwarded > 0 && (
+              <Chip colour="amber">+{session.xpAwarded} XP</Chip>
+            )}
+            {isDM &&
+              !isOpen &&
+              session.xpAwarded > 0 &&
+              session.attendees.length > 0 &&
+              session.xpApplied !== undefined &&
+              (session.xpApplied === true ? (
+                <Chip colour="green">
+                  <span>XP Applied</span>
+                  <CheckIcon className="h-[1em] w-[1em]" />
+                </Chip>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={handleApplyXp}
+                  loading={applyingXp}
+                  loadingLabel="Applying"
+                >
+                  Apply XP
+                </Button>
+              ))}
+            {isDM && !isOpen && onSave && (
+              <Button variant="secondary" size="sm" onClick={() => setView("edit")}>
+                Edit
               </Button>
-            ))}
-          {isDM && onSave && (
-            <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
-              Edit
-            </Button>
-          )}
-          {isDM && onDelete && (
-            <Button variant="dangerGhost" size="sm" onClick={() => setConfirmingDelete(true)}>
-              Delete
-            </Button>
-          )}
+            )}
+            {tappable && onCloseSession && (
+              <Button size="sm" disabled={!hasSavedSummary} onClick={() => setView("close")}>
+                Close Session
+              </Button>
+            )}
+            {isDM && onDelete && (
+              <RemoveButton label="Delete session" onClick={() => setConfirmingDelete(true)} />
+            )}
+          </div>
         </div>
+
+        {attendeeNames.length > 0 && (
+          <div className="flex items-center gap-1.5">
+            <span className={uiTextLabel}>Attendees</span>
+            <span className={`text-xs lg:text-sm ${uiTextBody}`}>{attendeeNames.join(", ")}</span>
+          </div>
+        )}
+        {tappable && onCloseSession && !hasSavedSummary && (
+          <p className={uiTextNotice}>Save the session notes before closing.</p>
+        )}
+
+        {session.summary && (
+          <p className={`text-sm lg:text-base ${uiTextBody}`}>{session.summary}</p>
+        )}
+
+        {isDM && session.dmNotes && (
+          <p className={`${uiTextMeta} border-t ${colourDivider} pt-2`}>DM: {session.dmNotes}</p>
+        )}
       </div>
 
-      {session.attendees.length > 0 && (
-        <p className={uiTextMeta}>
-          Attendees: {session.attendees.map((id) => nameById[id] ?? id).join(", ")}
-        </p>
-      )}
-
-      {session.summary && <p className={`text-sm lg:text-base ${uiTextBody}`}>{session.summary}</p>}
-
-      {isDM && session.dmNotes && (
-        <p className={`${uiTextMeta} border-t ${colourDivider} pt-2`}>DM: {session.dmNotes}</p>
-      )}
-
-      {editing && onSave && (
+      {view === "notes" && onSave && (
         <SessionForm
-          campaignId={campaignId}
+          mode="open"
           characters={characters}
           session={session}
           onSave={onSave}
-          onClose={() => setEditing(false)}
+          onClose={() => setView("none")}
+        />
+      )}
+
+      {view === "close" && onCloseSession && (
+        <SessionForm
+          mode="close"
+          characters={characters}
+          session={session}
+          onRequestCloseSession={setPendingClose}
+          onClose={() => setView("none")}
+        />
+      )}
+
+      {pendingClose && (
+        <CloseSessionConfirmModal
+          xpAwarded={pendingClose.xpAwarded}
+          attendeeNames={pendingClose.attendees.map((id) => nameById[id] ?? id)}
+          busy={closing}
+          onYes={() => void handleConfirmClose()}
+          onNo={() => setPendingClose(null)}
+        />
+      )}
+
+      {view === "edit" && onSave && (
+        <SessionForm
+          mode="edit"
+          characters={characters}
+          session={session}
+          onSave={onSave}
+          onClose={() => setView("none")}
         />
       )}
 

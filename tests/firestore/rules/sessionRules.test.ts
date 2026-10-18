@@ -114,21 +114,35 @@ describe("Firestore Rules: Sessions", () => {
     await expect(summaries.limit(200).get()).rejects.toThrow();
   });
 
-  it("DM can write a safe summary but cannot include private DM notes", async () => {
+  it("DM cannot create a session summary directly, with or without private DM notes", async () => {
     const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
     const summary = {
       date: new Date(),
       summary: "Safe recap",
-      xpAwarded: 50,
+      xpAwarded: 0,
       attendees: [],
       createdAt: new Date(),
+      status: "open",
     };
     const summaries = dbAs(env, "dm-1").collection("campaigns/c1/sessionSummaries");
 
-    await expect(summaries.doc("safe").set(summary)).resolves.toBeUndefined();
+    await expect(summaries.doc("safe").set(summary)).rejects.toThrow();
     await expect(
       summaries.doc("unsafe").set({ ...summary, dmNotes: "must remain private" })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot add private DM notes to an existing session summary", async () => {
+    const env = await getTestEnv();
+    await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
+    await createSessionSummary(env, "c1", "s1");
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection("campaigns/c1/sessionSummaries")
+        .doc("s1")
+        .update({ dmNotes: "must remain private" })
     ).rejects.toThrow();
   });
 
@@ -156,7 +170,7 @@ describe("Firestore Rules: Sessions", () => {
     await expect(anonDb.collection("campaigns/c1/sessions").doc("s1").get()).rejects.toThrow();
   });
 
-  it("DM can create a session", async () => {
+  it("DM cannot create a session directly because sessions start through the protected operation", async () => {
     const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
 
@@ -164,13 +178,14 @@ describe("Firestore Rules: Sessions", () => {
     await expect(
       dmDb.collection("campaigns/c1/sessions").doc("s-new").set({
         date: new Date(),
-        summary: "New session",
+        summary: "",
         dmNotes: "",
-        xpAwarded: 50,
+        xpAwarded: 0,
         attendees: [],
         createdAt: new Date(),
+        status: "open",
       })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 
   it("non-DM player cannot create a session", async () => {
@@ -190,58 +205,53 @@ describe("Firestore Rules: Sessions", () => {
     ).rejects.toThrow();
   });
 
-  it("DM cannot create a session with oversized private notes", async () => {
+  it("DM cannot update a session to oversized notes, an XP amount outside the range, duplicate attendees or unexpected fields", async () => {
     const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
+    await createSession(env, "c1", "s1", { attendees: ["char-1"] });
+    const session = dbAs(env, "dm-1").collection("campaigns/c1/sessions").doc("s1");
 
+    await expect(session.update({ dmNotes: "x".repeat(4_001) })).rejects.toThrow();
+    await expect(session.update({ xpAwarded: 100_001 })).rejects.toThrow();
+    await expect(session.update({ attendees: ["char-1", "char-1"] })).rejects.toThrow();
+    await expect(session.update({ unexpected: true })).rejects.toThrow();
+  });
+
+  it("keeps the open or closed status behind the protected operations", async () => {
+    const env = await getTestEnv();
+    await createCampaign(env, "c1", "dm-1");
+    await createSession(env, "c1", "open", { status: "open", xpAwarded: 0, summary: "" });
+    await createSessionSummary(env, "c1", "open", { status: "open", xpAwarded: 0, summary: "" });
+    await createSession(env, "c1", "closed", { status: "closed", xpApplied: true });
+    await createSession(env, "c1", "older");
+    const sessions = dbAs(env, "dm-1").collection("campaigns/c1/sessions");
+
+    await expect(sessions.doc("open").update({ status: "closed" })).rejects.toThrow();
+    await expect(sessions.doc("closed").update({ status: "open" })).rejects.toThrow();
+    await expect(sessions.doc("older").update({ status: "open" })).rejects.toThrow();
     await expect(
       dbAs(env, "dm-1")
-        .collection("campaigns/c1/sessions")
-        .doc("s-large")
-        .set({
-          date: new Date(),
-          summary: "Summary",
-          dmNotes: "x".repeat(4_001),
-          xpAwarded: 50,
-          attendees: [],
-          createdAt: new Date(),
-        })
+        .collection("campaigns/c1/sessionSummaries")
+        .doc("open")
+        .update({ status: "closed" })
     ).rejects.toThrow();
   });
 
-  it("DM cannot create a session outside the XP range", async () => {
+  it("keeps an open session at zero XP but lets the DM edit its notes, date and attendees", async () => {
     const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
+    await createSession(env, "c1", "open", { status: "open", xpAwarded: 0, summary: "" });
+    await createSessionSummary(env, "c1", "open", { status: "open", xpAwarded: 0, summary: "" });
+    const session = dbAs(env, "dm-1").collection("campaigns/c1/sessions").doc("open");
+    const summary = dbAs(env, "dm-1").collection("campaigns/c1/sessionSummaries").doc("open");
 
-    await expect(
-      dbAs(env, "dm-1").collection("campaigns/c1/sessions").doc("s-xp").set({
-        date: new Date(),
-        summary: "Summary",
-        dmNotes: "",
-        xpAwarded: 100_001,
-        attendees: [],
-        createdAt: new Date(),
-      })
-    ).rejects.toThrow();
-  });
-
-  it("DM cannot create a session with duplicate attendees or unexpected fields", async () => {
-    const env = await getTestEnv();
-    await createCampaign(env, "c1", "dm-1");
-    const sessions = dbAs(env, "dm-1").collection("campaigns/c1/sessions");
-    const valid = {
-      date: new Date(),
-      summary: "Summary",
-      dmNotes: "",
-      xpAwarded: 50,
-      attendees: ["char-1"],
-      createdAt: new Date(),
-    };
-
-    await expect(
-      sessions.doc("duplicates").set({ ...valid, attendees: ["char-1", "char-1"] })
-    ).rejects.toThrow();
-    await expect(sessions.doc("extra").set({ ...valid, unexpected: true })).rejects.toThrow();
+    await expect(session.update({ summary: "Notes so far" })).resolves.toBeUndefined();
+    await expect(session.update({ dmNotes: "Private notes" })).resolves.toBeUndefined();
+    await expect(session.update({ attendees: ["char-1"] })).resolves.toBeUndefined();
+    await expect(session.update({ date: new Date("2026-10-20") })).resolves.toBeUndefined();
+    await expect(summary.update({ summary: "Notes so far" })).resolves.toBeUndefined();
+    await expect(session.update({ xpAwarded: 50 })).rejects.toThrow();
+    await expect(summary.update({ xpAwarded: 50 })).rejects.toThrow();
   });
 
   it("DM can update a session", async () => {

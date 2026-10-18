@@ -1,6 +1,6 @@
 // tests/integration/CampaignOverview.test.tsx
 //
-// CharacterRow, MyCharacterCard, PartyRosterTile, SessionForm, SessionCard,
+// CharacterRow, MyCharacterCard, PartyRosterTile, BeginSessionForm, SessionCard,
 // CustomItemLibraryAdmin and the section drawer are all mocked, each already
 // has its own dedicated test file. This file is scoped to the campaign page's
 // own orchestration: which section opens from the link, the section menu for
@@ -141,19 +141,22 @@ vi.mock("../../src/pages/CampaignOverview/PartyRosterTile", () => ({
   ),
 }));
 
-vi.mock("../../src/pages/CampaignOverview/SessionForm", () => ({
-  SessionForm: ({
+vi.mock("../../src/pages/CampaignOverview/BeginSessionForm", () => ({
+  BeginSessionForm: ({
     characters,
+    onBegin,
     onClose,
   }: {
     characters: { id: string; characterName: string }[];
+    onBegin: (date: string, attendees: string[]) => void;
     onClose: () => void;
   }) => (
     <div>
-      Mock SessionForm
+      Mock BeginSessionForm
       {characters.map((entry) => (
         <span key={entry.id}>Session attendee: {entry.characterName}</span>
       ))}
+      <button onClick={() => onBegin("2026-10-17", ["c1"])}>Mock Begin</button>
       <button onClick={onClose}>Mock Close Session Form</button>
     </div>
   ),
@@ -165,17 +168,20 @@ vi.mock("../../src/pages/CampaignOverview/SessionCard", () => ({
     onDelete,
     onSave,
     onApplyXp,
+    onCloseSession,
   }: {
     session: { id: string };
     onDelete?: () => void;
     onSave?: () => void;
     onApplyXp?: () => void;
+    onCloseSession?: () => void;
   }) => (
     <div>
       Mock SessionCard: {session.id}
       {onDelete && <button onClick={onDelete}>Mock Delete Session</button>}
       {onSave && <button onClick={onSave}>Mock Save Session</button>}
       {onApplyXp && <button onClick={onApplyXp}>Mock Apply XP</button>}
+      {onCloseSession && <button onClick={onCloseSession}>Mock Close Session</button>}
     </div>
   ),
 }));
@@ -205,8 +211,11 @@ function campaign(over: Partial<CampaignWithId> = {}): CampaignWithId {
 function sessionsResult(over: Record<string, unknown> = {}) {
   return {
     sessions: [],
+    openSession: null,
     loading: false,
     error: null,
+    startSession: vi.fn(),
+    closeSession: vi.fn(),
     deleteSession: vi.fn(),
     updateSession: vi.fn(),
     ...over,
@@ -523,7 +532,7 @@ describe("CampaignOverview: the Session History section", () => {
     renderPage("player-1", "sessions");
     expect(screen.getByText("Mock SessionCard: s1")).toBeInTheDocument();
     expect(screen.queryByText("Mock Delete Session")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "New Session" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Begin Session" })).not.toBeInTheDocument();
 
     renderPage("dm-1", "sessions");
     expect(screen.getByText("Mock Delete Session")).toBeInTheDocument();
@@ -543,14 +552,48 @@ describe("CampaignOverview: the Session History section", () => {
     });
     renderPage("dm-1", "sessions");
 
-    await user.click(screen.getByRole("button", { name: "New Session" }));
+    await user.click(screen.getByRole("button", { name: "Begin Session" }));
 
     expect(screen.getByText("Session attendee: Vex")).toBeInTheDocument();
     expect(screen.getByText("Session attendee: Thrun")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "New Session" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Begin Session" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Mock Close Session Form" }));
-    expect(screen.getByRole("button", { name: "New Session" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Begin Session" })).toBeInTheDocument();
+  });
+
+  it("disables Begin Session with a note while a session is open", () => {
+    useSessionsMock.mockReturnValue(
+      sessionsResult({
+        sessions: [{ id: "s1", status: "open", attendees: [], xpAwarded: 0 }],
+        openSession: { id: "s1", status: "open", attendees: [], xpAwarded: 0 },
+      })
+    );
+    renderPage("dm-1", "sessions");
+
+    expect(screen.getByRole("button", { name: "Begin Session" })).toBeDisabled();
+    expect(
+      screen.getByText("Close the open session before beginning another.")
+    ).toBeInTheDocument();
+  });
+
+  it("begins and closes sessions through the hook", async () => {
+    const user = userEvent.setup();
+    const startSession = vi.fn().mockResolvedValue(undefined);
+    useSessionsMock.mockReturnValue(
+      sessionsResult({
+        startSession,
+        sessions: [{ id: "s1", status: "open", attendees: [], xpAwarded: 0 }],
+      })
+    );
+    renderPage("dm-1", "sessions");
+
+    expect(screen.getByRole("button", { name: "Mock Close Session" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Begin Session" })).toBeEnabled();
+    await user.click(screen.getByRole("button", { name: "Begin Session" }));
+    await user.click(screen.getByRole("button", { name: "Mock Begin" }));
+
+    expect(startSession).toHaveBeenCalledWith("2026-10-17", ["c1"]);
   });
 
   it("shows an error state when the sessions fail to load", () => {

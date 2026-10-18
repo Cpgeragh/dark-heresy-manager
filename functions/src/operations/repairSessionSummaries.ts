@@ -46,6 +46,7 @@ function safeSummaryData(data: Record<string, unknown>): Record<string, unknown>
     return null;
   }
   if (data.xpApplied !== undefined && typeof data.xpApplied !== "boolean") return null;
+  if (data.status !== undefined && data.status !== "open" && data.status !== "closed") return null;
 
   return {
     date: data.date,
@@ -54,6 +55,7 @@ function safeSummaryData(data: Record<string, unknown>): Record<string, unknown>
     attendees: data.attendees,
     createdAt: data.createdAt,
     ...(data.xpApplied === undefined ? {} : { xpApplied: data.xpApplied }),
+    ...(data.status === undefined ? {} : { status: data.status }),
   };
 }
 

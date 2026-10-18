@@ -8,10 +8,14 @@ import type { SessionListDocument } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
 import {
   adjustSessionXp as adjustSessionXpDocument,
+  closeSession as closeSessionDocument,
   deleteSession as deleteSessionDocument,
+  startSession as startSessionDocument,
   updateSession as updateSessionDocument,
+  type CloseSessionData,
   type SessionUpdateData,
 } from "../services/sessionService";
+import { isSessionOpen } from "../utils/sessionStatus";
 
 type SessionWithId = SessionListDocument & { id: string };
 
@@ -20,8 +24,12 @@ export function useSessions(
   isDM: boolean | null
 ): {
   sessions: SessionWithId[];
+  /** The one session that is currently open, or null. */
+  openSession: SessionWithId | null;
   loading: boolean;
   error: Error | null;
+  startSession: (date: string, attendees: string[]) => Promise<void>;
+  closeSession: (sessionId: string, data: CloseSessionData) => Promise<void>;
   deleteSession: (sessionId: string, reverseXp?: boolean) => Promise<void>;
   updateSession: (sessionId: string, data: SessionUpdateData) => Promise<void>;
 } {
@@ -43,6 +51,24 @@ export function useSessions(
         id: sessionDocument.id,
         ...(sessionDocument.data() as SessionListDocument),
       }))
+  );
+
+  const openSession = sessions.find(isSessionOpen) ?? null;
+
+  const startSession = useCallback(
+    async (date: string, attendees: string[]) => {
+      if (!campaignId) return;
+      await startSessionDocument(campaignId, date, attendees);
+    },
+    [campaignId]
+  );
+
+  const closeSession = useCallback(
+    async (sessionId: string, data: CloseSessionData) => {
+      if (!campaignId) return;
+      await closeSessionDocument(campaignId, sessionId, data);
+    },
+    [campaignId]
   );
 
   const deleteSession = useCallback(
@@ -77,5 +103,14 @@ export function useSessions(
     [campaignId, sessions]
   );
 
-  return { sessions, loading, error, deleteSession, updateSession };
+  return {
+    sessions,
+    openSession,
+    loading,
+    error,
+    startSession,
+    closeSession,
+    deleteSession,
+    updateSession,
+  };
 }

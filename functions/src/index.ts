@@ -58,6 +58,12 @@ import {
   type DeleteSessionInput,
 } from "./operations/sessionXp.js";
 import {
+  closeSession as runCloseSession,
+  startSession as runStartSession,
+  type CloseSessionInput,
+  type StartSessionInput,
+} from "./operations/sessionLifecycle.js";
+import {
   reconcileCharacterSpentXp as runReconcileCharacterSpentXp,
   type ReconcileCharacterSpentXpInput,
 } from "./operations/reconcileCharacterSpentXp.js";
@@ -1055,6 +1061,44 @@ export const adjustSessionXp = onCall<AdjustSessionXpInput>({ timeoutSeconds: 30
       (request.data as AdjustSessionXpInput | undefined)?.operationId
     ),
     handler: ({ uid, data, idempotency }) => runAdjustSessionXp(data, uid, idempotency),
+  });
+});
+
+export const startSession = onCall<StartSessionInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<StartSessionInput, void>({
+    request,
+    operation: "start-session",
+    allowedFields: ["campaignId", "date", "attendees", "operationId"],
+    requiredFields: ["campaignId", "date", "attendees", "operationId"],
+    fieldShapes: { campaignId: "string", date: "string", operationId: "string" },
+    payloadBounds: { maxBytes: 8_000, maxStringCharacters: 200 },
+    rateLimits: [{ key: `start-session:${callerUid}`, limit: 60, windowMs: 60 * 60 * 1000 }],
+    idempotencyKey: buildOperationIdempotencyKey(
+      "start-session",
+      callerUid,
+      (request.data as StartSessionInput | undefined)?.operationId
+    ),
+    handler: ({ uid, data, idempotency }) => runStartSession(data, uid, idempotency),
+  });
+});
+
+export const closeSession = onCall<CloseSessionInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<CloseSessionInput, void>({
+    request,
+    operation: "close-session",
+    allowedFields: ["campaignId", "sessionId", "xpAwarded", "attendees", "operationId"],
+    requiredFields: ["campaignId", "sessionId", "xpAwarded", "attendees", "operationId"],
+    fieldShapes: { campaignId: "string", sessionId: "string", operationId: "string" },
+    payloadBounds: { maxBytes: 8_000, maxStringCharacters: 200 },
+    rateLimits: [{ key: `close-session:${callerUid}`, limit: 100, windowMs: 60 * 60 * 1000 }],
+    idempotencyKey: buildOperationIdempotencyKey(
+      "close-session",
+      callerUid,
+      (request.data as CloseSessionInput | undefined)?.operationId
+    ),
+    handler: ({ uid, data, idempotency }) => runCloseSession(data, uid, idempotency),
   });
 });
 

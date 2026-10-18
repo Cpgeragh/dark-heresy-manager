@@ -71,9 +71,11 @@ confusing output:
 - [ ] `CustomItemLibraryAdmin.tsx`'s category and status filter chips communicate the
       selected filter only through colour (`activeChip`/`inactiveChip`), with no
       `aria-pressed` on the underlying button.
-- [ ] `SessionForm.tsx`, used for new and edited sessions, associates its Date, XP
-      Awarded, Summary and DM Notes labels with their fields: confirm a screen reader
-      announces each field by its label.
+- [ ] `BeginSessionForm.tsx` and `SessionForm.tsx`, used to begin, run, close and edit
+      sessions, associate their Date, XP Awarded, Summary and DM Notes labels with their
+      fields: confirm a screen reader announces each field by its label. The open session
+      card is one tappable button named "Open session of" and the date, so confirm it is
+      announced and that the trash icon button on it is reachable separately.
 
 - [ ] `NotesTab.tsx`'s note-search input has no `aria-label` or associated `<label>`,
       only `placeholder="Search notes…"`: same gap as the other search boxes above,

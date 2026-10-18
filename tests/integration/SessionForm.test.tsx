@@ -1,109 +1,269 @@
 // tests/integration/SessionForm.test.tsx
-//
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-
-const createSessionMock = vi.fn();
-vi.mock("../../src/services/sessionService", () => ({
-  createSession: (...args: unknown[]) => createSessionMock(...args),
-}));
+import { addAttendee } from "../utils/attendeePicker";
 
 const mockToastError = vi.fn();
 const mockToastSuccess = vi.fn();
-const mockToastWarning = vi.fn();
 vi.mock("../../src/components/Toast", () => ({
-  useToast: () => ({ error: mockToastError, success: mockToastSuccess, warning: mockToastWarning }),
+  useToast: () => ({ error: mockToastError, success: mockToastSuccess, warning: vi.fn() }),
 }));
 
 import { SessionForm } from "../../src/pages/CampaignOverview/SessionForm";
+import type { SessionListDocument } from "../../src/types/Firestore";
 
 const characters = [
   { id: "c1", characterName: "Vex" },
   { id: "c2", characterName: "Thrun" },
 ];
 
+function stored(overrides: Partial<SessionListDocument> = {}): SessionListDocument {
+  return {
+    date: new Date("2026-03-15"),
+    summary: "Recap",
+    dmNotes: "Notes",
+    xpAwarded: 100,
+    attendees: ["c1"],
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-function renderForm() {
-  const onClose = vi.fn();
-  render(<SessionForm campaignId="campaign-1" characters={characters} onClose={onClose} />);
-  const dateInput = screen.getByLabelText(/^Date/) as HTMLInputElement;
-  const xpInput = screen.getByLabelText(/^XP Awarded/) as HTMLInputElement;
-  const summaryInput = screen.getByLabelText(/^Summary/) as HTMLTextAreaElement;
-  const dmNotesInput = screen.getByLabelText("DM Notes (private)") as HTMLTextAreaElement;
-  return { onClose, dateInput, xpInput, summaryInput, dmNotesInput };
-}
+describe("SessionForm open mode", () => {
+  function renderOpen(onSave = vi.fn().mockResolvedValue(undefined)) {
+    const onClose = vi.fn();
+    render(
+      <SessionForm
+        mode="open"
+        characters={characters}
+        session={stored({ status: "open", xpAwarded: 0, summary: "", dmNotes: "" })}
+        onClose={onClose}
+        onSave={onSave}
+      />
+    );
+    return { onSave, onClose };
+  }
 
-describe("SessionForm", () => {
-  it("opens as a pop-up titled New Session with a required Date", () => {
-    renderForm();
+  it("is titled Session in Progress with only the Notes", () => {
+    renderOpen();
 
-    expect(screen.getByRole("dialog", { name: "New Session" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Date/)).toHaveAttribute("type", "date");
+    expect(screen.getByRole("dialog", { name: "Session in Progress" })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/XP Awarded/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Date/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Session" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Attendees" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Attendees" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
+  });
+
+  it("requires a summary, so Save stays disabled while it is blank", async () => {
+    const user = userEvent.setup();
+    renderOpen();
+    const save = screen.getByRole("button", { name: "Save" });
+
     expect(screen.getByText("Required")).toBeInTheDocument();
+    expect(save).toBeDisabled();
+    await user.type(screen.getByLabelText(/^Summary/), "They reached the hive.");
+    expect(save).toBeEnabled();
+    await user.clear(screen.getByLabelText(/^Summary/));
+    expect(save).toBeDisabled();
+  });
+
+  it("saves only the notes, with no date, no attendees and no XP, then closes", async () => {
+    const user = userEvent.setup();
+    const { onSave, onClose } = renderOpen();
+
+    await user.type(screen.getByLabelText(/^Summary/), "They reached the hive.");
+    await user.type(screen.getByLabelText(/DM Notes/), "Foreshadow the informant.");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onSave).toHaveBeenCalledWith({
+      summary: "They reached the hive.",
+      dmNotes: "Foreshadow the informant.",
+    });
+    expect(mockToastSuccess).toHaveBeenCalledWith("Session saved");
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("has no Close Session button, because closing starts from the session card", () => {
+    renderOpen();
+
+    expect(screen.queryByRole("button", { name: "Close Session" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "End of Session" })).not.toBeInTheDocument();
+  });
+});
+
+describe("SessionForm close mode", () => {
+  function renderClose() {
+    const onRequestCloseSession = vi.fn();
+    const onSave = vi.fn();
+    render(
+      <SessionForm
+        mode="close"
+        characters={characters}
+        session={stored({ status: "open", xpAwarded: 0 })}
+        onClose={vi.fn()}
+        onSave={onSave}
+        onRequestCloseSession={onRequestCloseSession}
+      />
+    );
+    return { onRequestCloseSession, onSave };
+  }
+
+  it("shows only the Session and Attendees boxes, with no Notes", () => {
+    renderClose();
+
+    expect(screen.getByRole("dialog", { name: "Close Session" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Session" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Attendees" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Notes" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Summary/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/DM Notes/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Date/)).not.toBeInTheDocument();
+  });
+
+  it("requires XP Awarded, which starts empty, before Close Session", async () => {
+    const user = userEvent.setup();
+    renderClose();
+    const close = screen.getByRole("button", { name: "Close Session" });
+
+    expect(screen.getByLabelText(/^XP Awarded/)).toHaveValue("");
+    expect(close).toBeDisabled();
+    await user.type(screen.getByLabelText(/^XP Awarded/), "0");
+    expect(close).toBeEnabled();
+  });
+
+  it("requires at least one attendee to close, shown by the required note", async () => {
+    const user = userEvent.setup();
+    renderClose();
+    await user.type(screen.getByLabelText(/^XP Awarded/), "150");
+    const close = screen.getByRole("button", { name: "Close Session" });
+
+    expect(screen.getByText("Required")).toBeInTheDocument();
+    expect(close).toBeEnabled();
+    await user.click(screen.getByRole("button", { name: "Remove Vex" }));
+    expect(close).toBeDisabled();
+  });
+
+  it("hands the XP and attendees to the confirmation instead of saving", async () => {
+    const user = userEvent.setup();
+    const { onRequestCloseSession, onSave } = renderClose();
+
+    await user.type(screen.getByLabelText(/^XP Awarded/), "150");
+    await addAttendee(user, "Thrun");
+    await user.click(screen.getByRole("button", { name: "Close Session" }));
+
+    expect(onRequestCloseSession).toHaveBeenCalledWith({
+      xpAwarded: 150,
+      attendees: ["c1", "c2"],
+    });
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("accepts only whole numbers in XP Awarded and refuses more than the limit", async () => {
+    const user = userEvent.setup();
+    renderClose();
+    const xp = screen.getByLabelText(/^XP Awarded/);
+
+    await user.type(xp, "2.1a-0");
+    expect(xp).toHaveValue("210");
+
+    await user.clear(xp);
+    await user.type(xp, "100000");
+    expect(xp).toHaveValue("100000");
+    await user.type(xp, "1");
+    expect(xp).toHaveValue("100000");
+  });
+});
+
+describe("SessionForm edit mode", () => {
+  function renderEdit(session = stored(), onSave = vi.fn().mockResolvedValue(undefined)) {
+    const onClose = vi.fn();
+    render(
+      <SessionForm
+        mode="edit"
+        characters={characters}
+        session={session}
+        onClose={onClose}
+        onSave={onSave}
+      />
+    );
+    return { onSave, onClose };
+  }
+
+  it("opens as Edit Session filled in with a required date, XP Awarded and Summary", () => {
+    renderEdit();
+
+    expect(screen.getByRole("dialog", { name: "Edit Session" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Date/)).toHaveValue("2026-03-15");
+    expect(screen.getByLabelText(/^XP Awarded/)).toHaveValue("100");
+    expect(screen.getByLabelText(/^Summary/)).toHaveValue("Recap");
     expect(screen.getByRole("heading", { name: "Session" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Attendees" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove Vex" })).toBeInTheDocument();
   });
 
-  it("explains the XP adjustment only when editing a session whose XP was applied", () => {
-    const stored = {
-      date: new Date("2026-03-15"),
-      summary: "Recap",
-      dmNotes: "",
-      xpAwarded: 100,
-      attendees: ["c1"],
-      createdAt: new Date(),
-    };
-    const { unmount } = render(
-      <SessionForm
-        campaignId="campaign-1"
-        characters={characters}
-        onClose={vi.fn()}
-        session={{ ...stored, xpApplied: true }}
-        onSave={vi.fn()}
-      />
-    );
-    expect(screen.getByText(/XP was already applied/)).toBeInTheDocument();
-    unmount();
+  it("disables Save when no attendee is left", async () => {
+    const user = userEvent.setup();
+    renderEdit();
 
-    render(
-      <SessionForm
-        campaignId="campaign-1"
-        characters={characters}
-        onClose={vi.fn()}
-        session={{ ...stored, xpApplied: false }}
-        onSave={vi.fn()}
-      />
+    await user.click(screen.getByRole("button", { name: "Remove Vex" }));
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  });
+
+  it("disables Save when the date is cleared", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderEdit();
+    fireEvent.change(screen.getByLabelText(/^Date/), { target: { value: "" } });
+
+    const save = screen.getByRole("button", { name: "Save" });
+    expect(save).toBeDisabled();
+    await user.click(save);
+
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("saves the changed values including the XP, then closes", async () => {
+    const user = userEvent.setup();
+    const { onSave, onClose } = renderEdit();
+    const xp = screen.getByLabelText(/^XP Awarded/);
+
+    await user.clear(xp);
+    await user.type(xp, "150");
+    await addAttendee(user, "Thrun");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ xpAwarded: 150, summary: "Recap", attendees: ["c1", "c2"] })
     );
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("explains the XP adjustment only when the session's XP was applied", () => {
+    renderEdit(stored({ xpApplied: true }));
+    expect(screen.getByText(/XP was already applied/)).toBeInTheDocument();
+  });
+
+  it("shows no adjustment note when the XP was not applied", () => {
+    renderEdit(stored({ xpApplied: false }));
     expect(screen.queryByText(/XP was already applied/)).not.toBeInTheDocument();
   });
 
-  it("shows the server's message when an edit is refused", async () => {
+  it("shows the server's message when an edit is refused and stays open", async () => {
     const user = userEvent.setup();
-    const onSave = vi
-      .fn()
-      .mockRejectedValue(new Error("Session XP cannot be adjusted below the Spent XP of Vex."));
-    render(
-      <SessionForm
-        campaignId="campaign-1"
-        characters={characters}
-        onClose={vi.fn()}
-        session={{
-          date: new Date("2026-03-15"),
-          summary: "Recap",
-          dmNotes: "",
-          xpAwarded: 100,
-          attendees: ["c1"],
-          createdAt: new Date(),
-          xpApplied: true,
-        }}
-        onSave={onSave}
-      />
+    const { onClose } = renderEdit(
+      stored({ xpApplied: true }),
+      vi
+        .fn()
+        .mockRejectedValue(new Error("Session XP cannot be adjusted below the Spent XP of Vex."))
     );
 
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -111,114 +271,6 @@ describe("SessionForm", () => {
     expect(mockToastError).toHaveBeenCalledWith(
       "Session XP cannot be adjusted below the Spent XP of Vex."
     );
-  });
-
-  it("disables Save Session and does not save when the date is cleared", async () => {
-    const user = userEvent.setup();
-    const { onClose, dateInput } = renderForm();
-    fireEvent.change(dateInput, { target: { value: "" } });
-
-    const save = screen.getByRole("button", { name: "Save Session" });
-    expect(save).toBeDisabled();
-    await user.click(save);
-
-    expect(createSessionMock).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("keeps Save Session disabled until XP Awarded and Summary are filled in", async () => {
-    const user = userEvent.setup();
-    const { xpInput, summaryInput } = renderForm();
-    const save = screen.getByRole("button", { name: "Save Session" });
-
-    expect(xpInput).toHaveValue("");
-    expect(save).toBeDisabled();
-
-    await user.type(xpInput, "0");
-    expect(save).toBeDisabled();
-
-    await user.type(summaryInput, "A quiet night.");
-    expect(save).toBeEnabled();
-  });
-
-  it("accepts only whole numbers in XP Awarded and refuses more than the limit", async () => {
-    const user = userEvent.setup();
-    const { xpInput } = renderForm();
-
-    await user.type(xpInput, "2.1a-0");
-    expect(xpInput).toHaveValue("210");
-
-    await user.clear(xpInput);
-    await user.type(xpInput, "100000");
-    expect(xpInput).toHaveValue("100000");
-    await user.type(xpInput, "1");
-    expect(xpInput).toHaveValue("100000");
-  });
-
-  it("saves the session with attendees, summary, notes, and XP, then closes", async () => {
-    const user = userEvent.setup();
-    createSessionMock.mockResolvedValue(undefined);
-    const { onClose, xpInput, summaryInput, dmNotesInput } = renderForm();
-
-    await user.type(summaryInput, "Fought off a cult ambush.");
-    await user.type(dmNotesInput, "Foreshadow the informant.");
-    await user.clear(xpInput);
-    await user.type(xpInput, "150");
-    await user.click(screen.getByRole("checkbox", { name: "Vex" }));
-
-    await user.click(screen.getByRole("button", { name: "Save Session" }));
-
-    expect(createSessionMock).toHaveBeenCalledWith(
-      "campaign-1",
-      expect.objectContaining({
-        summary: "Fought off a cult ambush.",
-        dmNotes: "Foreshadow the informant.",
-        xpAwarded: 150,
-        attendees: ["c1"],
-      })
-    );
-    expect(mockToastSuccess).toHaveBeenCalledWith("Session saved");
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it("toggles an attendee off again on a second click", async () => {
-    const user = userEvent.setup();
-    createSessionMock.mockResolvedValue(undefined);
-    const { xpInput, summaryInput } = renderForm();
-    await user.type(xpInput, "0");
-    await user.type(summaryInput, "Recap");
-
-    const vexCheckbox = screen.getByRole("checkbox", { name: "Vex" });
-    await user.click(vexCheckbox);
-    await user.click(vexCheckbox);
-    await user.click(screen.getByRole("button", { name: "Save Session" }));
-
-    expect(createSessionMock).toHaveBeenCalledWith(
-      "campaign-1",
-      expect.objectContaining({ attendees: [] })
-    );
-  });
-
-  it("shows an error toast and does not close when saving fails", async () => {
-    const user = userEvent.setup();
-    createSessionMock.mockRejectedValue(new Error("network error"));
-    const { onClose, xpInput, summaryInput } = renderForm();
-    await user.type(xpInput, "0");
-    await user.type(summaryInput, "Recap");
-
-    await user.click(screen.getByRole("button", { name: "Save Session" }));
-
-    expect(mockToastError).toHaveBeenCalledWith("Failed to save session");
-    expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("calls onClose from Cancel without saving", async () => {
-    const user = userEvent.setup();
-    const { onClose } = renderForm();
-
-    await user.click(screen.getByRole("button", { name: "Cancel" }));
-
-    expect(createSessionMock).not.toHaveBeenCalled();
-    expect(onClose).toHaveBeenCalled();
   });
 });

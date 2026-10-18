@@ -4,11 +4,16 @@ import { useMemo, useState } from "react";
 import { useSessions } from "../../hooks/useSessions";
 import { useCampaignCharacterSummaries } from "../../hooks/useCampaignCharacterSummaries";
 import { applySessionXp } from "../../services/sessionService";
-import { uiStackBody, uiStackList, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import {
+  uiStackBody,
+  uiStackList,
+  uiTextNotice,
+  uiTextPlaceholder,
+} from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { ErrorState } from "../../ui/ErrorState";
 import { useRouteLoading } from "../../context/useRouteReady";
-import { SessionForm } from "./SessionForm";
+import { BeginSessionForm } from "./BeginSessionForm";
 import { SessionCard } from "./SessionCard";
 import { SectionPending } from "./SectionPending";
 
@@ -20,8 +25,11 @@ interface SessionHistorySectionProps {
 export function SessionHistorySection({ campaignId, isDM }: SessionHistorySectionProps) {
   const {
     sessions,
+    openSession,
     loading: sessionsLoading,
     error: sessionsError,
+    startSession,
+    closeSession,
     deleteSession,
     updateSession,
   } = useSessions(campaignId, isDM);
@@ -29,7 +37,7 @@ export function SessionHistorySection({ campaignId, isDM }: SessionHistorySectio
   const loading = sessionsLoading || summariesLoading;
   useRouteLoading(loading);
 
-  const [showSessionForm, setShowSessionForm] = useState(false);
+  const [showBeginForm, setShowBeginForm] = useState(false);
 
   const sessionCharacters = useMemo(
     () =>
@@ -45,18 +53,27 @@ export function SessionHistorySection({ campaignId, isDM }: SessionHistorySectio
 
   return (
     <div className={uiStackBody}>
-      {isDM && showSessionForm && (
-        <SessionForm
-          campaignId={campaignId}
+      {isDM && showBeginForm && (
+        <BeginSessionForm
           characters={sessionCharacters}
-          onClose={() => setShowSessionForm(false)}
+          onBegin={startSession}
+          onClose={() => setShowBeginForm(false)}
         />
       )}
 
       {isDM && (
-        <Button className="w-full sm:w-auto sm:self-start" onClick={() => setShowSessionForm(true)}>
-          New Session
-        </Button>
+        <div className={uiStackList}>
+          <Button
+            className="w-full sm:w-auto sm:self-start"
+            disabled={openSession !== null}
+            onClick={() => setShowBeginForm(true)}
+          >
+            Begin Session
+          </Button>
+          {openSession && (
+            <p className={uiTextNotice}>Close the open session before beginning another.</p>
+          )}
+        </div>
       )}
 
       {sessionsError ? (
@@ -68,12 +85,12 @@ export function SessionHistorySection({ campaignId, isDM }: SessionHistorySectio
           {sessions.map((session) => (
             <SessionCard
               key={session.id}
-              campaignId={campaignId}
               session={session}
               characters={sessionCharacters}
               isDM={isDM}
               onDelete={isDM ? (reverseXp) => deleteSession(session.id, reverseXp) : undefined}
               onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
+              onCloseSession={isDM ? (data) => closeSession(session.id, data) : undefined}
               onApplyXp={
                 isDM
                   ? () =>

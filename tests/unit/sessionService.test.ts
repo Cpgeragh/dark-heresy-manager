@@ -3,12 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockBatch,
   mockBatchCommit,
-  mockBatchSet,
   mockBatchUpdate,
   mockCallRepairSessionSummaries,
   mockCallApplySessionXp,
   mockCallDeleteSession,
   mockCallAdjustSessionXp,
+  mockCallStartSession,
+  mockCallCloseSession,
   mockDoc,
   mockIncrement,
   mockRunTransaction,
@@ -28,6 +29,8 @@ const {
   const mockCallApplySessionXp = vi.fn();
   const mockCallDeleteSession = vi.fn();
   const mockCallAdjustSessionXp = vi.fn();
+  const mockCallStartSession = vi.fn();
+  const mockCallCloseSession = vi.fn();
   const mockTransaction = {
     get: vi.fn(),
     update: vi.fn(),
@@ -42,6 +45,8 @@ const {
     mockCallApplySessionXp,
     mockCallDeleteSession,
     mockCallAdjustSessionXp,
+    mockCallStartSession,
+    mockCallCloseSession,
     mockDoc: vi.fn((...args: unknown[]) => {
       if (args.length === 1) {
         const parent = args[0] as { path: string };
@@ -78,6 +83,8 @@ vi.mock("firebase/functions", () => ({
     if (name === "applySessionXp") return mockCallApplySessionXp;
     if (name === "deleteSession") return mockCallDeleteSession;
     if (name === "adjustSessionXp") return mockCallAdjustSessionXp;
+    if (name === "startSession") return mockCallStartSession;
+    if (name === "closeSession") return mockCallCloseSession;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
@@ -85,7 +92,8 @@ vi.mock("firebase/functions", () => ({
 import {
   adjustSessionXp,
   applySessionXp,
-  createSession,
+  closeSession,
+  startSession,
   deleteSession,
   repairSessionSummaries,
   updateSession,
@@ -203,34 +211,6 @@ describe("session write operations", () => {
     expect(mockBatchUpdate).not.toHaveBeenCalled();
   });
 
-  it("creates the private session and safe member summary atomically", async () => {
-    const date = new Date("2026-08-28T00:00:00.000Z");
-    await createSession("camp-1", {
-      date,
-      summary: "Public recap",
-      dmNotes: "Private plan",
-      xpAwarded: 100,
-      attendees: ["char-1"],
-    });
-
-    expect(mockBatchSet).toHaveBeenCalledWith(
-      ref("campaigns/camp-1/sessions/generated-session"),
-      expect.objectContaining({ summary: "Public recap", dmNotes: "Private plan" })
-    );
-    expect(mockBatchSet).toHaveBeenCalledWith(
-      ref("campaigns/camp-1/sessionSummaries/generated-session"),
-      {
-        date,
-        summary: "Public recap",
-        xpAwarded: 100,
-        attendees: ["char-1"],
-        createdAt: "server-timestamp",
-        xpApplied: false,
-      }
-    );
-    expect(mockBatchCommit).toHaveBeenCalledOnce();
-  });
-
   it("keeps a DM-notes-only edit out of the member summary", async () => {
     await updateSession("camp-1", "session-1", { dmNotes: "Private change" });
 
@@ -291,6 +271,74 @@ describe("applySessionXp", () => {
   });
 });
 
+describe("startSession", () => {
+  it("calls the protected start operation with the date and attendees", async () => {
+    mockCallStartSession.mockResolvedValue({ data: undefined });
+    await startSession("camp-1", "2026-10-17", ["char-1", "char-2"]);
+
+    expect(mockCallStartSession).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      date: "2026-10-17",
+      attendees: ["char-1", "char-2"],
+      operationId: expect.any(String),
+    });
+  });
+
+  it("preserves protected-operation failures", async () => {
+    const error = new Error("A session is already open. Close it before starting another.");
+    mockCallStartSession.mockRejectedValue(error);
+
+    await expect(startSession("camp-1", "2026-10-17", ["char-1"])).rejects.toBe(error);
+  });
+
+  it("rejects a bad date or duplicate attendees without calling the server", async () => {
+    await expect(startSession("camp-1", "17/10/2026", [])).rejects.toThrow(
+      "A valid session date is required."
+    );
+    await expect(startSession("camp-1", "2026-10-17", ["char-1", "char-1"])).rejects.toThrow(
+      "more than once"
+    );
+    await expect(startSession("camp-1", "2026-10-17", [])).rejects.toThrow(
+      "At least one attendee is required."
+    );
+
+    expect(mockCallStartSession).not.toHaveBeenCalled();
+  });
+});
+
+describe("closeSession", () => {
+  const data = { xpAwarded: 150, attendees: ["char-1"] };
+
+  it("calls the protected close operation with the final values", async () => {
+    mockCallCloseSession.mockResolvedValue({ data: undefined });
+    await closeSession("camp-1", "sess-1", data);
+
+    expect(mockCallCloseSession).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      sessionId: "sess-1",
+      ...data,
+      operationId: expect.any(String),
+    });
+  });
+
+  it("preserves protected-operation failures", async () => {
+    const error = new Error("Total XP cannot exceed 10000000.");
+    mockCallCloseSession.mockRejectedValue(error);
+
+    await expect(closeSession("camp-1", "sess-1", data)).rejects.toBe(error);
+  });
+
+  it("rejects a bad amount or no attendee without calling the server", async () => {
+    await expect(closeSession("camp-1", "sess-1", { ...data, xpAwarded: -1 })).rejects.toThrow(
+      "XP awarded must be a whole number from 0 to 100000."
+    );
+    await expect(closeSession("camp-1", "sess-1", { ...data, attendees: [] })).rejects.toThrow(
+      "At least one attendee is required."
+    );
+
+    expect(mockCallCloseSession).not.toHaveBeenCalled();
+  });
+});
 describe("adjustSessionXp", () => {
   it("calls the protected adjustment operation with the new amount and attendees", async () => {
     mockCallAdjustSessionXp.mockResolvedValue({ data: undefined });
