@@ -73,7 +73,14 @@ export function ForceFieldRow({
       name={piece.name}
       badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       inactive={!active}
-      info={<InfoModal title={piece.name} />}
+      info={
+        <InfoModal
+          title={piece.name}
+          content={
+            piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
+          }
+        />
+      }
       metadata={
         <>
           {piece.protectionRating !== undefined && (

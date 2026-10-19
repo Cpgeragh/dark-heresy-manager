@@ -229,7 +229,17 @@ export function GrenadeCard({
                 </span>
               )}
             </div>
-            <EntryDetailLine label="Rules" />
+            <EntryDetailLine
+              label="Rules"
+              info={
+                item.rules?.trim() ? (
+                  <InfoModal
+                    title={`${item.name} Rules`}
+                    content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
+                  />
+                ) : undefined
+              }
+            />
             {showMishaps && (
               <div className="flex items-center gap-1.5">
                 <span className={uiTextLabel}>Mishaps</span>

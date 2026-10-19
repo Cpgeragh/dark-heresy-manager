@@ -83,6 +83,13 @@ describe("ItemCard without notes", () => {
     expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
   });
 
+  it("shows the item's own rules behind the Rules information button", () => {
+    renderCard({ ...itemWithoutNotes, rules: "Opens most locks." });
+    expect(
+      screen.getByRole("button", { name: "Show information about Combi-tool Rules" })
+    ).toBeInTheDocument();
+  });
+
   it("shows a plain Craftsmanship line for a cybernetic item", () => {
     renderCard({
       id: "a3",

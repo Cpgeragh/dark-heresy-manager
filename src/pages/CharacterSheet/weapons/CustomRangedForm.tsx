@@ -2,12 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-  uiStackField,
-} from "../../../ui/styles/editableStyles";
+import { editableInputClass, uiStackField } from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -15,6 +10,7 @@ import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/c
 import { colourToggleSelected } from "../../../ui/styles/colourTokens";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
+import { DescriptionAndRulesFields } from "../../../ui/forms/DescriptionAndRulesFields";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
@@ -121,6 +117,7 @@ export function CustomRangedForm({
     splitWeaponQualities(initialWeapon?.specialRules)
   );
   const [description, setDescription] = useState(initialWeapon?.description ?? "");
+  const [rules, setRules] = useState(initialWeapon?.rules ?? "");
   const [saving, setSaving] = useState(false);
   const [showClassPicker, setShowClassPicker] = useState(false);
   const [showTypePicker, setShowTypePicker] = useState(false);
@@ -182,6 +179,7 @@ export function CustomRangedForm({
         availability,
         specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
         description: description.trim() || undefined,
+        rules: rules.trim() || undefined,
         integrated: initialWeapon?.integrated ?? integrated,
         quantity:
           initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
@@ -585,7 +583,7 @@ export function CustomRangedForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Rules and Qualities">
+      <CustomFormSection title="Description, Rules, and Qualities">
         <div className="grid grid-cols-2 gap-2">
           <WeaponQualitySelector
             selected={selectedQualities}
@@ -599,19 +597,13 @@ export function CustomRangedForm({
             onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
           />
 
-          <div className="col-span-2">
-            <label htmlFor="custom-ranged-rules" className={uiFormLabel}>
-              Rules
-            </label>
-            <textarea
-              id="custom-ranged-rules"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              rows={3}
-              className={editableTextareaClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </div>
+          <DescriptionAndRulesFields
+            idPrefix="custom-ranged"
+            description={description}
+            onDescriptionChange={setDescription}
+            rules={rules}
+            onRulesChange={setRules}
+          />
         </div>
       </CustomFormSection>
     </CustomFormShell>

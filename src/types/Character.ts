@@ -207,6 +207,7 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
   clip?: string;
   rld?: string;
   specialRules?: string;
+  rules?: string;
   weight?: string;
   value?: string;
   availability?: string;
@@ -236,6 +237,7 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   damage?: string;
   pen?: string;
   specialRules?: string;
+  rules?: string;
   /** Multiplier applied to Strength Bonus for total melee Damage (Power Fist = 2). */
   strengthBonusMultiplier?: number;
   weight?: string;
@@ -269,6 +271,7 @@ export interface ShieldItem extends CustomLibraryLinkFields {
   damage?: string; // melee bash damage
   pen?: string;
   specialRules?: string;
+  rules?: string;
   notes?: string; // full rules text
   weight?: string;
   value?: string;
@@ -303,7 +306,8 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
   apOverrides?: Partial<Record<ArmourLocationKey, number>>;
   /** true = currently worn; false = stowed in pack */
   worn: boolean;
-  notes?: string;
+  description?: string;
+  notes?: string; // rules text
   weight?: string;
   value?: string;
   availability?: string;
@@ -340,6 +344,7 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
   name: string;
   craftsmanship?: CyberneticCraftsmanship;
   notes?: string; // player-added notes
+  rules?: string;
   value?: string;
   availability?: string;
   source?: string;
@@ -379,6 +384,7 @@ export interface ArcheotechItem extends CustomLibraryLinkFields {
   type?: string;
   description?: string;
   notes?: string;
+  rules?: string;
   weight?: string;
   value?: string;
   availability?: string;
@@ -417,6 +423,7 @@ export interface DrugItem extends CustomLibraryLinkFields {
   availability?: string;
   source?: string;
   notes?: string; // player-added notes
+  rules?: string;
 }
 
 /**
@@ -450,6 +457,7 @@ export interface GrenadeItem extends CustomLibraryLinkFields {
   damage?: string;
   pen?: string;
   specialRules?: string;
+  rules?: string;
   weight?: string;
   value?: string; // cost per grenade
   availability?: string;

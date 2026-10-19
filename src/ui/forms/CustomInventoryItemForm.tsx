@@ -6,9 +6,10 @@ import { formatMoneyInput, sanitizeMoneyInput } from "../format/moneyFormat";
 import { formatWeightInput, sanitizeWeightInput } from "../format/weightFormat";
 import { OptionPickerScreen } from "../pickers/OptionPickerScreen";
 import { PickerField } from "../pickers/PickerField";
-import { editableInputClass, editableTextareaClass, uiFormLabel } from "../styles/editableStyles";
+import { editableInputClass } from "../styles/editableStyles";
 import { CustomFormSection } from "./CustomFormSection";
 import { CustomFormShell } from "./CustomFormShell";
+import { DescriptionAndRulesFields } from "./DescriptionAndRulesFields";
 import { OriginSelector } from "./OriginSelector";
 import { RequiredFormLabel } from "./RequiredFormLabel";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -19,6 +20,7 @@ interface InitialValue {
   availability?: string;
   weight?: string;
   value?: string;
+  description?: string;
   rules?: string;
 }
 
@@ -34,6 +36,7 @@ export interface CustomInventoryItemDraft {
   availability: string;
   weight: string;
   value: string;
+  description?: string;
   rules?: string;
 }
 
@@ -44,7 +47,7 @@ interface Props {
   submitLabel: string;
   fieldIdPrefix: string;
   namePlaceholder: string;
-  rulesPlaceholder: string;
+  descriptionPlaceholder: string;
   onSubmit: (draft: CustomInventoryItemDraft) => void | Promise<void>;
   onCancel: () => void;
 }
@@ -56,7 +59,7 @@ export function CustomInventoryItemForm({
   submitLabel,
   fieldIdPrefix,
   namePlaceholder,
-  rulesPlaceholder,
+  descriptionPlaceholder,
   onSubmit,
   onCancel,
 }: Props) {
@@ -74,6 +77,7 @@ export function CustomInventoryItemForm({
   const [availability, setAvailability] = useState(initialValue?.availability ?? "");
   const [weight, setWeight] = useState(initialValue?.weight ?? "");
   const [value, setValue] = useState(initialValue?.value ?? "");
+  const [description, setDescription] = useState(initialValue?.description ?? "");
   const [rules, setRules] = useState(initialValue?.rules ?? "");
   const [saving, setSaving] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
@@ -106,6 +110,7 @@ export function CustomInventoryItemForm({
         availability,
         weight: formatWeightInput(weight),
         value: formatMoneyInput(value),
+        description: description.trim() || undefined,
         rules: rules.trim() || undefined,
       });
     } finally {
@@ -220,22 +225,16 @@ export function CustomInventoryItemForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Rules">
+      <CustomFormSection title="Description and Rules">
         <div className="grid grid-cols-2 gap-2">
-          <div className="col-span-2">
-            <label htmlFor={`${fieldIdPrefix}-rules`} className={uiFormLabel}>
-              Rules
-            </label>
-            <textarea
-              id={`${fieldIdPrefix}-rules`}
-              value={rules}
-              onChange={(event) => setRules(event.target.value)}
-              placeholder={rulesPlaceholder}
-              rows={3}
-              className={editableTextareaClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </div>
+          <DescriptionAndRulesFields
+            idPrefix={fieldIdPrefix}
+            description={description}
+            onDescriptionChange={setDescription}
+            rules={rules}
+            onRulesChange={setRules}
+            descriptionPlaceholder={descriptionPlaceholder}
+          />
         </div>
       </CustomFormSection>
     </CustomFormShell>

@@ -29,7 +29,7 @@ export function ArcheotechImplantRow({
   const locations = item.bodyLocation ?? [];
   const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId);
   const description = item.description ?? ref?.description;
-  const rules = ref?.rules;
+  const rules = item.rules?.trim() || ref?.rules;
 
   return (
     <CharacterEntryRow

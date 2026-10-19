@@ -34,6 +34,7 @@ import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
+import { DescriptionAndRulesFields } from "../../../ui/forms/DescriptionAndRulesFields";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
@@ -78,6 +79,7 @@ export function CustomArcheotechForm({
   // Common fields
   const [name, setName] = useState(initialItem?.name ?? "");
   const [description, setDescription] = useState(initialItem?.description ?? "");
+  const [rules, setRules] = useState(initialItem?.rules ?? "");
   const [notes, setNotes] = useState(initialItem?.notes ?? "");
   const [weight, setWeight] = useState(initialItem?.weight ?? "");
   const [value, setValue] = useState(initialItem?.value ?? "");
@@ -138,6 +140,7 @@ export function CustomArcheotechForm({
         name: name.trim(),
         type: selectedType,
         description: description.trim() || undefined,
+        rules: rules.trim() || undefined,
         notes: notes.trim() || undefined,
         weight: formatWeightInput(weight),
         value: formatMoneyInput(value),
@@ -455,7 +458,7 @@ export function CustomArcheotechForm({
             )}
             <div>
               <label htmlFor="custom-archeotech-special-rules" className={uiFormLabel}>
-                Special Rules <span className={uiFormLabelHint}>(optional)</span>
+                Qualities <span className={uiFormLabelHint}>(optional)</span>
               </label>
               <input
                 id="custom-archeotech-special-rules"
@@ -575,7 +578,7 @@ export function CustomArcheotechForm({
             </div>
             <div>
               <label htmlFor="custom-archeotech-shield-special-rules" className={uiFormLabel}>
-                Special Rules <span className={uiFormLabelHint}>(optional)</span>
+                Qualities <span className={uiFormLabelHint}>(optional)</span>
               </label>
               <input
                 id="custom-archeotech-shield-special-rules"
@@ -643,21 +646,15 @@ export function CustomArcheotechForm({
           </CustomFormSection>
         )}
 
-        <CustomFormSection title="Rules">
-          <div>
-            <label htmlFor="custom-archeotech-description" className={uiFormLabel}>
-              Description / Rules <span className={uiFormLabelHint}>(optional)</span>
-            </label>
-            <textarea
-              id="custom-archeotech-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Rules text, special properties…"
-              rows={3}
-              className={editableTextareaClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </div>
+        <CustomFormSection title="Description and Rules">
+          <DescriptionAndRulesFields
+            idPrefix="custom-archeotech"
+            description={description}
+            onDescriptionChange={setDescription}
+            rules={rules}
+            onRulesChange={setRules}
+            descriptionPlaceholder="What it is, how it looks, where it came from…"
+          />
           <div>
             <label htmlFor="custom-archeotech-notes" className={uiFormLabel}>
               Notes <span className={uiFormLabelHint}>(optional)</span>

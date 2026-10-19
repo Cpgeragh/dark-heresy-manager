@@ -493,17 +493,24 @@ export function MeleeCard({
             <EntryDetailLine
               label="Rules"
               info={
-                hasItemRules ? (
+                hasItemRules || weapon.rules?.trim() ? (
                   <InfoModal
                     title={`${weapon.name} Rules`}
                     content={
                       <div className={uiStackBody}>
-                        <p className={uiRuleName}>Concealed Weapon Bionic</p>
-                        {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                          <p key={rule} className={uiTextDescription}>
-                            {rule}
-                          </p>
-                        ))}
+                        {weapon.rules?.trim() && (
+                          <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>
+                        )}
+                        {hasItemRules && (
+                          <>
+                            <p className={uiRuleName}>Concealed Weapon Bionic</p>
+                            {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
+                              <p key={rule} className={uiTextDescription}>
+                                {rule}
+                              </p>
+                            ))}
+                          </>
+                        )}
                       </div>
                     }
                   />

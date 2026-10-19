@@ -41,6 +41,15 @@ describe("ArcheotechShieldRow shared header and Rules line", () => {
   });
 });
 
+describe("ArcheotechShieldRow rules", () => {
+  it("shows the item's own rules behind the Rules information button", () => {
+    renderRow({ item: { ...baseItem, rules: "Absorbs one hit." } });
+    expect(
+      screen.getByRole("button", { name: "Show information about Archeotech Buckler Rules" })
+    ).toBeInTheDocument();
+  });
+});
+
 describe("ArcheotechShieldRow chips", () => {
   it("shows both an Archeotech chip and a Shield chip", () => {
     renderRow();

@@ -149,7 +149,17 @@ export function ShieldCard({
                 </span>
               )}
             </div>
-            <EntryDetailLine label="Rules" />
+            <EntryDetailLine
+              label="Rules"
+              info={
+                item.rules?.trim() ? (
+                  <InfoModal
+                    title={`${item.name} Rules`}
+                    content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
+                  />
+                ) : undefined
+              }
+            />
           </div>
 
           {/* Weight / Value / Availability / Source */}

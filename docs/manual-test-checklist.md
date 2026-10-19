@@ -549,7 +549,7 @@ Add the five named armour fixtures and inspect their picker summaries before add
 - [ ] Craftsmanship (Poor/Common/Good/Best) is chosen at the moment you add a piece, both for worn armour and Force Fields: confirm the default is Common and cycling afterwards updates AP/weight/value where the rules say it should
 - [ ] Custom armour and custom Force Field creation and publishing: see §21
 - [ ] Custom armour and Force Field forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
-- [ ] **Autofill, Android:** the picker search boxes and the Name, Protection Rating, AP, Weight, Cost and Rules fields on the custom armour and Force Field form each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomPieceForm.tsx`)
+- [ ] **Autofill, Android:** the picker search boxes and the Name, Protection Rating, AP, Weight, Cost, Description and Rules fields on the custom armour and Force Field form each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomPieceForm.tsx`)
 
 ## 11. Cybernetics
 
@@ -577,7 +577,7 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 - [ ] Pick one of the six from that picker: it asks only for a cost, not a rarity (rarity's already fixed), and skips the craftsmanship-quality step entirely, installing directly once the cost is confirmed
 - [ ] For an existing implant that's missing **both** cost and rarity (e.g. Landrian Revealer), the row still reads "Cost and availability assigned on add" and the assign screen still asks for both
 - [ ] For Karrikian Lock-Arm specifically (no real quality data, but does need a body location): confirm it still goes through the location step and still ends up forced to Common craftsmanship, this one's deliberately unchanged
-- [ ] **Autofill, Android:** the Cybernetics picker search box, the Name, Cost and Rules fields on the custom implant form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomImplantForm.tsx`, `AssignedItemMetaFields.tsx`)
+- [ ] **Autofill, Android:** the Cybernetics picker search box, the Name, Cost, Description and Rules fields on the custom implant form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomImplantForm.tsx`, `AssignedItemMetaFields.tsx`)
 
 ## 12. Psychic Powers
 
@@ -696,7 +696,7 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 - [ ] Lumenmould specifically (no fixed listed price) shows the same note and prompt
 - [ ] Custom gear and custom consumable creation and publishing: see §21, Custom Item Library
 - [ ] Custom gear/consumable forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
-- [ ] **Autofill, Android:** the Gear and Consumable picker search boxes, the Name, Quantity, Weight, Cost and Rules fields on the custom gear and consumable forms, the GM-assigned Cost (Thrones) field and each typed consumable quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `AssignedItemMetaFields.tsx`, `QuantityControl.tsx`)
+- [ ] **Autofill, Android:** the Gear and Consumable picker search boxes, the Name, Quantity, Weight, Cost, Description and Rules fields on the custom gear and consumable forms, the GM-assigned Cost (Thrones) field and each typed consumable quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `AssignedItemMetaFields.tsx`, `QuantityControl.tsx`)
 
 ## 14. Companions
 
@@ -734,7 +734,7 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 - [ ] Custom drug creation: Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing: see §21, Custom Item Library
 - [ ] Custom drug form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
-- [ ] **Autofill, Android:** the Drug picker search box, the Name, Quantity, Weight, Cost and Rules fields on the custom drug form and each typed quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `QuantityControl.tsx`)
+- [ ] **Autofill, Android:** the Drug picker search box, the Name, Quantity, Weight, Cost, Description and Rules fields on the custom drug form and each typed quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `QuantityControl.tsx`)
 
 ## 16. Experience
 
@@ -898,6 +898,7 @@ same everywhere it's used.
 
 Use three profiles: creator/player A, unrelated player B, and the DM. Give at least two characters copies before editing so propagation is measurable. At every lifecycle state, record which profiles can see the definition and which characters hold copies. Refresh all profiles between draft, publish, update, and archive.
 
+- [ ] Every custom equipment form (Gear, Consumable, Drug, Implant, Armour piece, Force field, Ranged, Melee, Grenade, Shield, and Archeotech) has a Description box and a separate Rules box; save a draft with both filled, publish it, and confirm the Description sits behind the information icon beside the name and the Rules sit behind the icon on the item's `Rules` line, on a character copy and after Update all copies
 - [ ] Create a custom item as a normal player: it starts as **draft**, and only you can see it (log in as a second player/character and confirm they can't)
 - [ ] As DM, the same draft item is visible in admin view before publishing
 - [ ] DM publishes it: status becomes **published**, and it's now visible to every player in the picker, not just its creator

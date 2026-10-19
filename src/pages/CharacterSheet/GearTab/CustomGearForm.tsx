@@ -24,13 +24,14 @@ export function CustomGearForm({
         availability: initialItem?.availability,
         weight: initialItem?.weight,
         value: initialItem?.value,
-        rules: initialItem?.description,
+        description: initialItem?.description,
+        rules: initialItem?.rules,
       }}
       title={title}
       submitLabel={submitLabel}
       fieldIdPrefix="custom-gear"
       namePlaceholder="Item name..."
-      rulesPlaceholder="Notes, properties, weight, craftsmanship..."
+      descriptionPlaceholder="What it is, how it looks, where it came from..."
       onSubmit={(draft) =>
         onAdd({
           id: initialItem?.id ?? crypto.randomUUID(),
@@ -39,7 +40,8 @@ export function CustomGearForm({
           value: draft.value,
           availability: draft.availability,
           source: draft.source,
-          description: draft.rules,
+          description: draft.description,
+          rules: draft.rules,
           customLibraryId: initialItem?.customLibraryId,
           customLibraryVersionId: initialItem?.customLibraryVersionId,
         })

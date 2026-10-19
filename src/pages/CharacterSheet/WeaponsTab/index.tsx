@@ -160,9 +160,12 @@ const EMPTY_CUSTOM_ARMOUR_BY_ID = new Map<string, CampaignCustomItem<"armour">>(
 const WEAPON_TABS_ID = "weapon-sections";
 const CONCEALED_WEAPON_BIONIC_REFERENCE_ID = "ih-concealed-weapon-bionic";
 
-function cyberneticWeaponRules(referenceId?: string): string | undefined {
-  if (!referenceId || referenceId === CONCEALED_WEAPON_BIONIC_REFERENCE_ID) return undefined;
-  return CYBERNETICS_REFERENCE.find((reference) => reference.id === referenceId)?.notes;
+function cyberneticWeaponRules(cybernetic: CyberneticItem): string | undefined {
+  if (cybernetic.referenceId === CONCEALED_WEAPON_BIONIC_REFERENCE_ID) return undefined;
+  return (
+    cybernetic.rules?.trim() ||
+    CYBERNETICS_REFERENCE.find((reference) => reference.id === cybernetic.referenceId)?.notes
+  );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -1257,7 +1260,7 @@ export function WeaponsTab({
               key={entry.cybernetic.id}
               cyberneticName={entry.cybernetic.name}
               weapon={entry.weapon}
-              rules={cyberneticWeaponRules(entry.cybernetic.referenceId)}
+              rules={cyberneticWeaponRules(entry.cybernetic)}
               craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
               strengthBonus={strengthBonus}
             />
@@ -1373,7 +1376,7 @@ export function WeaponsTab({
               key={entry.cybernetic.id}
               cyberneticName={entry.cybernetic.name}
               weapon={entry.weapon}
-              rules={cyberneticWeaponRules(entry.cybernetic.referenceId)}
+              rules={cyberneticWeaponRules(entry.cybernetic)}
               craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
               strengthBonus={strengthBonus}
             />

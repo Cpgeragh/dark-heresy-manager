@@ -60,7 +60,7 @@ export function ImplantRow({
       : craftsmanshipDescription(ref, displayedCraftsmanship)
     : (item.notes ?? "No rules recorded.");
   const isConcealedWeaponBionic = ref?.id === "ih-concealed-weapon-bionic";
-  const rules = isConcealedWeaponBionic ? undefined : ref?.notes;
+  const rules = isConcealedWeaponBionic ? undefined : item.rules?.trim() || ref?.notes;
 
   return (
     <CharacterEntryRow
@@ -71,9 +71,13 @@ export function ImplantRow({
           title={item.name}
           content={
             item.notes ? (
-              <InfoSection heading="Player Notes">
+              ref ? (
+                <InfoSection heading="Player Notes">
+                  <InfoParagraph>{item.notes}</InfoParagraph>
+                </InfoSection>
+              ) : (
                 <InfoParagraph>{item.notes}</InfoParagraph>
-              </InfoSection>
+              )
             ) : undefined
           }
         />

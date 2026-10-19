@@ -100,7 +100,14 @@ export function PieceRow({
         name={piece.name}
         badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
         inactive={!worn}
-        info={<InfoModal title={piece.name} />}
+        info={
+          <InfoModal
+            title={piece.name}
+            content={
+              piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
+            }
+          />
+        }
         metadata={
           <div className={uiStackField}>
             <div className={uiChipRow}>

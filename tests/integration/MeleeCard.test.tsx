@@ -55,6 +55,20 @@ describe("MeleeCard shared header", () => {
   });
 });
 
+describe("MeleeCard rules", () => {
+  it("shows a Rules information button when the weapon has rules", () => {
+    renderCard({ weapon: { ...baseWeapon, rules: "Reach 2m." } });
+    expect(
+      screen.getByRole("button", { name: "Show information about Custom Chainsword Rules" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows a hyphen on the Rules line when the weapon has no rules", () => {
+    renderCard();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
+  });
+});
+
 describe("MeleeCard upgrades", () => {
   it("opens the upgrade picker and adds a compatible upgrade", async () => {
     const user = userEvent.setup();

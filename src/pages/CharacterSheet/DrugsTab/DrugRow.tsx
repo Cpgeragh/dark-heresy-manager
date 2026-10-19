@@ -37,7 +37,8 @@ export function DrugRow({
   recordComponentRender("DrugRow");
   const ref = DRUGS_REFERENCE.find((r) => r.id === item.referenceId);
   const hasDescription = !!(ref?.notes || item.notes);
-  const hasRules = !!(ref?.effect || ref?.sideEffect);
+  const rules = item.rules?.trim();
+  const hasRules = !!(rules || ref?.effect || ref?.sideEffect);
 
   return (
     <CharacterEntryRow
@@ -50,11 +51,14 @@ export function DrugRow({
             hasDescription ? (
               <>
                 {ref?.notes && <InfoParagraph>{ref.notes}</InfoParagraph>}
-                {item.notes && (
-                  <InfoSection heading="Player Notes">
+                {item.notes &&
+                  (ref ? (
+                    <InfoSection heading="Player Notes">
+                      <InfoParagraph>{item.notes}</InfoParagraph>
+                    </InfoSection>
+                  ) : (
                     <InfoParagraph>{item.notes}</InfoParagraph>
-                  </InfoSection>
-                )}
+                  ))}
               </>
             ) : undefined
           }
@@ -80,6 +84,7 @@ export function DrugRow({
                   title={`${item.name} Rules`}
                   content={
                     <>
+                      {rules && <InfoParagraph>{rules}</InfoParagraph>}
                       {ref?.effect && (
                         <InfoSection heading="Effect">
                           <InfoParagraph>{ref.effect}</InfoParagraph>

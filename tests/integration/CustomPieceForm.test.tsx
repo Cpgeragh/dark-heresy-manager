@@ -65,7 +65,8 @@ describe("CustomPieceForm submission shape", () => {
     await fillRequiredFields(user);
     await user.click(screen.getByRole("button", { name: "Flak" })); // Quality
     await user.click(screen.getByRole("button", { name: "Good" })); // Craftsmanship
-    await user.type(screen.getAllByRole("textbox")[4], "Some special rules."); // Rules (last field)
+    await user.type(screen.getByLabelText("Description"), "A plain flak vest.");
+    await user.type(screen.getByLabelText("Rules"), "Some special rules.");
 
     await user.click(screen.getByRole("button", { name: "Add" }));
 
@@ -77,6 +78,7 @@ describe("CustomPieceForm submission shape", () => {
         ap: 3,
         craftsmanship: "Good",
         qualities: ["Flak"],
+        description: "A plain flak vest.",
         notes: "Some special rules.",
         weight: "5 kg",
         value: "80 Thrones",
@@ -161,6 +163,7 @@ describe("CustomPieceForm editing", () => {
         locations: ["head"],
         ap: 2,
         craftsmanship: "Good",
+        description: "Existing description",
         notes: "Existing notes",
         qualities: ["Mesh"],
         weight: "2 kg",
@@ -174,7 +177,8 @@ describe("CustomPieceForm editing", () => {
     expect(textboxes[1]).toHaveValue("2");
     expect(textboxes[2]).toHaveValue("2 kg");
     expect(textboxes[3]).toHaveValue("10 Thrones");
-    expect(textboxes[4]).toHaveValue("Existing notes");
+    expect(screen.getByLabelText("Description")).toHaveValue("Existing description");
+    expect(screen.getByLabelText("Rules")).toHaveValue("Existing notes");
     // Origin ("2nd Ed") is picked up from initialPiece.source too, confirmed
     // indirectly since every required field is now satisfied without any
     // further interaction.

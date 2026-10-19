@@ -43,12 +43,12 @@ export interface CustomItemAuditFields {
 
 export type CustomGearData = Omit<
   GearItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "rules"
+  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId"
 >;
 
 export type CustomConsumableData = Omit<
   ConsumableItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "quantity" | "rules"
+  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "quantity"
 >;
 
 export type CustomDrugData = Omit<

@@ -61,6 +61,16 @@ describe("GrenadeCard shared header", () => {
   });
 });
 
+describe("GrenadeCard rules", () => {
+  it("shows a Rules information button when the grenade has rules", () => {
+    renderCard({ item: { ...baseItem, rules: "Fills a 3m area." } });
+    expect(
+      screen.getByRole("button", { name: "Show information about Custom Frag Rules" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).not.toHaveTextContent("Rules-");
+  });
+});
+
 describe("GrenadeCard header label", () => {
   it("shows a Grenade type chip and a Thrown class chip for a grenade", () => {
     renderCard();

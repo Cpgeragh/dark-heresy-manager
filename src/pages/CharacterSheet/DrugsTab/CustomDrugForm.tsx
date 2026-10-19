@@ -26,14 +26,15 @@ export function CustomDrugForm({
         availability: initialItem?.availability,
         weight: initialItem?.weight,
         value: initialItem?.value,
-        rules: initialItem?.notes,
+        description: initialItem?.notes,
+        rules: initialItem?.rules,
       }}
       quantity={{ initialValue: initialItem?.quantity, visible: includeQuantity }}
       title={title}
       submitLabel={submitLabel}
       fieldIdPrefix="custom-drug"
       namePlaceholder="Drug name..."
-      rulesPlaceholder="Notes, dose, effects..."
+      descriptionPlaceholder="What it is, how it looks, where it came from..."
       onSubmit={(draft) =>
         onAdd({
           id: initialItem?.id ?? crypto.randomUUID(),
@@ -43,7 +44,8 @@ export function CustomDrugForm({
           value: draft.value,
           availability: draft.availability,
           source: draft.source,
-          notes: draft.rules,
+          notes: draft.description,
+          rules: draft.rules,
           customLibraryId: initialItem?.customLibraryId,
           customLibraryVersionId: initialItem?.customLibraryVersionId,
         })

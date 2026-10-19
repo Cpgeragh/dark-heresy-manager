@@ -55,7 +55,7 @@ describe("CustomDrugForm", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it("retains quantity and maps rules to notes when quantity editing is hidden", async () => {
+  it("retains quantity, maps description to notes, and stores rules separately when quantity editing is hidden", async () => {
     const user = userEvent.setup();
     const { onAdd } = renderForm({
       title: "Edit Custom Drug",
@@ -70,14 +70,18 @@ describe("CustomDrugForm", () => {
         weight: "0.1 kg",
         value: "300 Thrones",
         notes: "Old notes",
+        rules: "Old rules",
         customLibraryId: "library-3",
         customLibraryVersionId: "version-3",
       },
     });
 
     expect(screen.queryByLabelText("Quantity")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Rules")).toHaveValue("Old rules");
+    await user.clear(screen.getByLabelText("Description"));
+    await user.type(screen.getByLabelText("Description"), "  Updated notes  ");
     await user.clear(screen.getByLabelText("Rules"));
-    await user.type(screen.getByLabelText("Rules"), "  Updated notes  ");
+    await user.type(screen.getByLabelText("Rules"), "  Updated rules  ");
     await user.click(screen.getByRole("button", { name: "Save Draft" }));
 
     expect(onAdd).toHaveBeenCalledWith(
@@ -85,6 +89,7 @@ describe("CustomDrugForm", () => {
         id: "drug-1",
         quantity: 4,
         notes: "Updated notes",
+        rules: "Updated rules",
         customLibraryId: "library-3",
         customLibraryVersionId: "version-3",
       })

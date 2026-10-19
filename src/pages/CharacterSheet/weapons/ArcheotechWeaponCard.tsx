@@ -69,7 +69,7 @@ export function ArcheotechWeaponCard({
   const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId);
   const specialRules = item.specialRules ?? ref?.specialRules;
   const description = item.description ?? ref?.description;
-  const rules = ref?.rules;
+  const rules = item.rules?.trim() || ref?.rules;
   const weight = item.weight ?? ref?.weight;
   const value = item.value ?? ref?.value;
   const availability = item.availability ?? ref?.availability;

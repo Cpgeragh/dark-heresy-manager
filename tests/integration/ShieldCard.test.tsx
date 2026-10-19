@@ -43,6 +43,16 @@ describe("ShieldCard shared header", () => {
   });
 });
 
+describe("ShieldCard rules", () => {
+  it("shows a Rules information button when the shield has rules", () => {
+    renderCard({ item: { ...baseItem, rules: "Grants cover." } });
+    expect(
+      screen.getByRole("button", { name: "Show information about Custom Buckler Rules" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).not.toHaveTextContent("Rules-");
+  });
+});
+
 describe("ShieldCard header", () => {
   it("shows a Shield chip under the name", () => {
     renderCard();

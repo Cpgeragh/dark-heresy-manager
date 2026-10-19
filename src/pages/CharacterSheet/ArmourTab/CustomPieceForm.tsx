@@ -7,7 +7,6 @@ import type {
 } from "../../../types/Character";
 import {
   editableInputClass,
-  editableTextareaClass,
   uiFormLabel,
   uiInfoModalWrapper,
   uiStackField,
@@ -19,6 +18,7 @@ import { Chip } from "../../../ui/chips/Chip";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
+import { DescriptionAndRulesFields } from "../../../ui/forms/DescriptionAndRulesFields";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
@@ -76,6 +76,7 @@ export function CustomPieceForm({
   const [selectedQualities, setSelectedQualities] = useState<Set<ArmourQuality>>(
     new Set(initialPiece?.qualities ?? [])
   );
+  const [description, setDescription] = useState(initialPiece?.description ?? "");
   const [notes, setNotes] = useState(initialPiece?.notes ?? "");
   const [protectionRating, setProtectionRating] = useState(
     initialPiece?.protectionRating !== undefined ? String(initialPiece.protectionRating) : ""
@@ -127,6 +128,7 @@ export function CustomPieceForm({
         : selectedQualities.size > 0
           ? [...selectedQualities]
           : undefined,
+      description: description.trim() || undefined,
       notes: notes.trim() || undefined,
       custom: true,
       ...(forceField
@@ -311,7 +313,7 @@ export function CustomPieceForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Rules and Qualities">
+      <CustomFormSection title="Description, Rules, and Qualities">
         <div
           className={uiStackField}
           role={forceField ? undefined : "group"}
@@ -345,20 +347,14 @@ export function CustomPieceForm({
             </div>
           )}
         </div>
-        <div>
-          <label htmlFor="custom-armour-rules" className={uiFormLabel}>
-            Rules
-          </label>
-          <textarea
-            id="custom-armour-rules"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Special rules or effects…"
-            rows={3}
-            className={editableTextareaClass(true) + " mt-0.5"}
-            autoComplete="off"
-          />
-        </div>
+        <DescriptionAndRulesFields
+          idPrefix="custom-armour"
+          description={description}
+          onDescriptionChange={setDescription}
+          rules={notes}
+          onRulesChange={setNotes}
+          rulesPlaceholder="Special rules or effects…"
+        />
       </CustomFormSection>
     </CustomFormShell>
   );

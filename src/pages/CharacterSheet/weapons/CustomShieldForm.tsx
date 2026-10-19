@@ -2,15 +2,12 @@
 
 import { useRef, useState } from "react";
 import type { ShieldItem } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-} from "../../../ui/styles/editableStyles";
+import { editableInputClass } from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
+import { DescriptionAndRulesFields } from "../../../ui/forms/DescriptionAndRulesFields";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
@@ -79,6 +76,7 @@ export function CustomShieldForm({
       : []
   );
   const [notes, setNotes] = useState(initialShield?.notes ?? "");
+  const [rules, setRules] = useState(initialShield?.rules ?? "");
   const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
   const qualityPicker = useWeaponQualityPicker(selectedQualities, setSelectedQualities);
@@ -109,6 +107,7 @@ export function CustomShieldForm({
         pen,
         specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
         notes: notes.trim() || undefined,
+        rules: rules.trim() || undefined,
         weight: formatWeightInput(weight),
         value: formatMoneyInput(value),
         availability,
@@ -307,7 +306,7 @@ export function CustomShieldForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Rules and Qualities">
+      <CustomFormSection title="Description, Rules, and Qualities">
         <div className="grid grid-cols-2 gap-2">
           <WeaponQualitySelector
             selected={selectedQualities}
@@ -320,19 +319,13 @@ export function CustomShieldForm({
             onConfirmPending={qualityPicker.confirmPending}
             onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
           />
-          <div className="col-span-2">
-            <label htmlFor="custom-shield-rules" className={uiFormLabel}>
-              Rules
-            </label>
-            <textarea
-              id="custom-shield-rules"
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              rows={3}
-              className={editableTextareaClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </div>
+          <DescriptionAndRulesFields
+            idPrefix="custom-shield"
+            description={notes}
+            onDescriptionChange={setNotes}
+            rules={rules}
+            onRulesChange={setRules}
+          />
         </div>
       </CustomFormSection>
     </CustomFormShell>

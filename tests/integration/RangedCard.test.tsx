@@ -69,6 +69,20 @@ describe("RangedCard shared header", () => {
   });
 });
 
+describe("RangedCard rules", () => {
+  it("shows a Rules information button when the weapon has rules", () => {
+    renderCard({ weapon: { ...baseWeapon, rules: "Jams on a roll of 96." } });
+    expect(
+      screen.getByRole("button", { name: "Show information about Custom Lasgun Rules" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows a hyphen on the Rules line when the weapon has no rules", () => {
+    renderCard();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
+  });
+});
+
 describe("RangedCard upgrades", () => {
   it("opens the upgrade picker and adds a compatible upgrade", async () => {
     const user = userEvent.setup();

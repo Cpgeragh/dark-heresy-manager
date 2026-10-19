@@ -53,7 +53,7 @@ describe("CustomGearForm", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it("preserves edit identifiers and maps trimmed rules to description", async () => {
+  it("preserves edit identifiers and stores trimmed description and rules separately", async () => {
     const user = userEvent.setup();
     const { onAdd } = renderForm({
       title: "Edit Custom Item",
@@ -65,12 +65,17 @@ describe("CustomGearForm", () => {
         availability: "Scarce",
         weight: "0.5 kg",
         value: "145 Thrones",
-        description: "Old rules",
+        description: "Old description",
+        rules: "Old rules",
         customLibraryId: "library-1",
         customLibraryVersionId: "version-1",
       },
     });
 
+    expect(screen.getByLabelText("Description")).toHaveValue("Old description");
+    expect(screen.getByLabelText("Rules")).toHaveValue("Old rules");
+    await user.clear(screen.getByLabelText("Description"));
+    await user.type(screen.getByLabelText("Description"), "  Revised description  ");
     await user.clear(screen.getByLabelText("Rules"));
     await user.type(screen.getByLabelText("Rules"), "  Revised rules  ");
     await user.click(screen.getByRole("button", { name: "Save Draft" }));
@@ -78,7 +83,8 @@ describe("CustomGearForm", () => {
     expect(onAdd).toHaveBeenCalledWith(
       expect.objectContaining({
         id: "gear-1",
-        description: "Revised rules",
+        description: "Revised description",
+        rules: "Revised rules",
         customLibraryId: "library-1",
         customLibraryVersionId: "version-1",
       })

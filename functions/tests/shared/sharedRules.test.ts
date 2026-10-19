@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from "vitest";
 import {
+  assertCustomItemData,
   getCharacteristicTierCosts,
   getCharacteristicAdvancesSpent,
   getNextTalentOrTraitPurchase,
@@ -21,6 +22,27 @@ import {
   type CharacterForCharacteristicCosts,
 } from "shared-rules";
 import { generateRecoveryCode } from "../../src/shared/recoveryCode.js";
+
+describe("shared-rules custom item data", () => {
+  it.each([
+    ["gear", {}],
+    ["consumable", {}],
+    ["drug", {}],
+    ["cybernetic", {}],
+    ["weapon", { weaponKind: "ranged" }],
+    ["armour", { armourKind: "worn" }],
+    ["archeotech", {}],
+  ])("accepts a rules field and a description for %s", (category, extra) => {
+    expect(() =>
+      assertCustomItemData(category, {
+        name: "Item",
+        rules: "Does a thing.",
+        ...(category === "drug" || category === "cybernetic" ? { notes: "A note." } : {}),
+        ...extra,
+      })
+    ).not.toThrow();
+  });
+});
 
 describe("shared-rules wiring", () => {
   it("returns four undefined tier costs when no career is set", () => {

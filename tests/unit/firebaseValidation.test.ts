@@ -129,6 +129,26 @@ describe("character import validation", () => {
 });
 
 describe("custom-item validation", () => {
+  it.each([
+    ["gear", {}],
+    ["consumable", {}],
+    ["drug", {}],
+    ["cybernetic", {}],
+    ["weapon", { weaponKind: "grenade" }],
+    ["armour", { armourKind: "shield" }],
+    ["archeotech", {}],
+  ])("accepts a separate rules field for %s", (category, extra) => {
+    expect(() =>
+      assertCustomItemData(category, { name: "Item", rules: "Does a thing.", ...extra })
+    ).not.toThrow();
+  });
+
+  it.each(["power", "trait"])("rejects a rules field for %s", (category) => {
+    expect(() => assertCustomItemData(category, { name: "Item", rules: "Does a thing." })).toThrow(
+      "unsupported field: rules"
+    );
+  });
+
   it("accepts a bounded category-specific definition", () => {
     expect(() =>
       assertCustomItemData("weapon", {

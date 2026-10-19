@@ -6,11 +6,7 @@ import type {
   CyberneticCraftsmanship,
   CyberneticItem,
 } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-} from "../../../ui/styles/editableStyles";
+import { editableInputClass } from "../../../ui/styles/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
@@ -19,6 +15,7 @@ import {
   CYBERNETIC_CRAFTSMANSHIP_OPTIONS,
 } from "../../../ui/styles/craftsmanship";
 import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
+import { DescriptionAndRulesFields } from "../../../ui/forms/DescriptionAndRulesFields";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
@@ -69,6 +66,7 @@ export function CustomImplantForm({
     String(findLocationOptionIndex(initialItem?.bodyLocation))
   );
   const [notes, setNotes] = useState(initialItem?.notes ?? "");
+  const [rules, setRules] = useState(initialItem?.rules ?? "");
   const [saving, setSaving] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -93,6 +91,7 @@ export function CustomImplantForm({
         availability,
         source: origin,
         notes: notes.trim() || undefined,
+        rules: rules.trim() || undefined,
         customLibraryId: initialItem?.customLibraryId,
         customLibraryVersionId: initialItem?.customLibraryVersionId,
         ...(includeLocation && selectedLocation ? { bodyLocation: selectedLocation } : {}),
@@ -223,22 +222,16 @@ export function CustomImplantForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Rules">
+      <CustomFormSection title="Description and Rules">
         <div className="grid grid-cols-2 gap-2">
-          <div className="col-span-2">
-            <label htmlFor="custom-cybernetic-rules" className={uiFormLabel}>
-              Rules
-            </label>
-            <textarea
-              id="custom-cybernetic-rules"
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              placeholder="Implant rules, effects, drawbacks..."
-              rows={3}
-              className={editableTextareaClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </div>
+          <DescriptionAndRulesFields
+            idPrefix="custom-cybernetic"
+            description={notes}
+            onDescriptionChange={setNotes}
+            rules={rules}
+            onRulesChange={setRules}
+            rulesPlaceholder="Implant rules, effects, drawbacks..."
+          />
         </div>
       </CustomFormSection>
     </CustomFormShell>

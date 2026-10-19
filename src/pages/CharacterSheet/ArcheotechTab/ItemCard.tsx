@@ -54,7 +54,7 @@ export function ItemCard({
 
   const description = item.description ?? ref?.description;
   const specialRules = ref?.specialRules;
-  const rules = ref?.rules;
+  const rules = item.rules?.trim() || ref?.rules;
   const weight = item.weight ?? ref?.weight;
   const value = item.value ?? ref?.value;
   const availability = item.availability ?? ref?.availability;

@@ -26,14 +26,15 @@ export function CustomConsumableForm({
         availability: initialItem?.availability,
         weight: initialItem?.weight,
         value: initialItem?.value,
-        rules: initialItem?.description,
+        description: initialItem?.description,
+        rules: initialItem?.rules,
       }}
       quantity={{ initialValue: initialItem?.quantity, visible: includeQuantity }}
       title={title}
       submitLabel={submitLabel}
       fieldIdPrefix="custom-consumable"
       namePlaceholder="Consumable name..."
-      rulesPlaceholder="Notes, dose, effects..."
+      descriptionPlaceholder="What it is, how it looks, where it came from..."
       onSubmit={(draft) =>
         onAdd({
           id: initialItem?.id ?? crypto.randomUUID(),
@@ -43,7 +44,8 @@ export function CustomConsumableForm({
           value: draft.value,
           availability: draft.availability,
           source: draft.source,
-          description: draft.rules,
+          description: draft.description,
+          rules: draft.rules,
           customLibraryId: initialItem?.customLibraryId,
           customLibraryVersionId: initialItem?.customLibraryVersionId,
         })
