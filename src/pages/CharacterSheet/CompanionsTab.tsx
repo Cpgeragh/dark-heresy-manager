@@ -346,21 +346,21 @@ function CompanionCard({
           info={
             <InfoModal title={companionReference.name} content={companionReference.description} />
           }
-          actions={<ExpandChevron expanded={expanded} />}
-        />
-      </div>
-
-      {expanded && (
-        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {editable && (
-            <div className="flex justify-end">
+          removeAction={
+            editable ? (
               <RemoveEntryButton
                 kind="Companion"
                 name={companionReference.name}
                 onRemove={onRemove}
               />
-            </div>
-          )}
+            ) : undefined
+          }
+          expandControl={<ExpandChevron expanded={expanded} />}
+        />
+      </div>
+
+      {expanded && (
+        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           <CompanionProfileDetails companionReference={companionReference} modalAs="button" />
         </div>
       )}

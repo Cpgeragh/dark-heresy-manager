@@ -5,17 +5,11 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import {
   uiChipRow,
-  uiInlineRow,
-  uiSection,
-  uiTextBody,
-  uiTextLabel,
-  uiItemName,
-  uiInfoModalWrapper,
-  uiTextGMNote,
-  uiStackField,
+  uiOverlayItemNameHover,
+  uiSectionShell,
+  uiStackSection,
 } from "../../../ui/styles/editableStyles";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -25,7 +19,12 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
-import { AccordionCard } from "../../../ui/AccordionCard";
+import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
+import { CharacterEntryRow, CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
+import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 
 interface Props extends CustomItemLibraryActionProps<"archeotech"> {
   item: ArcheotechItem;
@@ -48,55 +47,41 @@ export function ItemCard({
 }: Props) {
   const [expanded, setExpanded] = useState(false);
 
-  const hasBody = !!(item.description?.trim() || item.notes?.trim());
+  const notes = item.notes?.trim();
   const ref = item.referenceId
     ? ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId)
     : undefined;
 
   const description = item.description ?? ref?.description;
   const specialRules = ref?.specialRules;
+  const rules = ref?.rules;
   const weight = item.weight ?? ref?.weight;
   const value = item.value ?? ref?.value;
   const availability = item.availability ?? ref?.availability;
   const source = item.source ?? ref?.source;
 
-  const titleContent = (
+  const badge = (
     <>
-      <span className={uiItemName}>{item.name}</span>
       {libraryItem && <StatusBadge status={libraryItem.status} />}
       {item.type && <Chip colour="slate">{item.type}</Chip>}
     </>
   );
 
-  const details = (
+  const information = (
+    <InfoModal
+      title={item.name}
+      content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+    />
+  );
+
+  const removeAction = editable ? (
+    <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
+  ) : undefined;
+
+  const metadata = (
     <>
-      {editable && hasBody && (
-        <div className="flex justify-end">
-          <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
-        </div>
-      )}
-
-      {/* Expanded body */}
-      {expanded && (
-        <div className={uiStackField}>
-          {specialRules && (
-            <p className={`text-xs lg:text-sm ${uiTextBody}`}>
-              <span className={`${uiTextLabel} mr-1`}>Special</span>
-              {specialRules}
-            </p>
-          )}
-          {description && (
-            <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
-          )}
-          {item.notes?.trim() && (
-            <p className={`text-xs lg:text-sm ${uiTextGMNote} leading-relaxed`}>{item.notes}</p>
-          )}
-        </div>
-      )}
-
-      {/* Type-specific stat chips */}
       {item.type === "Armour" && (
-        <div className={`mt-1 ${uiChipRow}`}>
+        <div className={uiChipRow}>
           {item.locations && item.locations.length > 0 && (
             <StatChip label="Location" value={locationLabel(item.locations)} />
           )}
@@ -105,98 +90,112 @@ export function ItemCard({
         </div>
       )}
       {item.type === "Force Field" && item.protectionRating !== undefined && (
-        <div className="mt-1">
+        <div className={uiChipRow}>
           <StatChip label="PR" value={String(item.protectionRating)} />
         </div>
       )}
       {item.type === "Shield" && (
-        <div className={`mt-1 ${uiChipRow}`}>
+        <div className={uiChipRow}>
           {item.locations && item.locations.length > 0 && (
             <StatChip label="Location" value={locationLabel(item.locations)} />
           )}
           {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
         </div>
       )}
-      {item.type === "Cybernetic" && (
-        <div className={`mt-1 ${uiChipRow} items-center`}>
-          {item.bodyLocation && item.bodyLocation.length > 0 && (
-            <StatChip
-              label="Location"
-              value={item.bodyLocation
-                .map((location) => ARMOUR_LOCATION_LABELS[location])
-                .join(" & ")}
-            />
-          )}
-          {item.craftsmanship && (
-            <>
-              <span className={uiTextLabel}>Quality</span>
-              <Chip colour={CRAFTSMANSHIP_COLOUR[item.craftsmanship]} className="shrink-0">
-                {item.craftsmanship}
-              </Chip>
-            </>
-          )}
+      {item.type === "Cybernetic" && item.bodyLocation && item.bodyLocation.length > 0 && (
+        <div className={uiChipRow}>
+          <StatChip
+            label="Location"
+            value={item.bodyLocation
+              .map((location) => ARMOUR_LOCATION_LABELS[location])
+              .join(" & ")}
+          />
         </div>
       )}
-
-      {/* Chips */}
       <ItemMetaChips
         weight={weight}
         value={value}
         availability={availability}
         source={source}
-        className={`${uiChipRow} mt-1.5`}
+        className={uiChipRow}
       />
-      {libraryItem && (
-        <CustomItemActionButtons
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
-      )}
     </>
   );
 
-  if (hasBody) {
+  const lines = (
+    <>
+      {specialRules && <EntryDetailLine label="Qualities" value={specialRules} />}
+      <EntryDetailLine
+        label="Rules"
+        info={
+          rules ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={<InfoParagraph>{rules}</InfoParagraph>}
+            />
+          ) : undefined
+        }
+      />
+      {item.type === "Cybernetic" && item.craftsmanship && (
+        <EntryDetailLine label="Craftsmanship" value={item.craftsmanship} />
+      )}
+      {notes && <EntryDetailLine label="Notes" value={notes} />}
+    </>
+  );
+
+  const libraryActions = libraryItem ? (
+    <CustomItemActionButtons
+      libraryItem={libraryItem}
+      isDM={isDM}
+      canEditDefinition={canEditDefinition}
+      busyAction={busyAction}
+      onEditDefinition={onEditDefinition}
+      onPublish={onPublish}
+      onArchive={onArchive}
+      onUpdateAllCopies={onUpdateAllCopies}
+    />
+  ) : undefined;
+
+  if (notes) {
     return (
-      <AccordionCard
-        expanded={expanded}
-        onToggle={() => setExpanded((v) => !v)}
-        header={<div className={`${uiInlineRow} flex-wrap`}>{titleContent}</div>}
-      >
-        <div className="px-3 pb-3 lg:px-4 lg:pb-4">{details}</div>
-      </AccordionCard>
+      <div className={`${uiSectionShell} overflow-hidden`}>
+        <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
+          <CardOverlayButton
+            label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+            expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+          />
+          <CharacterEntryRowContent
+            interactive
+            name={item.name}
+            nameClassName={uiOverlayItemNameHover}
+            badge={badge}
+            info={information}
+            metadata={metadata}
+            removeAction={removeAction}
+            expandControl={<ExpandChevron expanded={expanded} />}
+          />
+        </div>
+        {expanded && (
+          <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
+            {lines}
+            {libraryActions}
+          </div>
+        )}
+      </div>
     );
   }
 
   return (
-    <div className={uiSection}>
-      <div className="flex items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <div className={`${uiInlineRow} flex-wrap`}>
-            {titleContent}
-            {description && (
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={item.name} content={description} />
-              </span>
-            )}
-          </div>
-          <div>{details}</div>
-        </div>
-
-        {editable && (
-          <RemoveEntryButton
-            kind="Archeotech item"
-            name={item.name}
-            onRemove={onRemove}
-            className="mt-0.5"
-          />
-        )}
-      </div>
-    </div>
+    <CharacterEntryRow
+      name={item.name}
+      badge={badge}
+      info={information}
+      metadata={metadata}
+      afterMetadata={lines}
+      removeAction={removeAction}
+    >
+      {libraryActions}
+    </CharacterEntryRow>
   );
 }

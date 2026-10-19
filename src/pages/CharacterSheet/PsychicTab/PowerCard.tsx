@@ -11,7 +11,6 @@ import {
   uiOverlayItemNameHover,
   uiSectionShell,
   uiTextPlaceholder,
-  uiTextDescription,
   uiStackSection,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
@@ -24,8 +23,8 @@ import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { InfoParagraph } from "../../../ui/InfoSection";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;
@@ -111,16 +110,6 @@ export function PowerCard({
   recordComponentRender("PowerCard");
   const [expanded, setExpanded] = useState(false);
 
-  const modalContent = (
-    <>
-      {power.description ? (
-        <p className={uiTextDescription}>{power.description}</p>
-      ) : (
-        <p className={`text-sm ${uiTextPlaceholder}`}>No description recorded.</p>
-      )}
-    </>
-  );
-
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
       <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4 text-sm lg:text-base`}>
@@ -142,32 +131,31 @@ export function PowerCard({
             <InfoModal
               as="span"
               title={power.name || "Psychic Power"}
-              content={modalContent}
-              hideTitle
+              content={
+                power.description ? <InfoParagraph>{power.description}</InfoParagraph> : undefined
+              }
             />
           }
           metadata={<PowerIdentityChips power={power} talentSourceName={talentSourceName} />}
-          actions={
-            <>
-              {editable && (
-                <div className={`relative ${uiLayerLocal} pointer-events-auto`}>
-                  <RemoveEntryButton
-                    kind="Psychic Power"
-                    name={power.name || "power"}
-                    onRemove={() => onRemove(power.id)}
-                  />
-                </div>
-              )}
-              {onSelect ? (
-                <ExpandButton
-                  expanded={expanded}
-                  label={`${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`}
-                  onClick={() => setExpanded((value) => !value)}
-                />
-              ) : (
-                <ExpandChevron expanded={expanded} />
-              )}
-            </>
+          removeAction={
+            editable ? (
+              <RemoveEntryButton
+                kind="Psychic Power"
+                name={power.name || "power"}
+                onRemove={() => onRemove(power.id)}
+              />
+            ) : undefined
+          }
+          expandControl={
+            onSelect ? (
+              <ExpandButton
+                expanded={expanded}
+                label={`${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`}
+                onClick={() => setExpanded((value) => !value)}
+              />
+            ) : (
+              <ExpandChevron expanded={expanded} />
+            )
           }
         />
       </div>

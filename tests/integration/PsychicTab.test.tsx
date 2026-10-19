@@ -748,6 +748,27 @@ describe("PsychicTab", () => {
     expect(screen.getAllByText("Available: 1").length).toBeGreaterThan(0);
   });
 
+  it("shows the power name and the shared empty message in the information window", async () => {
+    const user = userEvent.setup();
+    render(
+      <StatefulPsychicTab
+        talents={emptyTalents}
+        initialPsychic={{
+          ...emptyPsychic,
+          minorPowers: [{ id: "quiet", name: "Quiet Power", known: true, isMinor: true }],
+        }}
+      />
+    );
+
+    expect(screen.getAllByRole("button", { name: "Remove Quiet Power" }).length).toBeGreaterThan(0);
+    await user.click(
+      screen.getAllByRole("button", { name: "Show information about Quiet Power" })[0]
+    );
+    const dialog = screen.getByRole("dialog", { name: "Quiet Power" });
+    expect(within(dialog).getByRole("heading", { name: "Quiet Power" })).toBeInTheDocument();
+    expect(within(dialog).getByText("No description recorded.")).toBeInTheDocument();
+  });
+
   it("can add a power without consuming an available purchase", async () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {

@@ -590,6 +590,10 @@ Use the same disposable character from Talents. First test with no Psychic
 purchase or Psy Rating Talent, then prepare several Minor Psychic Power,
 Psychic Power, and Psy Rating selections without spending them.
 
+**Power card header:**
+
+- [ ] On every owned power card the trash button sits in the closed header, before the chevron, and the information window shows the power name as its heading, saying "No description recorded." when the power has no description
+
 **Header and read-only status:**
 
 - [ ] Psy Rating has no input on this page and equals the highest owned `Psy Rating N` Talent
@@ -704,6 +708,7 @@ Add the Cyber-Mastiff to a clean character, refresh, expand it, and compare ever
 
 - [ ] Add the Cyber-Mastiff: full stat block (characteristics, Movement, Wounds, Skills, Talents, Traits, Weapons, Armour, Gear) all display and match the source
 - [ ] Expand/collapse on the companion card works
+- [ ] The trash button sits in the closed header, before the chevron, and stays there when the card is collapsed
 - [ ] Remove the companion: confirm it actually disappears rather than just collapsing
 - [ ] Click every individual Skill, Talent, Trait, and Gear entry on the expanded card: each should open a populated rules popup
 
@@ -781,6 +786,7 @@ Start on a character with old-style plain-text notes (a legacy fixture, `notes` 
 - [ ] Notes display as cards, two per row on both phone and desktop, sorted newest-first
 - [ ] A note's preview shows up to three lines of its text and stops there (no more, no less) regardless of how short or long the actual note is: card heights stay consistent within a row either way
 - [ ] Tapping a card opens it for reading only: no Title/Note inputs, no Save button, just the full text
+- [ ] Each note title is a medium weight name that turns white when the card is hovered, and the card's Delete button comes before Edit
 - [ ] Edit sits on the card itself, next to Delete; opening it pre-fills Title and Note with the entry's current values, and Save updates the card in place and bumps its date
 - [ ] Deleting a note arms a confirm step (`Delete [title] from this character?` with Delete/Cancel) instead of deleting on the first tap
 - [ ] On a narrow phone screen, the title, preview text, and date never overlap the Edit/Delete buttons: Edit/Delete sit on their own row above the content on mobile, back inline with it on desktop
@@ -854,6 +860,8 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 - [ ] Add an Archeotech item typed as Armour: confirm it also appears on the Armour tab, and equipping/stowing from either tab stays in sync immediately (this is genuinely the same underlying list on both tabs, not a copy, so it should never need a refresh to agree)
 - [ ] Same check for one typed as a Weapon (Weapons tab) and one typed as a Grenade/Mine (counts toward the 2-type grenade limit in §9)
 - [ ] A plain (non-armour, non-weapon) Archeotech item behaves like a normal gear-style entry
+- [ ] Every Archeotech item card has its description behind the information icon beside the name, a `Rules` line showing "-" until rules text exists, and a `Qualities` line when the reference lists special rules; a cybernetic item shows a plain `Craftsmanship` line
+- [ ] An item with its own Notes is an expandable card with the trash button in the closed header and the chevron last, and the `Notes` line appears only when it is expanded; every other item is a flat row with the trash button first
 - [ ] Custom archeotech creation and publishing: see §21, Custom Item Library
 - [ ] Custom archeotech form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
 - [ ] **Autofill, Android:** the Archeotech picker search box, every field in the custom Archeotech form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomArcheotechForm.tsx`, `AssignedItemMetaFields.tsx`)

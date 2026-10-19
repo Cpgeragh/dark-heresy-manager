@@ -168,6 +168,15 @@ describe("NotesTab editing and deleting", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("puts the Delete button before Edit in the card's action buttons", () => {
+    render(<NotesWiring initial={oneEntry()} />);
+    const deleteButton = screen.getByRole("button", { name: "Delete Session 12" });
+    const editButton = screen.getByRole("button", { name: "Edit" });
+    expect(
+      deleteButton.compareDocumentPosition(editButton) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it("opens an entry for editing, pre-filled, and saves changes", async () => {
     const user = userEvent.setup();
     render(<NotesWiring initial={oneEntry()} />);

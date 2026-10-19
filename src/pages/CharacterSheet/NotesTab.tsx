@@ -16,7 +16,7 @@ import {
   editableTextareaClass,
   uiSectionShell,
   uiTextBody,
-  uiTextLabel,
+  uiOverlayItemNameHover,
   uiTextPlaceholder,
   uiTextDescription,
   uiStackSection,
@@ -168,7 +168,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
                   <CharacterEntryRowContent
                     interactive
                     name={entry.title}
-                    nameClassName={uiTextLabel}
+                    nameClassName={uiOverlayItemNameHover}
                     metadata={
                       <>
                         <p
@@ -183,20 +183,22 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
                         </div>
                       </>
                     }
+                    removeAction={
+                      editable ? (
+                        <RemoveEntryButton
+                          kind="Note"
+                          name={entry.title}
+                          verb="Delete"
+                          onRemove={() => deleteEntry(entry)}
+                        />
+                      ) : undefined
+                    }
                     actions={
                       editable ? (
-                        <div
-                          className={`pointer-events-auto relative ${uiLayerLocal} flex shrink-0 justify-end gap-1.5`}
-                        >
+                        <div className={`pointer-events-auto relative ${uiLayerLocal}`}>
                           <Button size="xs" onClick={() => openEdit(entry)}>
                             Edit
                           </Button>
-                          <RemoveEntryButton
-                            kind="Note"
-                            name={entry.title}
-                            verb="Delete"
-                            onRemove={() => deleteEntry(entry)}
-                          />
                         </div>
                       ) : undefined
                     }

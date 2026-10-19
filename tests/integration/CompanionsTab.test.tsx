@@ -83,6 +83,34 @@ describe("CompanionsTab", () => {
     await act(async () => finish());
   });
 
+  it("keeps the Remove button in the closed header", async () => {
+    const user = userEvent.setup();
+    render(
+      <CompanionsTab
+        editable
+        onUpdate={vi.fn()}
+        companions={[
+          {
+            id: "companion-1",
+            referenceId: "ih-adeptus-arbites-cyber-mastiff",
+            name: "Adeptus Arbites Cyber-Mastiff",
+            source: "IH",
+          },
+        ]}
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Collapse Adeptus Arbites Cyber-Mastiff details" })
+    );
+    expect(
+      screen.getByRole("button", { name: "Expand Adeptus Arbites Cyber-Mastiff details" })
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.getByRole("button", { name: "Remove Adeptus Arbites Cyber-Mastiff" })
+    ).toBeInTheDocument();
+  });
+
   it("does not show a spinner on Remove for an optimistic companion removal", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
