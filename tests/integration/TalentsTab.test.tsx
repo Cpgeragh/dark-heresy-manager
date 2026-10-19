@@ -183,6 +183,20 @@ function entry(uid: string, talentId: string, name: string, specialisation?: str
   return { uid, talentId, name, ...(specialisation ? { specialisation } : {}) };
 }
 
+function purityWithRecordedCybernetic(): TalentEntry {
+  return {
+    ...entry("purity-1", "purity-of-flesh", "Purity of Flesh"),
+    acquisition: {
+      purity: {
+        removedCyberneticIds: ["cyber-1"],
+        removedCybernetics: [{ id: "cyber-1", name: "Mechadendrite", craftsmanship: "Common" }],
+        qualifyingBionicsRemoved: 1,
+        fatePointsGained: 0,
+      },
+    },
+  };
+}
+
 function renderTab(props: Partial<React.ComponentProps<typeof TalentsTab>> = {}) {
   const onUpdateTalents = vi.fn();
   render(
@@ -1400,8 +1414,12 @@ describe("TalentsTab", () => {
     });
 
     await user.click(screen.getAllByRole("button", { name: "Remove Purity of Flesh" })[0]);
-    await user.click(screen.getByRole("button", { name: "Remove" }));
-    await user.click(screen.getByRole("button", { name: "Remove and restore recorded changes" }));
+    const manageDialog = screen.getByRole("dialog", { name: "Manage Talent" });
+    expect(within(manageDialog).getByRole("button", { name: "Remove Talent" })).toBeInTheDocument();
+    expect(within(manageDialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    await user.click(
+      within(manageDialog).getByRole("button", { name: "Remove and restore recorded changes" })
+    );
 
     expect(onUpdateCharacter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1423,6 +1441,69 @@ describe("TalentsTab", () => {
         talentsAndTraits: expect.objectContaining({ talents: [] }),
       })
     );
+  });
+
+  it("removes Purity of Flesh without restoring recorded changes from the same pop-up", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(true);
+    renderTab({
+      talents: makeTalents({ talents: [purityWithRecordedCybernetic()] }),
+      onUpdateCharacter,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Purity of Flesh" })[0]);
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage Talent" })).getByRole("button", {
+        name: "Remove Talent",
+      })
+    );
+
+    await waitFor(() => expect(onUpdateCharacter).toHaveBeenCalledOnce());
+    const saved = onUpdateCharacter.mock.calls[0][0];
+    expect(saved.talentsAndTraits.talents).toEqual([]);
+    expect(saved.cybernetics ?? []).toEqual([]);
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Manage Talent" })).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the Purity of Flesh pop-up open when its removal is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(false);
+    renderTab({
+      talents: makeTalents({ talents: [purityWithRecordedCybernetic()] }),
+      onUpdateCharacter,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Purity of Flesh" })[0]);
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage Talent" })).getByRole("button", {
+        name: "Remove and restore recorded changes",
+      })
+    );
+
+    await waitFor(() => expect(onUpdateCharacter).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog", { name: "Manage Talent" })).toBeInTheDocument();
+    expect(screen.getAllByText("Purity of Flesh").length).toBeGreaterThan(0);
+  });
+
+  it("keeps the removal pop-up open when removing an ordinary Talent is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(false);
+    renderTab({
+      talents: makeTalents({ talents: [entry("s1", "sound-constitution", "Sound Constitution")] }),
+      onUpdateCharacter,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Sound Constitution (1)" })[0]);
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Remove Talent" })).getByRole("button", {
+        name: "Remove",
+      })
+    );
+
+    await waitFor(() => expect(onUpdateCharacter).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog", { name: "Remove Talent" })).toBeInTheDocument();
   });
 
   it("shows automatically granted Talents as read-only with their source", () => {

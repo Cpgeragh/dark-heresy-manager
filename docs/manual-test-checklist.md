@@ -350,16 +350,17 @@ below deliberately change several of those pages.
 - [ ] A later Reformed Skin purchase asks whether its cause is Purity of Flesh or Critical Damage
 - [ ] Choosing Purity removes all Fate Points gained by that Purity purchase; additional Purity-related replacements do not subtract the same Fate again
 - [ ] Choosing Critical Damage leaves Purity Fate unchanged
-- [ ] Remove Purity of Flesh: the second confirmation offers **Remove and restore recorded changes**, **Remove Talent only**, and **Cancel**
+- [ ] Remove Purity of Flesh: one **Manage Talent** pop-up offers **Remove and restore recorded changes**, **Remove Talent**, and **Cancel**
 - [ ] Remove and restore returns recorded implants, integrated weapons, Archeotech, and concealed-weapon links without duplicating items already present
-- [ ] Remove Talent only leaves the removed inventory removed while all calculated Talent effects disappear
+- [ ] Remove Talent leaves the removed inventory removed while all calculated Talent effects disappear
+- [ ] A Talent removal that the server refuses leaves the pop-up open and the Talent on the character
 
 **Rite of Pure Thought:**
 
 - [ ] The acquisition lists the character's structured Mental Disorders and requires confirmation that the GM reviewed the changes
 - [ ] Every disorder selected for removal requires a non-blank replacement name
 - [ ] Each replacement retains the removed disorder's severity and is identified as its replacement
-- [ ] Removing Rite of Pure Thought offers the same restore/remove-only decision: restore brings back the recorded original disorders, while remove-only leaves the replacements in place
+- [ ] Removing Rite of Pure Thought offers the same restore or remove choice in one pop-up: restore brings back the recorded original disorders, while Remove Talent leaves the replacements in place
 
 **Faith Talents and read-only mode:**
 
@@ -475,6 +476,13 @@ This page is much bigger than it looks; go through it deliberately.
 ### How to test this page
 
 Use a disposable character and create a small labelled test inventory: one normal ranged weapon, one Heavy weapon, one one-handed melee weapon, one Two-Handed weapon, one shield, three grenade types, a clip-fed weapon, a loose-ammunition weapon, and a multi-magazine weapon. Record slot use and ammunition before every action. Work through equip limits first, then grenades, firing/reloading, alternate profiles, upgrades, cybernetic links, and finally custom forms. Refresh after each group and cross-check Armour, Archeotech, and Cybernetics where links exist.
+
+**Card headers and Rules lines (Ranged, Melee, Grenade, Shield, Archeotech weapon, Archeotech shield, and Cybernetic weapon):**
+
+- [ ] On every owned card, closed or open, the trash button sits first among the header buttons with the Equip button after it and the expand chevron last; the Cybernetic weapon card has no trash or Equip button, only the chevron
+- [ ] The info icon beside each card name is always shown and holds the description, saying "No description recorded." when empty; Grenade, Shield, and Archeotech weapon descriptions no longer sit in the `Rules` line
+- [ ] Every card has a `Rules` line showing its rules behind an icon or "-" when empty: Ranged and Melee show the Concealed Weapon Bionic rules, the Cybernetic weapon shows its implant's notes, and Grenade, Shield, and Archeotech cards show "-" until rules text exists
+- [ ] Card names are medium weight and wrap instead of being cut off, including a long Grenade name, and there is no extra gap above the chips in any card header
 
 **Equip slots (this applies across Ranged, Melee, and Shields together):**
 

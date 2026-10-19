@@ -32,11 +32,8 @@ import { EntryCard, TalentGroupCard } from "./TalentEntryCards";
 import { TalentPickerModal } from "./TalentPickerModal";
 import { getAvailablePsychicTalentPurchases, getTalentBehaviour } from "./talentUtils";
 import { getGrantedTalentEntries, filterTalentEntriesCoveredByGrants } from "./talentEffects";
-import { buildTalentRemovalUpdate, hasRestorableTalentEffect } from "./talentRemovalRules";
+import { buildTalentRemovalUpdate } from "./talentRemovalRules";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
-import { Button } from "../../ui/buttons/Button";
-import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { uiTextBody } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { getFaithTalentGroupChip, type FaithTalentGroupChip } from "./faithTalentGroups";
 import { useTalentAcquisitionFlow } from "./useTalentAcquisitionFlow";
@@ -104,7 +101,7 @@ function FaithTalentSection({
   editable: boolean;
   isDM: boolean;
   onAdd: (entry: TalentEntry) => void | Promise<boolean | void>;
-  onRemove: (uid: string) => void | Promise<unknown>;
+  onRemove: (uid: string, restoreOneTimeEffects?: boolean) => void | Promise<unknown>;
   pickerSuspended?: boolean;
   career?: string;
   rank?: string;
@@ -165,7 +162,7 @@ const TalentCards = memo(function TalentCards({
   entries: TalentEntry[];
   psychic: PsychicBlock;
   editable: boolean;
-  onRemove: (uid: string) => void | Promise<unknown>;
+  onRemove: (uid: string, restoreOneTimeEffects?: boolean) => void | Promise<unknown>;
   getStatusChip?: (talentId: string) => FaithTalentGroupChip | undefined;
 }) {
   recordComponentRender("TalentCards");
@@ -289,7 +286,7 @@ function RegularTalentSection({
   editable: boolean;
   isDM: boolean;
   onAdd: (entry: TalentEntry) => void | Promise<boolean | void>;
-  onRemove: (uid: string) => void | Promise<unknown>;
+  onRemove: (uid: string, restoreOneTimeEffects?: boolean) => void | Promise<unknown>;
   columns?: 1 | 2;
   pickerSuspended?: boolean;
   career?: string;
@@ -359,8 +356,6 @@ export function TalentsTab({
   onUpdateCharacter,
 }: TalentsTabProps) {
   recordComponentRender("TalentsTab");
-  const [savingTalentMutation, setSavingTalentMutation] = useState(false);
-  const [pendingEffectDeletion, setPendingEffectDeletion] = useState<TalentEntry | null>(null);
   const saveTalentAcquisition = useCallback(
     async (partial: Partial<Character>): Promise<boolean> => {
       if (onUpdateCharacter) return onUpdateCharacter(partial);
@@ -386,8 +381,10 @@ export function TalentsTab({
     weaponTraining,
     onSave: saveTalentAcquisition,
   });
-  const applyTalentRemoval = useCallback(
-    async (entry: TalentEntry, restoreOneTimeEffects: boolean) => {
+  const handleRemoveTalent = useCallback(
+    async (uid: string, restoreOneTimeEffects = false) => {
+      const entry = talents.talents.find((talent) => talent.uid === uid);
+      if (!entry) return;
       const update = buildTalentRemovalUpdate({
         entry,
         restoreOneTimeEffects,
@@ -399,15 +396,8 @@ export function TalentsTab({
         meleeWeapons,
         archeotech,
       });
-      if (onUpdateCharacter) {
-        setSavingTalentMutation(true);
-        const saved = await onUpdateCharacter(update);
-        setSavingTalentMutation(false);
-        if (saved === false) return;
-      } else {
-        onUpdateTalents(update.talentsAndTraits);
-      }
-      setPendingEffectDeletion(null);
+      if (onUpdateCharacter) return onUpdateCharacter(update);
+      onUpdateTalents(update.talentsAndTraits);
     },
     [
       talents,
@@ -420,18 +410,6 @@ export function TalentsTab({
       onUpdateCharacter,
       onUpdateTalents,
     ]
-  );
-  const handleRemoveTalent = useCallback(
-    (uid: string) => {
-      const entry = talents.talents.find((talent) => talent.uid === uid);
-      if (!entry) return;
-      if (hasRestorableTalentEffect(entry)) {
-        setPendingEffectDeletion(entry);
-        return;
-      }
-      return applyTalentRemoval(entry, false);
-    },
-    [talents.talents, applyTalentRemoval]
   );
   const [activeView, setActiveView] = useState<ViewGroup>("talents");
   const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
@@ -553,51 +531,6 @@ export function TalentsTab({
       </div>
 
       {acquisitionModal}
-
-      {pendingEffectDeletion && (
-        <PickerModal
-          title={`Remove ${pendingEffectDeletion.name}`}
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setPendingEffectDeletion(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-md"
-        >
-          <PickerBody>
-            <p className={`text-sm ${uiTextBody}`}>
-              This Talent recorded a one-time change. Choose whether removing the Talent should also
-              restore what that acquisition changed.
-            </p>
-            <div className={uiStackList}>
-              <Button
-                fullWidth
-                loading={savingTalentMutation}
-                loadingLabel="Saving"
-                onClick={() => void applyTalentRemoval(pendingEffectDeletion, true)}
-              >
-                Remove and restore recorded changes
-              </Button>
-              <Button
-                fullWidth
-                variant="ghost"
-                disabled={savingTalentMutation}
-                onClick={() => void applyTalentRemoval(pendingEffectDeletion, false)}
-              >
-                Remove Talent only
-              </Button>
-              <Button
-                fullWidth
-                variant="neutral"
-                disabled={savingTalentMutation}
-                onClick={() => setPendingEffectDeletion(null)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </PickerBody>
-        </PickerModal>
-      )}
     </div>
   );
 }

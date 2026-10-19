@@ -28,13 +28,14 @@ import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions
 import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
 import { AccordionCard } from "../../ui/AccordionCard";
 import { normaliseSources } from "./talentUtils";
+import { hasRestorableTalentEffect } from "./talentRemovalRules";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { CharacterEntryRow } from "../../ui/CharacterEntryRow";
 
 interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
   editable: boolean;
-  onRemove: (uid: string) => void | Promise<unknown>;
+  onRemove: (uid: string, restoreOneTimeEffects?: boolean) => void | Promise<unknown>;
   displayName?: string;
   secondaryText?: string;
   statusChip?: string;
@@ -151,8 +152,17 @@ export function EntryCard({
             <RemoveEntryButton
               kind={deletionNoun}
               name={shownName}
-              onRemove={() => onRemove(entry.uid)}
+              onRemove={() => onRemove(entry.uid, false)}
               blockedMessage={deletionBlockedMessage}
+              extra={
+                hasRestorableTalentEffect(entry)
+                  ? {
+                      label: "Remove and restore recorded changes",
+                      message: `${shownName} recorded a one-time change. Remove the Talent only, or remove it and restore what that acquisition changed?`,
+                      onClick: () => onRemove(entry.uid, true),
+                    }
+                  : undefined
+              }
             />
           ) : undefined
         }
@@ -186,7 +196,7 @@ export function TalentGroupCard({
   name: string;
   entries: readonly TalentEntry[];
   editable: boolean;
-  onRemove: (uid: string) => void | Promise<unknown>;
+  onRemove: (uid: string, restoreOneTimeEffects?: boolean) => void | Promise<unknown>;
   statusChip?: string;
   statusChipColour?: ChipColour;
 }) {
