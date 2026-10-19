@@ -11,6 +11,7 @@ export interface GearRef {
   name: string;
   source: SkillSource;
   description: string;
+  rules?: string;
   weight: string;
   value: string;
   availability: string;

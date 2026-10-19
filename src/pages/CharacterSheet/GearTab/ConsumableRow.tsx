@@ -1,8 +1,10 @@
 // src/pages/CharacterSheet/GearTab/ConsumableRow.tsx
 
 import type { ConsumableItem } from "../../../types/Character";
-import { uiChipRow, uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
+import { uiChipRow } from "../../../ui/styles/editableStyles";
 import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -34,30 +36,18 @@ export function ConsumableRow({
   onRemove,
 }: Props) {
   recordComponentRender("ConsumableRow");
-  const hasDesc = !!item.description?.trim();
+  const description = item.description?.trim();
+  const rules = item.rules?.trim();
 
   return (
     <CharacterEntryRow
       name={item.name}
       badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       info={
-        hasDesc ? (
-          <InfoModal
-            title={item.name}
-            content={<p className={uiTextDescription}>{item.description}</p>}
-          />
-        ) : undefined
-      }
-      leading={
-        <div className="flex flex-col items-center">
-          <span className={`${uiTextLabel} mb-0.5`}>Qty</span>
-          <QuantityControl
-            quantity={item.quantity}
-            editable={editable}
-            size="sm"
-            onUpdate={(q) => onUpdateQty(item.id, q)}
-          />
-        </div>
+        <InfoModal
+          title={item.name}
+          content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+        />
       }
       metadata={
         <ItemMetaChips
@@ -68,7 +58,27 @@ export function ConsumableRow({
           className={uiChipRow}
         />
       }
+      afterMetadata={
+        <EntryDetailLine
+          label="Rules"
+          info={
+            rules ? (
+              <InfoModal
+                title={`${item.name} Rules`}
+                content={<InfoParagraph>{rules}</InfoParagraph>}
+              />
+            ) : undefined
+          }
+        />
+      }
       actions={
+        <QuantityControl
+          quantity={item.quantity}
+          editable={editable}
+          onUpdate={(q) => onUpdateQty(item.id, q)}
+        />
+      }
+      removeAction={
         editable ? (
           <RemoveEntryButton
             kind="Consumable"

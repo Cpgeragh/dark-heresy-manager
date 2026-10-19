@@ -672,6 +672,9 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 
 - [ ] Items / Consumables tabs both list, add, and remove correctly
 - [ ] Consumables carry their own quantity control (e.g. doses of Panimune): confirm it increments/decrements and doesn't get confused with a plain gear item's lack of quantity
+- [ ] On every Gear item and Consumable row the trash button comes first among the action buttons, the info icon beside the name is always shown (saying "No description recorded." when empty), and a "Rules" line sits below the chips showing "-" until the item has rules text
+- [ ] The Consumable quantity control sits on the right of the row with no "Qty" label, after the trash button, at the same size as the Drug quantity control
+- [ ] A granted Gear item shows a `Gained from` line reading `[source] (type)` below its chips, and no trash button
 - [ ] Search finds items by partial name in both sections
 - [ ] An item with a listed "Varies" price (Cognomen, Forgery Kit) shows a "Cost assigned on add" note directly in the picker list, then prompts for a manually entered cost and rarity before it can actually be added
 - [ ] Lumenmould specifically (no fixed listed price) shows the same note and prompt
@@ -708,6 +711,9 @@ Drugs and combat stimulants carried by the character.
 Add and remove a reference drug, then create a uniquely named custom drug. In the custom form, make one field invalid at a time and verify Add remains unavailable; then submit a valid form, refresh, edit/publish through §21, and remove it. Exercise quantity at 0, 1, and a large value.
 
 - [ ] Add/remove from the reference list
+- [ ] Add Frenzon: a `Duration` line reading `1d10 minutes` sits below the chips, the info icon beside the name shows only its description, and the "Rules" line opens a window with its Effect
+- [ ] Add De-Tox: its "Rules" window shows an Effect heading and a Side Effects heading in the same style, and the info icon beside the name says "No description recorded."
+- [ ] The trash button comes first among the Drug row's action buttons, with the quantity control after it
 - [ ] Custom drug creation: Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing: see §21, Custom Item Library
 - [ ] Custom drug form's "\* Required" hint stays visible once all fields are filled, not just while incomplete

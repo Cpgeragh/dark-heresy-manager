@@ -12,6 +12,39 @@ function item(over: Partial<ConsumableItem> = {}): ConsumableItem {
 }
 
 describe("ConsumableRow", () => {
+  it("puts the quantity control on the right with no Qty label, after the Remove button", () => {
+    render(
+      <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
+    );
+
+    expect(screen.queryByText("Qty")).not.toBeInTheDocument();
+    const remove = screen.getByRole("button", { name: "Remove Stimm" });
+    const increase = screen.getByRole("button", { name: "Increase quantity" });
+    expect(
+      remove.compareDocumentPosition(increase) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("always shows a Rules line, with the rules behind it when the item has them", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
+    );
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
+
+    rerender(
+      <ConsumableRow
+        item={item({ rules: "Heals 1d5 Wounds." })}
+        editable={true}
+        onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Show information about Stimm Rules" }));
+    expect(screen.getByText("Heals 1d5 Wounds.")).toBeInTheDocument();
+  });
+
   it("renders the item name", () => {
     render(
       <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
@@ -45,7 +78,8 @@ describe("ConsumableRow", () => {
     expect(screen.getByRole("button", { name: /information/i })).toBeInTheDocument();
   });
 
-  it("hides the info button when there is no description", () => {
+  it("keeps the info button when there is no description and says nothing was recorded", async () => {
+    const user = userEvent.setup();
     render(
       <ConsumableRow
         item={item({ description: "" })}
@@ -54,7 +88,8 @@ describe("ConsumableRow", () => {
         onRemove={vi.fn()}
       />
     );
-    expect(screen.queryByRole("button", { name: /information/i })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Show information about Stimm" }));
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
   });
 
   it("wires the quantity control", async () => {

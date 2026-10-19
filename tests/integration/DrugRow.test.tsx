@@ -16,6 +16,71 @@ function item(over: Partial<DrugItem> = {}): DrugItem {
 }
 
 describe("DrugRow", () => {
+  it("shows the duration as a labelled line on the card", () => {
+    render(
+      <DrugRow
+        item={item({ name: "Frenzon", referenceId: "cr-frenzon" })}
+        editable={true}
+        onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Duration")).toBeInTheDocument();
+    expect(screen.getByText("1d10 minutes")).toBeInTheDocument();
+  });
+
+  it("shows the notes as the description and keeps the duration out of the window", async () => {
+    const user = userEvent.setup();
+    render(
+      <DrugRow
+        item={item({ name: "Frenzon", referenceId: "cr-frenzon" })}
+        editable={true}
+        onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Show information about Frenzon" }));
+    const dialog = screen.getByRole("dialog", { name: "Frenzon" });
+    expect(dialog).toHaveTextContent("A generic name for a variety of combat drugs");
+    expect(dialog).not.toHaveTextContent("Duration");
+    expect(dialog).not.toHaveTextContent("Gains the Frenzy talent");
+  });
+
+  it("shows the effect and side effects behind the Rules line", async () => {
+    const user = userEvent.setup();
+    render(
+      <DrugRow
+        item={item({ name: "De-Tox", referenceId: "cr-de-tox" })}
+        editable={true}
+        onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Show information about De-Tox Rules" }));
+    const dialog = screen.getByRole("dialog", { name: "De-Tox Rules" });
+    expect(dialog).toHaveTextContent("Effect");
+    expect(dialog).toHaveTextContent("Side Effects");
+    expect(dialog).toHaveTextContent("Immediately ends the ongoing effects");
+  });
+
+  it("says no description was recorded for a drug without notes", async () => {
+    const user = userEvent.setup();
+    render(
+      <DrugRow
+        item={item({ name: "De-Tox", referenceId: "cr-de-tox" })}
+        editable={true}
+        onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Show information about De-Tox" }));
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
+  });
+
   it("renders the item name", () => {
     render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
     expect(screen.getByText("Obscura")).toBeInTheDocument();
@@ -46,7 +111,7 @@ describe("DrugRow", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: /information/i }));
+    await user.click(screen.getByRole("button", { name: "Show information about Obscura Rules" }));
     expect(screen.getByText(/dream-like state/)).toBeInTheDocument();
   });
 

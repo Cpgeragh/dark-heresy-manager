@@ -11,6 +11,7 @@ export interface ConsumableRef {
   name: string;
   source: SkillSource;
   description?: string;
+  rules?: string;
   weight?: string;
   /** Cost per dose, pack, or bottle, when supplied by the source. */
   value?: string;

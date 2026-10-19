@@ -359,6 +359,7 @@ export interface GearItem extends CustomLibraryLinkFields {
   referenceId?: string; // links back to GearRef.id
   name: string;
   description?: string;
+  rules?: string;
   weight?: string;
   value?: string;
   availability?: string;
@@ -427,6 +428,7 @@ export interface ConsumableItem extends CustomLibraryLinkFields {
   name: string;
   quantity: number;
   description?: string;
+  rules?: string;
   weight?: string;
   value?: string; // cost per dose/unit
   availability?: string;

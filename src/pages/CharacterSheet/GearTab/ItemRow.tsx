@@ -2,9 +2,10 @@
 
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
-import { uiChipRow, uiTextDescription } from "../../../ui/styles/editableStyles";
-import { colourAmberPlain } from "../../../ui/styles/colourTokens";
+import { uiChipRow } from "../../../ui/styles/editableStyles";
 import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
@@ -33,7 +34,8 @@ export function ItemRow({
   onRemove,
 }: Props) {
   recordComponentRender("GearItemRow");
-  const hasDesc = !!item.description?.trim();
+  const description = item.description?.trim();
+  const rules = item.rules?.trim();
 
   // Fall back to reference data for items saved before weight/value/availability were stored
   const ref = item.referenceId ? GEAR_REFERENCE.find((r) => r.id === item.referenceId) : undefined;
@@ -46,12 +48,10 @@ export function ItemRow({
       name={item.name}
       badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       info={
-        hasDesc ? (
-          <InfoModal
-            title={item.name}
-            content={<p className={uiTextDescription}>{item.description}</p>}
-          />
-        ) : undefined
+        <InfoModal
+          title={item.name}
+          content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+        />
       }
       metadata={
         <ItemMetaChips
@@ -63,13 +63,27 @@ export function ItemRow({
         />
       }
       afterMetadata={
-        item.grantedByTalentName ? (
-          <p className={`text-xs ${colourAmberPlain}`}>
-            {item.grantedByTalentName} ({item.grantedByType}): Granted
-          </p>
-        ) : undefined
+        <>
+          <EntryDetailLine
+            label="Rules"
+            info={
+              rules ? (
+                <InfoModal
+                  title={`${item.name} Rules`}
+                  content={<InfoParagraph>{rules}</InfoParagraph>}
+                />
+              ) : undefined
+            }
+          />
+          {item.grantedByTalentName && (
+            <EntryDetailLine
+              label="Gained from"
+              value={`${item.grantedByTalentName} (${item.grantedByType})`}
+            />
+          )}
+        </>
       }
-      actions={
+      removeAction={
         editable && !item.grantedByTalentEntryUid ? (
           <RemoveEntryButton kind="Item" name={item.name} onRemove={onRemove} />
         ) : undefined
