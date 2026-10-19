@@ -22,13 +22,16 @@ interface Props {
    * other chips.
    */
   bare?: boolean;
-  size?: "sm" | "md";
+}
+
+interface ItemMetaChipsBaseProps extends Props {
+  size: "sm" | "md";
 }
 
 /**
  * Renders normal item metadata chips. Returns null when all props are falsy.
  */
-export function ItemMetaChips({
+function ItemMetaChipsBase({
   weight,
   value,
   availability,
@@ -36,8 +39,8 @@ export function ItemMetaChips({
   purchaseAmount,
   className,
   bare,
-  size = "md",
-}: Props) {
+  size,
+}: ItemMetaChipsBaseProps) {
   if (!weight && !value && !purchaseAmount && !availability && !source) return null;
 
   const displayedWeight = weight ? formatWeightForDisplay(weight) : undefined;
@@ -77,4 +80,12 @@ export function ItemMetaChips({
 
   if (bare) return chips;
   return <div className={className ?? uiChipRow}>{chips}</div>;
+}
+
+export function ItemMetaChips(props: Props) {
+  return <ItemMetaChipsBase {...props} size="md" />;
+}
+
+export function NestedItemMetaChips(props: Props) {
+  return <ItemMetaChipsBase {...props} size="sm" />;
 }

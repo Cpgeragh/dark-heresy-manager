@@ -158,9 +158,10 @@ appear on the main page.
 - [ ] Every grouped child is evaluated independently for ownership and current career/rank availability: one Common Lore child becoming available, being purchased, or being deleted must not add, remove, or unlock its siblings
 - [ ] The grouped picker stays open after adding while another valid child remains; add a second Skill without closing and reopening it, then confirm selecting the final valid child automatically returns to the parent picker instead of leaving an empty `No matches` screen
 - [ ] Expand a picker card using its chevron: this previews its information without selecting it
-- [ ] On a phone, each owned Skill card keeps name/info/delete on its first row, metadata and Total on its second row, the Upgrade action at the far right of that second row, and generated source text below; desktop uses the same structure with Upgrade immediately left of Delete: neither layout clips, overlaps, or turns Upgrade into a metadata chip
+- [ ] Owned Skill and Talent cards use the same padded character-entry row on phone and desktop: the name and information control sit at the upper left, actions share a wrapping upper-right area, normal-size metadata chips sit below, and generated source text follows the metadata
+- [ ] Each owned Skill combines its governing Characteristic and calculated value in one normal-size chip, such as `Per 31`, followed by its Basic or Advanced and training-level chips; there is no separate Total box
 - [ ] Main-page Skill cards do not receive whole-card hover/pressed styling; only their actual controls respond, while selectable cards inside pickers retain the shared whole-card interaction feedback
-- [ ] A Skill card has one information control containing both its rules and any generated effect details: no second information button appears beside Total
+- [ ] A Skill card has one information control containing both its rules and any generated effect details
 - [ ] Every DM-only Skill Upgrade action uses the same red outline styling, including the manual-cost path; an owning player never sees the off-career manual-cost action
 - [ ] Open the trash action on a **+20** Skill: the confirmation offers amber-outline **Downgrade to +10**, red-outline **Delete Skill**, and Cancel/close; downgrading removes only the latest level while deleting removes every independent purchase
 - [ ] Repeat at **+10**: the downgrade target is **Trained**; at **Trained**, no downgrade action is offered and Delete returns the Skill to Untrained and to the appropriate picker
@@ -1278,6 +1279,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 
 - [ ] In the Gear, Consumables, Drugs, Cybernetics, Archeotech, Weapons, Armour and Force Field pickers, each row shows the name, then a row of chips, then any description line, with the same small gap above each part (`PickerRowParts.tsx`)
 - [ ] Passive chips using a named `Chip` colour use the shared size and shape from `Chip.tsx` with matching `500/50` border, `500/10` fill and `300` text; slate and XP use that palette, while source abbreviations use the matching source colour and the code font
+- [ ] Chips on primary cards, rows, pickers and top-level metadata use the normal size and wrap when space is tight; only chips inside ammunition, magazine, attachment and upgrade content use the small nested size (`Chip.tsx`, `StatChip.tsx`, `ItemMetaChips.tsx`)
 - [ ] XP costs in the Talent, Skill, Elite Advance and option pickers, prices on every item, Owned and Draft tags, the roll chip, the Archeotech label and the session +XP badge all show the same amber (`Chip.tsx`, `ItemMetaChips.tsx`, `RollChip.tsx`)
 - [ ] Weight and per-quantity chips show the lighter grey beside the coloured availability chip, and "Tech-Priest Only" shows red like "Adeptus Mechanicus Only" (`sourceStyles.ts`)
 - [ ] On weapons, Las is red on both the type chip and the ammo chip, Launcher is yellow on both, Exotic is fuchsia on class, type and ammo including grenades, and SP weapons and Solid Projectile ammo are both teal (`weaponHelpers.ts`)

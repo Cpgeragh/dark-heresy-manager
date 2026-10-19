@@ -2,15 +2,17 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { StatChip } from "../../src/ui/chips/StatChip";
+import { NestedStatChip, StatChip } from "../../src/ui/chips/StatChip";
 
 describe("StatChip", () => {
-  it.each([
-    { name: "small", props: { size: "sm" as const } },
-    { name: "compact", props: {} },
-    { name: "non-compact", props: { compactOnMobile: false } },
-  ])("displays numeric zero in the $name layout", ({ props }) => {
-    render(<StatChip label="Total" value={0} {...props} />);
+  it("displays numeric zero in the normal layout", () => {
+    render(<StatChip label="Total" value={0} />);
+
+    expect(screen.getByText("0")).toBeInTheDocument();
+  });
+
+  it("displays numeric zero in the nested layout", () => {
+    render(<NestedStatChip label="Total" value={0} />);
 
     expect(screen.getByText("0")).toBeInTheDocument();
   });

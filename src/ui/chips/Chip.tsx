@@ -17,7 +17,7 @@ type ButtonChipProps = ChipStyleOptions &
     children: ReactNode;
   };
 
-type ChipProps = SpanChipProps | ButtonChipProps;
+export type ChipProps = SpanChipProps | ButtonChipProps;
 
 export function Chip(props: ChipProps) {
   if (props.as === "button") {
@@ -58,4 +58,8 @@ export function Chip(props: ChipProps) {
       {children}
     </span>
   );
+}
+
+export function NestedChip(props: Omit<SpanChipProps, "size">) {
+  return <Chip {...props} size="sm" />;
 }

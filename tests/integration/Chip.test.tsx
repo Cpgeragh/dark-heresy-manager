@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { Chip } from "../../src/ui/chips/Chip";
+import { Chip, NestedChip } from "../../src/ui/chips/Chip";
 import { chipColours, type ChipColour } from "../../src/ui/styles/colourTokens";
 import { uiCorner } from "../../src/ui/styles/shapeStyles";
 
@@ -36,11 +36,11 @@ describe("Chip", () => {
     expect(screen.getByText("Label")).toHaveClass("text-sky-300", "font-code", "shrink-0");
   });
 
-  it("applies the size classes", () => {
+  it("uses the small size only for nested chips", () => {
     render(
-      <Chip size="sm" colour="slate">
+      <NestedChip colour="slate">
         Label
-      </Chip>
+      </NestedChip>
     );
 
     expect(screen.getByText("Label")).toHaveClass("h-5");

@@ -10,7 +10,7 @@ const STATUS_COLOUR: Record<CustomItemStatus, ChipColour> = {
 
 export function StatusBadge({ status }: { status: CustomItemStatus }) {
   return (
-    <Chip size="sm" colour={STATUS_COLOUR[status]} className="shrink-0 uppercase tracking-wide">
+    <Chip colour={STATUS_COLOUR[status]} className="shrink-0 uppercase tracking-wide">
       {status}
     </Chip>
   );

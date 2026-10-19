@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import * as ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -28,6 +29,22 @@ function hasClass(line: string, className: string) {
 }
 
 describe("shared layout recipes", () => {
+  it("keeps owned Skill and Talent entries on the shared character-entry row", () => {
+    const skillRow = readFileSync(
+      join(__dirname, "../../src/pages/CharacterSheet/SkillsTab/SkillRow.tsx"),
+      "utf8"
+    );
+    const talentEntries = readFileSync(
+      join(__dirname, "../../src/mechanics/talents/TalentEntryCards.tsx"),
+      "utf8"
+    );
+
+    expect(skillRow).toContain("<CharacterEntryRow");
+    expect(talentEntries).toContain("<CharacterEntryRow");
+    expect(skillRow).not.toContain('"px-3 lg:px-4 py-2.5 lg:py-3"');
+    expect(talentEntries).not.toContain('uiSection + " flex items-start justify-between');
+  });
+
   it("defines the standard row and field layouts", () => {
     expect(uiChipRow).toBe("flex flex-wrap gap-1.5");
     expect(uiInlineRow).toBe("flex items-center gap-2");
@@ -66,6 +83,63 @@ describe("shared layout recipes", () => {
     expect(uiStackSection).toBe("space-y-3");
     expect(uiStackList).toBe("space-y-2");
     expect(uiStackField).toBe("space-y-1");
+  });
+
+  it("keeps small chips inside nested item content", () => {
+    const directSmallChipOffenders: string[] = [];
+    const nestedChipOffenders: string[] = [];
+    const chipComponents = new Set(["Chip", "ItemMetaChips", "StatChip", "DamageTypeChip"]);
+    const nestedChipComponents = new Set(["NestedChip", "NestedItemMetaChips", "NestedStatChip"]);
+    const nestedChipFiles = [
+      "src/pages/CharacterSheet/ArmourTab/ArmourUpgradePicker.tsx",
+      "src/pages/CharacterSheet/weapons/AmmoEntryRow.tsx",
+      "src/pages/CharacterSheet/weapons/MeleeCard.tsx",
+      "src/pages/CharacterSheet/weapons/RangedCard.tsx",
+      "src/pages/CharacterSheet/weapons/weaponShared.tsx",
+    ];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (!file.endsWith(".tsx")) continue;
+      const normalisedFile = file.replaceAll("\\", "/");
+      const source = ts.createSourceFile(
+        file,
+        readFileSync(file, "utf8"),
+        ts.ScriptTarget.Latest,
+        true,
+        ts.ScriptKind.TSX
+      );
+
+      function inspect(node: ts.Node) {
+        if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+          const tagName = node.tagName.getText(source);
+          const line = source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1;
+          if (chipComponents.has(tagName) && !normalisedFile.endsWith("src/ui/chips/Chip.tsx")) {
+            const hasSmallSize = node.attributes.properties.some(
+              (attribute) =>
+                ts.isJsxAttribute(attribute) &&
+                ts.isIdentifier(attribute.name) &&
+                attribute.name.text === "size" &&
+                attribute.initializer !== undefined &&
+                ts.isStringLiteral(attribute.initializer) &&
+                attribute.initializer.text === "sm"
+            );
+            if (hasSmallSize) directSmallChipOffenders.push(`${file}:${line} ${tagName}`);
+          }
+          if (
+            nestedChipComponents.has(tagName) &&
+            !nestedChipFiles.some((allowedFile) => normalisedFile.endsWith(allowedFile))
+          ) {
+            nestedChipOffenders.push(`${file}:${line} ${tagName}`);
+          }
+        }
+        ts.forEachChild(node, inspect);
+      }
+
+      inspect(source);
+    }
+
+    expect(directSmallChipOffenders).toEqual([]);
+    expect(nestedChipOffenders).toEqual([]);
   });
 
   it("leaves no hand-typed stack gap in the source", () => {

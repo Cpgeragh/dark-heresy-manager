@@ -65,7 +65,7 @@ export function OptionPickerScreen({
                     <Chip colour="amber">Owned</Chip>
                   ) : null}
                   {rankChips?.map((rank) => (
-                    <Chip key={rank} size="sm" colour="fuchsia" className="font-code">
+                    <Chip key={rank} colour="fuchsia" className="font-code">
                       {rank}
                     </Chip>
                   ))}
