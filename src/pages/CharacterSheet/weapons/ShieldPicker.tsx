@@ -81,9 +81,7 @@ export function ShieldPicker({
                   <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
                   <PickerRowChips>
                     <StatChip label="AP" value={String(data.ap)} />
-                    {data.locations && (
-                      <StatChip label="Location" value={data.locations} />
-                    )}
+                    {data.locations && <StatChip label="Location" value={data.locations} />}
                     {data.damage && <StatChip label="Dmg" value={data.damage} />}
                     {data.damage && <DamageTypeChip damage={data.damage} />}
                     {data.pen && <StatChip label="Pen" value={data.pen} />}

@@ -16,7 +16,6 @@ import {
 } from "../../../data/reference/ammoReference";
 import {
   uiChipRow,
-  uiInlineRow,
   uiSplitRow,
   uiNoticeBox,
   uiSectionShell,
@@ -24,7 +23,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
   uiRuleName,
   uiTextDescription,
   uiStackSection,
@@ -34,7 +33,7 @@ import {
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../../ui/buttons/ExpandButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import {
   colourNoticePink,
   colourToggleSelected,
@@ -49,7 +48,8 @@ import { Chip, NestedChip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { StatChip } from "../../../ui/chips/StatChip";
 import {
@@ -314,9 +314,7 @@ export function MeleeCard({
       className={`${weapon.concealedBionic ? `${uiNoticeBox} ${colourNoticePink}` : uiSectionShell} overflow-hidden`}
     >
       {/* Header: always visible */}
-      <div
-        className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-      >
+      <div className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         {!forceExpanded && (
           <CardOverlayButton
             label={
@@ -328,76 +326,70 @@ export function MeleeCard({
             onClick={onSelect ?? (() => setExpanded((e) => !e))}
           />
         )}
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className={`${uiChipRow} items-center`}>
-            <p className={uiCardTitleHover}>{weapon.name}</p>
-            {rulesDescription && (
-              <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                <InfoModal
-                  title={weapon.name}
-                  content={<p className={uiTextDescription}>{rulesDescription}</p>}
-                />
-              </span>
-            )}
-            {libraryItem && <StatusBadge status={libraryItem.status} />}
-            {integrated && (
-              <Chip colour="violet">
-                Integrated
-              </Chip>
-            )}
-          </div>
-          {(classChips.length > 0 || activeWeaponType || weapon.concealedBionic) && (
-            <div className={`mt-0.5 ${uiChipRow} items-center`}>
-              {weapon.concealedBionic && (
-                <Chip colour="pink">
-                  Concealed Bionic
-                </Chip>
-              )}
-              {weapon.concealedBionic && (
-                <Chip colour="pink">
-                  Cybernetic
-                </Chip>
-              )}
-              {classChips.map((chip) => (
-                <Chip key={chip.label} colour={chip.colour}>
-                  {chip.label}
-                </Chip>
-              ))}
-              {activeWeaponType && (
-                <Chip colour={activeWeaponType.colour}>
-                  {activeWeaponType.label}
-                </Chip>
-              )}
-            </div>
-          )}
-        </div>
-        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-          {onToggleEquip && (
-            <EquipToggle
-              equipped={isEquipped}
-              disabled={slotsDisabled}
-              editable={editable}
-              onChange={onToggleEquip}
-            />
-          )}
-          {!forceExpanded &&
-            (onSelect ? (
-              <ExpandButton
-                expanded={expanded}
-                label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-                onClick={() => setExpanded((e) => !e)}
+        <CharacterEntryRowContent
+          interactive
+          name={weapon.name}
+          nameClassName={uiOverlayCardTitleHover}
+          info={
+            rulesDescription ? (
+              <InfoModal
+                title={weapon.name}
+                content={<p className={uiTextDescription}>{rulesDescription}</p>}
               />
-            ) : (
-              <ExpandChevron expanded={expanded} />
-            ))}
-        </div>
+            ) : undefined
+          }
+          badge={
+            <>
+              {libraryItem && <StatusBadge status={libraryItem.status} />}
+              {integrated && <Chip colour="violet">Integrated</Chip>}
+            </>
+          }
+          metadata={
+            classChips.length > 0 || activeWeaponType || weapon.concealedBionic ? (
+              <div className={`mt-0.5 ${uiChipRow} items-center`}>
+                {weapon.concealedBionic && <Chip colour="pink">Concealed Bionic</Chip>}
+                {weapon.concealedBionic && <Chip colour="pink">Cybernetic</Chip>}
+                {classChips.map((chip) => (
+                  <Chip key={chip.label} colour={chip.colour}>
+                    {chip.label}
+                  </Chip>
+                ))}
+                {activeWeaponType && (
+                  <Chip colour={activeWeaponType.colour}>{activeWeaponType.label}</Chip>
+                )}
+              </div>
+            ) : undefined
+          }
+          actions={
+            <>
+              {onToggleEquip && (
+                <EquipToggle
+                  equipped={isEquipped}
+                  disabled={slotsDisabled}
+                  editable={editable}
+                  onChange={onToggleEquip}
+                />
+              )}
+              {!forceExpanded &&
+                (onSelect ? (
+                  <ExpandButton
+                    expanded={expanded}
+                    label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+                    onClick={() => setExpanded((e) => !e)}
+                  />
+                ) : (
+                  <ExpandChevron expanded={expanded} />
+                ))}
+            </>
+          }
+        />
       </div>
 
       {(expanded || forceExpanded) && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && !integrated && (
             <div className="flex justify-end">
-              <RemoveButton onClick={onRemove} label="Remove" />
+              <RemoveEntryButton kind="Melee Weapon" name={weapon.name} onRemove={onRemove} />
             </div>
           )}
 
@@ -566,9 +558,7 @@ export function MeleeCard({
                 )}
               </div>
               {pistolAmmoFamily && (
-                <NestedChip colour={pistolAmmoFamily.colour}>
-                  {pistolAmmoFamily.label}
-                </NestedChip>
+                <NestedChip colour={pistolAmmoFamily.colour}>{pistolAmmoFamily.label}</NestedChip>
               )}
               {pistolAmmoEntries.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>

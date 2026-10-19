@@ -1,6 +1,7 @@
 // tests/integration/ArcheotechWeaponCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { ArcheotechWeaponCard } from "../../src/pages/CharacterSheet/weapons/ArcheotechWeaponCard";
@@ -34,5 +35,21 @@ describe("ArcheotechWeaponCard weapon-class chip", () => {
     renderCard({ id: "a3", name: "Custom Trinket" });
     expect(screen.queryByText("Melee")).not.toBeInTheDocument();
     expect(screen.queryByText("Basic")).not.toBeInTheDocument();
+  });
+});
+
+describe("ArcheotechWeaponCard remove", () => {
+  it("calls onRemove only after removal is confirmed", async () => {
+    const user = userEvent.setup();
+    const { onRemove } = renderCard({
+      id: "a2",
+      name: "Reclamator Rifle",
+      referenceId: "lw-reclamator-rifle",
+    });
+
+    await user.click(screen.getByRole("button", { name: "Remove Reclamator Rifle" }));
+    expect(onRemove).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onRemove).toHaveBeenCalledOnce();
   });
 });

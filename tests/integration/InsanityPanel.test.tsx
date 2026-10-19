@@ -129,7 +129,7 @@ describe("InsanityPanel editable=false", () => {
 
     expect(screen.queryByRole("button", { name: "Add Disorder" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add Trauma" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Remove / })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute(
       "aria-disabled",
       "true"
@@ -302,8 +302,8 @@ describe("InsanityPanel disorder severity escalation", () => {
   });
 });
 
-describe("InsanityPanel delete confirmation", () => {
-  it("arms a confirm step on a disorder's Remove instead of deleting immediately", async () => {
+describe("InsanityPanel removal confirmation", () => {
+  it("arms a confirm step on a disorder instead of removing immediately", async () => {
     const user = userEvent.setup();
     render(
       <InsanityWiring
@@ -322,17 +322,17 @@ describe("InsanityPanel delete confirmation", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Fear of the Dead" })[0]);
 
-    expect(screen.getByRole("dialog", { name: "Delete Disorder" })).toBeInTheDocument();
-    expect(screen.getByText("Delete Fear of the Dead from this character?")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Remove Disorder" })).toBeInTheDocument();
+    expect(screen.getByText("Remove Fear of the Dead from this character?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(screen.queryByText("Fear of the Dead", { selector: "span" })).not.toBeInTheDocument();
   });
 
-  it("cancels a disorder deletion without removing it", async () => {
+  it("cancels a disorder removal without changing it", async () => {
     const user = userEvent.setup();
     render(
       <InsanityWiring
@@ -351,14 +351,16 @@ describe("InsanityPanel delete confirmation", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Fear of the Dead" })[0]);
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(screen.queryByRole("dialog", { name: "Delete Disorder" })).not.toBeInTheDocument();
-    expect(screen.getAllByText("Fear of the Dead", { selector: "span" }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("dialog", { name: "Remove Disorder" })).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: "Remove Fear of the Dead" }).length
+    ).toBeGreaterThan(0);
   });
 
-  it("arms a confirm step on a trauma's Remove and deletes only after confirming", async () => {
+  it("arms a confirm step on a trauma and removes only after confirming", async () => {
     const user = userEvent.setup();
     render(
       <InsanityWiring
@@ -372,12 +374,12 @@ describe("InsanityPanel delete confirmation", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Withdrawn and Quiet" })[0]);
 
-    expect(screen.getByRole("dialog", { name: "Delete Trauma" })).toBeInTheDocument();
-    expect(screen.getByText("Delete Withdrawn and Quiet from this character?")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Remove Trauma" })).toBeInTheDocument();
+    expect(screen.getByText("Remove Withdrawn and Quiet from this character?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(screen.queryByText("Withdrawn and Quiet", { selector: "span" })).not.toBeInTheDocument();
   });
@@ -402,8 +404,8 @@ describe("InsanityPanel optimistic saves", () => {
     const user = userEvent.setup();
     const onUpdate = renderPanel({ points: 20, disorders: [disorder] });
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Fear of the Dead" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ disorders: [] }), {
       optimistic: true,
@@ -433,8 +435,8 @@ describe("InsanityPanel optimistic saves", () => {
       ],
     });
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Withdrawn and Quiet" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ currentTrauma: [] }), {
       optimistic: true,

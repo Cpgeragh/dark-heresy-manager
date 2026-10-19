@@ -5,19 +5,19 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
 import {
   uiChipRow,
-  uiInlineRow,
   uiNoticeBox,
   uiSectionShell,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { EquipToggle } from "./weaponShared";
 import { locationLabel } from "../../../utils/armourLocations";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 
 interface Props {
@@ -52,51 +52,51 @@ export function ArcheotechShieldRow({
 
   return (
     <div className={containerClass}>
-      <div className={`${uiCardTapHeader} relative w-full flex items-stretch gap-2 p-3 lg:p-4`}>
+      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         <CardOverlayButton
           label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
           expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className={`${uiInlineRow} flex-wrap`}>
-            <span className={uiCardTitleHover}>{item.name}</span>
-          </div>
-          <div className={`mt-0.5 ${uiChipRow} items-center`}>
-            {highlightAsArcheotech && (
-              <Chip colour="amber" className="shrink-0">
-                Archeotech
-              </Chip>
-            )}
-            <Chip colour="lime">
-              Shield
-            </Chip>
-          </div>
-        </div>
-        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-          {onToggleEquip && (
-            <EquipToggle
-              equipped={isEquipped}
-              disabled={slotsDisabled}
-              editable={editable}
-              onChange={onToggleEquip}
-            />
-          )}
-          <ExpandChevron expanded={expanded} />
-        </div>
+        <CharacterEntryRowContent
+          interactive
+          name={item.name}
+          nameClassName={uiOverlayCardTitleHover}
+          metadata={
+            <div className={`mt-0.5 ${uiChipRow} items-center`}>
+              {highlightAsArcheotech && (
+                <Chip colour="amber" className="shrink-0">
+                  Archeotech
+                </Chip>
+              )}
+              <Chip colour="lime">Shield</Chip>
+            </div>
+          }
+          actions={
+            <>
+              {onToggleEquip && (
+                <EquipToggle
+                  equipped={isEquipped}
+                  disabled={slotsDisabled}
+                  editable={editable}
+                  onChange={onToggleEquip}
+                />
+              )}
+              <ExpandChevron expanded={expanded} />
+            </>
+          }
+        />
       </div>
 
       {expanded && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4">
           {editable && (
             <div className="flex justify-end mt-2">
-              <RemoveButton onClick={onRemove} label="Remove" />
+              <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
             </div>
           )}
           <div className={`mt-1 ${uiChipRow}`}>
-            {locations.length > 0 && (
-              <StatChip label="Location" value={locationLabel(locations)} />
-            )}
+            {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
             {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
           </div>
           <ItemMetaChips

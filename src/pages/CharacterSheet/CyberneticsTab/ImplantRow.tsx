@@ -5,15 +5,14 @@ import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsRefere
 import { Chip } from "../../../ui/chips/Chip";
 import {
   uiChipRow,
-  uiSection,
   uiTextLabel,
-  uiItemName,
   uiInfoModalWrapper,
   uiTextDescription,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { colourAmberPlain } from "../../../ui/styles/colourTokens";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
@@ -72,37 +71,34 @@ export function ImplantRow({
   const isConcealedWeaponBionic = ref?.id === "ih-concealed-weapon-bionic";
 
   return (
-    <div className={[uiSection, "flex items-start gap-3"].join(" ")}>
-      {/* Name + craftsmanship description */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <p className={`${uiItemName} truncate`}>{item.name}</p>
-          {libraryItem && <StatusBadge status={libraryItem.status} />}
-          {!isConcealedWeaponBionic && (ref?.notes || item.notes) && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={item.name}
-                content={
-                  <div className={uiStackBody}>
-                    {ref?.notes && (
-                      <div>
-                        <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
-                        <p className={uiTextDescription}>{ref.notes}</p>
-                      </div>
-                    )}
-                    {item.notes && (
-                      <div>
-                        <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                        <p className={uiTextDescription}>{item.notes}</p>
-                      </div>
-                    )}
+    <CharacterEntryRow
+      name={item.name}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      info={
+        !isConcealedWeaponBionic && (ref?.notes || item.notes) ? (
+          <InfoModal
+            title={item.name}
+            content={
+              <div className={uiStackBody}>
+                {ref?.notes && (
+                  <div>
+                    <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
+                    <p className={uiTextDescription}>{ref.notes}</p>
                   </div>
-                }
-              />
-            </span>
-          )}
-        </div>
-        <div className={`${uiChipRow} mt-1`}>
+                )}
+                {item.notes && (
+                  <div>
+                    <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+                    <p className={uiTextDescription}>{item.notes}</p>
+                  </div>
+                )}
+              </div>
+            }
+          />
+        ) : undefined
+      }
+      metadata={
+        <div className={uiChipRow}>
           {item.bodyLocation && item.bodyLocation.length > 0 && (
             <Chip colour="slate">
               {item.bodyLocation.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
@@ -118,64 +114,71 @@ export function ImplantRow({
             source={item.source ?? ref?.source}
           />
         </div>
-        {item.grantedByTalentName && (
-          <p className={`mt-1 text-xs ${colourAmberPlain}`}>
-            {item.grantedByTalentName} ({item.grantedByType}): Granted
-          </p>
-        )}
-        {linkedArmName && linkedWeaponName && (
-          <div className={`mt-1 ${uiChipRow} items-center`}>
-            <span className={uiTextLabel}>Linked</span>
-            <Chip colour="pink">{linkedArmName}</Chip>
-            <Chip colour="pink">{linkedWeaponName}</Chip>
-          </div>
-        )}
-        {item.craftsmanship && (
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className={uiTextLabel}>Quality</span>
-            <Chip
-              as="button"
-              type="button"
-              onClick={() => canChangeQuality && onCycleQuality(item.id)}
-              title={
-                canChangeQuality
-                  ? `Click to change quality (currently ${displayedCraftsmanship})`
-                  : displayedCraftsmanship
-              }
-              disabled={!canChangeQuality}
-              colour={CRAFTSMANSHIP_COLOUR[displayedCraftsmanship]}
-              className="shrink-0"
-            >
-              {displayedCraftsmanship}
-            </Chip>
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${displayedCraftsmanship} ${item.name}`}
-                content={
-                  <p className={`whitespace-pre-line ${uiTextDescription}`}>{qualityDescription}</p>
+      }
+      afterMetadata={
+        <>
+          {item.grantedByTalentName && (
+            <p className={`text-xs ${colourAmberPlain}`}>
+              {item.grantedByTalentName} ({item.grantedByType}): Granted
+            </p>
+          )}
+          {linkedArmName && linkedWeaponName && (
+            <div className={`${uiChipRow} items-center`}>
+              <span className={uiTextLabel}>Linked</span>
+              <Chip colour="pink">{linkedArmName}</Chip>
+              <Chip colour="pink">{linkedWeaponName}</Chip>
+            </div>
+          )}
+          {item.craftsmanship && (
+            <div className="flex items-center gap-1.5">
+              <span className={uiTextLabel}>Quality</span>
+              <Chip
+                as="button"
+                type="button"
+                onClick={() => canChangeQuality && onCycleQuality(item.id)}
+                title={
+                  canChangeQuality
+                    ? `Click to change quality (currently ${displayedCraftsmanship})`
+                    : displayedCraftsmanship
                 }
-              />
-            </span>
-          </div>
-        )}
-        {libraryItem && (
-          <CustomItemActionButtons
-            libraryItem={libraryItem}
-            isDM={isDM}
-            canEditDefinition={canEditDefinition}
-            busyAction={busyAction}
-            onEditDefinition={onEditDefinition}
-            onPublish={onPublish}
-            onArchive={onArchive}
-            onUpdateAllCopies={onUpdateAllCopies}
-          />
-        )}
-      </div>
-
-      {/* Remove */}
-      {editable && !item.grantedByTalentEntryUid && (
-        <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />
+                disabled={!canChangeQuality}
+                colour={CRAFTSMANSHIP_COLOUR[displayedCraftsmanship]}
+                className="shrink-0"
+              >
+                {displayedCraftsmanship}
+              </Chip>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal
+                  title={`${displayedCraftsmanship} ${item.name}`}
+                  content={
+                    <p className={`whitespace-pre-line ${uiTextDescription}`}>
+                      {qualityDescription}
+                    </p>
+                  }
+                />
+              </span>
+            </div>
+          )}
+        </>
+      }
+      actions={
+        editable && !item.grantedByTalentEntryUid ? (
+          <RemoveEntryButton kind="Implant" name={item.name} onRemove={() => onRemove(item.id)} />
+        ) : undefined
+      }
+    >
+      {libraryItem && (
+        <CustomItemActionButtons
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
       )}
-    </div>
+    </CharacterEntryRow>
   );
 }

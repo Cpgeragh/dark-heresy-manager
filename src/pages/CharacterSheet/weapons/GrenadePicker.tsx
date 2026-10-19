@@ -98,11 +98,7 @@ export function GrenadePicker({
                     </Chip>
                     {(() => {
                       const c = weaponClassChip(data.class);
-                      return c ? (
-                        <Chip colour={c.colour}>
-                          {c.label}
-                        </Chip>
-                      ) : null;
+                      return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
                     })()}
                   </PickerRowChips>
                   <PickerRowChips>
@@ -170,11 +166,7 @@ export function GrenadePicker({
                   </Chip>
                   {(() => {
                     const c = weaponClassChip(ref.class);
-                    return c ? (
-                      <Chip colour={c.colour}>
-                        {c.label}
-                      </Chip>
-                    ) : null;
+                    return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
                   })()}
                 </PickerRowChips>
                 <PickerRowChips>

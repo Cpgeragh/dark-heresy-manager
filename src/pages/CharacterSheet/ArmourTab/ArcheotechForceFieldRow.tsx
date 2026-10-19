@@ -2,20 +2,10 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
-import {
-  uiChipRow,
-  uiInlineRow,
-  uiNoticeBox,
-  uiSection,
-  uiCardTitle,
-  uiTextLabel,
-  uiTextPlaceholder,
-  uiInfoModalWrapper,
-  uiInactiveItem,
-} from "../../../ui/styles/editableStyles";
+import { uiChipRow } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -37,55 +27,50 @@ export function ArcheotechForceFieldRow({
 }: Props) {
   const active = item.equipped ?? false;
 
-  const containerClass = highlightAsArcheotech
-    ? `${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4`
-    : uiSection;
-
   return (
-    <div
-      className={[containerClass, "flex items-start gap-3", !active ? uiInactiveItem : ""].join(
-        " "
-      )}
-    >
-      <div className="flex-1 min-w-0">
-        <div className={`${uiInlineRow} flex-wrap`}>
-          <span className={uiCardTitle}>{item.name}</span>
-          {highlightAsArcheotech && (
-            <Chip colour="amber" className="shrink-0">
-              Archeotech
-            </Chip>
+    <CharacterEntryRow
+      name={item.name}
+      badge={
+        highlightAsArcheotech ? (
+          <Chip colour="amber" className="shrink-0">
+            Archeotech
+          </Chip>
+        ) : undefined
+      }
+      tone={highlightAsArcheotech ? "archeotech" : "default"}
+      inactive={!active}
+      info={
+        item.description ? (
+          <InfoModal title={`${item.name} Rules`} content={item.description} />
+        ) : undefined
+      }
+      metadata={
+        <>
+          {item.protectionRating !== undefined && (
+            <div className={uiChipRow}>
+              <StatChip label="PR" value={String(item.protectionRating)} />
+            </div>
           )}
-        </div>
-        {item.protectionRating !== undefined && (
-          <div className="mt-1">
-            <StatChip label="PR" value={String(item.protectionRating)} />
-          </div>
-        )}
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Rules</span>
-          {item.description ? (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal title={`${item.name} Rules`} content={item.description} />
-            </span>
-          ) : (
-            <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-          )}
-        </div>
-        <ItemMetaChips
-          weight={item.weight}
-          value={item.value}
-          availability={item.availability}
-          className={`${uiChipRow} mt-1`}
-        />
-      </div>
-
-      {editable && onToggleEquip && (
-        <Button variant="neutral" size="sm" onClick={onToggleEquip}>
-          {active ? "Deactivate" : "Activate"}
-        </Button>
-      )}
-
-      {editable && <RemoveButton onClick={onRemove} label="Remove" />}
-    </div>
+          <ItemMetaChips
+            weight={item.weight}
+            value={item.value}
+            availability={item.availability}
+            className={uiChipRow}
+          />
+        </>
+      }
+      actions={
+        editable ? (
+          <>
+            {onToggleEquip && (
+              <Button variant="neutral" size="sm" onClick={onToggleEquip}>
+                {active ? "Deactivate" : "Activate"}
+              </Button>
+            )}
+            <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
+          </>
+        ) : undefined
+      }
+    />
   );
 }

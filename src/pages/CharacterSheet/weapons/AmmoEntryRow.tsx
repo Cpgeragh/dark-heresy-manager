@@ -111,11 +111,7 @@ export function AmmoEntryRow({
 
       {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
         <div className={`${uiChipRow} items-center text-[10px] lg:text-xs`}>
-          {visibleClipSizeLabel && (
-            <NestedChip colour="slate">
-              {visibleClipSizeLabel}
-            </NestedChip>
-          )}
+          {visibleClipSizeLabel && <NestedChip colour="slate">{visibleClipSizeLabel}</NestedChip>}
           {ammoRef && (
             <NestedItemMetaChips
               value={ammoRef.cost}

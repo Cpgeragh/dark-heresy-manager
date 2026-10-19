@@ -57,7 +57,22 @@ describe("MeleeCard upgrades", () => {
     const monoLabel = screen.getAllByText("Mono")[0];
     const removeBtn = monoLabel.parentElement!.querySelector("button")!;
     await user.click(removeBtn);
+    expect(onRemoveUpgrade).not.toHaveBeenCalled();
+    expect(screen.getByText("Remove Mono from this weapon?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemoveUpgrade).toHaveBeenCalledWith("cr-mono");
+  });
+});
+
+describe("MeleeCard remove", () => {
+  it("calls onRemove only after removal is confirmed", async () => {
+    const user = userEvent.setup();
+    const { onRemove } = renderCard();
+
+    await user.click(screen.getByRole("button", { name: "Remove Custom Chainsword" }));
+    expect(onRemove).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onRemove).toHaveBeenCalledOnce();
   });
 });
 

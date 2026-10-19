@@ -61,7 +61,9 @@ describe("CharacterKebabContent Recovery Code section", () => {
     fireEvent.click(screen.getByRole("button", { name: "Share" }));
     const dialog = screen.getByRole("dialog", { name: "Share Character" });
     expect(within(dialog).getByRole("img")).toBeInTheDocument();
-    expect(screen.queryByText(`${window.location.origin}?code=DH-TEST-0001`)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(`${window.location.origin}?code=DH-TEST-0001`)
+    ).not.toBeInTheDocument();
   });
 
   it("shows no Share button when there's no code", () => {

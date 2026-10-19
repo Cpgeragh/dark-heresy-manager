@@ -1,19 +1,17 @@
 import type { WornArmourPiece } from "../../../types/Character";
 import {
   uiChipRow,
-  uiSection,
   uiTextLabel,
   uiTextBody,
   uiTextPlaceholder,
-  uiItemName,
   uiInfoModalWrapper,
-  uiInactiveItem,
   uiRuleName,
   uiTextDescription,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -72,94 +70,102 @@ export function ForceFieldRow({
   const craftsmanship = piece.craftsmanship ?? "Common";
 
   return (
-    <div className={[uiSection, "flex items-start gap-3", !active ? uiInactiveItem : ""].join(" ")}>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className={`${uiItemName} truncate`}>{piece.name}</span>
-          {libraryItem && <StatusBadge status={libraryItem.status} />}
-        </div>
-
-        <div className={`mt-1 ${uiChipRow}`}>
+    <CharacterEntryRow
+      name={piece.name}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      inactive={!active}
+      metadata={
+        <>
           {piece.protectionRating !== undefined && (
-            <StatChip label="PR" value={String(piece.protectionRating)} />
+            <div className={uiChipRow}>
+              <StatChip label="PR" value={String(piece.protectionRating)} />
+            </div>
           )}
-        </div>
-
-        <ItemMetaChips
-          weight={piece.weight}
-          value={piece.value}
-          availability={piece.availability}
-          source={piece.source}
-          className={`${uiChipRow} mt-1`}
-        />
-
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {qualities.length > 0 ? qualities.join(", ") : "-"}
-          </span>
-          {qualities.length > 0 && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${piece.name} Qualities`}
-                content={<ForceFieldQualitiesContent qualities={qualities} />}
-              />
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Rules</span>
-          {notes ? (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal title={`${piece.name} Rules`} content={notes} />
-            </span>
-          ) : (
-            <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Craftsmanship</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
-          <InfoModal
-            title={`${craftsmanship} Force Field`}
-            content={forceFieldCraftsmanshipDescription(craftsmanship)}
+          <ItemMetaChips
+            weight={piece.weight}
+            value={piece.value}
+            availability={piece.availability}
+            source={piece.source}
+            className={uiChipRow}
           />
-        </div>
+        </>
+      }
+      afterMetadata={
+        <>
+          <div className="flex items-center gap-1.5">
+            <span className={uiTextLabel}>Qualities</span>
+            <span className={`text-xs lg:text-sm ${uiTextBody}`}>
+              {qualities.length > 0 ? qualities.join(", ") : "-"}
+            </span>
+            {qualities.length > 0 && (
+              <span className={uiInfoModalWrapper}>
+                <InfoModal
+                  title={`${piece.name} Qualities`}
+                  content={<ForceFieldQualitiesContent qualities={qualities} />}
+                />
+              </span>
+            )}
+          </div>
 
-        {ref?.spareCellValue && (
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className={uiTextLabel}>Spare Cells</span>
-            <Stepper
-              value={piece.spareCells ?? 0}
-              editable={editable}
-              onChange={(value) => onUpdateSpareCells(piece.id, value)}
+          <div className="flex items-center gap-1.5">
+            <span className={uiTextLabel}>Rules</span>
+            {notes ? (
+              <span className={uiInfoModalWrapper}>
+                <InfoModal title={`${piece.name} Rules`} content={notes} />
+              </span>
+            ) : (
+              <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className={uiTextLabel}>Craftsmanship</span>
+            <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
+            <InfoModal
+              title={`${craftsmanship} Force Field`}
+              content={forceFieldCraftsmanshipDescription(craftsmanship)}
             />
           </div>
-        )}
 
-        {libraryItem && (
-          <CustomItemActionButtons
-            libraryItem={libraryItem}
-            isDM={isDM}
-            canEditDefinition={canEditDefinition}
-            busyAction={busyAction}
-            onEditDefinition={onEditDefinition}
-            onPublish={onPublish}
-            onArchive={onArchive}
-            onUpdateAllCopies={onUpdateAllCopies}
-          />
-        )}
-      </div>
-
-      {editable && (
-        <Button variant="neutral" size="sm" onClick={() => onToggle(piece.id)}>
-          {active ? "Deactivate" : "Activate"}
-        </Button>
+          {ref?.spareCellValue && (
+            <div className="flex items-center gap-1.5">
+              <span className={uiTextLabel}>Spare Cells</span>
+              <Stepper
+                value={piece.spareCells ?? 0}
+                editable={editable}
+                onChange={(value) => onUpdateSpareCells(piece.id, value)}
+              />
+            </div>
+          )}
+        </>
+      }
+      actions={
+        editable ? (
+          <>
+            <Button variant="neutral" size="sm" onClick={() => onToggle(piece.id)}>
+              {active ? "Deactivate" : "Activate"}
+            </Button>
+            <RemoveEntryButton
+              kind="Force Field"
+              name={piece.name}
+              onRemove={() => onRemove(piece.id)}
+            />
+          </>
+        ) : undefined
+      }
+    >
+      {libraryItem && (
+        <CustomItemActionButtons
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
       )}
-
-      {editable && <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />}
-    </div>
+    </CharacterEntryRow>
   );
 }

@@ -44,8 +44,7 @@ describe("Elite Advance access", () => {
             takenAtTier: 5,
           },
         ],
-      })
-      .map((entry) => entry.id)
+      }).map((entry) => entry.id)
     ).toEqual(["nascent-psyker", "cult-of-the-red-redemption"]);
   });
 

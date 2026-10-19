@@ -168,14 +168,8 @@ export function ArmourPicker({
                 <StatChip label="Location" value={locationLabel(data.locations)} />
               </PickerRowChips>
               <PickerRowChips>
-                {item.status === "draft" && (
-                  <Chip colour="amber">
-                    Draft
-                  </Chip>
-                )}
-                <Chip colour="fuchsia">
-                  Custom
-                </Chip>
+                {item.status === "draft" && <Chip colour="amber">Draft</Chip>}
+                <Chip colour="fuchsia">Custom</Chip>
                 <ItemMetaChips
                   weight={data.weight}
                   value={data.value}

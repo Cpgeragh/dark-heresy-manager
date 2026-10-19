@@ -9,7 +9,7 @@ class ResizeObserverStub {
   unobserve() {}
   disconnect() {}
 }
-global.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
+globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 
 // The handful of suites that declare `@vitest-environment node` (e.g. to spawn
 // a real child process and check build output) have no window/DOM at all;

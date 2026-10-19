@@ -73,9 +73,11 @@ describe("ShieldCard equip toggle", () => {
 });
 
 describe("ShieldCard remove", () => {
-  it("calls onRemove when Remove is clicked", async () => {
+  it("calls onRemove only after removal is confirmed", async () => {
     const user = userEvent.setup();
     const { onRemove } = renderCard();
+    await user.click(screen.getByRole("button", { name: "Remove Custom Buckler" }));
+    expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalled();
   });

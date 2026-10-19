@@ -153,9 +153,7 @@ describe("protectedCallable", () => {
   });
 
   it("releases an idempotency claim if the rate limit rejects the call it raced against", async () => {
-    vi.mocked(enforceRateLimit).mockRejectedValueOnce(
-      new HttpsError("resource-exhausted", "Wait")
-    );
+    vi.mocked(enforceRateLimit).mockRejectedValueOnce(new HttpsError("resource-exhausted", "Wait"));
     const release = vi.fn();
     vi.mocked(claimIdempotency).mockResolvedValueOnce({
       kind: "claimed",

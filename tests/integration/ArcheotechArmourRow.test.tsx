@@ -56,14 +56,18 @@ describe("ArcheotechArmourRow chips", () => {
 });
 
 describe("ArcheotechArmourRow rules", () => {
-  it("shows a Rules info modal when a description is present", () => {
+  it("shows a Rules information control when a description is present", () => {
     renderRow();
-    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show information about Ork Mega Armour Rules" })
+    ).toBeInTheDocument();
   });
 
-  it("shows a placeholder when there is no description", () => {
+  it("omits the Rules information control when there is no description", () => {
     renderRow({ item: { ...baseItem, description: undefined, referenceId: undefined } });
-    expect(screen.getAllByText("-").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.queryByRole("button", { name: "Show information about Ork Mega Armour Rules" })
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -82,9 +86,11 @@ describe("ArcheotechArmourRow equip toggle", () => {
 });
 
 describe("ArcheotechArmourRow remove", () => {
-  it("calls onRemove when Remove is clicked", async () => {
+  it("calls onRemove only after removal is confirmed", async () => {
     const user = userEvent.setup();
     const { onRemove } = renderRow();
+    await user.click(screen.getByRole("button", { name: "Remove Ork Mega Armour" }));
+    expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalled();
   });
@@ -94,6 +100,8 @@ describe("ArcheotechArmourRow read-only", () => {
   it("hides the Wear/Stow and Remove buttons when not editable", () => {
     renderRow({ editable: false });
     expect(screen.queryByRole("button", { name: "Stow" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Remove Ork Mega Armour" })
+    ).not.toBeInTheDocument();
   });
 });

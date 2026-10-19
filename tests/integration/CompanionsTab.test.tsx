@@ -111,6 +111,7 @@ describe("CompanionsTab", () => {
       name: "Remove Adeptus Arbites Cyber-Mastiff",
     });
     await user.click(removeButton);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
     expect(removeButton).not.toHaveAttribute("aria-busy");

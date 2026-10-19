@@ -14,6 +14,7 @@ import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { Chip } from "../../ui/chips/Chip";
 import { CheckIcon } from "../../ui/icons/CheckIcon";
+import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import {
@@ -28,7 +29,6 @@ import {
   uiTextNotice,
 } from "../../ui/styles/editableStyles";
 import { colourDivider } from "../../ui/styles/colourTokens";
-import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { toSessionDate } from "../../utils/sessionDate";
 import { isSessionOpen } from "../../utils/sessionStatus";
 import { CloseSessionConfirmModal } from "./CloseSessionConfirmModal";
@@ -152,7 +152,9 @@ export function SessionCard({
       {tappable && (
         <CardOverlayButton label={`Open session of ${dateStr}`} onClick={() => setView("notes")} />
       )}
-      <div className={`${uiStackList}${tappable ? " pointer-events-none relative" : ""}`}>
+      <div
+        className={`${uiStackList}${tappable ? ` pointer-events-none relative ${uiLayerLocal}` : ""}`}
+      >
         <div className="flex items-center justify-between">
           <span className="font-semibold lg:text-lg">{dateStr}</span>
           <div

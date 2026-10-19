@@ -8,7 +8,7 @@ import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
 import { Chip } from "../../ui/chips/Chip";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { RemoveButton } from "../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import {
   uiInlineRow,
@@ -24,6 +24,7 @@ import {
 } from "../../ui/styles/editableStyles";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import { uiLayerLocal } from "../../ui/styles/layerStyles";
+import { CharacterEntryRowContent } from "../../ui/CharacterEntryRow";
 import { createLocalId } from "../../utils/createLocalId";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 
@@ -45,7 +46,6 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<"add" | "edit" | "view" | null>(null);
   const [activeEntry, setActiveEntry] = useState<NoteEntry | null>(null);
-  const [deleteArmed, setDeleteArmed] = useState<NoteEntry | null>(null);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const formScrollPositionRef = useRef(0);
@@ -106,13 +106,11 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
     closeAll();
   }
 
-  function confirmDelete() {
-    if (!deleteArmed) return;
-    onSave(
-      entries.filter((entry) => entry.id !== deleteArmed.id),
+  function deleteEntry(entry: NoteEntry) {
+    return onSave(
+      entries.filter((current) => current.id !== entry.id),
       { optimistic: true }
     );
-    setDeleteArmed(null);
   }
 
   const normalisedQuery = query.trim().toLowerCase();
@@ -167,29 +165,42 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
                     label={`Open note ${entry.title}`}
                     onClick={() => openView(entry)}
                   />
-                  <div className="pointer-events-none relative flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="min-w-0 text-left lg:flex-1">
-                      <span className={uiTextLabel}>{entry.title}</span>
-                      <p
-                        className={`mt-2 text-sm ${uiTextBody} leading-relaxed line-clamp-3 min-h-[4.3rem]`}
-                      >
-                        {entry.text}
-                      </p>
-                      <Chip colour="cyan" className="mt-2">
-                        {formatDate(entry.updatedAt)}
-                      </Chip>
-                    </div>
-                    {editable && (
-                      <div
-                        className={`pointer-events-auto relative ${uiLayerLocal} flex shrink-0 justify-end gap-1.5 order-first lg:order-2`}
-                      >
-                        <Button size="xs" onClick={() => openEdit(entry)}>
-                          Edit
-                        </Button>
-                        <RemoveButton onClick={() => setDeleteArmed(entry)} label="Remove" />
-                      </div>
-                    )}
-                  </div>
+                  <CharacterEntryRowContent
+                    interactive
+                    name={entry.title}
+                    nameClassName={uiTextLabel}
+                    metadata={
+                      <>
+                        <p
+                          className={`mt-2 text-sm ${uiTextBody} leading-relaxed line-clamp-3 min-h-[4.3rem]`}
+                        >
+                          {entry.text}
+                        </p>
+                        <div>
+                          <Chip colour="cyan" className="mt-2">
+                            {formatDate(entry.updatedAt)}
+                          </Chip>
+                        </div>
+                      </>
+                    }
+                    actions={
+                      editable ? (
+                        <div
+                          className={`pointer-events-auto relative ${uiLayerLocal} flex shrink-0 justify-end gap-1.5`}
+                        >
+                          <Button size="xs" onClick={() => openEdit(entry)}>
+                            Edit
+                          </Button>
+                          <RemoveEntryButton
+                            kind="Note"
+                            name={entry.title}
+                            verb="Delete"
+                            onRemove={() => deleteEntry(entry)}
+                          />
+                        </div>
+                      ) : undefined
+                    }
+                  />
                 </div>
               ))}
             </div>
@@ -246,34 +257,6 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
         >
           <PickerBody>
             <p className={`${uiTextDescription} whitespace-pre-wrap`}>{activeEntry.text}</p>
-          </PickerBody>
-        </PickerModal>
-      )}
-
-      {deleteArmed && (
-        <PickerModal
-          title="Delete Note"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setDeleteArmed(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmDelete}>
-                Delete
-              </Button>
-              <Button variant="neutral" onClick={() => setDeleteArmed(null)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Delete {deleteArmed.title} from this character?
-            </p>
           </PickerBody>
         </PickerModal>
       )}

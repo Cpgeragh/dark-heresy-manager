@@ -176,7 +176,7 @@ describe("TraitsTab", () => {
     expect(screen.getByText("None added yet.")).toBeInTheDocument();
   });
 
-  it("aggregates Skin of Iron grants and restores an upgraded cybernetic when the latest grant is deleted", async () => {
+  it("aggregates Skin of Iron grants and restores an upgraded cybernetic when the latest grant is removed", async () => {
     const user = userEvent.setup();
     const onUpdateCybernetics = vi.fn();
     const entries: TalentEntry[] = [
@@ -200,10 +200,10 @@ describe("TraitsTab", () => {
       onUpdateCybernetics,
     });
     expect(screen.getByText("Owned: 2/4")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Delete Skin of Iron" }));
+    await user.click(screen.getByRole("button", { name: "Remove Skin of Iron" }));
     await user.click(
-      within(screen.getByRole("dialog", { name: "Delete Trait" })).getByRole("button", {
-        name: "Delete",
+      within(screen.getByRole("dialog", { name: "Remove Trait" })).getByRole("button", {
+        name: "Remove",
       })
     );
     expect(onUpdateCybernetics).toHaveBeenCalledWith([
@@ -237,10 +237,10 @@ describe("TraitsTab", () => {
       onUpdateCharacter,
     });
 
-    await user.click(screen.getByRole("button", { name: "Delete Skin of Iron" }));
+    await user.click(screen.getByRole("button", { name: "Remove Skin of Iron" }));
     await user.click(
-      within(screen.getByRole("dialog", { name: "Delete Trait" })).getByRole("button", {
-        name: "Delete",
+      within(screen.getByRole("dialog", { name: "Remove Trait" })).getByRole("button", {
+        name: "Remove",
       })
     );
 
@@ -255,7 +255,7 @@ describe("TraitsTab", () => {
     expect(onUpdateCybernetics).not.toHaveBeenCalled();
   });
 
-  it("keeps the Delete button waiting until a Trait removal is saved", async () => {
+  it("keeps the Remove button waiting until a Trait removal is saved", async () => {
     const user = userEvent.setup();
     let settle: (saved: boolean) => void = () => {};
     const onUpdateCharacter = vi.fn(
@@ -267,15 +267,17 @@ describe("TraitsTab", () => {
     const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
     renderTab({ talents: makeTalents({ traits: [entry] }), onUpdateCharacter });
 
-    await user.click(screen.getByRole("button", { name: "Delete Plain Trait" }));
-    const dialog = screen.getByRole("dialog", { name: "Delete Trait" });
-    await user.click(within(dialog).getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    const dialog = screen.getByRole("dialog", { name: "Remove Trait" });
+    await user.click(within(dialog).getByRole("button", { name: "Remove" }));
 
     await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
     await act(async () => {
       settle(true);
     });
-    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Remove Trait" })).not.toBeInTheDocument()
+    );
   });
 
   it("shows the picker row as waiting until a Trait add is saved", async () => {
@@ -332,18 +334,18 @@ describe("TraitsTab", () => {
     expect(next.traits[0].name).toBe("Spec Trait (Something)");
   });
 
-  it("confirms deletion using Trait wording and supports cancellation", async () => {
+  it("confirms removal using Trait wording and supports cancellation", async () => {
     const user = userEvent.setup();
     const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
     const { onUpdateTalents } = renderTab({ talents: makeTalents({ traits: [entry] }) });
 
-    await user.click(screen.getByRole("button", { name: "Delete Plain Trait" }));
-    expect(screen.getByRole("dialog", { name: "Delete Trait" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    expect(screen.getByRole("dialog", { name: "Remove Trait" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onUpdateTalents).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Delete Plain Trait" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
     expect(next.traits).toHaveLength(0);
   });
@@ -428,7 +430,7 @@ describe("TraitsTab", () => {
     expect(next.traits[1].specialisation).toBe("Weapon Skill");
   });
 
-  it("deletes only one acquisition from a repeated Unnatural Characteristic", async () => {
+  it("removes only one acquisition from a repeated Unnatural Characteristic", async () => {
     const user = userEvent.setup();
     const traits: TalentEntry[] = [
       {
@@ -447,9 +449,9 @@ describe("TraitsTab", () => {
     const { onUpdateTalents } = renderTab({ talents: makeTalents({ traits }) });
 
     await user.click(
-      screen.getByRole("button", { name: "Delete Unnatural Characteristic (Weapon Skill)" })
+      screen.getByRole("button", { name: "Remove Unnatural Characteristic (Weapon Skill)" })
     );
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
     expect(next.traits).toHaveLength(1);
     expect(next.traits[0].uid).toBe("u1");
@@ -607,6 +609,6 @@ describe("TraitsTab", () => {
     });
     expect(screen.getByText("Machine (2)")).toBeInTheDocument();
     expect(screen.getByText("The Flesh is Weak (Talent): Granted")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Delete Machine (2)" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Machine (2)" })).not.toBeInTheDocument();
   });
 });

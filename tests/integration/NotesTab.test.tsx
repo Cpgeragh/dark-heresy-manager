@@ -195,11 +195,11 @@ describe("NotesTab editing and deleting", () => {
     expect(screen.queryByRole("button", { name: "Add Note" })).not.toBeInTheDocument();
   });
 
-  it("arms a confirm step on Remove and only deletes after confirming", async () => {
+  it("arms a Delete confirmation and only deletes after confirming", async () => {
     const user = userEvent.setup();
     render(<NotesWiring initial={oneEntry()} />);
 
-    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
     expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
     expect(screen.getByText("Delete Session 12 from this character?")).toBeInTheDocument();
     expect(screen.getByText("Session 12")).toBeInTheDocument();
@@ -207,7 +207,7 @@ describe("NotesTab editing and deleting", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.getByText("Session 12")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
     expect(screen.queryByText("Session 12")).not.toBeInTheDocument();
     expect(screen.getByText("No notes yet.")).toBeInTheDocument();
@@ -239,7 +239,7 @@ describe("NotesTab editing and deleting", () => {
     await act(async () => finish());
   });
 
-  it("closes the delete dialog straight away and asks for an optimistic save", async () => {
+  it("keeps the delete dialog pending until the optimistic save finishes", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onSave = vi.fn(
@@ -250,12 +250,14 @@ describe("NotesTab editing and deleting", () => {
     );
     render(<NotesTab notes={oneEntry()} editable onSave={onSave} />);
 
-    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
     expect(onSave).toHaveBeenCalledWith([], { optimistic: true });
-    expect(screen.queryByRole("dialog", { name: "Delete Note" })).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
 
     await act(async () => finish());
+    expect(screen.queryByRole("dialog", { name: "Delete Note" })).not.toBeInTheDocument();
   });
 });

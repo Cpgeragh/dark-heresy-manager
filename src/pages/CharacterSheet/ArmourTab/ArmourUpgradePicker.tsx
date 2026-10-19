@@ -4,7 +4,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import {
   uiSplitRow,
   uiCell,
@@ -27,7 +27,12 @@ export function ArmourUpgradeCard({
       <div className={`${uiSplitRow}`}>
         <span className={`text-xs lg:text-sm font-medium ${uiTextBody}`}>{upgrade.name}</span>
         {editable && (
-          <RemoveButton onClick={() => onRemove(upgrade.id)} label={`Remove ${upgrade.name}`} />
+          <RemoveEntryButton
+            kind="Upgrade"
+            name={upgrade.name}
+            from="this armour"
+            onRemove={() => onRemove(upgrade.id)}
+          />
         )}
       </div>
       <NestedItemMetaChips

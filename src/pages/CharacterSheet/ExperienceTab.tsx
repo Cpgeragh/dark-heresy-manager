@@ -799,9 +799,7 @@ function RankEntryList({
           <div className={`min-w-0 ${uiStackField}`}>
             <div className={`text-sm ${colourTextPrimary} lg:text-base`}>{entry.name}</div>
             {showKind && (
-              <Chip colour={ENTRY_KIND_COLOURS[entry.kind]}>
-                {ENTRY_KIND_LABELS[entry.kind]}
-              </Chip>
+              <Chip colour={ENTRY_KIND_COLOURS[entry.kind]}>{ENTRY_KIND_LABELS[entry.kind]}</Chip>
             )}
           </div>
           <span className={`shrink-0 font-code text-sm ${uiTextBody} lg:text-base`}>

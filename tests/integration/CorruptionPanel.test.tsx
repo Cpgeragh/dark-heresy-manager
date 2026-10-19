@@ -119,8 +119,8 @@ describe("CorruptionPanel optimistic saves", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Witch-mark" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ malignancies: [] }), {
       optimistic: true,
@@ -139,8 +139,8 @@ describe("CorruptionPanel optimistic saves", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Extra eye" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorMutations: [] }), {
       optimistic: true,
@@ -160,8 +160,8 @@ describe("CorruptionPanel optimistic saves", () => {
     );
 
     await user.click(screen.getByRole("tab", { name: "Major Mutations" }));
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Extra eye" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ majorMutations: [] }), {
       optimistic: true,
@@ -228,7 +228,7 @@ describe("CorruptionPanel editable=false", () => {
     );
 
     expect(screen.queryByRole("button", { name: "Add Malignancy" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Witch-mark" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute(
       "aria-disabled",
       "true"

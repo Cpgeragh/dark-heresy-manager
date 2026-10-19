@@ -1,16 +1,9 @@
 // src/pages/CharacterSheet/GearTab/ConsumableRow.tsx
 
 import type { ConsumableItem } from "../../../types/Character";
-import {
-  uiChipRow,
-  uiInlineRow,
-  uiSection,
-  uiTextLabel,
-  uiItemName,
-  uiInfoModalWrapper,
-  uiTextDescription,
-} from "../../../ui/styles/editableStyles";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { uiChipRow, uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
@@ -44,9 +37,19 @@ export function ConsumableRow({
   const hasDesc = !!item.description?.trim();
 
   return (
-    <div className={uiSection}>
-      <div className="flex items-start gap-3">
-        <div className="flex flex-col items-center shrink-0">
+    <CharacterEntryRow
+      name={item.name}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      info={
+        hasDesc ? (
+          <InfoModal
+            title={item.name}
+            content={<p className={uiTextDescription}>{item.description}</p>}
+          />
+        ) : undefined
+      }
+      leading={
+        <div className="flex flex-col items-center">
           <span className={`${uiTextLabel} mb-0.5`}>Qty</span>
           <QuantityControl
             quantity={item.quantity}
@@ -55,43 +58,38 @@ export function ConsumableRow({
             onUpdate={(q) => onUpdateQty(item.id, q)}
           />
         </div>
-
-        <div className="flex-1 min-w-0">
-          <div className={`${uiInlineRow}`}>
-            <p className={uiItemName}>{item.name}</p>
-            {libraryItem && <StatusBadge status={libraryItem.status} />}
-            {hasDesc && (
-              <span className={uiInfoModalWrapper}>
-                <InfoModal
-                  title={item.name}
-                  content={<p className={uiTextDescription}>{item.description}</p>}
-                />
-              </span>
-            )}
-          </div>
-          <ItemMetaChips
-            weight={item.weight}
-            value={item.value}
-            availability={item.availability}
-            source={item.source}
-            className={`${uiChipRow} mt-1`}
+      }
+      metadata={
+        <ItemMetaChips
+          weight={item.weight}
+          value={item.value}
+          availability={item.availability}
+          source={item.source}
+          className={uiChipRow}
+        />
+      }
+      actions={
+        editable ? (
+          <RemoveEntryButton
+            kind="Consumable"
+            name={item.name}
+            onRemove={() => onRemove(item.id)}
           />
-          {libraryItem && (
-            <CustomItemActionButtons
-              libraryItem={libraryItem}
-              isDM={isDM}
-              canEditDefinition={canEditDefinition}
-              busyAction={busyAction}
-              onEditDefinition={onEditDefinition}
-              onPublish={onPublish}
-              onArchive={onArchive}
-              onUpdateAllCopies={onUpdateAllCopies}
-            />
-          )}
-        </div>
-
-        {editable && <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />}
-      </div>
-    </div>
+        ) : undefined
+      }
+    >
+      {libraryItem && (
+        <CustomItemActionButtons
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
+      )}
+    </CharacterEntryRow>
   );
 }

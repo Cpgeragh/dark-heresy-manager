@@ -163,7 +163,7 @@ describe("SkillsTab", () => {
     expect(screen.queryByText("Total")).not.toBeInTheDocument();
   });
 
-  it("keeps Upgrade and Delete together in the wrapping upper action area", () => {
+  it("keeps Upgrade and Remove together in the wrapping upper action area", () => {
     renderTab({ isDM: true });
 
     const upgrades = screen.getAllByRole("button", { name: "Upgrade to +10" });
@@ -173,7 +173,7 @@ describe("SkillsTab", () => {
       const actions = upgrade.parentElement;
       expect(actions).toHaveClass("flex", "flex-wrap", "items-center", "justify-end");
       expect(
-        within(actions as HTMLElement).getByRole("button", { name: "Delete Awareness" })
+        within(actions as HTMLElement).getByRole("button", { name: "Remove Awareness" })
       ).toBeInTheDocument();
       expect(actions?.parentElement).toHaveClass("items-start", "justify-between");
     }
@@ -236,62 +236,59 @@ describe("SkillsTab", () => {
     }
   });
 
-  it("uses the card-header delete confirmation before removing a skill", async () => {
+  it("uses the shared confirmation before removing a skill", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    const deleteButtons = screen.getAllByRole("button", {
-      name: "Delete Awareness",
+    const removeButtons = screen.getAllByRole("button", {
+      name: "Remove Awareness",
     });
 
-    expect(deleteButtons.length).toBeGreaterThan(0);
-    const deleteContainers = deleteButtons.map((button) => button.parentElement?.parentElement);
-    for (const container of deleteContainers) {
+    expect(removeButtons.length).toBeGreaterThan(0);
+    const removeContainers = removeButtons.map((button) => button.parentElement?.parentElement);
+    for (const container of removeContainers) {
       expect(container).toHaveClass("justify-between");
     }
 
-    await user.click(deleteButtons[0]);
-    expect(screen.getByText("Delete Awareness from this character?")).toBeInTheDocument();
+    await user.click(removeButtons[0]);
+    expect(screen.getByText("Remove Awareness from this character?")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Downgrade to/ })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onUpdate).not.toHaveBeenCalled();
-    expect(screen.queryByText("Delete Awareness from this character?")).not.toBeInTheDocument();
+    expect(screen.queryByText("Remove Awareness from this character?")).not.toBeInTheDocument();
 
-    await user.click(deleteButtons[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(removeButtons[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as SkillEntry[];
     expect(next.find((entry) => entry.id === "s1")).toBeUndefined();
-    expect(screen.queryByRole("dialog", { name: "Delete Skill" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Remove Skill" })).not.toBeInTheDocument();
   });
 
   it.each([
     { level: "+10" as const, target: "trained" as const, label: "Trained" },
     { level: "+20" as const, target: "+10" as const, label: "+10" },
-  ])(
-    "offers Downgrade to $label or full deletion from $level",
-    async ({ level, target, label }) => {
-      const user = userEvent.setup();
-      const { onUpdate } = renderTab({ skills: [skill({ level })] });
+  ])("offers Downgrade to $label or full removal from $level", async ({ level, target, label }) => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({ skills: [skill({ level })] });
 
-      await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
-      const dialog = screen.getByRole("dialog", { name: "Manage Skill" });
-      const downgradeButton = within(dialog).getByRole("button", { name: `Downgrade to ${label}` });
-      expect(downgradeButton).toHaveClass("border-amber-500", "text-amber-500");
-      expect(downgradeButton).not.toHaveClass("bg-amber-900/40");
-      expect(within(dialog).getByRole("button", { name: "Delete Skill" })).toBeInTheDocument();
-      expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Remove Awareness" })[0]);
+    const dialog = screen.getByRole("dialog", { name: "Manage Skill" });
+    const downgradeButton = within(dialog).getByRole("button", { name: `Downgrade to ${label}` });
+    expect(downgradeButton).toHaveClass("border-amber-500", "text-amber-500");
+    expect(downgradeButton).not.toHaveClass("bg-amber-900/40");
+    expect(within(dialog).getByRole("button", { name: "Remove Skill" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
 
-      await user.click(within(dialog).getByRole("button", { name: `Downgrade to ${label}` }));
+    await user.click(within(dialog).getByRole("button", { name: `Downgrade to ${label}` }));
 
-      expect(onUpdate).toHaveBeenCalledTimes(1);
-      const next = onUpdate.mock.calls[0][0] as SkillEntry[];
-      expect(next.find((entry) => entry.id === "s1")?.level).toBe(target);
-      expect(screen.queryByRole("dialog", { name: "Manage Skill" })).not.toBeInTheDocument();
-    }
-  );
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+    const next = onUpdate.mock.calls[0][0] as SkillEntry[];
+    expect(next.find((entry) => entry.id === "s1")?.level).toBe(target);
+    expect(screen.queryByRole("dialog", { name: "Manage Skill" })).not.toBeInTheDocument();
+  });
 
   it("shows the add affordance when editable", () => {
     renderTab();
@@ -307,7 +304,8 @@ describe("SkillsTab", () => {
     const list = within(dialog).getByTestId("skill-picker-card-list");
     expect(list).toHaveClass("space-y-2", "p-3");
     const selectAwareness = within(dialog).getByRole("button", { name: "Select Awareness" });
-    expect(selectAwareness.parentElement).toHaveClass("hover:bg-slate-800");
+    expect(selectAwareness).toHaveClass("peer", "hover:bg-slate-800");
+    expect(selectAwareness.parentElement).not.toHaveClass("hover:bg-slate-800");
     const awarenessCard = selectAwareness.closest("div.rounded-lg");
     expect(awarenessCard).toHaveClass("border-slate-500");
     expect(within(awarenessCard!).getAllByText("CR").length).toBeGreaterThan(0);
@@ -552,12 +550,12 @@ describe("SkillsTab", () => {
     expect(dialog.querySelector('[aria-busy="true"]')).toBeNull();
   });
 
-  it("sends a delete as an instant update", async () => {
+  it("sends a removal as an instant update", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Awareness" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate.mock.calls[0][1]).toEqual({ optimistic: true });
   });
@@ -632,7 +630,7 @@ describe("SkillsTab", () => {
       ],
     });
 
-    await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Awareness" })[0]);
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage Skill" })).getByRole("button", {
         name: "Downgrade to +10",
@@ -688,7 +686,7 @@ describe("SkillsTab", () => {
       screen.getAllByText("Cult Briefing (Heretek) (Talent): counts Tech-Use as trained").length
     ).toBeGreaterThan(0);
     expect(screen.getAllByText("Talented (Awareness) (Talent): +10").length).toBeGreaterThan(0);
-    expect(screen.queryByRole("button", { name: "Delete Tech-Use" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Tech-Use" })).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Show information about Awareness Adjustments" })
     ).not.toBeInTheDocument();
@@ -715,7 +713,7 @@ describe("SkillsTab", () => {
       screen.getAllByText("Career: Guardsman (Career): counts Drive (Ground Vehicle) as trained")
     ).toHaveLength(1);
     expect(
-      screen.queryByRole("button", { name: "Delete Drive (Ground Vehicle)" })
+      screen.queryByRole("button", { name: "Remove Drive (Ground Vehicle)" })
     ).not.toBeInTheDocument();
   });
 
@@ -743,7 +741,7 @@ describe("SkillsTab", () => {
       screen.getAllByText("Blank Slate (Trait): counts Common Lore (War) as trained").length
     ).toBeGreaterThan(0);
     expect(
-      screen.queryByRole("button", { name: "Delete Common Lore (War)" })
+      screen.queryByRole("button", { name: "Remove Common Lore (War)" })
     ).not.toBeInTheDocument();
   });
 
@@ -795,7 +793,7 @@ describe("SkillsTab", () => {
       talents: GUARDSMAN_DRIVE_GRANT,
     });
 
-    await user.click(screen.getAllByRole("button", { name: "Delete Drive (Ground Vehicle)" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Drive (Ground Vehicle)" })[0]);
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage Skill" })).getByRole("button", {
         name: "Downgrade to Trained",
@@ -837,14 +835,14 @@ describe("SkillsTab", () => {
     expect(
       screen.queryByText(/Cult Briefing \(Heretek\) \(Talent\): Trained/)
     ).not.toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Delete Tech-Use" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Remove Tech-Use" }).length).toBeGreaterThan(0);
 
-    await user.click(screen.getAllByRole("button", { name: "Delete Tech-Use" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Tech-Use" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(
       screen.getAllByText("Cult Briefing (Heretek) (Talent): counts Tech-Use as trained").length
     ).toBeGreaterThan(0);
-    expect(screen.queryByRole("button", { name: "Delete Tech-Use" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Tech-Use" })).not.toBeInTheDocument();
   });
 });

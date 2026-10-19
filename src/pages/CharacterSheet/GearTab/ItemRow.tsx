@@ -2,16 +2,10 @@
 
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
-import {
-  uiChipRow,
-  uiInlineRow,
-  uiSection,
-  uiItemName,
-  uiInfoModalWrapper,
-  uiTextDescription,
-} from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiTextDescription } from "../../../ui/styles/editableStyles";
 import { colourAmberPlain } from "../../../ui/styles/colourTokens";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
@@ -48,51 +42,51 @@ export function ItemRow({
   const availability = item.availability ?? ref?.availability;
 
   return (
-    <div className={uiSection}>
-      <div className="flex items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <div className={`${uiInlineRow}`}>
-            <p className={uiItemName}>{item.name}</p>
-            {libraryItem && <StatusBadge status={libraryItem.status} />}
-            {hasDesc && (
-              <span className={uiInfoModalWrapper}>
-                <InfoModal
-                  title={item.name}
-                  content={<p className={uiTextDescription}>{item.description}</p>}
-                />
-              </span>
-            )}
-          </div>
-          <ItemMetaChips
-            weight={weight}
-            value={value}
-            availability={availability}
-            source={item.source}
-            className={`${uiChipRow} mt-1`}
+    <CharacterEntryRow
+      name={item.name}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      info={
+        hasDesc ? (
+          <InfoModal
+            title={item.name}
+            content={<p className={uiTextDescription}>{item.description}</p>}
           />
-          {item.grantedByTalentName && (
-            <p className={`mt-1 text-xs ${colourAmberPlain}`}>
-              {item.grantedByTalentName} ({item.grantedByType}): Granted
-            </p>
-          )}
-          {libraryItem && (
-            <CustomItemActionButtons
-              libraryItem={libraryItem}
-              isDM={isDM}
-              canEditDefinition={canEditDefinition}
-              busyAction={busyAction}
-              onEditDefinition={onEditDefinition}
-              onPublish={onPublish}
-              onArchive={onArchive}
-              onUpdateAllCopies={onUpdateAllCopies}
-            />
-          )}
-        </div>
-
-        {editable && !item.grantedByTalentEntryUid && (
-          <RemoveButton onClick={onRemove} label="Remove" />
-        )}
-      </div>
-    </div>
+        ) : undefined
+      }
+      metadata={
+        <ItemMetaChips
+          weight={weight}
+          value={value}
+          availability={availability}
+          source={item.source}
+          className={uiChipRow}
+        />
+      }
+      afterMetadata={
+        item.grantedByTalentName ? (
+          <p className={`text-xs ${colourAmberPlain}`}>
+            {item.grantedByTalentName} ({item.grantedByType}): Granted
+          </p>
+        ) : undefined
+      }
+      actions={
+        editable && !item.grantedByTalentEntryUid ? (
+          <RemoveEntryButton kind="Item" name={item.name} onRemove={onRemove} />
+        ) : undefined
+      }
+    >
+      {libraryItem && (
+        <CustomItemActionButtons
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
+      )}
+    </CharacterEntryRow>
   );
 }

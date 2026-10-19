@@ -8,11 +8,11 @@ import { QrModal } from "../../src/ui/modals/QrModal";
 
 describe("QrModal", () => {
   it("shows a QR code without printing its URL", () => {
-    render(
-      <QrModal title="Share App" url="https://example.com" onClose={vi.fn()} />
-    );
+    render(<QrModal title="Share App" url="https://example.com" onClose={vi.fn()} />);
     expect(screen.getByText("Share App")).toBeInTheDocument();
-    expect(within(screen.getByRole("dialog", { name: "Share App" })).getByRole("img")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("dialog", { name: "Share App" })).getByRole("img")
+    ).toBeInTheDocument();
     expect(screen.queryByText("https://example.com")).not.toBeInTheDocument();
   });
 

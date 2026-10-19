@@ -27,7 +27,6 @@ import {
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
   uiChipRow,
-  uiInlineRow,
   uiSplitRow,
   uiCell,
   uiNoticeBox,
@@ -37,7 +36,7 @@ import {
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiItemName,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
   uiRuleName,
   uiTextDescription,
   uiStackSection,
@@ -47,7 +46,7 @@ import {
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../../ui/buttons/ExpandButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import {
   colourButtonOutlineCyan,
   colourButtonOutlineOrange,
@@ -62,14 +61,12 @@ import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip, NestedChip } from "../../../ui/chips/Chip";
-import {
-  ItemMetaChips,
-  NestedItemMetaChips,
-} from "../../../ui/chips/ItemMetaChips";
+import { ItemMetaChips, NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -435,9 +432,7 @@ export function RangedCard({
       className={`${weapon.concealedBionic ? `${uiNoticeBox} ${colourNoticePink}` : uiSectionShell} overflow-hidden`}
     >
       {/* Header: always visible */}
-      <div
-        className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-      >
+      <div className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         {!forceExpanded && (
           <CardOverlayButton
             label={
@@ -449,84 +444,70 @@ export function RangedCard({
             onClick={onSelect ?? toggleExpanded}
           />
         )}
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className={`${uiChipRow} items-center`}>
-            <p className={uiCardTitleHover}>{weapon.name}</p>
-            {rulesDescription && (
-              <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                <InfoModal
-                  title={weapon.name}
-                  content={<p className={uiTextDescription}>{rulesDescription}</p>}
-                />
-              </span>
-            )}
-            {libraryItem && <StatusBadge status={libraryItem.status} />}
-            {integrated && (
-              <Chip colour="violet">
-                Integrated
-              </Chip>
-            )}
-          </div>
-          {(weapon.class || activeWeaponType || weapon.concealedBionic) && (
-            <div className={`mt-0.5 ${uiChipRow} items-center`}>
-              {weapon.concealedBionic && (
-                <Chip colour="pink">
-                  Concealed Bionic
-                </Chip>
-              )}
-              {weapon.concealedBionic && (
-                <Chip colour="pink">
-                  Cybernetic
-                </Chip>
-              )}
-              {(() => {
-                const c = weaponClassChip(weapon.class);
-                return c ? (
-                  <Chip colour={c.colour}>
-                    {c.label}
-                  </Chip>
-                ) : null;
-              })()}
-              {activeWeaponType && (
-                <Chip colour={activeWeaponType.colour}>
-                  {activeWeaponType.label}
-                </Chip>
-              )}
-              {hasKnaveBallisticPenalty && (
-                <Chip colour="amber">
-                  Knave: BS −10
-                </Chip>
-              )}
-            </div>
-          )}
-        </div>
-        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-          {onToggleEquip && (
-            <EquipToggle
-              equipped={isEquipped}
-              disabled={slotsDisabled}
-              editable={editable}
-              onChange={onToggleEquip}
-            />
-          )}
-          {!forceExpanded &&
-            (onSelect ? (
-              <ExpandButton
-                expanded={expanded}
-                label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-                onClick={toggleExpanded}
+        <CharacterEntryRowContent
+          interactive
+          name={weapon.name}
+          nameClassName={uiOverlayCardTitleHover}
+          info={
+            rulesDescription ? (
+              <InfoModal
+                title={weapon.name}
+                content={<p className={uiTextDescription}>{rulesDescription}</p>}
               />
-            ) : (
-              <ExpandChevron expanded={expanded} />
-            ))}
-        </div>
+            ) : undefined
+          }
+          badge={
+            <>
+              {libraryItem && <StatusBadge status={libraryItem.status} />}
+              {integrated && <Chip colour="violet">Integrated</Chip>}
+            </>
+          }
+          metadata={
+            weapon.class || activeWeaponType || weapon.concealedBionic ? (
+              <div className={`mt-0.5 ${uiChipRow} items-center`}>
+                {weapon.concealedBionic && <Chip colour="pink">Concealed Bionic</Chip>}
+                {weapon.concealedBionic && <Chip colour="pink">Cybernetic</Chip>}
+                {(() => {
+                  const c = weaponClassChip(weapon.class);
+                  return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
+                })()}
+                {activeWeaponType && (
+                  <Chip colour={activeWeaponType.colour}>{activeWeaponType.label}</Chip>
+                )}
+                {hasKnaveBallisticPenalty && <Chip colour="amber">Knave: BS −10</Chip>}
+              </div>
+            ) : undefined
+          }
+          actions={
+            <>
+              {onToggleEquip && (
+                <EquipToggle
+                  equipped={isEquipped}
+                  disabled={slotsDisabled}
+                  editable={editable}
+                  onChange={onToggleEquip}
+                />
+              )}
+              {!forceExpanded &&
+                (onSelect ? (
+                  <ExpandButton
+                    expanded={expanded}
+                    label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+                    onClick={toggleExpanded}
+                  />
+                ) : (
+                  <ExpandChevron expanded={expanded} />
+                ))}
+            </>
+          }
+        />
       </div>
 
       {(expanded || forceExpanded) && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && !integrated && (
             <div className="flex justify-end">
-              <RemoveButton onClick={onRemove} label="Remove" />
+              <RemoveEntryButton kind="Ranged Weapon" name={weapon.name} onRemove={onRemove} />
             </div>
           )}
 
@@ -742,9 +723,7 @@ export function RangedCard({
                       className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 ${uiSplitRow}`}
                     >
                       <span className={`${uiItemName} truncate`}>{g.name}</span>
-                      <Chip colour="amber">
-                        Archeotech
-                      </Chip>
+                      <Chip colour="amber">Archeotech</Chip>
                     </div>
                   ))}
                 </div>
@@ -757,9 +736,7 @@ export function RangedCard({
               <span className={uiTextLabel}>Magazines</span>
               {activeAmmoFamily && (
                 <div className={`${uiChipRow} items-center`}>
-                  <NestedChip colour={activeAmmoFamily.colour}>
-                    {activeAmmoFamily.label}
-                  </NestedChip>
+                  <NestedChip colour={activeAmmoFamily.colour}>{activeAmmoFamily.label}</NestedChip>
                 </div>
               )}
               <div className={uiStackList}>
@@ -874,9 +851,7 @@ export function RangedCard({
 
               {activeAmmoFamily && (
                 <div className={`${uiChipRow} items-center`}>
-                  <NestedChip colour={activeAmmoFamily.colour}>
-                    {activeAmmoFamily.label}
-                  </NestedChip>
+                  <NestedChip colour={activeAmmoFamily.colour}>{activeAmmoFamily.label}</NestedChip>
                 </div>
               )}
 

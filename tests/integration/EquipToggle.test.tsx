@@ -16,9 +16,21 @@ describe("EquipToggle", () => {
     expect(screen.getByRole("button", { name: "Unequip" })).toBeInTheDocument();
   });
 
+  it("keeps three responsive action sizes between phone and full desktop widths", () => {
+    render(<EquipToggle equipped={false} disabled={false} editable onChange={vi.fn()} />);
+
+    expect(screen.getByRole("button", { name: "Equip" })).toHaveClass(
+      "sm:h-7",
+      "sm:px-2.5",
+      "md:h-8",
+      "md:px-3",
+      "md:text-sm"
+    );
+  });
+
   it("shows an Equipped chip with no button when not editable", () => {
     render(<EquipToggle equipped disabled={false} editable={false} onChange={vi.fn()} />);
-    expect(screen.getByText("Equipped")).toBeInTheDocument();
+    expect(screen.getByText("Equipped")).toHaveClass("h-5", "text-[10px]");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 

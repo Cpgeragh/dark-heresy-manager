@@ -190,7 +190,7 @@ describe("EliteAdvancesTab", () => {
     expect(screen.getByText("Nascent Psyker")).toBeInTheDocument();
   });
 
-  it("removes the Minor Power linked to a deleted Nascent Psyker package", async () => {
+  it("removes the Minor Power linked to a removed Nascent Psyker package", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn(async () => true);
     render(
@@ -222,9 +222,9 @@ describe("EliteAdvancesTab", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete Nascent Psyker" }));
-    const confirmation = screen.getByRole("dialog", { name: "Delete Elite Advance" });
-    await user.click(within(confirmation).getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Remove Nascent Psyker" }));
+    const confirmation = screen.getByRole("dialog", { name: "Remove Elite Advance" });
+    await user.click(within(confirmation).getByRole("button", { name: "Remove" }));
 
     expect(onUpdateCharacter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -354,7 +354,7 @@ describe("EliteAdvancesTab", () => {
     expect(screen.getByText("Bloodsworn Charter")).toBeInTheDocument();
     expect(screen.getByText("Malfian Bloodsworn (Alternate Rank): Granted")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Delete Bloodsworn Charter" })
+      screen.queryByRole("button", { name: "Remove Bloodsworn Charter" })
     ).not.toBeInTheDocument();
     expect(screen.queryByText("0 XP")).not.toBeInTheDocument();
   });

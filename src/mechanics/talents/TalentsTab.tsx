@@ -195,7 +195,6 @@ const TalentCards = memo(function TalentCards({
             displayName={`${reference?.name ?? talentEntries[0].name} (${talentEntries.length})`}
             editable={editable}
             onRemove={onRemove}
-            confirmDeletion
             statusAfterSource
             statusChip={statusChip?.label}
             statusChipColour={statusChip?.colour}
@@ -220,11 +219,10 @@ const TalentCards = memo(function TalentCards({
             removable={available.length > 0}
             deletionBlockedMessage={
               available.length === 0
-                ? "This Talent cannot be deleted until its linked Psychic powers are deleted."
+                ? "This Talent cannot be removed until its linked Psychic powers are removed."
                 : undefined
             }
             onRemove={onRemove}
-            confirmDeletion
             statusAfterSource
           />
         );
@@ -255,7 +253,6 @@ const TalentCards = memo(function TalentCards({
           entry={entry}
           editable={editable}
           onRemove={onRemove}
-          confirmDeletion
           statusChip={statusChip?.label}
           statusChipColour={statusChip?.colour}
           statusAfterSource
@@ -270,7 +267,7 @@ const TalentCards = memo(function TalentCards({
             [...psychic.minorPowers, ...psychic.majorPowers].some(
               (power) => power.psyRatingTalentEntryUid === entry.uid
             )
-              ? "This Talent cannot be deleted until its linked Psychic powers are deleted."
+              ? "This Talent cannot be removed until its linked Psychic powers are removed."
               : undefined
           }
         />
@@ -563,7 +560,7 @@ export function TalentsTab({
 
       {pendingEffectDeletion && (
         <PickerModal
-          title={`Delete ${pendingEffectDeletion.name}`}
+          title={`Remove ${pendingEffectDeletion.name}`}
           query=""
           onQueryChange={() => undefined}
           onClose={() => setPendingEffectDeletion(null)}
@@ -573,7 +570,7 @@ export function TalentsTab({
         >
           <PickerBody>
             <p className={`text-sm ${uiTextBody}`}>
-              This Talent recorded a one-time change. Choose whether deleting the Talent should also
+              This Talent recorded a one-time change. Choose whether removing the Talent should also
               restore what that acquisition changed.
             </p>
             <div className={uiStackList}>
@@ -583,7 +580,7 @@ export function TalentsTab({
                 loadingLabel="Saving"
                 onClick={() => void applyTalentRemoval(pendingEffectDeletion, true)}
               >
-                Delete and restore recorded changes
+                Remove and restore recorded changes
               </Button>
               <Button
                 fullWidth
@@ -591,7 +588,7 @@ export function TalentsTab({
                 disabled={savingTalentMutation}
                 onClick={() => void applyTalentRemoval(pendingEffectDeletion, false)}
               >
-                Delete Talent only
+                Remove Talent only
               </Button>
               <Button
                 fullWidth

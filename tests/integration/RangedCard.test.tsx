@@ -71,7 +71,22 @@ describe("RangedCard upgrades", () => {
     const compactLabel = screen.getAllByText("Compact")[0];
     const removeBtn = compactLabel.parentElement!.querySelector("button")!;
     await user.click(removeBtn);
+    expect(onRemoveUpgrade).not.toHaveBeenCalled();
+    expect(screen.getByText("Remove Compact from this weapon?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemoveUpgrade).toHaveBeenCalledWith("cr-compact");
+  });
+});
+
+describe("RangedCard remove", () => {
+  it("calls onRemove only after removal is confirmed", async () => {
+    const user = userEvent.setup();
+    const { onRemove } = renderCard();
+
+    await user.click(screen.getByRole("button", { name: "Remove Custom Lasgun" }));
+    expect(onRemove).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onRemove).toHaveBeenCalledOnce();
   });
 });
 

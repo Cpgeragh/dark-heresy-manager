@@ -87,9 +87,7 @@ describe("packaged Elite Advance effects", () => {
       homeworld: "",
       talents: [],
       traits: [],
-      eliteAdvances: [
-        { uid: "nascent", eliteAdvanceId: "nascent-psyker", name: "Nascent Psyker" },
-      ],
+      eliteAdvances: [{ uid: "nascent", eliteAdvanceId: "nascent-psyker", name: "Nascent Psyker" }],
     };
 
     expect(getDerivedTraitEntries(nascent)).toContainEqual(

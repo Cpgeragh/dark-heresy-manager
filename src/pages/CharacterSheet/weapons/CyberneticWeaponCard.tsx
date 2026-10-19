@@ -8,18 +8,17 @@ import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import {
   uiChipRow,
-  uiInlineRow,
   uiNoticeBox,
   uiTextLabel,
   uiTextBody,
   uiTextPlaceholder,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
   uiInfoModalWrapper,
   uiStackSection,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { colourNoticePink } from "../../../ui/styles/colourTokens";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
@@ -32,6 +31,7 @@ import {
   meleeDamageForCraftsmanship,
 } from "./weaponHelpers";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 
 export function CyberneticWeaponCard({
   cyberneticName,
@@ -58,39 +58,31 @@ export function CyberneticWeaponCard({
 
   return (
     <div className={`${uiNoticeBox} ${colourNoticePink} overflow-hidden`}>
-      <div
-        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-      >
+      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         <CardOverlayButton
           label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
           expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className={`${uiInlineRow}`}>
-            <p className={uiCardTitleHover}>{weapon.name}</p>
-          </div>
-          <div className={`mt-0.5 ${uiChipRow} items-center`}>
-            <Chip colour="pink">
-              Cybernetic
-            </Chip>
-            {weapon.class === "Melee" ? (
-              <Chip colour="orange">
-                Melee
-              </Chip>
-            ) : weapon.class ? (
-              (() => {
-                const c = weaponClassChip(weapon.class);
-                return c ? (
-                  <Chip colour={c.colour}>
-                    {c.label}
-                  </Chip>
-                ) : null;
-              })()
-            ) : null}
-          </div>
-        </div>
-        <ExpandChevron expanded={expanded} />
+        <CharacterEntryRowContent
+          interactive
+          name={weapon.name}
+          nameClassName={uiOverlayCardTitleHover}
+          metadata={
+            <div className={`mt-0.5 ${uiChipRow} items-center`}>
+              <Chip colour="pink">Cybernetic</Chip>
+              {weapon.class === "Melee" ? (
+                <Chip colour="orange">Melee</Chip>
+              ) : weapon.class ? (
+                (() => {
+                  const c = weaponClassChip(weapon.class);
+                  return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
+                })()
+              ) : null}
+            </div>
+          }
+          actions={<ExpandChevron expanded={expanded} />}
+        />
       </div>
 
       {expanded && (

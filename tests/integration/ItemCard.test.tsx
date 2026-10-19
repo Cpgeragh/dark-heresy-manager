@@ -35,7 +35,7 @@ function renderCard(item: ArcheotechItem, editable = true) {
 describe("ItemCard with body content (description/notes)", () => {
   it("renders the title as a real button and starts collapsed", () => {
     renderCard(itemWithBody);
-    const header = screen.getByRole("button", { name: /Digi-weapon/ });
+    const header = screen.getByRole("button", { expanded: false });
     expect(header).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText("A tiny concealed blade fitted to a ring.")).not.toBeInTheDocument();
   });
@@ -43,14 +43,14 @@ describe("ItemCard with body content (description/notes)", () => {
   it("expands to show the description when the header is clicked", async () => {
     const user = userEvent.setup();
     renderCard(itemWithBody);
-    await user.click(screen.getByRole("button", { name: /Digi-weapon/ }));
+    await user.click(screen.getByRole("button", { expanded: false }));
     expect(screen.getByText("A tiny concealed blade fitted to a ring.")).toBeInTheDocument();
   });
 
   it("collapses again on a second click", async () => {
     const user = userEvent.setup();
     renderCard(itemWithBody);
-    const header = screen.getByRole("button", { name: /Digi-weapon/ });
+    const header = screen.getByRole("button", { expanded: false });
     await user.click(header);
     await user.click(header);
     expect(screen.queryByText("A tiny concealed blade fitted to a ring.")).not.toBeInTheDocument();
@@ -60,24 +60,28 @@ describe("ItemCard with body content (description/notes)", () => {
 describe("ItemCard with no body content", () => {
   it("renders the title as plain text, not a button", () => {
     renderCard(itemWithoutBody);
-    expect(screen.queryByRole("button", { name: /Combi-tool/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Expand Combi-tool details" })
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Combi-tool")).toBeInTheDocument();
   });
 });
 
 describe("ItemCard remove", () => {
-  it("calls onRemove when the remove button is clicked, and it's not nested inside the header button", async () => {
+  it("confirms removal outside the expandable header button", async () => {
     const user = userEvent.setup();
     const { onRemove } = renderCard(itemWithBody);
-    const removeBtn = screen.getByRole("button", { name: "Remove" });
-    const header = screen.getByRole("button", { name: /Digi-weapon/ });
+    const removeBtn = screen.getByRole("button", { name: "Remove Digi-weapon" });
+    const header = screen.getByRole("button", { expanded: false });
     expect(header).not.toContainElement(removeBtn);
     await user.click(removeBtn);
+    expect(onRemove).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 
   it("does not render a remove button when not editable", () => {
     renderCard(itemWithBody, false);
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Digi-weapon" })).not.toBeInTheDocument();
   });
 });

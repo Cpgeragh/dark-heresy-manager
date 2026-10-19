@@ -38,7 +38,7 @@ describe("ArcheotechShieldRow expand/collapse", () => {
     const user = userEvent.setup();
     renderRow({ isEquipped: true });
     expect(screen.getByText("AP")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /Archeotech Buckler/ }));
+    await user.click(screen.getByRole("button", { name: "Collapse Archeotech Buckler details" }));
     expect(screen.queryByText("AP")).not.toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe("ArcheotechShieldRow expand/collapse", () => {
   it("shows stats again when expanded a second time", async () => {
     const user = userEvent.setup();
     renderRow({ isEquipped: false });
-    await user.click(screen.getByRole("button", { name: /Archeotech Buckler/ }));
+    await user.click(screen.getByRole("button", { name: "Expand Archeotech Buckler details" }));
     expect(screen.getByText("AP")).toBeInTheDocument();
   });
 });
@@ -66,9 +66,11 @@ describe("ArcheotechShieldRow equip toggle", () => {
 });
 
 describe("ArcheotechShieldRow remove", () => {
-  it("calls onRemove when Remove is clicked", async () => {
+  it("calls onRemove only after removal is confirmed", async () => {
     const user = userEvent.setup();
     const { onRemove } = renderRow({ isEquipped: true });
+    await user.click(screen.getByRole("button", { name: "Remove Archeotech Buckler" }));
+    expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalled();
   });

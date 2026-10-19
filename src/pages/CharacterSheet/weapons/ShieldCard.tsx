@@ -8,26 +8,26 @@ import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButto
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
   uiChipRow,
-  uiInlineRow,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
   uiTextDescription,
   uiStackSection,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { colourDivider } from "../../../ui/styles/colourTokens";
 
@@ -65,43 +65,43 @@ export function ShieldCard({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header: always visible */}
-      <div
-        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-      >
+      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         <CardOverlayButton
           label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
           expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className={`${uiChipRow} items-center`}>
-            <p className={uiCardTitleHover}>{item.name}</p>
-            {libraryItem && <StatusBadge status={libraryItem.status} />}
-          </div>
-          <div className={`mt-0.5 ${uiChipRow} items-center`}>
-            <Chip colour="lime">
-              Shield
-            </Chip>
-          </div>
-        </div>
-        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-          {onToggleEquip && (
-            <EquipToggle
-              equipped={isEquipped}
-              disabled={slotsDisabled}
-              editable={editable}
-              onChange={onToggleEquip}
-            />
-          )}
-          <ExpandChevron expanded={expanded} />
-        </div>
+        <CharacterEntryRowContent
+          interactive
+          name={item.name}
+          nameClassName={uiOverlayCardTitleHover}
+          badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+          metadata={
+            <div className={`mt-0.5 ${uiChipRow} items-center`}>
+              <Chip colour="lime">Shield</Chip>
+            </div>
+          }
+          actions={
+            <>
+              {onToggleEquip && (
+                <EquipToggle
+                  equipped={isEquipped}
+                  disabled={slotsDisabled}
+                  editable={editable}
+                  onChange={onToggleEquip}
+                />
+              )}
+              <ExpandChevron expanded={expanded} />
+            </>
+          }
+        />
       </div>
 
       {expanded && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && (
             <div className="flex justify-end">
-              <RemoveButton onClick={onRemove} label="Remove" />
+              <RemoveEntryButton kind="Shield" name={item.name} onRemove={onRemove} />
             </div>
           )}
 

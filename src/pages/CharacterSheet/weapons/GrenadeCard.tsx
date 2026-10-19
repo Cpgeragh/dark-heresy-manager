@@ -9,7 +9,6 @@ import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { GRENADE_REFERENCE } from "../../../data/reference/weaponReference";
 import {
   uiChipRow,
-  uiInlineRow,
   uiSplitRow,
   uiSection,
   uiSectionShell,
@@ -18,7 +17,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
   uiTextDescription,
   uiStackSection,
   uiStackField,
@@ -30,7 +29,7 @@ import {
   colourFillInset,
 } from "../../../ui/styles/colourTokens";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -39,7 +38,8 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -119,58 +119,54 @@ export function GrenadeCard({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header: always visible */}
-      <div
-        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-      >
+      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         <CardOverlayButton
           label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
           expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className={`${uiChipRow} items-center`}>
-            <p className={`${uiCardTitleHover} truncate`}>{item.name}</p>
-            {libraryItem && <StatusBadge status={libraryItem.status} />}
-          </div>
-          <div className={`mt-0.5 ${uiChipRow} items-center`}>
-            <Chip
-              colour={item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"}
-            >
-              {item.type ?? "Grenade"}
-            </Chip>
-            {(() => {
-              const c = weaponClassChip(item.class);
-              return c ? (
-                <Chip colour={c.colour}>
-                  {c.label}
-                </Chip>
-              ) : null;
-            })()}
-            {isEquipped && (
-              <Chip colour="emerald">
-                {equippedCount} ready
+        <CharacterEntryRowContent
+          interactive
+          name={item.name}
+          nameClassName={`${uiOverlayCardTitleHover} truncate`}
+          badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+          metadata={
+            <div className={`mt-0.5 ${uiChipRow} items-center`}>
+              <Chip
+                colour={
+                  item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"
+                }
+              >
+                {item.type ?? "Grenade"}
               </Chip>
-            )}
-          </div>
-        </div>
-        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-          {onToggleEquip && (
-            <EquipToggle
-              equipped={isEquipped}
-              disabled={!isEquipped && !canEquipMoreTypes}
-              editable={editable}
-              onChange={onToggleEquip}
-            />
-          )}
-          <ExpandChevron expanded={expanded} />
-        </div>
+              {(() => {
+                const c = weaponClassChip(item.class);
+                return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
+              })()}
+              {isEquipped && <Chip colour="emerald">{equippedCount} ready</Chip>}
+            </div>
+          }
+          actions={
+            <>
+              {onToggleEquip && (
+                <EquipToggle
+                  equipped={isEquipped}
+                  disabled={!isEquipped && !canEquipMoreTypes}
+                  editable={editable}
+                  onChange={onToggleEquip}
+                />
+              )}
+              <ExpandChevron expanded={expanded} />
+            </>
+          }
+        />
       </div>
 
       {expanded && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && (
             <div className="flex justify-end">
-              <RemoveButton onClick={onRemove} label="Remove" />
+              <RemoveEntryButton kind="Grenade" name={item.name} onRemove={onRemove} />
             </div>
           )}
 

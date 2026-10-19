@@ -2,16 +2,9 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
-import {
-  uiChipRow,
-  uiInlineRow,
-  uiNoticeBox,
-  uiSection,
-  uiTextLabel,
-  uiCardTitle,
-} from "../../../ui/styles/editableStyles";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
-import { colourNoticeAmber } from "../../../ui/styles/colourTokens";
+import { uiChipRow, uiTextLabel } from "../../../ui/styles/editableStyles";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -32,46 +25,48 @@ export function ArcheotechImplantRow({
 }: Props) {
   const locations = item.bodyLocation ?? [];
 
-  const containerClass = highlightAsArcheotech
-    ? `${uiNoticeBox} ${colourNoticeAmber} p-3 lg:p-4`
-    : uiSection;
-
   return (
-    <div className={`${containerClass} flex items-start gap-3`}>
-      <div className="flex-1 min-w-0">
-        <div className={`${uiInlineRow} flex-wrap`}>
-          <span className={uiCardTitle}>{item.name}</span>
-          {highlightAsArcheotech && (
-            <Chip colour="amber" className="shrink-0">
-              Archeotech
-            </Chip>
-          )}
-        </div>
-        <div className={`${uiChipRow} items-center mt-1`}>
-          {locations.length > 0 && (
-            <StatChip
-              label="Location"
-              value={locations.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
-            />
-          )}
-          {item.craftsmanship && (
-            <>
-              <span className={uiTextLabel}>Quality</span>
-              <Chip colour={CRAFTSMANSHIP_COLOUR[item.craftsmanship]} className="shrink-0">
-                {item.craftsmanship}
-              </Chip>
-            </>
-          )}
-        </div>
-        <ItemMetaChips
-          weight={item.weight}
-          value={item.value}
-          availability={item.availability}
-          className={`${uiChipRow} mt-1`}
-        />
-      </div>
-
-      {editable && <RemoveButton onClick={onRemove} label="Remove" />}
-    </div>
+    <CharacterEntryRow
+      name={item.name}
+      badge={
+        highlightAsArcheotech ? (
+          <Chip colour="amber" className="shrink-0">
+            Archeotech
+          </Chip>
+        ) : undefined
+      }
+      tone={highlightAsArcheotech ? "archeotech" : "default"}
+      metadata={
+        <>
+          <div className={`${uiChipRow} items-center`}>
+            {locations.length > 0 && (
+              <StatChip
+                label="Location"
+                value={locations.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
+              />
+            )}
+            {item.craftsmanship && (
+              <>
+                <span className={uiTextLabel}>Quality</span>
+                <Chip colour={CRAFTSMANSHIP_COLOUR[item.craftsmanship]} className="shrink-0">
+                  {item.craftsmanship}
+                </Chip>
+              </>
+            )}
+          </div>
+          <ItemMetaChips
+            weight={item.weight}
+            value={item.value}
+            availability={item.availability}
+            className={uiChipRow}
+          />
+        </>
+      }
+      actions={
+        editable ? (
+          <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
+        ) : undefined
+      }
+    />
   );
 }

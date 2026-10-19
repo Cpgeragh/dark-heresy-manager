@@ -49,7 +49,7 @@ Start at 0 and set Points to one below, exactly on, and one above every document
 - [ ] At the top of the track, the page switches to "Character retires from play" and hides the Status/Thresholds grid
 - [ ] Add a Temporary Trauma from the picker: roll chip and rules text match the entry chosen
 - [ ] Add a Disorder: severity chip colour and info text match its severity, type chip is correct
-- [ ] Remove a Trauma and a Disorder: both arm a confirm step ("Delete [name] from this character?" with Delete/Cancel) instead of deleting on the first tap; the list only updates after confirming
+- [ ] Remove a Trauma and a Disorder: both arm a confirm step (`Remove [name] from this character?` with Remove/Cancel) instead of removing on the first tap; the list only updates after confirming
 - [ ] Escalate a Disorder to its next severity tier: button reads "Escalate to Severe"/"Escalate to Acute" depending on current tier, arms its own confirm step ("Escalate [name] to [tier]?" with Escalate/Cancel), and disappears once already at the highest tier for that disorder (The Flesh is Weak has no Minor tier; Horrific Nightmares has no Acute tier)
 - [ ] Editable mode shows an icon Add button beside Disorders and Temporary Trauma headers; read-only mode shows a View icon button instead, which opens the picker in browse-only mode: rows don't respond to clicks and there's no custom-add action
 - [ ] Disorder/Trauma picker rows are boxed cards, matching Talents/Traits/Skills/Psychic
@@ -82,7 +82,7 @@ Use the same boundary method as Insanity: one below, on, and one above every thr
 - [ ] Custom Malignancy/Mutation form requires Name, Origin (Custom/2nd Ed), and Rules Text: Add stays disabled until all three are filled
 - [ ] Once added, a custom malignancy/mutation shows its Origin as a source chip on the entry
 - [ ] Custom Malignancy/Mutation form's "\* Required" hint stays visible even after every field is filled in, not just while incomplete
-- [ ] Removing a Malignancy, Minor Mutation, or Major Mutation arms a confirm step ("Delete [name] from this character?" with Delete/Cancel) instead of deleting on the first tap
+- [ ] Removing a Malignancy, Minor Mutation, or Major Mutation arms a confirm step (`Remove [name] from this character?` with Remove/Cancel) instead of removing on the first tap
 - [ ] **Autofill, Android:** the Corruption Points number, the picker search boxes, the custom Malignancy and Mutation Name and Rules Text fields, the rolled value field in Edit Rolls, and Malignancy Notes or Legacy Malignancy Notes each show no autofill suggestion row above the keyboard (`Stepper.tsx`, `PickerModal.tsx`, `CorruptionMalignancyPicker.tsx`, `MutationPicker.tsx`, `RollModifierFields.tsx`, `CorruptionPanel.tsx`)
 
 **Watch for:** this is the one page that writes to another page: a rolled
@@ -155,7 +155,7 @@ appear on the main page.
 - [ ] Open a group after scrolling down, press Back, and confirm the parent picker returns to the same scroll position
 - [ ] Add one child from a group: only that Skill becomes Trained, appears on the main page, and disappears from the untrained picker; unpurchased siblings neither appear on the main page nor disappear from the picker with it
 - [ ] Buy several Skills, refresh or reopen the character, and confirm every purchased tier remains present with its original XP cost and Rank attribution; the catalogue is not copied into the character as owned data
-- [ ] Every grouped child is evaluated independently for ownership and current career/rank availability: one Common Lore child becoming available, being purchased, or being deleted must not add, remove, or unlock its siblings
+- [ ] Every grouped child is evaluated independently for ownership and current career/rank availability: one Common Lore child becoming available, being purchased, or being removed must not add, remove, or unlock its siblings
 - [ ] The grouped picker stays open after adding while another valid child remains; add a second Skill without closing and reopening it, then confirm selecting the final valid child automatically returns to the parent picker instead of leaving an empty `No matches` screen
 - [ ] Expand a picker card using its chevron: this previews its information without selecting it
 - [ ] Owned Skill and Talent cards use the same padded character-entry row on phone and desktop: the name and information control sit at the upper left, actions share a wrapping upper-right area, normal-size metadata chips sit below, and generated source text follows the metadata
@@ -163,8 +163,8 @@ appear on the main page.
 - [ ] Main-page Skill cards do not receive whole-card hover/pressed styling; only their actual controls respond, while selectable cards inside pickers retain the shared whole-card interaction feedback
 - [ ] A Skill card has one information control containing both its rules and any generated effect details
 - [ ] Every DM-only Skill Upgrade action uses the same red outline styling, including the manual-cost path; an owning player never sees the off-career manual-cost action
-- [ ] Open the trash action on a **+20** Skill: the confirmation offers amber-outline **Downgrade to +10**, red-outline **Delete Skill**, and Cancel/close; downgrading removes only the latest level while deleting removes every independent purchase
-- [ ] Repeat at **+10**: the downgrade target is **Trained**; at **Trained**, no downgrade action is offered and Delete returns the Skill to Untrained and to the appropriate picker
+- [ ] Open the trash action on a **+20** Skill: the confirmation offers amber-outline **Downgrade to +10**, red-outline **Remove Skill**, and Cancel/close; downgrading removes only the latest level while removing the Skill removes every independent purchase
+- [ ] Repeat at **+10**: the downgrade target is **Trained**; at **Trained**, no downgrade action is offered and Remove returns the Skill to Untrained and to the appropriate picker
 
 **Talent-supplied Skill effects:**
 
@@ -173,7 +173,7 @@ appear on the main page.
 - [ ] Add **Machinator Array**: Silent Move receives −10 and names Machinator Array as the source
 - [ ] Add **Cult Briefing (Political)**: every Common Lore Skill counts as Basic while the Talent is owned, but an otherwise Untrained Common Lore Skill is not injected onto the main Skills page
 - [ ] Every generated `counts as Basic` message includes the full affected Skill name and identifies the source type correctly: Homeworld effects say **Homeworld**, Talent effects say **Talent**, and Trait effects say **Trait** (for example Forge World, Cult Briefing, and Hagiography)
-- [ ] With Tech-Use Untrained, add **Cult Briefing (Heretek)**: Tech-Use becomes Trained, cannot be deleted as if independently purchased, and names the Talent source
+- [ ] With Tech-Use Untrained, add **Cult Briefing (Heretek)**: Tech-Use becomes Trained, cannot be removed as if independently purchased, and names the Talent source
 - [ ] Independently train Tech-Use first, then add Cult Briefing (Heretek): the Skill does not gain another level and the redundant training source is not displayed
 - [ ] Remove Cult Briefing (Heretek) from both preparations: a solely granted Tech-Use returns to Untrained, while independently trained Tech-Use remains Trained
 - [ ] Add **Cult Briefing (Infestation)** and repeat the same solely-granted versus independently-trained check with Medicae
@@ -189,7 +189,7 @@ appear on the main page.
 - [ ] The Speak Language (Low Gothic) skill Guardsman always grants shows as Trained immediately, no choice screen needed for it
 - [ ] A Career-, Talent-, Trait-, or Homeworld-granted Trained Skill spends no XP and creates no removable independent purchase; removing the source removes only the derived training
 - [ ] Upgrade a freely granted Trained Skill to **+10**: only the paid **+10** tier increases Spent XP and appears on its source Rank card; the free Trained tier is never charged or listed as a purchase
-- [ ] Downgrade that Skill from **+10**: the paid upgrade and its Rank-card entry disappear, while the source-derived Trained Skill remains without a Delete action
+- [ ] Downgrade that Skill from **+10**: the paid upgrade and its Rank-card entry disappear, while the source-derived Trained Skill remains without a Remove action
 - [ ] Change Career away from Guardsman to a career with no starting-benefit data yet: the granted Skill reverts to Untrained
 - [ ] Re-pick Guardsman after changing away: the choice screen appears again; picking differently this time updates which Skill is granted
 - [ ] **Autofill, Android:** the Skills picker search box, the XP Cost field on the manual cost screen and the manual upgrade cost field on an owned Skill each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `AddSkillModal.tsx`, `SkillRow.tsx`)
@@ -222,8 +222,8 @@ below deliberately change several of those pages.
 - [ ] Complete a single-purchase choice or an acquisition screen: it returns to the still-open Talent picker at the same scroll position and the now-unavailable Talent is absent
 - [ ] From **Show all**, complete a manual-cost purchase belonging to a choice-based Talent: if choices remain, it returns to that same refreshed choice screen rather than the main or rank-filtered picker
 - [ ] All six Weapon Training entries are absent: Basic, Heavy, Melee, Pistol, Thrown, and Exotic Weapon Training
-- [ ] Every normal Talent deletion uses a two-step **Delete / Cancel** confirmation
-- [ ] Refresh after several additions and deletions and confirm the same cards, ranks, choices, and sources remain
+- [ ] Every normal Talent removal uses a two-step **Remove / Cancel** confirmation
+- [ ] Refresh after several additions and removals and confirm the same cards, ranks, choices, and sources remain
 - [ ] Any acquisition screen showing a "\* Required" hint keeps it visible even once every required field is filled, not just while incomplete
 
 **Ranked Talents:**
@@ -231,10 +231,10 @@ below deliberately change several of those pages.
 - [ ] Add **Sound Constitution** three times: its picker chip progresses through `Owned: 1`, `Owned: 2`, and `Owned: 3`, while the page shows one `Sound Constitution (3)` card
 - [ ] Sound Constitution remains in the picker indefinitely and each purchase adds exactly +1 maximum Wound
 - [ ] Open the Wounds adjustment information: the source is listed as Sound Constitution with its total rank
-- [ ] Delete the ranked card once: only one purchase is removed, the card becomes `(2)`, and maximum Wounds fall by one
-- [ ] Add **Power Well** repeatedly: it remains available, aggregates into one numbered card, and confirmed deletion removes one purchase at a time
+- [ ] Remove the ranked card once: only one purchase is removed, the card becomes `(2)`, and maximum Wounds fall by one
+- [ ] Add **Power Well** repeatedly: it remains available, aggregates into one numbered card, and confirmed removal removes one purchase at a time
 - [ ] Add **The Flesh is Weak** four times: its picker status progresses from `Owned: 1/4` to `Owned: 4/4`, and one card progresses from rank (1) to rank (4)
-- [ ] At rank 4 The Flesh is Weak disappears from the picker; deleting one purchase lowers it to rank 3 and makes it available again
+- [ ] At rank 4 The Flesh is Weak disappears from the picker; removing one purchase lowers it to rank 3 and makes it available again
 - [ ] Traits shows one read-only **Machine (rank)** grant and Armour receives the same number of Misc AP at every location
 - [ ] Give the character Natural Armour and at least one location with a bionic bonus as well: **Misc Bonuses** lists Natural Armour, The Flesh is Weak, and Bionic as separate lines, while the location total contains their combined value
 
@@ -250,7 +250,7 @@ below deliberately change several of those pages.
 - [ ] Buy one choice: the Talent displays as one normal named card, for example `Resistance (Fear)`, while its choice picker remains open if another valid option exists
 - [ ] In that still-open choice picker, the owned choice is absent and cannot be duplicated with different capitalisation
 - [ ] Buy a second choice without returning to the main picker: the entries become one expandable parent with separately listed children
-- [ ] Expand and collapse the parent, then delete one child: only that purchase is removed and the surviving child returns to a normal card when only one remains
+- [ ] Expand and collapse the parent, then remove one child: only that purchase is removed and the surviving child returns to a normal card when only one remains
 - [ ] Exhaust every finite option: the whole Talent disappears from the Add Talent picker
 
 **Single-purchase fixed choices:**
@@ -267,20 +267,20 @@ below deliberately change several of those pages.
 - [ ] Cult (specific) requires a non-blank cult name and displays `Hatred (Cult: name)`
 - [ ] Xeno (specific) requires a non-blank xeno name and displays `Hatred (Xeno: name)`
 - [ ] Distinct Cult and Xeno names can be added repeatedly; duplicates differing only by spaces or capitalisation are rejected
-- [ ] Multiple Hatred purchases group into one expandable parent with individually deletable children
+- [ ] Multiple Hatred purchases group into one expandable parent with individually removable children
 - [ ] Hatred remains available after every ordinary fixed choice is owned because Cult and Xeno are open-ended
 - [ ] Reformed Skin requires non-blank replacement text and rejects a duplicate replacement case-insensitively
-- [ ] One Reformed Skin is a normal named card; two or more form an expandable group with individually deletable children
+- [ ] One Reformed Skin is a normal named card; two or more form an expandable group with individually removable children
 
 **Psychic purchase records:**
 
 - [ ] Add **Minor Psychic Power** and **Psychic Power** on Talents: no actual power is chosen here
 - [ ] Their Talent cards and picker cards show `Owned: N`; they do not show availability
 - [ ] Add several purchases: each Add creates one selection and the Talent remains available
-- [ ] Delete an unused purchase: Delete/Cancel confirmation appears and only one purchase is removed
-- [ ] Link every purchase to powers on Psychic, then tap the Talent trash button: **Cannot Delete Talent** explains that its linked Psychic powers must be deleted first
+- [ ] Remove an unused purchase: Remove/Cancel confirmation appears and only one purchase is removed
+- [ ] Link every purchase to powers on Psychic, then tap the Talent trash button: **Cannot Remove Talent** explains that its linked Psychic powers must be removed first
 - [ ] The warning appears only after tapping trash; it is not permanently printed on the Talent card
-- [ ] Delete a linked power on Psychic, return here, and confirm the released Talent purchase can now be deleted
+- [ ] Remove a linked power on Psychic, return here, and confirm the released Talent purchase can now be removed
 
 **Simple permanent and granted effects:**
 
@@ -290,7 +290,7 @@ below deliberately change several of those pages.
 - [ ] Add **Touched by the Fates**, confirm the displayed half-Willpower-Bonus value, and verify Vitals sets total Fate to that recorded value
 - [ ] Change Willpower afterwards: the already recorded Touched by the Fates value does not silently recalculate
 - [ ] Add **The Power Within**: a read-only `Resistance (Psychic Powers)` card appears with `Granted by The Power Within`
-- [ ] Add **Purity of Flesh**: a read-only `Gift of Purity` card appears and cannot be deleted independently
+- [ ] Add **Purity of Flesh**: a read-only `Gift of Purity` card appears and cannot be removed independently
 - [ ] If an independently purchased Talent duplicates a calculated grant, only one visible card is shown; removing the independent copy reveals the still-active granted card
 
 **Cult Briefing acquisition routes:**
@@ -299,7 +299,7 @@ below deliberately change several of those pages.
 - [ ] Heretek requires a granted augmetic and one of Autosanguine, Logis Implant, Orthoproxy, or Technical Knock; Tech-Use also becomes Trained when it was Untrained
 - [ ] A Heretek augmetic that requires a body location cannot be completed until a valid location is chosen
 - [ ] Choosing Concealed Weapon Bionic requires an existing Bionic Arm and an eligible unmodified pistol or one-handed melee weapon; readable errors appear when either is missing
-- [ ] Completing Concealed Weapon Bionic installs the augmetic and links the selected weapon; deleting Cult Briefing removes that granted augmetic and clears the weapon link
+- [ ] Completing Concealed Weapon Bionic installs the augmetic and links the selected weapon; removing Cult Briefing removes that granted augmetic and clears the weapon link
 - [ ] Pleasure grants +5 Fellowship and requires Chem Geld or Decadence
 - [ ] Infestation trains Medicae and displays a read-only Hardy grant
 - [ ] Blood requires one of Melee Weapon Training (Primitive, Chain, Shock, or Power) and displays a read-only Frenzy grant
@@ -333,8 +333,8 @@ below deliberately change several of those pages.
 - [ ] Acquisition clearly displays the recorded Willpower Bonus and the resulting Minor/Major selection counts before confirmation
 - [ ] Later Willpower changes do not retroactively change selections already recorded by an owned Psy Rating Talent
 - [ ] Psychic displays the highest owned Psy Rating, not the most recently purchased one
-- [ ] A Psy Rating Talent with linked powers cannot be deleted; tapping trash opens the same Cannot Delete warning used for Psychic purchase Talents
-- [ ] After deleting linked powers, deleting the Talent removes a Discipline only if that purchase introduced it and no other remaining Psy Rating Talent also introduced it
+- [ ] A Psy Rating Talent with linked powers cannot be removed; tapping trash opens the same Cannot Remove warning used for Psychic purchase Talents
+- [ ] After removing linked powers, removing the Talent removes a Discipline only if that purchase introduced it and no other remaining Psy Rating Talent also introduced it
 
 **Purity of Flesh and Reformed Skin:**
 
@@ -350,23 +350,23 @@ below deliberately change several of those pages.
 - [ ] A later Reformed Skin purchase asks whether its cause is Purity of Flesh or Critical Damage
 - [ ] Choosing Purity removes all Fate Points gained by that Purity purchase; additional Purity-related replacements do not subtract the same Fate again
 - [ ] Choosing Critical Damage leaves Purity Fate unchanged
-- [ ] Delete Purity of Flesh: the second confirmation offers **Delete and restore recorded changes**, **Delete Talent only**, and **Cancel**
-- [ ] Delete and restore returns recorded implants, integrated weapons, Archeotech, and concealed-weapon links without duplicating items already present
-- [ ] Delete Talent only leaves the removed inventory removed while all calculated Talent effects disappear
+- [ ] Remove Purity of Flesh: the second confirmation offers **Remove and restore recorded changes**, **Remove Talent only**, and **Cancel**
+- [ ] Remove and restore returns recorded implants, integrated weapons, Archeotech, and concealed-weapon links without duplicating items already present
+- [ ] Remove Talent only leaves the removed inventory removed while all calculated Talent effects disappear
 
 **Rite of Pure Thought:**
 
 - [ ] The acquisition lists the character's structured Mental Disorders and requires confirmation that the GM reviewed the changes
 - [ ] Every disorder selected for removal requires a non-blank replacement name
 - [ ] Each replacement retains the removed disorder's severity and is identified as its replacement
-- [ ] Deleting Rite of Pure Thought offers the same restore/delete-only decision: restore brings back the recorded original disorders, while delete-only leaves the replacements in place
+- [ ] Removing Rite of Pure Thought offers the same restore/remove-only decision: restore brings back the recorded original disorders, while remove-only leaves the replacements in place
 
 **Faith Talents and read-only mode:**
 
 - [ ] Faith Talents share one alphabetical list and show the correct **General / Emperor's Sign / Emperor's Mercy / Emperor's Wrath** chip
 - [ ] The Faith picker stays open after an addition and removes the now-owned non-repeatable Talent
-- [ ] Faith Talent deletion uses Delete/Cancel and removes only the chosen entry
-- [ ] In View mode, Talent and Faith pickers remain searchable and information popups work, but cards do not add, delete, or show selection feedback
+- [ ] Faith Talent removal uses Remove/Cancel and removes only the chosen entry
+- [ ] In View mode, Talent and Faith pickers remain searchable and information popups work, but cards do not add, remove, or show selection feedback
 
 **Career-granted starting Talents:**
 
@@ -437,7 +437,7 @@ and acquisition-based Traits, refreshing after each group. Keep Characteristics,
 Skills, Insanity, Armour, Cybernetics, Talents, and Weapon Training available for
 cross-checking permanent effects and their named sources.
 
-- [ ] Add and remove an ordinary Trait; deletion uses the same Delete/Cancel confirmation as Talents
+- [ ] Add and remove an ordinary Trait; removal uses the same Remove/Cancel confirmation as Talents
 - [ ] In view-only mode, picker rows do not activate; in edit mode, each pressed row alone shows the shared touch feedback
 - [ ] Secondary choice screens use a forward arrow to enter and a back arrow to return, preserving the parent picker position; after a purchase they remain open only while another valid choice exists
 - [ ] Fear uses the four labelled ratings; Size uses Minuscule through Massive; selecting either Trait's one permitted choice automatically returns to the main Trait picker and removes that entire Trait from it
@@ -445,10 +445,10 @@ cross-checking permanent effects and their named sources.
 - [ ] Unnatural Characteristic's choice screen remains open after a selection, keeps every repeatable Characteristic available, and updates that option's **Owned: N** immediately; on the main page, different Characteristics group under one expandable card and deleting one acquisition lowers only its count by one
 - [ ] Add 10+ mixed Traits: two natural-height columns remain aligned without stretched cards, blank gaps, overlap, or clipping
 - [ ] Natural Armour and Armour Plating add named Misc AP sources; only the strongest Machine value applies, including Machine granted by The Flesh is Weak
-- [ ] Multiple Arms, Labourer Build, Fit For Purpose, Superior Origins, Soul-bound, and Sanctioning changes appear on the affected Characteristic with the Trait named as the source; deletion reverses them
+- [ ] Multiple Arms, Labourer Build, Fit For Purpose, Superior Origins, Soul-bound, and Sanctioning changes appear on the affected Characteristic with the Trait named as the source; removal reverses them
 - [ ] Size, Amorphous, Crawler, Quadruped, and Unnatural Speed update movement correctly; Unnatural Agility does not multiply movement; Burrow/Fly/Hover speeds appear as separate modes
 - [ ] Wary shows +1 Initiative; relevant Homeworld Traits update Basic/Trained Skill use and modifiers with named Trait sources
-- [ ] Soul-bound requires the bound entity and one permanent consequence; test Insanity, blindness, Characteristic loss, and mutation routes, including required rolls/text and deletion reversal
+- [ ] Soul-bound requires the bound entity and one permanent consequence; test Insanity, blindness, Characteristic loss, and mutation routes, including required rolls/text and removal reversal
 - [ ] Blank Slate requires exactly three Common Lore, Forbidden Lore, Scholastic Lore, or Trade Skills; all three count as Trained and gain +10, and removal restores their independent state
 - [ ] Sanctioned Psyker requires one of all 13 source-table results plus the 3d10 age increase; check an Insanity result, both +3 Characteristic results, Reconstructed Skull, Throne Wed/Chem Geld, and Optical Rupture/Common Cybernetic Senses
 - [ ] Choosing Imperial Psyker records Sanctioned Psyker as a read-only Career Trait; changing Career removes its derived effects and any Optical Rupture implant without touching independent copies
@@ -612,7 +612,7 @@ Psychic Power, and Psy Rating selections without spending them.
 - [ ] Each linked power has a chip naming **Minor Psychic Power**, while Talents still shows the owned purchase records
 - [ ] Repeat with two Psychic Power purchases in Major Powers; each linked power names **Psychic Power**
 - [ ] A Minor purchase cannot link a Major power and a Major purchase cannot link a Minor power
-- [ ] Delete one linked power using Delete/Cancel confirmation: the power disappears, its Talent purchase remains, and availability returns by one
+- [ ] Remove one linked power using Remove/Cancel confirmation: the power disappears, its Talent purchase remains, and availability returns by one
 
 **Psy Rating selections:**
 
@@ -623,7 +623,7 @@ Psychic Power, and Psy Rating selections without spending them.
 - [ ] If several Psy Rating Talents were purchased before choosing powers, selections are consumed in purchase order and each power receives the corresponding Talent chip
 - [ ] A Major Psy Rating selection only displays powers from the Discipline recorded on that Talent
 - [ ] A custom Major power created through that route has its required Discipline fixed to the same value
-- [ ] Deleting a linked power releases one selection back to the correct Psy Rating Talent
+- [ ] Removing a linked power releases one selection back to the correct Psy Rating Talent
 
 **Independent powers and manual assignment:**
 
@@ -644,7 +644,7 @@ Psychic Power, and Psy Rating selections without spending them.
 - [ ] Press and hold a selectable power card: only that card shows the pressed effect
 - [ ] In View mode, search, filters, expansion, and information remain usable, but there is no pressed selection feedback and nothing can be added or linked
 - [ ] Power cards show source, Discipline, selection source where applicable, PT, Action, Range, Sustained, and the complete rules text
-- [ ] Delete asks for confirmation; Cancel preserves the power and Delete removes only that power
+- [ ] Remove asks for confirmation; Cancel preserves the power and Remove removes only that power
 
 **Custom powers and campaign library:**
 
@@ -763,12 +763,12 @@ Start on a character with old-style plain-text notes (a legacy fixture, `notes` 
 - [ ] Notes display as cards, two per row on both phone and desktop, sorted newest-first
 - [ ] A note's preview shows up to three lines of its text and stops there (no more, no less) regardless of how short or long the actual note is: card heights stay consistent within a row either way
 - [ ] Tapping a card opens it for reading only: no Title/Note inputs, no Save button, just the full text
-- [ ] Edit sits on the card itself, next to Remove; opening it pre-fills Title and Note with the entry's current values, and Save updates the card in place and bumps its date
-- [ ] Removing a note arms a confirm step ("Delete '[title]' from this character?" with Delete/Cancel) instead of deleting on the first tap
-- [ ] On a narrow phone screen, the title, preview text, and date never overlap the Edit/Remove buttons: Edit/Remove sit on their own row above the content on mobile, back inline with it on desktop
+- [ ] Edit sits on the card itself, next to Delete; opening it pre-fills Title and Note with the entry's current values, and Save updates the card in place and bumps its date
+- [ ] Deleting a note arms a confirm step (`Delete [title] from this character?` with Delete/Cancel) instead of deleting on the first tap
+- [ ] On a narrow phone screen, the title, preview text, and date never overlap the Edit/Delete buttons: Edit/Delete sit on their own row above the content on mobile, back inline with it on desktop
 - [ ] Search box (shown only once at least one note exists) filters by both title and note text, case-insensitive, live as you type
 - [ ] A search with no matches shows "No notes match your search.", distinct from the true empty state's "No notes yet."
-- [ ] Read-only mode: the search box still works and cards still open for reading, but there's no Add button and no Edit/Remove on any card
+- [ ] Read-only mode: the search box still works and cards still open for reading, but there's no Add button and no Edit/Delete on any card
 - [ ] **Autofill, Android:** the search box, the Title field and the Note field each show no autofill suggestion row above the keyboard (`NotesTab.tsx`)
 
 ## 18. Background
@@ -1348,10 +1348,10 @@ Use an editable character with a career, and slow the network in the browser's d
 - [ ] Upgrading a Skill, adding a Skill from the picker, and adding or upgrading with a manual cost as the DM show waiting dots on the button or the tapped row until the save finishes, and the dialog closes only then (`SkillRow.tsx`, `AddSkillModal.tsx`)
 - [ ] Confirming a Characteristic Upgrade shows waiting dots on the Upgrade button and closes the dialog when the save finishes (`CharacteristicField.tsx`)
 - [ ] Training a weapon group, training with a manual cost, buying a career exotic weapon and adding an exotic weapon as the DM show waiting dots on the confirm button and close the dialog when the save finishes (`WeaponTrainingTab.tsx`)
-- [ ] Deleting a Skill, downgrading a Skill, downgrading a Characteristic and removing weapon training or an exotic weapon close the dialog at once and change the sheet at once
-- [ ] Adding a Talent from the picker, including one with a choice or a manual cost, shows waiting dots on the tapped row or the Buy button and returns to the list only when the save finishes; removing a Talent shows waiting dots on its Remove or Delete button (`TalentPickerModal.tsx`, `TalentEntryCards.tsx`)
+- [ ] Removing a Skill, downgrading a Skill, downgrading a Characteristic and removing weapon training or an exotic weapon close the dialog at once and change the sheet at once
+- [ ] Adding a Talent from the picker, including one with a choice or a manual cost, shows waiting dots on the tapped row or the Buy button and returns to the list only when the save finishes; removing a Talent shows waiting dots on its Remove button (`TalentPickerModal.tsx`, `TalentEntryCards.tsx`)
 - [ ] Adding, removing or finishing the acquisition of a Trait, and saving a custom Trait, show waiting dots and change talents, cybernetics and gear together in one save, so a refused change leaves all three as they were (`TraitsTab.tsx`)
-- [ ] Buying a special Elite Advance, a skill, a fixed-package talent or a manual talent shows waiting dots and closes the dialog only when the save finishes, and removing a special Elite Advance shows waiting dots on its Delete button (`EliteAdvancesTab.tsx`)
+- [ ] Buying a special Elite Advance, a skill, a fixed-package talent or a manual talent shows waiting dots and closes the dialog only when the save finishes, and removing a special Elite Advance shows waiting dots on its Remove button (`EliteAdvancesTab.tsx`)
 - [ ] Choosing a Homeworld or a Career, an Advance Scheme row, an Insanity roll for an Advance Scheme, or finishing a Homeworld, Career or Imperial Psyker choice modal shows waiting dots on the tapped row or button and closes the picker only when the save finishes; a Career change saves the header, talents, experience, insanity and cybernetics together (`BackgroundSetupFields.tsx`)
 - [ ] Creating or editing a custom ranged, melee, grenade or shield definition, and creating a custom integrated ranged or melee weapon, keeps the form in its saving state until the character has the item, and only then closes it and shows the success message
 - [ ] A purchase the server refuses, such as one that would spend more than the character's Total XP, leaves the dialog open with the error message and without waiting dots

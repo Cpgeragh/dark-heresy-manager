@@ -4,10 +4,7 @@
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { Button } from "../../../ui/buttons/Button";
 import { Chip, NestedChip } from "../../../ui/chips/Chip";
-import {
-  ItemMetaChips,
-  NestedItemMetaChips,
-} from "../../../ui/chips/ItemMetaChips";
+import { ItemMetaChips, NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
@@ -15,7 +12,7 @@ import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerMo
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CloseIcon } from "../../../ui/icons/CloseIcon";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import {
@@ -117,9 +114,7 @@ export function WeaponQualitySelector({
 export function DamageTypeChip({ damage }: { damage: string }) {
   const damageType = parseDamageType(damage);
   if (!damageType) return null;
-  return (
-    <StatChip label="Type" value={damageType.label} valueColour={damageType.colour} />
-  );
+  return <StatChip label="Type" value={damageType.label} valueColour={damageType.colour} />;
 }
 
 // ─── Equip Toggle ─────────────────────────────────────────────────────────────
@@ -137,9 +132,9 @@ export function EquipToggle({
 }) {
   if (!editable) {
     return equipped ? (
-      <Chip colour="emerald" className="uppercase tracking-wide shrink-0">
+      <NestedChip colour="emerald" className="uppercase tracking-wide shrink-0">
         Equipped
-      </Chip>
+      </NestedChip>
     ) : null;
   }
   return (
@@ -149,7 +144,7 @@ export function EquipToggle({
       disabled={disabled && !equipped}
       loadingLabel={equipped ? "Unequipping" : "Equipping"}
       title={equipped ? "Click to unequip" : disabled ? "Slots full" : "Click to equip"}
-      className={`relative ${uiLayerLocal} pointer-events-auto shrink-0`}
+      className={`relative ${uiLayerLocal} pointer-events-auto shrink-0 sm:h-7 sm:px-2.5 md:h-8 md:px-3 md:text-sm`}
       onClick={(event) => {
         event.stopPropagation();
         if (!disabled || equipped) return onChange();
@@ -205,7 +200,12 @@ export function UpgradeCard({
       <div className={`${uiSplitRow}`}>
         <span className={`text-xs lg:text-sm font-medium ${uiTextBody}`}>{upgrade.name}</span>
         {editable && (
-          <RemoveButton onClick={() => onRemove(upgrade.id)} label={`Remove ${upgrade.name}`} />
+          <RemoveEntryButton
+            kind="Upgrade"
+            name={upgrade.name}
+            from="this weapon"
+            onRemove={() => onRemove(upgrade.id)}
+          />
         )}
       </div>
       <div className="flex flex-wrap gap-1 mt-1">

@@ -5,14 +5,12 @@ import { TRAIT_LIST } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
   uiChipRow,
-  uiTextBody,
   uiTextLabel,
   uiTextDescription,
   uiStackBody,
   uiStackList,
 } from "../../ui/styles/editableStyles";
-import { RemoveButton } from "../../ui/buttons/RemoveButton";
-import { Button } from "../../ui/buttons/Button";
+import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
 import { Chip } from "../../ui/chips/Chip";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
@@ -26,7 +24,6 @@ import {
 } from "../../ui/styles/colourTokens";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
-import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { AccordionCard } from "../../ui/AccordionCard";
 import { normaliseSources } from "./talentUtils";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -36,7 +33,6 @@ interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
   editable: boolean;
   onRemove: (uid: string) => void | Promise<unknown>;
-  confirmDeletion?: boolean;
   displayName?: string;
   secondaryText?: string;
   statusChip?: string;
@@ -52,7 +48,6 @@ export function EntryCard({
   entry,
   editable,
   onRemove,
-  confirmDeletion = false,
   displayName,
   secondaryText,
   statusChip,
@@ -72,7 +67,6 @@ export function EntryCard({
   onUpdateAllCopies,
 }: EntryCardProps) {
   recordComponentRender("TalentEntryCard");
-  const [deleteArmed, setDeleteArmed] = useState(false);
   const shownName = displayName ?? entry.name;
   const isGranted = Boolean(entry.grantedByTalentEntryUid);
   const eliteAdvanceSource = entry.eliteAdvancePurchase?.sourceName;
@@ -154,13 +148,11 @@ export function EntryCard({
         afterMetadata={statusAfterSource ? secondaryInformation : undefined}
         actions={
           editable && (removable || deletionBlockedMessage) && !isGranted ? (
-            <RemoveButton
-              onClick={() =>
-                deletionBlockedMessage || confirmDeletion
-                  ? setDeleteArmed(true)
-                  : onRemove(entry.uid)
-              }
-              label={`${confirmDeletion ? "Delete" : "Remove"} ${shownName}`}
+            <RemoveEntryButton
+              kind={deletionNoun}
+              name={shownName}
+              onRemove={() => onRemove(entry.uid)}
+              blockedMessage={deletionBlockedMessage}
               className="mt-0.5"
             />
           ) : undefined
@@ -180,41 +172,6 @@ export function EntryCard({
           />
         )}
       </CharacterEntryRow>
-      {deleteArmed && (
-        <PickerModal
-          title={
-            deletionBlockedMessage ? `Cannot Delete ${deletionNoun}` : `Delete ${deletionNoun}`
-          }
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setDeleteArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            deletionBlockedMessage ? (
-              <Button fullWidth variant="ghost" onClick={() => setDeleteArmed(false)}>
-                Close
-              </Button>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="primary" onClick={() => onRemove(entry.uid)}>
-                  Delete
-                </Button>
-                <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
-                  Cancel
-                </Button>
-              </div>
-            )
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              {deletionBlockedMessage ?? `Delete ${shownName} from this character?`}
-            </p>
-          </PickerBody>
-        </PickerModal>
-      )}
     </>
   );
 }
@@ -259,7 +216,6 @@ export function TalentGroupCard({
                 entry={entry}
                 editable={editable}
                 onRemove={onRemove}
-                confirmDeletion
                 removable={!entry.grantedByTalentEntryUid}
                 statusAfterSource={statusAfterSource}
                 statusChip={statusChip}

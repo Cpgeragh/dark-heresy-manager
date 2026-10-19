@@ -112,6 +112,18 @@ describe("GrenadeCard equip toggle", () => {
   });
 });
 
+describe("GrenadeCard remove", () => {
+  it("calls onRemove only after removal is confirmed", async () => {
+    const user = userEvent.setup();
+    const { onRemove } = renderCard();
+
+    await user.click(screen.getByRole("button", { name: "Remove Custom Frag" }));
+    expect(onRemove).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onRemove).toHaveBeenCalledOnce();
+  });
+});
+
 describe("GrenadeCard quantity", () => {
   it("calls onUpdateQty when the quantity is incremented", async () => {
     const user = userEvent.setup();

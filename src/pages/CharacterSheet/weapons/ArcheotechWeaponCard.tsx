@@ -9,20 +9,19 @@ import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   uiChipRow,
-  uiInlineRow,
   uiNoticeBox,
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
   uiInfoModalWrapper,
   uiTextDescription,
   uiStackSection,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { colourNoticeAmber, colourDivider } from "../../../ui/styles/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
@@ -31,7 +30,8 @@ import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared
 import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { weaponClassChip } from "./weaponHelpers";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 
 export function ArcheotechWeaponCard({
@@ -94,60 +94,56 @@ export function ArcheotechWeaponCard({
   return (
     <div className={containerClass}>
       {/* Header: always visible */}
-      <div
-        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-      >
+      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         <CardOverlayButton
           label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
           expanded={expanded}
           onClick={() => setExpanded((e) => !e)}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className={`${uiInlineRow} flex-wrap`}>
-            <p className={uiCardTitleHover}>{item.name}</p>
-          </div>
-          {(highlightAsArcheotech || weaponClass) && (
-            <div className={`mt-0.5 ${uiChipRow} items-center`}>
-              {highlightAsArcheotech && (
-                <Chip colour="amber" className="shrink-0">
-                  Archeotech
-                </Chip>
+        <CharacterEntryRowContent
+          interactive
+          name={item.name}
+          nameClassName={uiOverlayCardTitleHover}
+          metadata={
+            highlightAsArcheotech || weaponClass ? (
+              <div className={`mt-0.5 ${uiChipRow} items-center`}>
+                {highlightAsArcheotech && (
+                  <Chip colour="amber" className="shrink-0">
+                    Archeotech
+                  </Chip>
+                )}
+                {weaponClass === "Melee" ? (
+                  <Chip colour="orange">Melee</Chip>
+                ) : weaponClass ? (
+                  (() => {
+                    const c = weaponClassChip(weaponClass);
+                    return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
+                  })()
+                ) : null}
+              </div>
+            ) : undefined
+          }
+          actions={
+            <>
+              {onToggleEquip && (
+                <EquipToggle
+                  equipped={isEquipped}
+                  disabled={slotsDisabled}
+                  editable={editable}
+                  onChange={onToggleEquip}
+                />
               )}
-              {weaponClass === "Melee" ? (
-                <Chip colour="orange">
-                  Melee
-                </Chip>
-              ) : weaponClass ? (
-                (() => {
-                  const c = weaponClassChip(weaponClass);
-                  return c ? (
-                    <Chip colour={c.colour}>
-                      {c.label}
-                    </Chip>
-                  ) : null;
-                })()
-              ) : null}
-            </div>
-          )}
-        </div>
-        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-          {onToggleEquip && (
-            <EquipToggle
-              equipped={isEquipped}
-              disabled={slotsDisabled}
-              editable={editable}
-              onChange={onToggleEquip}
-            />
-          )}
-          <ExpandChevron expanded={expanded} />
-        </div>
+              <ExpandChevron expanded={expanded} />
+            </>
+          }
+        />
       </div>
 
       {expanded && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && onRemove && (
             <div className="flex justify-end">
-              <RemoveButton onClick={onRemove} label="Remove" />
+              <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
             </div>
           )}
 

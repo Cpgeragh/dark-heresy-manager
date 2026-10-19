@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { DocumentSnapshot, Firestore, Transaction } from "firebase-admin/firestore";
-import { persistRecountOnRejection, readDeviceCount, writeDeviceCount } from "../../src/shared/deviceCount";
+import {
+  persistRecountOnRejection,
+  readDeviceCount,
+  writeDeviceCount,
+} from "../../src/shared/deviceCount";
 
 describe("readDeviceCount", () => {
   it("returns the stored count without recounting when one already exists", async () => {

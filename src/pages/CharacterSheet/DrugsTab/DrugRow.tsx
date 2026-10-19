@@ -5,15 +5,12 @@ import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
 import {
   uiChipRow,
-  uiInlineRow,
-  uiSection,
   uiTextBody,
   uiTextLabel,
-  uiItemName,
-  uiInfoModalWrapper,
   uiTextDescription,
 } from "../../../ui/styles/editableStyles";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
@@ -46,91 +43,93 @@ export function DrugRow({
   const hasInfo = !!(ref?.effect || ref?.sideEffect || ref?.notes || item.notes);
 
   return (
-    <div className={[uiSection, "flex items-start gap-3"].join(" ")}>
-      {/* Name + duration + chips */}
-      <div className="flex-1 min-w-0">
-        <div className={`${uiInlineRow}`}>
-          <p className={uiItemName}>{item.name}</p>
-          {libraryItem && <StatusBadge status={libraryItem.status} />}
-          {hasInfo && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={item.name}
-                content={
-                  <>
-                    {ref?.duration && (
-                      <div>
-                        <p className={`${uiTextLabel} font-semibold mb-1`}>Duration</p>
-                        <p className={uiTextDescription}>{ref.duration}</p>
-                      </div>
-                    )}
-                    {ref?.effect && (
-                      <div>
-                        <p className={`${uiTextLabel} font-semibold mb-1`}>Effect</p>
-                        <p className={uiTextDescription}>{ref.effect}</p>
-                      </div>
-                    )}
-                    {ref?.sideEffect && (
-                      <div>
-                        <p
-                          className={`text-xs lg:text-sm font-semibold ${colourHeadingAccent} uppercase tracking-wide mb-1`}
-                        >
-                          Side Effects
-                        </p>
-                        <p className={uiTextDescription}>{ref.sideEffect}</p>
-                      </div>
-                    )}
-                    {ref?.notes && (
-                      <div>
-                        <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                        <p className={uiTextDescription}>{ref.notes}</p>
-                      </div>
-                    )}
-                    {item.notes && (
-                      <div>
-                        <p className={`${uiTextLabel} font-semibold mb-1`}>Player Notes</p>
-                        <p className={uiTextDescription}>{item.notes}</p>
-                      </div>
-                    )}
-                  </>
-                }
-              />
-            </span>
-          )}
-        </div>
-        {ref?.duration && (
-          <p className={`text-xs lg:text-sm ${uiTextBody} mt-0.5`}>Duration: {ref.duration}</p>
-        )}
+    <CharacterEntryRow
+      name={item.name}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      info={
+        hasInfo ? (
+          <InfoModal
+            title={item.name}
+            content={
+              <>
+                {ref?.duration && (
+                  <div>
+                    <p className={`${uiTextLabel} font-semibold mb-1`}>Duration</p>
+                    <p className={uiTextDescription}>{ref.duration}</p>
+                  </div>
+                )}
+                {ref?.effect && (
+                  <div>
+                    <p className={`${uiTextLabel} font-semibold mb-1`}>Effect</p>
+                    <p className={uiTextDescription}>{ref.effect}</p>
+                  </div>
+                )}
+                {ref?.sideEffect && (
+                  <div>
+                    <p
+                      className={`text-xs lg:text-sm font-semibold ${colourHeadingAccent} uppercase tracking-wide mb-1`}
+                    >
+                      Side Effects
+                    </p>
+                    <p className={uiTextDescription}>{ref.sideEffect}</p>
+                  </div>
+                )}
+                {ref?.notes && (
+                  <div>
+                    <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+                    <p className={uiTextDescription}>{ref.notes}</p>
+                  </div>
+                )}
+                {item.notes && (
+                  <div>
+                    <p className={`${uiTextLabel} font-semibold mb-1`}>Player Notes</p>
+                    <p className={uiTextDescription}>{item.notes}</p>
+                  </div>
+                )}
+              </>
+            }
+          />
+        ) : undefined
+      }
+      beforeMetadata={
+        ref?.duration ? (
+          <p className={`text-xs lg:text-sm ${uiTextBody}`}>Duration: {ref.duration}</p>
+        ) : undefined
+      }
+      metadata={
         <ItemMetaChips
           weight={item.weight ?? ref?.weight ?? "0 kg"}
           value={item.value ?? ref?.value}
           availability={item.availability ?? ref?.availability}
           source={item.source}
-          className={`${uiChipRow} mt-1`}
+          className={uiChipRow}
         />
-        {libraryItem && (
-          <CustomItemActionButtons
-            libraryItem={libraryItem}
-            isDM={isDM}
-            canEditDefinition={canEditDefinition}
-            busyAction={busyAction}
-            onEditDefinition={onEditDefinition}
-            onPublish={onPublish}
-            onArchive={onArchive}
-            onUpdateAllCopies={onUpdateAllCopies}
+      }
+      actions={
+        <>
+          <QuantityControl
+            quantity={item.quantity}
+            editable={editable}
+            onUpdate={(q) => onUpdateQty(item.id, q)}
           />
-        )}
-      </div>
-
-      {/* Quantity controls */}
-      <QuantityControl
-        quantity={item.quantity}
-        editable={editable}
-        onUpdate={(q) => onUpdateQty(item.id, q)}
-      />
-
-      {/* Remove */}
-      {editable && <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />}
-    </div>
+          {editable && (
+            <RemoveEntryButton kind="Drug" name={item.name} onRemove={() => onRemove(item.id)} />
+          )}
+        </>
+      }
+    >
+      {libraryItem && (
+        <CustomItemActionButtons
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
+      )}
+    </CharacterEntryRow>
   );
 }

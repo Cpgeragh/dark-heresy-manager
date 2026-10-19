@@ -93,7 +93,6 @@ function UnnaturalCharacteristicCards({
         entry={entryToRemove}
         editable={editable}
         onRemove={onRemove}
-        confirmDeletion
         deletionNoun="Trait"
         displayName={group[0].name}
         statusChip={`Owned: ${group.length}`}
@@ -348,7 +347,6 @@ export function TraitsTab({
             entry={entry}
             editable={editable}
             onRemove={handleRemoveTrait}
-            confirmDeletion
             deletionNoun="Trait"
             libraryItem={libraryItem}
             isDM={isDM && editable}
@@ -387,7 +385,6 @@ export function TraitsTab({
                 entry={skinOfIronEntries[skinOfIronEntries.length - 1]}
                 editable={editable}
                 onRemove={handleRemoveTrait}
-                confirmDeletion
                 deletionNoun="Trait"
                 displayName="Skin of Iron"
                 statusChip={`Owned: ${skinOfIronEntries.length}/4`}

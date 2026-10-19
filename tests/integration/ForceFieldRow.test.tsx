@@ -99,9 +99,11 @@ describe("ForceFieldRow activate/deactivate", () => {
 });
 
 describe("ForceFieldRow remove", () => {
-  it("calls onRemove when Remove is clicked", async () => {
+  it("calls onRemove only after removal is confirmed", async () => {
     const user = userEvent.setup();
     const { onRemove } = renderRow();
+    await user.click(screen.getByRole("button", { name: "Remove Refraction Field" }));
+    expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledWith("f1");
   });
@@ -111,6 +113,8 @@ describe("ForceFieldRow read-only", () => {
   it("hides Activate/Deactivate and Remove when not editable", () => {
     renderRow({ editable: false });
     expect(screen.queryByRole("button", { name: "Deactivate" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Remove Refraction Field" })
+    ).not.toBeInTheDocument();
   });
 });

@@ -540,13 +540,7 @@ export function TalentAcquisitionModal({
               >
                 <PickerRowName
                   name={item.name}
-                  badges={
-                    selected && (
-                      <Chip colour="amber">
-                        Life-critical
-                      </Chip>
-                    )
-                  }
+                  badges={selected && <Chip colour="amber">Life-critical</Chip>}
                 />
                 <PickerRowText>{item.kind}</PickerRowText>
               </PickerRow>
@@ -739,10 +733,7 @@ export function TalentAcquisitionModal({
                       <p className={uiTextBody}>{item.name}</p>
                       <p className={colourAmberPlain}>{item.kind}</p>
                     </div>
-                    <Chip
-                      colour={item.qualifiesForFate ? "amber" : "slate"}
-                      className="shrink-0"
-                    >
+                    <Chip colour={item.qualifiesForFate ? "amber" : "slate"} className="shrink-0">
                       {item.qualifiesForFate ? "Qualifies for Fate" : "Removed — no Fate"}
                     </Chip>
                   </div>

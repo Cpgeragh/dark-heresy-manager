@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { ItemRow } from "../../src/pages/CharacterSheet/GearTab/ItemRow";
@@ -24,13 +25,20 @@ describe("ItemRow", () => {
     );
 
     expect(screen.getByText("Sanctioned Psyker (Trait): Granted")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Remove Chattallium Ring" })
+    ).not.toBeInTheDocument();
   });
 
-  it("shows a Remove button and no granted text for a normal item", () => {
-    render(<ItemRow item={gearItem()} editable onRemove={vi.fn()} />);
+  it("shows a named Remove button and confirms before removing a normal item", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    render(<ItemRow item={gearItem()} editable onRemove={onRemove} />);
 
     expect(screen.queryByText(/Granted$/)).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remove Chattallium Ring" }));
+    expect(onRemove).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onRemove).toHaveBeenCalledOnce();
   });
 });

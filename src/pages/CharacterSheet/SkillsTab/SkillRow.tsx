@@ -9,7 +9,7 @@ import { Chip } from "../../../ui/chips/Chip";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/reference/skillDescriptions";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
@@ -17,7 +17,8 @@ import {
   editableInputClass,
   uiFormLabel,
   uiInfoModalWrapper,
-  uiItemNameHover,
+  uiOverlayItemNameHover,
+  uiOverlayPeerHoverText,
   uiSectionShell,
   uiTextBody,
   uiTextDescription,
@@ -31,6 +32,7 @@ import { colourAmberPlain, type ChipColour } from "../../../ui/styles/colourToke
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -73,7 +75,6 @@ export function SkillRow({
   isDM = false,
 }: SkillRowProps) {
   recordComponentRender("SkillRow");
-  const [deleteArmed, setDeleteArmed] = useState(false);
   const [upgradeArmed, setUpgradeArmed] = useState(false);
   const [manualUpgradeArmed, setManualUpgradeArmed] = useState(false);
   const [manualUpgradeCost, setManualUpgradeCost] = useState("");
@@ -136,9 +137,10 @@ export function SkillRow({
   const downgradeLevel: SkillAdvanceLevel | undefined =
     purchasedLevel === "+20" ? "+10" : purchasedLevel === "+10" ? "trained" : undefined;
   const downgradeLabel = downgradeLevel === "trained" ? "Trained" : downgradeLevel;
-  const handleDowngrade = useCallback(() => {
-    if (downgradeLevel) updateLevel(skill.id, downgradeLevel);
-  }, [downgradeLevel, skill.id, updateLevel]);
+  const handleDowngrade = useCallback(
+    () => (downgradeLevel ? updateLevel(skill.id, downgradeLevel) : undefined),
+    [downgradeLevel, skill.id, updateLevel]
+  );
 
   const manualUpgradeCostNumber = Number(manualUpgradeCost);
   const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "";
@@ -215,9 +217,11 @@ export function SkillRow({
                 onClick={() => onSelect(skill.id)}
               />
             )}
-            <div className={`relative pointer-events-none lg:hidden ${uiStackList}`}>
+            <div
+              className={`relative ${uiLayerLocal} pointer-events-none lg:hidden ${uiStackList} ${uiOverlayPeerHoverText}`}
+            >
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className={`${uiItemNameHover} break-words`}>{displayName}</span>
+                <span className={`${uiOverlayItemNameHover} break-words`}>{displayName}</span>
                 {pickerInformation && (
                   <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                     {pickerInformation}
@@ -227,9 +231,11 @@ export function SkillRow({
               {pickerMetadata}
               {pickerSecondaryInformation}
             </div>
-            <div className={`relative pointer-events-none hidden lg:block ${uiStackList}`}>
+            <div
+              className={`relative ${uiLayerLocal} pointer-events-none hidden lg:block ${uiStackList} ${uiOverlayPeerHoverText}`}
+            >
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className={`${uiItemNameHover} truncate`}>{displayName}</span>
+                <span className={`${uiOverlayItemNameHover} truncate`}>{displayName}</span>
                 {pickerInformation && (
                   <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                     {pickerInformation}
@@ -294,9 +300,19 @@ export function SkillRow({
                   </Button>
                 )}
                 {canDelete && (
-                  <RemoveButton
-                    onClick={() => setDeleteArmed(true)}
-                    label={`Delete ${skill.name}`}
+                  <RemoveEntryButton
+                    kind="Skill"
+                    name={skill.name}
+                    onRemove={handleRemove}
+                    extra={
+                      downgradeLevel
+                        ? {
+                            label: `Downgrade to ${downgradeLabel}`,
+                            message: `Downgrade ${skill.name} to ${downgradeLabel}, or remove it from this character?`,
+                            onClick: handleDowngrade,
+                          }
+                        : undefined
+                    }
                   />
                 )}
               </>
@@ -388,72 +404,6 @@ export function SkillRow({
               className={editableInputClass(true) + " mt-0.5"}
               autoComplete="off"
             />
-          </PickerBody>
-        </PickerModal>
-      )}
-
-      {deleteArmed && (
-        <PickerModal
-          title={downgradeLevel ? "Manage Skill" : "Delete Skill"}
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setDeleteArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            downgradeLevel ? (
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="warningOutline"
-                  onClick={() => {
-                    handleDowngrade();
-                    setDeleteArmed(false);
-                  }}
-                >
-                  Downgrade to {downgradeLabel}
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    handleRemove();
-                    setDeleteArmed(false);
-                  }}
-                >
-                  Delete Skill
-                </Button>
-                <Button
-                  className="col-span-2"
-                  variant="neutral"
-                  onClick={() => setDeleteArmed(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    handleRemove();
-                    setDeleteArmed(false);
-                  }}
-                >
-                  Delete
-                </Button>
-                <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
-                  Cancel
-                </Button>
-              </div>
-            )
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              {downgradeLevel
-                ? `Downgrade ${skill.name} to ${downgradeLabel}, or delete it from this character?`
-                : `Delete ${skill.name} from this character?`}
-            </p>
           </PickerBody>
         </PickerModal>
       )}

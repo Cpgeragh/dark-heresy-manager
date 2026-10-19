@@ -15,6 +15,14 @@ describe("CardOverlayButton", () => {
     expect(button.className).toContain("active:scale-");
   });
 
+  it("owns card hover feedback without making nested controls share that state", () => {
+    render(<CardOverlayButton label="Expand Grenade details" expanded={false} />);
+
+    const button = screen.getByRole("button", { name: "Expand Grenade details" });
+    expect(button).toHaveClass("peer", "hover:bg-slate-800");
+    expect(button).not.toHaveClass("group");
+  });
+
   it("reports the expanded state, and leaves it out for a card that chooses", () => {
     const { rerender } = render(<CardOverlayButton label="Expand Grenade details" expanded />);
     expect(screen.getByRole("button")).toHaveAttribute("aria-expanded", "true");

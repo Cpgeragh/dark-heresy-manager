@@ -213,7 +213,8 @@ describe("DrugsTab", () => {
 
     // The row renders twice (mobile-column copy + desktop-grid copy, both mounted
     // simultaneously, CSS-hidden per breakpoint), so target the first real match.
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Obscura" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
@@ -266,10 +267,12 @@ describe("DrugsTab", () => {
     const drug: DrugItem = { id: "d1", name: "Obscura", referenceId: "obscura", quantity: 1 };
     renderTab({ drugs: [drug], onUpdate });
 
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    const removeButton = screen.getAllByRole("button", { name: "Remove Obscura" })[0];
+    await user.click(removeButton);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
-    expect(screen.getAllByRole("button", { name: "Remove" })[0]).not.toHaveAttribute("aria-busy");
+    expect(removeButton).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
   });

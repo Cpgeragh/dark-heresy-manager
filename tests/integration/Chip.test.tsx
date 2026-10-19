@@ -37,11 +37,7 @@ describe("Chip", () => {
   });
 
   it("uses the small size only for nested chips", () => {
-    render(
-      <NestedChip colour="slate">
-        Label
-      </NestedChip>
-    );
+    render(<NestedChip colour="slate">Label</NestedChip>);
 
     expect(screen.getByText("Label")).toHaveClass("h-5");
   });

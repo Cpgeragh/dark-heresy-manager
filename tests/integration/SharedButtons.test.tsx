@@ -21,7 +21,9 @@ describe("ExpandButton", () => {
   });
 
   it("keeps an extra class from the caller", () => {
-    render(<ExpandButton expanded={false} label="Expand" onClick={() => undefined} className="ml-auto" />);
+    render(
+      <ExpandButton expanded={false} label="Expand" onClick={() => undefined} className="ml-auto" />
+    );
 
     expect(screen.getByRole("button", { name: "Expand" })).toHaveClass("ml-auto");
   });

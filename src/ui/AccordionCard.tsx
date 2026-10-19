@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { ExpandChevron } from "./icons/ExpandChevron";
 import { uiFocusRing, uiHoverSurface, uiPressFeedback } from "./styles/buttonStyles";
 import { uiSectionShell } from "./styles/editableStyles";
+import { CharacterEntryRowContent } from "./CharacterEntryRow";
 
 interface AccordionCardProps {
   expanded: boolean;
@@ -33,10 +34,13 @@ export function AccordionCard({
         onClick={onToggle}
         aria-expanded={expanded}
         {...aria}
-        className={`group flex w-full items-center gap-3 p-3 text-left transition ${uiHoverSurface} lg:p-4 ${uiPressFeedback()} ${uiFocusRing}`}
+        className={`group w-full p-3 text-left transition ${uiHoverSurface} lg:p-4 ${uiPressFeedback()} ${uiFocusRing}`}
       >
-        <div className="min-w-0 flex-1">{header}</div>
-        {showChevron && <ExpandChevron expanded={expanded} />}
+        <CharacterEntryRowContent
+          name={header}
+          nameClassName=""
+          actions={showChevron ? <ExpandChevron expanded={expanded} /> : undefined}
+        />
       </button>
       {children}
     </div>

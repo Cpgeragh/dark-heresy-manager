@@ -95,17 +95,19 @@ describe("ImplantRow", () => {
         onRemove={vi.fn()}
       />
     );
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Auto-Quill" })).not.toBeInTheDocument();
     expect(screen.getByText(/Skin of Iron/)).toBeInTheDocument();
   });
 
-  it("calls onRemove for a normal, non-granted implant", async () => {
+  it("calls onRemove for a normal implant only after confirmation", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     render(
       <ImplantRow item={item()} editable={true} onCycleQuality={vi.fn()} onRemove={onRemove} />
     );
 
+    await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
+    expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledWith("c1");
   });

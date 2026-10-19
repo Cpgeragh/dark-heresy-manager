@@ -223,11 +223,7 @@ export function AddSkillModal({
             item.skills.map((skill) => skill.source).filter((s): s is SkillSource => Boolean(s))
           ),
         ].map((source) => (
-          <Chip
-            key={source}
-            colour={sourceChipColour(source)}
-            className="font-code shrink-0"
-          >
+          <Chip key={source} colour={sourceChipColour(source)} className="font-code shrink-0">
             {source}
           </Chip>
         ))}

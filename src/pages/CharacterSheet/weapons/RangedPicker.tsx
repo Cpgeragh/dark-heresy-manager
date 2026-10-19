@@ -11,7 +11,8 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   uiChipRow,
   uiInlineRow,
-  uiCardTitleHover,
+  uiOverlayCardTitleHover,
+  uiOverlayPeerHoverText,
   uiInfoModalWrapper,
   uiSectionShell,
   uiTextBody,
@@ -41,6 +42,7 @@ import { RangedCard } from "./RangedCard";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
+import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 import {
   weaponClassChip,
   weaponTypeChip,
@@ -99,9 +101,11 @@ function RangedWeaponCardPickerRow({
             expanded={editable ? undefined : false}
             onClick={editable ? onSelect : showDetails}
           />
-          <div className={`${uiExpandButton} relative pointer-events-none`}>
+          <div
+            className={`${uiExpandButton} relative ${uiLayerLocal} pointer-events-none ${uiOverlayPeerHoverText}`}
+          >
             <div className={`${uiChipRow} items-center`}>
-              <p className={uiCardTitleHover}>{weaponReference.name}</p>
+              <p className={uiOverlayCardTitleHover}>{weaponReference.name}</p>
               {weaponReference.description && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal
@@ -113,16 +117,8 @@ function RangedWeaponCardPickerRow({
             </div>
             {(classChip || typeChip) && (
               <div className={`mt-0.5 ${uiChipRow} items-center`}>
-                {classChip && (
-                  <Chip colour={classChip.colour}>
-                    {classChip.label}
-                  </Chip>
-                )}
-                {typeChip && (
-                  <Chip colour={typeChip.colour}>
-                    {typeChip.label}
-                  </Chip>
-                )}
+                {classChip && <Chip colour={classChip.colour}>{classChip.label}</Chip>}
+                {typeChip && <Chip colour={typeChip.colour}>{typeChip.label}</Chip>}
               </div>
             )}
           </div>
@@ -418,36 +414,18 @@ export function RangedPicker({
               <PickerRowChips>
                 {(() => {
                   const c = weaponClassChip(data.class);
-                  return c ? (
-                    <Chip colour={c.colour}>
-                      {c.label}
-                    </Chip>
-                  ) : null;
+                  return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
                 })()}
                 {(() => {
                   const t = weaponTypeChip(data.type);
-                  return t ? (
-                    <Chip colour={t.colour}>
-                      {t.label}
-                    </Chip>
-                  ) : null;
+                  return t ? <Chip colour={t.colour}>{t.label}</Chip> : null;
                 })()}
                 {(() => {
                   const f = ammoFamilyChip(data.ammoType);
-                  return f ? (
-                    <Chip colour={f.colour}>
-                      {f.label}
-                    </Chip>
-                  ) : null;
+                  return f ? <Chip colour={f.colour}>{f.label}</Chip> : null;
                 })()}
-                {item.status === "draft" && (
-                  <Chip colour="amber">
-                    Draft
-                  </Chip>
-                )}
-                <Chip colour="fuchsia">
-                  Custom
-                </Chip>
+                {item.status === "draft" && <Chip colour="amber">Draft</Chip>}
+                <Chip colour="fuchsia">Custom</Chip>
                 <ItemMetaChips
                   weight={data.weight}
                   value={data.value}

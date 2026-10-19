@@ -249,7 +249,8 @@ describe("ArcheotechTab", () => {
 
     // The row renders twice (mobile-column copy + desktop-grid copy, both mounted
     // simultaneously, CSS-hidden per breakpoint), so target the first real match.
-    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Auto-Quill" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });

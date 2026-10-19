@@ -248,11 +248,7 @@ export function MeleePicker({
               <PickerRowChips>
                 {(() => {
                   const t = weaponTypeChip(data.type);
-                  return t ? (
-                    <Chip colour={t.colour}>
-                      {t.label}
-                    </Chip>
-                  ) : null;
+                  return t ? <Chip colour={t.colour}>{t.label}</Chip> : null;
                 })()}
                 <ItemMetaChips
                   weight={data.weight}
@@ -260,14 +256,8 @@ export function MeleePicker({
                   availability={data.availability}
                   source={data.source}
                 />
-                {item.status === "draft" && (
-                  <Chip colour="amber">
-                    Draft
-                  </Chip>
-                )}
-                <Chip colour="fuchsia">
-                  Custom
-                </Chip>
+                {item.status === "draft" && <Chip colour="amber">Draft</Chip>}
+                <Chip colour="fuchsia">Custom</Chip>
               </PickerRowChips>
             </PickerRow>
           );

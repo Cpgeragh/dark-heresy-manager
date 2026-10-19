@@ -161,11 +161,7 @@ export function PowerPicker({
           <FilterButton className="flex-1" onClick={() => setShowSourceFilterPicker(true)}>
             {sourceFilter ?? "All Sources"}
           </FilterButton>
-          {selectionLocked && (
-            <Chip colour="amber">
-              All selections used
-            </Chip>
-          )}
+          {selectionLocked && <Chip colour="amber">All selections used</Chip>}
         </div>
       }
       footer={

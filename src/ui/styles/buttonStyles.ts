@@ -66,8 +66,8 @@ export const uiEditableValueHover = `${colourHoverTextPrimary} hover:underline d
 
 export const uiExpandButton = "flex-1 min-w-0 text-left";
 
-/** Header of a tappable card: the hover tint, and the group its title turns white with. */
-export const uiCardTapHeader = `group transition ${colourHoverSurface}`;
+/** Header of a tappable card whose hover feedback belongs to its overlay button. */
+export const uiCardTapHeader = "transition";
 
 /** Icon size inside an icon button, matched to the button's own size. */
 export const uiIconButtonIconSize = { md: "w-[18px] h-[18px]", sm: "w-4 h-4" } as const;

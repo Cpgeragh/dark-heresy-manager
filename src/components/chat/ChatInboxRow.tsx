@@ -6,12 +6,14 @@ import { Chip } from "../../ui/chips/Chip";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import {
   uiInlineRow,
-  uiItemNameHover,
+  uiOverlayItemNameHover,
+  uiOverlayPeerHoverText,
   uiSectionShell,
   uiTextMeta,
 } from "../../ui/styles/editableStyles";
 import { formatChatListTime } from "../../utils/formatChatListTime";
 import { ChatAvatar, type ChatAvatarPicture } from "./ChatAvatar";
+import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { UnreadBadge } from "./UnreadBadge";
 
 interface ChatInboxRowProps {
@@ -36,11 +38,13 @@ export function ChatInboxRow({ chat, picture, onOpen }: ChatInboxRowProps) {
       className={`${uiSectionShell} ${uiCardTapHeader} relative flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 text-left`}
     >
       <CardOverlayButton label={label} onClick={onOpen} />
-      <div className="pointer-events-none relative flex min-w-0 flex-1 items-center gap-3">
+      <div
+        className={`pointer-events-none relative ${uiLayerLocal} flex min-w-0 flex-1 items-center gap-3 ${uiOverlayPeerHoverText}`}
+      >
         <ChatAvatar name={avatarName} picture={picture} />
         <div className="min-w-0 flex-1">
           <div className={uiInlineRow}>
-            <span className={`${uiItemNameHover} truncate`}>{chat.characterName}</span>
+            <span className={`${uiOverlayItemNameHover} truncate`}>{chat.characterName}</span>
             <UnreadBadge count={chat.unreadCount} />
             {chat.closed && <Chip colour="slate">Closed</Chip>}
           </div>

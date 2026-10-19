@@ -2,13 +2,10 @@ import { useState } from "react";
 import type { WornArmourPiece } from "../../../types/Character";
 import {
   uiChipRow,
-  uiSection,
   uiTextLabel,
   uiTextBody,
   uiTextPlaceholder,
-  uiItemName,
   uiInfoModalWrapper,
-  uiInactiveItem,
   uiRuleName,
   uiTextDescription,
   uiStackBody,
@@ -16,7 +13,8 @@ import {
   uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -97,96 +95,113 @@ export function PieceRow({
   const addableCompatible = compatible.filter((upgrade) => !upgradeIds.includes(upgrade.id));
 
   return (
-    <div className={[uiSection, "flex items-start gap-3", !worn ? uiInactiveItem : ""].join(" ")}>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className={`${uiItemName} truncate`}>{piece.name}</span>
-          {libraryItem && <StatusBadge status={libraryItem.status} />}
-        </div>
-
-        <div className={`mt-1 ${uiStackField}`}>
-          <div className={`${uiChipRow}`}>
-            <StatChip label="Location" value={locationLabel(piece.locations)} />
-            <StatChip label="AP" value={apDesc} />
+    <>
+      <CharacterEntryRow
+        name={piece.name}
+        badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+        inactive={!worn}
+        metadata={
+          <div className={uiStackField}>
+            <div className={uiChipRow}>
+              <StatChip label="Location" value={locationLabel(piece.locations)} />
+              <StatChip label="AP" value={apDesc} />
+            </div>
+            <ItemMetaChips
+              weight={effectiveArmourWeight(piece, upgradeRefs)}
+              value={piece.value}
+              availability={piece.availability}
+              source={piece.source}
+            />
           </div>
-          <ItemMetaChips
-            weight={effectiveArmourWeight(piece, upgradeRefs)}
-            value={piece.value}
-            availability={piece.availability}
-            source={piece.source}
-          />
-        </div>
-
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {qualities.length > 0 ? qualities.join(", ") : "-"}
-          </span>
-          {qualities.length > 0 && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${piece.name} Qualities`}
-                content={<ArmourQualitiesContent qualities={qualities} />}
-              />
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Rules</span>
-          {notes ? (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal title={`${piece.name} Rules`} content={notes} />
-            </span>
-          ) : (
-            <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Craftsmanship</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
-          <InfoModal
-            title={`${craftsmanship} Armour`}
-            content={armourCraftsmanshipDescription(craftsmanship)}
-          />
-        </div>
-
-        {(upgradeRefs.length > 0 || addableCompatible.length > 0) && (
-          <div className={`border-t ${colourDivider} pt-2 mt-2 ${uiStackList}`}>
-            <div className="flex items-center justify-between">
-              <span className={uiTextLabel}>Upgrades</span>
-              {editable ? (
-                <AddButton
-                  label="Add upgrade"
-                  size="sm"
-                  onClick={() => setShowUpgradePicker(true)}
-                />
-              ) : (
-                <ViewButton
-                  label="View upgrades"
-                  size="sm"
-                  onClick={() => setShowUpgradePicker(true)}
-                />
+        }
+        afterMetadata={
+          <>
+            <div className="flex items-center gap-1.5">
+              <span className={uiTextLabel}>Qualities</span>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
+                {qualities.length > 0 ? qualities.join(", ") : "-"}
+              </span>
+              {qualities.length > 0 && (
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal
+                    title={`${piece.name} Qualities`}
+                    content={<ArmourQualitiesContent qualities={qualities} />}
+                  />
+                </span>
               )}
             </div>
-            {upgradeRefs.length === 0 ? (
-              <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
-            ) : (
-              <div className={uiStackList}>
-                {upgradeRefs.map((upgrade) => (
-                  <ArmourUpgradeCard
-                    key={upgrade.id}
-                    upgrade={upgrade}
-                    editable={editable}
-                    onRemove={(upgradeId) => onRemoveUpgrade(piece.id, upgradeId)}
-                  />
-                ))}
+
+            <div className="flex items-center gap-1.5">
+              <span className={uiTextLabel}>Rules</span>
+              {notes ? (
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal title={`${piece.name} Rules`} content={notes} />
+                </span>
+              ) : (
+                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className={uiTextLabel}>Craftsmanship</span>
+              <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
+              <InfoModal
+                title={`${craftsmanship} Armour`}
+                content={armourCraftsmanshipDescription(craftsmanship)}
+              />
+            </div>
+
+            {(upgradeRefs.length > 0 || addableCompatible.length > 0) && (
+              <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+                <div className="flex items-center justify-between">
+                  <span className={uiTextLabel}>Upgrades</span>
+                  {editable ? (
+                    <AddButton
+                      label="Add upgrade"
+                      size="sm"
+                      onClick={() => setShowUpgradePicker(true)}
+                    />
+                  ) : (
+                    <ViewButton
+                      label="View upgrades"
+                      size="sm"
+                      onClick={() => setShowUpgradePicker(true)}
+                    />
+                  )}
+                </div>
+                {upgradeRefs.length === 0 ? (
+                  <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
+                ) : (
+                  <div className={uiStackList}>
+                    {upgradeRefs.map((upgrade) => (
+                      <ArmourUpgradeCard
+                        key={upgrade.id}
+                        upgrade={upgrade}
+                        editable={editable}
+                        onRemove={(upgradeId) => onRemoveUpgrade(piece.id, upgradeId)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-
+          </>
+        }
+        actions={
+          editable ? (
+            <>
+              <Button variant="neutral" size="sm" onClick={() => onToggle(piece.id)}>
+                {worn ? "Stow" : "Wear"}
+              </Button>
+              <RemoveEntryButton
+                kind="Armour"
+                name={piece.name}
+                onRemove={() => onRemove(piece.id)}
+              />
+            </>
+          ) : undefined
+        }
+      >
         {libraryItem && (
           <CustomItemActionButtons
             libraryItem={libraryItem}
@@ -199,15 +214,7 @@ export function PieceRow({
             onUpdateAllCopies={onUpdateAllCopies}
           />
         )}
-      </div>
-
-      {editable && (
-        <Button variant="neutral" size="sm" onClick={() => onToggle(piece.id)}>
-          {worn ? "Stow" : "Wear"}
-        </Button>
-      )}
-
-      {editable && <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />}
+      </CharacterEntryRow>
 
       {showUpgradePicker && (
         <ArmourUpgradePicker
@@ -219,6 +226,6 @@ export function PieceRow({
           onClose={() => setShowUpgradePicker(false)}
         />
       )}
-    </div>
+    </>
   );
 }

@@ -1033,7 +1033,7 @@ describe("TalentsTab", () => {
     );
   });
 
-  it("deactivates a Discipline when its introducing Psy Rating Talent is deleted", async () => {
+  it("deactivates a Discipline when its introducing Psy Rating Talent is removed", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn();
     const psyRating = {
@@ -1051,8 +1051,8 @@ describe("TalentsTab", () => {
       onUpdateCharacter,
     });
 
-    await user.click(screen.getAllByRole("button", { name: "Delete Psy Rating 3" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Psy Rating 3" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onUpdateCharacter).toHaveBeenCalledWith(
       expect.objectContaining({
         talentsAndTraits: expect.objectContaining({ talents: [] }),
@@ -1365,7 +1365,7 @@ describe("TalentsTab", () => {
     );
   });
 
-  it("can restore Purity cybernetics and concealed-weapon links when deleting", async () => {
+  it("can restore Purity cybernetics and concealed-weapon links when removing", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn();
     const purity = {
@@ -1399,9 +1399,9 @@ describe("TalentsTab", () => {
       rangedWeapons: [{ id: "weapon-1", name: "Autopistol" }],
     });
 
-    await user.click(screen.getAllByRole("button", { name: "Delete Purity of Flesh" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
-    await user.click(screen.getByRole("button", { name: "Delete and restore recorded changes" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Purity of Flesh" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Remove and restore recorded changes" }));
 
     expect(onUpdateCharacter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1431,7 +1431,7 @@ describe("TalentsTab", () => {
     expect(screen.getAllByText("Resistance (Psychic Powers)").length).toBeGreaterThan(0);
     expect(screen.getAllByText("The Power Within (Talent): Granted").length).toBeGreaterThan(0);
     expect(
-      screen.queryByRole("button", { name: "Delete Resistance (Psychic Powers)" })
+      screen.queryByRole("button", { name: "Remove Resistance (Psychic Powers)" })
     ).not.toBeInTheDocument();
     for (const grantedText of screen.getAllByText("The Power Within (Talent): Granted")) {
       const cardContent = grantedText.parentElement;
@@ -1453,16 +1453,16 @@ describe("TalentsTab", () => {
     });
     const { onUpdateTalents } = renderTab({ talents });
     expect(screen.getAllByText("Sound Constitution (3)").length).toBeGreaterThan(0);
-    await user.click(screen.getAllByRole("button", { name: "Delete Sound Constitution (3)" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Remove Sound Constitution (3)" })[0]);
     expect(onUpdateTalents).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onUpdateTalents).not.toHaveBeenCalled();
-    await user.click(screen.getAllByRole("button", { name: "Delete Sound Constitution (3)" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Sound Constitution (3)" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onUpdateTalents.mock.calls[0][0].talents).toHaveLength(2);
   });
 
-  it("groups multiple choices and deletes only the chosen child", async () => {
+  it("groups multiple choices and removes only the chosen child", async () => {
     const user = userEvent.setup();
     const talents = makeTalents({
       talents: [
@@ -1473,12 +1473,12 @@ describe("TalentsTab", () => {
     const { onUpdateTalents } = renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Expand Resistance" })[0]);
     expect(screen.getByText("Resistance (Fear)")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Delete Resistance (Fear)" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Remove Resistance (Fear)" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onUpdateTalents.mock.calls[0][0].talents).toEqual([talents.talents[1]]);
   });
 
-  it("shows Psychic purchase ownership and warns before attempting to delete a linked purchase", async () => {
+  it("shows Psychic purchase ownership and warns before removing a linked purchase", async () => {
     const user = userEvent.setup();
     const talents = makeTalents({
       talents: [
@@ -1495,7 +1495,7 @@ describe("TalentsTab", () => {
     );
     expect(screen.getAllByText("Owned: 2").length).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("button", { name: "Delete Minor Psychic Power" }).length
+      screen.getAllByRole("button", { name: "Remove Minor Psychic Power" }).length
     ).toBeGreaterThan(0);
     unmount();
     render(
@@ -1509,20 +1509,20 @@ describe("TalentsTab", () => {
     expect(screen.getAllByText("Owned: 1").length).toBeGreaterThan(0);
     expect(
       screen.queryByText(
-        "This Talent cannot be deleted until its linked Psychic powers are deleted."
+        "This Talent cannot be removed until its linked Psychic powers are removed."
       )
     ).not.toBeInTheDocument();
-    await user.click(screen.getAllByRole("button", { name: "Delete Minor Psychic Power" })[0]);
-    const blockedDialog = screen.getByRole("dialog", { name: "Cannot Delete Talent" });
+    await user.click(screen.getAllByRole("button", { name: "Remove Minor Psychic Power" })[0]);
+    const blockedDialog = screen.getByRole("dialog", { name: "Cannot Remove Talent" });
     expect(blockedDialog).toBeInTheDocument();
     expect(
-      screen.getByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")
+      screen.getByText("This Talent cannot be removed until its linked Psychic powers are removed.")
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
     expect(within(blockedDialog).getByText("Close")).toBeInTheDocument();
   });
 
-  it("warns when deleting a Psy Rating Talent with linked powers", async () => {
+  it("warns when removing a Psy Rating Talent with linked powers", async () => {
     const user = userEvent.setup();
     const psyRating = entry("psy-3", "psy-rating-3", "Psy Rating 3");
     const psychic: PsychicBlock = {
@@ -1548,15 +1548,15 @@ describe("TalentsTab", () => {
 
     expect(
       screen.queryByText(
-        "This Talent cannot be deleted until its linked Psychic powers are deleted."
+        "This Talent cannot be removed until its linked Psychic powers are removed."
       )
     ).not.toBeInTheDocument();
-    await user.click(screen.getAllByRole("button", { name: "Delete Psy Rating 3" })[0]);
-    expect(screen.getByRole("dialog", { name: "Cannot Delete Talent" })).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Remove Psy Rating 3" })[0]);
+    expect(screen.getByRole("dialog", { name: "Cannot Remove Talent" })).toBeInTheDocument();
     expect(
-      screen.getByText("This Talent cannot be deleted until its linked Psychic powers are deleted.")
+      screen.getByText("This Talent cannot be removed until its linked Psychic powers are removed.")
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
   });
 
   it("shows Psychic purchase ownership in the Talent picker", async () => {
@@ -1574,28 +1574,28 @@ describe("TalentsTab", () => {
     expect(within(card!).getByText("Owned: 2")).toBeInTheDocument();
   });
 
-  it("allows an unused Psychic purchase to be deleted with confirmation", async () => {
+  it("allows an unused Psychic purchase to be removed with confirmation", async () => {
     const user = userEvent.setup();
     const talents = makeTalents({
       talents: [entry("p1", "minor-psychic-power", "Minor Psychic Power")],
     });
     const { onUpdateTalents } = renderTab({ talents });
-    await user.click(screen.getAllByRole("button", { name: "Delete Minor Psychic Power" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Minor Psychic Power" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onUpdateTalents.mock.calls[0][0].talents).toHaveLength(0);
   });
 
-  it("confirms Faith Talent deletion and preserves read-only display", async () => {
+  it("confirms Faith Talent removal and preserves read-only display", async () => {
     const user = userEvent.setup();
     const faith = entry("f1", "faith-talent", "Faith Talent");
     const { onUpdateTalents } = renderTab({ talents: makeTalents({ talents: [faith] }) });
-    await user.click(screen.getAllByRole("button", { name: "Delete Faith Talent" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Faith Talent" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onUpdateTalents.mock.calls[0][0].talents).toHaveLength(0);
 
     cleanup();
     renderTab({ editable: false, talents: makeTalents({ talents: [faith] }) });
     expect(screen.getAllByText("Faith Talent").length).toBeGreaterThan(0);
-    expect(screen.queryByRole("button", { name: "Delete Faith Talent" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Faith Talent" })).not.toBeInTheDocument();
   });
 });

@@ -206,6 +206,7 @@ describe("ArmourTab", () => {
 
     const wardsLabel = screen.getAllByText("Hexagramatic Wards")[0];
     fireEvent.click(wardsLabel.parentElement!.querySelector("button")!);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ upgrades: [] })], {
       optimistic: true,
@@ -235,7 +236,8 @@ describe("ArmourTab", () => {
   it("asks for an optimistic update when a piece is removed", () => {
     const { onUpdate } = renderTab();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove Flak Jacket" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
   });
@@ -300,7 +302,8 @@ describe("ArmourTab", () => {
       onUpdateArcheotech,
     });
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove Ork Mega Armour" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdateArcheotech).toHaveBeenCalledWith([], { optimistic: true });
   });

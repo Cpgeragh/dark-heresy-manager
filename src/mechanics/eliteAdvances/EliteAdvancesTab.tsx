@@ -1019,7 +1019,6 @@ export function EliteAdvancesTab({
                   entry={displayEntry}
                   editable={editable}
                   onRemove={(uid) => removeSpecial(uid)}
-                  confirmDeletion
                   deletionNoun="Elite Advance"
                   statusChip={
                     entry.grantedByAlternateRankId

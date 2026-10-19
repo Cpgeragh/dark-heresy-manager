@@ -8,7 +8,8 @@ import type {
 } from "../../types/Character";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { Button } from "../../ui/buttons/Button";
-import { RemoveButton } from "../../ui/buttons/RemoveButton";
+import { CharacterEntryRow } from "../../ui/CharacterEntryRow";
+import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { Chip } from "../../ui/chips/Chip";
 import { RollChip } from "../../ui/chips/RollChip";
@@ -18,10 +19,7 @@ import {
   uiChipRow,
   uiSplitRow,
   uiInfoModalWrapper,
-  uiItemName,
-  uiSection,
   uiTextBody,
-  uiTextLabel,
   uiTextPlaceholder,
   uiTextDescription,
   uiStackList,
@@ -52,24 +50,33 @@ function DisorderRow({
   onRemove: () => void;
   onEscalate: (severity: InsanityDisorderSeverity) => void;
 }) {
-  const [deleteArmed, setDeleteArmed] = useState(false);
   const [escalateArmed, setEscalateArmed] = useState(false);
   const ref = getInsanityDisorderRef(disorder.referenceId);
   const nextSeverity = getNextDisorderSeverity(disorder);
 
   return (
-    <div className={uiSection}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <span className={uiItemName}>{disorder.name}</span>
-          <div className={`mt-1 ${uiChipRow} items-center`}>
-            <Chip colour={disorderTypeChipColour(disorder.type)}>
-              {disorder.type}
-            </Chip>
+    <>
+      <CharacterEntryRow
+        name={disorder.name}
+        info={
+          <InfoModal
+            title={disorder.name}
+            content={
+              <DisorderInfoContent
+                type={ref?.type ?? disorder.type}
+                name={ref?.name ?? disorder.name}
+                description={ref?.description ?? disorder.notes ?? "Custom disorder."}
+                typeDescription={ref?.typeDescription}
+                notes={disorder.notes}
+              />
+            }
+          />
+        }
+        metadata={
+          <div className={`${uiChipRow} items-center`}>
+            <Chip colour={disorderTypeChipColour(disorder.type)}>{disorder.type}</Chip>
             <span className="inline-flex items-center gap-1">
-              <Chip colour={severityChipColour[disorder.severity]}>
-                {disorder.severity}
-              </Chip>
+              <Chip colour={severityChipColour[disorder.severity]}>{disorder.severity}</Chip>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={disorder.severity}
@@ -85,35 +92,20 @@ function DisorderRow({
               </Chip>
             )}
           </div>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rules</span>
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={disorder.name}
-                content={
-                  <DisorderInfoContent
-                    type={ref?.type ?? disorder.type}
-                    name={ref?.name ?? disorder.name}
-                    description={ref?.description ?? disorder.notes ?? "Custom disorder."}
-                    typeDescription={ref?.typeDescription}
-                    notes={disorder.notes}
-                  />
-                }
-              />
-            </span>
-          </div>
-        </div>
-        {editable && (
-          <div className="flex shrink-0 gap-1.5">
-            {nextSeverity && (
-              <Button size="xs" onClick={() => setEscalateArmed(true)}>
-                Escalate to {nextSeverity}
-              </Button>
-            )}
-            <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />
-          </div>
-        )}
-      </div>
+        }
+        actions={
+          editable ? (
+            <>
+              {nextSeverity && (
+                <Button size="xs" onClick={() => setEscalateArmed(true)}>
+                  Escalate to {nextSeverity}
+                </Button>
+              )}
+              <RemoveEntryButton kind="Disorder" name={disorder.name} onRemove={onRemove} />
+            </>
+          ) : undefined
+        }
+      />
       {escalateArmed && nextSeverity && (
         <PickerModal
           title={`Escalate to ${nextSeverity}`}
@@ -147,34 +139,7 @@ function DisorderRow({
           </PickerBody>
         </PickerModal>
       )}
-      {deleteArmed && (
-        <PickerModal
-          title="Delete Disorder"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setDeleteArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={onRemove}>
-                Delete
-              </Button>
-              <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Delete {disorder.name} from this character?
-            </p>
-          </PickerBody>
-        </PickerModal>
-      )}
-    </div>
+    </>
   );
 }
 
@@ -191,64 +156,31 @@ function TraumaRow({
   editable: boolean;
   onRemove: () => void;
 }) {
-  const [deleteArmed, setDeleteArmed] = useState(false);
   const ref = getMentalTraumaRef(trauma.referenceId);
   const name = trauma.name ?? ref?.name ?? "Custom Trauma";
   const roll = ref?.roll ?? trauma.roll;
   const effect = ref?.effect ?? trauma.effect ?? trauma.notes ?? "Custom trauma.";
 
   return (
-    <div className={uiSection}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <span className={uiItemName}>{name}</span>
-          {(roll || trauma.source) && (
-            <div className={`mt-1 ${uiChipRow}`}>
-              {roll && <RollChip>{roll}</RollChip>}
-              {trauma.source && (
-                <Chip colour={sourceChipColour(trauma.source)} className="font-code">
-                  {trauma.source}
-                </Chip>
-              )}
-            </div>
-          )}
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rules</span>
-            <span className={uiInfoModalWrapper}>
-              <InfoModal title={name} content={<p className={uiTextDescription}>{effect}</p>} />
-            </span>
+    <CharacterEntryRow
+      name={name}
+      info={<InfoModal title={name} content={<p className={uiTextDescription}>{effect}</p>} />}
+      metadata={
+        roll || trauma.source ? (
+          <div className={uiChipRow}>
+            {roll && <RollChip>{roll}</RollChip>}
+            {trauma.source && (
+              <Chip colour={sourceChipColour(trauma.source)} className="font-code">
+                {trauma.source}
+              </Chip>
+            )}
           </div>
-        </div>
-        {editable && <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />}
-      </div>
-      {deleteArmed && (
-        <PickerModal
-          title="Delete Trauma"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setDeleteArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={onRemove}>
-                Delete
-              </Button>
-              <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Delete {name} from this character?
-            </p>
-          </PickerBody>
-        </PickerModal>
-      )}
-    </div>
+        ) : undefined
+      }
+      actions={
+        editable ? <RemoveEntryButton kind="Trauma" name={name} onRemove={onRemove} /> : undefined
+      }
+    />
   );
 }
 

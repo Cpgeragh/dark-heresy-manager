@@ -66,11 +66,13 @@ describe("DrugRow", () => {
     expect(onUpdateQty).toHaveBeenCalledWith("d1", 3);
   });
 
-  it("calls onRemove", async () => {
+  it("calls onRemove only after removal is confirmed", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={onRemove} />);
 
+    await user.click(screen.getByRole("button", { name: "Remove Obscura" }));
+    expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledWith("d1");
   });
@@ -78,6 +80,6 @@ describe("DrugRow", () => {
   it("hides the quantity and remove controls when not editable", () => {
     render(<DrugRow item={item()} editable={false} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
     expect(screen.queryByRole("button", { name: "Increase quantity" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Obscura" })).not.toBeInTheDocument();
   });
 });

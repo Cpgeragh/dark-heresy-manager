@@ -51,17 +51,19 @@ describe("ArcheotechImplantRow", () => {
     expect(screen.getByText(/Right Arm/i)).toBeInTheDocument();
   });
 
-  it("calls onRemove when editable, and hides Remove when not", async () => {
+  it("confirms removal when editable, and hides Remove when not", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     const { rerender } = render(
       <ArcheotechImplantRow item={item()} editable={true} onRemove={onRemove} />
     );
 
+    await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
+    expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalled();
 
     rerender(<ArcheotechImplantRow item={item()} editable={false} onRemove={onRemove} />);
-    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove Auto-Quill" })).not.toBeInTheDocument();
   });
 });

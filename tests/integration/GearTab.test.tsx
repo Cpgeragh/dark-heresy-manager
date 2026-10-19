@@ -375,6 +375,7 @@ describe("GearTab", () => {
     const item: GearItem = { id: "g1", name: "Grapnel", referenceId: "grapnel" };
     const { onUpdate } = renderTab({ gear: [item] });
 
+    await user.click(screen.getByRole("button", { name: "Remove Grapnel" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
@@ -390,6 +391,7 @@ describe("GearTab", () => {
     };
     const { onUpdateConsumables } = renderTab({ consumables: [item] });
 
+    await user.click(screen.getByRole("button", { name: "Remove Stimm" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdateConsumables).toHaveBeenCalledWith([], { optimistic: true });
@@ -456,10 +458,12 @@ describe("GearTab", () => {
     const item: GearItem = { id: "g1", name: "Grapnel", referenceId: "grapnel" };
     renderTab({ gear: [item], onUpdate });
 
+    const removeButton = screen.getByRole("button", { name: "Remove Grapnel" });
+    await user.click(removeButton);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
-    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
+    expect(removeButton).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
   });
@@ -476,10 +480,12 @@ describe("GearTab", () => {
     const item: ConsumableItem = { id: "c1", name: "Stimm", referenceId: "stimm", quantity: 2 };
     renderTab({ consumables: [item], onUpdateConsumables });
 
+    const removeButton = screen.getByRole("button", { name: "Remove Stimm" });
+    await user.click(removeButton);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdateConsumables).toHaveBeenCalledWith([], { optimistic: true });
-    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("aria-busy");
+    expect(removeButton).not.toHaveAttribute("aria-busy");
 
     await act(async () => finish());
   });

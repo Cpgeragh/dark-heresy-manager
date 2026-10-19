@@ -5,10 +5,6 @@ import { PlusIcon } from "../icons/PlusIcon";
 
 export function AddButton({ size = "md", ...props }: IconButtonProps) {
   return (
-    <IconButton
-      {...props}
-      size={size}
-      icon={<PlusIcon className={uiIconButtonIconSize[size]} />}
-    />
+    <IconButton {...props} size={size} icon={<PlusIcon className={uiIconButtonIconSize[size]} />} />
   );
 }

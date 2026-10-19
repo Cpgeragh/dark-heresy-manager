@@ -148,6 +148,7 @@ describe("WeaponsTab upgrades", () => {
     await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
     const compactLabel = screen.getAllByText("Compact")[0];
     await user.click(compactLabel.parentElement!.querySelector("button")!);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdateRanged).toHaveBeenCalledWith(
       [expect.objectContaining({ id: "w1", upgrades: [] })],
@@ -182,6 +183,7 @@ describe("WeaponsTab upgrades", () => {
     await user.click(screen.getByRole("button", { name: "Expand Custom Chainsword details" }));
     const monoLabel = screen.getAllByText("Mono")[0];
     await user.click(monoLabel.parentElement!.querySelector("button")!);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdateMelee).toHaveBeenCalledWith(
       [expect.objectContaining({ id: "w2", upgrades: [] })],
@@ -469,6 +471,7 @@ describe("WeaponsTab remove / equip-toggle", () => {
     const user = userEvent.setup();
     const { noop } = renderTab();
     await user.click(screen.getByRole("button", { name: "Expand Lasgun details" }));
+    await user.click(screen.getByRole("button", { name: "Remove Lasgun" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(noop).toHaveBeenCalledWith([], { optimistic: true });
   });

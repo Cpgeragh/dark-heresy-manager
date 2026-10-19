@@ -1,10 +1,15 @@
 // src/ui/buttons/CardOverlayButton.tsx
-// The invisible button stretched over a tappable card's header, so the whole header opens, expands
-// or chooses while the buttons inside it still work. The header carries `uiCardTapHeader` for the
-// hover tint, and its title carries `uiCardTitleHover` or `uiItemNameHover`.
+// The button stretched over a tappable card's header, so the whole header opens, expands, or chooses
+// while the buttons inside it still work. This button owns the hover tint, and its peer title uses
+// `uiOverlayCardTitleHover` or `uiOverlayItemNameHover` so nested controls do not highlight the card.
 
 import type { ButtonHTMLAttributes } from "react";
-import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
+import {
+  uiDisabledControl,
+  uiFocusRing,
+  uiHoverSurface,
+  uiPressFeedback,
+} from "../styles/buttonStyles";
 import { usePendingClick } from "../usePendingClick";
 import { uiCorner } from "../styles/shapeStyles";
 
@@ -36,7 +41,7 @@ export function CardOverlayButton({
       aria-expanded={expanded}
       aria-busy={pending || undefined}
       disabled={disabled || pending}
-      className={`absolute inset-0 w-full ${uiCorner} focus-visible:ring-inset ${uiFocusRing} ${uiPressFeedback(
+      className={`peer absolute inset-0 w-full ${uiCorner} ${uiHoverSurface} transition focus-visible:ring-inset ${uiFocusRing} ${uiPressFeedback(
         !disabled && !pending
       )} ${pending ? "cursor-wait" : uiDisabledControl}`.trim()}
       onClick={handleClick}

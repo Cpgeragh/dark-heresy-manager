@@ -11,12 +11,7 @@ interface StatChipBaseProps extends StatChipProps {
   size: "sm" | "md";
 }
 
-function StatChipBase({
-  label,
-  value,
-  size,
-  valueColour = colourTextPrimary,
-}: StatChipBaseProps) {
+function StatChipBase({ label, value, size, valueColour = colourTextPrimary }: StatChipBaseProps) {
   const displayValue = value === "" || value === null || value === undefined ? "—" : value;
 
   if (size === "sm") {

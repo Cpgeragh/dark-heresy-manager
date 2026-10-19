@@ -120,15 +120,12 @@ describe("Firestore Rules: characterSummaries", () => {
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
 
     await expect(
-      dbAs(env, "player-1")
-        .collection("campaigns/c1/characterSummaries")
-        .doc("char1")
-        .set({
-          campaignId: "c1",
-          characterName: "Test Acolyte",
-          userId: "player-1",
-          recoveryCode: "DH-TEST-0001",
-        })
+      dbAs(env, "player-1").collection("campaigns/c1/characterSummaries").doc("char1").set({
+        campaignId: "c1",
+        characterName: "Test Acolyte",
+        userId: "player-1",
+        recoveryCode: "DH-TEST-0001",
+      })
     ).rejects.toThrow();
   });
 

@@ -3,6 +3,7 @@
 import { chipClassName } from "./chipStyles";
 import {
   colourGroupHoverTextStrong,
+  colourPeerHoverTextStrong,
   chipColours,
   colourAccentBar,
   colourAmberPlain,
@@ -187,10 +188,16 @@ export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]
 /** Small circular loading spinner. Set its size with width and height classes where it is used. */
 export const uiSpinner = `rounded-full border-2 ${colourSplashRule} border-t-red-600 animate-spin`;
 export const uiSubheading = `text-xs lg:text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`;
-export const uiItemName = `text-sm lg:text-base font-medium ${colourTextPrimary}`;
+const uiItemNameTypography = "text-sm lg:text-base font-medium";
+const uiCardTitleTypography = "text-sm lg:text-base font-semibold";
+/** Base and hover colour placed on content directly following a CardOverlayButton. */
+export const uiOverlayPeerHoverText = `${colourTextPrimary} ${colourPeerHoverTextStrong}`;
+export const uiItemName = `${uiItemNameTypography} ${colourTextPrimary}`;
 export const uiItemNameHover = `${uiItemName} ${colourGroupHoverTextStrong}`;
-export const uiCardTitle = `text-sm lg:text-base font-semibold ${colourTextPrimary}`;
+export const uiOverlayItemNameHover = `${uiItemNameTypography} text-inherit`;
+export const uiCardTitle = `${uiCardTitleTypography} ${colourTextPrimary}`;
 export const uiCardTitleHover = `${uiCardTitle} ${colourGroupHoverTextStrong}`;
+export const uiOverlayCardTitleHover = `${uiCardTitleTypography} text-inherit`;
 /** Rule or ability name above its description inside an info modal. */
 export const uiRuleName = `text-sm lg:text-base font-semibold ${colourMetadataLabelText}`;
 

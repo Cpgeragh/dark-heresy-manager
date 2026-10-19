@@ -32,6 +32,12 @@ Found by reading the source directly, not yet confirmed live: check these
 first, they're the most likely places a screen reader will produce
 confusing output:
 
+- [ ] `RemoveEntryButton.tsx` owns character-entry trash actions: confirm each trigger
+      announces `Remove [name]`, or `Delete [name]` for Notes, and opens a native dialog
+      named `Remove [kind]` or `Delete [kind]`; Cancel and Close return focus sensibly,
+      blocked removals expose their explanation without a confirm action, and separately
+      focused information, equip, and removal controls never activate an expandable card.
+
 - [ ] `PortraitUpload.tsx`'s uploaded image always uses `alt="Portrait"`
       regardless of which character it belongs to: on a page like
       Campaign Overview showing several characters' portraits

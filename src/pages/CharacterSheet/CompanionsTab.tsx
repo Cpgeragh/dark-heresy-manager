@@ -7,7 +7,7 @@ import { ViewButton } from "../../ui/buttons/ViewButton";
 import { InfoModal } from "../../components/InfoModal";
 import { ItemMetaChips } from "../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal } from "../../ui/pickers/PickerModal";
-import { RemoveButton } from "../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { StatChip } from "../../ui/chips/StatChip";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
@@ -25,7 +25,8 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
-  uiItemNameHover,
+  uiOverlayItemNameHover,
+  uiOverlayPeerHoverText,
   uiRuleName,
   uiStackSection,
   uiStackBody,
@@ -38,6 +39,7 @@ import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { GEAR_REFERENCE } from "../../data/reference/gearReference";
 import { colourDivider } from "../../ui/styles/colourTokens";
 import { uiLayerLocal } from "../../ui/styles/layerStyles";
+import { CharacterEntryRowContent } from "../../ui/CharacterEntryRow";
 
 const CHARACTERISTICS: { key: keyof CompanionRef["characteristics"]; label: string }[] = [
   { key: "ws", label: "WS" },
@@ -79,9 +81,11 @@ function CompanionPickerCard({
           pending={pending}
           onClick={onSelect ? handleSelect : toggle}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none ${uiInlineRow}`}>
+        <div
+          className={`${uiExpandButton} relative ${uiLayerLocal} pointer-events-none ${uiInlineRow} ${uiOverlayPeerHoverText}`}
+        >
           <div className="flex items-center gap-1.5">
-            <span className={uiItemNameHover}>{companionReference.name}</span>
+            <span className={uiOverlayItemNameHover}>{companionReference.name}</span>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
               <InfoModal
                 title={companionReference.name}
@@ -329,32 +333,32 @@ function CompanionCard({
 
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
-      <div
-        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-      >
+      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         <CardOverlayButton
           label={`${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`}
           expanded={expanded}
           onClick={() => setExpanded((current) => !current)}
         />
-        <div className={`${uiExpandButton} relative pointer-events-none`}>
-          <div className="flex items-center gap-1.5">
-            <h3 className={uiItemNameHover}>{companionReference.name}</h3>
-            <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-              <InfoModal title={companionReference.name} content={companionReference.description} />
-            </span>
-          </div>
-        </div>
-        <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-          <ExpandChevron expanded={expanded} />
-        </div>
+        <CharacterEntryRowContent
+          interactive
+          name={companionReference.name}
+          nameClassName={uiOverlayItemNameHover}
+          info={
+            <InfoModal title={companionReference.name} content={companionReference.description} />
+          }
+          actions={<ExpandChevron expanded={expanded} />}
+        />
       </div>
 
       {expanded && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
           {editable && (
             <div className="flex justify-end">
-              <RemoveButton onClick={onRemove} label={`Remove ${companionReference.name}`} />
+              <RemoveEntryButton
+                kind="Companion"
+                name={companionReference.name}
+                onRemove={onRemove}
+              />
             </div>
           )}
           <CompanionProfileDetails companionReference={companionReference} modalAs="button" />

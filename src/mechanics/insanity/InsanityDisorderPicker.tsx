@@ -324,9 +324,7 @@ export function InsanityDisorderPicker({
           >
             <PickerRowName name={ref.name} />
             <PickerRowChips>
-              <Chip colour={disorderTypeChipColour(ref.type)}>
-                {ref.type}
-              </Chip>
+              <Chip colour={disorderTypeChipColour(ref.type)}>{ref.type}</Chip>
             </PickerRowChips>
             <PickerRowInfoLine
               label="Rules"

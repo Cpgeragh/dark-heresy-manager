@@ -86,6 +86,7 @@ export const colourHoverTextPrimary = "hover:text-slate-200";
 export const colourHoverTextBody = "hover:text-slate-300";
 export const colourEnabledHoverTextBody = "enabled:hover:text-slate-300";
 export const colourGroupHoverTextStrong = "group-hover:text-white";
+export const colourPeerHoverTextStrong = "peer-hover:text-white";
 export const colourHoverAccentTint = "hover:bg-red-500/10";
 export const colourHoverToastControl = "hover:bg-white/10";
 export const colourHoverLoadedDot = "hover:bg-green-500";

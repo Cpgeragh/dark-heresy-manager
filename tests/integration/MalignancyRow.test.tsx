@@ -92,14 +92,14 @@ describe("MalignancyRow", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Remove Palsy" }));
 
     expect(onRemove).not.toHaveBeenCalled();
-    expect(screen.getByRole("dialog", { name: "Delete Malignancy" })).toBeInTheDocument();
-    expect(screen.getByText("Delete Palsy from this character?")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Remove Malignancy" })).toBeInTheDocument();
+    expect(screen.getByText("Remove Palsy from this character?")).toBeInTheDocument();
   });
 
-  it("deletes only after confirming", async () => {
+  it("removes only after confirming", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     render(
@@ -111,13 +111,13 @@ describe("MalignancyRow", () => {
       />
     );
 
+    await user.click(screen.getByRole("button", { name: "Remove Palsy" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
 
     expect(onRemove).toHaveBeenCalled();
   });
 
-  it("cancels without deleting", async () => {
+  it("cancels without removing", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     render(
@@ -129,10 +129,10 @@ describe("MalignancyRow", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Remove Palsy" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(onRemove).not.toHaveBeenCalled();
-    expect(screen.queryByRole("dialog", { name: "Delete Malignancy" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Remove Malignancy" })).not.toBeInTheDocument();
   });
 });

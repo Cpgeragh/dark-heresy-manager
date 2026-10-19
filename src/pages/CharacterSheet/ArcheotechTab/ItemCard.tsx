@@ -14,7 +14,7 @@ import {
   uiTextGMNote,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -72,7 +72,7 @@ export function ItemCard({
     <>
       {editable && hasBody && (
         <div className="flex justify-end">
-          <RemoveButton onClick={onRemove} label="Remove" />
+          <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
         </div>
       )}
 
@@ -188,7 +188,14 @@ export function ItemCard({
           <div>{details}</div>
         </div>
 
-        {editable && <RemoveButton onClick={onRemove} label="Remove" className="mt-0.5" />}
+        {editable && (
+          <RemoveEntryButton
+            kind="Archeotech item"
+            name={item.name}
+            onRemove={onRemove}
+            className="mt-0.5"
+          />
+        )}
       </div>
     </div>
   );

@@ -743,8 +743,8 @@ describe("PsychicTab", () => {
       />
     );
     expect(screen.queryByText("Available: 1")).not.toBeInTheDocument();
-    await user.click(screen.getAllByRole("button", { name: "Delete Linked Minor" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Linked Minor" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(screen.getAllByText("Available: 1").length).toBeGreaterThan(0);
   });
 
@@ -810,8 +810,8 @@ describe("PsychicTab", () => {
       ],
     };
     const { onUpdate } = renderTab({ talents, psychic });
-    await user.click(screen.getAllByRole("button", { name: "Delete Linked Minor" })[0]);
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Linked Minor" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorPowers: [] }), {
       optimistic: true,
     });
@@ -849,8 +849,8 @@ describe("PsychicTab", () => {
 
     onUpdate.mockClear();
     const linkedRender = renderTab({ talents, psychic: linked });
-    await user.click(screen.getAllByRole("button", { name: "Delete Fake Minor Power" }).at(-1)!);
-    await user.click(screen.getAllByRole("button", { name: "Delete" }).at(-1)!);
+    await user.click(screen.getAllByRole("button", { name: "Remove Fake Minor Power" }).at(-1)!);
+    await user.click(screen.getAllByRole("button", { name: "Remove" }).at(-1)!);
     expect(linkedRender.onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ minorPowers: [] }),
       { optimistic: true }

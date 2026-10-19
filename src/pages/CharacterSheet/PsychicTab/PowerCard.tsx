@@ -8,18 +8,14 @@ import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours, psychicSelectionSourceColours } from "./psychicStyles";
 import {
   uiChipRow,
-  uiCardTitleHover,
-  uiInfoModalWrapper,
+  uiOverlayCardTitleHover,
   uiSectionShell,
-  uiTextBody,
   uiTextPlaceholder,
   uiTextDescription,
-  uiStackField,
   uiStackSection,
 } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
-import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
-import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
@@ -29,6 +25,7 @@ import { ExpandButton } from "../../../ui/buttons/ExpandButton";
 import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { uiLayerLocal } from "../../../ui/styles/layerStyles";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;
@@ -113,7 +110,6 @@ export function PowerCard({
 }: PowerCardProps) {
   recordComponentRender("PowerCard");
   const [expanded, setExpanded] = useState(false);
-  const [deleteArmed, setDeleteArmed] = useState(false);
 
   const modalContent = (
     <>
@@ -127,9 +123,7 @@ export function PowerCard({
 
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
-      <div
-        className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4 text-sm lg:text-base`}
-      >
+      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4 text-sm lg:text-base`}>
         <CardOverlayButton
           label={
             onSelect
@@ -140,43 +134,42 @@ export function PowerCard({
           onClick={onSelect ?? (() => setExpanded((value) => !value))}
         />
 
-        <div className={`relative pointer-events-none min-w-0 flex-1 ${uiStackField}`}>
-          <div className="flex items-center gap-1.5">
-            <p className={uiCardTitleHover}>
-              {power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
-            </p>
-            <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-              <InfoModal
-                as="span"
-                title={power.name || "Psychic Power"}
-                content={modalContent}
-                hideTitle
-              />
-            </span>
-          </div>
-          <PowerIdentityChips power={power} talentSourceName={talentSourceName} />
-        </div>
-
-        <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
-          {editable && (
-            <div className={`relative ${uiLayerLocal} pointer-events-auto`}>
-              <RemoveButton
-                onClick={() => setDeleteArmed(true)}
-                label={`Delete ${power.name || "power"}`}
-              />
-            </div>
-          )}
-
-          {onSelect ? (
-            <ExpandButton
-              expanded={expanded}
-              label={`${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`}
-              onClick={() => setExpanded((value) => !value)}
+        <CharacterEntryRowContent
+          interactive
+          name={power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
+          nameClassName={uiOverlayCardTitleHover}
+          info={
+            <InfoModal
+              as="span"
+              title={power.name || "Psychic Power"}
+              content={modalContent}
+              hideTitle
             />
-          ) : (
-            <ExpandChevron expanded={expanded} />
-          )}
-        </div>
+          }
+          metadata={<PowerIdentityChips power={power} talentSourceName={talentSourceName} />}
+          actions={
+            <>
+              {editable && (
+                <div className={`relative ${uiLayerLocal} pointer-events-auto`}>
+                  <RemoveEntryButton
+                    kind="Psychic Power"
+                    name={power.name || "power"}
+                    onRemove={() => onRemove(power.id)}
+                  />
+                </div>
+              )}
+              {onSelect ? (
+                <ExpandButton
+                  expanded={expanded}
+                  label={`${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`}
+                  onClick={() => setExpanded((value) => !value)}
+                />
+              ) : (
+                <ExpandChevron expanded={expanded} />
+              )}
+            </>
+          }
+        />
       </div>
 
       {expanded && (
@@ -209,34 +202,6 @@ export function PowerCard({
             />
           )}
         </div>
-      )}
-
-      {deleteArmed && (
-        <PickerModal
-          title="Delete Psychic Power"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setDeleteArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={() => onRemove(power.id)}>
-                Delete
-              </Button>
-              <Button variant="neutral" onClick={() => setDeleteArmed(false)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Delete {power.name || "this power"} from this character?
-            </p>
-          </PickerBody>
-        </PickerModal>
       )}
     </div>
   );
