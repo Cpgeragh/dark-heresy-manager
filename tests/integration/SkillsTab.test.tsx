@@ -245,9 +245,10 @@ describe("SkillsTab", () => {
     });
 
     expect(removeButtons.length).toBeGreaterThan(0);
-    const removeContainers = removeButtons.map((button) => button.parentElement?.parentElement);
-    for (const container of removeContainers) {
-      expect(container).toHaveClass("justify-between");
+    for (const button of removeButtons) {
+      const actionArea = button.parentElement?.parentElement;
+      expect(actionArea?.parentElement).toHaveClass("justify-between");
+      expect(actionArea?.firstElementChild?.contains(button)).toBe(true);
     }
 
     await user.click(removeButtons[0]);

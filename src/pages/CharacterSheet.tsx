@@ -538,8 +538,9 @@ export default function CharacterSheet({
   );
 
   const handleUpdateInsanity = useCallback(
-    (next: InsanityBlock, options?: PatchOptions) => patchField("insanity", next, options),
-    [patchField]
+    (next: InsanityBlock, options?: PatchOptions) =>
+      patchFieldWithResult("insanity", next, options),
+    [patchFieldWithResult]
   );
 
   const handleUpdateCorruption = useCallback(

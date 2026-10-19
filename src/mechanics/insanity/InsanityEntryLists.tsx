@@ -48,7 +48,7 @@ function DisorderRow({
   disorder: InsanityDisorderEntry;
   editable: boolean;
   onRemove: () => void;
-  onEscalate: (severity: InsanityDisorderSeverity) => void;
+  onEscalate: (severity: InsanityDisorderSeverity) => void | Promise<boolean | void>;
 }) {
   const [escalateArmed, setEscalateArmed] = useState(false);
   const ref = getInsanityDisorderRef(disorder.referenceId);
@@ -94,15 +94,15 @@ function DisorderRow({
           </div>
         }
         actions={
+          editable && nextSeverity ? (
+            <Button size="xs" onClick={() => setEscalateArmed(true)}>
+              Escalate to {nextSeverity}
+            </Button>
+          ) : undefined
+        }
+        removeAction={
           editable ? (
-            <>
-              {nextSeverity && (
-                <Button size="xs" onClick={() => setEscalateArmed(true)}>
-                  Escalate to {nextSeverity}
-                </Button>
-              )}
-              <RemoveEntryButton kind="Disorder" name={disorder.name} onRemove={onRemove} />
-            </>
+            <RemoveEntryButton kind="Disorder" name={disorder.name} onRemove={onRemove} />
           ) : undefined
         }
       />
@@ -119,9 +119,9 @@ function DisorderRow({
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="primary"
-                onClick={() => {
-                  onEscalate(nextSeverity);
-                  setEscalateArmed(false);
+                onClick={async () => {
+                  const saved = await onEscalate(nextSeverity);
+                  if (saved !== false) setEscalateArmed(false);
                 }}
               >
                 Escalate
@@ -177,7 +177,7 @@ function TraumaRow({
           </div>
         ) : undefined
       }
-      actions={
+      removeAction={
         editable ? <RemoveEntryButton kind="Trauma" name={name} onRemove={onRemove} /> : undefined
       }
     />
@@ -260,7 +260,7 @@ export function DisordersList({
   legacyDisorders: string;
   editable: boolean;
   onRemove: (id: string) => void;
-  onEscalate: (id: string, severity: InsanityDisorderSeverity) => void;
+  onEscalate: (id: string, severity: InsanityDisorderSeverity) => void | Promise<boolean | void>;
   onLegacyChange: (notes: string) => void;
 }) {
   if (disorders.length > 0) {

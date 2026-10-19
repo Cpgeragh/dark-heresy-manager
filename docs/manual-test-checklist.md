@@ -50,7 +50,7 @@ Start at 0 and set Points to one below, exactly on, and one above every document
 - [ ] Add a Temporary Trauma from the picker: roll chip and rules text match the entry chosen
 - [ ] Add a Disorder: severity chip colour and info text match its severity, type chip is correct
 - [ ] Remove a Trauma and a Disorder: both arm a confirm step (`Remove [name] from this character?` with Remove/Cancel) instead of removing on the first tap; the list only updates after confirming
-- [ ] Escalate a Disorder to its next severity tier: button reads "Escalate to Severe"/"Escalate to Acute" depending on current tier, arms its own confirm step ("Escalate [name] to [tier]?" with Escalate/Cancel), and disappears once already at the highest tier for that disorder (The Flesh is Weak has no Minor tier; Horrific Nightmares has no Acute tier)
+- [ ] Escalate a Disorder to its next severity tier: button reads "Escalate to Severe"/"Escalate to Acute" depending on current tier, arms its own confirm step ("Escalate [name] to [tier]?" with Escalate/Cancel) whose Escalate button shows waiting dots and keeps the window open until the save finishes, closing it only when the save succeeds, and the button disappears once already at the highest tier for that disorder (The Flesh is Weak has no Minor tier; Horrific Nightmares has no Acute tier)
 - [ ] Editable mode shows an icon Add button beside Disorders and Temporary Trauma headers; read-only mode shows a View icon button instead, which opens the picker in browse-only mode: rows don't respond to clicks and there's no custom-add action
 - [ ] Disorder/Trauma picker rows are boxed cards, matching Talents/Traits/Skills/Psychic
 - [ ] Custom Disorder form requires Type, Name, Origin (Custom/2nd Ed), Severity, and Rules Text; custom Trauma form requires Name, Origin, and Rules Text: Add stays disabled until every required field is filled
@@ -289,7 +289,7 @@ below deliberately change several of those pages.
 - [ ] The Machinator Array information also states the −10 Silent Move penalty and inability to swim; only the numeric Characteristic/Skill effects are calculated by the app
 - [ ] Add **Touched by the Fates**, confirm the displayed half-Willpower-Bonus value, and verify Vitals sets total Fate to that recorded value
 - [ ] Change Willpower afterwards: the already recorded Touched by the Fates value does not silently recalculate
-- [ ] Add **The Power Within**: a read-only `Resistance (Psychic Powers)` card appears with `Granted by The Power Within`
+- [ ] Add **The Power Within**: a read-only `Resistance (Psychic Powers)` card appears with a `Gained from` line reading `The Power Within (Talent)` below its chips
 - [ ] Add **Purity of Flesh**: a read-only `Gift of Purity` card appears and cannot be removed independently
 - [ ] If an independently purchased Talent duplicates a calculated grant, only one visible card is shown; removing the independent copy reveals the still-active granted card
 

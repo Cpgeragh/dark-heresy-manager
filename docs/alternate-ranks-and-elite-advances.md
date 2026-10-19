@@ -94,14 +94,14 @@ The replaced normal rank does not produce missed-rank options while the characte
 
 The Elite Advances page has one Add or View flow. Special, Skills and Talents are picker categories within that flow.
 
-| Purchased item                                       | Visible destination | Provenance                                   |
-| ---------------------------------------------------- | ------------------- | -------------------------------------------- |
-| Packaged Elite Advance granted by an Alternate Rank  | Elite Advances      | `[Alternate Rank] (Alternate Rank): Granted` |
-| Packaged Elite Advance                               | Elite Advances      | The packaged advance remains as its own card |
-| Skill bought as an Elite Advance                     | Skills              | `Gained from: [source] (Elite Advance)`      |
-| Normal Talent bought as an Elite Advance             | Talents             | `Gained from: [source] (Elite Advance)`      |
-| Faith Talent bought as an Elite Advance              | Faith Talents       | `Gained from: [source] (Elite Advance)`      |
-| Weapon Training bought from an Elite Advance package | Weapon Training     | Package provenance stored with the purchase  |
+| Purchased item                                       | Visible destination | Provenance                                              |
+| ---------------------------------------------------- | ------------------- | ------------------------------------------------------- |
+| Packaged Elite Advance granted by an Alternate Rank  | Elite Advances      | `Gained from` line: `[Alternate Rank] (Alternate Rank)` |
+| Packaged Elite Advance                               | Elite Advances      | The packaged advance remains as its own card            |
+| Skill bought as an Elite Advance                     | Skills              | `Gained from` line: `[source] (Elite Advance)`          |
+| Normal Talent bought as an Elite Advance             | Talents             | `Gained from` line: `[source] (Elite Advance)`          |
+| Faith Talent bought as an Elite Advance              | Faith Talents       | `Gained from` line: `[source] (Elite Advance)`          |
+| Weapon Training bought from an Elite Advance package | Weapon Training     | Package provenance stored with the purchase             |
 
 Direct Skill and Talent purchases do not create cards on the Elite Advances page. Their exact costs remain attached to their normal Skill or Talent records and contribute to XP accounting.
 

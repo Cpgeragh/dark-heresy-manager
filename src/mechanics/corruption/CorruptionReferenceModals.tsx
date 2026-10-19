@@ -1,15 +1,7 @@
-import {
-  uiRuleName,
-  uiTextLabel,
-  uiTextDescription,
-  uiStackBody,
-} from "../../ui/styles/editableStyles";
+import { InfoParagraph, InfoSection } from "../../ui/InfoSection";
+import { uiRuleName, uiStackBody } from "../../ui/styles/editableStyles";
 import type { CorruptionMalignancyRef } from "./corruptionReference";
 import type { MutationRef } from "./mutationsReference";
-
-function RuleParagraph({ children }: { children: React.ReactNode }) {
-  return <p className={uiTextDescription}>{children}</p>;
-}
 
 export function MalignancyInfoContent({
   malignancy,
@@ -25,12 +17,11 @@ export function MalignancyInfoContent({
           <p className={uiRuleName}>{malignancy.roll}</p>
         </div>
       )}
-      {malignancy.effect && <RuleParagraph>{malignancy.effect}</RuleParagraph>}
+      {malignancy.effect && <InfoParagraph>{malignancy.effect}</InfoParagraph>}
       {notes && (
-        <div>
-          <p className={uiTextLabel}>Notes</p>
-          <RuleParagraph>{notes}</RuleParagraph>
-        </div>
+        <InfoSection heading="Notes">
+          <InfoParagraph>{notes}</InfoParagraph>
+        </InfoSection>
       )}
     </div>
   );
@@ -50,12 +41,11 @@ export function MutationInfoContent({
           <p className={uiRuleName}>{mutation.roll}</p>
         </div>
       )}
-      {mutation.effect && <RuleParagraph>{mutation.effect}</RuleParagraph>}
+      {mutation.effect && <InfoParagraph>{mutation.effect}</InfoParagraph>}
       {notes && (
-        <div>
-          <p className={uiTextLabel}>Notes</p>
-          <RuleParagraph>{notes}</RuleParagraph>
-        </div>
+        <InfoSection heading="Notes">
+          <InfoParagraph>{notes}</InfoParagraph>
+        </InfoSection>
       )}
     </div>
   );

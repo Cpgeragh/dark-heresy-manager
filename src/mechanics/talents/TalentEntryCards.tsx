@@ -5,13 +5,15 @@ import { TRAIT_LIST } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
   uiChipRow,
-  uiTextLabel,
   uiTextDescription,
   uiStackBody,
   uiStackList,
 } from "../../ui/styles/editableStyles";
 import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
+import { EntryDetailLine } from "../../ui/EntryDetailLine";
+import { InfoParagraph, InfoSection } from "../../ui/InfoSection";
 import { Chip } from "../../ui/chips/Chip";
+import { StatusBadge } from "../../ui/chips/StatusBadge";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
@@ -39,7 +41,6 @@ interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   statusChipColour?: ChipColour;
   removable?: boolean;
   deletionBlockedMessage?: string;
-  statusAfterSource?: boolean;
   deletionNoun?: "Talent" | "Trait" | "Elite Advance";
   infoContent?: ReactNode;
 }
@@ -54,7 +55,6 @@ export function EntryCard({
   statusChipColour,
   removable = true,
   deletionBlockedMessage,
-  statusAfterSource = false,
   deletionNoun = "Talent",
   infoContent,
   libraryItem,
@@ -81,50 +81,50 @@ export function EntryCard({
       ? [entry.source]
       : [];
 
-  const information =
-    infoContent || description || entry.notes ? (
-      <InfoModal
-        title={shownName}
-        content={
-          infoContent ?? (
-            <div className={uiStackBody}>
-              {description && <p className={uiTextDescription}>{description}</p>}
-              {entry.notes && (
-                <div>
-                  <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                  <div className={uiStackList}>
-                    {entry.notes.split("\n\n").map((group, index) => {
-                      const breakAt = group.indexOf("\n");
-                      const heading = breakAt === -1 ? group : group.slice(0, breakAt);
-                      const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
-                      return (
-                        <p key={index} className={`${uiTextDescription} whitespace-pre-line`}>
-                          <span className="font-semibold">{heading}</span>
-                          {body && `\n${body}`}
-                        </p>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          )
-        }
-      />
-    ) : undefined;
+  const hasInformation = Boolean(infoContent || description || entry.notes);
+  const information = (
+    <InfoModal
+      title={shownName}
+      content={
+        hasInformation
+          ? (infoContent ?? (
+              <div className={uiStackBody}>
+                {description && <InfoParagraph>{description}</InfoParagraph>}
+                {entry.notes && (
+                  <InfoSection heading="Notes">
+                    <div className={uiStackList}>
+                      {entry.notes.split("\n\n").map((group, index) => {
+                        const breakAt = group.indexOf("\n");
+                        const heading = breakAt === -1 ? group : group.slice(0, breakAt);
+                        const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
+                        return (
+                          <p key={index} className={`${uiTextDescription} whitespace-pre-line`}>
+                            <span className="font-semibold">{heading}</span>
+                            {body && `\n${body}`}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </InfoSection>
+                )}
+              </div>
+            ))
+          : undefined
+      }
+    />
+  );
 
   const secondaryInformation = (
     <>
       {secondaryText && <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>}
       {isGranted && (
-        <p className={`text-sm ${colourAmberPlain}`}>
-          {entry.grantedByTalentName} ({entry.grantedByType}): Granted
-        </p>
+        <EntryDetailLine
+          label="Gained from"
+          value={`${entry.grantedByTalentName} (${entry.grantedByType})`}
+        />
       )}
       {eliteAdvanceSource && (
-        <p className={`text-sm ${colourAmberPlain}`}>
-          Gained from: {eliteAdvanceSource} (Elite Advance)
-        </p>
+        <EntryDetailLine label="Gained from" value={`${eliteAdvanceSource} (Elite Advance)`} />
       )}
     </>
   );
@@ -133,8 +133,8 @@ export function EntryCard({
     <>
       <CharacterEntryRow
         name={shownName}
+        badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
         info={information}
-        beforeMetadata={!statusAfterSource ? secondaryInformation : undefined}
         metadata={
           <div className={`${uiChipRow} items-center`}>
             {refSources.map((source) => (
@@ -145,15 +145,14 @@ export function EntryCard({
             {statusChip && <Chip colour={statusChipColour ?? "amber"}>{statusChip}</Chip>}
           </div>
         }
-        afterMetadata={statusAfterSource ? secondaryInformation : undefined}
-        actions={
+        afterMetadata={secondaryInformation}
+        removeAction={
           editable && (removable || deletionBlockedMessage) && !isGranted ? (
             <RemoveEntryButton
               kind={deletionNoun}
               name={shownName}
               onRemove={() => onRemove(entry.uid)}
               blockedMessage={deletionBlockedMessage}
-              className="mt-0.5"
             />
           ) : undefined
         }
@@ -181,7 +180,6 @@ export function TalentGroupCard({
   entries,
   editable,
   onRemove,
-  statusAfterSource = false,
   statusChip,
   statusChipColour,
 }: {
@@ -189,7 +187,6 @@ export function TalentGroupCard({
   entries: readonly TalentEntry[];
   editable: boolean;
   onRemove: (uid: string) => void | Promise<unknown>;
-  statusAfterSource?: boolean;
   statusChip?: string;
   statusChipColour?: ChipColour;
 }) {
@@ -217,7 +214,6 @@ export function TalentGroupCard({
                 editable={editable}
                 onRemove={onRemove}
                 removable={!entry.grantedByTalentEntryUid}
-                statusAfterSource={statusAfterSource}
                 statusChip={statusChip}
                 statusChipColour={statusChipColour}
               />

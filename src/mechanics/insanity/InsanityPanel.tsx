@@ -63,7 +63,7 @@ import {
 interface InsanityPanelProps {
   insanity?: InsanityBlock;
   editable: boolean;
-  onUpdate: (next: InsanityBlock, options?: PatchOptions) => void;
+  onUpdate: (next: InsanityBlock, options?: PatchOptions) => void | Promise<boolean | void>;
   sectionClassName: string;
   talents?: TalentsAndTraitsBlock;
   career?: string;

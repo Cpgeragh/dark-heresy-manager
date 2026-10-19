@@ -195,7 +195,6 @@ const TalentCards = memo(function TalentCards({
             displayName={`${reference?.name ?? talentEntries[0].name} (${talentEntries.length})`}
             editable={editable}
             onRemove={onRemove}
-            statusAfterSource
             statusChip={statusChip?.label}
             statusChipColour={statusChip?.colour}
           />
@@ -223,7 +222,6 @@ const TalentCards = memo(function TalentCards({
                 : undefined
             }
             onRemove={onRemove}
-            statusAfterSource
           />
         );
       }
@@ -240,7 +238,6 @@ const TalentCards = memo(function TalentCards({
             entries={talentEntries}
             editable={editable}
             onRemove={onRemove}
-            statusAfterSource
             statusChip={statusChip?.label}
             statusChipColour={statusChip?.colour}
           />
@@ -255,7 +252,6 @@ const TalentCards = memo(function TalentCards({
           onRemove={onRemove}
           statusChip={statusChip?.label}
           statusChipColour={statusChip?.colour}
-          statusAfterSource
           removable={
             !entry.grantedByTalentEntryUid &&
             ![...psychic.minorPowers, ...psychic.majorPowers].some(

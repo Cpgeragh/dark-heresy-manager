@@ -352,7 +352,8 @@ describe("EliteAdvancesTab", () => {
     );
 
     expect(screen.getByText("Bloodsworn Charter")).toBeInTheDocument();
-    expect(screen.getByText("Malfian Bloodsworn (Alternate Rank): Granted")).toBeInTheDocument();
+    expect(screen.getByText("Gained from")).toBeInTheDocument();
+    expect(screen.getByText("Malfian Bloodsworn (Alternate Rank)")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Remove Bloodsworn Charter" })
     ).not.toBeInTheDocument();

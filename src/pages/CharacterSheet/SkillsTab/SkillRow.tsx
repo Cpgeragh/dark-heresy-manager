@@ -10,6 +10,8 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/reference/skillDescriptions";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoSection } from "../../../ui/InfoSection";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
@@ -99,8 +101,7 @@ export function SkillRow({
     <div className={uiStackBody}>
       {skillDescription && <p className={uiTextDescription}>{skillDescription}</p>}
       {talentSources.length > 0 && (
-        <div>
-          <p className={`${uiFormLabel} mb-1`}>Effects</p>
+        <InfoSection heading="Effects">
           <ul className={`${uiStackField} ${uiTextDescription}`}>
             {talentSources.map((source, index) => (
               <li key={index}>
@@ -113,7 +114,7 @@ export function SkillRow({
               </li>
             ))}
           </ul>
-        </div>
+        </InfoSection>
       )}
     </div>
   );
@@ -251,15 +252,17 @@ export function SkillRow({
         <CharacterEntryRow
           name={displayName}
           info={
-            hasSkillInfo ? (
-              <InfoModal title={skill.name} content={skillInfoContent} as="span" />
-            ) : undefined
+            <InfoModal
+              title={skill.name}
+              content={hasSkillInfo ? skillInfoContent : undefined}
+              as="span"
+            />
           }
           metadata={
             <div className={`${uiChipRow} items-center`}>
               <Chip
                 colour={characteristicChipColour(skill.characteristic)}
-                className="shrink-0"
+                className="font-code shrink-0"
                 aria-label={`${characteristicName} ${total}`}
               >
                 {CHAR_LABEL[skill.characteristic]} {total}
@@ -277,9 +280,10 @@ export function SkillRow({
           afterMetadata={
             <>
               {eliteAdvancePurchase && (
-                <p className={`text-sm ${colourAmberPlain}`}>
-                  Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
-                </p>
+                <EntryDetailLine
+                  label="Gained from"
+                  value={`${eliteAdvancePurchase.sourceName} (Elite Advance)`}
+                />
               )}
               {talentSourceSummary && (
                 <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
@@ -287,7 +291,7 @@ export function SkillRow({
             </>
           }
           actions={
-            hasUpgrade || canDelete ? (
+            hasUpgrade ? (
               <>
                 {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
                   <Button size="xs" onClick={() => setUpgradeArmed(true)}>
@@ -299,23 +303,25 @@ export function SkillRow({
                     Upgrade to {nextTierAccess.level}
                   </Button>
                 )}
-                {canDelete && (
-                  <RemoveEntryButton
-                    kind="Skill"
-                    name={skill.name}
-                    onRemove={handleRemove}
-                    extra={
-                      downgradeLevel
-                        ? {
-                            label: `Downgrade to ${downgradeLabel}`,
-                            message: `Downgrade ${skill.name} to ${downgradeLabel}, or remove it from this character?`,
-                            onClick: handleDowngrade,
-                          }
-                        : undefined
-                    }
-                  />
-                )}
               </>
+            ) : undefined
+          }
+          removeAction={
+            canDelete ? (
+              <RemoveEntryButton
+                kind="Skill"
+                name={skill.name}
+                onRemove={handleRemove}
+                extra={
+                  downgradeLevel
+                    ? {
+                        label: `Downgrade to ${downgradeLabel}`,
+                        message: `Downgrade ${skill.name} to ${downgradeLabel}, or remove it from this character?`,
+                        onClick: handleDowngrade,
+                      }
+                    : undefined
+                }
+              />
             ) : undefined
           }
         />

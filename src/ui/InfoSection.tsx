@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { uiRuleName } from "./styles/editableStyles";
+import { uiRuleName, uiTextDescription } from "./styles/editableStyles";
 
 interface InfoSectionProps {
   heading: string;
@@ -14,4 +14,9 @@ export function InfoSection({ heading, children }: InfoSectionProps) {
       <div className="mt-1">{children}</div>
     </div>
   );
+}
+
+/** A paragraph of description or rules text inside an info window. */
+export function InfoParagraph({ children }: { children: ReactNode }) {
+  return <p className={uiTextDescription}>{children}</p>;
 }

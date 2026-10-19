@@ -77,7 +77,7 @@ interface BackgroundTabProps {
   experience?: ExperienceBlock;
   onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
   insanity?: InsanityBlock;
-  onUpdateInsanity?: (next: InsanityBlock) => void | Promise<void>;
+  onUpdateInsanity?: (next: InsanityBlock) => void | Promise<boolean | void>;
   onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
 }
 

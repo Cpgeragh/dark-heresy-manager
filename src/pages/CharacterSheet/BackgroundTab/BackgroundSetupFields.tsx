@@ -51,7 +51,7 @@ export interface BackgroundSetupFieldsProps {
   experience?: ExperienceBlock;
   onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
   insanity?: InsanityBlock;
-  onUpdateInsanity?: (next: InsanityBlock) => void | Promise<void>;
+  onUpdateInsanity?: (next: InsanityBlock) => void | Promise<boolean | void>;
   /** Saves several character fields in one step, so a pick that changes the header, talents, experience, insanity and cybernetics is accepted or refused as a whole. */
   onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
 }

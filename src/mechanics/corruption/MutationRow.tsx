@@ -70,15 +70,15 @@ export function MutationRow({
           </>
         }
         actions={
+          editable && rollEntries.length > 0 ? (
+            <Button size="xs" onClick={() => setIsEditingRolls(true)}>
+              Edit Rolls
+            </Button>
+          ) : undefined
+        }
+        removeAction={
           editable ? (
-            <>
-              {rollEntries.length > 0 && (
-                <Button size="xs" onClick={() => setIsEditingRolls(true)}>
-                  Edit Rolls
-                </Button>
-              )}
-              <RemoveEntryButton kind="Mutation" name={display.name} onRemove={onRemove} />
-            </>
+            <RemoveEntryButton kind="Mutation" name={display.name} onRemove={onRemove} />
           ) : undefined
         }
       />

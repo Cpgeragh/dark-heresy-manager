@@ -9,7 +9,7 @@ import { recordComponentRender } from "../../performance/performanceMetrics";
 interface InsanityTabProps {
   insanity: InsanityBlock;
   editable: boolean;
-  onUpdate: (next: InsanityBlock, options?: PatchOptions) => void;
+  onUpdate: (next: InsanityBlock, options?: PatchOptions) => void | Promise<boolean | void>;
   talents?: TalentsAndTraitsBlock;
   career?: string;
 }

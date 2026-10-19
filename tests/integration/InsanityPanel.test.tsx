@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -188,6 +188,60 @@ describe("InsanityPanel disorder severity escalation", () => {
 
     expect(screen.getAllByText("Severe").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "Escalate to Acute" }).length).toBeGreaterThan(0);
+  });
+
+  describe("escalation save", () => {
+    const disorder: InsanityBlock = {
+      points: 20,
+      disorders: [
+        {
+          id: "d1",
+          referenceId: "phobia-fear-of-the-dead",
+          type: "Phobia",
+          name: "Fear of the Dead",
+          severity: "Minor",
+        },
+      ],
+    };
+
+    function renderWithPendingSave() {
+      let settle: (saved: boolean) => void = () => undefined;
+      const onUpdate = vi.fn(
+        () =>
+          new Promise<boolean>((resolve) => {
+            settle = resolve;
+          })
+      );
+      render(
+        <InsanityPanel insanity={disorder} editable onUpdate={onUpdate} sectionClassName="" />
+      );
+      return { settle: (saved: boolean) => settle(saved) };
+    }
+
+    it("keeps the window open while the save is pending and closes it once saved", async () => {
+      const user = userEvent.setup();
+      const { settle } = renderWithPendingSave();
+
+      await user.click(screen.getAllByRole("button", { name: "Escalate to Severe" })[0]);
+      await user.click(screen.getByRole("button", { name: "Escalate" }));
+
+      expect(screen.getByRole("dialog", { name: "Escalate to Severe" })).toBeInTheDocument();
+
+      await act(async () => settle(true));
+
+      expect(screen.queryByRole("dialog", { name: "Escalate to Severe" })).not.toBeInTheDocument();
+    });
+
+    it("keeps the window open when the save is refused", async () => {
+      const user = userEvent.setup();
+      const { settle } = renderWithPendingSave();
+
+      await user.click(screen.getAllByRole("button", { name: "Escalate to Severe" })[0]);
+      await user.click(screen.getByRole("button", { name: "Escalate" }));
+      await act(async () => settle(false));
+
+      expect(screen.getByRole("dialog", { name: "Escalate to Severe" })).toBeInTheDocument();
+    });
   });
 
   it("cancels an escalation without changing severity", async () => {

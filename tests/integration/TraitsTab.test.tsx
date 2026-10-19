@@ -608,7 +608,8 @@ describe("TraitsTab", () => {
       }),
     });
     expect(screen.getByText("Machine (2)")).toBeInTheDocument();
-    expect(screen.getByText("The Flesh is Weak (Talent): Granted")).toBeInTheDocument();
+    expect(screen.getByText("Gained from")).toBeInTheDocument();
+    expect(screen.getByText("The Flesh is Weak (Talent)")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove Machine (2)" })).not.toBeInTheDocument();
   });
 });
