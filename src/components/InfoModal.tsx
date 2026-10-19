@@ -7,12 +7,12 @@ import { InfoIcon } from "../ui/icons/InfoIcon";
 import { ModalHeader } from "../ui/modals/ModalHeader";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { uiInfoButton } from "../ui/styles/buttonStyles";
-import { uiTextBody, uiStackBody } from "../ui/styles/editableStyles";
+import { uiTextBody, uiTextPlaceholder, uiStackBody } from "../ui/styles/editableStyles";
 import { colourFillPanel } from "../ui/styles/colourTokens";
 
 interface InfoModalProps {
   title: string;
-  content: ReactNode;
+  content?: ReactNode;
   hideTitle?: boolean;
   as?: "button" | "span";
 }
@@ -78,7 +78,7 @@ export function InfoModal({ title, content, hideTitle = false, as = "button" }: 
             {hideTitle && (
               <CloseButton onClick={() => setOpen(false)} className="float-right ml-3 mb-1" />
             )}
-            {content}
+            {content ?? <p className={uiTextPlaceholder}>No description recorded.</p>}
           </div>
         </ModalShell>
       )}

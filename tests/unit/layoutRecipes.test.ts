@@ -96,6 +96,7 @@ describe("shared layout recipes", () => {
       "src/pages/CharacterSheet/weapons/MeleeCard.tsx",
       "src/pages/CharacterSheet/weapons/RangedCard.tsx",
       "src/pages/CharacterSheet/weapons/weaponShared.tsx",
+      "src/ui/buttons/StateToggleButton.tsx",
     ];
 
     for (const file of sourceFiles(join(__dirname, "../../src"))) {

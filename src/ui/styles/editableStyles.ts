@@ -197,9 +197,9 @@ export const uiItemNameHover = `${uiItemName} ${colourGroupHoverTextStrong}`;
 export const uiOverlayItemNameHover = `${uiItemNameTypography} text-inherit`;
 export const uiCardTitle = `${uiCardTitleTypography} ${colourTextPrimary}`;
 export const uiCardTitleHover = `${uiCardTitle} ${colourGroupHoverTextStrong}`;
-export const uiOverlayCardTitleHover = `${uiCardTitleTypography} text-inherit`;
-/** Rule or ability name above its description inside an info modal. */
-export const uiRuleName = `text-sm lg:text-base font-semibold ${colourMetadataLabelText}`;
+export const uiOverlayCardTitleHover = uiOverlayItemNameHover;
+/** Rule name or section heading inside an info modal. */
+export const uiRuleName = `text-sm lg:text-base font-semibold uppercase tracking-wide ${colourMetadataLabelText}`;
 
 // ──────────────────────────────────────────────────────────────────────────────
 

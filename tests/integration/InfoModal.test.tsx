@@ -22,6 +22,13 @@ describe("InfoModal", () => {
     expect(screen.getByText("Boom.")).toBeInTheDocument();
   });
 
+  it("says no description was recorded when it is given no content", async () => {
+    const user = userEvent.setup();
+    render(<InfoModal title="Frag Grenade" />);
+    await user.click(screen.getByRole("button", { name: "Show information about Frag Grenade" }));
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
+  });
+
   it("renders a role=button span instead of a button when as='span'", () => {
     render(<InfoModal title="Frag Grenade" content={<p>Boom.</p>} as="span" />);
     const trigger = screen.getByRole("button", { name: "Show information about Frag Grenade" });

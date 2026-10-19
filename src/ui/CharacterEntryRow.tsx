@@ -22,6 +22,8 @@ interface CharacterEntryRowContentProps {
   metadata?: ReactNode;
   afterMetadata?: ReactNode;
   actions?: ReactNode;
+  removeAction?: ReactNode;
+  expandControl?: ReactNode;
   children?: ReactNode;
   nameClassName?: string;
   interactive?: boolean;
@@ -42,6 +44,8 @@ export function CharacterEntryRowContent({
   metadata,
   afterMetadata,
   actions,
+  removeAction,
+  expandControl,
   children,
   nameClassName = uiItemName,
   interactive = false,
@@ -68,7 +72,19 @@ export function CharacterEntryRowContent({
         {afterMetadata}
         {children}
       </div>
-      {actions && <div className={`${uiInlineRow} shrink-0 flex-wrap justify-end`}>{actions}</div>}
+      {(removeAction || actions || expandControl) && (
+        <div className={`${uiInlineRow} shrink-0 flex-wrap justify-end`}>
+          {removeAction && (
+            <div
+              className={interactive ? `relative ${uiLayerLocal} pointer-events-auto` : undefined}
+            >
+              {removeAction}
+            </div>
+          )}
+          {actions}
+          {expandControl && <div className="ml-2 lg:ml-3">{expandControl}</div>}
+        </div>
+      )}
     </div>
   );
 }
@@ -85,6 +101,8 @@ export function CharacterEntryRow({
   metadata,
   afterMetadata,
   actions,
+  removeAction,
+  expandControl,
   children,
   nameClassName,
   interactive,
@@ -103,6 +121,8 @@ export function CharacterEntryRow({
         metadata={metadata}
         afterMetadata={afterMetadata}
         actions={actions}
+        removeAction={removeAction}
+        expandControl={expandControl}
         nameClassName={nameClassName}
         interactive={interactive}
       >

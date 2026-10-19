@@ -3,6 +3,7 @@
 
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { Button } from "../../../ui/buttons/Button";
+import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { Chip, NestedChip } from "../../../ui/chips/Chip";
 import { ItemMetaChips, NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -33,7 +34,6 @@ import {
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
-import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 
 export function WeaponQualitySelector({
   selected,
@@ -130,28 +130,19 @@ export function EquipToggle({
   editable: boolean;
   onChange: () => void | Promise<void>;
 }) {
-  if (!editable) {
-    return equipped ? (
-      <NestedChip colour="emerald" className="uppercase tracking-wide shrink-0">
-        Equipped
-      </NestedChip>
-    ) : null;
-  }
   return (
-    <Button
-      size="xs"
-      variant={equipped ? "successOutline" : "ghost"}
-      disabled={disabled && !equipped}
-      loadingLabel={equipped ? "Unequipping" : "Equipping"}
-      title={equipped ? "Click to unequip" : disabled ? "Slots full" : "Click to equip"}
-      className={`relative ${uiLayerLocal} pointer-events-auto shrink-0 sm:h-7 sm:px-2.5 md:h-8 md:px-3 md:text-sm`}
-      onClick={(event) => {
-        event.stopPropagation();
-        if (!disabled || equipped) return onChange();
-      }}
-    >
-      {equipped ? "Unequip" : "Equip"}
-    </Button>
+    <StateToggleButton
+      active={equipped}
+      activeLabel="Unequip"
+      inactiveLabel="Equip"
+      activeBusyLabel="Unequipping"
+      inactiveBusyLabel="Equipping"
+      statusLabel="Equipped"
+      disabled={disabled}
+      editable={editable}
+      onChange={onChange}
+      disabledTitle="Slots full"
+    />
   );
 }
 
