@@ -68,12 +68,7 @@ export function ConcealedWeaponBionicInstaller({
         {selectingArm
           ? arms.map((item) => (
               <div key={item.id} className={uiStackList}>
-                <ImplantRow
-                  item={item}
-                  editable={false}
-                  onCycleQuality={() => {}}
-                  onRemove={() => {}}
-                />
+                <ImplantRow item={item} editable={false} onRemove={() => {}} />
                 <Button size="sm" onClick={() => setArmId(item.id)}>
                   Select Bionic Arm
                 </Button>

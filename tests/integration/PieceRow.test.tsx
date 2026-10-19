@@ -111,3 +111,26 @@ describe("PieceRow read-only", () => {
     expect(screen.queryByRole("button", { name: "Remove Flak Jacket" })).not.toBeInTheDocument();
   });
 });
+
+describe("PieceRow shared entry pieces", () => {
+  it("shows a Worn chip and no button when read-only and worn", () => {
+    renderRow({ editable: false });
+    expect(screen.getByText("Worn")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Stow" })).not.toBeInTheDocument();
+  });
+
+  it("always has an information icon and says no description was recorded", async () => {
+    const user = userEvent.setup();
+    renderRow();
+    await user.click(screen.getByRole("button", { name: "Show information about Flak Jacket" }));
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
+  });
+
+  it("shows a Craftsmanship line and puts the Remove button before the Stow button", () => {
+    renderRow();
+    expect(screen.getByText("Craftsmanship")).toBeInTheDocument();
+    const remove = screen.getByRole("button", { name: "Remove Flak Jacket" });
+    const stow = screen.getByRole("button", { name: "Stow" });
+    expect(remove.compareDocumentPosition(stow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});

@@ -3,18 +3,12 @@
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/chips/Chip";
-import {
-  uiChipRow,
-  uiTextLabel,
-  uiInfoModalWrapper,
-  uiTextDescription,
-  uiStackBody,
-} from "../../../ui/styles/editableStyles";
-import { colourAmberPlain } from "../../../ui/styles/colourTokens";
+import { uiChipRow, uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
 import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { CRAFTSMANSHIP_COLOUR } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import {
@@ -34,7 +28,6 @@ interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   linkedWeaponName?: string;
   linkedWeaponType?: "ranged" | "melee";
   editable: boolean;
-  onCycleQuality: (id: string) => void;
   onRemove: (id: string) => void;
 }
 
@@ -52,13 +45,11 @@ export function ImplantRow({
   onPublish,
   onArchive,
   onUpdateAllCopies,
-  onCycleQuality,
   onRemove,
 }: Props) {
   recordComponentRender("ImplantRow");
   const ref = CYBERNETICS_REFERENCE.find((r) => r.id === item.referenceId);
   const qualityOptions = availableCraftsmanship(ref);
-  const canChangeQuality = editable && qualityOptions.length > 1;
   const displayedCraftsmanship =
     item.craftsmanship && qualityOptions.includes(item.craftsmanship)
       ? item.craftsmanship
@@ -69,33 +60,23 @@ export function ImplantRow({
       : craftsmanshipDescription(ref, displayedCraftsmanship)
     : (item.notes ?? "No rules recorded.");
   const isConcealedWeaponBionic = ref?.id === "ih-concealed-weapon-bionic";
+  const rules = isConcealedWeaponBionic ? undefined : ref?.notes;
 
   return (
     <CharacterEntryRow
       name={item.name}
       badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       info={
-        !isConcealedWeaponBionic && (ref?.notes || item.notes) ? (
-          <InfoModal
-            title={item.name}
-            content={
-              <div className={uiStackBody}>
-                {ref?.notes && (
-                  <div>
-                    <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
-                    <p className={uiTextDescription}>{ref.notes}</p>
-                  </div>
-                )}
-                {item.notes && (
-                  <div>
-                    <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                    <p className={uiTextDescription}>{item.notes}</p>
-                  </div>
-                )}
-              </div>
-            }
-          />
-        ) : undefined
+        <InfoModal
+          title={item.name}
+          content={
+            item.notes ? (
+              <InfoSection heading="Player Notes">
+                <InfoParagraph>{item.notes}</InfoParagraph>
+              </InfoSection>
+            ) : undefined
+          }
+        />
       }
       metadata={
         <div className={uiChipRow}>
@@ -117,37 +98,22 @@ export function ImplantRow({
       }
       afterMetadata={
         <>
-          {item.grantedByTalentName && (
-            <p className={`text-xs ${colourAmberPlain}`}>
-              {item.grantedByTalentName} ({item.grantedByType}): Granted
-            </p>
-          )}
-          {linkedArmName && linkedWeaponName && (
-            <div className={`${uiChipRow} items-center`}>
-              <span className={uiTextLabel}>Linked</span>
-              <Chip colour="pink">{linkedArmName}</Chip>
-              <Chip colour="pink">{linkedWeaponName}</Chip>
-            </div>
-          )}
+          <EntryDetailLine
+            label="Rules"
+            info={
+              rules ? (
+                <InfoModal
+                  title={`${item.name} Rules`}
+                  content={<InfoParagraph>{rules}</InfoParagraph>}
+                />
+              ) : undefined
+            }
+          />
           {item.craftsmanship && (
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Quality</span>
-              <Chip
-                as="button"
-                type="button"
-                onClick={() => canChangeQuality && onCycleQuality(item.id)}
-                title={
-                  canChangeQuality
-                    ? `Click to change quality (currently ${displayedCraftsmanship})`
-                    : displayedCraftsmanship
-                }
-                disabled={!canChangeQuality}
-                colour={CRAFTSMANSHIP_COLOUR[displayedCraftsmanship]}
-                className="shrink-0"
-              >
-                {displayedCraftsmanship}
-              </Chip>
-              <span className={uiInfoModalWrapper}>
+            <EntryDetailLine
+              label="Craftsmanship"
+              value={displayedCraftsmanship}
+              info={
                 <InfoModal
                   title={`${displayedCraftsmanship} ${item.name}`}
                   content={
@@ -156,12 +122,25 @@ export function ImplantRow({
                     </p>
                   }
                 />
-              </span>
+              }
+            />
+          )}
+          {linkedArmName && linkedWeaponName && (
+            <div className={`${uiChipRow} items-center`}>
+              <span className={uiTextLabel}>Linked</span>
+              <Chip colour="pink">{linkedArmName}</Chip>
+              <Chip colour="pink">{linkedWeaponName}</Chip>
             </div>
+          )}
+          {item.grantedByTalentName && (
+            <EntryDetailLine
+              label="Gained from"
+              value={`${item.grantedByTalentName} (${item.grantedByType})`}
+            />
           )}
         </>
       }
-      actions={
+      removeAction={
         editable && !item.grantedByTalentEntryUid ? (
           <RemoveEntryButton kind="Implant" name={item.name} onRemove={() => onRemove(item.id)} />
         ) : undefined

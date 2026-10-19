@@ -118,3 +118,27 @@ describe("ForceFieldRow read-only", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe("ForceFieldRow shared entry pieces", () => {
+  it("shows an Active chip and no button when read-only and active", () => {
+    renderRow({ editable: false });
+    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Deactivate" })).not.toBeInTheDocument();
+  });
+
+  it("always has an information icon and says no description was recorded", async () => {
+    const user = userEvent.setup();
+    renderRow();
+    await user.click(
+      screen.getByRole("button", { name: "Show information about Refraction Field" })
+    );
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
+  });
+
+  it("puts the Remove button before the Deactivate button", () => {
+    renderRow();
+    const remove = screen.getByRole("button", { name: "Remove Refraction Field" });
+    const toggle = screen.getByRole("button", { name: "Deactivate" });
+    expect(remove.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});

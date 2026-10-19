@@ -2,19 +2,18 @@ import type { WornArmourPiece } from "../../../types/Character";
 import {
   uiChipRow,
   uiTextLabel,
-  uiTextBody,
-  uiTextPlaceholder,
-  uiInfoModalWrapper,
   uiRuleName,
   uiTextDescription,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
-import { Button } from "../../../ui/buttons/Button";
+import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
@@ -74,6 +73,7 @@ export function ForceFieldRow({
       name={piece.name}
       badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       inactive={!active}
+      info={<InfoModal title={piece.name} />}
       metadata={
         <>
           {piece.protectionRating !== undefined && (
@@ -92,40 +92,39 @@ export function ForceFieldRow({
       }
       afterMetadata={
         <>
-          <div className="flex items-center gap-1.5">
-            <span className={uiTextLabel}>Qualities</span>
-            <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-              {qualities.length > 0 ? qualities.join(", ") : "-"}
-            </span>
-            {qualities.length > 0 && (
-              <span className={uiInfoModalWrapper}>
+          <EntryDetailLine
+            label="Qualities"
+            value={qualities.length > 0 ? qualities.join(", ") : undefined}
+            info={
+              qualities.length > 0 ? (
                 <InfoModal
                   title={`${piece.name} Qualities`}
                   content={<ForceFieldQualitiesContent qualities={qualities} />}
                 />
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rules</span>
-            {notes ? (
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={`${piece.name} Rules`} content={notes} />
-              </span>
-            ) : (
-              <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className={uiTextLabel}>Craftsmanship</span>
-            <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
-            <InfoModal
-              title={`${craftsmanship} Force Field`}
-              content={forceFieldCraftsmanshipDescription(craftsmanship)}
-            />
-          </div>
+              ) : undefined
+            }
+          />
+          <EntryDetailLine
+            label="Rules"
+            info={
+              notes ? (
+                <InfoModal
+                  title={`${piece.name} Rules`}
+                  content={<InfoParagraph>{notes}</InfoParagraph>}
+                />
+              ) : undefined
+            }
+          />
+          <EntryDetailLine
+            label="Craftsmanship"
+            value={craftsmanship}
+            info={
+              <InfoModal
+                title={`${craftsmanship} Force Field`}
+                content={forceFieldCraftsmanshipDescription(craftsmanship)}
+              />
+            }
+          />
 
           {ref?.spareCellValue && (
             <div className="flex items-center gap-1.5">
@@ -140,17 +139,25 @@ export function ForceFieldRow({
         </>
       }
       actions={
+        <StateToggleButton
+          active={active}
+          activeLabel="Deactivate"
+          inactiveLabel="Activate"
+          activeBusyLabel="Deactivating"
+          inactiveBusyLabel="Activating"
+          statusLabel="Active"
+          disabled={false}
+          editable={editable}
+          onChange={() => onToggle(piece.id)}
+        />
+      }
+      removeAction={
         editable ? (
-          <>
-            <Button variant="neutral" size="sm" onClick={() => onToggle(piece.id)}>
-              {active ? "Deactivate" : "Activate"}
-            </Button>
-            <RemoveEntryButton
-              kind="Force Field"
-              name={piece.name}
-              onRemove={() => onRemove(piece.id)}
-            />
-          </>
+          <RemoveEntryButton
+            kind="Force Field"
+            name={piece.name}
+            onRemove={() => onRemove(piece.id)}
+          />
         ) : undefined
       }
     >

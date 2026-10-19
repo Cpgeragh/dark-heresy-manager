@@ -86,18 +86,15 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantPicker", () => ({
 vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow", () => ({
   ImplantRow: ({
     item,
-    onCycleQuality,
     onRemove,
   }: {
     item: { id: string; name: string };
-    onCycleQuality: (id: string) => void;
     onRemove: (id: string) => void;
   }) => {
     recordComponentRenderMock("ImplantRow");
     return (
       <div>
         <span>{item.name}</span>
-        <button onClick={() => onCycleQuality(item.id)}>Cycle {item.name}</button>
         <button onClick={() => onRemove(item.id)}>Remove {item.name}</button>
       </div>
     );
@@ -402,50 +399,6 @@ describe("CyberneticsTab", () => {
         expect.objectContaining({
           id: "ranged-1",
           concealedBionic: { cyberneticId: expect.any(String), craftsmanship: "Common" },
-        }),
-      ],
-      { optimistic: true }
-    );
-  });
-
-  it("cycles an implant's quality", async () => {
-    const user = userEvent.setup();
-    const item: CyberneticItem = { id: "c1", name: "Auto-Quill", referenceId: "unknown-ref" };
-    const { onUpdate } = renderTab({ cybernetics: [item] });
-
-    // The row renders twice (mobile-column copy + desktop-grid copy).
-    await user.click(screen.getAllByText("Cycle Auto-Quill")[0]);
-
-    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "c1" })], {
-      optimistic: true,
-    });
-  });
-
-  it("cycling a concealed-weapon implant's quality also updates the linked weapon", async () => {
-    const user = userEvent.setup();
-    const item: CyberneticItem = {
-      id: "c1",
-      name: "Concealed Weapon Bionic",
-      referenceId: "ih-concealed-weapon-bionic",
-      craftsmanship: "Common",
-      concealedWeapon: { armId: "arm-1", weaponId: "ranged-1", weaponType: "ranged" },
-    };
-    const rangedWeapon: RangedWeapon = {
-      id: "ranged-1",
-      name: "Lasgun",
-      damage: "1d10+3",
-      pen: "0",
-      concealedBionic: { cyberneticId: "c1", craftsmanship: "Common" },
-    };
-    const { onUpdateRanged } = renderTab({ cybernetics: [item], rangedWeapons: [rangedWeapon] });
-
-    await user.click(screen.getAllByText("Cycle Concealed Weapon Bionic")[0]);
-
-    expect(onUpdateRanged).toHaveBeenCalledWith(
-      [
-        expect.objectContaining({
-          id: "ranged-1",
-          concealedBionic: expect.objectContaining({ cyberneticId: "c1" }),
         }),
       ],
       { optimistic: true }

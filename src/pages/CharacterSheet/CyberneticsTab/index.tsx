@@ -16,15 +16,10 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
-import {
-  craftsmanshipAvailability,
-  craftsmanshipValue,
-  nextAvailableCraftsmanship,
-} from "./cyberneticsHelpers";
+import { craftsmanshipAvailability, craftsmanshipValue } from "./cyberneticsHelpers";
 import { Button } from "../../../ui/buttons/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import {
   uiChipRow,
   uiFieldGrid,
@@ -289,59 +284,6 @@ export function CyberneticsTab({
       onUpdateRanged,
       rangedWeapons,
     ]
-  );
-
-  const cycleQuality = useCallback(
-    (id: string) => {
-      if (!editable) return;
-      const current = cybernetics.find((item) => item.id === id);
-      const ref = CYBERNETICS_REFERENCE.find((item) => item.id === current?.referenceId);
-      const craftsmanship = nextAvailableCraftsmanship(current?.craftsmanship ?? "Common", ref);
-      if (current?.concealedWeapon) {
-        if (current.concealedWeapon.weaponType === "ranged") {
-          onUpdateRanged(
-            rangedWeapons.map((item) =>
-              item.id === current.concealedWeapon?.weaponId && item.concealedBionic
-                ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
-                : item
-            ),
-            { optimistic: true }
-          );
-        } else {
-          onUpdateMelee(
-            meleeWeapons.map((item) =>
-              item.id === current.concealedWeapon?.weaponId && item.concealedBionic
-                ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
-                : item
-            ),
-            { optimistic: true }
-          );
-        }
-      }
-      onUpdate(
-        cybernetics.map((c) => {
-          if (c.id !== id) return c;
-          const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
-          const craftsmanship = nextAvailableCraftsmanship(c.craftsmanship ?? "Common", ref);
-          const hasQualitySpecificCost = Boolean(ref?.poorValue || ref?.goodValue);
-          const hasQualitySpecificAvailability = Boolean(
-            ref?.poorAvailability || ref?.goodAvailability
-          );
-          return {
-            ...c,
-            craftsmanship,
-            ...(hasQualitySpecificCost && ref
-              ? { value: craftsmanshipValue(ref, craftsmanship) }
-              : {}),
-            ...(hasQualitySpecificAvailability && ref
-              ? { availability: craftsmanshipAvailability(ref, craftsmanship) }
-              : {}),
-          };
-        }),
-        { optimistic: true }
-      );
-    },
-    [editable, cybernetics, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
   );
 
   const addCustomImplant = useCallback(
@@ -797,7 +739,6 @@ export function CyberneticsTab({
           onPublish={() => libraryItem && publishCyberneticDefinition(libraryItem)}
           onArchive={() => libraryItem && archiveCyberneticDefinition(libraryItem)}
           onUpdateAllCopies={() => libraryItem && updateAllCyberneticCopies(libraryItem)}
-          onCycleQuality={cycleQuality}
           onRemove={removeImplant}
         />
       );
@@ -809,7 +750,6 @@ export function CyberneticsTab({
       characterName,
       customCyberneticsByIdForOwnedRows,
       cybernetics,
-      cycleQuality,
       editable,
       getBusyAction,
       isDM,

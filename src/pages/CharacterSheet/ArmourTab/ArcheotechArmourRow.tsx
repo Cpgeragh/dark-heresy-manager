@@ -3,12 +3,15 @@
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
 import { uiChipRow } from "../../../ui/styles/editableStyles";
-import { Button } from "../../../ui/buttons/Button";
+import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
+import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { locationLabel } from "../../../utils/armourLocations";
 
 interface Props {
@@ -28,6 +31,9 @@ export function ArcheotechArmourRow({
 }: Props) {
   const isEquipped = item.equipped ?? false;
   const locations = item.locations ?? [];
+  const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId);
+  const description = item.description ?? ref?.description;
+  const rules = ref?.rules;
 
   return (
     <CharacterEntryRow
@@ -42,9 +48,10 @@ export function ArcheotechArmourRow({
       tone={highlightAsArcheotech ? "archeotech" : "default"}
       inactive={!isEquipped}
       info={
-        item.description ? (
-          <InfoModal title={`${item.name} Rules`} content={item.description} />
-        ) : undefined
+        <InfoModal
+          title={item.name}
+          content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+        />
       }
       metadata={
         <>
@@ -61,16 +68,37 @@ export function ArcheotechArmourRow({
           />
         </>
       }
+      afterMetadata={
+        <EntryDetailLine
+          label="Rules"
+          info={
+            rules ? (
+              <InfoModal
+                title={`${item.name} Rules`}
+                content={<InfoParagraph>{rules}</InfoParagraph>}
+              />
+            ) : undefined
+          }
+        />
+      }
       actions={
+        onToggleEquip ? (
+          <StateToggleButton
+            active={isEquipped}
+            activeLabel="Stow"
+            inactiveLabel="Wear"
+            activeBusyLabel="Stowing"
+            inactiveBusyLabel="Wearing"
+            statusLabel="Worn"
+            disabled={false}
+            editable={editable}
+            onChange={onToggleEquip}
+          />
+        ) : undefined
+      }
+      removeAction={
         editable ? (
-          <>
-            {onToggleEquip && (
-              <Button variant="neutral" size="sm" onClick={onToggleEquip}>
-                {isEquipped ? "Stow" : "Wear"}
-              </Button>
-            )}
-            <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
-          </>
+          <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
         ) : undefined
       }
     />

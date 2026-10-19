@@ -67,3 +67,27 @@ describe("ArcheotechImplantRow", () => {
     expect(screen.queryByRole("button", { name: "Remove Auto-Quill" })).not.toBeInTheDocument();
   });
 });
+
+describe("ArcheotechImplantRow shared entry pieces", () => {
+  it("shows craftsmanship on a labelled Craftsmanship line as plain text", () => {
+    render(
+      <ArcheotechImplantRow
+        item={item({ craftsmanship: "Good" })}
+        editable={true}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.getByText("Craftsmanship")).toBeInTheDocument();
+    expect(screen.getByText("Good")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Good" })).not.toBeInTheDocument();
+  });
+
+  it("always has an information icon and an empty Rules line", async () => {
+    const user = userEvent.setup();
+    render(<ArcheotechImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Show information about Auto-Quill" }));
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
+  });
+});

@@ -48,18 +48,36 @@ describe("ArcheotechForceFieldRow chips", () => {
 });
 
 describe("ArcheotechForceFieldRow rules", () => {
-  it("shows a Rules information control when a description is present", () => {
+  it("shows the description in the information window beside the name", async () => {
+    const user = userEvent.setup();
     renderRow();
-    expect(
-      screen.getByRole("button", { name: "Show information about Jokaerian Field Rules" })
-    ).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Show information about Jokaerian Field" })
+    );
+    expect(screen.getByRole("dialog", { name: "Jokaerian Field" })).toHaveTextContent(
+      baseItem.description!
+    );
   });
 
-  it("omits the Rules information control when there is no description", () => {
+  it("shows an empty Rules line when the item has no rules text", () => {
+    renderRow();
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
+  });
+
+  it("says no description was recorded when there is none", async () => {
+    const user = userEvent.setup();
     renderRow({ item: { ...baseItem, description: undefined, referenceId: undefined } });
-    expect(
-      screen.queryByRole("button", { name: "Show information about Jokaerian Field Rules" })
-    ).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Show information about Jokaerian Field" })
+    );
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
+  });
+
+  it("puts the Remove button first in the action area", () => {
+    renderRow();
+    const button = screen.getByRole("button", { name: /^Remove / });
+    expect(button.parentElement?.parentElement?.firstElementChild?.contains(button)).toBe(true);
   });
 });
 

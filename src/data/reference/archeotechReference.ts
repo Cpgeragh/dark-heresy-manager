@@ -13,6 +13,7 @@ export interface ArcheotechRef {
   type: string;
   /** Full rules text shown in the info panel / picker */
   description: string;
+  rules?: string;
   specialRules?: string;
   weight?: string;
   value?: string;

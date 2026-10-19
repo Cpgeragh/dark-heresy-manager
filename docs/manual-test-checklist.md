@@ -530,6 +530,9 @@ Worn armour, upgrades, and Force Fields.
 Add the five named armour fixtures and inspect their picker summaries before adding them. After adding, compare every per-location AP value, total weight, value, resistance, and craftsmanship state with the reference data. Fit and remove upgrades, activate fields in sequence, change spare cells, refresh, and then inspect Armour values from another linked page such as Cybernetics. Use a fresh custom item for the publishing lifecycle rather than modifying reference data.
 
 - [ ] Selenite Void Suit, Boarding Armour, Hospitaller Carapace, Sororitas Powered Armour, and Ork Mega Armour all show a real per-location AP breakdown (e.g. "3 (Head 4)"), not an asterisk. Check this on **both** the equipped-piece card and in the "Add Armour" picker list, both surfaces need to show the real breakdown.
+- [ ] On every Armour piece, Force field, Archeotech armour and Archeotech force field row the trash button comes first and the info icon beside the name is always shown; the Armour piece and Force field icons say "No description recorded."
+- [ ] Wear, Stow, Activate and Deactivate use the Equip button look and sizes, with the green outline when worn or active; on a read-only sheet a worn or active piece shows a small `Worn` or `Active` chip and no button
+- [ ] Every Armour piece, Force field and Archeotech row has Qualities (where it has any), `Rules` and `Craftsmanship` lines written the same way, each showing "-" when empty
 - [ ] Fit the Impellor upgrade to a Selenite Void Suit: weight chip becomes 25 kg (20 base + 5), not 20 kg next to a separate "+5"
 - [ ] The Impellor upgrade is only offered on the Selenite Void Suit: not on any carapace or power armour piece
 - [ ] Hexagramatic Wards is only offered on carapace/power armour, and applying it changes that piece's stated resistances correctly
@@ -546,14 +549,15 @@ Implants, bionics, and the Concealed Weapon Bionic install flow.
 
 ### How to test this page
 
-Use a character with enough funds/context to install the Concealed Weapon Bionic at Poor, Common, and Good craftsmanship, recording cost and availability before and after cycling. Add one common-only implant, one Good-only Mechadendrite, and one location-assigned bionic. Refresh after installation, then cross-check granted weapons on Weapons and Toughness contributions on Armour before removing the parent implant.
+Use a character with enough funds/context to install the Concealed Weapon Bionic at Poor, Common, and Good craftsmanship, recording cost and availability at each quality. Add one common-only implant, one Good-only Mechadendrite, and one location-assigned bionic. Refresh after installation, then cross-check granted weapons on Weapons and Toughness contributions on Armour before removing the parent implant.
 
+- [ ] On every Implant and Archeotech implant row the trash button comes first, the info icon beside the name is always shown (saying "No description recorded." when empty), a `Rules` line shows the item rules behind its icon or "-", and a `Gained from` line reads `[source] ([type])` for a granted implant
 - [ ] Install a Concealed Weapon Bionic at Good craftsmanship: cost shows 750 Thrones _and_ availability shows Rare (not Scarce)
 - [ ] Install the same at Poor and Common: cost changes (150 / 300) but availability stays Scarce at both
-- [ ] Cycling craftsmanship on an already-installed Concealed Weapon Bionic updates cost and availability together, every time, not just cost
-- [ ] Most other implants have **no craftsmanship choice at all** (only Common exists for them): confirm those don't show a pointless cycle control
+- [ ] An installed implant shows its craftsmanship as plain text on a labelled `Craftsmanship` line with an info icon, and it is not clickable; to change it, remove the implant and install it again at the other craftsmanship
+- [ ] Most other implants have **no craftsmanship choice at all** (only Common exists for them): confirm those show no Craftsmanship line
 - [ ] Mechadendrites specifically are locked to **Good** craftsmanship only, never Common/Poor/Best
-- [ ] For the handful of other implants that _do_ list Poor/Common/Good text, cycling still only changes cost, not availability: confirm the new availability logic from §11's first item didn't leak onto them
+- [ ] For the handful of other implants that _do_ list Poor/Common/Good text, installing at each quality still only changes cost, not availability: confirm the new availability logic from §11's first item didn't leak onto them
 - [ ] A bionic implant assigned a body location shows up as a Toughness Bonus contribution on the relevant Armour location
 - [ ] Custom implant form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
@@ -1289,7 +1293,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] XP costs in the Talent, Skill, Elite Advance and option pickers, prices on every item, Owned and Draft tags, the roll chip, the Archeotech label and the session +XP badge all show the same amber (`Chip.tsx`, `ItemMetaChips.tsx`, `RollChip.tsx`)
 - [ ] Weight and per-quantity chips show the lighter grey beside the coloured availability chip, and "Tech-Priest Only" shows red like "Adeptus Mechanicus Only" (`sourceStyles.ts`)
 - [ ] On weapons, Las is red on both the type chip and the ammo chip, Launcher is yellow on both, Exotic is fuchsia on class, type and ammo including grenades, and SP weapons and Solid Projectile ammo are both teal (`weaponHelpers.ts`)
-- [ ] Quality chips on Archeotech items and implants show Poor red, Common grey, Good green and Best amber (`craftsmanship.ts`)
+- [ ] Quality chips on Archeotech items show Poor red, Common grey, Good green and Best amber (`craftsmanship.ts`)
 - [ ] Skill rows show Untrained red, Trained orange, +10 sky and +20 green, with Basic in teal and Advanced in purple (`SkillRow.tsx`)
 - [ ] Session cards show "+XP" in amber and "XP Applied" in green, and the Loaded label on a Ranged magazine and on an ammo row is a green chip (`SessionCard.tsx`, `RangedCard.tsx`, `AmmoEntryRow.tsx`)
 - [ ] Rank card entry kinds, Faith Talent groups and Custom Item Library filter chips use the same lighter chip look, with the active filter red (`ExperienceTab.tsx`, `faithTalentGroups.ts`, `CustomItemLibraryAdmin.tsx`)
@@ -1304,7 +1308,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The Insanity custom disorder Type box, the weapon Qualities box and the Talent choice box look and press like the other form boxes, with an arrow, left-aligned words and a red border when selected (`PickerField.tsx`)
 - [ ] Every text box where you type shows the same dark fill and grey border, and a red border when you click into it, including the GM message box, the custom ammo name box, the typed delete confirmation box, the quantity editor on Gear, Drugs and Consumables, and the characteristic Base box (`editableInputColour` in `editableStyles.ts`)
 - [ ] The characteristic Base box shows a red border when its value is invalid, and the not-allowed cursor when the sheet is read-only
-- [ ] The Wear, Stow, Activate and Deactivate buttons on the Armour tab, and the Back buttons in the Gender, Appearance trait, Implant and assigned cost screens, are grey outlined buttons that shrink slightly when pressed and show a red ring when focused (`Button`, `neutral`)
+- [ ] The Back buttons in the Gender, Appearance trait, Implant and assigned cost screens, are grey outlined buttons that shrink slightly when pressed and show a red ring when focused (`Button`, `neutral`)
 - [ ] The Campaign options menu rows Import JSON, Repair Character Summaries and Repair Session Summaries are full-width buttons with centred words, show moving dots while they work, and Import JSON opens the file chooser (`CampaignOverview.tsx`)
 - [ ] In every pick-one row, which covers the craftsmanship rows in the weapon, armour, force field, implant and integrated pickers and the custom item forms, the Archeotech and Armour piece location rows, the Psychic power form rows, the Career starting choices and the weapon profile buttons on the Ranged and Melee cards, an unselected button has a dark fill, grey border and dim text that brighten on hover, the selected button shows its own colour, and every button shows a red ring when focused (`ToggleButton.tsx`)
 - [ ] The Origin selector in the custom item forms looks the same as the other pick-one rows (`toggleButtonClass`)

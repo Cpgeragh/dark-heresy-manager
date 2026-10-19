@@ -18,22 +18,14 @@ function item(over: Partial<CyberneticItem> = {}): CyberneticItem {
 
 describe("ImplantRow", () => {
   it("renders the item name", () => {
-    render(
-      <ImplantRow item={item()} editable={true} onCycleQuality={vi.fn()} onRemove={vi.fn()} />
-    );
+    render(<ImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
     expect(screen.getByText("Auto-Quill")).toBeInTheDocument();
   });
 
   it("shows a status badge when linked to a campaign library item", () => {
     const libraryItem = { status: "published" } as CampaignCustomItem<"cybernetic">;
     render(
-      <ImplantRow
-        item={item()}
-        libraryItem={libraryItem}
-        editable={true}
-        onCycleQuality={vi.fn()}
-        onRemove={vi.fn()}
-      />
+      <ImplantRow item={item()} libraryItem={libraryItem} editable={true} onRemove={vi.fn()} />
     );
     expect(screen.getByText(/published/i)).toBeInTheDocument();
   });
@@ -46,7 +38,6 @@ describe("ImplantRow", () => {
         linkedWeaponName="Laspistol"
         linkedWeaponType="ranged"
         editable={true}
-        onCycleQuality={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -54,36 +45,51 @@ describe("ImplantRow", () => {
     expect(screen.getByText("Laspistol")).toBeInTheDocument();
   });
 
-  it("cycles quality on click when the reference has more than one tier", async () => {
-    const user = userEvent.setup();
-    const onCycleQuality = vi.fn();
+  it("shows craftsmanship as plain text on a Craftsmanship line, not as a button", () => {
     render(
       <ImplantRow
         item={item({ referenceId: CONCEALED_WEAPON_BIONIC_ID, craftsmanship: "Common" })}
         editable={true}
-        onCycleQuality={onCycleQuality}
         onRemove={vi.fn()}
       />
     );
 
-    await user.click(screen.getByText("Common"));
-    expect(onCycleQuality).toHaveBeenCalledWith("c1");
+    expect(screen.getByText("Craftsmanship")).toBeInTheDocument();
+    expect(screen.getByText("Common")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Common" })).not.toBeInTheDocument();
   });
 
-  it("does not cycle quality when not editable", async () => {
+  it("shows the item rules behind the Rules line", async () => {
     const user = userEvent.setup();
-    const onCycleQuality = vi.fn();
     render(
       <ImplantRow
-        item={item({ referenceId: CONCEALED_WEAPON_BIONIC_ID, craftsmanship: "Common" })}
-        editable={false}
-        onCycleQuality={onCycleQuality}
+        item={item({ name: "Bionic Arm", referenceId: "cr-bionic-arm" })}
+        editable={true}
         onRemove={vi.fn()}
       />
     );
 
-    await user.click(screen.getByText("Common"));
-    expect(onCycleQuality).not.toHaveBeenCalled();
+    await user.click(
+      screen.getByRole("button", { name: "Show information about Bionic Arm Rules" })
+    );
+    expect(screen.getByRole("dialog", { name: "Bionic Arm Rules" })).toHaveTextContent(
+      "Toughness Bonus against hits to the arm location"
+    );
+  });
+
+  it("always shows the information icon and says nothing was recorded without player notes", async () => {
+    const user = userEvent.setup();
+    render(<ImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Show information about Auto-Quill" }));
+    expect(screen.getByText("No description recorded.")).toBeInTheDocument();
+  });
+
+  it("puts the Remove button first in the action area", () => {
+    render(<ImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+
+    const button = screen.getByRole("button", { name: "Remove Auto-Quill" });
+    expect(button.parentElement?.parentElement?.firstElementChild?.contains(button)).toBe(true);
   });
 
   it("hides Remove for a talent-granted implant, even when editable", () => {
@@ -91,7 +97,6 @@ describe("ImplantRow", () => {
       <ImplantRow
         item={item({ grantedByTalentEntryUid: "t1", grantedByTalentName: "Skin of Iron" })}
         editable={true}
-        onCycleQuality={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -102,9 +107,7 @@ describe("ImplantRow", () => {
   it("calls onRemove for a normal implant only after confirmation", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(
-      <ImplantRow item={item()} editable={true} onCycleQuality={vi.fn()} onRemove={onRemove} />
-    );
+    render(<ImplantRow item={item()} editable={true} onRemove={onRemove} />);
 
     await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
     expect(onRemove).not.toHaveBeenCalled();
