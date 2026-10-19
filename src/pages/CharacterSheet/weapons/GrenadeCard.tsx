@@ -15,10 +15,8 @@ import {
   uiInactiveItem,
   uiTextBody,
   uiTextLabel,
-  uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiOverlayCardTitleHover,
-  uiTextDescription,
+  uiOverlayItemNameHover,
   uiStackSection,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
@@ -40,6 +38,8 @@ import { weaponClassChip } from "./weaponHelpers";
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -109,7 +109,6 @@ export function GrenadeCard({
   const ref = GRENADE_REFERENCE.find((r) => r.id === item.referenceId);
   const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
   const rulesDescription = ref?.description ?? item.description;
-  const hasInfo = !!rulesDescription;
   const ruleNamesInLookup = getKnownSpecialRuleNames(item.specialRules);
 
   const equippedCount = isEquipped ? Math.min(item.quantity, 3) : item.quantity;
@@ -128,10 +127,18 @@ export function GrenadeCard({
         <CharacterEntryRowContent
           interactive
           name={item.name}
-          nameClassName={`${uiOverlayCardTitleHover} truncate`}
+          nameClassName={uiOverlayItemNameHover}
           badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+          info={
+            <InfoModal
+              title={item.name}
+              content={
+                rulesDescription ? <InfoParagraph>{rulesDescription}</InfoParagraph> : undefined
+              }
+            />
+          }
           metadata={
-            <div className={`mt-0.5 ${uiChipRow} items-center`}>
+            <div className={`${uiChipRow} items-center`}>
               <Chip
                 colour={
                   item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"
@@ -146,30 +153,27 @@ export function GrenadeCard({
               {isEquipped && <Chip colour="emerald">{equippedCount} ready</Chip>}
             </div>
           }
-          actions={
-            <>
-              {onToggleEquip && (
-                <EquipToggle
-                  equipped={isEquipped}
-                  disabled={!isEquipped && !canEquipMoreTypes}
-                  editable={editable}
-                  onChange={onToggleEquip}
-                />
-              )}
-              <ExpandChevron expanded={expanded} />
-            </>
+          removeAction={
+            editable ? (
+              <RemoveEntryButton kind="Grenade" name={item.name} onRemove={onRemove} />
+            ) : undefined
           }
+          actions={
+            onToggleEquip ? (
+              <EquipToggle
+                equipped={isEquipped}
+                disabled={!isEquipped && !canEquipMoreTypes}
+                editable={editable}
+                onChange={onToggleEquip}
+              />
+            ) : undefined
+          }
+          expandControl={<ExpandChevron expanded={expanded} />}
         />
       </div>
 
       {expanded && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {editable && (
-            <div className="flex justify-end">
-              <RemoveEntryButton kind="Grenade" name={item.name} onRemove={onRemove} />
-            </div>
-          )}
-
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"
@@ -225,19 +229,7 @@ export function GrenadeCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              {hasInfo ? (
-                <span className={uiInfoModalWrapper}>
-                  <InfoModal
-                    title={`${item.name} Rules`}
-                    content={<p className={uiTextDescription}>{rulesDescription}</p>}
-                  />
-                </span>
-              ) : (
-                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-              )}
-            </div>
+            <EntryDetailLine label="Rules" />
             {showMishaps && (
               <div className="flex items-center gap-1.5">
                 <span className={uiTextLabel}>Mishaps</span>

@@ -11,7 +11,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   uiChipRow,
   uiInlineRow,
-  uiOverlayCardTitleHover,
+  uiOverlayItemNameHover,
   uiOverlayPeerHoverText,
   uiInfoModalWrapper,
   uiSectionShell,
@@ -105,7 +105,7 @@ function RangedWeaponCardPickerRow({
             className={`${uiExpandButton} relative ${uiLayerLocal} pointer-events-none ${uiOverlayPeerHoverText}`}
           >
             <div className={`${uiChipRow} items-center`}>
-              <p className={uiOverlayCardTitleHover}>{weaponReference.name}</p>
+              <p className={uiOverlayItemNameHover}>{weaponReference.name}</p>
               {weaponReference.description && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal

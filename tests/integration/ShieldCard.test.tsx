@@ -27,6 +27,22 @@ function renderCard(props: Partial<React.ComponentProps<typeof ShieldCard>> = {}
   return { onRemove };
 }
 
+describe("ShieldCard shared header", () => {
+  it("shows the Remove button in the closed header", () => {
+    renderCard({ isEquipped: false });
+    expect(screen.queryByText("Damage")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove Custom Buckler" })).toBeInTheDocument();
+  });
+
+  it("shows the notes as the description beside the name and a hyphen on the Rules line", async () => {
+    const user = userEvent.setup();
+    renderCard({ item: { ...baseItem, notes: "Flexible plates." } });
+    await user.click(screen.getByRole("button", { name: "Show information about Custom Buckler" }));
+    expect(screen.getAllByText("Flexible plates.").length).toBeGreaterThan(0);
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
+  });
+});
+
 describe("ShieldCard header", () => {
   it("shows a Shield chip under the name", () => {
     renderCard();

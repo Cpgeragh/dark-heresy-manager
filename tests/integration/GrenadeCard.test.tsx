@@ -38,6 +38,29 @@ function renderCard(props: Partial<React.ComponentProps<typeof GrenadeCard>> = {
   return { onRemove, onUpdateQty };
 }
 
+describe("GrenadeCard shared header", () => {
+  it("shows the Remove button in the closed header and the chevron last", () => {
+    renderCard({ isEquipped: false, onToggleEquip: vi.fn() });
+    expect(screen.queryByText("Range")).not.toBeInTheDocument();
+    const remove = screen.getByRole("button", { name: "Remove Custom Frag" });
+    const expand = screen.getByRole("button", { name: "Expand Custom Frag details" });
+    expect(remove).toBeInTheDocument();
+    expect(
+      remove.compareDocumentPosition(screen.getByRole("button", { name: "Equip" })) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(expand).toBeInTheDocument();
+  });
+
+  it("shows an information button beside the name and a hyphen on the Rules line", () => {
+    renderCard();
+    expect(
+      screen.getByRole("button", { name: "Show information about Custom Frag" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
+  });
+});
+
 describe("GrenadeCard header label", () => {
   it("shows a Grenade type chip and a Thrown class chip for a grenade", () => {
     renderCard();

@@ -1,6 +1,6 @@
 // tests/integration/CyberneticWeaponCard.test.tsx
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -17,16 +17,63 @@ function visibleText(text: string): HTMLElement {
   return match;
 }
 
-function renderCard(weapon: CyberneticWeapon, craftsmanship: WeaponCraftsmanship = "Common") {
+function renderCard(
+  weapon: CyberneticWeapon,
+  craftsmanship: WeaponCraftsmanship = "Common",
+  rules?: string
+) {
   render(
     <CyberneticWeaponCard
       cyberneticName="Test Mechadendrite"
       weapon={weapon}
+      rules={rules}
       craftsmanship={craftsmanship}
       strengthBonus={4}
     />
   );
 }
+
+const LASPISTOL: CyberneticWeapon = {
+  type: "ranged",
+  name: "Laspistol (Compact)",
+  class: "Pistol",
+  damage: "1d10+1 E",
+  pen: "0",
+};
+
+function rulesLine(): HTMLElement {
+  const label = screen.getByText("Rules");
+  const line = label.parentElement;
+  if (!line) throw new Error("The Rules label has no line around it");
+  return line;
+}
+
+describe("CyberneticWeaponCard rules and description", () => {
+  it("shows an information button beside the name even when there is no description", () => {
+    renderCard(LASPISTOL);
+    expect(
+      screen.getByRole("button", { name: "Show information about Laspistol (Compact)" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows a hyphen on the Rules line when the implant records no rules", () => {
+    renderCard(LASPISTOL);
+    expect(rulesLine()).toHaveTextContent("Rules-");
+    expect(
+      screen.queryByRole("button", { name: "Show information about Laspistol (Compact) Rules" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows a Rules information button when the implant records rules", () => {
+    renderCard(LASPISTOL, "Common", "Counts as a natural weapon.");
+    expect(
+      within(rulesLine()).getByRole("button", {
+        name: "Show information about Laspistol (Compact) Rules",
+      })
+    ).toBeInTheDocument();
+    expect(rulesLine()).not.toHaveTextContent("Rules-");
+  });
+});
 
 describe("CyberneticWeaponCard origin", () => {
   it("shows the implant name under a labeled Gained From row", () => {
@@ -145,7 +192,9 @@ describe("CyberneticWeaponCard expand/collapse", () => {
       pen: "0",
     });
     expect(screen.getByText("Damage")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /Laspistol \(Compact\)/ }));
+    await user.click(
+      screen.getByRole("button", { name: /Collapse Laspistol \(Compact\) details/ })
+    );
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
   });
 
@@ -158,9 +207,10 @@ describe("CyberneticWeaponCard expand/collapse", () => {
       damage: "1d10+1 E",
       pen: "0",
     });
-    const header = screen.getByRole("button", { name: /Laspistol \(Compact\)/ });
-    await user.click(header);
-    await user.click(header);
+    await user.click(
+      screen.getByRole("button", { name: /Collapse Laspistol \(Compact\) details/ })
+    );
+    await user.click(screen.getByRole("button", { name: /Expand Laspistol \(Compact\) details/ }));
     expect(screen.getByText("Damage")).toBeInTheDocument();
   });
 });

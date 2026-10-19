@@ -23,7 +23,7 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiOverlayCardTitleHover,
+  uiOverlayItemNameHover,
   uiRuleName,
   uiTextDescription,
   uiStackSection,
@@ -50,6 +50,8 @@ import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { StatChip } from "../../../ui/chips/StatChip";
 import {
@@ -329,14 +331,14 @@ export function MeleeCard({
         <CharacterEntryRowContent
           interactive
           name={weapon.name}
-          nameClassName={uiOverlayCardTitleHover}
+          nameClassName={uiOverlayItemNameHover}
           info={
-            rulesDescription ? (
-              <InfoModal
-                title={weapon.name}
-                content={<p className={uiTextDescription}>{rulesDescription}</p>}
-              />
-            ) : undefined
+            <InfoModal
+              title={weapon.name}
+              content={
+                rulesDescription ? <InfoParagraph>{rulesDescription}</InfoParagraph> : undefined
+              }
+            />
           }
           badge={
             <>
@@ -346,7 +348,7 @@ export function MeleeCard({
           }
           metadata={
             classChips.length > 0 || activeWeaponType || weapon.concealedBionic ? (
-              <div className={`mt-0.5 ${uiChipRow} items-center`}>
+              <div className={`${uiChipRow} items-center`}>
                 {weapon.concealedBionic && <Chip colour="pink">Concealed Bionic</Chip>}
                 {weapon.concealedBionic && <Chip colour="pink">Cybernetic</Chip>}
                 {classChips.map((chip) => (
@@ -360,39 +362,37 @@ export function MeleeCard({
               </div>
             ) : undefined
           }
+          removeAction={
+            editable && !integrated ? (
+              <RemoveEntryButton kind="Melee Weapon" name={weapon.name} onRemove={onRemove} />
+            ) : undefined
+          }
           actions={
-            <>
-              {onToggleEquip && (
-                <EquipToggle
-                  equipped={isEquipped}
-                  disabled={slotsDisabled}
-                  editable={editable}
-                  onChange={onToggleEquip}
-                />
-              )}
-              {!forceExpanded &&
-                (onSelect ? (
-                  <ExpandButton
-                    expanded={expanded}
-                    label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-                    onClick={() => setExpanded((e) => !e)}
-                  />
-                ) : (
-                  <ExpandChevron expanded={expanded} />
-                ))}
-            </>
+            onToggleEquip ? (
+              <EquipToggle
+                equipped={isEquipped}
+                disabled={slotsDisabled}
+                editable={editable}
+                onChange={onToggleEquip}
+              />
+            ) : undefined
+          }
+          expandControl={
+            forceExpanded ? undefined : onSelect ? (
+              <ExpandButton
+                expanded={expanded}
+                label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+                onClick={() => setExpanded((e) => !e)}
+              />
+            ) : (
+              <ExpandChevron expanded={expanded} />
+            )
           }
         />
       </div>
 
       {(expanded || forceExpanded) && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {editable && !integrated && (
-            <div className="flex justify-end">
-              <RemoveEntryButton kind="Melee Weapon" name={weapon.name} onRemove={onRemove} />
-            </div>
-          )}
-
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"
@@ -490,10 +490,10 @@ export function MeleeCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              {hasItemRules ? (
-                <span className={uiInfoModalWrapper}>
+            <EntryDetailLine
+              label="Rules"
+              info={
+                hasItemRules ? (
                   <InfoModal
                     title={`${weapon.name} Rules`}
                     content={
@@ -507,11 +507,9 @@ export function MeleeCard({
                       </div>
                     }
                   />
-                </span>
-              ) : (
-                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-              )}
-            </div>
+                ) : undefined
+              }
+            />
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>

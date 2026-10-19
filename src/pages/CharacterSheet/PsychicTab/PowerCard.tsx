@@ -8,7 +8,7 @@ import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours, psychicSelectionSourceColours } from "./psychicStyles";
 import {
   uiChipRow,
-  uiOverlayCardTitleHover,
+  uiOverlayItemNameHover,
   uiSectionShell,
   uiTextPlaceholder,
   uiTextDescription,
@@ -137,7 +137,7 @@ export function PowerCard({
         <CharacterEntryRowContent
           interactive
           name={power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
-          nameClassName={uiOverlayCardTitleHover}
+          nameClassName={uiOverlayItemNameHover}
           info={
             <InfoModal
               as="span"

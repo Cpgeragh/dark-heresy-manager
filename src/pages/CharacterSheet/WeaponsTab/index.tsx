@@ -39,6 +39,7 @@ import { ShieldPicker } from "../weapons/ShieldPicker";
 import { CustomShieldForm } from "../weapons/CustomShieldForm";
 import { ArcheotechShieldRow } from "../weapons/ArcheotechShieldRow";
 import { CyberneticWeaponCard } from "../weapons/CyberneticWeaponCard";
+import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 import {
@@ -157,6 +158,12 @@ const WEAPON_CUSTOM_ITEM_CATEGORIES = ["weapon", "armour"] as const;
 const EMPTY_CUSTOM_WEAPONS_BY_ID = new Map<string, CampaignCustomItem<"weapon">>();
 const EMPTY_CUSTOM_ARMOUR_BY_ID = new Map<string, CampaignCustomItem<"armour">>();
 const WEAPON_TABS_ID = "weapon-sections";
+const CONCEALED_WEAPON_BIONIC_REFERENCE_ID = "ih-concealed-weapon-bionic";
+
+function cyberneticWeaponRules(referenceId?: string): string | undefined {
+  if (!referenceId || referenceId === CONCEALED_WEAPON_BIONIC_REFERENCE_ID) return undefined;
+  return CYBERNETICS_REFERENCE.find((reference) => reference.id === referenceId)?.notes;
+}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -1250,6 +1257,7 @@ export function WeaponsTab({
               key={entry.cybernetic.id}
               cyberneticName={entry.cybernetic.name}
               weapon={entry.weapon}
+              rules={cyberneticWeaponRules(entry.cybernetic.referenceId)}
               craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
               strengthBonus={strengthBonus}
             />
@@ -1365,6 +1373,7 @@ export function WeaponsTab({
               key={entry.cybernetic.id}
               cyberneticName={entry.cybernetic.name}
               weapon={entry.weapon}
+              rules={cyberneticWeaponRules(entry.cybernetic.referenceId)}
               craftsmanship={entry.cybernetic.craftsmanship ?? "Common"}
               strengthBonus={strengthBonus}
             />

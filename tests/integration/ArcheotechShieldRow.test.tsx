@@ -25,6 +25,22 @@ function renderRow(props: Partial<React.ComponentProps<typeof ArcheotechShieldRo
   return { onRemove };
 }
 
+describe("ArcheotechShieldRow shared header and Rules line", () => {
+  it("shows the Remove button in the closed header", () => {
+    renderRow({ isEquipped: false });
+    expect(screen.queryByText("AP")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove Archeotech Buckler" })).toBeInTheDocument();
+  });
+
+  it("shows an information button beside the name and a Rules line when expanded", () => {
+    renderRow({ isEquipped: true });
+    expect(
+      screen.getByRole("button", { name: "Show information about Archeotech Buckler" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
+  });
+});
+
 describe("ArcheotechShieldRow chips", () => {
   it("shows both an Archeotech chip and a Shield chip", () => {
     renderRow();

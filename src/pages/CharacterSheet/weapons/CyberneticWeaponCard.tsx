@@ -11,8 +11,7 @@ import {
   uiNoticeBox,
   uiTextLabel,
   uiTextBody,
-  uiTextPlaceholder,
-  uiOverlayCardTitleHover,
+  uiOverlayItemNameHover,
   uiInfoModalWrapper,
   uiStackSection,
   uiStackField,
@@ -32,15 +31,19 @@ import {
 } from "./weaponHelpers";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 
 export function CyberneticWeaponCard({
   cyberneticName,
   weapon,
+  rules,
   craftsmanship,
   strengthBonus,
 }: {
   cyberneticName: string;
   weapon: CyberneticWeapon;
+  rules?: string;
   craftsmanship: WeaponCraftsmanship;
   strengthBonus: number;
 }) {
@@ -67,9 +70,10 @@ export function CyberneticWeaponCard({
         <CharacterEntryRowContent
           interactive
           name={weapon.name}
-          nameClassName={uiOverlayCardTitleHover}
+          nameClassName={uiOverlayItemNameHover}
+          info={<InfoModal title={weapon.name} />}
           metadata={
-            <div className={`mt-0.5 ${uiChipRow} items-center`}>
+            <div className={`${uiChipRow} items-center`}>
               <Chip colour="pink">Cybernetic</Chip>
               {weapon.class === "Melee" ? (
                 <Chip colour="orange">Melee</Chip>
@@ -81,7 +85,7 @@ export function CyberneticWeaponCard({
               ) : null}
             </div>
           }
-          actions={<ExpandChevron expanded={expanded} />}
+          expandControl={<ExpandChevron expanded={expanded} />}
         />
       </div>
 
@@ -135,10 +139,17 @@ export function CyberneticWeaponCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-            </div>
+            <EntryDetailLine
+              label="Rules"
+              info={
+                rules ? (
+                  <InfoModal
+                    title={`${weapon.name} Rules`}
+                    content={<InfoParagraph>{rules}</InfoParagraph>}
+                  />
+                ) : undefined
+              }
+            />
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>

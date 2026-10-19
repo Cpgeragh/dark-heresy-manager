@@ -1,7 +1,7 @@
 // src/ui/buttons/CardOverlayButton.tsx
 // The button stretched over a tappable card's header, so the whole header opens, expands, or chooses
 // while the buttons inside it still work. This button owns the hover tint, and its peer title uses
-// `uiOverlayCardTitleHover` or `uiOverlayItemNameHover` so nested controls do not highlight the card.
+// `uiOverlayItemNameHover` so nested controls do not highlight the card.
 
 import type { ButtonHTMLAttributes } from "react";
 import {

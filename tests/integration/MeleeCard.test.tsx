@@ -40,6 +40,21 @@ function renderCard(props: Partial<React.ComponentProps<typeof MeleeCard>> = {})
   return { onRemove, onAddUpgrade, onRemoveUpgrade, onUpdateQuantity };
 }
 
+describe("MeleeCard shared header", () => {
+  it("shows the Remove button in the closed header", () => {
+    renderCard({ forceExpanded: false, isEquipped: false });
+    expect(screen.queryByText("Qualities")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove Custom Chainsword" })).toBeInTheDocument();
+  });
+
+  it("shows an information button beside the name even without a description", () => {
+    renderCard();
+    expect(
+      screen.getByRole("button", { name: "Show information about Custom Chainsword" })
+    ).toBeInTheDocument();
+  });
+});
+
 describe("MeleeCard upgrades", () => {
   it("opens the upgrade picker and adds a compatible upgrade", async () => {
     const user = userEvent.setup();

@@ -13,6 +13,29 @@ function renderCard(item: ArcheotechItem) {
   return { onRemove };
 }
 
+describe("ArcheotechWeaponCard shared header and Rules line", () => {
+  it("shows the Remove button in the closed header", () => {
+    render(
+      <ArcheotechWeaponCard
+        item={{ id: "a4", name: "Custom Trinket" }}
+        editable
+        onRemove={vi.fn()}
+        isEquipped={false}
+      />
+    );
+    expect(screen.queryByText("Qualities")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove Custom Trinket" })).toBeInTheDocument();
+  });
+
+  it("shows an information button beside the name and a hyphen on the Rules line", () => {
+    renderCard({ id: "a5", name: "Custom Trinket" });
+    expect(
+      screen.getByRole("button", { name: "Show information about Custom Trinket" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
+  });
+});
+
 describe("ArcheotechWeaponCard weapon-class chip", () => {
   it("shows an orange Melee chip for a melee weapon", () => {
     // Real reference entry: Midath-Pattern Power Glove, weaponClass "Melee".

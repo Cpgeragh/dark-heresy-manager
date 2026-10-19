@@ -13,10 +13,8 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextPlaceholder,
-  uiOverlayCardTitleHover,
+  uiOverlayItemNameHover,
   uiInfoModalWrapper,
-  uiTextDescription,
   uiStackSection,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
@@ -32,6 +30,8 @@ import { weaponClassChip } from "./weaponHelpers";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 
 export function ArcheotechWeaponCard({
@@ -69,6 +69,7 @@ export function ArcheotechWeaponCard({
   const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId);
   const specialRules = item.specialRules ?? ref?.specialRules;
   const description = item.description ?? ref?.description;
+  const rules = ref?.rules;
   const weight = item.weight ?? ref?.weight;
   const value = item.value ?? ref?.value;
   const availability = item.availability ?? ref?.availability;
@@ -103,10 +104,16 @@ export function ArcheotechWeaponCard({
         <CharacterEntryRowContent
           interactive
           name={item.name}
-          nameClassName={uiOverlayCardTitleHover}
+          nameClassName={uiOverlayItemNameHover}
+          info={
+            <InfoModal
+              title={item.name}
+              content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+            />
+          }
           metadata={
             highlightAsArcheotech || weaponClass ? (
-              <div className={`mt-0.5 ${uiChipRow} items-center`}>
+              <div className={`${uiChipRow} items-center`}>
                 {highlightAsArcheotech && (
                   <Chip colour="amber" className="shrink-0">
                     Archeotech
@@ -123,30 +130,27 @@ export function ArcheotechWeaponCard({
               </div>
             ) : undefined
           }
-          actions={
-            <>
-              {onToggleEquip && (
-                <EquipToggle
-                  equipped={isEquipped}
-                  disabled={slotsDisabled}
-                  editable={editable}
-                  onChange={onToggleEquip}
-                />
-              )}
-              <ExpandChevron expanded={expanded} />
-            </>
+          removeAction={
+            editable && onRemove ? (
+              <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
+            ) : undefined
           }
+          actions={
+            onToggleEquip ? (
+              <EquipToggle
+                equipped={isEquipped}
+                disabled={slotsDisabled}
+                editable={editable}
+                onChange={onToggleEquip}
+              />
+            ) : undefined
+          }
+          expandControl={<ExpandChevron expanded={expanded} />}
         />
       </div>
 
       {expanded && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {editable && onRemove && (
-            <div className="flex justify-end">
-              <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
-            </div>
-          )}
-
           {/* Stat chips: only for items with structured weapon data */}
           {hasWeaponStats && (
             <div className={`${uiChipRow}`}>
@@ -189,19 +193,17 @@ export function ArcheotechWeaponCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              {description ? (
-                <span className={uiInfoModalWrapper}>
+            <EntryDetailLine
+              label="Rules"
+              info={
+                rules ? (
                   <InfoModal
                     title={`${item.name} Rules`}
-                    content={<p className={uiTextDescription}>{description}</p>}
+                    content={<InfoParagraph>{rules}</InfoParagraph>}
                   />
-                </span>
-              ) : (
-                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-              )}
-            </div>
+                ) : undefined
+              }
+            />
             {showMishaps && (
               <div className="flex items-center gap-1.5">
                 <span className={uiTextLabel}>Mishaps</span>

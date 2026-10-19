@@ -36,7 +36,7 @@ import {
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiItemName,
-  uiOverlayCardTitleHover,
+  uiOverlayItemNameHover,
   uiRuleName,
   uiTextDescription,
   uiStackSection,
@@ -67,6 +67,8 @@ import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -447,14 +449,14 @@ export function RangedCard({
         <CharacterEntryRowContent
           interactive
           name={weapon.name}
-          nameClassName={uiOverlayCardTitleHover}
+          nameClassName={uiOverlayItemNameHover}
           info={
-            rulesDescription ? (
-              <InfoModal
-                title={weapon.name}
-                content={<p className={uiTextDescription}>{rulesDescription}</p>}
-              />
-            ) : undefined
+            <InfoModal
+              title={weapon.name}
+              content={
+                rulesDescription ? <InfoParagraph>{rulesDescription}</InfoParagraph> : undefined
+              }
+            />
           }
           badge={
             <>
@@ -464,7 +466,7 @@ export function RangedCard({
           }
           metadata={
             weapon.class || activeWeaponType || weapon.concealedBionic ? (
-              <div className={`mt-0.5 ${uiChipRow} items-center`}>
+              <div className={`${uiChipRow} items-center`}>
                 {weapon.concealedBionic && <Chip colour="pink">Concealed Bionic</Chip>}
                 {weapon.concealedBionic && <Chip colour="pink">Cybernetic</Chip>}
                 {(() => {
@@ -478,39 +480,37 @@ export function RangedCard({
               </div>
             ) : undefined
           }
+          removeAction={
+            editable && !integrated ? (
+              <RemoveEntryButton kind="Ranged Weapon" name={weapon.name} onRemove={onRemove} />
+            ) : undefined
+          }
           actions={
-            <>
-              {onToggleEquip && (
-                <EquipToggle
-                  equipped={isEquipped}
-                  disabled={slotsDisabled}
-                  editable={editable}
-                  onChange={onToggleEquip}
-                />
-              )}
-              {!forceExpanded &&
-                (onSelect ? (
-                  <ExpandButton
-                    expanded={expanded}
-                    label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-                    onClick={toggleExpanded}
-                  />
-                ) : (
-                  <ExpandChevron expanded={expanded} />
-                ))}
-            </>
+            onToggleEquip ? (
+              <EquipToggle
+                equipped={isEquipped}
+                disabled={slotsDisabled}
+                editable={editable}
+                onChange={onToggleEquip}
+              />
+            ) : undefined
+          }
+          expandControl={
+            forceExpanded ? undefined : onSelect ? (
+              <ExpandButton
+                expanded={expanded}
+                label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+                onClick={toggleExpanded}
+              />
+            ) : (
+              <ExpandChevron expanded={expanded} />
+            )
           }
         />
       </div>
 
       {(expanded || forceExpanded) && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {editable && !integrated && (
-            <div className="flex justify-end">
-              <RemoveEntryButton kind="Ranged Weapon" name={weapon.name} onRemove={onRemove} />
-            </div>
-          )}
-
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"
@@ -616,10 +616,10 @@ export function RangedCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              {hasItemRules ? (
-                <span className={uiInfoModalWrapper}>
+            <EntryDetailLine
+              label="Rules"
+              info={
+                hasItemRules ? (
                   <InfoModal
                     title={`${weapon.name} Rules`}
                     content={
@@ -633,11 +633,9 @@ export function RangedCard({
                       </div>
                     }
                   />
-                </span>
-              ) : (
-                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-              )}
-            </div>
+                ) : undefined
+              }
+            />
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Craftsmanship</span>
               <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>

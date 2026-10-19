@@ -11,10 +11,8 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextLabel,
-  uiTextPlaceholder,
   uiInfoModalWrapper,
-  uiOverlayCardTitleHover,
-  uiTextDescription,
+  uiOverlayItemNameHover,
   uiStackSection,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
@@ -28,6 +26,8 @@ import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { colourDivider } from "../../../ui/styles/colourTokens";
 
@@ -74,37 +74,40 @@ export function ShieldCard({
         <CharacterEntryRowContent
           interactive
           name={item.name}
-          nameClassName={uiOverlayCardTitleHover}
+          nameClassName={uiOverlayItemNameHover}
           badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+          info={
+            <InfoModal
+              title={item.name}
+              content={item.notes ? <InfoParagraph>{item.notes}</InfoParagraph> : undefined}
+            />
+          }
           metadata={
-            <div className={`mt-0.5 ${uiChipRow} items-center`}>
+            <div className={`${uiChipRow} items-center`}>
               <Chip colour="lime">Shield</Chip>
             </div>
           }
-          actions={
-            <>
-              {onToggleEquip && (
-                <EquipToggle
-                  equipped={isEquipped}
-                  disabled={slotsDisabled}
-                  editable={editable}
-                  onChange={onToggleEquip}
-                />
-              )}
-              <ExpandChevron expanded={expanded} />
-            </>
+          removeAction={
+            editable ? (
+              <RemoveEntryButton kind="Shield" name={item.name} onRemove={onRemove} />
+            ) : undefined
           }
+          actions={
+            onToggleEquip ? (
+              <EquipToggle
+                equipped={isEquipped}
+                disabled={slotsDisabled}
+                editable={editable}
+                onChange={onToggleEquip}
+              />
+            ) : undefined
+          }
+          expandControl={<ExpandChevron expanded={expanded} />}
         />
       </div>
 
       {expanded && (
         <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {editable && (
-            <div className="flex justify-end">
-              <RemoveEntryButton kind="Shield" name={item.name} onRemove={onRemove} />
-            </div>
-          )}
-
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"
@@ -146,19 +149,7 @@ export function ShieldCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rules</span>
-              {item.notes ? (
-                <span className={uiInfoModalWrapper}>
-                  <InfoModal
-                    title={`${item.name} Rules`}
-                    content={<p className={uiTextDescription}>{item.notes}</p>}
-                  />
-                </span>
-              ) : (
-                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
-              )}
-            </div>
+            <EntryDetailLine label="Rules" />
           </div>
 
           {/* Weight / Value / Availability / Source */}
