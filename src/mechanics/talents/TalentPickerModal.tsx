@@ -761,7 +761,7 @@ export function TalentPickerModal({
               {rankChips && rankChips.length > 0 && (
                 <PickerRowChips>
                   {rankChips.map((rankName) => (
-                    <Chip key={rankName} size="sm" colour="fuchsia" className="font-code">
+                    <Chip key={rankName} colour="fuchsia" className="font-code">
                       {rankName}
                     </Chip>
                   ))}

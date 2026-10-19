@@ -80,13 +80,13 @@ export function ShieldPicker({
                 >
                   <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
                   <PickerRowChips>
-                    <StatChip size="sm" label="AP" value={String(data.ap)} />
+                    <StatChip label="AP" value={String(data.ap)} />
                     {data.locations && (
-                      <StatChip size="sm" label="Location" value={data.locations} />
+                      <StatChip label="Location" value={data.locations} />
                     )}
-                    {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
-                    {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
-                    {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+                    {data.damage && <StatChip label="Dmg" value={data.damage} />}
+                    {data.damage && <DamageTypeChip damage={data.damage} />}
+                    {data.pen && <StatChip label="Pen" value={data.pen} />}
                   </PickerRowChips>
                   <PickerRowChips>
                     <ItemMetaChips
@@ -134,11 +134,11 @@ export function ShieldPicker({
               <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
-                  <StatChip size="sm" label="AP" value={String(ref.ap)} />
-                  {ref.locations && <StatChip size="sm" label="Location" value={ref.locations} />}
-                  {ref.damage && <StatChip size="sm" label="Dmg" value={ref.damage} />}
-                  {ref.damage && <DamageTypeChip size="sm" damage={ref.damage} />}
-                  <StatChip size="sm" label="Pen" value={String(ref.pen)} />
+                  <StatChip label="AP" value={String(ref.ap)} />
+                  {ref.locations && <StatChip label="Location" value={ref.locations} />}
+                  {ref.damage && <StatChip label="Dmg" value={ref.damage} />}
+                  {ref.damage && <DamageTypeChip damage={ref.damage} />}
+                  <StatChip label="Pen" value={String(ref.pen)} />
                 </PickerRowChips>
                 <PickerRowChips>
                   <ItemMetaChips

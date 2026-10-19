@@ -52,7 +52,7 @@ export function MalignancyRow({
             <div className={`mt-1 ${uiChipRow}`}>
               {display.roll && <RollChip>{display.roll}</RollChip>}
               {malignancy.source && (
-                <Chip size="sm" colour={sourceChipColour(malignancy.source)} className="font-code">
+                <Chip colour={sourceChipColour(malignancy.source)} className="font-code">
                   {malignancy.source}
                 </Chip>
               )}
@@ -63,7 +63,6 @@ export function MalignancyRow({
               {rollEntries.map((entry) => (
                 <Chip
                   key={entry.characteristic}
-                  size="sm"
                   colour={entry.value === undefined ? "rose" : "sky"}
                 >
                   {entry.label}: {entry.value ?? "not recorded"}

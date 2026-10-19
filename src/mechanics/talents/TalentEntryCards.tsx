@@ -5,13 +5,9 @@ import { TRAIT_LIST } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
   uiChipRow,
-  uiInfoModalWrapper,
-  uiItemName,
-  uiSection,
   uiTextBody,
   uiTextLabel,
   uiTextDescription,
-  uiStackField,
   uiStackBody,
   uiStackList,
 } from "../../ui/styles/editableStyles";
@@ -34,6 +30,7 @@ import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { AccordionCard } from "../../ui/AccordionCard";
 import { normaliseSources } from "./talentUtils";
 import { recordComponentRender } from "../../performance/performanceMetrics";
+import { CharacterEntryRow } from "../../ui/CharacterEntryRow";
 
 interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
@@ -90,81 +87,85 @@ export function EntryCard({
       ? [entry.source]
       : [];
 
+  const information =
+    infoContent || description || entry.notes ? (
+      <InfoModal
+        title={shownName}
+        content={
+          infoContent ?? (
+            <div className={uiStackBody}>
+              {description && <p className={uiTextDescription}>{description}</p>}
+              {entry.notes && (
+                <div>
+                  <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+                  <div className={uiStackList}>
+                    {entry.notes.split("\n\n").map((group, index) => {
+                      const breakAt = group.indexOf("\n");
+                      const heading = breakAt === -1 ? group : group.slice(0, breakAt);
+                      const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
+                      return (
+                        <p key={index} className={`${uiTextDescription} whitespace-pre-line`}>
+                          <span className="font-semibold">{heading}</span>
+                          {body && `\n${body}`}
+                        </p>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        }
+      />
+    ) : undefined;
+
+  const secondaryInformation = (
+    <>
+      {secondaryText && <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>}
+      {isGranted && (
+        <p className={`text-sm ${colourAmberPlain}`}>
+          {entry.grantedByTalentName} ({entry.grantedByType}): Granted
+        </p>
+      )}
+      {eliteAdvanceSource && (
+        <p className={`text-sm ${colourAmberPlain}`}>
+          Gained from: {eliteAdvanceSource} (Elite Advance)
+        </p>
+      )}
+    </>
+  );
+
   return (
-    <div className={uiSection + " flex items-start justify-between gap-2 text-sm lg:text-base"}>
-      <div className={`min-w-0 ${uiStackField}`}>
-        <div className="flex items-center gap-1.5">
-          <span className={`${uiItemName} break-words`}>{shownName}</span>
-          {(infoContent || description || entry.notes) && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={shownName}
-                content={
-                  infoContent ?? (
-                    <div className={uiStackBody}>
-                      {description && <p className={uiTextDescription}>{description}</p>}
-                      {entry.notes && (
-                        <div>
-                          <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                          <div className={uiStackList}>
-                            {entry.notes.split("\n\n").map((group, index) => {
-                              const breakAt = group.indexOf("\n");
-                              const heading = breakAt === -1 ? group : group.slice(0, breakAt);
-                              const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
-                              return (
-                                <p
-                                  key={index}
-                                  className={`${uiTextDescription} whitespace-pre-line`}
-                                >
-                                  <span className="font-semibold">{heading}</span>
-                                  {body && `\n${body}`}
-                                </p>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                }
-              />
-            </span>
-          )}
-        </div>
-        {!statusAfterSource && secondaryText && (
-          <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>
-        )}
-        {!statusAfterSource && isGranted && (
-          <p className={`text-sm ${colourAmberPlain}`}>
-            {entry.grantedByTalentName} ({entry.grantedByType}): Granted
-          </p>
-        )}
-        {!statusAfterSource && eliteAdvanceSource && (
-          <p className={`text-sm ${colourAmberPlain}`}>
-            Gained from: {eliteAdvanceSource} (Elite Advance)
-          </p>
-        )}
-        <div className={`${uiChipRow} items-center`}>
-          {refSources.map((source) => (
-            <Chip key={source} colour={sourceChipColour(source)} className="font-code">
-              {source}
-            </Chip>
-          ))}
-          {statusChip && <Chip colour={statusChipColour ?? "amber"}>{statusChip}</Chip>}
-        </div>
-        {statusAfterSource && secondaryText && (
-          <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>
-        )}
-        {statusAfterSource && isGranted && (
-          <p className={`text-sm ${colourAmberPlain}`}>
-            {entry.grantedByTalentName} ({entry.grantedByType}): Granted
-          </p>
-        )}
-        {statusAfterSource && eliteAdvanceSource && (
-          <p className={`text-sm ${colourAmberPlain}`}>
-            Gained from: {eliteAdvanceSource} (Elite Advance)
-          </p>
-        )}
+    <>
+      <CharacterEntryRow
+        name={shownName}
+        info={information}
+        beforeMetadata={!statusAfterSource ? secondaryInformation : undefined}
+        metadata={
+          <div className={`${uiChipRow} items-center`}>
+            {refSources.map((source) => (
+              <Chip key={source} colour={sourceChipColour(source)} className="font-code">
+                {source}
+              </Chip>
+            ))}
+            {statusChip && <Chip colour={statusChipColour ?? "amber"}>{statusChip}</Chip>}
+          </div>
+        }
+        afterMetadata={statusAfterSource ? secondaryInformation : undefined}
+        actions={
+          editable && (removable || deletionBlockedMessage) && !isGranted ? (
+            <RemoveButton
+              onClick={() =>
+                deletionBlockedMessage || confirmDeletion
+                  ? setDeleteArmed(true)
+                  : onRemove(entry.uid)
+              }
+              label={`${confirmDeletion ? "Delete" : "Remove"} ${shownName}`}
+              className="mt-0.5"
+            />
+          ) : undefined
+        }
+      >
         {libraryItem && (
           <CustomItemActionButtons
             libraryItem={libraryItem}
@@ -178,17 +179,7 @@ export function EntryCard({
             className="mt-1 flex flex-wrap gap-2"
           />
         )}
-      </div>
-      {editable && (removable || deletionBlockedMessage) && !isGranted && (
-        <RemoveButton
-          onClick={() =>
-            deletionBlockedMessage || confirmDeletion ? setDeleteArmed(true) : onRemove(entry.uid)
-          }
-          label={`${confirmDeletion ? "Delete" : "Remove"} ${shownName}`}
-          className="mt-0.5"
-        />
-      )}
-
+      </CharacterEntryRow>
       {deleteArmed && (
         <PickerModal
           title={
@@ -224,7 +215,7 @@ export function EntryCard({
           </PickerBody>
         </PickerModal>
       )}
-    </div>
+    </>
   );
 }
 

@@ -60,7 +60,6 @@ export function SkillGroupRow({
             {characteristics.map((characteristic) => (
               <Chip
                 key={characteristic}
-                size="sm"
                 colour={characteristicChipColour(characteristic)}
                 className="font-code shrink-0"
               >
@@ -68,7 +67,7 @@ export function SkillGroupRow({
               </Chip>
             ))}
             {skills[0].advanced && (
-              <Chip size="sm" colour="purple" className="shrink-0">
+              <Chip colour="purple" className="shrink-0">
                 Advanced
               </Chip>
             )}

@@ -1,7 +1,7 @@
 import type { ArmourUpgradeRef } from "../../../data/reference/armourUpgradeReference";
 import { Button } from "../../../ui/buttons/Button";
 import { InfoModal } from "../../../components/InfoModal";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
+import { NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";
@@ -30,12 +30,11 @@ export function ArmourUpgradeCard({
           <RemoveButton onClick={() => onRemove(upgrade.id)} label={`Remove ${upgrade.name}`} />
         )}
       </div>
-      <ItemMetaChips
+      <NestedItemMetaChips
         weight={upgrade.weight}
         value={upgrade.value}
         availability={upgrade.availability}
         source={upgrade.source}
-        size="sm"
         className="flex flex-wrap gap-1 mt-1"
       />
       <div className="flex items-center gap-1.5 mt-1">
@@ -79,12 +78,11 @@ export function ArmourUpgradePicker({
           <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
             <PickerRowName name={upgrade.name} />
             <PickerRowChips>
-              <ItemMetaChips
+              <NestedItemMetaChips
                 weight={upgrade.weight}
                 value={upgrade.value}
                 availability={upgrade.availability}
                 source={upgrade.source}
-                size="sm"
                 bare
               />
             </PickerRowChips>

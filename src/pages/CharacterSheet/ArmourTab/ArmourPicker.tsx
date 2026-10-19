@@ -138,8 +138,8 @@ export function ArmourPicker({
               <PickerRow key={ref.id} interactive={editable} onClick={() => setSelected(ref)}>
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
-                  <StatChip size="sm" label="AP" value={apBreakdown(ref)} />
-                  <StatChip size="sm" label="Location" value={locationLabel(ref.locations)} />
+                  <StatChip label="AP" value={apBreakdown(ref)} />
+                  <StatChip label="Location" value={locationLabel(ref.locations)} />
                 </PickerRowChips>
                 <PickerRowChips>
                   <ItemMetaChips
@@ -164,16 +164,16 @@ export function ArmourPicker({
             >
               <PickerRowName name={item.name} />
               <PickerRowChips>
-                <StatChip size="sm" label="AP" value={apBreakdown(data)} />
-                <StatChip size="sm" label="Location" value={locationLabel(data.locations)} />
+                <StatChip label="AP" value={apBreakdown(data)} />
+                <StatChip label="Location" value={locationLabel(data.locations)} />
               </PickerRowChips>
               <PickerRowChips>
                 {item.status === "draft" && (
-                  <Chip size="sm" colour="amber">
+                  <Chip colour="amber">
                     Draft
                   </Chip>
                 )}
-                <Chip size="sm" colour="fuchsia">
+                <Chip colour="fuchsia">
                   Custom
                 </Chip>
                 <ItemMetaChips

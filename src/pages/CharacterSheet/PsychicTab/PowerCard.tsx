@@ -85,10 +85,10 @@ function PowerStats({ power }: { power: PsychicPower }) {
 
   return (
     <div className="grid grid-cols-4 gap-[clamp(2px,1vw,6px)] lg:flex lg:flex-wrap lg:gap-1.5">
-      {power.threshold && <StatChip compactOnMobile label="PT" value={power.threshold} />}
-      {power.focusTime && <StatChip compactOnMobile label="Action" value={power.focusTime} />}
-      {power.range && <StatChip compactOnMobile label="Range" value={power.range} />}
-      {power.sustained && <StatChip compactOnMobile label="Sustained" value={power.sustained} />}
+      {power.threshold && <StatChip label="PT" value={power.threshold} />}
+      {power.focusTime && <StatChip label="Action" value={power.focusTime} />}
+      {power.range && <StatChip label="Range" value={power.range} />}
+      {power.sustained && <StatChip label="Sustained" value={power.sustained} />}
     </div>
   );
 }

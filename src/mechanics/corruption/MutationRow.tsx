@@ -50,7 +50,7 @@ export function MutationRow({
             <div className={`mt-1 ${uiChipRow}`}>
               {display.roll && <RollChip>{display.roll}</RollChip>}
               {mutation.source && (
-                <Chip size="sm" colour={sourceChipColour(mutation.source)} className="font-code">
+                <Chip colour={sourceChipColour(mutation.source)} className="font-code">
                   {mutation.source}
                 </Chip>
               )}
@@ -61,7 +61,6 @@ export function MutationRow({
               {rollEntries.map((entry) => (
                 <Chip
                   key={entry.characteristic}
-                  size="sm"
                   colour={entry.value === undefined ? "rose" : "sky"}
                 >
                   {entry.label}: {entry.value ?? "not recorded"}

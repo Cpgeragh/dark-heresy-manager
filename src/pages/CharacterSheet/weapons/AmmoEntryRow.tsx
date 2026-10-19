@@ -6,8 +6,8 @@ import {
   isChargePackAmmoName,
 } from "../../../data/reference/ammoReference";
 import { Button } from "../../../ui/buttons/Button";
-import { Chip } from "../../../ui/chips/Chip";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
+import { NestedChip } from "../../../ui/chips/Chip";
+import { NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
@@ -97,9 +97,9 @@ export function AmmoEntryRow({
           />
           <span className={`${uiItemName} truncate`}>{displayName}</span>
           {isLoaded && (
-            <Chip size="sm" colour="green" className="uppercase tracking-wide shrink-0">
+            <NestedChip colour="green" className="uppercase tracking-wide shrink-0">
               Loaded
-            </Chip>
+            </NestedChip>
           )}
         </div>
         {editable && (
@@ -112,23 +112,22 @@ export function AmmoEntryRow({
       {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
         <div className={`${uiChipRow} items-center text-[10px] lg:text-xs`}>
           {visibleClipSizeLabel && (
-            <Chip size="sm" colour="slate">
+            <NestedChip colour="slate">
               {visibleClipSizeLabel}
-            </Chip>
+            </NestedChip>
           )}
           {ammoRef && (
-            <ItemMetaChips
+            <NestedItemMetaChips
               value={ammoRef.cost}
               purchaseAmount={ammoRef.purchaseAmount}
               availability={ammoRef.availability}
-              size="sm"
               bare
             />
           )}
-          <Chip size="sm" colour="slate">
+          <NestedChip colour="slate">
             <WeightIcon className="h-[1em] w-[1em] shrink-0" />
             <span>{formatWeightForDisplay(formatAmmoWeight(weightKg ?? 0))}</span>
-          </Chip>
+          </NestedChip>
         </div>
       )}
 

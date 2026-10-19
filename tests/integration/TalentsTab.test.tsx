@@ -222,6 +222,17 @@ function StatefulTalentsTab() {
 }
 
 describe("TalentsTab owned render boundary", () => {
+  it("uses the shared character-entry geometry and normal chips", () => {
+    renderTab({
+      talents: makeTalents({ talents: [entry("owned-1", "plain-talent", "Plain Talent")] }),
+    });
+
+    const [source] = screen.getAllByText("CR");
+    expect(source).toHaveClass("h-6", "text-xs");
+    expect(source).not.toHaveClass("h-5", "text-[10px]");
+    expect(source.closest("div.rounded-lg")).toHaveClass("p-3", "lg:p-4");
+  });
+
   it("does not rebuild owned talent cards when a picker opens and closes", async () => {
     recordComponentRenderMock.mockClear();
     const user = userEvent.setup();

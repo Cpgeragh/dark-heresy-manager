@@ -140,7 +140,7 @@ export function ForceFieldPicker({
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
                   {ref.protectionRating !== undefined && (
-                    <StatChip size="sm" label="PR" value={String(ref.protectionRating)} />
+                    <StatChip label="PR" value={String(ref.protectionRating)} />
                   )}
                 </PickerRowChips>
                 <PickerRowChips>
@@ -167,16 +167,16 @@ export function ForceFieldPicker({
               <PickerRowName name={item.name} />
               <PickerRowChips>
                 {data.protectionRating !== undefined && (
-                  <StatChip size="sm" label="PR" value={String(data.protectionRating)} />
+                  <StatChip label="PR" value={String(data.protectionRating)} />
                 )}
               </PickerRowChips>
               <PickerRowChips>
                 {item.status === "draft" && (
-                  <Chip size="sm" colour="amber">
+                  <Chip colour="amber">
                     Draft
                   </Chip>
                 )}
-                <Chip size="sm" colour="fuchsia">
+                <Chip colour="fuchsia">
                   Custom
                 </Chip>
                 <ItemMetaChips

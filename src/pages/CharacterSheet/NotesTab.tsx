@@ -175,7 +175,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
                       >
                         {entry.text}
                       </p>
-                      <Chip size="sm" colour="cyan" className="mt-2">
+                      <Chip colour="cyan" className="mt-2">
                         {formatDate(entry.updatedAt)}
                       </Chip>
                     </div>

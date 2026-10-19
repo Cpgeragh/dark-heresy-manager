@@ -241,15 +241,15 @@ export function MeleePicker({
             >
               <PickerRowName name={item.name} />
               <PickerRowChips>
-                {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
-                {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
-                {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+                {data.damage && <StatChip label="Dmg" value={data.damage} />}
+                {data.damage && <DamageTypeChip damage={data.damage} />}
+                {data.pen && <StatChip label="Pen" value={data.pen} />}
               </PickerRowChips>
               <PickerRowChips>
                 {(() => {
                   const t = weaponTypeChip(data.type);
                   return t ? (
-                    <Chip size="sm" colour={t.colour}>
+                    <Chip colour={t.colour}>
                       {t.label}
                     </Chip>
                   ) : null;
@@ -261,11 +261,11 @@ export function MeleePicker({
                   source={data.source}
                 />
                 {item.status === "draft" && (
-                  <Chip size="sm" colour="amber">
+                  <Chip colour="amber">
                     Draft
                   </Chip>
                 )}
-                <Chip size="sm" colour="fuchsia">
+                <Chip colour="fuchsia">
                   Custom
                 </Chip>
               </PickerRowChips>

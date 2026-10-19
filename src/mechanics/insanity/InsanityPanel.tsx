@@ -122,11 +122,11 @@ function InsanityStatusChips({ points }: { points: number }) {
           <div className={`flex flex-col items-center ${uiStackField}`}>
             <span className={uiTextLabel}>Status</span>
             <div className={`${uiChipRow} justify-center`}>
-              <Chip size="sm" colour={insanityDegreeChipColour(entry)}>
+              <Chip colour={insanityDegreeChipColour(entry)}>
                 Trauma Modifier: {entry.traumaModifier}
               </Chip>
               <span className="inline-flex items-center gap-1">
-                <Chip size="sm" colour={insanityDisorderLevelChipColour(entry)}>
+                <Chip colour={insanityDisorderLevelChipColour(entry)}>
                   Disorder Level: {insanityDisorderLevelLabel(entry)}
                 </Chip>
                 <span className={uiInfoModalWrapper}>

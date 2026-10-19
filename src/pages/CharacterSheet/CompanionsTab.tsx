@@ -110,11 +110,7 @@ function CompanionPickerCard({
         <div
           className={`px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t ${colourDivider} ${uiStackSection}`}
         >
-          <CompanionProfileDetails
-            companionReference={companionReference}
-            statSize="sm"
-            modalAs="span"
-          />
+          <CompanionProfileDetails companionReference={companionReference} modalAs="span" />
         </div>
       )}
     </div>
@@ -240,26 +236,19 @@ function ProfileEntries({
 
 function CompanionProfileDetails({
   companionReference,
-  statSize,
   modalAs,
 }: {
   companionReference: CompanionRef;
-  statSize?: "sm" | "md";
   modalAs?: "button" | "span";
 }) {
   return (
     <>
       <div className={`${uiChipRow} mt-2`}>
         {CHARACTERISTICS.map(({ key, label }) => (
-          <StatChip
-            key={key}
-            size={statSize}
-            label={label}
-            value={companionReference.characteristics[key]}
-          />
+          <StatChip key={key} label={label} value={companionReference.characteristics[key]} />
         ))}
-        <StatChip size={statSize} label="Move" value={companionReference.movement} />
-        <StatChip size={statSize} label="Wounds" value={companionReference.wounds} />
+        <StatChip label="Move" value={companionReference.movement} />
+        <StatChip label="Wounds" value={companionReference.wounds} />
       </div>
 
       <div className={`${uiStackList} border-t ${colourDivider} pt-2 mt-2`}>
@@ -317,7 +306,7 @@ function CompanionProfileDetails({
       </div>
 
       <div className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-2`}>
-        <ItemMetaChips source={companionReference.source} bare size="sm" />
+        <ItemMetaChips source={companionReference.source} bare />
       </div>
     </>
   );

@@ -45,7 +45,7 @@ import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
-import { Chip } from "../../../ui/chips/Chip";
+import { Chip, NestedChip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
@@ -341,7 +341,7 @@ export function MeleeCard({
             )}
             {libraryItem && <StatusBadge status={libraryItem.status} />}
             {integrated && (
-              <Chip size="sm" colour="violet">
+              <Chip colour="violet">
                 Integrated
               </Chip>
             )}
@@ -349,22 +349,22 @@ export function MeleeCard({
           {(classChips.length > 0 || activeWeaponType || weapon.concealedBionic) && (
             <div className={`mt-0.5 ${uiChipRow} items-center`}>
               {weapon.concealedBionic && (
-                <Chip size="sm" colour="pink">
+                <Chip colour="pink">
                   Concealed Bionic
                 </Chip>
               )}
               {weapon.concealedBionic && (
-                <Chip size="sm" colour="pink">
+                <Chip colour="pink">
                   Cybernetic
                 </Chip>
               )}
               {classChips.map((chip) => (
-                <Chip key={chip.label} size="sm" colour={chip.colour}>
+                <Chip key={chip.label} colour={chip.colour}>
                   {chip.label}
                 </Chip>
               ))}
               {activeWeaponType && (
-                <Chip size="sm" colour={activeWeaponType.colour}>
+                <Chip colour={activeWeaponType.colour}>
                   {activeWeaponType.label}
                 </Chip>
               )}
@@ -566,9 +566,9 @@ export function MeleeCard({
                 )}
               </div>
               {pistolAmmoFamily && (
-                <Chip size="sm" colour={pistolAmmoFamily.colour}>
+                <NestedChip colour={pistolAmmoFamily.colour}>
                   {pistolAmmoFamily.label}
-                </Chip>
+                </NestedChip>
               )}
               {pistolAmmoEntries.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>

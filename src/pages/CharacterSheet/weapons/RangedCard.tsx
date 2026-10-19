@@ -61,8 +61,11 @@ import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
-import { Chip } from "../../../ui/chips/Chip";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
+import { Chip, NestedChip } from "../../../ui/chips/Chip";
+import {
+  ItemMetaChips,
+  NestedItemMetaChips,
+} from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
@@ -459,7 +462,7 @@ export function RangedCard({
             )}
             {libraryItem && <StatusBadge status={libraryItem.status} />}
             {integrated && (
-              <Chip size="sm" colour="violet">
+              <Chip colour="violet">
                 Integrated
               </Chip>
             )}
@@ -467,30 +470,30 @@ export function RangedCard({
           {(weapon.class || activeWeaponType || weapon.concealedBionic) && (
             <div className={`mt-0.5 ${uiChipRow} items-center`}>
               {weapon.concealedBionic && (
-                <Chip size="sm" colour="pink">
+                <Chip colour="pink">
                   Concealed Bionic
                 </Chip>
               )}
               {weapon.concealedBionic && (
-                <Chip size="sm" colour="pink">
+                <Chip colour="pink">
                   Cybernetic
                 </Chip>
               )}
               {(() => {
                 const c = weaponClassChip(weapon.class);
                 return c ? (
-                  <Chip size="sm" colour={c.colour}>
+                  <Chip colour={c.colour}>
                     {c.label}
                   </Chip>
                 ) : null;
               })()}
               {activeWeaponType && (
-                <Chip size="sm" colour={activeWeaponType.colour}>
+                <Chip colour={activeWeaponType.colour}>
                   {activeWeaponType.label}
                 </Chip>
               )}
               {hasKnaveBallisticPenalty && (
-                <Chip size="sm" colour="amber">
+                <Chip colour="amber">
                   Knave: BS −10
                 </Chip>
               )}
@@ -739,7 +742,7 @@ export function RangedCard({
                       className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 ${uiSplitRow}`}
                     >
                       <span className={`${uiItemName} truncate`}>{g.name}</span>
-                      <Chip size="sm" colour="amber">
+                      <Chip colour="amber">
                         Archeotech
                       </Chip>
                     </div>
@@ -754,9 +757,9 @@ export function RangedCard({
               <span className={uiTextLabel}>Magazines</span>
               {activeAmmoFamily && (
                 <div className={`${uiChipRow} items-center`}>
-                  <Chip size="sm" colour={activeAmmoFamily.colour}>
+                  <NestedChip colour={activeAmmoFamily.colour}>
                     {activeAmmoFamily.label}
-                  </Chip>
+                  </NestedChip>
                 </div>
               )}
               <div className={uiStackList}>
@@ -827,18 +830,17 @@ export function RangedCard({
                       {(ammoRef || magazineCapacity > 0) && (
                         <div className={`${uiChipRow} items-center text-[10px] lg:text-xs`}>
                           {ammoRef && (
-                            <ItemMetaChips
+                            <NestedItemMetaChips
                               value={ammoRef.cost}
                               purchaseAmount={ammoRef.purchaseAmount}
                               availability={ammoRef.availability}
-                              size="sm"
                               bare
                             />
                           )}
-                          <Chip size="sm" colour="slate">
+                          <NestedChip colour="slate">
                             <WeightIcon className="h-[1em] w-[1em] shrink-0" />
                             <span>{formatWeightForDisplay(formatAmmoWeight(magazineWeight))}</span>
-                          </Chip>
+                          </NestedChip>
                         </div>
                       )}
                       <div className="flex items-center gap-1.5">
@@ -872,9 +874,9 @@ export function RangedCard({
 
               {activeAmmoFamily && (
                 <div className={`${uiChipRow} items-center`}>
-                  <Chip size="sm" colour={activeAmmoFamily.colour}>
+                  <NestedChip colour={activeAmmoFamily.colour}>
                     {activeAmmoFamily.label}
-                  </Chip>
+                  </NestedChip>
                 </div>
               )}
 

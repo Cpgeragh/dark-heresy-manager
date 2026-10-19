@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
-import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
+import { CHAR_FULL_LABEL, CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import type { SkillTierAccess } from "shared-rules";
 import { characteristicChipColour, sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
@@ -30,7 +30,7 @@ import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { colourAmberPlain, type ChipColour } from "../../../ui/styles/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { uiLayerLocal } from "../../../ui/styles/layerStyles";
+import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -149,112 +149,140 @@ export function SkillRow({
   const hasCareerUpgrade = editable && nextTierAccess?.status === "unlocked";
   const hasManualUpgrade = editable && isDM && nextTierAccess?.status === "not-on-career";
   const hasUpgrade = hasCareerUpgrade || hasManualUpgrade;
+  const levelLabel =
+    skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level;
+  const total = skill.total ?? "—";
+  const characteristicName = CHAR_FULL_LABEL[skill.characteristic].replace(/\s+\([^)]+\)$/, "");
+
+  const pickerInformation = hasSkillInfo ? (
+    <InfoModal title={skill.name} content={skillInfoContent} as="span" />
+  ) : undefined;
+
+  const pickerMetadata = (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+      <div className={`${uiChipRow} items-center`}>
+        {skill.source && (
+          <Chip colour={sourceChipColour(skill.source)} className="font-code shrink-0">
+            {skill.source}
+          </Chip>
+        )}
+        {cost !== undefined && (
+          <Chip colour="amber" className="font-code shrink-0">
+            {cost} XP
+          </Chip>
+        )}
+        <Chip
+          colour={characteristicChipColour(skill.characteristic)}
+          className="font-code shrink-0"
+        >
+          {CHAR_LABEL[skill.characteristic]}
+        </Chip>
+        <Chip colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
+          {skill.advanced ? "Advanced" : "Basic"}
+        </Chip>
+        {!hideLevelChip && (
+          <Chip colour={levelBadgeColour} className="shrink-0">
+            {levelLabel}
+          </Chip>
+        )}
+      </div>
+      <StatChip label="Total" value={total} />
+    </div>
+  );
+  const pickerSecondaryInformation = (
+    <>
+      {eliteAdvancePurchase && (
+        <p className={`text-sm ${colourAmberPlain}`}>
+          Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
+        </p>
+      )}
+      {talentSourceSummary && (
+        <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
+      )}
+    </>
+  );
 
   return (
-    <div className={uiSectionShell + " overflow-hidden"}>
-      {/* COLLAPSED ROW */}
-      <div
-        className={`relative w-full text-left ${onSelect ? uiCardTapHeader : ""} ${
-          previewMode ? "p-3 lg:p-4" : "px-3 lg:px-4 py-2.5 lg:py-3"
-        }`}
-      >
-        {onSelect && (
-          <CardOverlayButton label={`Select ${skill.name}`} onClick={() => onSelect(skill.id)} />
-        )}
-        {/* Mobile: header, right-aligned upgrade, metadata with an isolated Total, then the full-width effect. */}
-        <div className={`relative pointer-events-none lg:hidden ${uiStackList}`}>
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <span className={`${uiItemNameHover} break-words`}>{displayName}</span>
-              {hasSkillInfo && (
-                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                  <InfoModal title={skill.name} content={skillInfoContent} as="span" />
-                </span>
-              )}
-            </div>
-            {canDelete && (
-              <div className={`relative ${uiLayerLocal} shrink-0 pointer-events-auto`}>
-                <RemoveButton onClick={() => setDeleteArmed(true)} label={`Delete ${skill.name}`} />
-              </div>
+    <>
+      {previewMode ? (
+        <div className={uiSectionShell + " overflow-hidden"}>
+          <div
+            className={`relative w-full p-3 text-left lg:p-4 ${onSelect ? uiCardTapHeader : ""}`}
+          >
+            {onSelect && (
+              <CardOverlayButton
+                label={`Select ${skill.name}`}
+                onClick={() => onSelect(skill.id)}
+              />
             )}
-          </div>
-          {hasUpgrade && (
-            <div className={`relative ${uiLayerLocal} flex justify-end pointer-events-auto`}>
-              {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
-                <Button size="xs" onClick={() => setUpgradeArmed(true)}>
-                  Upgrade to {nextTierAccess.level}
-                </Button>
-              )}
-              {hasManualUpgrade && nextTierAccess?.status === "not-on-career" && (
-                <Button size="xs" onClick={() => setManualUpgradeArmed(true)}>
-                  Upgrade to {nextTierAccess.level}
-                </Button>
-              )}
+            <div className={`relative pointer-events-none lg:hidden ${uiStackList}`}>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className={`${uiItemNameHover} break-words`}>{displayName}</span>
+                {pickerInformation && (
+                  <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
+                    {pickerInformation}
+                  </span>
+                )}
+              </div>
+              {pickerMetadata}
+              {pickerSecondaryInformation}
             </div>
-          )}
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className={`relative pointer-events-none hidden lg:block ${uiStackList}`}>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className={`${uiItemNameHover} truncate`}>{displayName}</span>
+                {pickerInformation && (
+                  <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
+                    {pickerInformation}
+                  </span>
+                )}
+              </div>
+              {pickerMetadata}
+              {pickerSecondaryInformation}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <CharacterEntryRow
+          name={displayName}
+          info={
+            hasSkillInfo ? (
+              <InfoModal title={skill.name} content={skillInfoContent} as="span" />
+            ) : undefined
+          }
+          metadata={
             <div className={`${uiChipRow} items-center`}>
-              {previewMode && skill.source && (
-                <Chip
-                  size="sm"
-                  colour={sourceChipColour(skill.source)}
-                  className="font-code shrink-0"
-                >
-                  {skill.source}
-                </Chip>
-              )}
-              {previewMode && cost !== undefined && (
-                <Chip size="sm" colour="amber" className="font-code shrink-0">
-                  {cost} XP
-                </Chip>
-              )}
               <Chip
-                size="sm"
                 colour={characteristicChipColour(skill.characteristic)}
-                className="font-code shrink-0"
+                className="shrink-0"
+                aria-label={`${characteristicName} ${total}`}
               >
-                {CHAR_LABEL[skill.characteristic]}
+                {CHAR_LABEL[skill.characteristic]} {total}
               </Chip>
-              <Chip size="sm" colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
+              <Chip colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
                 {skill.advanced ? "Advanced" : "Basic"}
               </Chip>
               {!hideLevelChip && (
-                <Chip size="sm" colour={levelBadgeColour} className="shrink-0">
-                  {skill.level === "trained"
-                    ? "Trained"
-                    : skill.level === "untrained"
-                      ? "Untrained"
-                      : skill.level}
+                <Chip colour={levelBadgeColour} className="shrink-0">
+                  {levelLabel}
                 </Chip>
               )}
             </div>
-            <StatChip label="Total" value={skill.total ?? "—"} />
-          </div>
-          {eliteAdvancePurchase && (
-            <p className={`text-sm ${colourAmberPlain}`}>
-              Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
-            </p>
-          )}
-          {talentSourceSummary && (
-            <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
-          )}
-        </div>
-
-        {/* Desktop uses its extra width to keep Upgrade immediately left of Delete. */}
-        <div className={`relative pointer-events-none hidden lg:block ${uiStackList}`}>
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <span className={`${uiItemNameHover} truncate`}>{displayName}</span>
-              {hasSkillInfo && (
-                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                  <InfoModal title={skill.name} content={skillInfoContent} as="span" />
-                </span>
+          }
+          afterMetadata={
+            <>
+              {eliteAdvancePurchase && (
+                <p className={`text-sm ${colourAmberPlain}`}>
+                  Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
+                </p>
               )}
-            </div>
-            {(hasUpgrade || canDelete) && (
-              <div
-                className={`relative ${uiLayerLocal} flex shrink-0 items-center gap-3 pointer-events-auto`}
-              >
+              {talentSourceSummary && (
+                <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
+              )}
+            </>
+          }
+          actions={
+            hasUpgrade || canDelete ? (
+              <>
                 {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
                   <Button size="xs" onClick={() => setUpgradeArmed(true)}>
                     Upgrade to {nextTierAccess.level}
@@ -271,52 +299,11 @@ export function SkillRow({
                     label={`Delete ${skill.name}`}
                   />
                 )}
-              </div>
-            )}
-          </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-            <div className={`${uiChipRow} items-center`}>
-              {previewMode && skill.source && (
-                <Chip colour={sourceChipColour(skill.source)} className="font-code shrink-0">
-                  {skill.source}
-                </Chip>
-              )}
-              {previewMode && cost !== undefined && (
-                <Chip colour="amber" className="font-code shrink-0">
-                  {cost} XP
-                </Chip>
-              )}
-              <Chip
-                colour={characteristicChipColour(skill.characteristic)}
-                className="font-code shrink-0"
-              >
-                {CHAR_LABEL[skill.characteristic]}
-              </Chip>
-              <Chip colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
-                {skill.advanced ? "Advanced" : "Basic"}
-              </Chip>
-              {!hideLevelChip && (
-                <Chip colour={levelBadgeColour} className="shrink-0">
-                  {skill.level === "trained"
-                    ? "Trained"
-                    : skill.level === "untrained"
-                      ? "Untrained"
-                      : skill.level}
-                </Chip>
-              )}
-            </div>
-            <StatChip label="Total" value={skill.total ?? "—"} />
-          </div>
-          {eliteAdvancePurchase && (
-            <p className={`text-sm ${colourAmberPlain}`}>
-              Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
-            </p>
-          )}
-          {talentSourceSummary && (
-            <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
-          )}
-        </div>
-      </div>
+              </>
+            ) : undefined
+          }
+        />
+      )}
 
       {upgradeArmed && nextTierAccess?.status === "unlocked" && (
         <PickerModal
@@ -470,6 +457,6 @@ export function SkillRow({
           </PickerBody>
         </PickerModal>
       )}
-    </div>
+    </>
   );
 }

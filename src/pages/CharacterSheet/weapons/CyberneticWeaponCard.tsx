@@ -71,18 +71,18 @@ export function CyberneticWeaponCard({
             <p className={uiCardTitleHover}>{weapon.name}</p>
           </div>
           <div className={`mt-0.5 ${uiChipRow} items-center`}>
-            <Chip size="sm" colour="pink">
+            <Chip colour="pink">
               Cybernetic
             </Chip>
             {weapon.class === "Melee" ? (
-              <Chip size="sm" colour="orange">
+              <Chip colour="orange">
                 Melee
               </Chip>
             ) : weapon.class ? (
               (() => {
                 const c = weaponClassChip(weapon.class);
                 return c ? (
-                  <Chip size="sm" colour={c.colour}>
+                  <Chip colour={c.colour}>
                     {c.label}
                   </Chip>
                 ) : null;

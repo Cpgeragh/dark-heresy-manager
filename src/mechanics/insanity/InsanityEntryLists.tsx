@@ -63,11 +63,11 @@ function DisorderRow({
         <div className="min-w-0">
           <span className={uiItemName}>{disorder.name}</span>
           <div className={`mt-1 ${uiChipRow} items-center`}>
-            <Chip size="sm" colour={disorderTypeChipColour(disorder.type)}>
+            <Chip colour={disorderTypeChipColour(disorder.type)}>
               {disorder.type}
             </Chip>
             <span className="inline-flex items-center gap-1">
-              <Chip size="sm" colour={severityChipColour[disorder.severity]}>
+              <Chip colour={severityChipColour[disorder.severity]}>
                 {disorder.severity}
               </Chip>
               <span className={uiInfoModalWrapper}>
@@ -80,7 +80,7 @@ function DisorderRow({
               </span>
             </span>
             {disorder.source && (
-              <Chip size="sm" colour={sourceChipColour(disorder.source)} className="font-code">
+              <Chip colour={sourceChipColour(disorder.source)} className="font-code">
                 {disorder.source}
               </Chip>
             )}
@@ -206,7 +206,7 @@ function TraumaRow({
             <div className={`mt-1 ${uiChipRow}`}>
               {roll && <RollChip>{roll}</RollChip>}
               {trauma.source && (
-                <Chip size="sm" colour={sourceChipColour(trauma.source)} className="font-code">
+                <Chip colour={sourceChipColour(trauma.source)} className="font-code">
                   {trauma.source}
                 </Chip>
               )}

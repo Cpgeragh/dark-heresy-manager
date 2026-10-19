@@ -104,8 +104,8 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
   ) : (
     <div className={`${uiStackBody} ${uiTextDescription}`}>
       <p>
-        Advanced Skills cannot be attempted while Untrained. The displayed Total shows the
-        Characteristic value the Skill will use once it becomes Trained.
+        Advanced Skills cannot be attempted while Untrained. The displayed number beside the
+        Characteristic shows the value the Skill will use once it becomes Trained.
       </p>
       <p>
         The first acquisition makes the Skill Trained. Further acquisitions increase its Total by

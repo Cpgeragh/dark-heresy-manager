@@ -114,12 +114,12 @@ function RangedWeaponCardPickerRow({
             {(classChip || typeChip) && (
               <div className={`mt-0.5 ${uiChipRow} items-center`}>
                 {classChip && (
-                  <Chip size="sm" colour={classChip.colour}>
+                  <Chip colour={classChip.colour}>
                     {classChip.label}
                   </Chip>
                 )}
                 {typeChip && (
-                  <Chip size="sm" colour={typeChip.colour}>
+                  <Chip colour={typeChip.colour}>
                     {typeChip.label}
                   </Chip>
                 )}
@@ -408,18 +408,18 @@ export function RangedPicker({
             >
               <PickerRowName name={item.name} />
               <PickerRowChips>
-                {data.range && <StatChip size="sm" label="Range" value={data.range} />}
-                {data.rof && <StatChip size="sm" label="ROF" value={data.rof} />}
-                {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
-                {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
-                {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
-                {data.clip && <StatChip size="sm" label="Clip" value={data.clip} />}
+                {data.range && <StatChip label="Range" value={data.range} />}
+                {data.rof && <StatChip label="ROF" value={data.rof} />}
+                {data.damage && <StatChip label="Dmg" value={data.damage} />}
+                {data.damage && <DamageTypeChip damage={data.damage} />}
+                {data.pen && <StatChip label="Pen" value={data.pen} />}
+                {data.clip && <StatChip label="Clip" value={data.clip} />}
               </PickerRowChips>
               <PickerRowChips>
                 {(() => {
                   const c = weaponClassChip(data.class);
                   return c ? (
-                    <Chip size="sm" colour={c.colour}>
+                    <Chip colour={c.colour}>
                       {c.label}
                     </Chip>
                   ) : null;
@@ -427,7 +427,7 @@ export function RangedPicker({
                 {(() => {
                   const t = weaponTypeChip(data.type);
                   return t ? (
-                    <Chip size="sm" colour={t.colour}>
+                    <Chip colour={t.colour}>
                       {t.label}
                     </Chip>
                   ) : null;
@@ -435,17 +435,17 @@ export function RangedPicker({
                 {(() => {
                   const f = ammoFamilyChip(data.ammoType);
                   return f ? (
-                    <Chip size="sm" colour={f.colour}>
+                    <Chip colour={f.colour}>
                       {f.label}
                     </Chip>
                   ) : null;
                 })()}
                 {item.status === "draft" && (
-                  <Chip size="sm" colour="amber">
+                  <Chip colour="amber">
                     Draft
                   </Chip>
                 )}
-                <Chip size="sm" colour="fuchsia">
+                <Chip colour="fuchsia">
                   Custom
                 </Chip>
                 <ItemMetaChips

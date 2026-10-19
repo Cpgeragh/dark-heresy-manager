@@ -134,11 +134,11 @@ function CorruptionStatusChips({ points }: { points: number }) {
           <div className={`flex flex-col items-center ${uiStackField}`}>
             <span className={uiTextLabel}>Status</span>
             <div className={`${uiChipRow} justify-center`}>
-              <Chip size="sm" colour={corruptionDegreeChipColour(entry)}>
+              <Chip colour={corruptionDegreeChipColour(entry)}>
                 Malignancy Test Modifier: {entry.malignancyModifier}
               </Chip>
               <span className="inline-flex items-center gap-1">
-                <Chip size="sm" colour={corruptionDegreeChipColour(entry)}>
+                <Chip colour={corruptionDegreeChipColour(entry)}>
                   Mutation Level: {corruptionMutationLevelLabel(entry)}
                 </Chip>
                 <span className={uiInfoModalWrapper}>

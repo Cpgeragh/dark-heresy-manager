@@ -86,7 +86,6 @@ export function GrenadePicker({
                   <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
                   <PickerRowChips>
                     <Chip
-                      size="sm"
                       colour={
                         data.type === "Mine"
                           ? "violet"
@@ -100,7 +99,7 @@ export function GrenadePicker({
                     {(() => {
                       const c = weaponClassChip(data.class);
                       return c ? (
-                        <Chip size="sm" colour={c.colour}>
+                        <Chip colour={c.colour}>
                           {c.label}
                         </Chip>
                       ) : null;
@@ -108,13 +107,13 @@ export function GrenadePicker({
                   </PickerRowChips>
                   <PickerRowChips>
                     {data.type !== "Mine" && data.type !== "Missile" && (
-                      <StatChip size="sm" label="Range" value={thrownRange} />
+                      <StatChip label="Range" value={thrownRange} />
                     )}
                     {data.damage && data.damage !== "—" && (
-                      <StatChip size="sm" label="Dmg" value={data.damage} />
+                      <StatChip label="Dmg" value={data.damage} />
                     )}
-                    {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
-                    {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+                    {data.damage && <DamageTypeChip damage={data.damage} />}
+                    {data.pen && <StatChip label="Pen" value={data.pen} />}
                   </PickerRowChips>
                   <PickerRowChips>
                     <ItemMetaChips
@@ -163,7 +162,6 @@ export function GrenadePicker({
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
                   <Chip
-                    size="sm"
                     colour={
                       ref.type === "Mine" ? "violet" : ref.type === "Missile" ? "orange" : "cyan"
                     }
@@ -173,7 +171,7 @@ export function GrenadePicker({
                   {(() => {
                     const c = weaponClassChip(ref.class);
                     return c ? (
-                      <Chip size="sm" colour={c.colour}>
+                      <Chip colour={c.colour}>
                         {c.label}
                       </Chip>
                     ) : null;
@@ -181,11 +179,11 @@ export function GrenadePicker({
                 </PickerRowChips>
                 <PickerRowChips>
                   {ref.type !== "Mine" && ref.type !== "Missile" && (
-                    <StatChip size="sm" label="Range" value={thrownRange} />
+                    <StatChip label="Range" value={thrownRange} />
                   )}
-                  {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}
-                  <DamageTypeChip size="sm" damage={ref.damage} />
-                  <StatChip size="sm" label="Pen" value={ref.pen} />
+                  {ref.damage !== "—" && <StatChip label="Dmg" value={ref.damage} />}
+                  <DamageTypeChip damage={ref.damage} />
+                  <StatChip label="Pen" value={ref.pen} />
                 </PickerRowChips>
                 <PickerRowChips>
                   <ItemMetaChips

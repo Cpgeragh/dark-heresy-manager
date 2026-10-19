@@ -225,7 +225,6 @@ export function AddSkillModal({
         ].map((source) => (
           <Chip
             key={source}
-            size="sm"
             colour={sourceChipColour(source)}
             className="font-code shrink-0"
           >
@@ -235,7 +234,6 @@ export function AddSkillModal({
         {getSkillGroupCharacteristics(item.skills).map((characteristic) => (
           <Chip
             key={characteristic}
-            size="sm"
             colour={characteristicChipColour(characteristic)}
             className="font-code shrink-0"
           >
@@ -243,7 +241,7 @@ export function AddSkillModal({
           </Chip>
         ))}
         {item.skills[0].advanced && (
-          <Chip size="sm" colour="purple" className="shrink-0">
+          <Chip colour="purple" className="shrink-0">
             Advanced
           </Chip>
         )}

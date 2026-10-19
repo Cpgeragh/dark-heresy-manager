@@ -144,52 +144,39 @@ describe("SkillsTab", () => {
       screen.getAllByRole("button", { name: "Show information about Advanced Skills" })[0]
     );
     expect(screen.getByText(/cannot be attempted while Untrained/)).toBeInTheDocument();
-    expect(screen.getByText(/displayed Total shows the Characteristic value/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/displayed number beside the Characteristic shows the value/)
+    ).toBeInTheDocument();
   });
 
-  it("shows the computed skill total in a labelled stat chip", () => {
+  it("shows the computed Skill value in the governing characteristic chip", () => {
     renderTab();
 
-    const totalLabels = screen.getAllByText("Total");
-    expect(totalLabels.length).toBeGreaterThan(0);
-    const controlGroups = totalLabels.map((label) => label.parentElement?.parentElement);
-    for (const label of totalLabels) {
-      expect(label.parentElement).toHaveTextContent("30");
+    const characteristicValues = screen.getAllByLabelText("Perception 30");
+    expect(characteristicValues.length).toBeGreaterThan(0);
+    for (const value of characteristicValues) {
+      expect(value).toHaveTextContent("Per 30");
+      expect(value).toHaveClass("h-6", "text-xs");
+      expect(value).not.toHaveClass("font-code", "h-5", "text-[10px]");
+      expect(value.closest("div.rounded-lg")).toHaveClass("p-3", "lg:p-4");
     }
-    for (const group of controlGroups) {
-      expect(group).toHaveClass("grid", "grid-cols-[minmax(0,1fr)_auto]");
-    }
+    expect(screen.queryByText("Total")).not.toBeInTheDocument();
   });
 
-  it("keeps Upgrade on its own right-aligned mobile row and immediately left of Delete on desktop", () => {
+  it("keeps Upgrade and Delete together in the wrapping upper action area", () => {
     renderTab({ isDM: true });
 
     const upgrades = screen.getAllByRole("button", { name: "Upgrade to +10" });
-    expect(upgrades.length).toBeGreaterThanOrEqual(2);
-    let mobileLayouts = 0;
-    let desktopLayouts = 0;
+    expect(upgrades.length).toBeGreaterThan(0);
     for (const upgrade of upgrades) {
       expect(upgrade).toHaveClass("border-red-500", "text-red-500");
-      const controls = upgrade.parentElement;
-      let metadataRow: Element | null | undefined;
-      if (controls?.classList.contains("justify-end")) {
-        mobileLayouts += 1;
-        metadataRow = controls.nextElementSibling;
-      } else {
-        desktopLayouts += 1;
-        expect(controls).toHaveClass("flex", "items-center");
-        expect(
-          within(controls as HTMLElement).getByRole("button", { name: "Delete Awareness" })
-        ).toBeInTheDocument();
-        const headerRow = controls?.parentElement;
-        expect(headerRow).toHaveClass("justify-between");
-        metadataRow = headerRow?.nextElementSibling;
-      }
-      expect(metadataRow).toHaveClass("grid", "grid-cols-[minmax(0,1fr)_auto]");
-      expect(within(metadataRow as HTMLElement).getByText("Total")).toBeInTheDocument();
+      const actions = upgrade.parentElement;
+      expect(actions).toHaveClass("flex", "flex-wrap", "items-center", "justify-end");
+      expect(
+        within(actions as HTMLElement).getByRole("button", { name: "Delete Awareness" })
+      ).toBeInTheDocument();
+      expect(actions?.parentElement).toHaveClass("items-start", "justify-between");
     }
-    expect(mobileLayouts).toBeGreaterThan(0);
-    expect(desktopLayouts).toBeGreaterThan(0);
   });
 
   it("places grouped skill chips beneath the category name", () => {
@@ -695,7 +682,7 @@ describe("SkillsTab", () => {
         traits: [],
       },
     });
-    expect(screen.getAllByText("40").length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText("Perception 40").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tech-Use").length).toBeGreaterThan(0);
     expect(
       screen.getAllByText("Cult Briefing (Heretek) (Talent): counts Tech-Use as trained").length
@@ -723,11 +710,10 @@ describe("SkillsTab", () => {
       talents: GUARDSMAN_DRIVE_GRANT,
     });
 
-    // The mobile and desktop layouts coexist in the DOM, with one card in each.
-    expect(screen.getAllByText("Drive (Ground Vehicle)")).toHaveLength(2);
+    expect(screen.getAllByText("Drive (Ground Vehicle)")).toHaveLength(1);
     expect(
       screen.getAllByText("Career: Guardsman (Career): counts Drive (Ground Vehicle) as trained")
-    ).toHaveLength(2);
+    ).toHaveLength(1);
     expect(
       screen.queryByRole("button", { name: "Delete Drive (Ground Vehicle)" })
     ).not.toBeInTheDocument();

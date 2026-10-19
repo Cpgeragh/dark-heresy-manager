@@ -542,7 +542,7 @@ export function TalentAcquisitionModal({
                   name={item.name}
                   badges={
                     selected && (
-                      <Chip size="sm" colour="amber">
+                      <Chip colour="amber">
                         Life-critical
                       </Chip>
                     )
@@ -740,7 +740,6 @@ export function TalentAcquisitionModal({
                       <p className={colourAmberPlain}>{item.kind}</p>
                     </div>
                     <Chip
-                      size="sm"
                       colour={item.qualifiesForFate ? "amber" : "slate"}
                       className="shrink-0"
                     >

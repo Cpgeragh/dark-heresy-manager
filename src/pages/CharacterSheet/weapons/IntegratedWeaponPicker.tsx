@@ -172,10 +172,10 @@ export function IntegratedWeaponPicker({
               >
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
-                  <Chip size="sm" colour="violet">
+                  <Chip colour="violet">
                     Integrated
                   </Chip>
-                  <Chip size="sm" colour="sky">
+                  <Chip colour="sky">
                     Ranged
                   </Chip>
                   <ItemMetaChips
@@ -232,10 +232,10 @@ export function IntegratedWeaponPicker({
               >
                 <PickerRowName name={ref.name} />
                 <PickerRowChips>
-                  <Chip size="sm" colour="violet">
+                  <Chip colour="violet">
                     Integrated
                   </Chip>
-                  <Chip size="sm" colour="orange">
+                  <Chip colour="orange">
                     Melee
                   </Chip>
                   <ItemMetaChips
@@ -295,10 +295,10 @@ export function IntegratedWeaponPicker({
                 >
                   <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
                   <PickerRowChips>
-                    <Chip size="sm" colour="violet">
+                    <Chip colour="violet">
                       Integrated
                     </Chip>
-                    <Chip size="sm" colour={isRanged ? "sky" : "orange"}>
+                    <Chip colour={isRanged ? "sky" : "orange"}>
                       {isRanged ? "Ranged" : "Melee"}
                     </Chip>
                     <ItemMetaChips

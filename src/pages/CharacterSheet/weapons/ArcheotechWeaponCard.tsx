@@ -109,19 +109,19 @@ export function ArcheotechWeaponCard({
           {(highlightAsArcheotech || weaponClass) && (
             <div className={`mt-0.5 ${uiChipRow} items-center`}>
               {highlightAsArcheotech && (
-                <Chip size="sm" colour="amber" className="shrink-0">
+                <Chip colour="amber" className="shrink-0">
                   Archeotech
                 </Chip>
               )}
               {weaponClass === "Melee" ? (
-                <Chip size="sm" colour="orange">
+                <Chip colour="orange">
                   Melee
                 </Chip>
               ) : weaponClass ? (
                 (() => {
                   const c = weaponClassChip(weaponClass);
                   return c ? (
-                    <Chip size="sm" colour={c.colour}>
+                    <Chip colour={c.colour}>
                       {c.label}
                     </Chip>
                   ) : null;

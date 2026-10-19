@@ -64,11 +64,11 @@ export function ArcheotechShieldRow({
           </div>
           <div className={`mt-0.5 ${uiChipRow} items-center`}>
             {highlightAsArcheotech && (
-              <Chip size="sm" colour="amber" className="shrink-0">
+              <Chip colour="amber" className="shrink-0">
                 Archeotech
               </Chip>
             )}
-            <Chip size="sm" colour="lime">
+            <Chip colour="lime">
               Shield
             </Chip>
           </div>
@@ -95,9 +95,9 @@ export function ArcheotechShieldRow({
           )}
           <div className={`mt-1 ${uiChipRow}`}>
             {locations.length > 0 && (
-              <StatChip size="sm" label="Location" value={locationLabel(locations)} />
+              <StatChip label="Location" value={locationLabel(locations)} />
             )}
-            {item.ap !== undefined && <StatChip size="sm" label="AP" value={String(item.ap)} />}
+            {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
           </div>
           <ItemMetaChips
             weight={item.weight}

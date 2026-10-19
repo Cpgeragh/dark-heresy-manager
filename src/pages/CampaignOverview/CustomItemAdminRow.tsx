@@ -115,7 +115,7 @@ export function CustomItemAdminRow({
         <div className="min-w-0">
           <div className={`${uiChipRow} items-center`}>
             <span className={`text-sm font-medium ${colourTextPrimary}`}>{item.name}</span>
-            <Chip size="sm" colour="slate" className="uppercase tracking-wide">
+            <Chip colour="slate" className="uppercase tracking-wide">
               {CUSTOM_ITEM_CATEGORY_LABELS[item.category]}
             </Chip>
             <StatusBadge status={item.status} />

@@ -79,7 +79,7 @@ export function ShieldCard({
             {libraryItem && <StatusBadge status={libraryItem.status} />}
           </div>
           <div className={`mt-0.5 ${uiChipRow} items-center`}>
-            <Chip size="sm" colour="lime">
+            <Chip colour="lime">
               Shield
             </Chip>
           </div>

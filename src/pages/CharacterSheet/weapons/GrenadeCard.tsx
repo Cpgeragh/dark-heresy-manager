@@ -97,7 +97,7 @@ export function GrenadeCard({
               Stowed · {item.quantity} remaining
             </p>
           </div>
-          <Chip size="sm" colour="slate" className="shrink-0">
+          <Chip colour="slate" className="shrink-0">
             Stowed
           </Chip>
         </div>
@@ -134,7 +134,6 @@ export function GrenadeCard({
           </div>
           <div className={`mt-0.5 ${uiChipRow} items-center`}>
             <Chip
-              size="sm"
               colour={item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"}
             >
               {item.type ?? "Grenade"}
@@ -142,13 +141,13 @@ export function GrenadeCard({
             {(() => {
               const c = weaponClassChip(item.class);
               return c ? (
-                <Chip size="sm" colour={c.colour}>
+                <Chip colour={c.colour}>
                   {c.label}
                 </Chip>
               ) : null;
             })()}
             {isEquipped && (
-              <Chip size="sm" colour="emerald">
+              <Chip colour="emerald">
                 {equippedCount} ready
               </Chip>
             )}

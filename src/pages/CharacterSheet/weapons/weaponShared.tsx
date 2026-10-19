@@ -3,8 +3,11 @@
 
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { Button } from "../../../ui/buttons/Button";
-import { Chip } from "../../../ui/chips/Chip";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
+import { Chip, NestedChip } from "../../../ui/chips/Chip";
+import {
+  ItemMetaChips,
+  NestedItemMetaChips,
+} from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
@@ -111,11 +114,11 @@ export function WeaponQualitySelector({
 
 // ─── Damage Type Helpers ──────────────────────────────────────────────────────
 
-export function DamageTypeChip({ damage, size = "md" }: { damage: string; size?: "sm" | "md" }) {
+export function DamageTypeChip({ damage }: { damage: string }) {
   const damageType = parseDamageType(damage);
   if (!damageType) return null;
   return (
-    <StatChip label="Type" value={damageType.label} size={size} valueColour={damageType.colour} />
+    <StatChip label="Type" value={damageType.label} valueColour={damageType.colour} />
   );
 }
 
@@ -134,7 +137,7 @@ export function EquipToggle({
 }) {
   if (!editable) {
     return equipped ? (
-      <Chip size="sm" colour="emerald" className="uppercase tracking-wide shrink-0">
+      <Chip colour="emerald" className="uppercase tracking-wide shrink-0">
         Equipped
       </Chip>
     ) : null;
@@ -206,15 +209,14 @@ export function UpgradeCard({
         )}
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
-        <Chip size="sm" colour="slate">
+        <NestedChip colour="slate">
           <WeightIcon className="h-[1em] w-[1em] shrink-0" />
           <span className="leading-none">{displayedWeightModifier}</span>
-        </Chip>
-        <ItemMetaChips
+        </NestedChip>
+        <NestedItemMetaChips
           value={upgrade.value}
           availability={upgrade.availability}
           source={upgrade.source}
-          size="sm"
           bare
         />
       </div>
