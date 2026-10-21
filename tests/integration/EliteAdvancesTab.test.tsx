@@ -236,6 +236,34 @@ describe("EliteAdvancesTab", () => {
     );
   });
 
+  it("keeps the Remove pop-up open when removing an Elite Advance is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn(async () => false);
+    render(
+      <EliteAdvancesTab
+        talents={{
+          ...EMPTY_TALENTS,
+          eliteAdvances: [
+            { uid: "nascent-entry", eliteAdvanceId: "nascent-psyker", name: "Nascent Psyker" },
+          ],
+        }}
+        skills={[]}
+        experience={{ total: 0, spent: 0, ranks: [] }}
+        insanity={INSANITY}
+        psychic={{ psyRating: 0, minorPowers: [], majorPowers: [] }}
+        editable
+        onUpdateCharacter={onUpdateCharacter}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Remove Nascent Psyker" }));
+    const confirmation = screen.getByRole("dialog", { name: "Remove Elite Advance" });
+    await user.click(within(confirmation).getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateCharacter).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog", { name: "Remove Elite Advance" })).toBeInTheDocument();
+  });
+
   it("offers Redemption package advances and buys Flame as real Weapon Training", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn(async () => true);

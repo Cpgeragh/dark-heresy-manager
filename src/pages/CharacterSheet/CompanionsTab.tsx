@@ -323,7 +323,7 @@ function CompanionCard({
 }: {
   companion: CompanionItem;
   editable: boolean;
-  onRemove: () => void | Promise<void>;
+  onRemove: () => void | Promise<boolean | void>;
 }) {
   const [expanded, setExpanded] = useState(true);
   const companionReference = COMPANION_REFERENCE.find(
@@ -375,7 +375,7 @@ export function CompanionsTab({
 }: {
   companions: CompanionItem[];
   editable: boolean;
-  onUpdate: (next: CompanionItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdate: (next: CompanionItem[], options?: PatchOptions) => void | Promise<boolean | void>;
 }) {
   const [showPicker, setShowPicker] = useState(false);
 
@@ -399,12 +399,7 @@ export function CompanionsTab({
               key={companion.id}
               companion={companion}
               editable={editable}
-              onRemove={() => {
-                onUpdate(
-                  companions.filter((entry) => entry.id !== companion.id),
-                  { optimistic: true }
-                );
-              }}
+              onRemove={() => onUpdate(companions.filter((entry) => entry.id !== companion.id))}
             />
           ))}
         </div>

@@ -5,7 +5,7 @@ import {
   formatAmmoName,
   isChargePackAmmoName,
 } from "../../../data/reference/ammoReference";
-import { Button } from "../../../ui/buttons/Button";
+import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { NestedChip } from "../../../ui/chips/Chip";
 import { NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -56,7 +56,7 @@ export function AmmoEntryRow({
   ammoTracking: AmmoTrackingMode;
   weightKg?: number;
   onSetLoaded: () => void;
-  onRemove: () => void;
+  onRemove: () => unknown;
   onUpdateClips: (qty: number) => void;
   onUpdateRounds: (qty: number) => void;
   onSetLooseRounds: (qty: number) => void;
@@ -103,9 +103,12 @@ export function AmmoEntryRow({
           )}
         </div>
         {editable && (
-          <Button size="xs" onClick={onRemove} className="shrink-0">
-            Remove
-          </Button>
+          <RemoveEntryButton
+            kind="Ammunition"
+            name={displayName}
+            from="this weapon"
+            onRemove={onRemove}
+          />
         )}
       </div>
 

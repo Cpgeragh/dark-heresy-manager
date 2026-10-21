@@ -1,6 +1,6 @@
 // tests/integration/ImplantRow.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ImplantRow } from "../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow";
@@ -113,5 +113,17 @@ describe("ImplantRow", () => {
     expect(onRemove).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledWith("c1");
+  });
+
+  it("keeps the Remove pop-up open when the removal is refused", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn().mockResolvedValue(false);
+    render(<ImplantRow item={item()} editable={true} onRemove={onRemove} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onRemove).toHaveBeenCalledWith("c1"));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 });

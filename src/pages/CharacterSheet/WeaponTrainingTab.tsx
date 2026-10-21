@@ -156,25 +156,22 @@ export function WeaponTrainingTab({
       delete xpPurchases[id];
       delete manualCosts[id];
       delete eliteAdvancePurchases[id];
-      void onUpdate(
-        {
-          ...weaponTraining,
-          trained: weaponTraining.trained.filter((t) => t !== id),
-          xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
-          manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
-          eliteAdvancePurchases:
-            Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
-        },
-        { optimistic: true }
-      );
+      return onUpdate({
+        ...weaponTraining,
+        trained: weaponTraining.trained.filter((t) => t !== id),
+        xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
+        manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
+        eliteAdvancePurchases:
+          Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
+      });
     },
     [weaponTraining, onUpdate]
   );
 
-  const confirmRemoveTraining = useCallback(() => {
+  const confirmRemoveTraining = useCallback(async () => {
     if (!pendingRemoveTraining) return;
-    handleRemoveTraining(pendingRemoveTraining.id);
-    setPendingRemoveTraining(null);
+    const saved = await handleRemoveTraining(pendingRemoveTraining.id);
+    if (saved !== false) setPendingRemoveTraining(null);
   }, [pendingRemoveTraining, handleRemoveTraining, setPendingRemoveTraining]);
 
   const confirmTrain = useCallback(async () => {
@@ -262,21 +259,18 @@ export function WeaponTrainingTab({
 
   const handleRemoveExotic = useCallback(
     (index: number) => {
-      void onUpdate(
-        {
-          ...weaponTraining,
-          exoticWeapons: weaponTraining.exoticWeapons.filter((_, i) => i !== index),
-        },
-        { optimistic: true }
-      );
+      return onUpdate({
+        ...weaponTraining,
+        exoticWeapons: weaponTraining.exoticWeapons.filter((_, i) => i !== index),
+      });
     },
     [weaponTraining, onUpdate]
   );
 
-  const confirmRemoveExotic = useCallback(() => {
+  const confirmRemoveExotic = useCallback(async () => {
     if (!pendingRemoveExotic) return;
-    handleRemoveExotic(pendingRemoveExotic.index);
-    setPendingRemoveExotic(null);
+    const saved = await handleRemoveExotic(pendingRemoveExotic.index);
+    if (saved !== false) setPendingRemoveExotic(null);
   }, [pendingRemoveExotic, handleRemoveExotic, setPendingRemoveExotic]);
 
   const confirmExoticPurchase = useCallback(async () => {

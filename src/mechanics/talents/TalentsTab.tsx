@@ -213,7 +213,7 @@ const TalentCards = memo(function TalentCards({
             statusChip={`Owned: ${talentEntries.length}`}
             editable={editable}
             removable={available.length > 0}
-            deletionBlockedMessage={
+            removalBlockedMessage={
               available.length === 0
                 ? "This Talent cannot be removed until its linked Psychic powers are removed."
                 : undefined
@@ -255,7 +255,7 @@ const TalentCards = memo(function TalentCards({
               (power) => power.psyRatingTalentEntryUid === entry.uid
             )
           }
-          deletionBlockedMessage={
+          removalBlockedMessage={
             !entry.grantedByTalentEntryUid &&
             [...psychic.minorPowers, ...psychic.majorPowers].some(
               (power) => power.psyRatingTalentEntryUid === entry.uid

@@ -1,6 +1,6 @@
 // tests/integration/GearTab.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
@@ -378,7 +378,7 @@ describe("GearTab", () => {
     await user.click(screen.getByRole("button", { name: "Remove Grapnel" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onUpdate).toHaveBeenCalledWith([]);
   });
 
   it("removes an existing consumable", async () => {
@@ -394,7 +394,7 @@ describe("GearTab", () => {
     await user.click(screen.getByRole("button", { name: "Remove Stimm" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdateConsumables).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onUpdateConsumables).toHaveBeenCalledWith([]);
   });
 
   it("does not show a spinner on a gear row for an optimistic add", async () => {
@@ -446,7 +446,7 @@ describe("GearTab", () => {
     await act(async () => finish());
   }, 15000);
 
-  it("does not show a spinner on Remove for an optimistic gear removal", async () => {
+  it("keeps the Remove pop-up open until the gear removal is saved", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -458,17 +458,17 @@ describe("GearTab", () => {
     const item: GearItem = { id: "g1", name: "Grapnel", referenceId: "grapnel" };
     renderTab({ gear: [item], onUpdate });
 
-    const removeButton = screen.getByRole("button", { name: "Remove Grapnel" });
-    await user.click(removeButton);
+    await user.click(screen.getByRole("button", { name: "Remove Grapnel" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
-    expect(removeButton).not.toHaveAttribute("aria-busy");
+    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     await act(async () => finish());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("does not show a spinner on Remove for an optimistic consumable removal", async () => {
+  it("keeps the Remove pop-up open until the consumable removal is saved", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdateConsumables = vi.fn(
@@ -480,14 +480,40 @@ describe("GearTab", () => {
     const item: ConsumableItem = { id: "c1", name: "Stimm", referenceId: "stimm", quantity: 2 };
     renderTab({ consumables: [item], onUpdateConsumables });
 
-    const removeButton = screen.getByRole("button", { name: "Remove Stimm" });
-    await user.click(removeButton);
+    await user.click(screen.getByRole("button", { name: "Remove Stimm" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdateConsumables).toHaveBeenCalledWith([], { optimistic: true });
-    expect(removeButton).not.toHaveAttribute("aria-busy");
+    expect(onUpdateConsumables).toHaveBeenCalledWith([]);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     await act(async () => finish());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a gear item is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    const item: GearItem = { id: "g1", name: "Grapnel", referenceId: "grapnel" };
+    renderTab({ gear: [item], onUpdate });
+
+    await user.click(screen.getByRole("button", { name: "Remove Grapnel" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a consumable is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateConsumables = vi.fn().mockResolvedValue(false);
+    const item: ConsumableItem = { id: "c1", name: "Stimm", referenceId: "stimm", quantity: 2 };
+    renderTab({ consumables: [item], onUpdateConsumables });
+
+    await user.click(screen.getByRole("button", { name: "Remove Stimm" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateConsumables).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("asks for an optimistic save when a consumable quantity changes", async () => {

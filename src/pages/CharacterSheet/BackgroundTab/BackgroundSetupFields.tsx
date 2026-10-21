@@ -45,9 +45,9 @@ export interface BackgroundSetupFieldsProps {
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
-  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
+  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<boolean | void>;
   gear?: GearItem[];
-  onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  onUpdateGear?: (next: GearItem[]) => void | Promise<boolean | void>;
   experience?: ExperienceBlock;
   onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
   insanity?: InsanityBlock;

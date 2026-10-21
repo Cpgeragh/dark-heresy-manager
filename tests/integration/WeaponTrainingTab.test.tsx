@@ -77,6 +77,18 @@ describe("WeaponTrainingTab", () => {
     expect(onUpdate).not.toHaveBeenCalled();
   });
 
+  it("keeps the remove-training pop-up open when the removal is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    renderTab({ weaponTraining: makeBlock({ trained: ["basic-bolt"] }), onUpdate });
+
+    await user.click(screen.getAllByRole("button", { name: /^Bolt/ })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
   it("disables training buttons and ignores clicks in read-only mode", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ editable: false });
@@ -189,9 +201,7 @@ describe("WeaponTrainingTab", () => {
     await user.click(screen.getAllByRole("button", { name: /^Bolt/ })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ trained: [] }), {
-      optimistic: true,
-    });
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ trained: [] }));
   });
 
   it("keeps the train dialog open with waiting dots until the save settles", async () => {
@@ -291,6 +301,21 @@ describe("WeaponTrainingTab", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(onUpdate).not.toHaveBeenCalled();
+  });
+
+  it("keeps the remove-exotic pop-up open when the removal is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    renderTab({
+      weaponTraining: makeBlock({ exoticWeapons: [{ name: "Needle Pistol", cost: 200 }] }),
+      onUpdate,
+    });
+
+    await user.click(screen.getByLabelText("Remove Needle Pistol"));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("disables the exotic weapon chip in read-only mode", () => {

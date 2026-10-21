@@ -1,6 +1,6 @@
 // tests/integration/MeleeCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -141,17 +141,30 @@ describe("MeleeCard pistol ammo optimistic saves", () => {
     );
   });
 
-  it("asks for an optimistic save when an ammo type is removed", async () => {
+  it("asks for confirmation and waits for the server when an ammo type is removed", async () => {
     const { user, onUpdateAlternateRangedAmmoEntries } = await openPistolProfile();
 
-    const removeButtons = screen.getAllByRole("button", { name: "Remove" });
-    await user.click(removeButtons[removeButtons.length - 1]);
+    await user.click(screen.getByRole("button", { name: "Remove Homemade Slugs" }));
+    expect(onUpdateAlternateRangedAmmoEntries).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdateAlternateRangedAmmoEntries).toHaveBeenCalledWith(
       [expect.objectContaining({ id: "e1" })],
       "e1",
-      { optimistic: true }
+      undefined
     );
+  });
+
+  it("keeps the Remove pop-up open when removing an ammo type is refused", async () => {
+    const { user, onUpdateAlternateRangedAmmoEntries } = await openPistolProfile(
+      vi.fn().mockResolvedValue(false)
+    );
+
+    await user.click(screen.getByRole("button", { name: "Remove Homemade Slugs" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateAlternateRangedAmmoEntries).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 });
 

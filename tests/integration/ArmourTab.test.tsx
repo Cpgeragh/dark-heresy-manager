@@ -1,6 +1,6 @@
 // tests/integration/ArmourTab.test.tsx
 import { beforeEach, describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import type {
@@ -193,7 +193,7 @@ describe("ArmourTab", () => {
     );
   });
 
-  it("asks for an optimistic update when an upgrade is removed from armour", () => {
+  it("waits for the server when an upgrade is removed from armour", () => {
     const armour = [
       piece({
         referenceId: "cr-power-armour",
@@ -208,9 +208,7 @@ describe("ArmourTab", () => {
     fireEvent.click(wardsLabel.parentElement!.querySelector("button")!);
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ upgrades: [] })], {
-      optimistic: true,
-    });
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ upgrades: [] })]);
   });
 
   it("asks for an optimistic update when a worn piece is stowed", () => {
@@ -233,13 +231,13 @@ describe("ArmourTab", () => {
     });
   });
 
-  it("asks for an optimistic update when a piece is removed", () => {
+  it("waits for the server when a piece is removed", () => {
     const { onUpdate } = renderTab();
 
     fireEvent.click(screen.getAllByRole("button", { name: "Remove Flak Jacket" })[0]);
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onUpdate).toHaveBeenCalledWith([]);
   });
 
   it("asks for an optimistic update when a force field is deactivated", () => {
@@ -285,7 +283,7 @@ describe("ArmourTab", () => {
     });
   });
 
-  it("asks for an optimistic update when Archeotech armour is removed", () => {
+  it("waits for the server when Archeotech armour is removed", () => {
     const onUpdateArcheotech = vi.fn();
     renderTab({
       armour: [],
@@ -305,6 +303,61 @@ describe("ArmourTab", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Remove Ork Mega Armour" })[0]);
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdateArcheotech).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onUpdateArcheotech).toHaveBeenCalledWith([]);
+  });
+
+  it("keeps the Remove pop-up open when removing a piece is refused", async () => {
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    renderTab({ onUpdate });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove Flak Jacket" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing an upgrade is refused", async () => {
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    const armour = [
+      piece({
+        referenceId: "cr-power-armour",
+        name: "Power Armour",
+        locations: ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"],
+        upgrades: ["ih-hexagramatic-wards"],
+      }),
+    ];
+    renderTab({ armour, onUpdate });
+
+    const wardsLabel = screen.getAllByText("Hexagramatic Wards")[0];
+    fireEvent.click(wardsLabel.parentElement!.querySelector("button")!);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing Archeotech armour is refused", async () => {
+    const onUpdateArcheotech = vi.fn().mockResolvedValue(false);
+    renderTab({
+      armour: [],
+      archeotech: [
+        {
+          id: "x1",
+          name: "Ork Mega Armour",
+          type: "Armour",
+          ap: 10,
+          locations: ["head", "body"],
+          equipped: true,
+        },
+      ],
+      onUpdateArcheotech,
+    });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove Ork Mega Armour" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateArcheotech).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 });

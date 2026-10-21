@@ -8,6 +8,7 @@ import type {
   RangedWeapon,
   MeleeWeapon,
   WeaponCraftsmanship,
+  Character,
 } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
@@ -77,11 +78,15 @@ interface CyberneticsTabProps {
   meleeWeapons: MeleeWeapon[];
   strengthBonus?: number;
   editable: boolean;
-  onUpdate: (next: CyberneticItem[], options?: PatchOptions) => void | Promise<void>;
-  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void | Promise<void>;
-  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void | Promise<void>;
+  onUpdate: (next: CyberneticItem[], options?: PatchOptions) => void | Promise<boolean | void>;
+  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void | Promise<boolean | void>;
+  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void | Promise<boolean | void>;
+  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
   archeotech?: ArcheotechItem[];
-  onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateArcheotech?: (
+    next: ArcheotechItem[],
+    options?: PatchOptions
+  ) => void | Promise<boolean | void>;
   career?: string;
 }
 
@@ -109,6 +114,7 @@ export function CyberneticsTab({
   onUpdate,
   onUpdateRanged,
   onUpdateMelee,
+  onUpdateCharacter,
   archeotech,
   onUpdateArcheotech,
   career,
@@ -407,26 +413,39 @@ export function CyberneticsTab({
   );
 
   const removeImplant = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (!editable) return;
-      onUpdateRanged(
-        rangedWeapons.map((item) =>
-          item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
-        ),
-        { optimistic: true }
+      const nextRanged = rangedWeapons.map((item) =>
+        item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
       );
-      onUpdateMelee(
-        meleeWeapons.map((item) =>
-          item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
-        ),
-        { optimistic: true }
+      const nextMelee = meleeWeapons.map((item) =>
+        item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
       );
-      onUpdate(
-        cybernetics.filter((c) => c.id !== id),
-        { optimistic: true }
-      );
+      const nextCybernetics = cybernetics.filter((c) => c.id !== id);
+      if (onUpdateCharacter) {
+        return onUpdateCharacter({
+          rangedWeapons: nextRanged,
+          meleeWeapons: nextMelee,
+          cybernetics: nextCybernetics,
+        });
+      }
+      const results = [
+        await onUpdateRanged(nextRanged),
+        await onUpdateMelee(nextMelee),
+        await onUpdate(nextCybernetics),
+      ];
+      return results.every((result) => result !== false);
     },
-    [editable, cybernetics, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
+    [
+      editable,
+      cybernetics,
+      meleeWeapons,
+      onUpdate,
+      onUpdateCharacter,
+      onUpdateMelee,
+      onUpdateRanged,
+      rangedWeapons,
+    ]
   );
 
   // ── Integrated weapons ─────────────────────────────────────────────────────
@@ -469,10 +488,7 @@ export function CyberneticsTab({
   const removeArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech(
-        (archeotech ?? []).filter((a) => a.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
     },
     [editable, archeotech, onUpdateArcheotech]
   );
@@ -651,10 +667,7 @@ export function CyberneticsTab({
   const removeIntegratedRanged = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateRanged(
-        rangedWeapons.filter((w) => w.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateRanged(rangedWeapons.filter((w) => w.id !== id));
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -662,10 +675,7 @@ export function CyberneticsTab({
   const removeIntegratedMelee = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateMelee(
-        meleeWeapons.filter((w) => w.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateMelee(meleeWeapons.filter((w) => w.id !== id));
     },
     [editable, meleeWeapons, onUpdateMelee]
   );

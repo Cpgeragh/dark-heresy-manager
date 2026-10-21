@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -454,16 +454,14 @@ describe("InsanityPanel optimistic saves", () => {
     return onUpdate;
   }
 
-  it("asks for an optimistic save when a disorder is removed", async () => {
+  it("waits for the server when a disorder is removed", async () => {
     const user = userEvent.setup();
     const onUpdate = renderPanel({ points: 20, disorders: [disorder] });
 
     await user.click(screen.getAllByRole("button", { name: "Remove Fear of the Dead" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ disorders: [] }), {
-      optimistic: true,
-    });
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ disorders: [] }));
   });
 
   it("asks for an optimistic save when a disorder is escalated", async () => {
@@ -479,7 +477,7 @@ describe("InsanityPanel optimistic saves", () => {
     );
   });
 
-  it("asks for an optimistic save when a trauma is removed", async () => {
+  it("waits for the server when a trauma is removed", async () => {
     const user = userEvent.setup();
     const onUpdate = renderPanel({
       points: 0,
@@ -492,9 +490,37 @@ describe("InsanityPanel optimistic saves", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove Withdrawn and Quiet" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ currentTrauma: [] }), {
-      optimistic: true,
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ currentTrauma: [] }));
+  });
+
+  it("keeps the Remove pop-up open when removing a disorder is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderPanel({ points: 20, disorders: [disorder] });
+    onUpdate.mockResolvedValue(false);
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Fear of the Dead" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a trauma is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = renderPanel({
+      points: 0,
+      disorders: [],
+      currentTrauma: [
+        { id: "t1", referenceId: "01-40", roll: "01-40", name: "Withdrawn and Quiet" },
+      ],
     });
+    onUpdate.mockResolvedValue(false);
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Withdrawn and Quiet" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("groups the points change into an instant counter save", async () => {

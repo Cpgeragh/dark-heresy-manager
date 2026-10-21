@@ -22,8 +22,8 @@ import { recordComponentRender } from "../../../performance/performanceMetrics";
 interface Props {
   editable?: boolean;
   customItems?: CampaignCustomItem<"consumable">[];
-  onSelect: (ref: ConsumableRef) => void | Promise<void>;
-  onSelectCustomItem?: (item: CampaignCustomItem<"consumable">) => void | Promise<void>;
+  onSelect: (ref: ConsumableRef) => void | Promise<boolean | void>;
+  onSelectCustomItem?: (item: CampaignCustomItem<"consumable">) => void | Promise<boolean | void>;
   onCustom?: () => void;
   onClose: () => void;
   suspended?: boolean;

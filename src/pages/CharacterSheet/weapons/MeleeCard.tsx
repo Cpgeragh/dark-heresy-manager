@@ -125,7 +125,7 @@ export function MeleeCard({
     entries: WeaponAmmoEntry[],
     loadedAmmoId?: string,
     options?: PatchOptions
-  ) => void;
+  ) => void | Promise<boolean | void>;
   allowUpgrades?: boolean;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
@@ -263,7 +263,7 @@ export function MeleeCard({
     loadedAmmoId?: string,
     options?: PatchOptions
   ) {
-    onUpdateAlternateRangedAmmoEntries?.(entries, loadedAmmoId, options);
+    return onUpdateAlternateRangedAmmoEntries?.(entries, loadedAmmoId, options);
   }
 
   function handleAddPistolAmmo(name: string, referenceId?: string) {
@@ -296,10 +296,9 @@ export function MeleeCard({
   function handleRemovePistolAmmo(entryId: string) {
     const next = pistolAmmoEntries.filter((entry) => entry.id !== entryId);
     const nextLoaded = next.find((entry) => entry.loaded) ?? next[0];
-    updatePistolAmmo(
+    return updatePistolAmmo(
       next.map((entry) => ({ ...entry, loaded: entry.id === nextLoaded?.id })),
-      nextLoaded?.id,
-      { optimistic: true }
+      nextLoaded?.id
     );
   }
 

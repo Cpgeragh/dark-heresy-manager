@@ -23,9 +23,9 @@ interface CompleteBackgroundSetupModalProps {
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
-  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
+  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<boolean | void>;
   gear?: GearItem[];
-  onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  onUpdateGear?: (next: GearItem[]) => void | Promise<boolean | void>;
   onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
   onReturnToDashboard: () => void;
   onComplete: () => void;

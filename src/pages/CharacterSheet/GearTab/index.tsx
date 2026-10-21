@@ -55,8 +55,11 @@ interface GearTabProps {
   gear: GearItem[];
   consumables: ConsumableItem[];
   editable: boolean;
-  onUpdate: (next: GearItem[], options?: PatchOptions) => void | Promise<void>;
-  onUpdateConsumables: (next: ConsumableItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdate: (next: GearItem[], options?: PatchOptions) => void | Promise<boolean | void>;
+  onUpdateConsumables: (
+    next: ConsumableItem[],
+    options?: PatchOptions
+  ) => void | Promise<boolean | void>;
 }
 
 type GearSection = "items" | "consumables";
@@ -230,10 +233,7 @@ export function GearTab({
   const removeConsumable = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateConsumables(
-        consumables.filter((c) => c.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateConsumables(consumables.filter((c) => c.id !== id));
     },
     [editable, consumables, onUpdateConsumables]
   );
@@ -472,10 +472,7 @@ export function GearTab({
   const removeItem = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(
-        gear.filter((g) => g.id !== id),
-        { optimistic: true }
-      );
+      return onUpdate(gear.filter((g) => g.id !== id));
     },
     [editable, gear, onUpdate]
   );

@@ -484,6 +484,12 @@ Use a disposable character and create a small labelled test inventory: one norma
 - [ ] Every card has a `Rules` line showing its rules behind an icon or "-" when empty: Ranged and Melee show the Concealed Weapon Bionic rules, the Cybernetic weapon shows its implant's notes, and Grenade, Shield, and Archeotech cards show "-" until rules text exists
 - [ ] Card names are medium weight and wrap instead of being cut off, including a long Grenade name, and there is no extra gap above the chips in any card header
 
+**Removing weapons, upgrades, and ammo:**
+
+- [ ] Removing a Ranged weapon, Melee weapon, Grenade, Shield, Archeotech weapon, or Archeotech shield opens a `Remove [kind]` pop-up asking `Remove [name] from this character?` with Remove and Cancel, and Cancel changes nothing
+- [ ] After Remove is pressed the button shows waiting dots, the card stays until the save finishes, and the pop-up closes only when the save succeeds; if the save is refused or fails, for example with the network switched off, the pop-up stays open and the card stays
+- [ ] Removing a weapon upgrade or an ammo type asks first in the same way, and an ammo type no longer removes on the first tap
+
 **Equip slots (this applies across Ranged, Melee, and Shields together):**
 
 - [ ] You can equip up to 4 slots' worth of gear in total: confirm the app actually stops you at the limit rather than just visually suggesting one
@@ -541,6 +547,7 @@ Add the five named armour fixtures and inspect their picker summaries before add
 - [ ] On every Armour piece, Force field, Archeotech armour and Archeotech force field row the trash button comes first and the info icon beside the name is always shown; the Armour piece and Force field icons say "No description recorded."
 - [ ] Wear, Stow, Activate and Deactivate use the Equip button look and sizes, with the green outline when worn or active; on a read-only sheet a worn or active piece shows a small `Worn` or `Active` chip and no button
 - [ ] Every Armour piece, Force field and Archeotech row has Qualities (where it has any), `Rules` and `Craftsmanship` lines written the same way, each showing "-" when empty
+- [ ] Removing an Armour piece, Force field, Archeotech armour, Archeotech force field, or an upgrade asks `Remove [name] from this character?` with Remove and Cancel, shows waiting dots until the save finishes, and keeps the pop-up open and the item in place if the save is refused
 - [ ] Fit the Impellor upgrade to a Selenite Void Suit: weight chip becomes 25 kg (20 base + 5), not 20 kg next to a separate "+5"
 - [ ] The Impellor upgrade is only offered on the Selenite Void Suit: not on any carapace or power armour piece
 - [ ] Hexagramatic Wards is only offered on carapace/power armour, and applying it changes that piece's stated resistances correctly
@@ -560,6 +567,8 @@ Implants, bionics, and the Concealed Weapon Bionic install flow.
 Use a character with enough funds/context to install the Concealed Weapon Bionic at Poor, Common, and Good craftsmanship, recording cost and availability at each quality. Add one common-only implant, one Good-only Mechadendrite, and one location-assigned bionic. Refresh after installation, then cross-check granted weapons on Weapons and Toughness contributions on Armour before removing the parent implant.
 
 - [ ] On every Implant and Archeotech implant row the trash button comes first, the info icon beside the name is always shown (saying "No description recorded." when empty), a `Rules` line shows the item rules behind its icon or "-", and a `Gained from` line reads `[source] ([type])` for a granted implant
+- [ ] Removing an Implant or Archeotech implant asks `Remove [name] from this character?`, shows waiting dots, and saves the implant and any Concealed Weapon Bionic link together, so a refused save leaves the implant, the link, and the pop-up as they were
+- [ ] An Archeotech integrated weapon has its own trash button and asks first in the same way
 - [ ] Install a Concealed Weapon Bionic at Good craftsmanship: cost shows 750 Thrones _and_ availability shows Rare (not Scarce)
 - [ ] Install the same at Poor and Common: cost changes (150 / 300) but availability stays Scarce at both
 - [ ] An installed implant shows its craftsmanship as plain text on a labelled `Craftsmanship` line with an info icon, and it is not clickable; to change it, remove the implant and install it again at the other craftsmanship
@@ -689,6 +698,7 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 - [ ] Items / Consumables tabs both list, add, and remove correctly
 - [ ] Consumables carry their own quantity control (e.g. doses of Panimune): confirm it increments/decrements and doesn't get confused with a plain gear item's lack of quantity
 - [ ] On every Gear item and Consumable row the trash button comes first among the action buttons, the info icon beside the name is always shown (saying "No description recorded." when empty), and a "Rules" line sits below the chips showing "-" until the item has rules text
+- [ ] Removing a Gear item or a Consumable asks `Remove [name] from this character?` with Remove and Cancel, shows waiting dots until the save finishes, and keeps the pop-up open and the row in place if the save is refused
 - [ ] The Consumable quantity control sits on the right of the row with no "Qty" label, after the trash button, at the same size as the Drug quantity control
 - [ ] A granted Gear item shows a `Gained from` line reading `[source] (type)` below its chips, and no trash button
 - [ ] Search finds items by partial name in both sections
@@ -709,7 +719,7 @@ Add the Cyber-Mastiff to a clean character, refresh, expand it, and compare ever
 - [ ] Add the Cyber-Mastiff: full stat block (characteristics, Movement, Wounds, Skills, Talents, Traits, Weapons, Armour, Gear) all display and match the source
 - [ ] Expand/collapse on the companion card works
 - [ ] The trash button sits in the closed header, before the chevron, and stays there when the card is collapsed
-- [ ] Remove the companion: confirm it actually disappears rather than just collapsing
+- [ ] Remove the companion: a `Remove Companion` pop-up asks first, the card disappears only after the save finishes, and a refused save keeps the pop-up open and the card in place
 - [ ] Click every individual Skill, Talent, Trait, and Gear entry on the expanded card: each should open a populated rules popup
 
 **Watch for:** those popups work by guessing a reference ID from the entry's
@@ -731,6 +741,7 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 - [ ] Add Frenzon: a `Duration` line reading `1d10 minutes` sits below the chips, the info icon beside the name shows only its description, and the "Rules" line opens a window with its Effect
 - [ ] Add De-Tox: its "Rules" window shows an Effect heading and a Side Effects heading in the same style, and the info icon beside the name says "No description recorded."
 - [ ] The trash button comes first among the Drug row's action buttons, with the quantity control after it
+- [ ] Removing a Drug asks `Remove [name] from this character?` with Remove and Cancel, shows waiting dots until the save finishes, and keeps the pop-up open and the row in place if the save is refused
 - [ ] Custom drug creation: Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing: see §21, Custom Item Library
 - [ ] Custom drug form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
@@ -862,6 +873,7 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 - [ ] A plain (non-armour, non-weapon) Archeotech item behaves like a normal gear-style entry
 - [ ] Every Archeotech item card has its description behind the information icon beside the name, a `Rules` line showing "-" until rules text exists, and a `Qualities` line when the reference lists special rules; a cybernetic item shows a plain `Craftsmanship` line
 - [ ] An item with its own Notes is an expandable card with the trash button in the closed header and the chevron last, and the `Notes` line appears only when it is expanded; every other item is a flat row with the trash button first
+- [ ] Removing an Archeotech item, from an expandable card or a flat row, asks `Remove [name] from this character?`, shows waiting dots until the save finishes, and keeps the pop-up open and the item in place if the save is refused
 - [ ] Custom archeotech creation and publishing: see §21, Custom Item Library
 - [ ] Custom archeotech form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
 - [ ] **Autofill, Android:** the Archeotech picker search box, every field in the custom Archeotech form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomArcheotechForm.tsx`, `AssignedItemMetaFields.tsx`)
@@ -1366,7 +1378,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 
 ## 36. Waiting and Instant Saves
 
-A purchase waits on screen and a removal or downgrade is instant.
+A purchase, removal, or downgrade waits on screen and keeps its pop-up open when the server refuses it. Adding, equipping, and changing a quantity or counter change the sheet at once.
 
 ### How to test this system
 
@@ -1375,14 +1387,15 @@ Use an editable character with a career, and slow the network in the browser's d
 - [ ] Upgrading a Skill, adding a Skill from the picker, and adding or upgrading with a manual cost as the DM show waiting dots on the button or the tapped row until the save finishes, and the dialog closes only then (`SkillRow.tsx`, `AddSkillModal.tsx`)
 - [ ] Confirming a Characteristic Upgrade shows waiting dots on the Upgrade button and closes the dialog when the save finishes (`CharacteristicField.tsx`)
 - [ ] Training a weapon group, training with a manual cost, buying a career exotic weapon and adding an exotic weapon as the DM show waiting dots on the confirm button and close the dialog when the save finishes (`WeaponTrainingTab.tsx`)
-- [ ] Removing a Skill, downgrading a Skill, downgrading a Characteristic and removing weapon training or an exotic weapon close the dialog at once and change the sheet at once
-- [ ] Adding a Talent from the picker, including one with a choice or a manual cost, shows waiting dots on the tapped row or the Buy button and returns to the list only when the save finishes; removing a Talent shows waiting dots on its Remove button (`TalentPickerModal.tsx`, `TalentEntryCards.tsx`)
+- [ ] Removing a Skill, downgrading a Skill from the Manage Skill pop-up, downgrading a Characteristic, and removing weapon training or an exotic weapon show waiting dots on the confirming button, and the pop-up closes only when the save finishes (`SkillRow.tsx`, `CharacteristicField.tsx`, `WeaponTrainingTab.tsx`)
+- [ ] Adding a Talent from the picker, including one with a choice or a manual cost, shows waiting dots on the tapped row or the Buy button and returns to the list only when the save finishes; removing a Talent shows waiting dots on the Remove button of its pop-up (`TalentPickerModal.tsx`, `TalentEntryCards.tsx`)
 - [ ] Adding, removing or finishing the acquisition of a Trait, and saving a custom Trait, show waiting dots and change talents, cybernetics and gear together in one save, so a refused change leaves all three as they were (`TraitsTab.tsx`)
 - [ ] Buying a special Elite Advance, a skill, a fixed-package talent or a manual talent shows waiting dots and closes the dialog only when the save finishes, and removing a special Elite Advance shows waiting dots on its Remove button (`EliteAdvancesTab.tsx`)
 - [ ] Choosing a Homeworld or a Career, an Advance Scheme row, an Insanity roll for an Advance Scheme, or finishing a Homeworld, Career or Imperial Psyker choice modal shows waiting dots on the tapped row or button and closes the picker only when the save finishes; a Career change saves the header, talents, experience, insanity and cybernetics together (`BackgroundSetupFields.tsx`)
 - [ ] Creating or editing a custom ranged, melee, grenade or shield definition, and creating a custom integrated ranged or melee weapon, keeps the form in its saving state until the character has the item, and only then closes it and shows the success message
 - [ ] A purchase the server refuses, such as one that would spend more than the character's Total XP, leaves the dialog open with the error message and without waiting dots
-- [ ] A removal the server refuses puts the sheet back to how it was and shows the error message
+- [ ] A removal or downgrade the server refuses leaves its pop-up open with the error message, the item still on the sheet, and no waiting dots
+- [ ] Adding a Gear item, equipping a weapon, and changing a quantity or counter change the sheet at once, and a save the server refuses puts the sheet back and shows the error message
 
 ## Coverage notes
 

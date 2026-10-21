@@ -104,12 +104,12 @@ interface WeaponsTabProps {
   editable: boolean;
   strengthBonus: number;
   knaveOfPistols?: boolean;
-  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void | Promise<void>;
-  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void | Promise<void>;
-  onUpdateGrenades: (next: GrenadeItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateRanged: (next: RangedWeapon[], options?: PatchOptions) => void | Promise<boolean | void>;
+  onUpdateMelee: (next: MeleeWeapon[], options?: PatchOptions) => void | Promise<boolean | void>;
+  onUpdateGrenades: (next: GrenadeItem[], options?: PatchOptions) => void | Promise<boolean | void>;
   cybernetics?: CyberneticItem[];
   shields?: ShieldItem[];
-  onUpdateShields?: (next: ShieldItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateShields?: (next: ShieldItem[], options?: PatchOptions) => void | Promise<boolean | void>;
   archeotech?: ArcheotechItem[];
   onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void;
 }
@@ -366,10 +366,7 @@ export function WeaponsTab({
   const removeGrenade = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateGrenades(
-        grenades.filter((g) => g.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateGrenades(grenades.filter((g) => g.id !== id));
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -461,7 +458,7 @@ export function WeaponsTab({
       if (!editable) return;
       const next = [...rangedWeapons];
       next.splice(index, 1);
-      onUpdateRanged(next, { optimistic: true });
+      return onUpdateRanged(next);
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -484,7 +481,7 @@ export function WeaponsTab({
   const removeUpgradeFromRanged = useCallback(
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
-      onUpdateRanged(
+      return onUpdateRanged(
         rangedWeapons.map((weapon) =>
           weapon.id === weaponId
             ? {
@@ -492,8 +489,7 @@ export function WeaponsTab({
                 upgrades: (weapon.upgrades ?? []).filter((id) => id !== upgradeId),
               }
             : weapon
-        ),
-        { optimistic: true }
+        )
       );
     },
     [editable, rangedWeapons, onUpdateRanged]
@@ -502,7 +498,7 @@ export function WeaponsTab({
   const updateRangedAmmoEntries = useCallback(
     (weaponId: string, entries: WeaponAmmoEntry[], options?: PatchOptions) => {
       if (!editable) return;
-      onUpdateRanged(
+      return onUpdateRanged(
         rangedWeapons.map((w) => (w.id === weaponId ? { ...w, ammoEntries: entries } : w)),
         options
       );
@@ -860,7 +856,7 @@ export function WeaponsTab({
       if (!editable) return;
       const next = [...meleeWeapons];
       next.splice(index, 1);
-      onUpdateMelee(next, { optimistic: true });
+      return onUpdateMelee(next);
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -883,7 +879,7 @@ export function WeaponsTab({
   const removeUpgradeFromMelee = useCallback(
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
-      onUpdateMelee(
+      return onUpdateMelee(
         meleeWeapons.map((weapon) =>
           weapon.id === weaponId
             ? {
@@ -891,8 +887,7 @@ export function WeaponsTab({
                 upgrades: (weapon.upgrades ?? []).filter((id) => id !== upgradeId),
               }
             : weapon
-        ),
-        { optimistic: true }
+        )
       );
     },
     [editable, meleeWeapons, onUpdateMelee]
@@ -917,7 +912,7 @@ export function WeaponsTab({
       options?: PatchOptions
     ) => {
       if (!editable) return;
-      onUpdateMelee(
+      return onUpdateMelee(
         meleeWeapons.map((weapon) =>
           weapon.id === weaponId
             ? {
@@ -999,10 +994,7 @@ export function WeaponsTab({
   const removeShield = useCallback(
     (id: string) => {
       if (!editable || !onUpdateShields) return;
-      onUpdateShields(
-        (shields ?? []).filter((s) => s.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateShields((shields ?? []).filter((s) => s.id !== id));
     },
     [editable, shields, onUpdateShields]
   );
@@ -1010,10 +1002,7 @@ export function WeaponsTab({
   const removeArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech(
-        (archeotech ?? []).filter((a) => a.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
     },
     [editable, archeotech, onUpdateArcheotech]
   );

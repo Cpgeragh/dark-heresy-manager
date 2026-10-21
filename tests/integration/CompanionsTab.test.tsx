@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { CompanionsTab } from "../../src/pages/CharacterSheet/CompanionsTab";
@@ -111,7 +111,7 @@ describe("CompanionsTab", () => {
     ).toBeInTheDocument();
   });
 
-  it("does not show a spinner on Remove for an optimistic companion removal", async () => {
+  it("keeps the Remove pop-up waiting until the companion removal is saved", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -141,9 +141,37 @@ describe("CompanionsTab", () => {
     await user.click(removeButton);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
-    expect(removeButton).not.toHaveAttribute("aria-busy");
+    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(screen.getByRole("dialog", { name: "Remove Companion" })).toBeInTheDocument();
 
     await act(async () => finish());
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Remove Companion" })).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the Remove pop-up open when removing a companion is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    render(
+      <CompanionsTab
+        editable
+        onUpdate={onUpdate}
+        companions={[
+          {
+            id: "companion-1",
+            referenceId: "ih-adeptus-arbites-cyber-mastiff",
+            name: "Adeptus Arbites Cyber-Mastiff",
+            source: "IH",
+          },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Remove Adeptus Arbites Cyber-Mastiff" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog", { name: "Remove Companion" })).toBeInTheDocument();
   });
 });

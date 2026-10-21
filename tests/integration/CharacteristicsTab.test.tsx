@@ -155,14 +155,10 @@ describe("CharacteristicsTab", () => {
     await user.click(advance!);
     await user.click(screen.getByRole("button", { name: "Downgrade" }));
 
-    expect(updateCharacteristic).toHaveBeenCalledWith(
-      "ws",
-      {
-        base: 30,
-        advances: 0,
-      },
-      { optimistic: true }
-    );
+    expect(updateCharacteristic).toHaveBeenCalledTimes(1);
+    expect(updateCharacteristic.mock.calls[0][0]).toBe("ws");
+    expect(updateCharacteristic.mock.calls[0][1]).toEqual({ base: 30, advances: 0 });
+    expect(updateCharacteristic.mock.calls[0][2]).toBeUndefined();
   });
 
   it("renders all nine characteristic labels", () => {

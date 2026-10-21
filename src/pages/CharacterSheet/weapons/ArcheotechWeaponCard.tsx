@@ -55,7 +55,7 @@ export function ArcheotechWeaponCard({
   item: ArcheotechItem;
   strengthBonus?: number;
   editable?: boolean;
-  onRemove?: () => void | Promise<void>;
+  onRemove?: () => void | Promise<boolean | void>;
   isEquipped?: boolean;
   onToggleEquip?: () => void | Promise<void>;
   slotsDisabled?: boolean;

@@ -153,14 +153,9 @@ export function CharacteristicField({
   const confirmAdvanceChange = useCallback(async () => {
     if (pendingAdvances === null) return;
     const next = { base, advances: pendingAdvances };
-    if (pendingAdvances < advances) {
-      void onChange(next, { optimistic: true });
-      setPendingAdvances(null);
-      return;
-    }
     const saved = await onChange(next);
     if (saved !== false) setPendingAdvances(null);
-  }, [advances, base, onChange, pendingAdvances]);
+  }, [base, onChange, pendingAdvances]);
 
   return (
     <>

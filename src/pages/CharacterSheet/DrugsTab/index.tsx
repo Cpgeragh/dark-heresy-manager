@@ -38,7 +38,7 @@ interface DrugsTabProps {
   isDM: boolean;
   drugs: DrugItem[];
   editable: boolean;
-  onUpdate: (next: DrugItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdate: (next: DrugItem[], options?: PatchOptions) => void | Promise<boolean | void>;
 }
 
 interface EditingDrugDefinition {
@@ -221,10 +221,7 @@ export function DrugsTab({
   const removeDrug = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(
-        drugs.filter((d) => d.id !== id),
-        { optimistic: true }
-      );
+      return onUpdate(drugs.filter((d) => d.id !== id));
     },
     [editable, drugs, onUpdate]
   );

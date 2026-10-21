@@ -1,6 +1,6 @@
 // tests/integration/DrugsTab.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import type {
@@ -216,7 +216,7 @@ describe("DrugsTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove Obscura" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onUpdate).toHaveBeenCalledWith([]);
   });
 
   it("asks for an optimistic save when a drug quantity changes", async () => {
@@ -255,7 +255,7 @@ describe("DrugsTab", () => {
     await act(async () => finish());
   }, 15000);
 
-  it("does not show a spinner on Remove for an optimistic drug removal", async () => {
+  it("keeps the Remove pop-up waiting until the drug removal is saved", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onUpdate = vi.fn(
@@ -271,9 +271,25 @@ describe("DrugsTab", () => {
     await user.click(removeButton);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
-    expect(removeButton).not.toHaveAttribute("aria-busy");
+    expect(onUpdate).toHaveBeenCalledWith([]);
+    expect(screen.getByRole("dialog", { name: "Remove Drug" })).toBeInTheDocument();
 
     await act(async () => finish());
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Remove Drug" })).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the Remove pop-up open when removing a drug is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    const drug: DrugItem = { id: "d1", name: "Obscura", referenceId: "obscura", quantity: 1 };
+    renderTab({ drugs: [drug], onUpdate });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Obscura" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog", { name: "Remove Drug" })).toBeInTheDocument();
   });
 });

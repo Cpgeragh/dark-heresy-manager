@@ -63,8 +63,8 @@ export function DrugPicker({
 }: {
   editable?: boolean;
   customItems?: CampaignCustomItem<"drug">[];
-  onSelect: (ref: DrugRef) => void | Promise<void>;
-  onSelectCustomItem?: (item: CampaignCustomItem<"drug">) => void | Promise<void>;
+  onSelect: (ref: DrugRef) => void | Promise<boolean | void>;
+  onSelectCustomItem?: (item: CampaignCustomItem<"drug">) => void | Promise<boolean | void>;
   onCustom?: () => void;
   onClose: () => void;
   suspended?: boolean;

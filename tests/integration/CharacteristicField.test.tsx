@@ -130,7 +130,7 @@ describe("CharacteristicField", () => {
     expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 4 });
   });
 
-  it("requires confirmation and shows the refund before reducing advances", () => {
+  it("requires confirmation and shows the refund before reducing advances", async () => {
     const onChange = vi.fn();
     render(
       <CharacteristicField
@@ -150,10 +150,31 @@ describe("CharacteristicField", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Downgrade" }));
-    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 0 }, { optimistic: true });
-    expect(
-      screen.queryByRole("dialog", { name: "Downgrade Characteristic" })
-    ).not.toBeInTheDocument();
+    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 0 });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Downgrade Characteristic" })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it("keeps the downgrade dialog open when the server refuses the save", async () => {
+    const onChange = vi.fn().mockResolvedValue(false);
+    render(
+      <CharacteristicField
+        label="Ballistic Skill"
+        value={{ base: 30, advances: 4 }}
+        editable
+        onChange={onChange}
+        tierCosts={[250, 500, 750, 1000]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /ballistic skill advance 1 of 4/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Downgrade" }));
+
+    await waitFor(() => expect(onChange).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog", { name: "Downgrade Characteristic" })).toBeInTheDocument();
   });
 
   it("keeps the upgrade dialog open with waiting dots until the save settles", async () => {

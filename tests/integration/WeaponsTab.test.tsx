@@ -1,6 +1,6 @@
 // tests/integration/WeaponsTab.test.tsx
 import { beforeEach, describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import type {
@@ -53,6 +53,8 @@ import type {
   MeleeWeapon,
   CyberneticItem,
   ArcheotechItem,
+  GrenadeItem,
+  ShieldItem,
 } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
@@ -136,7 +138,7 @@ describe("WeaponsTab upgrades", () => {
     );
   });
 
-  it("asks for an optimistic save when an upgrade is removed from a ranged weapon", async () => {
+  it("waits for the server when an upgrade is removed from a ranged weapon", async () => {
     const user = userEvent.setup();
     const onUpdateRanged = vi.fn();
     renderTab({
@@ -150,10 +152,9 @@ describe("WeaponsTab upgrades", () => {
     await user.click(compactLabel.parentElement!.querySelector("button")!);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdateRanged).toHaveBeenCalledWith(
-      [expect.objectContaining({ id: "w1", upgrades: [] })],
-      { optimistic: true }
-    );
+    expect(onUpdateRanged).toHaveBeenCalledWith([
+      expect.objectContaining({ id: "w1", upgrades: [] }),
+    ]);
   });
 
   it("asks for an optimistic save when an upgrade is added to a melee weapon", async () => {
@@ -171,7 +172,7 @@ describe("WeaponsTab upgrades", () => {
     );
   });
 
-  it("asks for an optimistic save when an upgrade is removed from a melee weapon", async () => {
+  it("waits for the server when an upgrade is removed from a melee weapon", async () => {
     const user = userEvent.setup();
     const onUpdateMelee = vi.fn();
     renderTab({
@@ -185,10 +186,45 @@ describe("WeaponsTab upgrades", () => {
     await user.click(monoLabel.parentElement!.querySelector("button")!);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdateMelee).toHaveBeenCalledWith(
-      [expect.objectContaining({ id: "w2", upgrades: [] })],
-      { optimistic: true }
-    );
+    expect(onUpdateMelee).toHaveBeenCalledWith([
+      expect.objectContaining({ id: "w2", upgrades: [] }),
+    ]);
+  });
+
+  it("keeps the Remove pop-up open when removing a ranged weapon upgrade is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateRanged = vi.fn().mockResolvedValue(false);
+    renderTab({
+      rangedWeapons: [{ ...customRanged, upgrades: ["cr-compact"] }],
+      meleeWeapons: [],
+      onUpdateRanged,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
+    const compactLabel = screen.getAllByText("Compact")[0];
+    await user.click(compactLabel.parentElement!.querySelector("button")!);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateRanged).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a melee weapon upgrade is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateMelee = vi.fn().mockResolvedValue(false);
+    renderTab({
+      rangedWeapons: [],
+      meleeWeapons: [{ ...customMelee, upgrades: ["cr-mono"] }],
+      onUpdateMelee,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Expand Custom Chainsword details" }));
+    const monoLabel = screen.getAllByText("Mono")[0];
+    await user.click(monoLabel.parentElement!.querySelector("button")!);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateMelee).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 });
 
@@ -473,7 +509,75 @@ describe("WeaponsTab remove / equip-toggle", () => {
     await user.click(screen.getByRole("button", { name: "Expand Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Remove Lasgun" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
-    expect(noop).toHaveBeenCalledWith([], { optimistic: true });
+    expect(noop).toHaveBeenCalledWith([]);
+  });
+
+  it("keeps the Remove pop-up open when removing a Ranged weapon is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateRanged = vi.fn().mockResolvedValue(false);
+    renderTab({ onUpdateRanged });
+    await user.click(screen.getByRole("button", { name: "Expand Lasgun details" }));
+    await user.click(screen.getByRole("button", { name: "Remove Lasgun" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await waitFor(() => expect(onUpdateRanged).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a Melee weapon is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateMelee = vi.fn().mockResolvedValue(false);
+    renderTab({ onUpdateMelee });
+    await user.click(screen.getByRole("button", { name: "Expand Chainsword details" }));
+    await user.click(screen.getByRole("button", { name: "Remove Chainsword" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await waitFor(() => expect(onUpdateMelee).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a Grenade is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateGrenades = vi.fn().mockResolvedValue(false);
+    const grenade: GrenadeItem = {
+      id: "g1",
+      name: "Custom Frag",
+      quantity: 5,
+      type: "Grenade",
+      class: "Thrown",
+      damage: "2d10 X",
+      pen: "0",
+      weight: "0.5 kg",
+      value: "10 Thrones",
+      availability: "Common",
+      custom: true,
+    };
+    renderTab({ grenades: [grenade], onUpdateGrenades });
+    await user.click(screen.getAllByRole("button", { name: "Remove Custom Frag" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await waitFor(() => expect(onUpdateGrenades).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a Shield is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateShields = vi.fn().mockResolvedValue(false);
+    const shield: ShieldItem = {
+      id: "s1",
+      name: "Custom Buckler",
+      ap: 2,
+      locations: "Arm",
+      damage: "1d10 I",
+      pen: "0",
+      specialRules: "Defensive",
+      weight: "2 kg",
+      value: "30 Thrones",
+      availability: "Scarce",
+      custom: true,
+    };
+    renderTab({ shields: [shield], onUpdateShields });
+    await user.click(screen.getAllByRole("button", { name: "Remove Custom Buckler" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await waitFor(() => expect(onUpdateShields).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("toggles equip on a Ranged weapon", async () => {

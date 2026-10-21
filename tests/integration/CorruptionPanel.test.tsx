@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -107,7 +107,7 @@ describe("CorruptionPanel optimistic saves", () => {
   const malignancy = { id: "m1", name: "Witch-mark", effect: "Custom effect.", custom: true };
   const mutation = { id: "mm1", name: "Extra eye", effect: "Custom effect.", custom: true };
 
-  it("asks for an optimistic save when a malignancy is removed", async () => {
+  it("waits for the server when a malignancy is removed", async () => {
     const user = userEvent.setup();
     const onUpdate = vi.fn();
     render(
@@ -122,12 +122,10 @@ describe("CorruptionPanel optimistic saves", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove Witch-mark" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ malignancies: [] }), {
-      optimistic: true,
-    });
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ malignancies: [] }));
   });
 
-  it("asks for an optimistic save when a minor mutation is removed", async () => {
+  it("waits for the server when a minor mutation is removed", async () => {
     const user = userEvent.setup();
     const onUpdate = vi.fn();
     render(
@@ -142,12 +140,10 @@ describe("CorruptionPanel optimistic saves", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove Extra eye" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorMutations: [] }), {
-      optimistic: true,
-    });
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorMutations: [] }));
   });
 
-  it("asks for an optimistic save when a major mutation is removed", async () => {
+  it("waits for the server when a major mutation is removed", async () => {
     const user = userEvent.setup();
     const onUpdate = vi.fn();
     render(
@@ -163,9 +159,65 @@ describe("CorruptionPanel optimistic saves", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove Extra eye" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ majorMutations: [] }), {
-      optimistic: true,
-    });
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ majorMutations: [] }));
+  });
+
+  it("keeps the Remove pop-up open when removing a malignancy is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    render(
+      <CorruptionPanel
+        corruption={{ points: 20, malignancies: [malignancy] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Witch-mark" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a minor mutation is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    render(
+      <CorruptionPanel
+        corruption={{ points: 20, malignancies: [], minorMutations: [mutation] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Extra eye" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing a major mutation is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    render(
+      <CorruptionPanel
+        corruption={{ points: 20, malignancies: [], majorMutations: [mutation] }}
+        editable
+        onUpdate={onUpdate}
+        sectionClassName=""
+      />
+    );
+
+    await user.click(screen.getByRole("tab", { name: "Major Mutations" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Extra eye" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("asks for an optimistic save when a malignancy without rolls is added", async () => {

@@ -371,13 +371,10 @@ export function CorruptionPanel({
 
   const handleRemoveMalignancy = useCallback(
     (id: string) =>
-      onUpdate(
-        {
-          ...value,
-          malignancies: structuredMalignancies.filter((entry) => entry.id !== id),
-        },
-        { optimistic: true }
-      ),
+      onUpdate({
+        ...value,
+        malignancies: structuredMalignancies.filter((entry) => entry.id !== id),
+      }),
     [value, structuredMalignancies, onUpdate]
   );
 
@@ -403,10 +400,7 @@ export function CorruptionPanel({
 
   const handleRemoveMinorMutation = useCallback(
     (id: string) =>
-      onUpdate(
-        { ...value, minorMutations: minorMutations.filter((entry) => entry.id !== id) },
-        { optimistic: true }
-      ),
+      onUpdate({ ...value, minorMutations: minorMutations.filter((entry) => entry.id !== id) }),
     [value, minorMutations, onUpdate]
   );
 
@@ -432,10 +426,7 @@ export function CorruptionPanel({
 
   const handleRemoveMajorMutation = useCallback(
     (id: string) =>
-      onUpdate(
-        { ...value, majorMutations: majorMutations.filter((entry) => entry.id !== id) },
-        { optimistic: true }
-      ),
+      onUpdate({ ...value, majorMutations: majorMutations.filter((entry) => entry.id !== id) }),
     [value, majorMutations, onUpdate]
   );
 

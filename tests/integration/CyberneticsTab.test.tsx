@@ -6,8 +6,9 @@
 // scoped to CyberneticsTab's own orchestration: the
 // concealed-weapon-bionic install flow, quality-cycling and its weapon-link side
 // effect, the custom/library implant flows, and integrated-weapon wiring.
+import { useState } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import type {
@@ -89,13 +90,17 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow", () => ({
     onRemove,
   }: {
     item: { id: string; name: string };
-    onRemove: (id: string) => void;
+    onRemove: (id: string) => unknown;
   }) => {
     recordComponentRenderMock("ImplantRow");
+    const [refused, setRefused] = useState(false);
     return (
       <div>
         <span>{item.name}</span>
-        <button onClick={() => onRemove(item.id)}>Remove {item.name}</button>
+        <button onClick={async () => setRefused((await onRemove(item.id)) === false)}>
+          Remove {item.name}
+        </button>
+        {refused && <span>Removal refused</span>}
       </div>
     );
   },
@@ -458,7 +463,48 @@ describe("CyberneticsTab", () => {
 
     await user.click(screen.getAllByText("Remove Auto-Quill")[0]);
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith([]));
+  });
+
+  it("passes a refused implant removal back to the row", async () => {
+    const user = userEvent.setup();
+    const item: CyberneticItem = { id: "c1", name: "Auto-Quill" };
+    const onUpdateCharacter = vi.fn().mockResolvedValue(false);
+    renderTab({ cybernetics: [item], onUpdateCharacter });
+
+    await user.click(screen.getAllByText("Remove Auto-Quill")[0]);
+
+    expect(await screen.findByText("Removal refused")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing an Archeotech implant is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateArcheotech = vi.fn().mockResolvedValue(false);
+    renderTab({
+      archeotech: [{ id: "a1", name: "Cortex Lattice", type: "Cybernetic" }],
+      onUpdateArcheotech,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Cortex Lattice" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateArcheotech).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Remove pop-up open when removing an Archeotech integrated weapon is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateArcheotech = vi.fn().mockResolvedValue(false);
+    renderTab({
+      archeotech: [{ id: "a2", name: "Phase Gauntlet", type: "Integrated Weapon" }],
+      onUpdateArcheotech,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Phase Gauntlet" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateArcheotech).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("adds an integrated ranged weapon from reference", async () => {

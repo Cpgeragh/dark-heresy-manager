@@ -1,6 +1,6 @@
 // tests/integration/ArcheotechTab.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import type {
@@ -252,7 +252,20 @@ describe("ArcheotechTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove Auto-Quill" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onUpdate).toHaveBeenCalledWith([]);
+  });
+
+  it("keeps the Remove pop-up open when removing an Archeotech item is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    const item: ArcheotechItem = { id: "a1", name: "Auto-Quill", referenceId: "auto-quill" };
+    renderTab({ archeotech: [item], onUpdate });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Auto-Quill" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("asks for an optimistic update when the equip toggle is pressed, without a spinner", async () => {

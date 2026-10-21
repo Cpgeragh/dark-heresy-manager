@@ -145,7 +145,7 @@ export function SkillRow({
 
   const manualUpgradeCostNumber = Number(manualUpgradeCost);
   const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "";
-  const canDelete =
+  const canRemove =
     editable &&
     skill.level !== "untrained" &&
     !(skill.talentMinimumLevel && skill.baseLevel === "untrained");
@@ -307,7 +307,7 @@ export function SkillRow({
             ) : undefined
           }
           removeAction={
-            canDelete ? (
+            canRemove ? (
               <RemoveEntryButton
                 kind="Skill"
                 name={skill.name}

@@ -66,10 +66,13 @@ interface ArmourTabProps {
   armour: WornArmourPiece[];
   toughnessBonus: number;
   editable: boolean;
-  onUpdate: (next: WornArmourPiece[], options?: PatchOptions) => void | Promise<void>;
+  onUpdate: (next: WornArmourPiece[], options?: PatchOptions) => void | Promise<boolean | void>;
   cybernetics?: CyberneticItem[];
   archeotech?: ArcheotechItem[];
-  onUpdateArcheotech?: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdateArcheotech?: (
+    next: ArcheotechItem[],
+    options?: PatchOptions
+  ) => void | Promise<boolean | void>;
   traits?: TalentEntry[];
   talents?: TalentsAndTraitsBlock;
   career?: string;
@@ -345,10 +348,7 @@ export function ArmourTab({
   const removePiece = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(
-        armour.filter((p) => p.id !== id),
-        { optimistic: true }
-      );
+      return onUpdate(armour.filter((p) => p.id !== id));
     },
     [editable, armour, onUpdate]
   );
@@ -371,13 +371,12 @@ export function ArmourTab({
   const removeUpgradeFromArmour = useCallback(
     (pieceId: string, upgradeId: string) => {
       if (!editable) return;
-      onUpdate(
+      return onUpdate(
         armour.map((piece) =>
           piece.id === pieceId
             ? { ...piece, upgrades: (piece.upgrades ?? []).filter((id) => id !== upgradeId) }
             : piece
-        ),
-        { optimistic: true }
+        )
       );
     },
     [armour, editable, onUpdate]
@@ -438,10 +437,7 @@ export function ArmourTab({
   const removeArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech(
-        (archeotech ?? []).filter((a) => a.id !== id),
-        { optimistic: true }
-      );
+      return onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
     },
     [editable, archeotech, onUpdateArcheotech]
   );

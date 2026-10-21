@@ -43,8 +43,8 @@ interface TraitsTabProps {
   gear?: GearItem[];
   editable: boolean;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
-  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
-  onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<boolean | void>;
+  onUpdateGear?: (next: GearItem[]) => void | Promise<boolean | void>;
   /** Saves several character fields in one step, so a Trait change that touches talents, cybernetics and gear is accepted or refused as a whole. */
   onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
   campaignId?: string;
@@ -93,7 +93,7 @@ function UnnaturalCharacteristicCards({
         entry={entryToRemove}
         editable={editable}
         onRemove={onRemove}
-        deletionNoun="Trait"
+        removalNoun="Trait"
         displayName={group[0].name}
         statusChip={`Owned: ${group.length}`}
       />
@@ -347,7 +347,7 @@ export function TraitsTab({
             entry={entry}
             editable={editable}
             onRemove={handleRemoveTrait}
-            deletionNoun="Trait"
+            removalNoun="Trait"
             libraryItem={libraryItem}
             isDM={isDM && editable}
             canEditDefinition={canEditDefinition}
@@ -385,7 +385,7 @@ export function TraitsTab({
                 entry={skinOfIronEntries[skinOfIronEntries.length - 1]}
                 editable={editable}
                 onRemove={handleRemoveTrait}
-                deletionNoun="Trait"
+                removalNoun="Trait"
                 displayName="Skin of Iron"
                 statusChip={`Owned: ${skinOfIronEntries.length}/4`}
               />

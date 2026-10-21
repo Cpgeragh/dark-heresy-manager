@@ -78,7 +78,7 @@ interface PsychicTabProps {
   talents: TalentsAndTraitsBlock;
   psyRating: number;
   editable: boolean;
-  onUpdate: (next: PsychicBlock, options?: PatchOptions) => void | Promise<void>;
+  onUpdate: (next: PsychicBlock, options?: PatchOptions) => void | Promise<boolean | void>;
 }
 
 type PickerTarget = "minor" | "major" | null;
@@ -252,13 +252,10 @@ export function PsychicTab({
   const removeMinorPower = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(
-        {
-          ...psychic,
-          minorPowers: psychic.minorPowers.filter((p) => p.id !== id),
-        },
-        { optimistic: true }
-      );
+      return onUpdate({
+        ...psychic,
+        minorPowers: psychic.minorPowers.filter((p) => p.id !== id),
+      });
     },
     [editable, psychic, onUpdate]
   );
@@ -266,13 +263,10 @@ export function PsychicTab({
   const removeMajorPower = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(
-        {
-          ...psychic,
-          majorPowers: psychic.majorPowers.filter((p) => p.id !== id),
-        },
-        { optimistic: true }
-      );
+      return onUpdate({
+        ...psychic,
+        majorPowers: psychic.majorPowers.filter((p) => p.id !== id),
+      });
     },
     [editable, psychic, onUpdate]
   );

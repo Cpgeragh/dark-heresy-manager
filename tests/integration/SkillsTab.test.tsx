@@ -551,14 +551,31 @@ describe("SkillsTab", () => {
     expect(dialog.querySelector('[aria-busy="true"]')).toBeNull();
   });
 
-  it("sends a removal as an instant update", async () => {
+  it("sends a removal as a waiting update, not an instant one", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
     await user.click(screen.getAllByRole("button", { name: "Remove Awareness" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdate.mock.calls[0][1]).toEqual({ optimistic: true });
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+    expect(onUpdate.mock.calls[0][1]).toBeUndefined();
+  });
+
+  it("keeps the removal pop-up open when removing a Skill is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    renderTab({ onUpdate });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Awareness" })[0]);
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Remove Skill" })).getByRole("button", {
+        name: "Remove",
+      })
+    );
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog", { name: "Remove Skill" })).toBeInTheDocument();
   });
 
   it("accepts 0 as a valid manual upgrade cost, blocking only a blank field", async () => {
@@ -801,7 +818,7 @@ describe("SkillsTab", () => {
       })
     );
 
-    expect(onUpdate).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onUpdate).toHaveBeenCalledWith([]);
   });
 
   it("hides redundant Cult Briefing training until it actually supplies the Skill", async () => {

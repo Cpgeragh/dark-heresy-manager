@@ -280,6 +280,20 @@ describe("TraitsTab", () => {
     );
   });
 
+  it("keeps the Remove pop-up open when removing a Trait is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(false);
+    const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
+    renderTab({ talents: makeTalents({ traits: [entry] }), onUpdateCharacter });
+
+    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    const dialog = screen.getByRole("dialog", { name: "Remove Trait" });
+    await user.click(within(dialog).getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateCharacter).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog", { name: "Remove Trait" })).toBeInTheDocument();
+  });
+
   it("shows the picker row as waiting until a Trait add is saved", async () => {
     const user = userEvent.setup();
     let settle: (saved: boolean) => void = () => {};

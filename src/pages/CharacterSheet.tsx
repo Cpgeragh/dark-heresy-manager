@@ -1016,6 +1016,7 @@ export default function CharacterSheet({
                   onUpdate={handleUpdateCybernetics}
                   onUpdateRanged={handleUpdateRangedWeapons}
                   onUpdateMelee={handleUpdateMeleeWeapons}
+                  onUpdateCharacter={patchFieldsWithResult}
                   archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
                   onUpdateArcheotech={handleUpdateArcheotech}
                   career={character.header.career}

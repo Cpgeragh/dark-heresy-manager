@@ -247,16 +247,27 @@ describe("RangedCard ammo optimistic saves", () => {
     },
   ];
 
-  it("asks for an optimistic save when an ammo type is removed", async () => {
+  it("asks for confirmation and waits for the server when an ammo type is removed", async () => {
     const user = userEvent.setup();
     const { onUpdateAmmoEntries } = renderCard({ weapon: { ...baseWeapon, ammoEntries: entries } });
 
-    const removeButtons = screen.getAllByRole("button", { name: "Remove" });
-    await user.click(removeButtons[removeButtons.length - 1]);
+    await user.click(screen.getByRole("button", { name: "Remove Charge Pack (Basic)" }));
+    expect(onUpdateAmmoEntries).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove" }));
 
-    expect(onUpdateAmmoEntries).toHaveBeenCalledWith([expect.objectContaining({ id: "e1" })], {
-      optimistic: true,
-    });
+    expect(onUpdateAmmoEntries).toHaveBeenCalledWith([expect.objectContaining({ id: "e1" })]);
+  });
+
+  it("keeps the Remove pop-up open when removing an ammo type is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateAmmoEntries = vi.fn().mockResolvedValue(false);
+    renderCard({ weapon: { ...baseWeapon, ammoEntries: entries }, onUpdateAmmoEntries });
+
+    await user.click(screen.getByRole("button", { name: "Remove Charge Pack (Basic)" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateAmmoEntries).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("asks for an optimistic save when a different ammo type is marked as loaded", async () => {

@@ -25,8 +25,12 @@ import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScre
 interface Props {
   editable?: boolean;
   customItems?: CampaignCustomItem<"archeotech">[];
-  onSelect: (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => void | Promise<void>;
-  onSelectCustomItem?: (item: CampaignCustomItem<"archeotech">) => void | Promise<void>;
+  onSelect: (
+    ref: ArcheotechRef,
+    gmValue?: string,
+    gmRarity?: string
+  ) => void | Promise<boolean | void>;
+  onSelectCustomItem?: (item: CampaignCustomItem<"archeotech">) => void | Promise<boolean | void>;
   onCustom: () => void;
   onClose: () => void;
   suspended?: boolean;

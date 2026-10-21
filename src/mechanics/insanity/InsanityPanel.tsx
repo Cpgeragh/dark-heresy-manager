@@ -241,13 +241,10 @@ export function InsanityPanel({
 
   const handleRemoveDisorder = useCallback(
     (id: string) =>
-      onUpdate(
-        {
-          ...value,
-          disorders: structuredDisorders.filter((entry) => entry.id !== id),
-        },
-        { optimistic: true }
-      ),
+      onUpdate({
+        ...value,
+        disorders: structuredDisorders.filter((entry) => entry.id !== id),
+      }),
     [value, structuredDisorders, onUpdate]
   );
 
@@ -273,13 +270,10 @@ export function InsanityPanel({
 
   const handleRemoveTrauma = useCallback(
     (id: string) =>
-      onUpdate(
-        {
-          ...value,
-          currentTrauma: structuredTrauma.filter((entry) => entry.id !== id),
-        },
-        { optimistic: true }
-      ),
+      onUpdate({
+        ...value,
+        currentTrauma: structuredTrauma.filter((entry) => entry.id !== id),
+      }),
     [value, structuredTrauma, onUpdate]
   );
 

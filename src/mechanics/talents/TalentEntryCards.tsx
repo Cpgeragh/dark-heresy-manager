@@ -41,8 +41,8 @@ interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   statusChip?: string;
   statusChipColour?: ChipColour;
   removable?: boolean;
-  deletionBlockedMessage?: string;
-  deletionNoun?: "Talent" | "Trait" | "Elite Advance";
+  removalBlockedMessage?: string;
+  removalNoun?: "Talent" | "Trait" | "Elite Advance";
   infoContent?: ReactNode;
 }
 
@@ -55,8 +55,8 @@ export function EntryCard({
   statusChip,
   statusChipColour,
   removable = true,
-  deletionBlockedMessage,
-  deletionNoun = "Talent",
+  removalBlockedMessage,
+  removalNoun = "Talent",
   infoContent,
   libraryItem,
   isDM = false,
@@ -148,12 +148,12 @@ export function EntryCard({
         }
         afterMetadata={secondaryInformation}
         removeAction={
-          editable && (removable || deletionBlockedMessage) && !isGranted ? (
+          editable && (removable || removalBlockedMessage) && !isGranted ? (
             <RemoveEntryButton
-              kind={deletionNoun}
+              kind={removalNoun}
               name={shownName}
               onRemove={() => onRemove(entry.uid, false)}
-              blockedMessage={deletionBlockedMessage}
+              blockedMessage={removalBlockedMessage}
               extra={
                 hasRestorableTalentEffect(entry)
                   ? {

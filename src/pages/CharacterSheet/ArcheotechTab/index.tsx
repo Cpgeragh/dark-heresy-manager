@@ -34,7 +34,7 @@ interface ArcheotechTabProps {
   isDM: boolean;
   archeotech: ArcheotechItem[];
   editable: boolean;
-  onUpdate: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<void>;
+  onUpdate: (next: ArcheotechItem[], options?: PatchOptions) => void | Promise<boolean | void>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -224,10 +224,7 @@ export function ArcheotechTab({
   const removeItem = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdate(
-        archeotech.filter((a) => a.id !== id),
-        { optimistic: true }
-      );
+      return onUpdate(archeotech.filter((a) => a.id !== id));
     },
     [editable, archeotech, onUpdate]
   );

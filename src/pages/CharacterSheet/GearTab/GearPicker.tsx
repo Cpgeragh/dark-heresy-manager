@@ -23,8 +23,8 @@ import { recordComponentRender } from "../../../performance/performanceMetrics";
 interface Props {
   editable?: boolean;
   customItems?: CampaignCustomItem<"gear">[];
-  onSelect: (ref: GearRef, gmValue?: string, gmRarity?: string) => void | Promise<void>;
-  onSelectCustomItem?: (item: CampaignCustomItem<"gear">) => void | Promise<void>;
+  onSelect: (ref: GearRef, gmValue?: string, gmRarity?: string) => void | Promise<boolean | void>;
+  onSelectCustomItem?: (item: CampaignCustomItem<"gear">) => void | Promise<boolean | void>;
   onCustom: () => void;
   onClose: () => void;
   suspended?: boolean;

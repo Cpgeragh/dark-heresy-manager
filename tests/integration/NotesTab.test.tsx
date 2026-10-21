@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -248,7 +248,7 @@ describe("NotesTab editing and deleting", () => {
     await act(async () => finish());
   });
 
-  it("keeps the delete dialog pending until the optimistic save finishes", async () => {
+  it("keeps the delete dialog pending until the save finishes", async () => {
     const user = userEvent.setup();
     let finish: () => void = () => undefined;
     const onSave = vi.fn(
@@ -262,11 +262,23 @@ describe("NotesTab editing and deleting", () => {
     await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(onSave).toHaveBeenCalledWith([], { optimistic: true });
+    expect(onSave).toHaveBeenCalledWith([]);
     expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
 
     await act(async () => finish());
     expect(screen.queryByRole("dialog", { name: "Delete Note" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the delete dialog open when deleting a note is refused", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockResolvedValue(false);
+    render(<NotesTab notes={oneEntry()} editable onSave={onSave} />);
+
+    await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
   });
 });

@@ -143,7 +143,10 @@ export function RangedCard({
   onRemove: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
-  onUpdateAmmoEntries: (entries: WeaponAmmoEntry[], options?: PatchOptions) => void;
+  onUpdateAmmoEntries: (
+    entries: WeaponAmmoEntry[],
+    options?: PatchOptions
+  ) => void | Promise<boolean | void>;
   onUpdateLoadedAmmoByProfile?: (profile: string, entryId: string) => void;
   onUpdateMagazineSlots?: (
     slots: WeaponMagazineSlot[],
@@ -385,7 +388,7 @@ export function RangedCard({
       const replacementIndex = next.findIndex((entry) => entry.id === replacement.id);
       next[replacementIndex] = { ...replacement, loaded: true };
     }
-    onUpdateAmmoEntries(next, { optimistic: true });
+    return onUpdateAmmoEntries(next);
   }
 
   function handleSetLoaded(entryId: string) {

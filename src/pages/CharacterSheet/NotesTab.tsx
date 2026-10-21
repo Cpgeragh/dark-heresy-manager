@@ -31,7 +31,7 @@ import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 interface NotesTabProps {
   notes: NoteEntry[];
   editable: boolean;
-  onSave: (value: NoteEntry[], options?: PatchOptions) => void | Promise<void>;
+  onSave: (value: NoteEntry[], options?: PatchOptions) => void | Promise<boolean | void>;
 }
 
 function formatDate(iso: string): string {
@@ -107,10 +107,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
   }
 
   function deleteEntry(entry: NoteEntry) {
-    return onSave(
-      entries.filter((current) => current.id !== entry.id),
-      { optimistic: true }
-    );
+    return onSave(entries.filter((current) => current.id !== entry.id));
   }
 
   const normalisedQuery = query.trim().toLowerCase();

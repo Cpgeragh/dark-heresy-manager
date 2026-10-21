@@ -29,7 +29,7 @@ import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 interface Props extends CustomItemLibraryActionProps<"archeotech"> {
   item: ArcheotechItem;
   editable: boolean;
-  onRemove: () => void | Promise<void>;
+  onRemove: () => void | Promise<boolean | void>;
 }
 
 export function ItemCard({

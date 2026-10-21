@@ -1,6 +1,6 @@
 // tests/integration/PsychicTab.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
@@ -833,10 +833,24 @@ describe("PsychicTab", () => {
     const { onUpdate } = renderTab({ talents, psychic });
     await user.click(screen.getAllByRole("button", { name: "Remove Linked Minor" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorPowers: [] }), {
-      optimistic: true,
-    });
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ minorPowers: [] }));
     expect(talents.talents).toHaveLength(1);
+  });
+
+  it("keeps the Remove pop-up open when removing a power is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn().mockResolvedValue(false);
+    const psychic: PsychicBlock = {
+      ...emptyPsychic,
+      minorPowers: [{ id: "minor-1", name: "Telepathy", known: true, isMinor: true }],
+    };
+    renderTab({ psychic, onUpdate });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Telepathy" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("shows, consumes, and releases a Psy Rating power grant", async () => {
@@ -873,8 +887,7 @@ describe("PsychicTab", () => {
     await user.click(screen.getAllByRole("button", { name: "Remove Fake Minor Power" }).at(-1)!);
     await user.click(screen.getAllByRole("button", { name: "Remove" }).at(-1)!);
     expect(linkedRender.onUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ minorPowers: [] }),
-      { optimistic: true }
+      expect.objectContaining({ minorPowers: [] })
     );
   });
 

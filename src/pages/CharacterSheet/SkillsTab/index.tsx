@@ -233,11 +233,7 @@ export function SkillsTab({
   const updateLevel = useCallback(
     (id: string, level: SkillEntry["level"]) => {
       if (level === "untrained") {
-        void onUpdate(
-          skills.filter((skill) => skill.id !== id),
-          { optimistic: true }
-        );
-        return;
+        return onUpdate(skills.filter((skill) => skill.id !== id));
       }
 
       const owned = skills.find((skill) => skill.id === id);
@@ -272,11 +268,7 @@ export function SkillsTab({
         !xpPurchases.trained &&
         manualCosts.trained === undefined;
       if (returnsToUnpaidGrantedTraining) {
-        void onUpdate(
-          skills.filter((skill) => skill.id !== id),
-          { optimistic: true }
-        );
-        return;
+        return onUpdate(skills.filter((skill) => skill.id !== id));
       }
 
       const updated: SkillEntry = {
@@ -291,10 +283,6 @@ export function SkillsTab({
       const next = owned
         ? skills.map((skill) => (skill.id === id ? updated : skill))
         : [...skills, updated];
-      if (nextIndex < currentIndex) {
-        void onUpdate(next, { optimistic: true });
-        return;
-      }
       return onUpdate(next);
     },
     [alternateRanks, career, computedSkills, onUpdate, rank, skills]

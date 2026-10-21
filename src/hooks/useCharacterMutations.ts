@@ -190,9 +190,7 @@ export function useCharacterMutations({
       field: K,
       value: Character[K],
       options?: PatchOptions
-    ): Promise<void> => {
-      await patchFieldWithResult(field, value, options);
-    },
+    ): Promise<boolean> => patchFieldWithResult(field, value, options),
     [patchFieldWithResult]
   );
 
@@ -247,8 +245,8 @@ export function useCharacterMutations({
       before: unknown[],
       after: unknown[],
       options?: PatchOptions
-    ): Promise<void> => {
-      if (!allowedToEdit || !hasCharacter) return;
+    ): Promise<boolean> => {
+      if (!allowedToEdit || !hasCharacter) return false;
       const version = options?.optimistic ? overlay?.apply(field, after) : undefined;
       setPendingUpdateCount((count) => count + 1);
       try {
@@ -256,11 +254,13 @@ export function useCharacterMutations({
           flushPendingNumbers: options?.optimistic === true,
         });
         if (version !== undefined) overlay?.confirm(field, version);
+        return true;
       } catch (err) {
         if (version !== undefined) overlay?.revert(field, version);
         const message = err instanceof Error ? err.message : "Failed to update quantity";
         toast.error(`Update failed: ${message}`);
         console.error("Failed to update character quantity:", err);
+        return false;
       } finally {
         setPendingUpdateCount((count) => Math.max(0, count - 1));
       }
