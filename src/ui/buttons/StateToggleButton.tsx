@@ -1,6 +1,6 @@
 import { NestedChip } from "../chips/Chip";
 import { uiLayerLocal } from "../styles/layerStyles";
-import { Button } from "./Button";
+import { EntryActionButton } from "./EntryActionButton";
 
 interface StateToggleButtonProps {
   active: boolean;
@@ -42,19 +42,18 @@ export function StateToggleButton({
       ? disabledTitle
       : inactiveTitle;
   return (
-    <Button
-      size="xs"
+    <EntryActionButton
       variant={active ? "successOutline" : "ghost"}
       disabled={disabled && !active}
       loadingLabel={active ? activeBusyLabel : inactiveBusyLabel}
       title={title}
-      className={`relative ${uiLayerLocal} pointer-events-auto shrink-0 sm:h-7 sm:px-2.5 md:h-8 md:px-3 md:text-sm`}
+      className={`relative ${uiLayerLocal} pointer-events-auto shrink-0`}
       onClick={(event) => {
         event.stopPropagation();
         if (!disabled || active) return onChange();
       }}
     >
       {active ? activeLabel : inactiveLabel}
-    </Button>
+    </EntryActionButton>
   );
 }

@@ -46,6 +46,9 @@ export const uiCardOverlayLinkFeedback =
 
 export const uiDismissButton = `${colourTextMuted} ${colourHoverTextPrimary} text-lg leading-none ${uiPressFeedback()} ${uiFocusRing}`;
 
+/** The three responsive sizes of a button for an action on an owned entry, taller from 640 px and larger from 768 px. */
+export const uiEntryActionSize = "sm:h-7 sm:px-2.5 md:h-8 md:px-3 md:text-sm";
+
 /** A small control that shows information, such as the info button and the tooltip button. */
 export const uiInfoButton = `${uiCornerSmall} border ${colourControlRaised} ${colourTextBody} ${colourHoverRaised} ${uiPressFeedback()} ${uiFocusRing}`;
 

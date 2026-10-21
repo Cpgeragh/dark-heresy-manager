@@ -4,7 +4,7 @@ import { RemoveButton } from "./buttons/RemoveButton";
 import { PickerBody, PickerModal } from "./pickers/PickerModal";
 import { uiTextBody } from "./styles/editableStyles";
 
-interface RemoveEntryExtra {
+export interface RemoveEntryExtra {
   label: string;
   message: string;
   onClick: () => unknown;

@@ -1376,6 +1376,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] A label and its input or value sit the same distance apart in every form, and bullet lists in information modals use the same small gap (`uiStackField`)
 - [ ] On a phone, the Skills and Psychic power panels use the same space as the same sections on desktop
 - [ ] Every scrollbar, in a long pop-up such as Session in Progress, in a picker list, in the navigation drawer and on the page itself, is thin with a slate grey thumb, a see-through track and no arrow buttons (`src/index.css`)
+- [ ] The Wear, Stow, Activate, Deactivate and Equip buttons are extra small on a phone, taller from 640 pixels wide and larger from 768 pixels wide (`EntryActionButton.tsx`)
 
 ## 36. Waiting and Instant Saves
 
