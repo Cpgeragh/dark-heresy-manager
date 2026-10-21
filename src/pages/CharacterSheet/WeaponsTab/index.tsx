@@ -1261,7 +1261,7 @@ export function WeaponsTab({
               item={entry.item}
               strengthBonus={strengthBonus}
               editable={editable}
-              isEquipped={entry.item.equipped ?? false}
+              isEquipped={entry.item.type === "Integrated Weapon" || (entry.item.equipped ?? false)}
               onToggleEquip={
                 entry.item.type !== "Integrated Weapon"
                   ? () => toggleEquipArcheotech(entry.item.id)
@@ -1286,7 +1286,6 @@ export function WeaponsTab({
               allowUpgrades={false}
               forceExpanded
               isEquipped
-              onRemove={() => {}}
               onAddUpgrade={() => {}}
               onRemoveUpgrade={() => {}}
               onUpdateAmmoEntries={(entries, options) =>
@@ -1377,7 +1376,7 @@ export function WeaponsTab({
               item={entry.item}
               strengthBonus={strengthBonus}
               editable={editable}
-              isEquipped={entry.item.equipped ?? false}
+              isEquipped={entry.item.type === "Integrated Weapon" || (entry.item.equipped ?? false)}
               onToggleEquip={
                 entry.item.type !== "Integrated Weapon"
                   ? () => toggleEquipArcheotech(entry.item.id)
@@ -1401,7 +1400,6 @@ export function WeaponsTab({
               allowUpgrades={false}
               forceExpanded
               isEquipped
-              onRemove={() => {}}
               onAddUpgrade={() => {}}
               onRemoveUpgrade={() => {}}
               onUpdateQuantity={(quantity) => updateMeleeQuantity(entry.weapon.id, quantity)}

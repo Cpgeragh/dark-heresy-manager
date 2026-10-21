@@ -103,10 +103,10 @@ export function buildWeaponInventoryModel({
     (item) => archeotechWeaponClass(item) === "Melee"
   );
   const archeotechIntegratedRangedItems = archeotechIntegratedWeaponItems.filter(
-    (item) => archeotechWeaponClass(item) !== "Melee" && item.equipped
+    (item) => archeotechWeaponClass(item) !== "Melee"
   );
   const archeotechIntegratedMeleeItems = archeotechIntegratedWeaponItems.filter(
-    (item) => archeotechWeaponClass(item) === "Melee" && item.equipped
+    (item) => archeotechWeaponClass(item) === "Melee"
   );
 
   const cyberneticWeaponItems = (cybernetics ?? []).flatMap((cybernetic) => {
@@ -123,15 +123,15 @@ export function buildWeaponInventoryModel({
   const normalRangedWeapons = rangedWeapons
     .map((weapon, index) => ({ weapon, index }))
     .filter(({ weapon }) => !isIntegratedRangedWeapon(weapon));
-  const equippedIntegratedRanged = rangedWeapons
+  const integratedRanged = rangedWeapons
     .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => isIntegratedRangedWeapon(weapon) && weapon.equipped);
+    .filter(({ weapon }) => isIntegratedRangedWeapon(weapon));
   const normalMeleeWeapons = meleeWeapons
     .map((weapon, index) => ({ weapon, index }))
     .filter(({ weapon }) => !isIntegratedMeleeWeapon(weapon));
-  const equippedIntegratedMelee = meleeWeapons
+  const integratedMelee = meleeWeapons
     .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => isIntegratedMeleeWeapon(weapon) && weapon.equipped);
+    .filter(({ weapon }) => isIntegratedMeleeWeapon(weapon));
 
   const allRangedEntries: RangedInventoryEntry[] = [
     ...normalRangedWeapons.map(({ weapon, index }) => ({
@@ -156,7 +156,7 @@ export function buildWeaponInventoryModel({
       item,
       name: item.name,
     })),
-    ...equippedIntegratedRanged.map(({ weapon, index }) => ({
+    ...integratedRanged.map(({ weapon, index }) => ({
       kind: "integrated" as const,
       weapon,
       index,
@@ -187,7 +187,7 @@ export function buildWeaponInventoryModel({
       item,
       name: item.name,
     })),
-    ...equippedIntegratedMelee.map(({ weapon, index }) => ({
+    ...integratedMelee.map(({ weapon, index }) => ({
       kind: "integrated" as const,
       weapon,
       index,
@@ -218,10 +218,7 @@ export function buildWeaponInventoryModel({
       .reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
     archeotechRangedItems.filter((item) => item.equipped).length +
     archeotechMeleeWeaponItems.filter((item) => item.equipped).length +
-    archeotechIntegratedWeaponItems.filter((item) => item.equipped).length +
     archeotechShieldItems.filter((item) => item.equipped).length +
-    equippedIntegratedRanged.reduce((sum, { weapon }) => sum + getRangedSlots(weapon), 0) +
-    equippedIntegratedMelee.reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
     (shields ?? []).filter((item) => item.equipped).length;
 
   return {

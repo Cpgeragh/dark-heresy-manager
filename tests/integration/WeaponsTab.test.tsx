@@ -580,6 +580,19 @@ describe("WeaponsTab remove / equip-toggle", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
+  it("always lists an integrated weapon without a Remove or Equip button", () => {
+    renderTab({
+      rangedWeapons: [
+        { id: "ir1", name: "Las Pistol", damage: "1d10+3 E", pen: "0", integrated: true },
+      ],
+      meleeWeapons: [],
+    });
+
+    expect(screen.getAllByText("Las Pistol").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Remove Las Pistol" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^(Equip|Unequip)$/ })).not.toBeInTheDocument();
+  });
+
   it("toggles equip on a Ranged weapon", async () => {
     const user = userEvent.setup();
     const { noop } = renderTab();

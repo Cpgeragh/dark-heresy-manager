@@ -75,32 +75,22 @@ export const INTEGRATED_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter(isIntegratedM
 type ComparableEntry =
   | { kind: "regular"; weapon: { equipped?: boolean }; name: string }
   | { kind: "cybernetic"; name: string }
-  | { kind: "archeotech"; item: { equipped?: boolean }; name: string }
+  | { kind: "archeotech"; item: { equipped?: boolean; type?: string }; name: string }
   | { kind: "integrated"; weapon: { equipped?: boolean }; name: string };
+
+function equippedRank(entry: ComparableEntry): number {
+  if (entry.kind === "cybernetic" || entry.kind === "integrated") return 0;
+  if (entry.kind === "archeotech") {
+    return entry.item.equipped || entry.item.type === "Integrated Weapon" ? 0 : 1;
+  }
+  return entry.weapon.equipped ? 0 : 1;
+}
 
 export function compareWeaponEntries(a: ComparableEntry, b: ComparableEntry): number {
   if (a.kind === "cybernetic" && b.kind !== "cybernetic") return -1;
   if (b.kind === "cybernetic" && a.kind !== "cybernetic") return 1;
-  const aEq =
-    a.kind === "regular" || a.kind === "integrated"
-      ? a.weapon.equipped
-        ? 0
-        : 1
-      : a.kind === "archeotech"
-        ? a.item.equipped
-          ? 0
-          : 1
-        : 0;
-  const bEq =
-    b.kind === "regular" || b.kind === "integrated"
-      ? b.weapon.equipped
-        ? 0
-        : 1
-      : b.kind === "archeotech"
-        ? b.item.equipped
-          ? 0
-          : 1
-        : 0;
+  const aEq = equippedRank(a);
+  const bEq = equippedRank(b);
   if (aEq !== bEq) return aEq - bEq;
   return a.name.localeCompare(b.name);
 }

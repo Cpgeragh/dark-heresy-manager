@@ -140,7 +140,7 @@ export function RangedCard({
   weapon: RangedWeapon;
   editable: boolean;
   strengthBonus?: number;
-  onRemove: () => void;
+  onRemove?: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
   onUpdateAmmoEntries: (
@@ -484,7 +484,7 @@ export function RangedCard({
             ) : undefined
           }
           removeAction={
-            editable && !integrated ? (
+            editable && onRemove ? (
               <RemoveEntryButton kind="Ranged Weapon" name={weapon.name} onRemove={onRemove} />
             ) : undefined
           }

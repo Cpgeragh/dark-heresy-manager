@@ -507,6 +507,83 @@ describe("CyberneticsTab", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
+  it("shows Remove and no Equip button on an integrated ranged weapon and removes it after confirmation", async () => {
+    const user = userEvent.setup();
+    const onUpdateRanged = vi.fn();
+    renderTab({
+      rangedWeapons: [
+        { id: "ir1", name: "Las Pistol", damage: "1d10+3 E", pen: "0", integrated: true },
+      ],
+      onUpdateRanged,
+    });
+
+    expect(screen.queryByRole("button", { name: /^(Equip|Unequip)$/ })).not.toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Remove Las Pistol" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateRanged).toHaveBeenCalledWith([]));
+  });
+
+  it("keeps the Remove pop-up open when removing an integrated ranged weapon is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateRanged = vi.fn().mockResolvedValue(false);
+    renderTab({
+      rangedWeapons: [
+        { id: "ir1", name: "Las Pistol", damage: "1d10+3 E", pen: "0", integrated: true },
+      ],
+      onUpdateRanged,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Las Pistol" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateRanged).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("shows Remove and no Equip button on an integrated melee weapon and removes it after confirmation", async () => {
+    const user = userEvent.setup();
+    const onUpdateMelee = vi.fn();
+    renderTab({
+      meleeWeapons: [
+        { id: "im1", name: "Mono-Blade", damage: "1d10+2 R", pen: "2", integrated: true },
+      ],
+      onUpdateMelee,
+    });
+
+    expect(screen.queryByRole("button", { name: /^(Equip|Unequip)$/ })).not.toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Remove Mono-Blade" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateMelee).toHaveBeenCalledWith([]));
+  });
+
+  it("keeps the Remove pop-up open when removing an integrated melee weapon is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateMelee = vi.fn().mockResolvedValue(false);
+    renderTab({
+      meleeWeapons: [
+        { id: "im1", name: "Mono-Blade", damage: "1d10+2 R", pen: "2", integrated: true },
+      ],
+      onUpdateMelee,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Remove Mono-Blade" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(onUpdateMelee).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("shows no Equip button on an Archeotech integrated weapon", () => {
+    renderTab({
+      archeotech: [{ id: "a2", name: "Phase Gauntlet", type: "Integrated Weapon" }],
+      onUpdateArcheotech: vi.fn(),
+    });
+
+    expect(screen.queryByRole("button", { name: /^(Equip|Unequip)$/ })).not.toBeInTheDocument();
+  });
+
   it("adds an integrated ranged weapon from reference", async () => {
     const user = userEvent.setup();
     const { onUpdateRanged } = renderTab();

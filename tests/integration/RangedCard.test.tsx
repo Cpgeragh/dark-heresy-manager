@@ -117,6 +117,12 @@ describe("RangedCard remove", () => {
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledOnce();
   });
+
+  it("shows no Remove button when the caller gives no removal", () => {
+    renderCard({ integrated: true, onRemove: undefined });
+
+    expect(screen.queryByRole("button", { name: "Remove Custom Lasgun" })).not.toBeInTheDocument();
+  });
 });
 
 describe("RangedCard Knave of Pistols penalty", () => {

@@ -117,7 +117,7 @@ export function MeleeCard({
   weapon: MeleeWeapon;
   editable: boolean;
   strengthBonus: number;
-  onRemove: () => void;
+  onRemove?: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
   onUpdateQuantity: (qty: number) => void;
@@ -362,7 +362,7 @@ export function MeleeCard({
             ) : undefined
           }
           removeAction={
-            editable && !integrated ? (
+            editable && onRemove ? (
               <RemoveEntryButton kind="Melee Weapon" name={weapon.name} onRemove={onRemove} />
             ) : undefined
           }

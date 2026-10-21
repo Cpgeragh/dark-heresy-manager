@@ -514,6 +514,7 @@ Use a disposable character and create a small labelled test inventory: one norma
 - [ ] Fitting a weapon upgrade changes the weapon's effective weight/stats where the upgrade says it should, and un-fitting it reverts cleanly
 - [ ] A weapon linked to an installed Concealed Weapon Bionic (from Cybernetics) shows that link correctly on its card
 - [ ] Integrated Weapons come from their own separate curated list (not "any weapon flagged integrated"): confirm the Integrated Weapon picker only ever offers the weapons actually meant to be mountable, and craftsmanship is chosen at add time same as everything else
+- [ ] An installed integrated ranged, melee, or Archeotech weapon is always on the character: the Weapons tab always lists it as equipped, even if it was unequipped before, with no Equip, Unequip, or Remove button, and it takes no weapon slot
 - [ ] A weapon granted directly by a cybernetic implant (e.g. a Ballistic Mechadendrite's built-in gun) shows as a distinct, **read-only** pink-bordered card with "Gained From [implant name]": it has no remove/equip controls of its own and should not consume a weapon slot, its craftsmanship follows the parent implant's
 
 **Shields:**
@@ -568,7 +569,7 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 
 - [ ] On every Implant and Archeotech implant row the trash button comes first, the info icon beside the name is always shown (saying "No description recorded." when empty), a `Rules` line shows the item rules behind its icon or "-", and a `Gained from` line reads `[source] ([type])` for a granted implant
 - [ ] Removing an Implant or Archeotech implant asks `Remove [name] from this character?`, shows waiting dots, and saves the implant and any Concealed Weapon Bionic link together, so a refused save leaves the implant, the link, and the pop-up as they were
-- [ ] An Archeotech integrated weapon has its own trash button and asks first in the same way
+- [ ] An integrated ranged, melee, or Archeotech weapon in the Integrated Weapons section has a trash button, asks `Remove [name] from this character?` in the same way, keeps the pop-up open if the save is refused, and has no Equip or Unequip button because it is always on
 - [ ] Install a Concealed Weapon Bionic at Good craftsmanship: cost shows 750 Thrones _and_ availability shows Rare (not Scarce)
 - [ ] Install the same at Poor and Common: cost changes (150 / 300) but availability stays Scarce at both
 - [ ] An installed implant shows its craftsmanship as plain text on a labelled `Craftsmanship` line with an info icon, and it is not clickable; to change it, remove the implant and install it again at the other craftsmanship

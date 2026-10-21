@@ -474,17 +474,6 @@ export function CyberneticsTab({
     [archeotech]
   );
 
-  const toggleEquipArcheotech = useCallback(
-    (id: string) => {
-      if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech(
-        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)),
-        { optimistic: true }
-      );
-    },
-    [editable, archeotech, onUpdateArcheotech]
-  );
-
   const removeArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
@@ -680,28 +669,6 @@ export function CyberneticsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
-  const toggleEquipIntegratedRanged = useCallback(
-    (id: string) => {
-      if (!editable) return;
-      onUpdateRanged(
-        rangedWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)),
-        { optimistic: true }
-      );
-    },
-    [editable, rangedWeapons, onUpdateRanged]
-  );
-
-  const toggleEquipIntegratedMelee = useCallback(
-    (id: string) => {
-      if (!editable) return;
-      onUpdateMelee(
-        meleeWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)),
-        { optimistic: true }
-      );
-    },
-    [editable, meleeWeapons, onUpdateMelee]
-  );
-
   const renderImplantRow = useCallback(
     (item: CyberneticItem) => {
       const linkedArm = item.concealedWeapon
@@ -801,8 +768,7 @@ export function CyberneticsTab({
               integrated
               allowUpgrades={false}
               forceExpanded
-              isEquipped={weapon.equipped ?? false}
-              onToggleEquip={() => toggleEquipIntegratedRanged(weapon.id)}
+              isEquipped
               onRemove={() => removeIntegratedRanged(weapon.id)}
               onAddUpgrade={() => {}}
               onRemoveUpgrade={() => {}}
@@ -836,8 +802,7 @@ export function CyberneticsTab({
               integrated
               allowUpgrades={false}
               forceExpanded
-              isEquipped={weapon.equipped ?? false}
-              onToggleEquip={() => toggleEquipIntegratedMelee(weapon.id)}
+              isEquipped
               onRemove={() => removeIntegratedMelee(weapon.id)}
               onAddUpgrade={() => {}}
               onRemoveUpgrade={() => {}}
@@ -859,8 +824,7 @@ export function CyberneticsTab({
               key={item.id}
               item={item}
               editable={editable}
-              isEquipped={item.equipped ?? false}
-              onToggleEquip={() => toggleEquipArcheotech(item.id)}
+              isEquipped
               onRemove={() => removeArcheotech(item.id)}
             />
           ),
@@ -881,9 +845,6 @@ export function CyberneticsTab({
       removeIntegratedMelee,
       removeIntegratedRanged,
       strengthBonus,
-      toggleEquipArcheotech,
-      toggleEquipIntegratedMelee,
-      toggleEquipIntegratedRanged,
     ]
   );
 

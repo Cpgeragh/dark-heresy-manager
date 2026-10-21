@@ -53,7 +53,7 @@ function model(overrides: Partial<WeaponInventoryModelInput> = {}) {
 }
 
 describe("buildWeaponInventoryModel categorisation", () => {
-  it("categorises regular and equipped integrated character weapons and preserves source indexes", () => {
+  it("categorises regular and integrated character weapons, treats integrated weapons as always equipped, and preserves source indexes", () => {
     const inventory = model({
       rangedWeapons: [
         ranged("r-zulu", "Zulu Rifle"),
@@ -71,11 +71,13 @@ describe("buildWeaponInventoryModel categorisation", () => {
 
     expect(inventory.allRangedEntries.map(({ kind, name }) => ({ kind, name }))).toEqual([
       { kind: "integrated", name: "Arm Cannon" },
+      { kind: "integrated", name: "Hidden Arm Gun" },
       { kind: "regular", name: "Alpha Rifle" },
       { kind: "regular", name: "Zulu Rifle" },
     ]);
     expect(inventory.allMeleeEntries.map(({ kind, name }) => ({ kind, name }))).toEqual([
       { kind: "integrated", name: "Arm Blade" },
+      { kind: "integrated", name: "Hidden Arm Blade" },
       { kind: "regular", name: "Alpha Blade" },
       { kind: "regular", name: "Zulu Blade" },
     ]);
@@ -85,10 +87,8 @@ describe("buildWeaponInventoryModel categorisation", () => {
     expect(inventory.allMeleeEntries.find((entry) => entry.name === "Zulu Blade")).toMatchObject({
       index: 0,
     });
-    expect(inventory.allRangedEntries.some((entry) => entry.name === "Hidden Arm Gun")).toBe(false);
-    expect(inventory.allMeleeEntries.some((entry) => entry.name === "Hidden Arm Blade")).toBe(
-      false
-    );
+    expect(inventory.allRangedEntries.some((entry) => entry.name === "Hidden Arm Gun")).toBe(true);
+    expect(inventory.allMeleeEntries.some((entry) => entry.name === "Hidden Arm Blade")).toBe(true);
   });
 
   it("categorises ranged and melee cybernetic weapons and ignores implants without weapons", () => {
@@ -139,12 +139,10 @@ describe("buildWeaponInventoryModel categorisation", () => {
       "Archeotech Rifle",
     ]);
     expect(inventory.allMeleeEntries.map((entry) => entry.name)).toEqual([
+      "Dormant Integrated Blade",
       "Integrated Blade",
       "Archeotech Blade",
     ]);
-    expect(
-      inventory.allMeleeEntries.some((entry) => entry.name === "Dormant Integrated Blade")
-    ).toBe(false);
   });
 
   it("falls back to authoritative archeotech reference classes", () => {
@@ -312,7 +310,7 @@ describe("buildWeaponInventoryModel slot calculation", () => {
           }),
         ],
       },
-      expectedSlots: 2,
+      expectedSlots: 0,
     },
     {
       source: "stored integrated melee weapon",
@@ -325,7 +323,7 @@ describe("buildWeaponInventoryModel slot calculation", () => {
           }),
         ],
       },
-      expectedSlots: 2,
+      expectedSlots: 0,
     },
     {
       source: "archeotech ranged weapon",
@@ -361,7 +359,7 @@ describe("buildWeaponInventoryModel slot calculation", () => {
           }),
         ],
       },
-      expectedSlots: 1,
+      expectedSlots: 0,
     },
     {
       source: "regular shield",
