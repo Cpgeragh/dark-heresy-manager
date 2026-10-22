@@ -1,19 +1,15 @@
 import { useState } from "react";
 import type { WornArmourPiece } from "../../../types/Character";
 import {
-  uiChipRow,
   uiTextLabel,
   uiTextPlaceholder,
   uiRuleName,
   uiTextDescription,
   uiStackBody,
-  uiStackField,
   uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -28,8 +24,6 @@ import { locationLabel } from "../../../utils/armourLocations";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { ARMOUR_UPGRADE_REFERENCE } from "../../../data/reference/armourUpgradeReference";
@@ -96,104 +90,55 @@ export function PieceRow({
 
   return (
     <>
-      <CharacterEntryRow
+      <OwnedEntryRow
         name={piece.name}
-        badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+        editable={editable}
         inactive={!worn}
-        info={
-          <InfoModal
-            title={piece.name}
-            content={
-              piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
-            }
-          />
+        information={
+          piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
         }
-        metadata={
-          <div className={uiStackField}>
-            <div className={uiChipRow}>
-              <StatChip label="Location" value={locationLabel(piece.locations)} />
-              <StatChip label="AP" value={apDesc} />
-            </div>
+        chips={
+          <>
+            <StatChip label="Location" value={locationLabel(piece.locations)} />
+            <StatChip label="AP" value={apDesc} />
             <ItemMetaChips
+              bare
               weight={effectiveArmourWeight(piece, upgradeRefs)}
               value={piece.value}
               availability={piece.availability}
               source={piece.source}
             />
-          </div>
-        }
-        afterMetadata={
-          <>
-            <EntryDetailLine
-              label="Qualities"
-              value={qualities.length > 0 ? qualities.join(", ") : undefined}
-              info={
-                qualities.length > 0 ? (
-                  <InfoModal
-                    title={`${piece.name} Qualities`}
-                    content={<ArmourQualitiesContent qualities={qualities} />}
-                  />
-                ) : undefined
-              }
-            />
-            <EntryDetailLine
-              label="Rules"
-              info={
-                notes ? (
-                  <InfoModal
-                    title={`${piece.name} Rules`}
-                    content={<InfoParagraph>{notes}</InfoParagraph>}
-                  />
-                ) : undefined
-              }
-            />
-            <EntryDetailLine
-              label="Craftsmanship"
-              value={craftsmanship}
-              info={
-                <InfoModal
-                  title={`${craftsmanship} Armour`}
-                  content={armourCraftsmanshipDescription(craftsmanship)}
-                />
-              }
-            />
-
-            {(upgradeRefs.length > 0 || addableCompatible.length > 0) && (
-              <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-                <div className="flex items-center justify-between">
-                  <span className={uiTextLabel}>Upgrades</span>
-                  {editable ? (
-                    <AddButton
-                      label="Add upgrade"
-                      size="sm"
-                      onClick={() => setShowUpgradePicker(true)}
-                    />
-                  ) : (
-                    <ViewButton
-                      label="View upgrades"
-                      size="sm"
-                      onClick={() => setShowUpgradePicker(true)}
-                    />
-                  )}
-                </div>
-                {upgradeRefs.length === 0 ? (
-                  <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
-                ) : (
-                  <div className={uiStackList}>
-                    {upgradeRefs.map((upgrade) => (
-                      <ArmourUpgradeCard
-                        key={upgrade.id}
-                        upgrade={upgrade}
-                        editable={editable}
-                        onRemove={(upgradeId) => onRemoveUpgrade(piece.id, upgradeId)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </>
         }
+        lines={{
+          craftsmanship: {
+            value: craftsmanship,
+            info: (
+              <InfoModal
+                title={`${craftsmanship} Armour`}
+                content={armourCraftsmanshipDescription(craftsmanship)}
+              />
+            ),
+          },
+          qualities: {
+            value: qualities.length > 0 ? qualities.join(", ") : undefined,
+            info:
+              qualities.length > 0 ? (
+                <InfoModal
+                  title={`${piece.name} Qualities`}
+                  content={<ArmourQualitiesContent qualities={qualities} />}
+                />
+              ) : undefined,
+          },
+          rules: {
+            info: notes ? (
+              <InfoModal
+                title={`${piece.name} Rules`}
+                content={<InfoParagraph>{notes}</InfoParagraph>}
+              />
+            ) : undefined,
+          },
+        }}
         actions={
           <StateToggleButton
             active={worn}
@@ -207,29 +152,54 @@ export function PieceRow({
             onChange={() => onToggle(piece.id)}
           />
         }
-        removeAction={
-          editable ? (
-            <RemoveEntryButton
-              kind="Armour"
-              name={piece.name}
-              onRemove={() => onRemove(piece.id)}
-            />
+        body={
+          upgradeRefs.length > 0 || addableCompatible.length > 0 ? (
+            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+              <div className="flex items-center justify-between">
+                <span className={uiTextLabel}>Upgrades</span>
+                {editable ? (
+                  <AddButton
+                    label="Add upgrade"
+                    size="sm"
+                    onClick={() => setShowUpgradePicker(true)}
+                  />
+                ) : (
+                  <ViewButton
+                    label="View upgrades"
+                    size="sm"
+                    onClick={() => setShowUpgradePicker(true)}
+                  />
+                )}
+              </div>
+              {upgradeRefs.length === 0 ? (
+                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
+              ) : (
+                <div className={uiStackList}>
+                  {upgradeRefs.map((upgrade) => (
+                    <ArmourUpgradeCard
+                      key={upgrade.id}
+                      upgrade={upgrade}
+                      editable={editable}
+                      onRemove={(upgradeId) => onRemoveUpgrade(piece.id, upgradeId)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           ) : undefined
         }
-      >
-        {libraryItem && (
-          <CustomItemActionButtons
-            libraryItem={libraryItem}
-            isDM={isDM}
-            canEditDefinition={canEditDefinition}
-            busyAction={busyAction}
-            onEditDefinition={onEditDefinition}
-            onPublish={onPublish}
-            onArchive={onArchive}
-            onUpdateAllCopies={onUpdateAllCopies}
-          />
-        )}
-      </CharacterEntryRow>
+        library={{
+          libraryItem,
+          isDM,
+          canEditDefinition,
+          busyAction,
+          onEditDefinition,
+          onPublish,
+          onArchive,
+          onUpdateAllCopies,
+        }}
+        removal={{ kind: "Armour Piece", onRemove: () => onRemove(piece.id) }}
+      />
 
       {showUpgradePicker && (
         <ArmourUpgradePicker

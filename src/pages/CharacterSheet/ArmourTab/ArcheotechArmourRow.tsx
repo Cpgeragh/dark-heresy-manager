@@ -2,12 +2,9 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
-import { uiChipRow } from "../../../ui/styles/editableStyles";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { InfoParagraph } from "../../../ui/InfoSection";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -36,51 +33,37 @@ export function ArcheotechArmourRow({
   const rules = item.rules?.trim() || ref?.rules;
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={item.name}
-      badge={
-        highlightAsArcheotech ? (
-          <Chip colour="amber" className="shrink-0">
-            Archeotech
-          </Chip>
-        ) : undefined
-      }
+      editable={editable}
+      badge={highlightAsArcheotech ? <Chip colour="amber">Archeotech</Chip> : undefined}
       tone={highlightAsArcheotech ? "archeotech" : "default"}
       inactive={!isEquipped}
-      info={
-        <InfoModal
-          title={item.name}
-          content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
-        />
-      }
-      metadata={
+      information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+      chips={
         <>
-          <div className={uiChipRow}>
-            {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
-            {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-            {item.stacks && <Chip colour="sky">Stacks</Chip>}
-          </div>
+          {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
+          {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
+          {item.stacks && <Chip colour="sky">Stacks</Chip>}
           <ItemMetaChips
+            bare
             weight={item.weight}
             value={item.value}
             availability={item.availability}
-            className={uiChipRow}
+            source={item.source}
           />
         </>
       }
-      afterMetadata={
-        <EntryDetailLine
-          label="Rules"
-          info={
-            rules ? (
-              <InfoModal
-                title={`${item.name} Rules`}
-                content={<InfoParagraph>{rules}</InfoParagraph>}
-              />
-            ) : undefined
-          }
-        />
-      }
+      lines={{
+        rules: {
+          info: rules ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={<InfoParagraph>{rules}</InfoParagraph>}
+            />
+          ) : undefined,
+        },
+      }}
       actions={
         onToggleEquip ? (
           <StateToggleButton
@@ -96,11 +79,7 @@ export function ArcheotechArmourRow({
           />
         ) : undefined
       }
-      removeAction={
-        editable ? (
-          <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
-        ) : undefined
-      }
+      removal={{ kind: "Archeotech Item", onRemove }}
     />
   );
 }

@@ -132,7 +132,7 @@ export function ArcheotechWeaponCard({
           }
           removeAction={
             editable && onRemove ? (
-              <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
+              <RemoveEntryButton kind="Archeotech Item" name={item.name} onRemove={onRemove} />
             ) : undefined
           }
           actions={

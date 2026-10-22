@@ -134,3 +134,32 @@ describe("PieceRow shared entry pieces", () => {
     expect(remove.compareDocumentPosition(stow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
+
+describe("PieceRow shared layout", () => {
+  it("names the Remove pop-up after an Armour Piece", async () => {
+    const user = userEvent.setup();
+    renderRow();
+
+    await user.click(screen.getByRole("button", { name: "Remove Flak Jacket" }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Armour Piece" })).toBeInTheDocument();
+  });
+
+  it("prints Craftsmanship, then Qualities, then Rules", () => {
+    renderRow();
+
+    const labels = screen
+      .getAllByText(/^(Craftsmanship|Qualities|Rules)$/)
+      .map((label) => label.textContent);
+
+    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules"]);
+  });
+
+  it("keeps the Location and AP boxes in the one chip row", () => {
+    renderRow();
+
+    const locationRow = screen.getByText("Location").closest("div")?.parentElement;
+    expect(locationRow).toBe(screen.getByText("AP").closest("div")?.parentElement);
+    expect(locationRow).toHaveClass("items-center");
+  });
+});

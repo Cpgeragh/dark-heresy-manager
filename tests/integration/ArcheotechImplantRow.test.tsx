@@ -91,3 +91,20 @@ describe("ArcheotechImplantRow shared entry pieces", () => {
     expect(screen.getByText("No description recorded.")).toBeInTheDocument();
   });
 });
+
+describe("ArcheotechImplantRow shared layout", () => {
+  it("names the Remove pop-up after an Archeotech Item", async () => {
+    const user = userEvent.setup();
+    render(<ArcheotechImplantRow item={item()} editable onRemove={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Archeotech Item" })).toBeInTheDocument();
+  });
+
+  it("shows the source chip when the item has a source", () => {
+    render(<ArcheotechImplantRow item={item({ source: "IH" })} editable onRemove={vi.fn()} />);
+
+    expect(screen.getByText("IH")).toBeInTheDocument();
+  });
+});

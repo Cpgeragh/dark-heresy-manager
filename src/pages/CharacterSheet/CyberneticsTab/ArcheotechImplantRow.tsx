@@ -4,11 +4,8 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { Chip } from "../../../ui/chips/Chip";
-import { uiChipRow } from "../../../ui/styles/editableStyles";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { InfoParagraph } from "../../../ui/InfoSection";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
@@ -32,63 +29,41 @@ export function ArcheotechImplantRow({
   const rules = item.rules?.trim() || ref?.rules;
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={item.name}
-      badge={
-        highlightAsArcheotech ? (
-          <Chip colour="amber" className="shrink-0">
-            Archeotech
-          </Chip>
-        ) : undefined
-      }
+      editable={editable}
+      badge={highlightAsArcheotech ? <Chip colour="amber">Archeotech</Chip> : undefined}
       tone={highlightAsArcheotech ? "archeotech" : "default"}
-      info={
-        <InfoModal
-          title={item.name}
-          content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
-        />
-      }
-      metadata={
+      information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+      chips={
         <>
           {locations.length > 0 && (
-            <div className={`${uiChipRow} items-center`}>
-              <StatChip
-                label="Location"
-                value={locations.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
-              />
-            </div>
+            <StatChip
+              label="Location"
+              value={locations.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
+            />
           )}
           <ItemMetaChips
+            bare
             weight={item.weight}
             value={item.value}
             availability={item.availability}
-            className={uiChipRow}
+            source={item.source}
           />
         </>
       }
-      afterMetadata={
-        <>
-          <EntryDetailLine
-            label="Rules"
-            info={
-              rules ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={<InfoParagraph>{rules}</InfoParagraph>}
-                />
-              ) : undefined
-            }
-          />
-          {item.craftsmanship && (
-            <EntryDetailLine label="Craftsmanship" value={item.craftsmanship} />
-          )}
-        </>
-      }
-      removeAction={
-        editable ? (
-          <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
-        ) : undefined
-      }
+      lines={{
+        craftsmanship: item.craftsmanship ? { value: item.craftsmanship } : undefined,
+        rules: {
+          info: rules ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={<InfoParagraph>{rules}</InfoParagraph>}
+            />
+          ) : undefined,
+        },
+      }}
+      removal={{ kind: "Archeotech Item", onRemove }}
     />
   );
 }

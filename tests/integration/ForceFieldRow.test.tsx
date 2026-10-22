@@ -142,3 +142,24 @@ describe("ForceFieldRow shared entry pieces", () => {
     expect(remove.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
+
+describe("ForceFieldRow shared layout", () => {
+  it("names the Remove pop-up after a Force Field", async () => {
+    const user = userEvent.setup();
+    renderRow();
+
+    await user.click(screen.getByRole("button", { name: "Remove Refraction Field" }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Force Field" })).toBeInTheDocument();
+  });
+
+  it("prints Craftsmanship, then Qualities, then Rules", () => {
+    renderRow();
+
+    const labels = screen
+      .getAllByText(/^(Craftsmanship|Qualities|Rules)$/)
+      .map((label) => label.textContent);
+
+    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules"]);
+  });
+});

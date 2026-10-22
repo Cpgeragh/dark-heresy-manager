@@ -123,3 +123,20 @@ describe("ArcheotechArmourRow read-only", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe("ArcheotechArmourRow shared layout", () => {
+  it("names the Remove pop-up after an Archeotech Item", async () => {
+    const user = userEvent.setup();
+    renderRow();
+
+    await user.click(screen.getByRole("button", { name: "Remove Ork Mega Armour" }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Archeotech Item" })).toBeInTheDocument();
+  });
+
+  it("shows the source chip when the item has a source", () => {
+    renderRow({ item: { ...baseItem, source: "IH" } });
+
+    expect(screen.getByText("IH")).toBeInTheDocument();
+  });
+});

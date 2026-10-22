@@ -21,9 +21,10 @@ import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButto
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
 import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
-import { CharacterEntryRow, CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 
 interface Props extends CustomItemLibraryActionProps<"archeotech"> {
@@ -60,85 +61,71 @@ export function ItemCard({
   const availability = item.availability ?? ref?.availability;
   const source = item.source ?? ref?.source;
 
+  const typeBadge = item.type ? <Chip colour="slate">{item.type}</Chip> : undefined;
+
   const badge = (
     <>
       {libraryItem && <StatusBadge status={libraryItem.status} />}
-      {item.type && <Chip colour="slate">{item.type}</Chip>}
+      {typeBadge}
     </>
   );
 
-  const information = (
-    <InfoModal
-      title={item.name}
-      content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
-    />
-  );
+  const information = description ? <InfoParagraph>{description}</InfoParagraph> : undefined;
 
-  const removeAction = editable ? (
-    <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
+  const rulesInfo = rules ? (
+    <InfoModal title={`${item.name} Rules`} content={<InfoParagraph>{rules}</InfoParagraph>} />
   ) : undefined;
 
-  const metadata = (
+  const removeAction = editable ? (
+    <RemoveEntryButton kind="Archeotech Item" name={item.name} onRemove={onRemove} />
+  ) : undefined;
+
+  const chips = (
     <>
       {item.type === "Armour" && (
-        <div className={uiChipRow}>
+        <>
           {item.locations && item.locations.length > 0 && (
             <StatChip label="Location" value={locationLabel(item.locations)} />
           )}
           {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
           {item.stacks && <Chip colour="sky">Stacks</Chip>}
-        </div>
+        </>
       )}
       {item.type === "Force Field" && item.protectionRating !== undefined && (
-        <div className={uiChipRow}>
-          <StatChip label="PR" value={String(item.protectionRating)} />
-        </div>
+        <StatChip label="PR" value={String(item.protectionRating)} />
       )}
       {item.type === "Shield" && (
-        <div className={uiChipRow}>
+        <>
           {item.locations && item.locations.length > 0 && (
             <StatChip label="Location" value={locationLabel(item.locations)} />
           )}
           {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-        </div>
+        </>
       )}
       {item.type === "Cybernetic" && item.bodyLocation && item.bodyLocation.length > 0 && (
-        <div className={uiChipRow}>
-          <StatChip
-            label="Location"
-            value={item.bodyLocation
-              .map((location) => ARMOUR_LOCATION_LABELS[location])
-              .join(" & ")}
-          />
-        </div>
+        <StatChip
+          label="Location"
+          value={item.bodyLocation.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
+        />
       )}
       <ItemMetaChips
+        bare
         weight={weight}
         value={value}
         availability={availability}
         source={source}
-        className={uiChipRow}
       />
     </>
   );
 
+  const craftsmanship =
+    item.type === "Cybernetic" && item.craftsmanship ? item.craftsmanship : undefined;
+
   const lines = (
     <>
+      {craftsmanship && <EntryDetailLine label="Craftsmanship" value={craftsmanship} />}
       {specialRules && <EntryDetailLine label="Qualities" value={specialRules} />}
-      <EntryDetailLine
-        label="Rules"
-        info={
-          rules ? (
-            <InfoModal
-              title={`${item.name} Rules`}
-              content={<InfoParagraph>{rules}</InfoParagraph>}
-            />
-          ) : undefined
-        }
-      />
-      {item.type === "Cybernetic" && item.craftsmanship && (
-        <EntryDetailLine label="Craftsmanship" value={item.craftsmanship} />
-      )}
+      <EntryDetailLine label="Rules" info={rulesInfo} />
       {notes && <EntryDetailLine label="Notes" value={notes} />}
     </>
   );
@@ -170,8 +157,8 @@ export function ItemCard({
             name={item.name}
             nameClassName={uiOverlayItemNameHover}
             badge={badge}
-            info={information}
-            metadata={metadata}
+            info={<InfoModal title={item.name} content={information} />}
+            metadata={<div className={`${uiChipRow} items-center`}>{chips}</div>}
             removeAction={removeAction}
             expandControl={<ExpandChevron expanded={expanded} />}
           />
@@ -187,15 +174,28 @@ export function ItemCard({
   }
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={item.name}
-      badge={badge}
-      info={information}
-      metadata={metadata}
-      afterMetadata={lines}
-      removeAction={removeAction}
-    >
-      {libraryActions}
-    </CharacterEntryRow>
+      editable={editable}
+      badge={typeBadge}
+      information={information}
+      chips={chips}
+      lines={{
+        craftsmanship: craftsmanship ? { value: craftsmanship } : undefined,
+        qualities: specialRules ? { value: specialRules } : undefined,
+        rules: { info: rulesInfo },
+      }}
+      library={{
+        libraryItem,
+        isDM,
+        canEditDefinition,
+        busyAction,
+        onEditDefinition,
+        onPublish,
+        onArchive,
+        onUpdateAllCopies,
+      }}
+      removal={{ kind: "Archeotech Item", onRemove }}
+    />
   );
 }

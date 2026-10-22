@@ -128,3 +128,15 @@ describe("ItemCard remove", () => {
     expect(screen.queryByRole("button", { name: "Remove Digi-weapon" })).not.toBeInTheDocument();
   });
 });
+
+describe("ItemCard flat row", () => {
+  it("names the Remove pop-up after an Archeotech Item", async () => {
+    const user = userEvent.setup();
+    const flat: ArcheotechItem = { id: "a9", name: "Combi-tool", type: "Device" };
+    render(<ItemCard item={flat} editable onRemove={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove Combi-tool" }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Archeotech Item" })).toBeInTheDocument();
+  });
+});

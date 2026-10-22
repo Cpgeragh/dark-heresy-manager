@@ -550,6 +550,8 @@ Add the five named armour fixtures and inspect their picker summaries before add
 - [ ] On every Armour piece, Force field, Archeotech armour and Archeotech force field row the trash button comes first and the info icon beside the name is always shown; the Armour piece and Force field icons say "No description recorded."
 - [ ] Wear, Stow, Activate and Deactivate use the Equip button look and sizes, with the green outline when worn or active; on a read-only sheet a worn or active piece shows a small `Worn` or `Active` chip and no button
 - [ ] Every Armour piece, Force field and Archeotech row has Qualities (where it has any), `Rules` and `Craftsmanship` lines written the same way, each showing "-" when empty
+- [ ] The lines on an Armour piece and a Force field run Craftsmanship, Qualities, then Rules, the Upgrades section or the Spare Cells stepper sits below them, and the Location or PR box shares one chip row with the weight, value, availability, and source chips (`PieceRow.tsx`, `ForceFieldRow.tsx`)
+- [ ] The Remove pop-up is titled `Remove Armour Piece` on an Armour piece and `Remove Force Field` on a Force field
 - [ ] Removing an Armour piece, Force field, Archeotech armour, Archeotech force field, or an upgrade asks `Remove [name] from this character?` with Remove and Cancel, shows waiting dots until the save finishes, and keeps the pop-up open and the item in place if the save is refused
 - [ ] Fit the Impellor upgrade to a Selenite Void Suit: weight chip becomes 25 kg (20 base + 5), not 20 kg next to a separate "+5"
 - [ ] The Impellor upgrade is only offered on the Selenite Void Suit: not on any carapace or power armour piece
@@ -879,6 +881,7 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 - [ ] A plain (non-armour, non-weapon) Archeotech item behaves like a normal gear-style entry
 - [ ] Every Archeotech item card has its description behind the information icon beside the name, a `Rules` line showing "-" until rules text exists, and a `Qualities` line when the reference lists special rules; a cybernetic item shows a plain `Craftsmanship` line
 - [ ] An item with its own Notes is an expandable card with the trash button in the closed header and the chevron last, and the `Notes` line appears only when it is expanded; every other item is a flat row with the trash button first
+- [ ] The Remove pop-up of every Archeotech item, whether it is a row or a card on the Archeotech, Armour, Cybernetics, or Weapons tab, is titled `Remove Archeotech Item`, and an Archeotech row shows the source chip when the item has a source
 - [ ] Removing an Archeotech item, from an expandable card or a flat row, asks `Remove [name] from this character?`, shows waiting dots until the save finishes, and keeps the pop-up open and the item in place if the save is refused
 - [ ] Custom archeotech creation and publishing: see §21, Custom Item Library
 - [ ] Custom archeotech form's "\* Required" hint stays visible once all fields are filled, not just while incomplete

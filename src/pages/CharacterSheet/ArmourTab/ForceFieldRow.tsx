@@ -1,15 +1,12 @@
 import type { WornArmourPiece } from "../../../types/Character";
 import {
-  uiChipRow,
   uiTextLabel,
   uiRuleName,
   uiTextDescription,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -17,8 +14,6 @@ import { InfoParagraph } from "../../../ui/InfoSection";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
 import { Stepper } from "../../../components/Stepper";
 
@@ -69,82 +64,56 @@ export function ForceFieldRow({
   const craftsmanship = piece.craftsmanship ?? "Common";
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={piece.name}
-      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      editable={editable}
       inactive={!active}
-      info={
-        <InfoModal
-          title={piece.name}
-          content={
-            piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
-          }
-        />
+      information={
+        piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
       }
-      metadata={
+      chips={
         <>
           {piece.protectionRating !== undefined && (
-            <div className={uiChipRow}>
-              <StatChip label="PR" value={String(piece.protectionRating)} />
-            </div>
+            <StatChip label="PR" value={String(piece.protectionRating)} />
           )}
           <ItemMetaChips
+            bare
             weight={piece.weight}
             value={piece.value}
             availability={piece.availability}
             source={piece.source}
-            className={uiChipRow}
           />
         </>
       }
-      afterMetadata={
-        <>
-          <EntryDetailLine
-            label="Qualities"
-            value={qualities.length > 0 ? qualities.join(", ") : undefined}
-            info={
-              qualities.length > 0 ? (
-                <InfoModal
-                  title={`${piece.name} Qualities`}
-                  content={<ForceFieldQualitiesContent qualities={qualities} />}
-                />
-              ) : undefined
-            }
-          />
-          <EntryDetailLine
-            label="Rules"
-            info={
-              notes ? (
-                <InfoModal
-                  title={`${piece.name} Rules`}
-                  content={<InfoParagraph>{notes}</InfoParagraph>}
-                />
-              ) : undefined
-            }
-          />
-          <EntryDetailLine
-            label="Craftsmanship"
-            value={craftsmanship}
-            info={
+      lines={{
+        craftsmanship: {
+          value: craftsmanship,
+          info: (
+            <InfoModal
+              title={`${craftsmanship} Force Field`}
+              content={forceFieldCraftsmanshipDescription(craftsmanship)}
+            />
+          ),
+        },
+        qualities: {
+          value: qualities.length > 0 ? qualities.join(", ") : undefined,
+          info:
+            qualities.length > 0 ? (
               <InfoModal
-                title={`${craftsmanship} Force Field`}
-                content={forceFieldCraftsmanshipDescription(craftsmanship)}
+                title={`${piece.name} Qualities`}
+                content={<ForceFieldQualitiesContent qualities={qualities} />}
               />
-            }
-          />
-
-          {ref?.spareCellValue && (
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Spare Cells</span>
-              <Stepper
-                value={piece.spareCells ?? 0}
-                editable={editable}
-                onChange={(value) => onUpdateSpareCells(piece.id, value)}
-              />
-            </div>
-          )}
-        </>
-      }
+            ) : undefined,
+        },
+        rules: {
+          info: notes ? (
+            <InfoModal
+              title={`${piece.name} Rules`}
+              content={<InfoParagraph>{notes}</InfoParagraph>}
+            />
+          ) : undefined,
+        },
+      }}
       actions={
         <StateToggleButton
           active={active}
@@ -158,28 +127,29 @@ export function ForceFieldRow({
           onChange={() => onToggle(piece.id)}
         />
       }
-      removeAction={
-        editable ? (
-          <RemoveEntryButton
-            kind="Force Field"
-            name={piece.name}
-            onRemove={() => onRemove(piece.id)}
-          />
+      body={
+        ref?.spareCellValue ? (
+          <div className="flex items-center gap-1.5">
+            <span className={uiTextLabel}>Spare Cells</span>
+            <Stepper
+              value={piece.spareCells ?? 0}
+              editable={editable}
+              onChange={(value) => onUpdateSpareCells(piece.id, value)}
+            />
+          </div>
         ) : undefined
       }
-    >
-      {libraryItem && (
-        <CustomItemActionButtons
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
-      )}
-    </CharacterEntryRow>
+      library={{
+        libraryItem,
+        isDM,
+        canEditDefinition,
+        busyAction,
+        onEditDefinition,
+        onPublish,
+        onArchive,
+        onUpdateAllCopies,
+      }}
+      removal={{ kind: "Force Field", onRemove: () => onRemove(piece.id) }}
+    />
   );
 }

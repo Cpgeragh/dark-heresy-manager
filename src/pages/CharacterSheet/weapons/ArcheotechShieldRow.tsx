@@ -88,7 +88,7 @@ export function ArcheotechShieldRow({
           }
           removeAction={
             editable ? (
-              <RemoveEntryButton kind="Archeotech item" name={item.name} onRemove={onRemove} />
+              <RemoveEntryButton kind="Archeotech Item" name={item.name} onRemove={onRemove} />
             ) : undefined
           }
           actions={

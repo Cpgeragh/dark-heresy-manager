@@ -115,3 +115,17 @@ describe("ArcheotechForceFieldRow read-only", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe("ArcheotechForceFieldRow shared layout", () => {
+  it("names the Remove pop-up after an Archeotech Item", async () => {
+    const user = userEvent.setup();
+    render(
+      <ArcheotechForceFieldRow item={{ ...baseItem, source: "IH" }} editable onRemove={vi.fn()} />
+    );
+
+    await user.click(screen.getByRole("button", { name: `Remove ${baseItem.name}` }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Archeotech Item" })).toBeInTheDocument();
+    expect(screen.getByText("IH")).toBeInTheDocument();
+  });
+});

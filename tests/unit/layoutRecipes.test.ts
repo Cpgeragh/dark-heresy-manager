@@ -57,6 +57,12 @@ describe("shared layout recipes", () => {
       "src/pages/CharacterSheet/GearTab/ConsumableRow.tsx",
       "src/pages/CharacterSheet/DrugsTab/DrugRow.tsx",
       "src/pages/CharacterSheet/CyberneticsTab/ImplantRow.tsx",
+      "src/pages/CharacterSheet/CyberneticsTab/ArcheotechImplantRow.tsx",
+      "src/pages/CharacterSheet/ArmourTab/PieceRow.tsx",
+      "src/pages/CharacterSheet/ArmourTab/ForceFieldRow.tsx",
+      "src/pages/CharacterSheet/ArmourTab/ArcheotechArmourRow.tsx",
+      "src/pages/CharacterSheet/ArmourTab/ArcheotechForceFieldRow.tsx",
+      "src/pages/CharacterSheet/ArcheotechTab/ItemCard.tsx",
     ]) {
       expect(readFileSync(join(__dirname, "../..", file), "utf8")).toContain("<OwnedEntryRow");
     }
