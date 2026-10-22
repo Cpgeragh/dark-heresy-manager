@@ -47,6 +47,31 @@ describe("PickerRow", () => {
     expect(row.firstElementChild).toHaveClass("flex", "items-center", "gap-3");
   });
 
+  it("shows the drill-down arrow after the main content when it opens another screen", () => {
+    render(<PickerRow opensScreen>Bolt pistol</PickerRow>);
+
+    const row = screen.getByRole("button", { name: "Bolt pistol" });
+    expect(row.firstElementChild).toHaveClass("flex", "items-center", "gap-3");
+    expect(row.querySelector("svg")).not.toBeNull();
+  });
+
+  it("sets aria-pressed only for a row that is chosen or not chosen", () => {
+    render(
+      <>
+        <PickerRow selected>Chosen</PickerRow>
+        <PickerRow selected={false}>Not chosen</PickerRow>
+        <PickerRow>Acts</PickerRow>
+      </>
+    );
+
+    expect(screen.getByRole("button", { name: "Chosen" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Not chosen" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+    expect(screen.getByRole("button", { name: "Acts" })).not.toHaveAttribute("aria-pressed");
+  });
+
   it("does not wrap its content when there is no trailing content", () => {
     render(<PickerRow>Bolt pistol</PickerRow>);
 

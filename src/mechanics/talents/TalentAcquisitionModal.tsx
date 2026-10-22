@@ -529,7 +529,6 @@ export function TalentAcquisitionModal({
               <PickerRow
                 key={item.key}
                 selected={selected}
-                aria-pressed={selected}
                 onClick={() =>
                   setFatalRemovalKeys((current) =>
                     current.includes(item.key)

@@ -496,7 +496,6 @@ export function BackgroundSetupFields({
           <PickerList>
             <PickerRow
               selected={!selectedAdvanceScheme}
-              aria-pressed={!selectedAdvanceScheme}
               onClick={() => handleAdvanceSchemeSelect()}
             >
               <PickerRowName name={selectedRank.name} />
@@ -505,7 +504,6 @@ export function BackgroundSetupFields({
               <PickerRow
                 key={rank.id}
                 selected={selectedAdvanceScheme?.id === rank.id}
-                aria-pressed={selectedAdvanceScheme?.id === rank.id}
                 onClick={() => handleAdvanceSchemeSelect(rank.id)}
               >
                 <PickerRowName name={rank.name} />
@@ -531,8 +529,6 @@ export function BackgroundSetupFields({
             {[1, 2, 3, 4, 5].map((value) => (
               <PickerRow
                 key={value}
-                selected={false}
-                aria-pressed={false}
                 onClick={async () => {
                   const saved = await commitAdvanceSchemeSelect(pendingAdvanceSchemeId, value);
                   if (saved !== false) setPendingAdvanceSchemeId(null);

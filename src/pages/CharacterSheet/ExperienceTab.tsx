@@ -726,7 +726,6 @@ function RankUpModal({
           <PickerList>
             <PickerRow
               selected={selectedAlternateRankId === ""}
-              aria-pressed={selectedAlternateRankId === ""}
               onClick={() => {
                 selectAlternateRank("");
                 setRankTypePickerOpen(false);
@@ -738,7 +737,6 @@ function RankUpModal({
               <PickerRow
                 key={alternateRank.id}
                 selected={selectedAlternateRankId === alternateRank.id}
-                aria-pressed={selectedAlternateRankId === alternateRank.id}
                 onClick={() => {
                   selectAlternateRank(alternateRank.id);
                   setRankTypePickerOpen(false);

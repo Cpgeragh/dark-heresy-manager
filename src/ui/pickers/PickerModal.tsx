@@ -15,6 +15,7 @@ import {
 } from "../styles/editableStyles";
 import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
+import { ArrowRight } from "../icons/PickerArrows";
 import { PlusIcon } from "../icons/PlusIcon";
 import {
   uiDisabledControl,
@@ -42,9 +43,12 @@ export function PickerList({ className = "", ...props }: HTMLAttributes<HTMLDivE
 
 export type PickerRowProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
   interactive?: boolean;
+  /** A row that is chosen or not chosen; leave it out for a row that simply acts. */
   selected?: boolean;
   /** Content after the row's main content, such as a drill-down arrow. */
   trailing?: ReactNode;
+  /** The row opens another screen, so it shows the drill-down arrow. */
+  opensScreen?: boolean;
   /** A handler that returns a promise keeps the row busy, with a spinner, until it settles. */
   onClick?: (event: MouseEvent<HTMLButtonElement>) => unknown;
 };
@@ -55,7 +59,8 @@ export function PickerRow({
   disabled = false,
   interactive = true,
   onClick,
-  selected = false,
+  selected,
+  opensScreen = false,
   trailing,
   tabIndex,
   type = "button",
@@ -70,6 +75,7 @@ export function PickerRow({
       type={type}
       disabled={disabled || pending}
       aria-busy={pending || undefined}
+      aria-pressed={selected}
       onClick={respondsToInput ? handleClick : undefined}
       tabIndex={respondsToInput ? tabIndex : -1}
       className={`relative w-full text-left ${uiSectionShell} p-3 lg:p-4 transition ${
@@ -81,10 +87,10 @@ export function PickerRow({
       } ${className}`.trim()}
       {...props}
     >
-      {trailing ? (
+      {trailing || opensScreen ? (
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">{children}</div>
-          {trailing}
+          {trailing ?? <ArrowRight />}
         </div>
       ) : (
         children

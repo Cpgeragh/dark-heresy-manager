@@ -1336,6 +1336,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] Session cards show "+XP" in amber and "XP Applied" in green, and the Loaded label on a Ranged magazine and on an ammo row is a green chip (`SessionCard.tsx`, `RangedCard.tsx`, `AmmoEntryRow.tsx`)
 - [ ] Rank card entry kinds, Faith Talent groups and Custom Item Library filter chips use the same lighter chip look, with the active filter red (`ExperienceTab.tsx`, `faithTalentGroups.ts`, `CustomItemLibraryAdmin.tsx`)
 - [ ] Hovering a row in an editable picker turns its name white and lightens its box together; in a read-only View picker neither changes (`PickerRow` in `PickerModal.tsx`)
+- [ ] A row that is chosen or not chosen, such as a Career, Homeworld, Divination, Gender or advance scheme row, is announced as pressed or not pressed by a screen reader, and a row that only acts is not (`PickerRow` in `PickerModal.tsx`)
 - [ ] A long item name wraps onto a second line with its info icon beside it, and no name is cut with an ellipsis
 - [ ] Pressing the info icon on any row opens its pop-up and does not select the row
 - [ ] The weapon and armour Add upgrade pickers show each upgrade's name, chips and description, with no "applies to" line
