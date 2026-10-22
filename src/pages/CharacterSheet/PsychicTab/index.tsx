@@ -27,7 +27,6 @@ import { Chip } from "../../../ui/chips/Chip";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { PickerBody, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
-import { ArrowRight } from "../../../ui/icons/PickerArrows";
 import { InfoModal } from "../../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../../data/reference/talentDescriptions";
 import {
@@ -126,7 +125,7 @@ function PowerRouteCard({
   onClick: () => void;
 }) {
   return (
-    <PickerRow aria-label={title} trailing={<ArrowRight />} onClick={onClick}>
+    <PickerRow aria-label={title} opensScreen onClick={onClick}>
       <PickerRowName name={title} />
       <PickerRowChips>
         <Chip colour={statusColour}>{status}</Chip>

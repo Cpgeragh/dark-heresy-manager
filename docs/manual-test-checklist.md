@@ -1342,6 +1342,11 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] Rank card entry kinds, Faith Talent groups and Custom Item Library filter chips use the same lighter chip look, with the active filter red (`ExperienceTab.tsx`, `faithTalentGroups.ts`, `CustomItemLibraryAdmin.tsx`)
 - [ ] Hovering a row in an editable picker turns its name white and lightens its box together; in a read-only View picker neither changes (`PickerRow` in `PickerModal.tsx`)
 - [ ] A row that is chosen or not chosen, such as a Career, Homeworld, Divination, Gender or advance scheme row, is announced as pressed or not pressed by a screen reader, and a row that only acts is not (`PickerRow` in `PickerModal.tsx`)
+- [ ] Every Skill row in the Add Skill picker is drawn once at every width, the name wraps, the information icon sits beside it, the chips include the Total, and Gained from and Talent effects show as labelled lines in the standard colours (`SkillPickerRow.tsx`)
+- [ ] In the Mutation, Malignancy, Disorder and Trauma pickers the information icon beside the name opens the full description and modifiers, there is no separate Rules line, and the arrow shows only when a roll, severity or option screen follows (`MutationPicker.tsx`, `CorruptionMalignancyPicker.tsx`, `InsanityDisorderPicker.tsx`, `InsanityTraumaPicker.tsx`)
+- [ ] In the Talent and Trait picker every row has an information icon, a custom item shows its status badge with no Custom chip, Prerequisites show as a labelled line, and the arrow shows only on a row that needs another step (`TalentPickerModal.tsx`)
+- [ ] In the Elite Advance pickers the Unlocked by, Missed rank, Prerequisites and Available through lines show as labelled lines, the Skill and Talent rows have an information icon, and the kind chooser rows show the arrow (`EliteAdvancesTab.tsx`)
+- [ ] The Psychic route cards, the Skills picker category rows, the Archeotech type chooser rows and the Cybernetics installation side rows show the arrow (`PickerRow` in `PickerModal.tsx`)
 - [ ] A long item name wraps onto a second line with its info icon beside it, and no name is cut with an ellipsis
 - [ ] Pressing the info icon on any row opens its pop-up and does not select the row
 - [ ] The weapon and armour Add upgrade pickers show each upgrade's name, chips and description, with no "applies to" line

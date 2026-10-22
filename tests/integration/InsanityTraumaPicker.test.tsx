@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -20,6 +20,26 @@ function setup(editable = true) {
 }
 
 describe("InsanityTraumaPicker", () => {
+  it("puts the information icon beside the name, shows the arrow only on a trauma with options, and has no Rules line", () => {
+    setup();
+    const plain = screen.getByText("Withdrawn and Quiet", { selector: "span" }).closest("button")!;
+    const withOptions = screen
+      .getByText("Hysterically Blind or Deaf", { selector: "span" })
+      .closest("button")!;
+
+    expect(
+      within(plain).getByRole("button", { name: "Show information about Withdrawn and Quiet" })
+    ).toBeInTheDocument();
+    expect(
+      within(withOptions).getByRole("button", {
+        name: "Show information about Hysterically Blind or Deaf",
+      })
+    ).toBeInTheDocument();
+    expect(withOptions.firstElementChild).toHaveClass("gap-3");
+    expect(plain.firstElementChild).not.toHaveClass("gap-3");
+    expect(screen.queryByText("Rules")).not.toBeInTheDocument();
+  });
+
   it("adds a trauma with no options immediately", async () => {
     const user = userEvent.setup();
     const { onAdd } = setup();

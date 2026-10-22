@@ -6,15 +6,12 @@ import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
   uiFormLabel,
-  uiTextBody,
   uiTextError,
-  uiTextLabel,
   uiTextPlaceholder,
   uiStackBody,
 } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
@@ -34,11 +31,12 @@ import {
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
+import { PickerRowChips, PickerRowLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../ui/InfoSection";
 import { FilterButton } from "../../ui/pickers/FilterButton";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerField } from "../../ui/pickers/PickerField";
-import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
+import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import {
   sanitizeNonNegativeIntegerInput,
   sanitizePositiveIntegerInput,
@@ -455,10 +453,16 @@ export function TalentPickerModal({
                 if (editable) return onSelectCustomItem?.(item);
               }}
             >
-              <PickerRowName name={item.name} />
-              <PickerRowChips>
-                <Chip colour="amber">{item.status === "draft" ? "Draft" : "Custom"}</Chip>
-              </PickerRowChips>
+              <PickerRowName
+                name={item.name}
+                status={item.status}
+                infoTitle={item.name}
+                information={
+                  item.data.description ? (
+                    <InfoParagraph>{item.data.description}</InfoParagraph>
+                  ) : undefined
+                }
+              />
             </PickerRow>
           ))}
           {overflowFiltered.map((item) => {
@@ -485,9 +489,7 @@ export function TalentPickerModal({
               <PickerRow
                 key={item.id}
                 interactive={canMakeManualPurchase}
-                trailing={
-                  usesChoicePicker || usesTextEntry || opensAcquisition ? <ArrowRight /> : undefined
-                }
+                opensScreen={usesChoicePicker || usesTextEntry || opensAcquisition}
                 onClick={() => {
                   if (!canMakeManualPurchase) return;
                   if (usesChoicePicker) {
@@ -502,15 +504,8 @@ export function TalentPickerModal({
               >
                 <PickerRowName
                   name={item.name}
-                  info={
-                    (TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                      <InfoModal
-                        title={item.name}
-                        content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
-                        as="span"
-                      />
-                    )
-                  }
+                  infoTitle={item.name}
+                  information={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
                 />
                 <PickerRowChips>
                   {sources.map((source) => (
@@ -524,10 +519,7 @@ export function TalentPickerModal({
                   {ownedCount > 0 && <Chip colour="amber">Owned: {ownedCount}</Chip>}
                 </PickerRowChips>
                 {row.prerequisites && (
-                  <PickerRowText>
-                    <span className={uiTextLabel}>Prerequisites: </span>
-                    <span className={`${uiTextBody} font-medium`}>{row.prerequisites}</span>
-                  </PickerRowText>
+                  <PickerRowLine label="Prerequisites" value={row.prerequisites} />
                 )}
               </PickerRow>
             );
@@ -714,7 +706,7 @@ export function TalentPickerModal({
             <PickerRow
               key={item.id}
               interactive={editable}
-              trailing={opensNextStep ? <ArrowRight /> : undefined}
+              opensScreen={opensNextStep}
               onClick={() => {
                 if (!editable) return;
                 const itemTalent = item as TalentData;
@@ -730,15 +722,8 @@ export function TalentPickerModal({
             >
               <PickerRowName
                 name={item.name}
-                info={
-                  (TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                    <InfoModal
-                      title={item.name}
-                      content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
-                      as="span"
-                    />
-                  )
-                }
+                infoTitle={item.name}
+                information={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
               />
               <PickerRowChips>
                 {sources.map((source) => (
@@ -768,10 +753,7 @@ export function TalentPickerModal({
                 </PickerRowChips>
               )}
               {row.prerequisites && (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Prerequisites: </span>
-                  <span className={`${uiTextBody} font-medium`}>{row.prerequisites}</span>
-                </PickerRowText>
+                <PickerRowLine label="Prerequisites" value={row.prerequisites} />
               )}
             </PickerRow>
           );

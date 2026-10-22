@@ -5,7 +5,6 @@ import { GEAR_REFERENCE } from "../../data/reference/gearReference";
 import type { TraitData } from "../../data/reference/traitData";
 import { SANCTIONING_RESULTS } from "./sanctioningReference";
 import { notesForSanctioning } from "./traitEffects";
-import { InfoModal } from "../../components/InfoModal";
 import type {
   ArmourLocationKey,
   CyberneticItem,
@@ -27,7 +26,7 @@ import {
 } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
@@ -170,14 +169,14 @@ export function TraitAcquisitionModal({
               }}
               selected={result.id === sanctionResultId}
             >
-              <PickerRowName name={result.name} />
+              <PickerRowName
+                name={result.name}
+                infoTitle={result.name}
+                information={result.effect}
+              />
               <PickerRowChips>
                 <RollChip>{result.roll}</RollChip>
               </PickerRowChips>
-              <PickerRowInfoLine
-                label="Rules"
-                info={<InfoModal title={result.name} content={result.effect} as="span" />}
-              />
             </PickerRow>
           ))}
         </PickerList>

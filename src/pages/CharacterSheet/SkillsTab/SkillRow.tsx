@@ -4,48 +4,27 @@ import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_FULL_LABEL, CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import type { SkillTierAccess } from "shared-rules";
-import { characteristicChipColour, sourceChipColour } from "../../../ui/styles/sourceStyles";
+import { characteristicChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
-import { StatChip } from "../../../ui/chips/StatChip";
-import { InfoModal } from "../../../components/InfoModal";
-import { SKILL_DESCRIPTIONS } from "../../../data/reference/skillDescriptions";
-import { InfoSection } from "../../../ui/InfoSection";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
-import {
-  uiChipRow,
-  editableInputClass,
-  uiFormLabel,
-  uiInfoModalWrapper,
-  uiOverlayItemNameHover,
-  uiOverlayPeerHoverText,
-  uiSectionShell,
-  uiTextBody,
-  uiTextDescription,
-  uiStackBody,
-  uiStackField,
-  uiStackList,
-} from "../../../ui/styles/editableStyles";
-import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
-import { colourAmberPlain, type ChipColour } from "../../../ui/styles/colourTokens";
+import { editableInputClass, uiFormLabel, uiTextBody } from "../../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { EntryActionButton } from "../../../ui/buttons/EntryActionButton";
-import { uiLayerLocal } from "../../../ui/styles/layerStyles";
+import {
+  LEVEL_BADGE,
+  getSkillInfoContent,
+  getTalentSourceSummary,
+  skillLevelLabel,
+} from "./skillRowShared";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
   editable: boolean;
   updateLevel: (id: string, level: SkillAdvanceLevel) => void | Promise<boolean | void>;
-  previewMode?: boolean;
-  onSelect?: (id: string) => void | Promise<boolean | void>;
-  indented?: boolean;
-  hideLevelChip?: boolean;
-  /** Real XP cost to train this skill, shown as a chip in previewMode when known. */
-  cost?: number;
-  /** What buying this skill's next tier looks like right now. Owned rows only, not previewMode. */
+  /** What buying this skill's next tier looks like right now. */
   nextTierAccess?: SkillTierAccess;
   onManualUpgrade?: (
     id: string,
@@ -55,22 +34,10 @@ interface SkillRowProps {
   isDM?: boolean;
 }
 
-const LEVEL_BADGE: Record<string, ChipColour> = {
-  untrained: "red",
-  trained: "orange",
-  "+10": "sky",
-  "+20": "green",
-};
-
 export function SkillRow({
   skill,
   editable,
   updateLevel,
-  previewMode = false,
-  onSelect,
-  indented = false,
-  hideLevelChip = false,
-  cost,
   nextTierAccess,
   onManualUpgrade,
   isDM = false,
@@ -81,50 +48,8 @@ export function SkillRow({
   const [manualUpgradeCost, setManualUpgradeCost] = useState("");
 
   const levelBadgeColour = LEVEL_BADGE[skill.level];
-  const talentSources = skill.talentSources ?? [];
-  const talentSourceSummary = talentSources
-    .map(
-      (source) =>
-        `${source.name} (${source.type})${
-          source.detail
-            ? `: ${source.detail}`
-            : source.amount !== 0
-              ? `: ${source.amount > 0 ? "+" : ""}${source.amount}`
-              : ""
-        }`
-    )
-    .join(" · ");
-  const skillDescription = SKILL_DESCRIPTIONS[skill.name];
-  const hasSkillInfo = Boolean(skillDescription) || talentSources.length > 0;
-  const skillInfoContent = (
-    <div className={uiStackBody}>
-      {skillDescription && <p className={uiTextDescription}>{skillDescription}</p>}
-      {talentSources.length > 0 && (
-        <InfoSection heading="Effects">
-          <ul className={`${uiStackField} ${uiTextDescription}`}>
-            {talentSources.map((source, index) => (
-              <li key={index}>
-                {source.name} ({source.type})
-                {source.detail
-                  ? `: ${source.detail}`
-                  : source.amount !== 0
-                    ? `: ${source.amount > 0 ? "+" : ""}${source.amount}`
-                    : ""}
-              </li>
-            ))}
-          </ul>
-        </InfoSection>
-      )}
-    </div>
-  );
-
-  const displayName = indented
-    ? skill.name
-        .slice(skill.category.length)
-        .trim()
-        .replace(/^\(|\)$/g, "")
-        .trim() || skill.name
-    : skill.name;
+  const talentSourceSummary = getTalentSourceSummary(skill);
+  const skillInfoContent = getSkillInfoContent(skill);
 
   const handleRemove = useCallback(
     () => updateLevel(skill.id, "untrained"),
@@ -151,160 +76,67 @@ export function SkillRow({
   const hasCareerUpgrade = editable && nextTierAccess?.status === "unlocked";
   const hasManualUpgrade = editable && isDM && nextTierAccess?.status === "not-on-career";
   const hasUpgrade = hasCareerUpgrade || hasManualUpgrade;
-  const levelLabel =
-    skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level;
+  const levelLabel = skillLevelLabel(skill.level);
   const total = skill.total ?? "—";
   const characteristicName = CHAR_FULL_LABEL[skill.characteristic].replace(/\s+\([^)]+\)$/, "");
 
-  const pickerInformation = hasSkillInfo ? (
-    <InfoModal title={skill.name} content={skillInfoContent} as="span" />
-  ) : undefined;
-
-  const pickerMetadata = (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-      <div className={`${uiChipRow} items-center`}>
-        {skill.source && (
-          <Chip colour={sourceChipColour(skill.source)} className="font-code shrink-0">
-            {skill.source}
-          </Chip>
-        )}
-        {cost !== undefined && (
-          <Chip colour="amber" className="font-code shrink-0">
-            {cost} XP
-          </Chip>
-        )}
-        <Chip
-          colour={characteristicChipColour(skill.characteristic)}
-          className="font-code shrink-0"
-        >
-          {CHAR_LABEL[skill.characteristic]}
-        </Chip>
-        <Chip colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
-          {skill.advanced ? "Advanced" : "Basic"}
-        </Chip>
-        {!hideLevelChip && (
-          <Chip colour={levelBadgeColour} className="shrink-0">
-            {levelLabel}
-          </Chip>
-        )}
-      </div>
-      <StatChip label="Total" value={total} />
-    </div>
-  );
-  const pickerSecondaryInformation = (
-    <>
-      {eliteAdvancePurchase && (
-        <p className={`text-sm ${colourAmberPlain}`}>
-          Gained from: {eliteAdvancePurchase.sourceName} (Elite Advance)
-        </p>
-      )}
-      {talentSourceSummary && (
-        <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
-      )}
-    </>
-  );
-
   return (
     <>
-      {previewMode ? (
-        <div className={uiSectionShell + " overflow-hidden"}>
-          <div
-            className={`relative w-full p-3 text-left lg:p-4 ${onSelect ? uiCardTapHeader : ""}`}
-          >
-            {onSelect && (
-              <CardOverlayButton
-                label={`Select ${skill.name}`}
-                onClick={() => onSelect(skill.id)}
-              />
-            )}
-            <div
-              className={`relative ${uiLayerLocal} pointer-events-none lg:hidden ${uiStackList} ${uiOverlayPeerHoverText}`}
+      <OwnedEntryRow
+        name={skill.name}
+        editable={editable}
+        information={skillInfoContent}
+        informationAs="span"
+        chips={
+          <>
+            <Chip
+              colour={characteristicChipColour(skill.characteristic)}
+              className="font-code"
+              aria-label={`${characteristicName} ${total}`}
             >
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className={`${uiOverlayItemNameHover} break-words`}>{displayName}</span>
-                {pickerInformation && (
-                  <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                    {pickerInformation}
-                  </span>
-                )}
-              </div>
-              {pickerMetadata}
-              {pickerSecondaryInformation}
-            </div>
-            <div
-              className={`relative ${uiLayerLocal} pointer-events-none hidden lg:block ${uiStackList} ${uiOverlayPeerHoverText}`}
-            >
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className={`${uiOverlayItemNameHover} truncate`}>{displayName}</span>
-                {pickerInformation && (
-                  <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                    {pickerInformation}
-                  </span>
-                )}
-              </div>
-              {pickerMetadata}
-              {pickerSecondaryInformation}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <OwnedEntryRow
-          name={skill.name}
-          displayName={displayName}
-          editable={editable}
-          information={hasSkillInfo ? skillInfoContent : undefined}
-          informationAs="span"
-          chips={
+              {CHAR_LABEL[skill.characteristic]} {total}
+            </Chip>
+            <Chip colour={skill.advanced ? "purple" : "teal"}>
+              {skill.advanced ? "Advanced" : "Basic"}
+            </Chip>
+            <Chip colour={levelBadgeColour}>{levelLabel}</Chip>
+          </>
+        }
+        lines={{
+          gainedFrom: eliteAdvancePurchase
+            ? `${eliteAdvancePurchase.sourceName} (Elite Advance)`
+            : undefined,
+          talentEffects: talentSourceSummary || undefined,
+        }}
+        actions={
+          hasUpgrade ? (
             <>
-              <Chip
-                colour={characteristicChipColour(skill.characteristic)}
-                className="font-code"
-                aria-label={`${characteristicName} ${total}`}
-              >
-                {CHAR_LABEL[skill.characteristic]} {total}
-              </Chip>
-              <Chip colour={skill.advanced ? "purple" : "teal"}>
-                {skill.advanced ? "Advanced" : "Basic"}
-              </Chip>
-              {!hideLevelChip && <Chip colour={levelBadgeColour}>{levelLabel}</Chip>}
+              {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
+                <EntryActionButton onClick={() => setUpgradeArmed(true)}>
+                  Upgrade to {nextTierAccess.level}
+                </EntryActionButton>
+              )}
+              {hasManualUpgrade && nextTierAccess?.status === "not-on-career" && (
+                <EntryActionButton onClick={() => setManualUpgradeArmed(true)}>
+                  Upgrade to {nextTierAccess.level}
+                </EntryActionButton>
+              )}
             </>
-          }
-          lines={{
-            gainedFrom: eliteAdvancePurchase
-              ? `${eliteAdvancePurchase.sourceName} (Elite Advance)`
-              : undefined,
-            talentEffects: talentSourceSummary || undefined,
-          }}
-          actions={
-            hasUpgrade ? (
-              <>
-                {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
-                  <EntryActionButton onClick={() => setUpgradeArmed(true)}>
-                    Upgrade to {nextTierAccess.level}
-                  </EntryActionButton>
-                )}
-                {hasManualUpgrade && nextTierAccess?.status === "not-on-career" && (
-                  <EntryActionButton onClick={() => setManualUpgradeArmed(true)}>
-                    Upgrade to {nextTierAccess.level}
-                  </EntryActionButton>
-                )}
-              </>
-            ) : undefined
-          }
-          removal={{
-            kind: "Skill",
-            onRemove: handleRemove,
-            hidden: !canRemove,
-            extra: downgradeLevel
-              ? {
-                  label: `Downgrade to ${downgradeLabel}`,
-                  message: `Downgrade ${skill.name} to ${downgradeLabel}, or remove it from this character?`,
-                  onClick: handleDowngrade,
-                }
-              : undefined,
-          }}
-        />
-      )}
+          ) : undefined
+        }
+        removal={{
+          kind: "Skill",
+          onRemove: handleRemove,
+          hidden: !canRemove,
+          extra: downgradeLevel
+            ? {
+                label: `Downgrade to ${downgradeLabel}`,
+                message: `Downgrade ${skill.name} to ${downgradeLabel}, or remove it from this character?`,
+                onClick: handleDowngrade,
+              }
+            : undefined,
+        }}
+      />
 
       {upgradeArmed && nextTierAccess?.status === "unlocked" && (
         <PickerModal

@@ -334,12 +334,9 @@ describe("SkillsTab", () => {
     const dialog = screen.getByRole("dialog", { name: "Available Untrained Basic Skills" });
     const list = within(dialog).getByTestId("skill-picker-card-list");
     expect(list).toHaveClass("space-y-2", "p-3");
-    const selectAwareness = within(dialog).getByRole("button", { name: "Select Awareness" });
-    expect(selectAwareness).toHaveClass("peer", "hover:bg-slate-800");
-    expect(selectAwareness.parentElement).not.toHaveClass("hover:bg-slate-800");
-    const awarenessCard = selectAwareness.closest("div.rounded-lg");
-    expect(awarenessCard).toHaveClass("border-slate-500");
-    expect(within(awarenessCard!).getAllByText("CR").length).toBeGreaterThan(0);
+    const awarenessRow = within(dialog).getByRole("button", { name: "Select Awareness" });
+    expect(awarenessRow).toHaveClass("rounded-lg", "border-slate-500", "hover:bg-slate-800");
+    expect(within(awarenessRow).getAllByText("CR").length).toBeGreaterThan(0);
 
     await user.click(within(dialog).getByRole("button", { name: "Select Awareness" }));
     const openDialog = screen.getByRole("dialog", { name: "Available Untrained Basic Skills" });

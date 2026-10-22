@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import type { InsanityDisorderEntry, InsanityDisorderSeverity } from "../../types/Character";
 import type { CustomItemOrigin } from "../../constants/customItems";
-import { InfoModal } from "../../components/InfoModal";
 import { Button } from "../../ui/buttons/Button";
 import { ToggleButton } from "../../ui/buttons/ToggleButton";
 import { Chip } from "../../ui/chips/Chip";
@@ -15,7 +14,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { FilterButton } from "../../ui/pickers/FilterButton";
@@ -315,6 +314,7 @@ export function InsanityDisorderPicker({
           <PickerRow
             key={ref.id}
             interactive={editable}
+            opensScreen
             onClick={() => {
               setSelected(ref);
               setSeverity(ref.severityOptions[0]);
@@ -322,27 +322,21 @@ export function InsanityDisorderPicker({
               setNotes("");
             }}
           >
-            <PickerRowName name={ref.name} />
-            <PickerRowChips>
-              <Chip colour={disorderTypeChipColour(ref.type)}>{ref.type}</Chip>
-            </PickerRowChips>
-            <PickerRowInfoLine
-              label="Rules"
-              info={
-                <InfoModal
-                  title={ref.name}
-                  content={
-                    <DisorderInfoContent
-                      type={ref.type}
-                      name={ref.name}
-                      description={ref.description}
-                      typeDescription={ref.typeDescription}
-                    />
-                  }
-                  as="span"
+            <PickerRowName
+              name={ref.name}
+              infoTitle={ref.name}
+              information={
+                <DisorderInfoContent
+                  type={ref.type}
+                  name={ref.name}
+                  description={ref.description}
+                  typeDescription={ref.typeDescription}
                 />
               }
             />
+            <PickerRowChips>
+              <Chip colour={disorderTypeChipColour(ref.type)}>{ref.type}</Chip>
+            </PickerRowChips>
           </PickerRow>
         ))}
       </PickerList>

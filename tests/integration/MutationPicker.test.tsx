@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -19,6 +19,21 @@ function setup(tier: "minor" | "major" = "minor", editable = true) {
   );
   return { onAdd, onClose };
 }
+
+describe("MutationPicker rows", () => {
+  it("puts the information icon beside the name, shows the arrow only when a roll is needed, and has no Rules line", () => {
+    setup();
+    const flat = screen.getByText("Tough Hide", { selector: "span" }).closest("button")!;
+    const rolled = screen.getByText("Misshapen", { selector: "span" }).closest("button")!;
+
+    expect(
+      within(flat).getByRole("button", { name: "Show information about Tough Hide" })
+    ).toBeInTheDocument();
+    expect(rolled.firstElementChild).toHaveClass("gap-3");
+    expect(flat.firstElementChild).not.toHaveClass("gap-3");
+    expect(screen.queryByText("Rules")).not.toBeInTheDocument();
+  });
+});
 
 describe("MutationPicker roll-capture sub-screen", () => {
   it("adds a flat-only mutation immediately, with no sub-screen", async () => {

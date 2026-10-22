@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { InfoModal } from "../../components/InfoModal";
 import {
   ALTERNATE_RANKS,
   ELITE_ADVANCES,
@@ -34,10 +33,16 @@ import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
+import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { FilterButton } from "../../ui/pickers/FilterButton";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
+import {
+  PickerRowChips,
+  PickerRowLine,
+  PickerRowName,
+  PickerRowText,
+} from "../../ui/pickers/PickerRowParts";
+import { SKILL_DESCRIPTIONS } from "../../data/reference/skillDescriptions";
 import {
   editableInputClass,
   uiFormLabel,
@@ -225,7 +230,7 @@ function PickerChoice({
   onClick: () => void;
 }) {
   return (
-    <PickerRow trailing={<ArrowRight />} onClick={onClick}>
+    <PickerRow opensScreen onClick={onClick}>
       <PickerRowName name={label} />
       <PickerRowText>{description}</PickerRowText>
     </PickerRow>
@@ -327,13 +332,8 @@ function SpecialAdvancePicker({
             >
               <PickerRowName
                 name={advance.name}
-                info={
-                  <InfoModal
-                    title={advance.name}
-                    content={<EliteAdvanceDetails advance={advance} />}
-                    as="span"
-                  />
-                }
+                infoTitle={advance.name}
+                information={<EliteAdvanceDetails advance={advance} />}
               />
               <PickerRowChips>
                 <Chip colour={sourceChipColour(advance.source)} className="font-code">
@@ -342,16 +342,10 @@ function SpecialAdvancePicker({
                 <Chip colour="amber">{advance.cost} XP</Chip>
               </PickerRowChips>
               {advance.prerequisites && (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Prerequisites: </span>
-                  {advance.prerequisites}
-                </PickerRowText>
+                <PickerRowLine label="Prerequisites" value={advance.prerequisites} />
               )}
               {alternateRankNames.length > 0 && (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Available through: </span>
-                  {alternateRankNames.join(", ")}
-                </PickerRowText>
+                <PickerRowLine label="Available through" value={alternateRankNames.join(", ")} />
               )}
             </PickerRow>
           );
@@ -577,6 +571,7 @@ function SkillAdvancePicker({
             <PickerRow
               key={option?.key ?? skill.id}
               interactive={canAdd}
+              opensScreen={canAdd && showAll}
               onClick={() => {
                 if (!canAdd) return;
                 if (showAll) {
@@ -605,7 +600,11 @@ function SkillAdvancePicker({
                 );
               }}
             >
-              <PickerRowName name={skill.name} />
+              <PickerRowName
+                name={skill.name}
+                infoTitle={skill.name}
+                information={SKILL_DESCRIPTIONS[skill.name]}
+              />
               <PickerRowChips>
                 <Chip colour={sourceChipColour(skill.source)} className="font-code">
                   {skill.source}
@@ -614,16 +613,13 @@ function SkillAdvancePicker({
                 {option && <Chip colour="amber">{option.cost} XP</Chip>}
               </PickerRowChips>
               {option?.eliteAdvanceId && (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Unlocked by: </span>
-                  {option.eliteAdvanceName ?? option.eliteAdvanceId}
-                </PickerRowText>
+                <PickerRowLine
+                  label="Unlocked by"
+                  value={option.eliteAdvanceName ?? option.eliteAdvanceId}
+                />
               )}
               {option?.prerequisites && (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Prerequisites: </span>
-                  {option.prerequisites}
-                </PickerRowText>
+                <PickerRowLine label="Prerequisites" value={option.prerequisites} />
               )}
             </PickerRow>
           );
@@ -724,15 +720,8 @@ function TalentAdvancePicker({
                     {option.specialisation ? ` (${option.specialisation})` : ""}
                   </>
                 }
-                info={
-                  TALENT_DESCRIPTIONS[talent.id] && (
-                    <InfoModal
-                      title={talent.name}
-                      content={TALENT_DESCRIPTIONS[talent.id]}
-                      as="span"
-                    />
-                  )
-                }
+                infoTitle={talent.name}
+                information={TALENT_DESCRIPTIONS[talent.id]}
               />
               <PickerRowChips>
                 {(Array.isArray(talent.source) ? talent.source : [talent.source]).map((source) => (
@@ -743,21 +732,18 @@ function TalentAdvancePicker({
                 <Chip colour="amber">{option.cost} XP</Chip>
               </PickerRowChips>
               {option.eliteAdvanceId ? (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Unlocked by: </span>
-                  {option.eliteAdvanceName ?? option.eliteAdvanceId}
-                </PickerRowText>
+                <PickerRowLine
+                  label="Unlocked by"
+                  value={option.eliteAdvanceName ?? option.eliteAdvanceId}
+                />
               ) : (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Missed rank: </span>
-                  {replacedRank?.name ?? option.replacedRankId}
-                </PickerRowText>
+                <PickerRowLine
+                  label="Missed rank"
+                  value={replacedRank?.name ?? option.replacedRankId}
+                />
               )}
               {option.prerequisites && (
-                <PickerRowText>
-                  <span className={uiTextLabel}>Prerequisites: </span>
-                  {option.prerequisites}
-                </PickerRowText>
+                <PickerRowLine label="Prerequisites" value={option.prerequisites} />
               )}
             </PickerRow>
           );

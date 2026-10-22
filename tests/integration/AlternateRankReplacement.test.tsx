@@ -49,9 +49,8 @@ describe("Alternate Rank replacement", () => {
     const daemonologyButton = forbiddenLore.getByRole("button", {
       name: "Select Forbidden Lore (Daemonology)",
     });
-    const daemonology = daemonologyButton.parentElement;
     expect(daemonologyButton).toBeInTheDocument();
-    expect(within(daemonology!).getAllByText("100 XP")).toHaveLength(2);
+    expect(within(daemonologyButton).getAllByText("100 XP")).toHaveLength(1);
   });
 
   it("uses Weapon Training from the selected Alternate Rank table", async () => {

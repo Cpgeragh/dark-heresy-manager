@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMalignancyEntry } from "../../types/Character";
 import type { CustomItemOrigin } from "../../constants/customItems";
 import { Button } from "../../ui/buttons/Button";
@@ -13,7 +12,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
@@ -211,6 +210,7 @@ export function CorruptionMalignancyPicker({
           <PickerRow
             key={ref.id}
             interactive={editable}
+            opensScreen={getRoll1d10Modifiers(ref.modifiers).length > 0}
             onClick={() => {
               if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
                 addReferenceMalignancy(ref);
@@ -220,20 +220,14 @@ export function CorruptionMalignancyPicker({
               }
             }}
           >
-            <PickerRowName name={ref.name} />
+            <PickerRowName
+              name={ref.name}
+              infoTitle={ref.name}
+              information={<MalignancyInfoContent malignancy={ref} />}
+            />
             <PickerRowChips>
               <RollChip>{ref.roll}</RollChip>
             </PickerRowChips>
-            <PickerRowInfoLine
-              label="Rules"
-              info={
-                <InfoModal
-                  title={ref.name}
-                  content={<MalignancyInfoContent malignancy={ref} />}
-                  as="span"
-                />
-              }
-            />
           </PickerRow>
         ))}
       </PickerList>

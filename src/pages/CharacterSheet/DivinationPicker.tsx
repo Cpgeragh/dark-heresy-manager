@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { InfoModal } from "../../components/InfoModal";
 import {
   DIVINATION_LIST,
   findDivinationByResult,
@@ -53,13 +52,8 @@ export function DivinationPicker({
           >
             <PickerRowName
               name={`“${divination.result}”`}
-              info={
-                <InfoModal
-                  title={divination.result}
-                  content={<DivinationInfoContent divination={divination} />}
-                  as="span"
-                />
-              }
+              infoTitle={divination.result}
+              information={<DivinationInfoContent divination={divination} />}
             />
             <PickerRowChips>
               <RollChip>{divination.roll}</RollChip>

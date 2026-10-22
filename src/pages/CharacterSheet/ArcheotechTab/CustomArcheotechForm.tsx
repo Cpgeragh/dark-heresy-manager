@@ -219,6 +219,7 @@ export function CustomArcheotechForm({
           {ITEM_TYPES.map((t) => (
             <PickerRow
               key={t}
+              opensScreen
               onClick={() => {
                 setSelectedType(t);
                 setPhase("details");

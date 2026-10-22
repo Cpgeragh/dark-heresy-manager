@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { InfoModal } from "../../components/InfoModal";
 import type { InsanityTraumaEntry } from "../../types/Character";
 import type { CustomItemOrigin } from "../../constants/customItems";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
@@ -11,7 +10,7 @@ import {
   PickerModal,
   PickerRow,
 } from "../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowInfoLine, PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
@@ -180,21 +179,20 @@ export function InsanityTraumaPicker({
     >
       <PickerList>
         {filtered.map((ref) => (
-          <PickerRow key={ref.roll} interactive={editable} onClick={() => handleSelect(ref)}>
-            <PickerRowName name={ref.name} />
+          <PickerRow
+            key={ref.roll}
+            interactive={editable}
+            opensScreen={Boolean(ref.options)}
+            onClick={() => handleSelect(ref)}
+          >
+            <PickerRowName
+              name={ref.name}
+              infoTitle={ref.name}
+              information={<p className={uiTextDescription}>{ref.effect}</p>}
+            />
             <PickerRowChips>
               <RollChip>{ref.roll}</RollChip>
             </PickerRowChips>
-            <PickerRowInfoLine
-              label="Rules"
-              info={
-                <InfoModal
-                  title={ref.name}
-                  content={<p className={uiTextDescription}>{ref.effect}</p>}
-                  as="span"
-                />
-              }
-            />
           </PickerRow>
         ))}
       </PickerList>

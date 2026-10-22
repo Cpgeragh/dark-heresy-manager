@@ -13,8 +13,8 @@ import { Button } from "../../../ui/buttons/Button";
 import { FilterButton } from "../../../ui/pickers/FilterButton";
 import { PickerList, PickerModal, PickerBody, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
-import { ArrowRight, ArrowLeft } from "../../../ui/icons/PickerArrows";
-import { SkillRow } from "./SkillRow";
+import { ArrowLeft } from "../../../ui/icons/PickerArrows";
+import { SkillPickerRow } from "./SkillPickerRow";
 import { editableInputClass, uiFormLabel } from "../../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
@@ -189,12 +189,9 @@ export function AddSkillModal({
       >
         <PickerList data-testid="skill-picker-card-list">
           {skills.map((skill) => (
-            <SkillRow
+            <SkillPickerRow
               key={skill.id}
               skill={skill}
-              editable={false}
-              previewMode
-              updateLevel={() => {}}
               onSelect={
                 canSelect
                   ? () => (showOverflow ? attemptOverflowAdd(skill) : handleSelect(skill))
@@ -211,11 +208,7 @@ export function AddSkillModal({
   }
 
   const renderGroupRow = (item: Extract<ListItem, { type: "group" }>) => (
-    <PickerRow
-      key={item.category}
-      onClick={() => setOpenCategory(item.category)}
-      trailing={<ArrowRight />}
-    >
+    <PickerRow key={item.category} onClick={() => setOpenCategory(item.category)} opensScreen>
       <PickerRowName name={item.category} />
       <PickerRowChips>
         {[
@@ -264,12 +257,9 @@ export function AddSkillModal({
           {overflowListItems.map((item) => {
             if (item.type === "skill") {
               return (
-                <SkillRow
+                <SkillPickerRow
                   key={item.skill.id}
                   skill={item.skill}
-                  editable={false}
-                  previewMode
-                  updateLevel={() => {}}
                   onSelect={canSelect ? () => attemptOverflowAdd(item.skill) : undefined}
                   hideLevelChip={hideLevelChip}
                 />
@@ -304,12 +294,9 @@ export function AddSkillModal({
         {listItems.map((item) => {
           if (item.type === "skill") {
             return (
-              <SkillRow
+              <SkillPickerRow
                 key={item.skill.id}
                 skill={item.skill}
-                editable={false}
-                previewMode
-                updateLevel={() => {}}
                 onSelect={editable ? () => handleSelect(item.skill) : undefined}
                 hideLevelChip={hideLevelChip}
                 cost={unlockedCosts?.get(item.skill.id)}

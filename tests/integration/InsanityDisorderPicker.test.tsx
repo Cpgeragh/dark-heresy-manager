@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -21,6 +21,17 @@ function setup(existingReferenceIds = new Set<string>(), editable = true) {
 }
 
 describe("InsanityDisorderPicker", () => {
+  it("puts the information icon beside the name and the arrow on every row, with no Rules line", () => {
+    setup();
+    const row = screen.getByText("Fear of the Dead", { selector: "span" }).closest("button")!;
+
+    expect(
+      within(row).getByRole("button", { name: "Show information about Fear of the Dead" })
+    ).toBeInTheDocument();
+    expect(row.firstElementChild).toHaveClass("gap-3");
+    expect(screen.queryByText("Rules")).not.toBeInTheDocument();
+  });
+
   it("shows a severity sub-screen defaulting to the first option", async () => {
     const user = userEvent.setup();
     setup();

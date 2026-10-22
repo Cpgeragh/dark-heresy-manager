@@ -118,13 +118,8 @@ export function HomeworldPicker({
           >
             <PickerRowName
               name={homeworld.name}
-              info={
-                <InfoModal
-                  title={homeworld.name}
-                  content={<HomeworldInfoContent homeworld={homeworld} />}
-                  as="span"
-                />
-              }
+              infoTitle={homeworld.name}
+              information={<HomeworldInfoContent homeworld={homeworld} />}
             />
             <PickerRowChips>
               <RollChip>{homeworld.roll}</RollChip>

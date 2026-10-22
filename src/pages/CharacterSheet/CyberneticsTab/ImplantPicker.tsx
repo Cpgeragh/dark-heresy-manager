@@ -224,7 +224,7 @@ export function ImplantPicker({
         <PickerList>
           <p className={`text-xs lg:text-sm ${uiTextBody}`}>Select installation side:</p>
           {options.map((opt) => (
-            <PickerRow key={opt.label} onClick={() => setLocation(opt.value)}>
+            <PickerRow key={opt.label} opensScreen onClick={() => setLocation(opt.value)}>
               <PickerRowName name={opt.label} />
             </PickerRow>
           ))}

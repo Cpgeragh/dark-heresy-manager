@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { InfoModal } from "../../components/InfoModal";
 import { CAREER_LIST, type CareerData, type CareerRankData } from "shared-rules";
 import type { HomeworldData } from "../../data/reference/homeworldData";
 import { Chip } from "../../ui/chips/Chip";
@@ -151,13 +150,8 @@ export function CareerPicker({
           >
             <PickerRowName
               name={career.name}
-              info={
-                <InfoModal
-                  title={career.name}
-                  content={<CareerInfoContent career={career} homeworld={homeworld} />}
-                  as="span"
-                />
-              }
+              infoTitle={career.name}
+              information={<CareerInfoContent career={career} homeworld={homeworld} />}
             />
             <PickerRowChips>
               <Chip colour={sourceChipColour(career.source)} className="font-code">
