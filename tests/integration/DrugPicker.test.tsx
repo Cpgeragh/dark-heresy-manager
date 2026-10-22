@@ -1,6 +1,6 @@
 // tests/integration/DrugPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -35,6 +35,14 @@ describe("DrugPicker", () => {
     expect(screen.getByText("Dryas")).toBeInTheDocument();
     expect(screen.getByText("Night Dust")).toBeInTheDocument();
     expect(screen.queryByText("Cast Spray")).not.toBeInTheDocument();
+  });
+
+  it("shows the information icon on a row and a Duration line", () => {
+    renderPicker();
+    expect(
+      within(row(DRUG_NAME)).getByRole("button", { name: `Show information about ${DRUG_NAME}` })
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Duration").length).toBeGreaterThan(0);
   });
 
   it("filters the list by search query", async () => {

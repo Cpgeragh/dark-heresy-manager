@@ -1,7 +1,6 @@
 // src/pages/CharacterSheet/DrugsTab/DrugPicker.tsx
 
 import { useState } from "react";
-import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE, type DrugRef } from "../../../data/reference/drugsReference";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
@@ -10,10 +9,15 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
+import {
+  PickerRowChips,
+  PickerRowLine,
+  PickerRowName,
+  PickerRowRulesLine,
+} from "../../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { colourHeadingAccent } from "../../../ui/styles/colourTokens";
 
@@ -111,26 +115,22 @@ export function DrugPicker({
               >
                 <PickerRowName
                   name={item.name}
-                  badges={<StatusBadge status={item.status} />}
-                  info={
-                    item.data.notes && (
-                      <InfoModal
-                        title={item.name}
-                        content={<p className={uiTextDescription}>{item.data.notes}</p>}
-                        as="span"
-                      />
-                    )
+                  status={item.status}
+                  infoTitle={item.name}
+                  information={
+                    item.data.notes ? <InfoParagraph>{item.data.notes}</InfoParagraph> : undefined
                   }
                 />
                 <PickerRowChips>
                   <ItemMetaChips
                     bare
-                    weight={item.data.weight ?? "0 kg"}
+                    weight={item.data.weight}
                     value={item.data.value}
                     availability={item.data.availability}
                     source={item.data.source}
                   />
                 </PickerRowChips>
+                <PickerRowRulesLine name={item.name} rules={item.data.rules} />
               </PickerRow>
             );
           }
@@ -142,20 +142,19 @@ export function DrugPicker({
             <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
               <PickerRowName
                 name={ref.name}
-                info={
-                  hasInfo && <InfoModal title={ref.name} content={drugInfoContent(ref)} as="span" />
-                }
+                infoTitle={ref.name}
+                information={hasInfo ? drugInfoContent(ref) : undefined}
               />
               <PickerRowChips>
                 <ItemMetaChips
                   bare
-                  weight={ref.weight ?? "0 kg"}
+                  weight={ref.weight}
                   value={ref.value}
                   availability={ref.availability}
                   source={ref.source}
                 />
               </PickerRowChips>
-              {ref.duration && <PickerRowText>Duration: {ref.duration}</PickerRowText>}
+              {ref.duration && <PickerRowLine label="Duration" value={ref.duration} />}
             </PickerRow>
           );
         })}

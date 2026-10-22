@@ -5,16 +5,21 @@ import {
   ARCHEOTECH_REFERENCE,
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
-import { uiTextBody, uiTextGMNote, uiTextDescription } from "../../../ui/styles/editableStyles";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
+import { uiTextGMNote } from "../../../ui/styles/editableStyles";
 import {
   PickerCustomAction,
   PickerList,
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
-import { InfoModal } from "../../../components/InfoModal";
+import {
+  PickerRowChips,
+  PickerRowLine,
+  PickerRowName,
+  PickerRowRulesLine,
+} from "../../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../../ui/InfoSection";
+import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
@@ -163,19 +168,16 @@ export function ArcheotechPickerModal({
             >
               <PickerRowName
                 name={entry.item.name}
-                badges={<StatusBadge status={entry.item.status} />}
-                info={
-                  entry.item.data.description && (
-                    <InfoModal
-                      title={entry.item.name}
-                      content={<p className={uiTextDescription}>{entry.item.data.description}</p>}
-                      as="span"
-                    />
-                  )
+                status={entry.item.status}
+                infoTitle={entry.item.name}
+                information={
+                  entry.item.data.description ? (
+                    <InfoParagraph>{entry.item.data.description}</InfoParagraph>
+                  ) : undefined
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
-                {entry.item.data.type && <span className={uiTextBody}>{entry.item.data.type}</span>}
+                {entry.item.data.type && <Chip colour="slate">{entry.item.data.type}</Chip>}
                 <ItemMetaChips
                   bare
                   weight={entry.item.data.weight}
@@ -184,27 +186,29 @@ export function ArcheotechPickerModal({
                   source={entry.item.data.source}
                 />
               </PickerRowChips>
+              {entry.item.data.specialRules && (
+                <PickerRowLine label="Qualities" value={entry.item.data.specialRules} />
+              )}
+              <PickerRowRulesLine name={entry.item.name} rules={entry.item.data.rules} />
             </PickerRow>
           ) : (
             <PickerRow
               key={entry.ref.id}
               interactive={editable}
+              opensScreen={needsGmInput(entry.ref)}
               onClick={() => handleRowClick(entry.ref)}
             >
               <PickerRowName
                 name={entry.ref.name}
-                info={
-                  entry.ref.description && (
-                    <InfoModal
-                      title={entry.ref.name}
-                      content={<p className={uiTextDescription}>{entry.ref.description}</p>}
-                      as="span"
-                    />
-                  )
+                infoTitle={entry.ref.name}
+                information={
+                  entry.ref.description ? (
+                    <InfoParagraph>{entry.ref.description}</InfoParagraph>
+                  ) : undefined
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
-                <span className={uiTextBody}>{entry.ref.type}</span>
+                <Chip colour="slate">{entry.ref.type}</Chip>
                 <ItemMetaChips
                   bare
                   weight={entry.ref.weight}
@@ -218,6 +222,10 @@ export function ArcheotechPickerModal({
                   <span className={uiTextGMNote}>GM determines cost &amp; availability</span>
                 )}
               </PickerRowChips>
+              {entry.ref.specialRules && (
+                <PickerRowLine label="Qualities" value={entry.ref.specialRules} />
+              )}
+              <PickerRowRulesLine name={entry.ref.name} rules={entry.ref.rules} />
             </PickerRow>
           )
         )}

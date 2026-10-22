@@ -9,6 +9,7 @@ import {
   PickerRowInfoLine,
   PickerRowLine,
   PickerRowName,
+  PickerRowRulesLine,
   PickerRowText,
 } from "../../src/ui/pickers/PickerRowParts";
 
@@ -168,6 +169,32 @@ describe("PickerRowLine", () => {
     await user.click(screen.getByText("About"));
 
     expect(onInfo).toHaveBeenCalledTimes(1);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+});
+
+describe("PickerRowRulesLine", () => {
+  it("shows nothing when the entry has no rules", () => {
+    const { container } = render(<PickerRowRulesLine name="Frag Grenade" rules="  " />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("shows a Rules label with an information icon that opens the rules without selecting the row", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    render(
+      <PickerRow onClick={onSelect}>
+        <PickerRowRulesLine name="Frag Grenade" rules="Fills a 3m area." />
+      </PickerRow>
+    );
+
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Show information about Frag Grenade Rules" })
+    );
+
+    expect(screen.getByText("Fills a 3m area.")).toBeInTheDocument();
     expect(onSelect).not.toHaveBeenCalled();
   });
 });

@@ -13,12 +13,16 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import {
+  PickerRowChips,
+  PickerRowName,
+  PickerRowRulesLine,
+} from "../../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
-import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
@@ -31,7 +35,6 @@ import {
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
 import { CRAFTSMANSHIP_COLOUR, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
@@ -338,15 +341,12 @@ export function ImplantPicker({
             >
               <PickerRowName
                 name={entry.item.name}
-                badges={<StatusBadge status={entry.item.status} />}
-                info={
-                  entry.item.data.notes && (
-                    <InfoModal
-                      title={entry.item.name}
-                      content={<p className={uiTextDescription}>{entry.item.data.notes}</p>}
-                      as="span"
-                    />
-                  )
+                status={entry.item.status}
+                infoTitle={entry.item.name}
+                information={
+                  entry.item.data.notes ? (
+                    <InfoParagraph>{entry.item.data.notes}</InfoParagraph>
+                  ) : undefined
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
@@ -360,19 +360,22 @@ export function ImplantPicker({
                   {entry.item.data.craftsmanship ?? "Common"}
                 </Chip>
               </PickerRowChips>
+              <PickerRowRulesLine name={entry.item.name} rules={entry.item.data.rules} />
             </PickerRow>
           ) : (
             <PickerRow
               key={entry.ref.id}
               interactive={editable}
+              opensScreen
               onClick={() => selectImplant(entry.ref)}
             >
               <PickerRowName
                 name={entry.ref.name}
-                info={
-                  (entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good) && (
-                    <InfoModal title={entry.ref.name} content={implantInfo(entry.ref)} as="span" />
-                  )
+                infoTitle={entry.ref.name}
+                information={
+                  entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good
+                    ? implantInfo(entry.ref)
+                    : undefined
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
@@ -394,6 +397,10 @@ export function ImplantPicker({
                   <span className={uiTextGMNote}>Availability assigned on add</span>
                 )}
               </PickerRowChips>
+              <PickerRowRulesLine
+                name={entry.ref.name}
+                rules={entry.ref.id === "ih-concealed-weapon-bionic" ? undefined : entry.ref.notes}
+              />
             </PickerRow>
           )
         )}

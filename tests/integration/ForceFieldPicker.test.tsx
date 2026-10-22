@@ -1,6 +1,6 @@
 // tests/integration/ForceFieldPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -131,10 +131,25 @@ describe("ForceFieldPicker read-only", () => {
 });
 
 describe("ForceFieldPicker custom fields", () => {
-  it("shows a Draft badge for a draft custom item", () => {
+  it("shows the draft status badge for a draft custom item and no Custom chip", () => {
     renderPicker({ customItems: [makeCustomItem({ status: "draft" })] });
     expect(row("Custom Field")).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(screen.getByText("draft")).toBeInTheDocument();
+    expect(screen.queryByText("Custom")).not.toBeInTheDocument();
+  });
+
+  it("shows the information icon on a custom row and on a reference row with the arrow", () => {
+    renderPicker({ customItems: [makeCustomItem()] });
+    expect(
+      within(row("Custom Field")).getByRole("button", {
+        name: "Show information about Custom Field",
+      })
+    ).toBeInTheDocument();
+    const bracer = row(FIELD_A);
+    expect(
+      within(bracer).getByRole("button", { name: `Show information about ${FIELD_A}` })
+    ).toBeInTheDocument();
+    expect(bracer.firstElementChild).toHaveClass("gap-3");
   });
 
   it("calls onSelectCustomItem when a custom field is clicked", async () => {

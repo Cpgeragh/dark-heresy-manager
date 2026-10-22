@@ -3,7 +3,8 @@ import { Button } from "../../../ui/buttons/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import {
   uiSplitRow,
@@ -81,7 +82,15 @@ export function ArmourUpgradePicker({
       <PickerList>
         {upgrades.map((upgrade) => (
           <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
-            <PickerRowName name={upgrade.name} />
+            <PickerRowName
+              name={upgrade.name}
+              infoTitle={upgrade.name}
+              information={
+                upgrade.description ? (
+                  <InfoParagraph>{upgrade.description}</InfoParagraph>
+                ) : undefined
+              }
+            />
             <PickerRowChips>
               <NestedItemMetaChips
                 weight={upgrade.weight}
@@ -91,7 +100,6 @@ export function ArmourUpgradePicker({
                 bare
               />
             </PickerRowChips>
-            <PickerRowText className="leading-relaxed">{upgrade.description}</PickerRowText>
           </PickerRow>
         ))}
       </PickerList>

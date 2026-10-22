@@ -102,7 +102,7 @@ export function DrugsTab({
             referenceId: ref.id,
             name: ref.name,
             quantity: 1,
-            weight: ref.weight ?? "0 kg",
+            weight: ref.weight,
             value: ref.value,
             availability: ref.availability,
             source: ref.source,

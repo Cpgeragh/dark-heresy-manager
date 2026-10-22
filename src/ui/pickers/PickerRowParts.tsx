@@ -5,6 +5,7 @@ import { InfoModal } from "../../components/InfoModal";
 import type { CustomItemStatus } from "../../types/CustomItems";
 import { StatusBadge } from "../chips/StatusBadge";
 import { EntryDetailLine } from "../EntryDetailLine";
+import { InfoParagraph } from "../InfoSection";
 import {
   uiChipRow,
   uiInfoModalWrapper,
@@ -88,6 +89,24 @@ export function PickerRowLine({
     <div className="mt-1">
       <EntryDetailLine label={label} value={value} info={info} />
     </div>
+  );
+}
+
+/** The Rules line of a picker row: a label with an information icon, shown only when the entry has rules. */
+export function PickerRowRulesLine({ name, rules }: { name: string; rules?: string }) {
+  const text = rules?.trim();
+  if (!text) return null;
+  return (
+    <PickerRowLine
+      label="Rules"
+      info={
+        <InfoModal
+          title={`${name} Rules`}
+          content={<InfoParagraph>{text}</InfoParagraph>}
+          as="span"
+        />
+      }
+    />
   );
 }
 

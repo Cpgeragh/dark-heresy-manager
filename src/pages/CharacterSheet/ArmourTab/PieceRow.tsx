@@ -1,13 +1,6 @@
 import { useState } from "react";
 import type { WornArmourPiece } from "../../../types/Character";
-import {
-  uiTextLabel,
-  uiTextPlaceholder,
-  uiRuleName,
-  uiTextDescription,
-  uiStackBody,
-  uiStackList,
-} from "../../../ui/styles/editableStyles";
+import { uiTextLabel, uiTextPlaceholder, uiStackList } from "../../../ui/styles/editableStyles";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -22,7 +15,7 @@ import {
 } from "./armourHelpers";
 import { locationLabel } from "../../../utils/armourLocations";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
-import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
+import { ArmourQualitiesContent } from "./ArmourQualitiesContent";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
@@ -39,23 +32,6 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
   onRemove: (id: string) => void;
   onAddUpgrade: (pieceId: string, upgradeId: string) => void;
   onRemoveUpgrade: (pieceId: string, upgradeId: string) => void;
-}
-
-function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
-  return (
-    <div className={uiStackBody}>
-      {qualities.map((name) => {
-        const desc = ARMOUR_SPECIAL_RULES[name];
-        if (!desc) return null;
-        return (
-          <div key={name}>
-            <p className={uiRuleName}>{name}</p>
-            <p className={`${uiTextDescription} mt-1`}>{desc}</p>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 export function PieceRow({

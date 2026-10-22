@@ -1,7 +1,6 @@
 // src/pages/CharacterSheet/GearTab/ConsumablePicker.tsx
 
 import { useState } from "react";
-import { InfoModal } from "../../../components/InfoModal";
 import {
   CONSUMABLES_REFERENCE,
   type ConsumableRef,
@@ -13,10 +12,13 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
-import { uiTextDescription } from "../../../ui/styles/editableStyles";
+import {
+  PickerRowChips,
+  PickerRowName,
+  PickerRowRulesLine,
+} from "../../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props {
@@ -78,15 +80,12 @@ export function ConsumablePicker({
             >
               <PickerRowName
                 name={entry.item.name}
-                badges={<StatusBadge status={entry.item.status} />}
-                info={
-                  entry.item.data.description && (
-                    <InfoModal
-                      title={entry.item.name}
-                      content={<p className={uiTextDescription}>{entry.item.data.description}</p>}
-                      as="span"
-                    />
-                  )
+                status={entry.item.status}
+                infoTitle={entry.item.name}
+                information={
+                  entry.item.data.description ? (
+                    <InfoParagraph>{entry.item.data.description}</InfoParagraph>
+                  ) : undefined
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
@@ -98,6 +97,7 @@ export function ConsumablePicker({
                   source={entry.item.data.source}
                 />
               </PickerRowChips>
+              <PickerRowRulesLine name={entry.item.name} rules={entry.item.data.rules} />
             </PickerRow>
           ) : (
             <PickerRow
@@ -107,14 +107,11 @@ export function ConsumablePicker({
             >
               <PickerRowName
                 name={entry.ref.name}
-                info={
-                  entry.ref.description && (
-                    <InfoModal
-                      title={entry.ref.name}
-                      content={<p className={uiTextDescription}>{entry.ref.description}</p>}
-                      as="span"
-                    />
-                  )
+                infoTitle={entry.ref.name}
+                information={
+                  entry.ref.description ? (
+                    <InfoParagraph>{entry.ref.description}</InfoParagraph>
+                  ) : undefined
                 }
               />
               <PickerRowChips className="text-xs lg:text-sm">
@@ -126,6 +123,7 @@ export function ConsumablePicker({
                   source={entry.ref.source}
                 />
               </PickerRowChips>
+              <PickerRowRulesLine name={entry.ref.name} rules={entry.ref.rules} />
             </PickerRow>
           )
         )}

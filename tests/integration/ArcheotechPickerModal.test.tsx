@@ -43,6 +43,21 @@ describe("ArcheotechPickerModal", () => {
     expect(screen.getAllByText(ITEM_NAME).length).toBeGreaterThan(0);
   });
 
+  it("shows the arrow only on an item that opens the GM-assigned-values step", () => {
+    renderPicker();
+    expect(row(GM_ITEM_NAME).firstElementChild).toHaveClass("gap-3");
+    expect(row(ITEM_NAME).firstElementChild).not.toHaveClass("gap-3");
+  });
+
+  it("shows the information icon and a Qualities line on a row that has qualities", () => {
+    renderPicker();
+    const grenade = row(ITEM_NAME);
+    expect(
+      within(grenade).getByRole("button", { name: `Show information about ${ITEM_NAME}` })
+    ).toBeInTheDocument();
+    expect(within(grenade).getByText("Qualities")).toBeInTheDocument();
+  });
+
   it("calls onSelect with the chosen ref when an item with a fixed cost is clicked", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();

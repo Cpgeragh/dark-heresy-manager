@@ -11,11 +11,16 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import {
+  PickerRowChips,
+  PickerRowName,
+  PickerRowRulesLine,
+} from "../../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../../ui/InfoSection";
+import { ArmourQualitiesLine } from "./ArmourQualitiesContent";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
-import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
@@ -136,8 +141,13 @@ export function ForceFieldPicker({
           if (entry.kind === "reference") {
             const ref = entry.ref;
             return (
-              <PickerRow key={ref.id} interactive={editable} onClick={() => setSelected(ref)}>
-                <PickerRowName name={ref.name} />
+              <PickerRow
+                key={ref.id}
+                interactive={editable}
+                opensScreen
+                onClick={() => setSelected(ref)}
+              >
+                <PickerRowName name={ref.name} infoTitle={ref.name} />
                 <PickerRowChips>
                   {ref.protectionRating !== undefined && (
                     <StatChip label="PR" value={String(ref.protectionRating)} />
@@ -151,6 +161,8 @@ export function ForceFieldPicker({
                     source={ref.source}
                   />
                 </PickerRowChips>
+                <ArmourQualitiesLine name={ref.name} qualities={ref.qualities} />
+                <PickerRowRulesLine name={ref.name} rules={ref.notes} />
               </PickerRow>
             );
           }
@@ -164,15 +176,20 @@ export function ForceFieldPicker({
               interactive={editable}
               onClick={() => onSelectCustomItem?.(item)}
             >
-              <PickerRowName name={item.name} />
+              <PickerRowName
+                name={item.name}
+                status={item.status}
+                infoTitle={item.name}
+                information={
+                  data.description ? <InfoParagraph>{data.description}</InfoParagraph> : undefined
+                }
+              />
               <PickerRowChips>
                 {data.protectionRating !== undefined && (
                   <StatChip label="PR" value={String(data.protectionRating)} />
                 )}
               </PickerRowChips>
               <PickerRowChips>
-                {item.status === "draft" && <Chip colour="amber">Draft</Chip>}
-                <Chip colour="fuchsia">Custom</Chip>
                 <ItemMetaChips
                   weight={data.weight}
                   value={data.value}
@@ -180,6 +197,8 @@ export function ForceFieldPicker({
                   source={data.source}
                 />
               </PickerRowChips>
+              <ArmourQualitiesLine name={item.name} qualities={data.qualities} />
+              <PickerRowRulesLine name={item.name} rules={data.notes} />
             </PickerRow>
           );
         })}

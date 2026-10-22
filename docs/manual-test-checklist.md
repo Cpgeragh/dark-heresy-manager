@@ -1325,7 +1325,12 @@ The same kind of element looks and behaves the same in every picker and card.
 
 Open each picker with the sheet editable, and again read-only where a View button exists. Repeat in a narrow window and a wide one, with a mouse for the hover checks.
 
-- [ ] In the Gear, Consumables, Drugs, Cybernetics, Archeotech, Weapons, Armour and Force Field pickers, each row shows the name, then a row of chips, then any description line, with the same small gap above each part (`PickerRowParts.tsx`)
+- [ ] In the Gear, Consumables, Drugs, Cybernetics, Archeotech, Armour and Force Field pickers, each row shows the name with its information icon, then a row of chips, then any labelled lines such as Duration, Qualities and Rules, with the same small gap above each part (`PickerRowParts.tsx`)
+- [ ] In the Gear, Consumables, Drugs, Cybernetics, Archeotech, Armour and Force Field pickers, every row has an information icon beside its name that opens "No description recorded." when nothing is recorded, and a custom item shows its status badge beside the name with no separate Custom chip (`PickerRowParts.tsx`)
+- [ ] In the Armour and Force Field pickers a reference row shows its Qualities line and its Rules line from the piece's notes when it has them, and in the Cybernetics picker a reference row shows its Rules line, except the Concealed Weapon Bionic (`PickerRowParts.tsx`)
+- [ ] The arrow shows on an Armour, Force Field or Cybernetics reference row, which opens a second screen, and on an Archeotech row that asks for a GM cost, and on no other row in those pickers (`PickerRow` in `PickerModal.tsx`)
+- [ ] The weapon upgrade, armour upgrade and ammo pickers show each description behind the information icon and print none in the row (`PickerRowParts.tsx`)
+- [ ] A drug with no recorded weight is added with no weight, and the Drug picker rows never add a weight of their own (`DrugsTab/index.tsx`)
 - [ ] Passive chips using a named `Chip` colour use the shared size and shape from `Chip.tsx` with matching `500/50` border, `500/10` fill and `300` text; slate and XP use that palette, while source abbreviations use the matching source colour and the code font
 - [ ] Chips on primary cards, rows, pickers and top-level metadata use the normal size and wrap when space is tight; only chips inside ammunition, magazine, attachment and upgrade content use the small nested size (`Chip.tsx`, `StatChip.tsx`, `ItemMetaChips.tsx`)
 - [ ] XP costs in the Talent, Skill, Elite Advance and option pickers, prices on every item, Owned and Draft tags, the roll chip, the Archeotech label and the session +XP badge all show the same amber (`Chip.tsx`, `ItemMetaChips.tsx`, `RollChip.tsx`)

@@ -1,10 +1,5 @@
 import type { WornArmourPiece } from "../../../types/Character";
-import {
-  uiTextLabel,
-  uiRuleName,
-  uiTextDescription,
-  uiStackBody,
-} from "../../../ui/styles/editableStyles";
+import { uiTextLabel } from "../../../ui/styles/editableStyles";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -12,7 +7,7 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
-import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
+import { ArmourQualitiesContent } from "./ArmourQualitiesContent";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
 import { Stepper } from "../../../components/Stepper";
@@ -23,23 +18,6 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onUpdateSpareCells: (id: string, value: number) => void;
-}
-
-function ForceFieldQualitiesContent({ qualities }: { qualities: string[] }) {
-  return (
-    <div className={uiStackBody}>
-      {qualities.map((name) => {
-        const desc = ARMOUR_SPECIAL_RULES[name];
-        if (!desc) return null;
-        return (
-          <div key={name}>
-            <p className={uiRuleName}>{name}</p>
-            <p className={`${uiTextDescription} mt-1`}>{desc}</p>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 export function ForceFieldRow({
@@ -101,7 +79,7 @@ export function ForceFieldRow({
             qualities.length > 0 ? (
               <InfoModal
                 title={`${piece.name} Qualities`}
-                content={<ForceFieldQualitiesContent qualities={qualities} />}
+                content={<ArmourQualitiesContent qualities={qualities} />}
               />
             ) : undefined,
         },

@@ -1,6 +1,6 @@
 // tests/integration/ArmourPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -71,6 +71,16 @@ describe("ArmourPicker list", () => {
     expect(row(ARMOUR_B)).toBeInTheDocument();
   });
 
+  it("shows the information icon, the Rules line from notes and the arrow on a reference row", () => {
+    renderPicker();
+    const helm = row(ARMOUR_B);
+    expect(
+      within(helm).getByRole("button", { name: "Show information about Carapace Helm" })
+    ).toBeInTheDocument();
+    expect(within(helm).getByText("Rules")).toBeInTheDocument();
+    expect(helm.firstElementChild).toHaveClass("gap-3");
+  });
+
   it("filters the list by search query", async () => {
     const user = userEvent.setup();
     renderPicker();
@@ -121,10 +131,20 @@ describe("ArmourPicker custom pieces", () => {
     expect(onCustom).toHaveBeenCalled();
   });
 
-  it("shows a Draft badge for a draft custom item", () => {
+  it("shows the draft status badge for a draft custom item and no Custom chip", () => {
     renderPicker({ customItems: [makeCustomItem({ status: "draft" })] });
     expect(row("Custom Coat")).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(screen.getByText("draft")).toBeInTheDocument();
+    expect(screen.queryByText("Custom")).not.toBeInTheDocument();
+  });
+
+  it("shows the information icon with no arrow on a custom row", () => {
+    renderPicker({ customItems: [makeCustomItem()] });
+    const coat = row("Custom Coat");
+    expect(
+      within(coat).getByRole("button", { name: "Show information about Custom Coat" })
+    ).toBeInTheDocument();
+    expect(coat.firstElementChild).not.toHaveClass("gap-3");
   });
 
   it("calls onSelectCustomItem when a custom piece is clicked", async () => {

@@ -44,6 +44,7 @@ vi.mock("../../src/pages/CharacterSheet/DrugsTab/CustomDrugForm", () => ({
 }));
 
 import { DrugsTab } from "../../src/pages/CharacterSheet/DrugsTab";
+import { DRUGS_REFERENCE } from "../../src/data/reference/drugsReference";
 import { ToastProvider } from "../../src/components/Toast";
 import type { DrugItem } from "../../src/types/Character";
 
@@ -150,6 +151,19 @@ describe("DrugsTab", () => {
       [expect.objectContaining({ name: DRUG_NAME, quantity: 1 })],
       { optimistic: true }
     );
+  });
+
+  it("does not invent a weight for a drug that has none", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+    const unweighed = DRUGS_REFERENCE.find((drug) => drug.weight === undefined);
+    expect(unweighed).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByText(unweighed!.name));
+
+    const added = onUpdate.mock.calls[0][0][0] as DrugItem;
+    expect(added.weight).toBeUndefined();
   });
 
   it("adds an existing library drug optimistically", async () => {

@@ -3,7 +3,8 @@ import { AMMO_REFERENCE, formatAmmoName } from "../../../data/reference/ammoRefe
 import { Button } from "../../../ui/buttons/Button";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
+import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import { InfoParagraph } from "../../../ui/InfoSection";
 import { editableInputColour, uiTextBody, uiStackList } from "../../../ui/styles/editableStyles";
 
 // ─── Ammo Picker ──────────────────────────────────────────────────────────────
@@ -96,7 +97,13 @@ export function AmmoPicker({
             }}
             disabled={editable && !allowDuplicates && existingNames.has(formatAmmoName(ammo.name))}
           >
-            <PickerRowName name={formatAmmoName(ammo.name)} />
+            <PickerRowName
+              name={formatAmmoName(ammo.name)}
+              infoTitle={formatAmmoName(ammo.name)}
+              information={
+                ammo.description ? <InfoParagraph>{ammo.description}</InfoParagraph> : undefined
+              }
+            />
             <PickerRowChips>
               <ItemMetaChips
                 availability={ammo.availability}
@@ -105,9 +112,6 @@ export function AmmoPicker({
                 bare
               />
             </PickerRowChips>
-            {ammo.description && (
-              <PickerRowText className="line-clamp-2">{ammo.description}</PickerRowText>
-            )}
           </PickerRow>
         ))}
       </PickerList>
