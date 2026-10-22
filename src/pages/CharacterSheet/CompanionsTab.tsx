@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from "react";
+import { useState } from "react";
 import type { CompanionItem } from "../../types/Character";
 import { COMPANION_REFERENCE, type CompanionRef } from "../../data/reference/companionReference";
 import { Button } from "../../ui/buttons/Button";
@@ -10,23 +10,14 @@ import { PickerList, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { StatChip } from "../../ui/chips/StatChip";
-import { ExpandChevron } from "../../ui/icons/ExpandChevron";
-import { usePendingClick } from "../../ui/usePendingClick";
+import { AccordionCard } from "../../ui/AccordionCard";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
-import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
-import { ExpandButton } from "../../ui/buttons/ExpandButton";
-import { uiCardTapHeader, uiExpandButton } from "../../ui/styles/buttonStyles";
 import {
   uiChipRow,
-  uiInlineRow,
   uiInfoModalWrapper,
-  uiSectionShell,
-  uiSpinner,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
-  uiOverlayItemNameHover,
-  uiOverlayPeerHoverText,
   uiRuleName,
   uiStackSection,
   uiStackBody,
@@ -38,8 +29,6 @@ import { TALENT_LIST } from "shared-rules";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { GEAR_REFERENCE } from "../../data/reference/gearReference";
 import { colourDivider } from "../../ui/styles/colourTokens";
-import { uiLayerLocal } from "../../ui/styles/layerStyles";
-import { CharacterEntryRowContent } from "../../ui/CharacterEntryRow";
 
 const CHARACTERISTICS: { key: keyof CompanionRef["characteristics"]; label: string }[] = [
   { key: "ws", label: "WS" },
@@ -64,60 +53,24 @@ function CompanionPickerCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const toggle = () => setExpanded((current) => !current);
-  const { pending, handleClick: handleSelect } = usePendingClick(
-    onSelect ? (_event: MouseEvent<HTMLButtonElement>) => onSelect() : undefined
-  );
 
   return (
-    <div className={`${uiSectionShell} overflow-hidden`}>
-      <div className={`${uiCardTapHeader} relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left`}>
-        <CardOverlayButton
-          label={
-            onSelect
-              ? `Select ${companionReference.name}`
-              : `${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`
-          }
-          expanded={onSelect ? undefined : expanded}
-          pending={pending}
-          onClick={onSelect ? handleSelect : toggle}
+    <AccordionCard
+      name={companionReference.name}
+      label={companionReference.name}
+      expanded={expanded}
+      onToggle={toggle}
+      onSelect={onSelect}
+      info={
+        <InfoModal
+          title={companionReference.name}
+          content={companionReference.description}
+          as="span"
         />
-        <div
-          className={`${uiExpandButton} relative ${uiLayerLocal} pointer-events-none ${uiInlineRow} ${uiOverlayPeerHoverText}`}
-        >
-          <div className="flex items-center gap-1.5">
-            <span className={uiOverlayItemNameHover}>{companionReference.name}</span>
-            <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-              <InfoModal
-                title={companionReference.name}
-                content={companionReference.description}
-                as="span"
-              />
-            </span>
-          </div>
-          {pending ? (
-            <span
-              className={`${uiSpinner} relative ${uiLayerLocal} h-4 w-4 ml-auto`}
-              aria-hidden="true"
-            />
-          ) : (
-            <ExpandButton
-              expanded={expanded}
-              label={expanded ? "Collapse companion details" : "Expand companion details"}
-              onClick={toggle}
-              className="ml-auto"
-            />
-          )}
-        </div>
-      </div>
-
-      {expanded && (
-        <div
-          className={`px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t ${colourDivider} ${uiStackSection}`}
-        >
-          <CompanionProfileDetails companionReference={companionReference} modalAs="span" />
-        </div>
-      )}
-    </div>
+      }
+    >
+      <CompanionProfileDetails companionReference={companionReference} modalAs="span" />
+    </AccordionCard>
   );
 }
 
@@ -325,46 +278,27 @@ function CompanionCard({
   editable: boolean;
   onRemove: () => void | Promise<boolean | void>;
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const companionReference = COMPANION_REFERENCE.find(
     (entry) => entry.id === companion.referenceId
   );
   if (!companionReference) return null;
 
   return (
-    <div className={`${uiSectionShell} overflow-hidden`}>
-      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
-        <CardOverlayButton
-          label={`${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`}
-          expanded={expanded}
-          onClick={() => setExpanded((current) => !current)}
-        />
-        <CharacterEntryRowContent
-          interactive
-          name={companionReference.name}
-          nameClassName={uiOverlayItemNameHover}
-          info={
-            <InfoModal title={companionReference.name} content={companionReference.description} />
-          }
-          removeAction={
-            editable ? (
-              <RemoveEntryButton
-                kind="Companion"
-                name={companionReference.name}
-                onRemove={onRemove}
-              />
-            ) : undefined
-          }
-          expandControl={<ExpandChevron expanded={expanded} />}
-        />
-      </div>
-
-      {expanded && (
-        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          <CompanionProfileDetails companionReference={companionReference} modalAs="button" />
-        </div>
-      )}
-    </div>
+    <AccordionCard
+      name={companionReference.name}
+      label={companionReference.name}
+      expanded={expanded}
+      onToggle={() => setExpanded((current) => !current)}
+      info={<InfoModal title={companionReference.name} content={companionReference.description} />}
+      removeAction={
+        editable ? (
+          <RemoveEntryButton kind="Companion" name={companionReference.name} onRemove={onRemove} />
+        ) : undefined
+      }
+    >
+      <CompanionProfileDetails companionReference={companionReference} modalAs="button" />
+    </AccordionCard>
   );
 }
 

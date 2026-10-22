@@ -70,6 +70,32 @@ describe("shared layout recipes", () => {
     expect(talentEntries).not.toContain('uiSection + " flex items-start justify-between');
   });
 
+  it("keeps every expandable card on the shared accordion card", () => {
+    const overlayAllowed = [
+      "src/ui/AccordionCard.tsx",
+      "src/pages/CharacterSheet/SkillsTab/SkillRow.tsx",
+      "src/pages/CharacterSheet/NotesTab.tsx",
+      "src/pages/CampaignOverview/SessionCard.tsx",
+      "src/components/chat/ChatInboxRow.tsx",
+    ];
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      const path = file.replace(/\\/g, "/");
+      const text = readFileSync(file, "utf8");
+      const importsOverlay = /import \{[^}]*\bCardOverlayButton\b[^}]*\} from/.test(text);
+      const importsExpandButton = /import \{[^}]*\bExpandButton\b[^}]*\} from/.test(text);
+      if (importsOverlay && !overlayAllowed.some((allowed) => path.endsWith(allowed))) {
+        offenders.push(path);
+      }
+      if (importsExpandButton && !path.endsWith("src/ui/AccordionCard.tsx")) {
+        offenders.push(path);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
   it("defines the standard row and field layouts", () => {
     expect(uiChipRow).toBe("flex flex-wrap gap-1.5");
     expect(uiInlineRow).toBe("flex items-center gap-2");

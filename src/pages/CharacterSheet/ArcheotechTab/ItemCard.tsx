@@ -3,12 +3,7 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import {
-  uiChipRow,
-  uiOverlayItemNameHover,
-  uiSectionShell,
-  uiStackSection,
-} from "../../../ui/styles/editableStyles";
+import { uiChipRow } from "../../../ui/styles/editableStyles";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -19,13 +14,10 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
-import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
-import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
+import { AccordionCard } from "../../../ui/AccordionCard";
 import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
-import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 
 interface Props extends CustomItemLibraryActionProps<"archeotech"> {
   item: ArcheotechItem;
@@ -145,31 +137,19 @@ export function ItemCard({
 
   if (notes) {
     return (
-      <div className={`${uiSectionShell} overflow-hidden`}>
-        <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
-          <CardOverlayButton
-            label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
-            expanded={expanded}
-            onClick={() => setExpanded((value) => !value)}
-          />
-          <CharacterEntryRowContent
-            interactive
-            name={item.name}
-            nameClassName={uiOverlayItemNameHover}
-            badge={badge}
-            info={<InfoModal title={item.name} content={information} />}
-            metadata={<div className={`${uiChipRow} items-center`}>{chips}</div>}
-            removeAction={removeAction}
-            expandControl={<ExpandChevron expanded={expanded} />}
-          />
-        </div>
-        {expanded && (
-          <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-            {lines}
-            {libraryActions}
-          </div>
-        )}
-      </div>
+      <AccordionCard
+        name={item.name}
+        label={item.name}
+        expanded={expanded}
+        onToggle={() => setExpanded((value) => !value)}
+        badge={badge}
+        info={<InfoModal title={item.name} content={information} />}
+        metadata={<div className={`${uiChipRow} items-center`}>{chips}</div>}
+        removeAction={removeAction}
+      >
+        {lines}
+        {libraryActions}
+      </AccordionCard>
     );
   }
 

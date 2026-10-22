@@ -1,6 +1,6 @@
 // src/ui/AccordionCard.tsx
 
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { CardOverlayButton } from "./buttons/CardOverlayButton";
 import { ExpandButton } from "./buttons/ExpandButton";
 import { CharacterEntryRowContent } from "./CharacterEntryRow";
@@ -11,8 +11,11 @@ import {
   uiNoticeBox,
   uiOverlayItemNameHover,
   uiSectionShell,
+  uiSpinner,
   uiStackSection,
 } from "./styles/editableStyles";
+import { uiLayerLocal } from "./styles/layerStyles";
+import { usePendingClick } from "./usePendingClick";
 
 const CARD_SHELL = {
   default: uiSectionShell,
@@ -62,6 +65,9 @@ export function AccordionCard({
 }: AccordionCardProps) {
   const toggleLabel = `${expanded ? "Collapse" : "Expand"} ${label} details`;
   const open = expanded || forceExpanded;
+  const { pending: selecting, handleClick: handleSelect } = usePendingClick(
+    onSelect ? (_event: MouseEvent<HTMLButtonElement>) => onSelect() : undefined
+  );
 
   return (
     <div className={`${CARD_SHELL[tone]} overflow-hidden`}>
@@ -70,8 +76,9 @@ export function AccordionCard({
           <CardOverlayButton
             label={onSelect ? (selectLabel ?? `Select ${label}`) : toggleLabel}
             expanded={onSelect ? undefined : expanded}
+            pending={selecting}
             aria-controls={bodyId}
-            onClick={onSelect ?? onToggle}
+            onClick={onSelect ? handleSelect : onToggle}
           />
         )}
         <CharacterEntryRowContent
@@ -85,7 +92,14 @@ export function AccordionCard({
           actions={actions}
           expandControl={
             forceExpanded ? undefined : onSelect ? (
-              <ExpandButton expanded={expanded} label={toggleLabel} onClick={onToggle} />
+              selecting ? (
+                <span
+                  className={`${uiSpinner} relative ${uiLayerLocal} h-4 w-4`}
+                  aria-hidden="true"
+                />
+              ) : (
+                <ExpandButton expanded={expanded} label={toggleLabel} onClick={onToggle} />
+              )
             ) : (
               <ExpandChevron expanded={expanded} />
             )

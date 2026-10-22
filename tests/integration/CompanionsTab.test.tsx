@@ -39,6 +39,11 @@ describe("CompanionsTab", () => {
       />
     );
 
+    expect(screen.queryByText("4/8/12/24")).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Expand Adeptus Arbites Cyber-Mastiff details" })
+    );
+
     expect(screen.getByText("4/8/12/24")).toBeInTheDocument();
     expect(screen.getByText(/Armour Plated/)).toBeInTheDocument();
     expect(screen.getByText(/Bite \(1d10\+3 R\)/)).toBeInTheDocument();
@@ -83,8 +88,7 @@ describe("CompanionsTab", () => {
     await act(async () => finish());
   });
 
-  it("keeps the Remove button in the closed header", async () => {
-    const user = userEvent.setup();
+  it("starts collapsed and keeps the Remove button in the closed header", () => {
     render(
       <CompanionsTab
         editable
@@ -100,9 +104,6 @@ describe("CompanionsTab", () => {
       />
     );
 
-    await user.click(
-      screen.getByRole("button", { name: "Collapse Adeptus Arbites Cyber-Mastiff details" })
-    );
     expect(
       screen.getByRole("button", { name: "Expand Adeptus Arbites Cyber-Mastiff details" })
     ).toHaveAttribute("aria-expanded", "false");

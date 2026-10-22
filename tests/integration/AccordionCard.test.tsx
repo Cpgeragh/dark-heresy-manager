@@ -1,6 +1,6 @@
 // tests/integration/AccordionCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { AccordionCard } from "../../src/ui/AccordionCard";
@@ -93,6 +93,28 @@ describe("AccordionCard", () => {
     expect(onToggle).not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole("button", { name: "Expand Group name details" }));
     expect(onToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a spinner in place of the chevron button and blocks a second tap while a select saves", async () => {
+    let settle: () => void = () => undefined;
+    const onSelect = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          settle = resolve;
+        })
+    );
+    const { container } = renderCard({ onSelect });
+    await userEvent.click(screen.getByRole("button", { name: "Select Group name" }));
+    expect(screen.queryByRole("button", { name: "Expand Group name details" })).toBeNull();
+    expect(container.querySelector(".animate-spin")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Select Group name" })).toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: "Select Group name" }));
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      settle();
+    });
+    expect(screen.getByRole("button", { name: "Expand Group name details" })).toBeInTheDocument();
+    expect(container.querySelector(".animate-spin")).toBeNull();
   });
 
   it("shows the body with no toggle when forced expanded", () => {

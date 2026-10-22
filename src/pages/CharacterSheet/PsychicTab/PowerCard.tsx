@@ -6,24 +6,14 @@ import { Chip } from "../../../ui/chips/Chip";
 import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours, psychicSelectionSourceColours } from "./psychicStyles";
-import {
-  uiChipRow,
-  uiOverlayItemNameHover,
-  uiSectionShell,
-  uiTextPlaceholder,
-  uiStackSection,
-} from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { StatChip } from "../../../ui/chips/StatChip";
-import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { ExpandButton } from "../../../ui/buttons/ExpandButton";
-import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
+import { AccordionCard } from "../../../ui/AccordionCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { InfoParagraph } from "../../../ui/InfoSection";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
@@ -111,86 +101,60 @@ export function PowerCard({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={`${uiSectionShell} overflow-hidden`}>
-      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4 text-sm lg:text-base`}>
-        <CardOverlayButton
-          label={
-            onSelect
-              ? (selectLabel ?? `Select ${power.name || "psychic power"}`)
-              : `${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`
-          }
-          expanded={onSelect ? undefined : expanded}
-          onClick={onSelect ?? (() => setExpanded((value) => !value))}
-        />
-
-        <CharacterEntryRowContent
-          interactive
-          name={power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
-          nameClassName={uiOverlayItemNameHover}
-          info={
-            <InfoModal
-              as="span"
-              title={power.name || "Psychic Power"}
-              content={
-                power.description ? <InfoParagraph>{power.description}</InfoParagraph> : undefined
-              }
-            />
-          }
-          metadata={<PowerIdentityChips power={power} talentSourceName={talentSourceName} />}
-          removeAction={
-            editable ? (
-              <RemoveEntryButton
-                kind="Psychic Power"
-                name={power.name || "power"}
-                onRemove={() => onRemove(power.id)}
-              />
-            ) : undefined
-          }
-          expandControl={
-            onSelect ? (
-              <ExpandButton
-                expanded={expanded}
-                label={`${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`}
-                onClick={() => setExpanded((value) => !value)}
-              />
-            ) : (
-              <ExpandChevron expanded={expanded} />
-            )
+    <AccordionCard
+      name={power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
+      label={power.name || "psychic power"}
+      expanded={expanded}
+      onToggle={() => setExpanded((value) => !value)}
+      onSelect={onSelect}
+      selectLabel={selectLabel}
+      info={
+        <InfoModal
+          as="span"
+          title={power.name || "Psychic Power"}
+          content={
+            power.description ? <InfoParagraph>{power.description}</InfoParagraph> : undefined
           }
         />
-      </div>
+      }
+      metadata={<PowerIdentityChips power={power} talentSourceName={talentSourceName} />}
+      removeAction={
+        editable ? (
+          <RemoveEntryButton
+            kind="Psychic Power"
+            name={power.name || "power"}
+            onRemove={() => onRemove(power.id)}
+          />
+        ) : undefined
+      }
+    >
+      <PowerStats power={power} />
 
-      {expanded && (
-        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          <PowerStats power={power} />
-
-          {onLinkPurchase && (
-            <Button size="sm" onClick={onLinkPurchase}>
-              {power.isMinor || power.discipline === "Minor"
-                ? "Use Minor Psychic Power selection"
-                : "Use Psychic Power selection"}
-            </Button>
-          )}
-          {onLinkPsyRatingGrant && (
-            <Button size="sm" variant="secondary" onClick={onLinkPsyRatingGrant}>
-              Use Psy Rating selection
-            </Button>
-          )}
-
-          {libraryItem && (
-            <CustomItemActionButtons
-              libraryItem={libraryItem}
-              isDM={isDM}
-              canEditDefinition={canEditDefinition}
-              busyAction={busyAction}
-              onEditDefinition={onEditDefinition}
-              onPublish={onPublish}
-              onArchive={onArchive}
-              onUpdateAllCopies={onUpdateAllCopies}
-            />
-          )}
-        </div>
+      {onLinkPurchase && (
+        <Button size="sm" onClick={onLinkPurchase}>
+          {power.isMinor || power.discipline === "Minor"
+            ? "Use Minor Psychic Power selection"
+            : "Use Psychic Power selection"}
+        </Button>
       )}
-    </div>
+      {onLinkPsyRatingGrant && (
+        <Button size="sm" variant="secondary" onClick={onLinkPsyRatingGrant}>
+          Use Psy Rating selection
+        </Button>
+      )}
+
+      {libraryItem && (
+        <CustomItemActionButtons
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
+      )}
+    </AccordionCard>
   );
 }
