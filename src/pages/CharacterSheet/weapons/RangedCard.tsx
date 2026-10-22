@@ -30,28 +30,22 @@ import {
   uiSplitRow,
   uiCell,
   uiNoticeBox,
-  uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiItemName,
-  uiOverlayItemNameHover,
   uiRuleName,
   uiTextDescription,
-  uiStackSection,
   uiStackField,
   uiStackBody,
   uiStackList,
 } from "../../../ui/styles/editableStyles";
-import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { ExpandButton } from "../../../ui/buttons/ExpandButton";
-import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
+import { AccordionCard } from "../../../ui/AccordionCard";
 import {
   colourButtonOutlineCyan,
   colourButtonOutlineOrange,
   colourNoticeAmber,
-  colourNoticePink,
   colourToggleSelected,
   colourDivider,
   colourFillInset,
@@ -66,10 +60,8 @@ import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
-import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import { StatChip } from "../../../ui/chips/StatChip";
 import {
@@ -169,12 +161,7 @@ export function RangedCard({
   onExpandedChange?: (expanded: boolean) => void;
 } & CustomItemLibraryActionProps<"weapon">) {
   recordComponentRender("RangedCard");
-  const [internalExpanded, setInternalExpanded] = useState(isEquipped);
-  const [previousIsEquipped, setPreviousIsEquipped] = useState(isEquipped);
-  if (controlledExpanded === undefined && previousIsEquipped !== isEquipped) {
-    setPreviousIsEquipped(isEquipped);
-    setInternalExpanded(isEquipped);
-  }
+  const [internalExpanded, setInternalExpanded] = useState(false);
   const expanded = controlledExpanded ?? internalExpanded;
 
   function toggleExpanded() {
@@ -433,562 +420,524 @@ export function RangedCard({
   }
 
   return (
-    <div
-      className={`${weapon.concealedBionic ? `${uiNoticeBox} ${colourNoticePink}` : uiSectionShell} overflow-hidden`}
-    >
-      {/* Header: always visible */}
-      <div className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full p-3 lg:p-4`}>
-        {!forceExpanded && (
-          <CardOverlayButton
-            label={
-              onSelect
-                ? `Select ${weapon.name}`
-                : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`
-            }
-            expanded={onSelect ? undefined : expanded}
-            onClick={onSelect ?? toggleExpanded}
+    <AccordionCard
+      tone={weapon.concealedBionic ? "pink" : "default"}
+      name={weapon.name}
+      label={weapon.name}
+      expanded={expanded}
+      onToggle={toggleExpanded}
+      forceExpanded={forceExpanded}
+      onSelect={onSelect}
+      info={
+        <InfoModal
+          title={weapon.name}
+          content={rulesDescription ? <InfoParagraph>{rulesDescription}</InfoParagraph> : undefined}
+        />
+      }
+      badge={
+        <>
+          {libraryItem && <StatusBadge status={libraryItem.status} />}
+          {integrated && <Chip colour="violet">Integrated</Chip>}
+        </>
+      }
+      metadata={
+        weapon.class || activeWeaponType || weapon.concealedBionic ? (
+          <div className={`${uiChipRow} items-center`}>
+            {weapon.concealedBionic && <Chip colour="pink">Concealed Bionic</Chip>}
+            {weapon.concealedBionic && <Chip colour="pink">Cybernetic</Chip>}
+            {(() => {
+              const c = weaponClassChip(weapon.class);
+              return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
+            })()}
+            {activeWeaponType && (
+              <Chip colour={activeWeaponType.colour}>{activeWeaponType.label}</Chip>
+            )}
+            {hasKnaveBallisticPenalty && <Chip colour="amber">Knave: BS −10</Chip>}
+          </div>
+        ) : undefined
+      }
+      removeAction={
+        editable && onRemove ? (
+          <RemoveEntryButton kind="Ranged Weapon" name={weapon.name} onRemove={onRemove} />
+        ) : undefined
+      }
+      actions={
+        onToggleEquip ? (
+          <EquipToggle
+            equipped={isEquipped}
+            disabled={slotsDisabled}
+            editable={editable}
+            onChange={onToggleEquip}
           />
-        )}
-        <CharacterEntryRowContent
-          interactive
-          name={weapon.name}
-          nameClassName={uiOverlayItemNameHover}
+        ) : undefined
+      }
+    >
+      {libraryItem && (
+        <CustomItemActionButtons
+          className="flex flex-wrap gap-2"
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
+      )}
+
+      {(alternateProfiles.length > 0 || alternateMeleeProfiles.length > 0) && (
+        <div className={`${uiChipRow}`}>
+          <ToggleButton
+            selected={!isMeleeProfile && activeProfileIndex === 0}
+            selectedClassName={colourToggleSelected.red}
+            className="px-2 py-1 text-xs lg:text-sm"
+            onClick={() => {
+              setActiveProfileIndex(0);
+              setActiveMeleeProfileIndex(null);
+            }}
+          >
+            {alternateMeleeProfiles.length > 0 ? "Ranged" : "Primary"}
+          </ToggleButton>
+          {alternateProfiles.map((profile, index) => (
+            <ToggleButton
+              key={profile.label}
+              selected={!isMeleeProfile && activeProfileIndex === index + 1}
+              selectedClassName={colourToggleSelected.red}
+              className="px-2 py-1 text-xs lg:text-sm"
+              onClick={() => {
+                setActiveProfileIndex(index + 1);
+                setActiveMeleeProfileIndex(null);
+              }}
+            >
+              {profile.label}
+            </ToggleButton>
+          ))}
+          {alternateMeleeProfiles.map((profile, index) => (
+            <ToggleButton
+              key={profile.label}
+              selected={activeMeleeProfileIndex === index}
+              selectedClassName={colourToggleSelected.red}
+              className="px-2 py-1 text-xs lg:text-sm"
+              onClick={() => {
+                setActiveProfileIndex(0);
+                setActiveMeleeProfileIndex(index);
+              }}
+            >
+              {profile.label}
+            </ToggleButton>
+          ))}
+        </div>
+      )}
+
+      {/* Stats grid */}
+      {isMeleeProfile && activeMeleeProfile ? (
+        <div className={`${uiChipRow}`}>
+          <StatChip
+            label="Damage"
+            value={activeMeleeProfile.damage.replace(/\s*[IREX]$/i, "").trim()}
+          />
+          <DamageTypeChip damage={activeMeleeProfile.damage} />
+          <StatChip label="Pen" value={activeMeleeProfile.pen} />
+          <StatChip label="SB" value={`+${strengthBonus}`} />
+          <StatChip
+            label="Total"
+            value={computeMeleeTotalDamage(activeMeleeProfile.damage, strengthBonus)}
+          />
+        </div>
+      ) : (
+        <div className={`${uiChipRow}`}>
+          {effective.range && <StatChip label="Range" value={effective.range} />}
+          {baseWeapon.rof && <StatChip label="RoF" value={baseWeapon.rof} />}
+          {effective.damage && (
+            <StatChip label="Damage" value={effective.damage.replace(/\s*[IREX]$/i, "").trim()} />
+          )}
+          {effective.damage && <DamageTypeChip damage={effective.damage} />}
+          {effective.pen && <StatChip label="Pen" value={effective.pen} />}
+          {effective.clip && <StatChip label="Clip" value={effective.clip} />}
+          {baseWeapon.rld && <StatChip label="Reload" value={baseWeapon.rld} />}
+        </div>
+      )}
+
+      <div className={uiStackField}>
+        <div className="flex items-center gap-1.5">
+          <span className={uiTextLabel}>Qualities</span>
+          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
+            {hasQualities ? rulesText : "-"}
+          </span>
+          {hasQualityModal && (
+            <span className={uiInfoModalWrapper}>
+              <InfoModal
+                title={`${weapon.name} Qualities`}
+                content={<SpecialRulesContent rules={rulesText} />}
+              />
+            </span>
+          )}
+        </div>
+        <EntryDetailLine
+          label="Rules"
           info={
+            hasItemRules || weapon.rules?.trim() ? (
+              <InfoModal
+                title={`${weapon.name} Rules`}
+                content={
+                  <div className={uiStackBody}>
+                    {weapon.rules?.trim() && <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>}
+                    {hasItemRules && (
+                      <>
+                        <p className={uiRuleName}>Concealed Weapon Bionic</p>
+                        {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
+                          <p key={rule} className={uiTextDescription}>
+                            {rule}
+                          </p>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                }
+              />
+            ) : undefined
+          }
+        />
+        <div className="flex items-center gap-1.5">
+          <span className={uiTextLabel}>Craftsmanship</span>
+          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
+          <span className={uiInfoModalWrapper}>
             <InfoModal
-              title={weapon.name}
+              title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
               content={
-                rulesDescription ? <InfoParagraph>{rulesDescription}</InfoParagraph> : undefined
+                concealedBionicEffect ? (
+                  <div className={uiStackBody}>
+                    <div>
+                      <p className={uiTextDescription}>{concealedBionicEffect}</p>
+                    </div>
+                  </div>
+                ) : (
+                  rangedCraftsmanshipDescription(craftsmanship)
+                )
               }
             />
-          }
-          badge={
-            <>
-              {libraryItem && <StatusBadge status={libraryItem.status} />}
-              {integrated && <Chip colour="violet">Integrated</Chip>}
-            </>
-          }
-          metadata={
-            weapon.class || activeWeaponType || weapon.concealedBionic ? (
-              <div className={`${uiChipRow} items-center`}>
-                {weapon.concealedBionic && <Chip colour="pink">Concealed Bionic</Chip>}
-                {weapon.concealedBionic && <Chip colour="pink">Cybernetic</Chip>}
-                {(() => {
-                  const c = weaponClassChip(weapon.class);
-                  return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
-                })()}
-                {activeWeaponType && (
-                  <Chip colour={activeWeaponType.colour}>{activeWeaponType.label}</Chip>
-                )}
-                {hasKnaveBallisticPenalty && <Chip colour="amber">Knave: BS −10</Chip>}
-              </div>
-            ) : undefined
-          }
-          removeAction={
-            editable && onRemove ? (
-              <RemoveEntryButton kind="Ranged Weapon" name={weapon.name} onRemove={onRemove} />
-            ) : undefined
-          }
-          actions={
-            onToggleEquip ? (
-              <EquipToggle
-                equipped={isEquipped}
-                disabled={slotsDisabled}
-                editable={editable}
-                onChange={onToggleEquip}
-              />
-            ) : undefined
-          }
-          expandControl={
-            forceExpanded ? undefined : onSelect ? (
-              <ExpandButton
-                expanded={expanded}
-                label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-                onClick={toggleExpanded}
-              />
-            ) : (
-              <ExpandChevron expanded={expanded} />
-            )
-          }
+          </span>
+        </div>
+      </div>
+
+      {/* Weight / Value / Availability / Source */}
+      <div className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}>
+        <ItemMetaChips
+          weight={effective.weight}
+          value={effective.value}
+          availability={weapon.availability}
+          source={weapon.source}
+          bare
         />
       </div>
 
-      {(expanded || forceExpanded) && (
-        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {libraryItem && (
-            <CustomItemActionButtons
-              className="flex flex-wrap gap-2"
-              libraryItem={libraryItem}
-              isDM={isDM}
-              canEditDefinition={canEditDefinition}
-              busyAction={busyAction}
-              onEditDefinition={onEditDefinition}
-              onPublish={onPublish}
-              onArchive={onArchive}
-              onUpdateAllCopies={onUpdateAllCopies}
-            />
-          )}
+      {/* Thrown weapon: quantity counter */}
+      {isThrown && (
+        <div className={`border-t ${colourDivider} pt-2 ${uiSplitRow}`}>
+          <span className={uiTextLabel}>{isThrown ? "Quantity" : "Rounds"}</span>
+          <QuantityControl
+            quantity={weapon.quantity ?? 0}
+            editable={editable}
+            size="sm"
+            onUpdate={onUpdateQuantity}
+          />
+        </div>
+      )}
 
-          {(alternateProfiles.length > 0 || alternateMeleeProfiles.length > 0) && (
-            <div className={`${uiChipRow}`}>
-              <ToggleButton
-                selected={!isMeleeProfile && activeProfileIndex === 0}
-                selectedClassName={colourToggleSelected.red}
-                className="px-2 py-1 text-xs lg:text-sm"
-                onClick={() => {
-                  setActiveProfileIndex(0);
-                  setActiveMeleeProfileIndex(null);
-                }}
-              >
-                {alternateMeleeProfiles.length > 0 ? "Ranged" : "Primary"}
-              </ToggleButton>
-              {alternateProfiles.map((profile, index) => (
-                <ToggleButton
-                  key={profile.label}
-                  selected={!isMeleeProfile && activeProfileIndex === index + 1}
-                  selectedClassName={colourToggleSelected.red}
-                  className="px-2 py-1 text-xs lg:text-sm"
-                  onClick={() => {
-                    setActiveProfileIndex(index + 1);
-                    setActiveMeleeProfileIndex(null);
-                  }}
-                >
-                  {profile.label}
-                </ToggleButton>
-              ))}
-              {alternateMeleeProfiles.map((profile, index) => (
-                <ToggleButton
-                  key={profile.label}
-                  selected={activeMeleeProfileIndex === index}
-                  selectedClassName={colourToggleSelected.red}
-                  className="px-2 py-1 text-xs lg:text-sm"
-                  onClick={() => {
-                    setActiveProfileIndex(0);
-                    setActiveMeleeProfileIndex(index);
-                  }}
-                >
-                  {profile.label}
-                </ToggleButton>
-              ))}
-            </div>
-          )}
-
-          {/* Stats grid */}
-          {isMeleeProfile && activeMeleeProfile ? (
-            <div className={`${uiChipRow}`}>
-              <StatChip
-                label="Damage"
-                value={activeMeleeProfile.damage.replace(/\s*[IREX]$/i, "").trim()}
-              />
-              <DamageTypeChip damage={activeMeleeProfile.damage} />
-              <StatChip label="Pen" value={activeMeleeProfile.pen} />
-              <StatChip label="SB" value={`+${strengthBonus}`} />
-              <StatChip
-                label="Total"
-                value={computeMeleeTotalDamage(activeMeleeProfile.damage, strengthBonus)}
-              />
-            </div>
+      {/* Grenade launcher: ammo drawn from grenade inventory */}
+      {isGrenadeLauncher && (
+        <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+          <span className={uiTextLabel}>Grenades</span>
+          {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 &&
+          (archeotechGrenades ?? []).length === 0 ? (
+            <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>
+              No grenades — add via the Grenades & Mines section below.
+            </p>
           ) : (
-            <div className={`${uiChipRow}`}>
-              {effective.range && <StatChip label="Range" value={effective.range} />}
-              {baseWeapon.rof && <StatChip label="RoF" value={baseWeapon.rof} />}
-              {effective.damage && (
-                <StatChip
-                  label="Damage"
-                  value={effective.damage.replace(/\s*[IREX]$/i, "").trim()}
-                />
-              )}
-              {effective.damage && <DamageTypeChip damage={effective.damage} />}
-              {effective.pen && <StatChip label="Pen" value={effective.pen} />}
-              {effective.clip && <StatChip label="Clip" value={effective.clip} />}
-              {baseWeapon.rld && <StatChip label="Reload" value={baseWeapon.rld} />}
-            </div>
-          )}
-
-          <div className={uiStackField}>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-                {hasQualities ? rulesText : "-"}
-              </span>
-              {hasQualityModal && (
-                <span className={uiInfoModalWrapper}>
-                  <InfoModal
-                    title={`${weapon.name} Qualities`}
-                    content={<SpecialRulesContent rules={rulesText} />}
-                  />
-                </span>
-              )}
-            </div>
-            <EntryDetailLine
-              label="Rules"
-              info={
-                hasItemRules || weapon.rules?.trim() ? (
-                  <InfoModal
-                    title={`${weapon.name} Rules`}
-                    content={
-                      <div className={uiStackBody}>
-                        {weapon.rules?.trim() && (
-                          <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>
-                        )}
-                        {hasItemRules && (
-                          <>
-                            <p className={uiRuleName}>Concealed Weapon Bionic</p>
-                            {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                              <p key={rule} className={uiTextDescription}>
-                                {rule}
-                              </p>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    }
-                  />
-                ) : undefined
-              }
-            />
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Craftsmanship</span>
-              <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal
-                  title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
-                  content={
-                    concealedBionicEffect ? (
-                      <div className={uiStackBody}>
-                        <div>
-                          <p className={uiTextDescription}>{concealedBionicEffect}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      rangedCraftsmanshipDescription(craftsmanship)
-                    )
-                  }
-                />
-              </span>
-            </div>
-          </div>
-
-          {/* Weight / Value / Availability / Source */}
-          <div className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}>
-            <ItemMetaChips
-              weight={effective.weight}
-              value={effective.value}
-              availability={weapon.availability}
-              source={weapon.source}
-              bare
-            />
-          </div>
-
-          {/* Thrown weapon: quantity counter */}
-          {isThrown && (
-            <div className={`border-t ${colourDivider} pt-2 ${uiSplitRow}`}>
-              <span className={uiTextLabel}>{isThrown ? "Quantity" : "Rounds"}</span>
-              <QuantityControl
-                quantity={weapon.quantity ?? 0}
-                editable={editable}
-                size="sm"
-                onUpdate={onUpdateQuantity}
-              />
-            </div>
-          )}
-
-          {/* Grenade launcher: ammo drawn from grenade inventory */}
-          {isGrenadeLauncher && (
-            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-              <span className={uiTextLabel}>Grenades</span>
-              {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 &&
-              (archeotechGrenades ?? []).length === 0 ? (
-                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>
-                  No grenades — add via the Grenades & Mines section below.
-                </p>
-              ) : (
-                <div className={uiStackList}>
-                  {(grenades ?? [])
-                    .filter((g) => g.type !== "Mine")
-                    .map((g) => (
-                      <div
-                        key={g.id}
-                        className={`${uiCorner} ${colourFillInset} px-2.5 lg:px-3 py-2 lg:py-2.5 ${uiSplitRow}`}
-                      >
-                        <span className={`${uiItemName} truncate`}>{g.name}</span>
-                        <QuantityControl
-                          quantity={g.quantity}
-                          editable={editable}
-                          size="sm"
-                          onUpdate={(qty) =>
-                            onUpdateGrenades?.(
-                              (grenades ?? []).map((x) =>
-                                x.id === g.id ? { ...x, quantity: qty } : x
-                              )
-                            )
-                          }
-                        />
-                      </div>
-                    ))}
-                  {(archeotechGrenades ?? []).map((g) => (
-                    <div
-                      key={g.id}
-                      className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 ${uiSplitRow}`}
-                    >
-                      <span className={`${uiItemName} truncate`}>{g.name}</span>
-                      <Chip colour="amber">Archeotech</Chip>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {usesMagazineSlots && (
-            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-              <span className={uiTextLabel}>Magazines</span>
-              {activeAmmoFamily && (
-                <div className={`${uiChipRow} items-center`}>
-                  <NestedChip colour={activeAmmoFamily.colour}>{activeAmmoFamily.label}</NestedChip>
-                </div>
-              )}
-              <div className={uiStackList}>
-                {magazineSlots.map((slot, index) => {
-                  const ammoRef = slot.referenceId
-                    ? AMMO_REFERENCE.find((ammo) => ammo.id === slot.referenceId)
-                    : undefined;
-                  const isActive = slot.id === activeMagazineSlot?.id;
-                  const displayName = ammoRef ? formatAmmoName(ammoRef.name) : slot.name;
-                  const magazineWeight =
-                    magazineCapacity > 0
-                      ? (parseFloat(effective.weight ?? "0") || 0) *
-                        0.1 *
-                        (slot.rounds / magazineCapacity)
-                      : 0;
-                  return (
-                    <div
-                      key={slot.id}
-                      className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 ${uiStackField}`}
-                    >
-                      <div className={`${uiSplitRow} flex-wrap`}>
-                        <div className={`${uiChipRow} items-center min-w-0`}>
-                          <span className={uiTextLabel}>Magazine {index + 1}</span>
-                          {displayName ? (
-                            <span className={uiItemName}>{displayName}</span>
-                          ) : (
-                            <span className={uiTextPlaceholder}>No ammunition selected</span>
-                          )}
-                          {ammoRef?.description && (
-                            <span className={uiInfoModalWrapper}>
-                              <InfoModal
-                                title={displayName ?? `Magazine ${index + 1}`}
-                                content={<p className={uiTextDescription}>{ammoRef.description}</p>}
-                              />
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {isActive ? (
-                            <Chip colour="green" className="shrink-0">
-                              Loaded
-                            </Chip>
-                          ) : (
-                            editable &&
-                            slot.referenceId && (
-                              <Button
-                                size="xs"
-                                variant="ghost"
-                                className={colourButtonOutlineOrange}
-                                onClick={() => handleSelectActiveMagazine(slot.id)}
-                              >
-                                Select
-                              </Button>
-                            )
-                          )}
-                          {editable && (
-                            <Button
-                              size="xs"
-                              variant="ghost"
-                              className={colourButtonOutlineCyan}
-                              onClick={() => setMagazineSlotPickerId(slot.id)}
-                            >
-                              {displayName ? "Change" : "Select ammo"}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      {(ammoRef || magazineCapacity > 0) && (
-                        <div className={`${uiChipRow} items-center text-[10px] lg:text-xs`}>
-                          {ammoRef && (
-                            <NestedItemMetaChips
-                              value={ammoRef.cost}
-                              purchaseAmount={ammoRef.purchaseAmount}
-                              availability={ammoRef.availability}
-                              bare
-                            />
-                          )}
-                          <NestedChip colour="slate">
-                            <WeightIcon className="h-[1em] w-[1em] shrink-0" />
-                            <span>{formatWeightForDisplay(formatAmmoWeight(magazineWeight))}</span>
-                          </NestedChip>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1.5">
-                        <span className={uiTextLabel}>Rounds</span>
-                        <QuantityControl
-                          quantity={slot.rounds}
-                          editable={editable && Boolean(slot.referenceId)}
-                          size="xs"
-                          onUpdate={(rounds) => handleUpdateMagazineRounds(slot.id, rounds)}
-                        />
-                        <span className={uiTextBody}>/ {magazineCapacity}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Regular weapon: ammo entries */}
-          {hasAmmo && !usesMagazineSlots && (
-            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-              <div className="flex items-center justify-between">
-                <span className={uiTextLabel}>Ammo</span>
-                {editable ? (
-                  <AddButton label="Add ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
-                ) : (
-                  <ViewButton label="View ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
-                )}
-              </div>
-
-              {activeAmmoFamily && (
-                <div className={`${uiChipRow} items-center`}>
-                  <NestedChip colour={activeAmmoFamily.colour}>{activeAmmoFamily.label}</NestedChip>
-                </div>
-              )}
-
-              {visibleAmmoEntries.length === 0 ? (
-                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>
-              ) : (
-                <div className={uiStackList}>
-                  {visibleAmmoEntries.map((entry) => {
-                    const entryAmmoRef = entry.referenceId
-                      ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
-                      : undefined;
-                    const entryAmmoTracking: AmmoTrackingMode =
-                      isSoldAsFullClip(entryAmmoRef) || entryAmmoRef?.isBackpackFeed
-                        ? "clip"
-                        : ammoTracking;
-                    const entryCapacity = ammoCapacityForWeapon(
-                      entryAmmoRef,
-                      weapon.referenceId,
-                      effective.clip
-                    );
-                    return (
-                      <AmmoEntryRow
-                        key={entry.id}
-                        entry={entry}
-                        isLoaded={
-                          entry.id === weapon.loadedAmmoByProfile?.[activeProfileKey] ||
-                          (!weapon.loadedAmmoByProfile?.[activeProfileKey] && entry.loaded)
-                        }
-                        editable={editable}
-                        clipSize={entryCapacity}
-                        ammoTracking={entryAmmoTracking}
-                        weightKg={calcEntryWeight(
-                          effective.weight,
-                          effective.clip,
-                          entry,
-                          entryAmmoTracking,
-                          entryCapacity
-                        )}
-                        onSetLoaded={() => handleSetLoaded(entry.id)}
-                        onRemove={() => handleRemoveAmmo(entry.id)}
-                        onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
-                        onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
-                        onSetLooseRounds={(qty) =>
-                          handleUpdateEntry(entry.id, { clips: 0, rounds: qty })
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Upgrades */}
-          {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-            <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-              <div className="flex items-center justify-between">
-                <span className={uiTextLabel}>Upgrades</span>
-                {(editable
-                  ? visibleCompatible.length > 0
-                  : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
-                  (editable ? (
-                    <AddButton
-                      label="Add upgrade"
-                      size="sm"
-                      onClick={() => setShowUpgradePicker(true)}
-                    />
-                  ) : (
-                    <ViewButton
-                      label="View upgrades"
-                      size="sm"
-                      onClick={() => setShowUpgradePicker(true)}
-                    />
-                  ))}
-              </div>
-              {upgradeRefs.length === 0 ? (
-                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
-              ) : (
-                <div className={uiStackList}>
-                  {upgradeRefs.map((upgrade) => (
-                    <UpgradeCard
-                      key={upgrade.id}
-                      upgrade={upgrade}
+            <div className={uiStackList}>
+              {(grenades ?? [])
+                .filter((g) => g.type !== "Mine")
+                .map((g) => (
+                  <div
+                    key={g.id}
+                    className={`${uiCorner} ${colourFillInset} px-2.5 lg:px-3 py-2 lg:py-2.5 ${uiSplitRow}`}
+                  >
+                    <span className={`${uiItemName} truncate`}>{g.name}</span>
+                    <QuantityControl
+                      quantity={g.quantity}
                       editable={editable}
-                      onRemove={onRemoveUpgrade}
+                      size="sm"
+                      onUpdate={(qty) =>
+                        onUpdateGrenades?.(
+                          (grenades ?? []).map((x) => (x.id === g.id ? { ...x, quantity: qty } : x))
+                        )
+                      }
                     />
-                  ))}
+                  </div>
+                ))}
+              {(archeotechGrenades ?? []).map((g) => (
+                <div
+                  key={g.id}
+                  className={`${uiNoticeBox} ${colourNoticeAmber} px-2 lg:px-3 py-1.5 lg:py-2 ${uiSplitRow}`}
+                >
+                  <span className={`${uiItemName} truncate`}>{g.name}</span>
+                  <Chip colour="amber">Archeotech</Chip>
                 </div>
-              )}
+              ))}
             </div>
-          )}
-
-          {showUpgradePicker && (
-            <UpgradePicker
-              compatibleUpgrades={visibleCompatible}
-              editable={editable}
-              onSelect={(id) => {
-                onAddUpgrade(id);
-              }}
-              onClose={() => setShowUpgradePicker(false)}
-            />
-          )}
-
-          {showAmmoPicker && (
-            <AmmoPicker
-              compatibleIds={profileCompatibleAmmoIds}
-              existingNames={existingAmmoNames}
-              editable={editable}
-              closeOnSelect={false}
-              onSelect={handleAddAmmo}
-              onClose={() => setShowAmmoPicker(false)}
-            />
-          )}
-
-          {magazineSlotPickerId && (
-            <AmmoPicker
-              title="Select Magazine Ammo"
-              compatibleIds={profileCompatibleAmmoIds}
-              existingNames={new Set()}
-              allowDuplicates
-              editable={editable}
-              onSelect={(name, referenceId) =>
-                handleSelectMagazineAmmo(magazineSlotPickerId, name, referenceId)
-              }
-              onClose={() => setMagazineSlotPickerId(null)}
-            />
           )}
         </div>
       )}
-    </div>
+
+      {usesMagazineSlots && (
+        <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+          <span className={uiTextLabel}>Magazines</span>
+          {activeAmmoFamily && (
+            <div className={`${uiChipRow} items-center`}>
+              <NestedChip colour={activeAmmoFamily.colour}>{activeAmmoFamily.label}</NestedChip>
+            </div>
+          )}
+          <div className={uiStackList}>
+            {magazineSlots.map((slot, index) => {
+              const ammoRef = slot.referenceId
+                ? AMMO_REFERENCE.find((ammo) => ammo.id === slot.referenceId)
+                : undefined;
+              const isActive = slot.id === activeMagazineSlot?.id;
+              const displayName = ammoRef ? formatAmmoName(ammoRef.name) : slot.name;
+              const magazineWeight =
+                magazineCapacity > 0
+                  ? (parseFloat(effective.weight ?? "0") || 0) *
+                    0.1 *
+                    (slot.rounds / magazineCapacity)
+                  : 0;
+              return (
+                <div
+                  key={slot.id}
+                  className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2 ${uiStackField}`}
+                >
+                  <div className={`${uiSplitRow} flex-wrap`}>
+                    <div className={`${uiChipRow} items-center min-w-0`}>
+                      <span className={uiTextLabel}>Magazine {index + 1}</span>
+                      {displayName ? (
+                        <span className={uiItemName}>{displayName}</span>
+                      ) : (
+                        <span className={uiTextPlaceholder}>No ammunition selected</span>
+                      )}
+                      {ammoRef?.description && (
+                        <span className={uiInfoModalWrapper}>
+                          <InfoModal
+                            title={displayName ?? `Magazine ${index + 1}`}
+                            content={<p className={uiTextDescription}>{ammoRef.description}</p>}
+                          />
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isActive ? (
+                        <Chip colour="green" className="shrink-0">
+                          Loaded
+                        </Chip>
+                      ) : (
+                        editable &&
+                        slot.referenceId && (
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            className={colourButtonOutlineOrange}
+                            onClick={() => handleSelectActiveMagazine(slot.id)}
+                          >
+                            Select
+                          </Button>
+                        )
+                      )}
+                      {editable && (
+                        <Button
+                          size="xs"
+                          variant="ghost"
+                          className={colourButtonOutlineCyan}
+                          onClick={() => setMagazineSlotPickerId(slot.id)}
+                        >
+                          {displayName ? "Change" : "Select ammo"}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  {(ammoRef || magazineCapacity > 0) && (
+                    <div className={`${uiChipRow} items-center text-[10px] lg:text-xs`}>
+                      {ammoRef && (
+                        <NestedItemMetaChips
+                          value={ammoRef.cost}
+                          purchaseAmount={ammoRef.purchaseAmount}
+                          availability={ammoRef.availability}
+                          bare
+                        />
+                      )}
+                      <NestedChip colour="slate">
+                        <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+                        <span>{formatWeightForDisplay(formatAmmoWeight(magazineWeight))}</span>
+                      </NestedChip>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <span className={uiTextLabel}>Rounds</span>
+                    <QuantityControl
+                      quantity={slot.rounds}
+                      editable={editable && Boolean(slot.referenceId)}
+                      size="xs"
+                      onUpdate={(rounds) => handleUpdateMagazineRounds(slot.id, rounds)}
+                    />
+                    <span className={uiTextBody}>/ {magazineCapacity}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Regular weapon: ammo entries */}
+      {hasAmmo && !usesMagazineSlots && (
+        <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+          <div className="flex items-center justify-between">
+            <span className={uiTextLabel}>Ammo</span>
+            {editable ? (
+              <AddButton label="Add ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
+            ) : (
+              <ViewButton label="View ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
+            )}
+          </div>
+
+          {activeAmmoFamily && (
+            <div className={`${uiChipRow} items-center`}>
+              <NestedChip colour={activeAmmoFamily.colour}>{activeAmmoFamily.label}</NestedChip>
+            </div>
+          )}
+
+          {visibleAmmoEntries.length === 0 ? (
+            <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>
+          ) : (
+            <div className={uiStackList}>
+              {visibleAmmoEntries.map((entry) => {
+                const entryAmmoRef = entry.referenceId
+                  ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
+                  : undefined;
+                const entryAmmoTracking: AmmoTrackingMode =
+                  isSoldAsFullClip(entryAmmoRef) || entryAmmoRef?.isBackpackFeed
+                    ? "clip"
+                    : ammoTracking;
+                const entryCapacity = ammoCapacityForWeapon(
+                  entryAmmoRef,
+                  weapon.referenceId,
+                  effective.clip
+                );
+                return (
+                  <AmmoEntryRow
+                    key={entry.id}
+                    entry={entry}
+                    isLoaded={
+                      entry.id === weapon.loadedAmmoByProfile?.[activeProfileKey] ||
+                      (!weapon.loadedAmmoByProfile?.[activeProfileKey] && entry.loaded)
+                    }
+                    editable={editable}
+                    clipSize={entryCapacity}
+                    ammoTracking={entryAmmoTracking}
+                    weightKg={calcEntryWeight(
+                      effective.weight,
+                      effective.clip,
+                      entry,
+                      entryAmmoTracking,
+                      entryCapacity
+                    )}
+                    onSetLoaded={() => handleSetLoaded(entry.id)}
+                    onRemove={() => handleRemoveAmmo(entry.id)}
+                    onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
+                    onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
+                    onSetLooseRounds={(qty) =>
+                      handleUpdateEntry(entry.id, { clips: 0, rounds: qty })
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Upgrades */}
+      {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
+        <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+          <div className="flex items-center justify-between">
+            <span className={uiTextLabel}>Upgrades</span>
+            {(editable
+              ? visibleCompatible.length > 0
+              : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
+              (editable ? (
+                <AddButton
+                  label="Add upgrade"
+                  size="sm"
+                  onClick={() => setShowUpgradePicker(true)}
+                />
+              ) : (
+                <ViewButton
+                  label="View upgrades"
+                  size="sm"
+                  onClick={() => setShowUpgradePicker(true)}
+                />
+              ))}
+          </div>
+          {upgradeRefs.length === 0 ? (
+            <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
+          ) : (
+            <div className={uiStackList}>
+              {upgradeRefs.map((upgrade) => (
+                <UpgradeCard
+                  key={upgrade.id}
+                  upgrade={upgrade}
+                  editable={editable}
+                  onRemove={onRemoveUpgrade}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {showUpgradePicker && (
+        <UpgradePicker
+          compatibleUpgrades={visibleCompatible}
+          editable={editable}
+          onSelect={(id) => {
+            onAddUpgrade(id);
+          }}
+          onClose={() => setShowUpgradePicker(false)}
+        />
+      )}
+
+      {showAmmoPicker && (
+        <AmmoPicker
+          compatibleIds={profileCompatibleAmmoIds}
+          existingNames={existingAmmoNames}
+          editable={editable}
+          closeOnSelect={false}
+          onSelect={handleAddAmmo}
+          onClose={() => setShowAmmoPicker(false)}
+        />
+      )}
+
+      {magazineSlotPickerId && (
+        <AmmoPicker
+          title="Select Magazine Ammo"
+          compatibleIds={profileCompatibleAmmoIds}
+          existingNames={new Set()}
+          allowDuplicates
+          editable={editable}
+          onSelect={(name, referenceId) =>
+            handleSelectMagazineAmmo(magazineSlotPickerId, name, referenceId)
+          }
+          onClose={() => setMagazineSlotPickerId(null)}
+        />
+      )}
+    </AccordionCard>
   );
 }

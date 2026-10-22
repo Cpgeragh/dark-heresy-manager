@@ -11,13 +11,10 @@ import {
   uiChipRow,
   uiSplitRow,
   uiSection,
-  uiSectionShell,
   uiInactiveItem,
   uiTextBody,
   uiTextLabel,
   uiInfoModalWrapper,
-  uiOverlayItemNameHover,
-  uiStackSection,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
 import {
@@ -26,8 +23,7 @@ import {
   colourTextMuted,
   colourFillInset,
 } from "../../../ui/styles/colourTokens";
-import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
+import { AccordionCard } from "../../../ui/AccordionCard";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -37,10 +33,8 @@ import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared
 import { weaponClassChip } from "./weaponHelpers";
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { CharacterEntryRowContent } from "../../../ui/CharacterEntryRow";
 import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
-import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { uiCorner } from "../../../ui/styles/shapeStyles";
@@ -75,14 +69,7 @@ export function GrenadeCard({
   isStowedCard?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
   recordComponentRender("GrenadeCard");
-  const expansionSource = !isStowedCard && isEquipped;
-  const [previousExpansionSource, setPreviousExpansionSource] = useState(expansionSource);
-  const [expanded, setExpanded] = useState(expansionSource);
-
-  if (previousExpansionSource !== expansionSource) {
-    setPreviousExpansionSource(expansionSource);
-    setExpanded(expansionSource);
-  }
+  const [expanded, setExpanded] = useState(false);
 
   // Stowed overflow card: read-only, always collapsed
   if (isStowedCard) {
@@ -116,166 +103,148 @@ export function GrenadeCard({
   const thrownRange = `${Math.max(0, strengthBonus) * 3}m`;
 
   return (
-    <div className={uiSectionShell + " overflow-hidden"}>
-      {/* Header: always visible */}
-      <div className={`${uiCardTapHeader} relative w-full p-3 lg:p-4`}>
-        <CardOverlayButton
-          label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
-          expanded={expanded}
-          onClick={() => setExpanded((e) => !e)}
+    <AccordionCard
+      name={item.name}
+      label={item.name}
+      expanded={expanded}
+      onToggle={() => setExpanded((e) => !e)}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      info={
+        <InfoModal
+          title={item.name}
+          content={rulesDescription ? <InfoParagraph>{rulesDescription}</InfoParagraph> : undefined}
         />
-        <CharacterEntryRowContent
-          interactive
-          name={item.name}
-          nameClassName={uiOverlayItemNameHover}
-          badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
+      }
+      metadata={
+        <div className={`${uiChipRow} items-center`}>
+          <Chip
+            colour={item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"}
+          >
+            {item.type ?? "Grenade"}
+          </Chip>
+          {(() => {
+            const c = weaponClassChip(item.class);
+            return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
+          })()}
+          {isEquipped && <Chip colour="emerald">{equippedCount} ready</Chip>}
+        </div>
+      }
+      removeAction={
+        editable ? (
+          <RemoveEntryButton kind="Grenade" name={item.name} onRemove={onRemove} />
+        ) : undefined
+      }
+      actions={
+        onToggleEquip ? (
+          <EquipToggle
+            equipped={isEquipped}
+            disabled={!isEquipped && !canEquipMoreTypes}
+            editable={editable}
+            onChange={onToggleEquip}
+          />
+        ) : undefined
+      }
+    >
+      {libraryItem && (
+        <CustomItemActionButtons
+          className="flex flex-wrap gap-2"
+          libraryItem={libraryItem}
+          isDM={isDM}
+          canEditDefinition={canEditDefinition}
+          busyAction={busyAction}
+          onEditDefinition={onEditDefinition}
+          onPublish={onPublish}
+          onArchive={onArchive}
+          onUpdateAllCopies={onUpdateAllCopies}
+        />
+      )}
+
+      {/* Stat chips */}
+      <div className={`${uiChipRow}`}>
+        {item.type !== "Mine" && item.type !== "Missile" && (
+          <StatChip label="Range" value={thrownRange} />
+        )}
+        {(!item.damage || item.damage === "—") && <StatChip label="Damage" value="—" />}
+        {item.damage && item.damage !== "—" && item.damage !== "Special" && (
+          <>
+            <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
+            <DamageTypeChip damage={item.damage} />
+          </>
+        )}
+        {item.damage === "Special" && (
+          <div
+            className={`flex flex-col items-center ${colourFillInset} ${uiCorner} px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]`}
+          >
+            <span className={uiTextLabel}>Damage</span>
+            <span className={`text-sm lg:text-base font-code ${colourAmberPlain} mt-0.5`}>
+              Special
+            </span>
+          </div>
+        )}
+        <StatChip label="Pen" value={item.pen && item.pen !== "—" ? item.pen : "—"} />
+      </div>
+
+      {/* Qualities / Rules */}
+      <div className={uiStackField}>
+        <div className="flex items-center gap-1.5">
+          <span className={uiTextLabel}>Qualities</span>
+          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
+            {hasRules ? item.specialRules : "-"}
+          </span>
+          {ruleNamesInLookup.length > 0 && (
+            <span className={uiInfoModalWrapper}>
+              <InfoModal
+                title={`${item.name} Qualities`}
+                content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
+              />
+            </span>
+          )}
+        </div>
+        <EntryDetailLine
+          label="Rules"
           info={
-            <InfoModal
-              title={item.name}
-              content={
-                rulesDescription ? <InfoParagraph>{rulesDescription}</InfoParagraph> : undefined
-              }
-            />
-          }
-          metadata={
-            <div className={`${uiChipRow} items-center`}>
-              <Chip
-                colour={
-                  item.type === "Mine" ? "violet" : item.type === "Missile" ? "orange" : "cyan"
-                }
-              >
-                {item.type ?? "Grenade"}
-              </Chip>
-              {(() => {
-                const c = weaponClassChip(item.class);
-                return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
-              })()}
-              {isEquipped && <Chip colour="emerald">{equippedCount} ready</Chip>}
-            </div>
-          }
-          removeAction={
-            editable ? (
-              <RemoveEntryButton kind="Grenade" name={item.name} onRemove={onRemove} />
-            ) : undefined
-          }
-          actions={
-            onToggleEquip ? (
-              <EquipToggle
-                equipped={isEquipped}
-                disabled={!isEquipped && !canEquipMoreTypes}
-                editable={editable}
-                onChange={onToggleEquip}
+            item.rules?.trim() ? (
+              <InfoModal
+                title={`${item.name} Rules`}
+                content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
               />
             ) : undefined
           }
-          expandControl={<ExpandChevron expanded={expanded} />}
         />
+        {showMishaps && (
+          <div className="flex items-center gap-1.5">
+            <span className={uiTextLabel}>Mishaps</span>
+            <span className={uiInfoModalWrapper}>
+              <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
+            </span>
+          </div>
+        )}
       </div>
 
-      {expanded && (
-        <div className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {libraryItem && (
-            <CustomItemActionButtons
-              className="flex flex-wrap gap-2"
-              libraryItem={libraryItem}
-              isDM={isDM}
-              canEditDefinition={canEditDefinition}
-              busyAction={busyAction}
-              onEditDefinition={onEditDefinition}
-              onPublish={onPublish}
-              onArchive={onArchive}
-              onUpdateAllCopies={onUpdateAllCopies}
-            />
-          )}
+      {/* Quantity row */}
+      <div className="flex items-center gap-3 pt-1">
+        <span className={`text-xs lg:text-sm ${uiTextBody} uppercase tracking-wide`}>Qty</span>
+        <QuantityControl
+          quantity={item.quantity}
+          editable={editable}
+          size="lg"
+          onUpdate={onUpdateQty}
+        />
+        {isEquipped && item.quantity > 3 && (
+          <span className={`text-[10px] lg:text-xs ${colourAmberPlain} ml-1`}>
+            3 ready, rest stowed
+          </span>
+        )}
+      </div>
 
-          {/* Stat chips */}
-          <div className={`${uiChipRow}`}>
-            {item.type !== "Mine" && item.type !== "Missile" && (
-              <StatChip label="Range" value={thrownRange} />
-            )}
-            {(!item.damage || item.damage === "—") && <StatChip label="Damage" value="—" />}
-            {item.damage && item.damage !== "—" && item.damage !== "Special" && (
-              <>
-                <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
-                <DamageTypeChip damage={item.damage} />
-              </>
-            )}
-            {item.damage === "Special" && (
-              <div
-                className={`flex flex-col items-center ${colourFillInset} ${uiCorner} px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]`}
-              >
-                <span className={uiTextLabel}>Damage</span>
-                <span className={`text-sm lg:text-base font-code ${colourAmberPlain} mt-0.5`}>
-                  Special
-                </span>
-              </div>
-            )}
-            <StatChip label="Pen" value={item.pen && item.pen !== "—" ? item.pen : "—"} />
-          </div>
-
-          {/* Qualities / Rules */}
-          <div className={uiStackField}>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-                {hasRules ? item.specialRules : "-"}
-              </span>
-              {ruleNamesInLookup.length > 0 && (
-                <span className={uiInfoModalWrapper}>
-                  <InfoModal
-                    title={`${item.name} Qualities`}
-                    content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
-                  />
-                </span>
-              )}
-            </div>
-            <EntryDetailLine
-              label="Rules"
-              info={
-                item.rules?.trim() ? (
-                  <InfoModal
-                    title={`${item.name} Rules`}
-                    content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
-                  />
-                ) : undefined
-              }
-            />
-            {showMishaps && (
-              <div className="flex items-center gap-1.5">
-                <span className={uiTextLabel}>Mishaps</span>
-                <span className={uiInfoModalWrapper}>
-                  <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Quantity row */}
-          <div className="flex items-center gap-3 pt-1">
-            <span className={`text-xs lg:text-sm ${uiTextBody} uppercase tracking-wide`}>Qty</span>
-            <QuantityControl
-              quantity={item.quantity}
-              editable={editable}
-              size="lg"
-              onUpdate={onUpdateQty}
-            />
-            {isEquipped && item.quantity > 3 && (
-              <span className={`text-[10px] lg:text-xs ${colourAmberPlain} ml-1`}>
-                3 ready, rest stowed
-              </span>
-            )}
-          </div>
-
-          {/* Weight / Value / Availability / Source */}
-          <ItemMetaChips
-            weight={item.weight}
-            value={item.value}
-            availability={item.availability}
-            source={item.source}
-            className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
-          />
-        </div>
-      )}
-    </div>
+      {/* Weight / Value / Availability / Source */}
+      <ItemMetaChips
+        weight={item.weight}
+        value={item.value}
+        availability={item.availability}
+        source={item.source}
+        className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
+      />
+    </AccordionCard>
   );
 }

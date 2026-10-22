@@ -1,6 +1,6 @@
 // tests/integration/GrenadeCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -21,7 +21,10 @@ const baseItem: GrenadeItem = {
   custom: true,
 };
 
-function renderCard(props: Partial<React.ComponentProps<typeof GrenadeCard>> = {}) {
+function renderCard(
+  props: Partial<React.ComponentProps<typeof GrenadeCard>> = {},
+  { collapsed = false } = {}
+) {
   const onRemove = vi.fn();
   const onUpdateQty = vi.fn();
   render(
@@ -35,12 +38,14 @@ function renderCard(props: Partial<React.ComponentProps<typeof GrenadeCard>> = {
       {...props}
     />
   );
+  const expand = screen.queryByRole("button", { name: /^Expand .* details$/ });
+  if (!collapsed && expand) fireEvent.click(expand);
   return { onRemove, onUpdateQty };
 }
 
 describe("GrenadeCard shared header", () => {
   it("shows the Remove button in the closed header and the chevron last", () => {
-    renderCard({ isEquipped: false, onToggleEquip: vi.fn() });
+    renderCard({ isEquipped: false, onToggleEquip: vi.fn() }, { collapsed: true });
     expect(screen.queryByText("Range")).not.toBeInTheDocument();
     const remove = screen.getByRole("button", { name: "Remove Custom Frag" });
     const expand = screen.getByRole("button", { name: "Expand Custom Frag details" });
@@ -117,7 +122,13 @@ describe("GrenadeCard equip toggle", () => {
     expect(onToggleEquip).toHaveBeenCalled();
   });
 
-  it("resets expansion when equipped status changes", async () => {
+  it("starts collapsed even when equipped", () => {
+    renderCard({}, { collapsed: true });
+    expect(screen.getByRole("button", { name: "Expand Custom Frag details" })).toBeInTheDocument();
+    expect(screen.queryByText("Range")).not.toBeInTheDocument();
+  });
+
+  it("keeps its expansion when the equipped status changes", async () => {
     const user = userEvent.setup();
     const props = {
       item: baseItem,
@@ -128,17 +139,11 @@ describe("GrenadeCard equip toggle", () => {
     };
     const { rerender } = render(<GrenadeCard {...props} isEquipped={false} />);
 
+    rerender(<GrenadeCard {...props} isEquipped />);
     expect(screen.getByRole("button", { name: "Expand Custom Frag details" })).toBeInTheDocument();
 
-    rerender(<GrenadeCard {...props} isEquipped />);
-    expect(
-      screen.getByRole("button", { name: "Collapse Custom Frag details" })
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Collapse Custom Frag details" }));
+    await user.click(screen.getByRole("button", { name: "Expand Custom Frag details" }));
     rerender(<GrenadeCard {...props} isEquipped={false} />);
-    rerender(<GrenadeCard {...props} isEquipped />);
-
     expect(
       screen.getByRole("button", { name: "Collapse Custom Frag details" })
     ).toBeInTheDocument();

@@ -10,11 +10,6 @@ import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   uiChipRow,
-  uiInlineRow,
-  uiOverlayItemNameHover,
-  uiOverlayPeerHoverText,
-  uiInfoModalWrapper,
-  uiSectionShell,
   uiTextBody,
   uiTextDescription,
   uiDescriptionBox,
@@ -39,17 +34,13 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip } from "./weaponShared";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { RangedCard } from "./RangedCard";
-import { CardOverlayButton } from "../../../ui/buttons/CardOverlayButton";
-import { ExpandButton } from "../../../ui/buttons/ExpandButton";
-import { uiCardTapHeader, uiExpandButton } from "../../../ui/styles/buttonStyles";
-import { uiLayerLocal } from "../../../ui/styles/layerStyles";
+import { AccordionCard } from "../../../ui/AccordionCard";
 import {
   weaponClassChip,
   weaponTypeChip,
   ammoFamilyChip,
   rangedCraftsmanshipDescription,
 } from "./weaponHelpers";
-import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
 import { InfoModal } from "../../../components/InfoModal";
 
 function RangedWeaponCardPickerRow({
@@ -90,50 +81,32 @@ function RangedWeaponCardPickerRow({
     const classChip = weaponClassChip(weaponReference.class);
     const typeChip = weaponTypeChip(weaponReference.type);
     return (
-      <div ref={rowRef} className={`${uiSectionShell} overflow-hidden`}>
-        <div
-          className={`${uiCardTapHeader} relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4`}
-        >
-          <CardOverlayButton
-            label={
-              editable ? `Select ${weaponReference.name}` : `Expand ${weaponReference.name} details`
-            }
-            expanded={editable ? undefined : false}
-            onClick={editable ? onSelect : showDetails}
-          />
-          <div
-            className={`${uiExpandButton} relative ${uiLayerLocal} pointer-events-none ${uiOverlayPeerHoverText}`}
-          >
-            <div className={`${uiChipRow} items-center`}>
-              <p className={uiOverlayItemNameHover}>{weaponReference.name}</p>
-              {weaponReference.description && (
-                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                  <InfoModal
-                    title={weaponReference.name}
-                    content={<p className={uiTextDescription}>{weaponReference.description}</p>}
-                  />
-                </span>
-              )}
-            </div>
-            {(classChip || typeChip) && (
-              <div className={`mt-0.5 ${uiChipRow} items-center`}>
+      <div ref={rowRef}>
+        <AccordionCard
+          name={weaponReference.name}
+          label={weaponReference.name}
+          expanded={false}
+          onToggle={showDetails}
+          onSelect={editable ? onSelect : undefined}
+          info={
+            <InfoModal
+              title={weaponReference.name}
+              content={
+                weaponReference.description ? (
+                  <p className={uiTextDescription}>{weaponReference.description}</p>
+                ) : undefined
+              }
+            />
+          }
+          metadata={
+            classChip || typeChip ? (
+              <div className={`${uiChipRow} items-center`}>
                 {classChip && <Chip colour={classChip.colour}>{classChip.label}</Chip>}
                 {typeChip && <Chip colour={typeChip.colour}>{typeChip.label}</Chip>}
               </div>
-            )}
-          </div>
-          <div className={`relative pointer-events-none ${uiInlineRow} shrink-0`}>
-            {editable ? (
-              <ExpandButton
-                expanded={false}
-                label={`Expand ${weaponReference.name} details`}
-                onClick={showDetails}
-              />
-            ) : (
-              <ExpandChevron expanded={false} />
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+        />
       </div>
     );
   }

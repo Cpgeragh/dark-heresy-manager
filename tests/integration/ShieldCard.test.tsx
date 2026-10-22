@@ -1,6 +1,6 @@
 // tests/integration/ShieldCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -21,15 +21,21 @@ const baseItem: ShieldItem = {
   custom: true,
 };
 
-function renderCard(props: Partial<React.ComponentProps<typeof ShieldCard>> = {}) {
+function renderCard(
+  props: Partial<React.ComponentProps<typeof ShieldCard>> = {},
+  { collapsed = false } = {}
+) {
   const onRemove = vi.fn();
   render(<ShieldCard item={baseItem} editable={true} isEquipped onRemove={onRemove} {...props} />);
+  if (!collapsed) {
+    fireEvent.click(screen.getByRole("button", { name: /^Expand .* details$/ }));
+  }
   return { onRemove };
 }
 
 describe("ShieldCard shared header", () => {
   it("shows the Remove button in the closed header", () => {
-    renderCard({ isEquipped: false });
+    renderCard({ isEquipped: false }, { collapsed: true });
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove Custom Buckler" })).toBeInTheDocument();
   });
@@ -73,15 +79,20 @@ describe("ShieldCard stats", () => {
   });
 
   it("hides stats when collapsed", () => {
-    renderCard({ isEquipped: false });
+    renderCard({ isEquipped: false }, { collapsed: true });
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
   });
 });
 
 describe("ShieldCard expand/collapse", () => {
+  it("starts collapsed even when equipped", () => {
+    renderCard({}, { collapsed: true });
+    expect(screen.queryByText("Damage")).not.toBeInTheDocument();
+  });
+
   it("toggles expanded state when the header is clicked", async () => {
     const user = userEvent.setup();
-    renderCard({ isEquipped: false });
+    renderCard({ isEquipped: false }, { collapsed: true });
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Expand Custom Buckler details" }));
     expect(screen.getByText("Damage")).toBeInTheDocument();

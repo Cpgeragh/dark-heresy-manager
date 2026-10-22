@@ -1,6 +1,6 @@
 // tests/integration/ArcheotechShieldRow.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -17,17 +17,23 @@ const baseItem: ArcheotechItem = {
   availability: "Very Rare",
 };
 
-function renderRow(props: Partial<React.ComponentProps<typeof ArcheotechShieldRow>> = {}) {
+function renderRow(
+  props: Partial<React.ComponentProps<typeof ArcheotechShieldRow>> = {},
+  { collapsed = false } = {}
+) {
   const onRemove = vi.fn();
   render(
     <ArcheotechShieldRow item={baseItem} editable isEquipped onRemove={onRemove} {...props} />
   );
+  if (!collapsed) {
+    fireEvent.click(screen.getByRole("button", { name: /^Expand .* details$/ }));
+  }
   return { onRemove };
 }
 
 describe("ArcheotechShieldRow shared header and Rules line", () => {
   it("shows the Remove button in the closed header", () => {
-    renderRow({ isEquipped: false });
+    renderRow({ isEquipped: false }, { collapsed: true });
     expect(screen.queryByText("AP")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove Archeotech Buckler" })).toBeInTheDocument();
   });
@@ -59,22 +65,24 @@ describe("ArcheotechShieldRow chips", () => {
 });
 
 describe("ArcheotechShieldRow expand/collapse", () => {
-  it("starts expanded when equipped and hides stats when collapsed", async () => {
+  it("starts collapsed even when equipped and hides stats when collapsed", async () => {
     const user = userEvent.setup();
-    renderRow({ isEquipped: true });
+    renderRow({ isEquipped: true }, { collapsed: true });
+    expect(screen.queryByText("AP")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand Archeotech Buckler details" }));
     expect(screen.getByText("AP")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Collapse Archeotech Buckler details" }));
     expect(screen.queryByText("AP")).not.toBeInTheDocument();
   });
 
   it("starts collapsed when not equipped", () => {
-    renderRow({ isEquipped: false });
+    renderRow({ isEquipped: false }, { collapsed: true });
     expect(screen.queryByText("AP")).not.toBeInTheDocument();
   });
 
   it("shows stats again when expanded a second time", async () => {
     const user = userEvent.setup();
-    renderRow({ isEquipped: false });
+    renderRow({ isEquipped: false }, { collapsed: true });
     await user.click(screen.getByRole("button", { name: "Expand Archeotech Buckler details" }));
     expect(screen.getByText("AP")).toBeInTheDocument();
   });

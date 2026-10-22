@@ -1,6 +1,6 @@
 // tests/integration/ArcheotechWeaponCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -10,6 +10,7 @@ import type { ArcheotechItem } from "../../src/types/Character";
 function renderCard(item: ArcheotechItem) {
   const onRemove = vi.fn();
   render(<ArcheotechWeaponCard item={item} editable onRemove={onRemove} isEquipped />);
+  fireEvent.click(screen.getByRole("button", { name: /^Expand .* details$/ }));
   return { onRemove };
 }
 
@@ -33,6 +34,23 @@ describe("ArcheotechWeaponCard shared header and Rules line", () => {
       screen.getByRole("button", { name: "Show information about Custom Trinket" })
     ).toBeInTheDocument();
     expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
+  });
+});
+
+describe("ArcheotechWeaponCard expansion", () => {
+  it("starts collapsed even when equipped", () => {
+    render(
+      <ArcheotechWeaponCard
+        item={{ id: "a6", name: "Custom Trinket" }}
+        editable
+        onRemove={vi.fn()}
+        isEquipped
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Expand Custom Trinket details" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Qualities")).not.toBeInTheDocument();
   });
 });
 

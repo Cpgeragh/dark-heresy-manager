@@ -342,7 +342,8 @@ describe("WeaponsTab", () => {
     expect(screen.getAllByRole("button", { name: /^View /i }).length).toBeGreaterThanOrEqual(2);
   });
 
-  it("shows only rounds for loose-loaded ranged ammo", () => {
+  it("shows only rounds for loose-loaded ranged ammo", async () => {
+    const user = userEvent.setup();
     renderTab({
       meleeWeapons: [],
       rangedWeapons: [
@@ -368,12 +369,15 @@ describe("WeaponsTab", () => {
       ],
     });
 
+    expect(screen.queryByText("Rounds")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand Shotgun details" }));
     expect(screen.getByText("Rounds")).toBeInTheDocument();
     expect(screen.queryByText("Clips")).not.toBeInTheDocument();
     expect(screen.getByText("7")).toBeInTheDocument();
   });
 
-  it("shows clips and rounds for clip-fed ranged ammo", () => {
+  it("shows clips and rounds for clip-fed ranged ammo", async () => {
+    const user = userEvent.setup();
     renderTab({
       meleeWeapons: [],
       rangedWeapons: [
@@ -399,6 +403,7 @@ describe("WeaponsTab", () => {
       ],
     });
 
+    await user.click(screen.getByRole("button", { name: "Expand Autogun details" }));
     expect(screen.getByText("Clips")).toBeInTheDocument();
     expect(screen.getByText("Rounds")).toBeInTheDocument();
   });

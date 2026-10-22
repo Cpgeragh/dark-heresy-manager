@@ -1,6 +1,6 @@
 // tests/integration/CyberneticWeaponCard.test.tsx
 import { describe, it, expect } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -17,7 +17,7 @@ function visibleText(text: string): HTMLElement {
   return match;
 }
 
-function renderCard(
+function renderCollapsedCard(
   weapon: CyberneticWeapon,
   craftsmanship: WeaponCraftsmanship = "Common",
   rules?: string
@@ -31,6 +31,15 @@ function renderCard(
       strengthBonus={4}
     />
   );
+}
+
+function renderCard(
+  weapon: CyberneticWeapon,
+  craftsmanship: WeaponCraftsmanship = "Common",
+  rules?: string
+) {
+  renderCollapsedCard(weapon, craftsmanship, rules);
+  fireEvent.click(screen.getByRole("button", { name: /^Expand .* details$/ }));
 }
 
 const LASPISTOL: CyberneticWeapon = {
@@ -182,35 +191,33 @@ describe("CyberneticWeaponCard craftsmanship effect", () => {
 });
 
 describe("CyberneticWeaponCard expand/collapse", () => {
-  it("starts expanded and hides the stats/qualities section when collapsed", async () => {
+  it("starts collapsed and shows the stats/qualities section when expanded", async () => {
     const user = userEvent.setup();
-    renderCard({
+    renderCollapsedCard({
       type: "ranged",
       name: "Laspistol (Compact)",
       class: "Pistol",
       damage: "1d10+1 E",
       pen: "0",
     });
+    expect(screen.queryByText("Damage")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Expand Laspistol \(Compact\) details/ }));
     expect(screen.getByText("Damage")).toBeInTheDocument();
+  });
+
+  it("hides the section again when collapsed a second time", async () => {
+    const user = userEvent.setup();
+    renderCollapsedCard({
+      type: "ranged",
+      name: "Laspistol (Compact)",
+      class: "Pistol",
+      damage: "1d10+1 E",
+      pen: "0",
+    });
+    await user.click(screen.getByRole("button", { name: /Expand Laspistol \(Compact\) details/ }));
     await user.click(
       screen.getByRole("button", { name: /Collapse Laspistol \(Compact\) details/ })
     );
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
-  });
-
-  it("shows the section again when expanded a second time", async () => {
-    const user = userEvent.setup();
-    renderCard({
-      type: "ranged",
-      name: "Laspistol (Compact)",
-      class: "Pistol",
-      damage: "1d10+1 E",
-      pen: "0",
-    });
-    await user.click(
-      screen.getByRole("button", { name: /Collapse Laspistol \(Compact\) details/ })
-    );
-    await user.click(screen.getByRole("button", { name: /Expand Laspistol \(Compact\) details/ }));
-    expect(screen.getByText("Damage")).toBeInTheDocument();
   });
 });
