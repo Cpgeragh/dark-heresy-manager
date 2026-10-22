@@ -77,6 +77,30 @@ describe("ImplantRow", () => {
     );
   });
 
+  it("prints Craftsmanship before Rules, then Gained from, with the Linked chips below the lines", () => {
+    render(
+      <ImplantRow
+        item={item({
+          referenceId: CONCEALED_WEAPON_BIONIC_ID,
+          craftsmanship: "Common",
+          grantedByTalentName: "Skin of Iron",
+          grantedByType: "Talent",
+        })}
+        linkedArmName="Left Bionic Arm"
+        linkedWeaponName="Laspistol"
+        linkedWeaponType="ranged"
+        editable={true}
+        onRemove={vi.fn()}
+      />
+    );
+
+    const labels = screen
+      .getAllByText(/^(Craftsmanship|Rules|Gained from|Linked)$/)
+      .map((label) => label.textContent);
+
+    expect(labels).toEqual(["Craftsmanship", "Rules", "Gained from", "Linked"]);
+  });
+
   it("always shows the information icon and says nothing was recorded without player notes", async () => {
     const user = userEvent.setup();
     render(<ImplantRow item={item()} editable={true} onRemove={vi.fn()} />);

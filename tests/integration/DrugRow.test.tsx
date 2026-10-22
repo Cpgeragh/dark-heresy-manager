@@ -142,6 +142,21 @@ describe("DrugRow", () => {
     expect(onRemove).toHaveBeenCalledWith("d1");
   });
 
+  it("shows no weight chip for a custom drug with no weight recorded", () => {
+    render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+
+    expect(screen.queryByText(/kg/)).not.toBeInTheDocument();
+  });
+
+  it("names the Remove pop-up after a Drug", async () => {
+    const user = userEvent.setup();
+    render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove Obscura" }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Drug" })).toBeInTheDocument();
+  });
+
   it("hides the quantity and remove controls when not editable", () => {
     render(<DrugRow item={item()} editable={false} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
     expect(screen.queryByRole("button", { name: "Increase quantity" })).not.toBeInTheDocument();

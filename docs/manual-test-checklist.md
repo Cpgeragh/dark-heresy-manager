@@ -570,6 +570,7 @@ Implants, bionics, and the Concealed Weapon Bionic install flow.
 Use a character with enough funds/context to install the Concealed Weapon Bionic at Poor, Common, and Good craftsmanship, recording cost and availability at each quality. Add one common-only implant, one Good-only Mechadendrite, and one location-assigned bionic. Refresh after installation, then cross-check granted weapons on Weapons and Toughness contributions on Armour before removing the parent implant.
 
 - [ ] On every Implant and Archeotech implant row the trash button comes first, the info icon beside the name is always shown (saying "No description recorded." when empty), a `Rules` line shows the item rules behind its icon or "-", and a `Gained from` line reads `[source] ([type])` for a granted implant
+- [ ] The lines on an Implant run Craftsmanship, Rules, then Gained from, and the pink Linked chips of a Concealed Weapon Bionic sit below them (`ImplantRow.tsx`)
 - [ ] Removing an Implant or Archeotech implant asks `Remove [name] from this character?`, shows waiting dots, and saves the implant and any Concealed Weapon Bionic link together, so a refused save leaves the implant, the link, and the pop-up as they were
 - [ ] An integrated ranged, melee, or Archeotech weapon in the Integrated Weapons section has a trash button, asks `Remove [name] from this character?` in the same way, keeps the pop-up open if the save is refused, and has no Equip or Unequip button because it is always on
 - [ ] Install a Concealed Weapon Bionic at Good craftsmanship: cost shows 750 Thrones _and_ availability shows Rare (not Scarce)
@@ -701,6 +702,7 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 - [ ] Items / Consumables tabs both list, add, and remove correctly
 - [ ] Consumables carry their own quantity control (e.g. doses of Panimune): confirm it increments/decrements and doesn't get confused with a plain gear item's lack of quantity
 - [ ] On every Gear item and Consumable row the trash button comes first among the action buttons, the info icon beside the name is always shown (saying "No description recorded." when empty), and a "Rules" line sits below the chips showing "-" until the item has rules text
+- [ ] The Remove pop-up is titled `Remove Gear Item` on a Gear item and `Remove Consumable` on a Consumable
 - [ ] Removing a Gear item or a Consumable asks `Remove [name] from this character?` with Remove and Cancel, shows waiting dots until the save finishes, and keeps the pop-up open and the row in place if the save is refused
 - [ ] The Consumable quantity control sits on the right of the row with no "Qty" label, after the trash button, at the same size as the Drug quantity control
 - [ ] A granted Gear item shows a `Gained from` line reading `[source] (type)` below its chips, and no trash button
@@ -744,6 +746,7 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 - [ ] Add Frenzon: a `Duration` line reading `1d10 minutes` sits below the chips, the info icon beside the name shows only its description, and the "Rules" line opens a window with its Effect
 - [ ] Add De-Tox: its "Rules" window shows an Effect heading and a Side Effects heading in the same style, and the info icon beside the name says "No description recorded."
 - [ ] The trash button comes first among the Drug row's action buttons, with the quantity control after it
+- [ ] A custom Drug with no weight recorded shows no weight chip, and its Remove pop-up is titled `Remove Drug`
 - [ ] Removing a Drug asks `Remove [name] from this character?` with Remove and Cancel, shows waiting dots until the save finishes, and keeps the pop-up open and the row in place if the save is refused
 - [ ] Custom drug creation: Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing: see §21, Custom Item Library

@@ -3,16 +3,11 @@
 import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
-import { uiChipRow } from "../../../ui/styles/editableStyles";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 export function DrugRow({
@@ -41,68 +36,58 @@ export function DrugRow({
   const hasRules = !!(rules || ref?.effect || ref?.sideEffect);
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={item.name}
-      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
-      info={
-        <InfoModal
-          title={item.name}
-          content={
-            hasDescription ? (
-              <>
-                {ref?.notes && <InfoParagraph>{ref.notes}</InfoParagraph>}
-                {item.notes &&
-                  (ref ? (
-                    <InfoSection heading="Player Notes">
-                      <InfoParagraph>{item.notes}</InfoParagraph>
-                    </InfoSection>
-                  ) : (
-                    <InfoParagraph>{item.notes}</InfoParagraph>
-                  ))}
-              </>
-            ) : undefined
-          }
-        />
+      editable={editable}
+      information={
+        hasDescription ? (
+          <>
+            {ref?.notes && <InfoParagraph>{ref.notes}</InfoParagraph>}
+            {item.notes &&
+              (ref ? (
+                <InfoSection heading="Player Notes">
+                  <InfoParagraph>{item.notes}</InfoParagraph>
+                </InfoSection>
+              ) : (
+                <InfoParagraph>{item.notes}</InfoParagraph>
+              ))}
+          </>
+        ) : undefined
       }
-      metadata={
+      chips={
         <ItemMetaChips
-          weight={item.weight ?? ref?.weight ?? "0 kg"}
+          bare
+          weight={item.weight ?? ref?.weight}
           value={item.value ?? ref?.value}
           availability={item.availability ?? ref?.availability}
           source={item.source}
-          className={uiChipRow}
         />
       }
-      afterMetadata={
-        <>
-          {ref?.duration && <EntryDetailLine label="Duration" value={ref.duration} />}
-          <EntryDetailLine
-            label="Rules"
-            info={
-              hasRules ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={
-                    <>
-                      {rules && <InfoParagraph>{rules}</InfoParagraph>}
-                      {ref?.effect && (
-                        <InfoSection heading="Effect">
-                          <InfoParagraph>{ref.effect}</InfoParagraph>
-                        </InfoSection>
-                      )}
-                      {ref?.sideEffect && (
-                        <InfoSection heading="Side Effects">
-                          <InfoParagraph>{ref.sideEffect}</InfoParagraph>
-                        </InfoSection>
-                      )}
-                    </>
-                  }
-                />
-              ) : undefined
-            }
-          />
-        </>
-      }
+      lines={{
+        duration: ref?.duration ? { value: ref.duration } : undefined,
+        rules: {
+          info: hasRules ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={
+                <>
+                  {rules && <InfoParagraph>{rules}</InfoParagraph>}
+                  {ref?.effect && (
+                    <InfoSection heading="Effect">
+                      <InfoParagraph>{ref.effect}</InfoParagraph>
+                    </InfoSection>
+                  )}
+                  {ref?.sideEffect && (
+                    <InfoSection heading="Side Effects">
+                      <InfoParagraph>{ref.sideEffect}</InfoParagraph>
+                    </InfoSection>
+                  )}
+                </>
+              }
+            />
+          ) : undefined,
+        },
+      }}
       actions={
         <QuantityControl
           quantity={item.quantity}
@@ -110,24 +95,17 @@ export function DrugRow({
           onUpdate={(q) => onUpdateQty(item.id, q)}
         />
       }
-      removeAction={
-        editable ? (
-          <RemoveEntryButton kind="Drug" name={item.name} onRemove={() => onRemove(item.id)} />
-        ) : undefined
-      }
-    >
-      {libraryItem && (
-        <CustomItemActionButtons
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
-      )}
-    </CharacterEntryRow>
+      library={{
+        libraryItem,
+        isDM,
+        canEditDefinition,
+        busyAction,
+        onEditDefinition,
+        onPublish,
+        onArchive,
+        onUpdateAllCopies,
+      }}
+      removal={{ kind: "Drug", onRemove: () => onRemove(item.id) }}
+    />
   );
 }

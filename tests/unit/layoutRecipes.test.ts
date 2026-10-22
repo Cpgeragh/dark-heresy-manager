@@ -51,6 +51,15 @@ describe("shared layout recipes", () => {
     expect(talentEntries).toContain("<OwnedEntryRow");
     expect(corruptionEntries).toContain("<OwnedEntryRow");
     expect(insanityEntries).toContain("<OwnedEntryRow");
+
+    for (const file of [
+      "src/pages/CharacterSheet/GearTab/ItemRow.tsx",
+      "src/pages/CharacterSheet/GearTab/ConsumableRow.tsx",
+      "src/pages/CharacterSheet/DrugsTab/DrugRow.tsx",
+      "src/pages/CharacterSheet/CyberneticsTab/ImplantRow.tsx",
+    ]) {
+      expect(readFileSync(join(__dirname, "../..", file), "utf8")).toContain("<OwnedEntryRow");
+    }
     expect(skillRow).not.toContain('"px-3 lg:px-4 py-2.5 lg:py-3"');
     expect(talentEntries).not.toContain('uiSection + " flex items-start justify-between');
   });

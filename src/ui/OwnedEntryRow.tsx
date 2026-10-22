@@ -103,7 +103,7 @@ export function OwnedEntryRow({
       info={<InfoModal title={name} content={information} as={informationAs} />}
       metadata={
         chips ? (
-          <div className={`${uiChipRow} items-center [&>*]:shrink-0`}>{chips}</div>
+          <div className={`${uiChipRow} items-center empty:hidden [&>*]:shrink-0`}>{chips}</div>
         ) : undefined
       }
       afterMetadata={

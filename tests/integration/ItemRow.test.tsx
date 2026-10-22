@@ -82,4 +82,27 @@ describe("ItemRow", () => {
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalledOnce();
   });
+
+  it("names the Remove pop-up after a Gear Item", async () => {
+    const user = userEvent.setup();
+    render(<ItemRow item={gearItem()} editable onRemove={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove Chattallium Ring" }));
+
+    expect(screen.getByRole("dialog", { name: "Remove Gear Item" })).toBeInTheDocument();
+  });
+
+  it("keeps the weight, availability, and source chips in one aligned row", () => {
+    render(
+      <ItemRow
+        item={gearItem({ weight: "1 kg", availability: "Rare", source: "CR" })}
+        editable
+        onRemove={vi.fn()}
+      />
+    );
+
+    const chipRow = screen.getByText("Rare").parentElement;
+    expect(chipRow).toHaveClass("items-center");
+    expect(screen.getByText("CR").parentElement).toBe(chipRow);
+  });
 });

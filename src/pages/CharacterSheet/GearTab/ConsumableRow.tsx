@@ -1,17 +1,12 @@
 // src/pages/CharacterSheet/GearTab/ConsumableRow.tsx
 
 import type { ConsumableItem } from "../../../types/Character";
-import { uiChipRow } from "../../../ui/styles/editableStyles";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { InfoParagraph } from "../../../ui/InfoSection";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props extends CustomItemLibraryActionProps<"consumable"> {
@@ -40,37 +35,29 @@ export function ConsumableRow({
   const rules = item.rules?.trim();
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={item.name}
-      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
-      info={
-        <InfoModal
-          title={item.name}
-          content={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
-        />
-      }
-      metadata={
+      editable={editable}
+      information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
+      chips={
         <ItemMetaChips
+          bare
           weight={item.weight}
           value={item.value}
           availability={item.availability}
           source={item.source}
-          className={uiChipRow}
         />
       }
-      afterMetadata={
-        <EntryDetailLine
-          label="Rules"
-          info={
-            rules ? (
-              <InfoModal
-                title={`${item.name} Rules`}
-                content={<InfoParagraph>{rules}</InfoParagraph>}
-              />
-            ) : undefined
-          }
-        />
-      }
+      lines={{
+        rules: {
+          info: rules ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={<InfoParagraph>{rules}</InfoParagraph>}
+            />
+          ) : undefined,
+        },
+      }}
       actions={
         <QuantityControl
           quantity={item.quantity}
@@ -78,28 +65,17 @@ export function ConsumableRow({
           onUpdate={(q) => onUpdateQty(item.id, q)}
         />
       }
-      removeAction={
-        editable ? (
-          <RemoveEntryButton
-            kind="Consumable"
-            name={item.name}
-            onRemove={() => onRemove(item.id)}
-          />
-        ) : undefined
-      }
-    >
-      {libraryItem && (
-        <CustomItemActionButtons
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
-      )}
-    </CharacterEntryRow>
+      library={{
+        libraryItem,
+        isDM,
+        canEditDefinition,
+        busyAction,
+        onEditDefinition,
+        onPublish,
+        onArchive,
+        onUpdateAllCopies,
+      }}
+      removal={{ kind: "Consumable", onRemove: () => onRemove(item.id) }}
+    />
   );
 }

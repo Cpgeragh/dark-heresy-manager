@@ -4,10 +4,8 @@ import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/chips/Chip";
 import { uiChipRow, uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
@@ -18,8 +16,6 @@ import {
 } from "./cyberneticsHelpers";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
@@ -63,27 +59,22 @@ export function ImplantRow({
   const rules = isConcealedWeaponBionic ? undefined : item.rules?.trim() || ref?.notes;
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={item.name}
-      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
-      info={
-        <InfoModal
-          title={item.name}
-          content={
-            item.notes ? (
-              ref ? (
-                <InfoSection heading="Player Notes">
-                  <InfoParagraph>{item.notes}</InfoParagraph>
-                </InfoSection>
-              ) : (
-                <InfoParagraph>{item.notes}</InfoParagraph>
-              )
-            ) : undefined
-          }
-        />
+      editable={editable}
+      information={
+        item.notes ? (
+          ref ? (
+            <InfoSection heading="Player Notes">
+              <InfoParagraph>{item.notes}</InfoParagraph>
+            </InfoSection>
+          ) : (
+            <InfoParagraph>{item.notes}</InfoParagraph>
+          )
+        ) : undefined
       }
-      metadata={
-        <div className={uiChipRow}>
+      chips={
+        <>
           {item.bodyLocation && item.bodyLocation.length > 0 && (
             <Chip colour="slate">
               {item.bodyLocation.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
@@ -98,26 +89,13 @@ export function ImplantRow({
             }
             source={item.source ?? ref?.source}
           />
-        </div>
+        </>
       }
-      afterMetadata={
-        <>
-          <EntryDetailLine
-            label="Rules"
-            info={
-              rules ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={<InfoParagraph>{rules}</InfoParagraph>}
-                />
-              ) : undefined
-            }
-          />
-          {item.craftsmanship && (
-            <EntryDetailLine
-              label="Craftsmanship"
-              value={displayedCraftsmanship}
-              info={
+      lines={{
+        craftsmanship: item.craftsmanship
+          ? {
+              value: displayedCraftsmanship,
+              info: (
                 <InfoModal
                   title={`${displayedCraftsmanship} ${item.name}`}
                   content={
@@ -126,42 +104,45 @@ export function ImplantRow({
                     </p>
                   }
                 />
-              }
+              ),
+            }
+          : undefined,
+        rules: {
+          info: rules ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={<InfoParagraph>{rules}</InfoParagraph>}
             />
-          )}
-          {linkedArmName && linkedWeaponName && (
-            <div className={`${uiChipRow} items-center`}>
-              <span className={uiTextLabel}>Linked</span>
-              <Chip colour="pink">{linkedArmName}</Chip>
-              <Chip colour="pink">{linkedWeaponName}</Chip>
-            </div>
-          )}
-          {item.grantedByTalentName && (
-            <EntryDetailLine
-              label="Gained from"
-              value={`${item.grantedByTalentName} (${item.grantedByType})`}
-            />
-          )}
-        </>
-      }
-      removeAction={
-        editable && !item.grantedByTalentEntryUid ? (
-          <RemoveEntryButton kind="Implant" name={item.name} onRemove={() => onRemove(item.id)} />
+          ) : undefined,
+        },
+        gainedFrom: item.grantedByTalentName
+          ? `${item.grantedByTalentName} (${item.grantedByType})`
+          : undefined,
+      }}
+      body={
+        linkedArmName && linkedWeaponName ? (
+          <div className={`${uiChipRow} items-center`}>
+            <span className={uiTextLabel}>Linked</span>
+            <Chip colour="pink">{linkedArmName}</Chip>
+            <Chip colour="pink">{linkedWeaponName}</Chip>
+          </div>
         ) : undefined
       }
-    >
-      {libraryItem && (
-        <CustomItemActionButtons
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
-      )}
-    </CharacterEntryRow>
+      library={{
+        libraryItem,
+        isDM,
+        canEditDefinition,
+        busyAction,
+        onEditDefinition,
+        onPublish,
+        onArchive,
+        onUpdateAllCopies,
+      }}
+      removal={{
+        kind: "Implant",
+        onRemove: () => onRemove(item.id),
+        hidden: Boolean(item.grantedByTalentEntryUid),
+      }}
+    />
   );
 }
