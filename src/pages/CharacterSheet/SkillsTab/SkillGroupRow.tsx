@@ -1,4 +1,4 @@
-import { uiChipRow, uiStackField, uiStackList } from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiStackList } from "../../../ui/styles/editableStyles";
 
 // src/pages/CharacterSheet/SkillsTab/SkillGroupRow.tsx
 
@@ -15,7 +15,6 @@ import { Chip } from "../../../ui/chips/Chip";
 import { SkillRow } from "./SkillRow";
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { colourTextPrimary, colourDivider } from "../../../ui/styles/colourTokens";
 
 interface SkillGroupRowProps {
   category: string;
@@ -47,49 +46,42 @@ export function SkillGroupRow({
 
   return (
     <AccordionCard
+      name={category}
+      label={category}
       expanded={expanded}
       onToggle={toggle}
-      header={
-        <div className={uiStackField}>
-          <span
-            className={`block truncate text-sm font-semibold ${colourTextPrimary} lg:text-base`}
-          >
-            {category}
-          </span>
-          <div className={`${uiChipRow} items-center`}>
-            {characteristics.map((characteristic) => (
-              <Chip
-                key={characteristic}
-                colour={characteristicChipColour(characteristic)}
-                className="font-code shrink-0"
-              >
-                {CHAR_LABEL[characteristic]}
-              </Chip>
-            ))}
-            {skills[0].advanced && (
-              <Chip colour="purple" className="shrink-0">
-                Advanced
-              </Chip>
-            )}
-          </div>
+      metadata={
+        <div className={`${uiChipRow} items-center`}>
+          {characteristics.map((characteristic) => (
+            <Chip
+              key={characteristic}
+              colour={characteristicChipColour(characteristic)}
+              className="font-code shrink-0"
+            >
+              {CHAR_LABEL[characteristic]}
+            </Chip>
+          ))}
+          {skills[0].advanced && (
+            <Chip colour="purple" className="shrink-0">
+              Advanced
+            </Chip>
+          )}
         </div>
       }
     >
-      {expanded && (
-        <div className={`border-t ${colourDivider} ${uiStackList} p-2`}>
-          {skills.map((skill) => (
-            <SkillRow
-              key={skill.id}
-              skill={skill}
-              editable={editable}
-              updateLevel={updateLevel}
-              nextTierAccess={getNextTierAccess?.(skill.id, skill.level)}
-              onManualUpgrade={onManualUpgrade}
-              isDM={isDM}
-            />
-          ))}
-        </div>
-      )}
+      <div className={uiStackList}>
+        {skills.map((skill) => (
+          <SkillRow
+            key={skill.id}
+            skill={skill}
+            editable={editable}
+            updateLevel={updateLevel}
+            nextTierAccess={getNextTierAccess?.(skill.id, skill.level)}
+            onManualUpgrade={onManualUpgrade}
+            isDM={isDM}
+          />
+        ))}
+      </div>
     </AccordionCard>
   );
 }

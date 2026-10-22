@@ -9,7 +9,7 @@ import { Chip } from "../../ui/chips/Chip";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
-import { type ChipColour, colourTextPrimary, colourDivider } from "../../ui/styles/colourTokens";
+import type { ChipColour } from "../../ui/styles/colourTokens";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { AccordionCard } from "../../ui/AccordionCard";
 import { normaliseSources } from "./talentUtils";
@@ -159,32 +159,26 @@ export function TalentGroupCard({
   const [expanded, setExpanded] = useState(false);
   return (
     <AccordionCard
+      name={name}
+      label={name}
       expanded={expanded}
       onToggle={() => setExpanded((value) => !value)}
-      aria-label={`${expanded ? "Collapse" : "Expand"} ${name}`}
-      header={
-        <span className={`block truncate text-sm font-semibold ${colourTextPrimary} lg:text-base`}>
-          {name}
-        </span>
-      }
     >
-      {expanded && (
-        <div className={`border-t ${colourDivider} ${uiStackList} p-2`}>
-          {[...entries]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((entry) => (
-              <EntryCard
-                key={entry.uid}
-                entry={entry}
-                editable={editable}
-                onRemove={onRemove}
-                removable={!entry.grantedByTalentEntryUid}
-                statusChip={statusChip}
-                statusChipColour={statusChipColour}
-              />
-            ))}
-        </div>
-      )}
+      <div className={uiStackList}>
+        {[...entries]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((entry) => (
+            <EntryCard
+              key={entry.uid}
+              entry={entry}
+              editable={editable}
+              onRemove={onRemove}
+              removable={!entry.grantedByTalentEntryUid}
+              statusChip={statusChip}
+              statusChipColour={statusChipColour}
+            />
+          ))}
+      </div>
     </AccordionCard>
   );
 }

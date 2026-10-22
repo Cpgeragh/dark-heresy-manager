@@ -229,10 +229,10 @@ describe("SkillsTab", () => {
     });
 
     const categoryName = screen.getByText("Ciphers");
-    const contentBlock = categoryName.parentElement;
+    const contentBlock = categoryName.parentElement?.parentElement;
 
     expect(contentBlock).toHaveClass("space-y-1");
-    expect(contentBlock?.children[0]).toBe(categoryName);
+    expect(contentBlock?.children[0]).toContainElement(categoryName);
     expect(contentBlock?.children[1]).toHaveTextContent("Int");
     expect(contentBlock?.children[1]).toHaveTextContent("Advanced");
   });
@@ -260,8 +260,9 @@ describe("SkillsTab", () => {
     const groupButtons = screen.getAllByRole("button", { name: /Trade/ });
     expect(groupButtons.length).toBeGreaterThan(0);
     for (const groupButton of groupButtons) {
-      expect(groupButton).toHaveTextContent("S");
-      expect(groupButton).toHaveTextContent("Int");
+      const header = groupButton.parentElement;
+      expect(header).toHaveTextContent("S");
+      expect(header).toHaveTextContent("Int");
     }
   });
 

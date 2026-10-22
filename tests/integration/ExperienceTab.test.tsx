@@ -168,14 +168,12 @@ describe("ExperienceTab named Career Rank ledger", () => {
       "Guard Rank Card",
       "Conscript Rank Card",
     ]);
-    expect(screen.getByRole("button", { name: "Collapse Scout Rank Card" })).toHaveAttribute(
-      "aria-expanded",
-      "true"
-    );
-    expect(screen.getByRole("button", { name: "Expand Veteran Rank Card" })).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
+    expect(
+      screen.getByRole("button", { name: "Collapse Scout Rank Card details" })
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("button", { name: "Expand Veteran Rank Card details" })
+    ).toHaveAttribute("aria-expanded", "false");
   });
 
   it("displays the selected Alternate Rank in progression and the Rank ledger", () => {
@@ -242,14 +240,12 @@ describe("ExperienceTab named Career Rank ledger", () => {
       />
     );
 
-    expect(screen.getByRole("button", { name: "Collapse Scout Rank Card" })).toHaveAttribute(
-      "aria-expanded",
-      "true"
-    );
-    expect(screen.getByRole("button", { name: "Expand Veteran Rank Card" })).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
+    expect(
+      screen.getByRole("button", { name: "Collapse Scout Rank Card details" })
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("button", { name: "Expand Veteran Rank Card details" })
+    ).toHaveAttribute("aria-expanded", "false");
   });
 
   it("shows career purchases when a previous Rank Card is expanded", async () => {
@@ -257,21 +253,22 @@ describe("ExperienceTab named Career Rank ledger", () => {
     renderTab();
     const conscript = within(screen.getByRole("article", { name: "Conscript Rank Card" }));
     expect(conscript.queryByText("Awareness — Trained")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Expand Conscript Rank Card" }));
+    await user.click(screen.getByRole("button", { name: "Expand Conscript Rank Card details" }));
     expect(conscript.getAllByText("Career Purchases from This Rank").length).toBeGreaterThan(0);
     const careerPanel = within(conscript.getByRole("tabpanel", { name: "Career Purchases" }));
-    expect(careerPanel.getByText("Skills")).toHaveClass("text-slate-200");
-    expect(careerPanel.getByText("Talents")).toHaveClass("text-slate-200");
-    expect(careerPanel.getByText("Weapon Training")).toHaveClass("text-slate-200");
+    expect(careerPanel.getByText("Skills").closest(".text-slate-200")).not.toBeNull();
+    expect(careerPanel.getByText("Talents").closest(".text-slate-200")).not.toBeNull();
+    expect(careerPanel.getByText("Weapon Training").closest(".text-slate-200")).not.toBeNull();
+    expect(careerPanel.getByText("Skills")).toHaveClass("font-medium");
     expect(careerPanel.queryByText("Awareness — Trained")).not.toBeInTheDocument();
-    await user.click(careerPanel.getByRole("button", { name: "Expand Skills purchases" }));
-    await user.click(careerPanel.getByRole("button", { name: "Expand Talents purchases" }));
-    await user.click(careerPanel.getByRole("button", { name: "Expand Weapon Training purchases" }));
+    await user.click(careerPanel.getByRole("button", { name: "Expand Skills details" }));
+    await user.click(careerPanel.getByRole("button", { name: "Expand Talents details" }));
+    await user.click(careerPanel.getByRole("button", { name: "Expand Weapon Training details" }));
     expect(careerPanel.getByText("Awareness — Trained")).toBeInTheDocument();
     expect(careerPanel.getByText("Basic Weapon Training (Las)")).toBeInTheDocument();
     expect(careerPanel.getByText("Sound Constitution")).toBeInTheDocument();
     expect(
-      careerPanel.queryByRole("button", { name: /Characteristics purchases/ })
+      careerPanel.queryByRole("button", { name: /Characteristics details/ })
     ).not.toBeInTheDocument();
     expect(careerPanel.getByText("300 XP")).toBeInTheDocument();
   });

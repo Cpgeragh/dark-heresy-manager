@@ -415,7 +415,9 @@ describe("TraitsTab", () => {
     });
 
     expect(screen.queryByText("Unnatural Characteristic (Weapon Skill)")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Expand Unnatural Characteristic" }));
+    await user.click(
+      screen.getByRole("button", { name: "Expand Unnatural Characteristic details" })
+    );
     expect(screen.getByText("Unnatural Characteristic (Weapon Skill)")).toBeInTheDocument();
     expect(screen.getByText("Unnatural Characteristic (Perception)")).toBeInTheDocument();
     expect(screen.getByText("Owned: 2")).toBeInTheDocument();

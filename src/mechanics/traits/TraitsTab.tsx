@@ -18,7 +18,6 @@ import { ViewButton } from "../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { AccordionCard } from "../../ui/AccordionCard";
 import {
-  uiItemName,
   uiSection,
   uiTextPlaceholder,
   uiStackList,
@@ -32,7 +31,6 @@ import { createDraftCustomItem, saveDraftCustomItem } from "../../services/custo
 import { useToast } from "../../components/Toast";
 import type { CampaignCustomItem, CustomTraitData } from "../../types/CustomItems";
 import { recordComponentRender } from "../../performance/performanceMetrics";
-import { colourDivider } from "../../ui/styles/colourTokens";
 
 interface TraitsTabProps {
   talents: TalentsAndTraitsBlock;
@@ -104,16 +102,12 @@ function UnnaturalCharacteristicCards({
 
   return (
     <AccordionCard
+      name="Unnatural Characteristic"
+      label="Unnatural Characteristic"
       expanded={expanded}
       onToggle={() => setExpanded((value) => !value)}
-      aria-label={`${expanded ? "Collapse" : "Expand"} Unnatural Characteristic`}
-      header={<span className={`block truncate ${uiItemName}`}>Unnatural Characteristic</span>}
     >
-      {expanded && (
-        <div className={`border-t ${colourDivider} ${uiStackList} p-2`}>
-          {groups.map(renderCharacteristic)}
-        </div>
-      )}
+      <div className={uiStackList}>{groups.map(renderCharacteristic)}</div>
     </AccordionCard>
   );
 }

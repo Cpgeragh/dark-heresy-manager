@@ -1552,7 +1552,7 @@ describe("TalentsTab", () => {
       ],
     });
     const { onUpdateTalents } = renderTab({ talents });
-    await user.click(screen.getAllByRole("button", { name: "Expand Resistance" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Expand Resistance details" })[0]);
     expect(screen.getByText("Resistance (Fear)")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Remove Resistance (Fear)" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));

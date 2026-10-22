@@ -23,10 +23,8 @@ import {
   uiChipRow,
   editableInputClass,
   readOnlyBadgeClass,
-  uiCardTitle,
   uiInfoModalWrapper,
   uiItemName,
-  uiNoticeBox,
   uiSection,
   uiSectionShell,
   uiTextBody,
@@ -49,7 +47,6 @@ import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { InfoModal } from "../../components/InfoModal";
 import { AccordionCard } from "../../ui/AccordionCard";
-import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
@@ -65,7 +62,6 @@ import {
   colourActiveSky,
   colourAmberPlain,
   colourCareerPathOutline,
-  colourNoticeRed,
   colourSuccessPlain,
   colourTextPrimary,
   type ChipColour,
@@ -822,16 +818,12 @@ function CareerPurchaseGroup({
 
   return (
     <AccordionCard
+      name={label}
+      label={label}
       expanded={expanded}
       onToggle={() => setExpanded((value) => !value)}
-      aria-label={`${expanded ? "Collapse" : "Expand"} ${label} purchases`}
-      header={<span className={`block truncate ${uiCardTitle}`}>{label}</span>}
     >
-      {expanded && (
-        <div className={`${uiStackList} border-t ${colourDivider} p-2`}>
-          <RankEntryList entries={entries} emptyText="" showKind={false} boxed />
-        </div>
-      )}
+      <RankEntryList entries={entries} emptyText="" showKind={false} boxed />
     </AccordionCard>
   );
 }
@@ -1187,69 +1179,55 @@ export function ExperienceTab({
               const expanded = expandedRankIds.has(card.rankId);
               const detailsId = `rank-card-${card.rankId}-details`;
               return (
-                <article
-                  key={card.rankId}
-                  aria-label={`${card.name} Rank Card`}
-                  className={card.isCurrent ? `${uiNoticeBox} ${colourNoticeRed}` : uiSectionShell}
-                >
+                <article key={card.rankId} aria-label={`${card.name} Rank Card`}>
                   <AccordionCard
-                    shellClassName={uiCorner}
-                    showChevron={false}
+                    tone={card.isCurrent ? "red" : "default"}
+                    name={
+                      <h3 className={`${uiItemName} text-lg ${colourHeadingAccent} lg:text-xl`}>
+                        {card.name}
+                      </h3>
+                    }
+                    label={`${card.name} Rank Card`}
                     expanded={expanded}
                     onToggle={() => toggleRankCard(card.rankId)}
-                    aria-controls={detailsId}
-                    aria-label={`${expanded ? "Collapse" : "Expand"} ${card.name} Rank Card`}
-                    header={
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="min-w-0">
-                          <h3 className={`${uiItemName} text-lg ${colourHeadingAccent} lg:text-xl`}>
-                            {card.name}
-                          </h3>
-                          <div className={`mt-1 ${uiChipRow}`}>
-                            <Chip colour="fuchsia" className="font-code">
-                              Rank {card.tier}
-                            </Chip>
-                            <Chip colour="amber" className="font-code">
-                              {card.xpLevel} XP
-                            </Chip>
-                            {card.isCurrent && <Chip colour="emerald">Current</Chip>}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between gap-3 sm:justify-end">
-                          <div className="sm:text-right">
-                            <div className={`${uiTextMeta} uppercase tracking-wide`}>
-                              Card Spent
-                            </div>
-                            <div className={`font-code text-xl ${colourTextPrimary} lg:text-2xl`}>
-                              {card.spentTotal} XP
-                            </div>
-                          </div>
-                          <ExpandChevron expanded={expanded} />
+                    bodyId={detailsId}
+                    metadata={
+                      <div className={uiChipRow}>
+                        <Chip colour="fuchsia" className="font-code">
+                          Rank {card.tier}
+                        </Chip>
+                        <Chip colour="amber" className="font-code">
+                          {card.xpLevel} XP
+                        </Chip>
+                        {card.isCurrent && <Chip colour="emerald">Current</Chip>}
+                      </div>
+                    }
+                    actions={
+                      <div className="sm:text-right">
+                        <div className={`${uiTextMeta} uppercase tracking-wide`}>Card Spent</div>
+                        <div className={`font-code text-xl ${colourTextPrimary} lg:text-2xl`}>
+                          {card.spentTotal} XP
                         </div>
                       </div>
                     }
                   >
-                    {expanded && (
-                      <div id={detailsId} className={`${uiStackBody} p-3 pt-0 lg:p-4 lg:pt-0`}>
-                        {editable && card.titleChoice && (
-                          <RankTitleChoice
-                            careerName={
-                              card.titleChoice.includesCareerName ? card.careerRankName : undefined
-                            }
-                            options={card.titleChoice.options}
-                            value={
-                              card.titleChoice.options.includes(card.name)
-                                ? card.name
-                                : card.titleChoice.includesCareerName
-                                  ? ""
-                                  : card.titleChoice.options[0]
-                            }
-                            onChange={(title) => changeRankTitle(card, title)}
-                          />
-                        )}
-                        <RankDetailsSwitcher card={card} />
-                      </div>
+                    {editable && card.titleChoice && (
+                      <RankTitleChoice
+                        careerName={
+                          card.titleChoice.includesCareerName ? card.careerRankName : undefined
+                        }
+                        options={card.titleChoice.options}
+                        value={
+                          card.titleChoice.options.includes(card.name)
+                            ? card.name
+                            : card.titleChoice.includesCareerName
+                              ? ""
+                              : card.titleChoice.options[0]
+                        }
+                        onChange={(title) => changeRankTitle(card, title)}
+                      />
                     )}
+                    <RankDetailsSwitcher card={card} />
                   </AccordionCard>
                 </article>
               );
