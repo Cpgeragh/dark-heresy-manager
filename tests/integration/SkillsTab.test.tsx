@@ -179,6 +179,35 @@ describe("SkillsTab", () => {
     }
   });
 
+  it("gives the Upgrade button the three responsive sizes", () => {
+    renderTab({ isDM: true });
+
+    for (const upgrade of screen.getAllByRole("button", { name: "Upgrade to +10" })) {
+      expect(upgrade).toHaveClass("text-xs", "sm:h-7", "sm:px-2.5", "md:h-8", "md:px-3");
+    }
+  });
+
+  it("shows the Talent effects as a labelled line after the chips", () => {
+    renderTab({
+      skills: [skill({ id: "awareness", name: "Awareness", level: "trained" })],
+      talents: {
+        homeworld: "",
+        talents: [
+          {
+            uid: "tal",
+            talentId: "talented",
+            name: "Talented (Awareness)",
+            specialisation: "Awareness",
+          },
+        ],
+        traits: [],
+      },
+    });
+
+    const line = screen.getAllByText("Talent effects")[0].parentElement as HTMLElement;
+    expect(within(line).getByText("Talented (Awareness) (Talent): +10")).toBeInTheDocument();
+  });
+
   it("places grouped skill chips beneath the category name", () => {
     renderTab({
       skills: [

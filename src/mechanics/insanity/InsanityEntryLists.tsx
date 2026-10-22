@@ -8,15 +8,14 @@ import type {
 } from "../../types/Character";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { Button } from "../../ui/buttons/Button";
-import { CharacterEntryRow } from "../../ui/CharacterEntryRow";
-import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
+import { EntryActionButton } from "../../ui/buttons/EntryActionButton";
+import { OwnedEntryRow } from "../../ui/OwnedEntryRow";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { Chip } from "../../ui/chips/Chip";
 import { RollChip } from "../../ui/chips/RollChip";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
-  uiChipRow,
   uiSplitRow,
   uiInfoModalWrapper,
   uiTextBody,
@@ -56,24 +55,20 @@ function DisorderRow({
 
   return (
     <>
-      <CharacterEntryRow
+      <OwnedEntryRow
         name={disorder.name}
-        info={
-          <InfoModal
-            title={disorder.name}
-            content={
-              <DisorderInfoContent
-                type={ref?.type ?? disorder.type}
-                name={ref?.name ?? disorder.name}
-                description={ref?.description ?? disorder.notes ?? "Custom disorder."}
-                typeDescription={ref?.typeDescription}
-                notes={disorder.notes}
-              />
-            }
+        editable={editable}
+        information={
+          <DisorderInfoContent
+            type={ref?.type ?? disorder.type}
+            name={ref?.name ?? disorder.name}
+            description={ref?.description ?? disorder.notes ?? "Custom disorder."}
+            typeDescription={ref?.typeDescription}
+            notes={disorder.notes}
           />
         }
-        metadata={
-          <div className={`${uiChipRow} items-center`}>
+        chips={
+          <>
             <Chip colour={disorderTypeChipColour(disorder.type)}>{disorder.type}</Chip>
             <span className="inline-flex items-center gap-1">
               <Chip colour={severityChipColour[disorder.severity]}>{disorder.severity}</Chip>
@@ -91,20 +86,16 @@ function DisorderRow({
                 {disorder.source}
               </Chip>
             )}
-          </div>
+          </>
         }
         actions={
           editable && nextSeverity ? (
-            <Button size="xs" onClick={() => setEscalateArmed(true)}>
+            <EntryActionButton onClick={() => setEscalateArmed(true)}>
               Escalate to {nextSeverity}
-            </Button>
+            </EntryActionButton>
           ) : undefined
         }
-        removeAction={
-          editable ? (
-            <RemoveEntryButton kind="Disorder" name={disorder.name} onRemove={onRemove} />
-          ) : undefined
-        }
+        removal={{ kind: "Disorder", onRemove }}
       />
       {escalateArmed && nextSeverity && (
         <PickerModal
@@ -162,24 +153,23 @@ function TraumaRow({
   const effect = ref?.effect ?? trauma.effect ?? trauma.notes ?? "Custom trauma.";
 
   return (
-    <CharacterEntryRow
+    <OwnedEntryRow
       name={name}
-      info={<InfoModal title={name} content={<p className={uiTextDescription}>{effect}</p>} />}
-      metadata={
+      editable={editable}
+      information={<p className={uiTextDescription}>{effect}</p>}
+      chips={
         roll || trauma.source ? (
-          <div className={uiChipRow}>
+          <>
             {roll && <RollChip>{roll}</RollChip>}
             {trauma.source && (
               <Chip colour={sourceChipColour(trauma.source)} className="font-code">
                 {trauma.source}
               </Chip>
             )}
-          </div>
+          </>
         ) : undefined
       }
-      removeAction={
-        editable ? <RemoveEntryButton kind="Trauma" name={name} onRemove={onRemove} /> : undefined
-      }
+      removal={{ kind: "Trauma", onRemove }}
     />
   );
 }

@@ -48,6 +48,7 @@ Start at 0 and set Points to one below, exactly on, and one above every document
 - [ ] "X pts until Trauma Test" and "X pts until [next Degree]" counters show the correct remaining distance and update live
 - [ ] At the top of the track, the page switches to "Character retires from play" and hides the Status/Thresholds grid
 - [ ] Add a Temporary Trauma from the picker: roll chip and rules text match the entry chosen
+- [ ] The Escalate to [severity] button on a Disorder uses the same three responsive sizes as the Upgrade, Edit Rolls, and Wear buttons (`InsanityEntryLists.tsx`)
 - [ ] Add a Disorder: severity chip colour and info text match its severity, type chip is correct
 - [ ] Remove a Trauma and a Disorder: both arm a confirm step (`Remove [name] from this character?` with Remove/Cancel) instead of removing on the first tap; the list only updates after confirming
 - [ ] Escalate a Disorder to its next severity tier: button reads "Escalate to Severe"/"Escalate to Acute" depending on current tier, arms its own confirm step ("Escalate [name] to [tier]?" with Escalate/Cancel) whose Escalate button shows waiting dots and keeps the window open until the save finishes, closing it only when the save succeeds, and the button disappears once already at the highest tier for that disorder (The Flesh is Weak has no Minor tier; Horrific Nightmares has no Acute tier)
@@ -75,6 +76,7 @@ Use the same boundary method as Insanity: one below, on, and one above every thr
 - [ ] Top of track shows "Character removed from play" and hides the Status/Thresholds grid
 - [ ] Add a Malignancy that rolls a characteristic modifier: "Edit Rolls" button appears, entering values saves them
 - [ ] A Malignancy with no rollable modifiers does _not_ show an "Edit Rolls" button
+- [ ] A Malignancy or Mutation with rolled values shows its roll chip, source chip, and one chip per characteristic in a single wrapping row, and the Edit Rolls button is extra small on a phone, taller from 640 pixels wide and larger from 768 pixels wide (`CorruptionEntryRow.tsx`)
 - [ ] Add a Minor and a Major Mutation independently: they stay in separate groups, don't cross-contaminate
 - [ ] On phone: three-way tab switch (Malignancies / Minor / Major) swipes correctly; on desktop, all three show side by side
 - [ ] Editable mode shows an icon Add button beside each group header; read-only mode shows a View icon button instead, which opens the picker in browse-only mode: rows don't respond to clicks and there's no custom-add action
@@ -158,7 +160,7 @@ appear on the main page.
 - [ ] Every grouped child is evaluated independently for ownership and current career/rank availability: one Common Lore child becoming available, being purchased, or being removed must not add, remove, or unlock its siblings
 - [ ] The grouped picker stays open after adding while another valid child remains; add a second Skill without closing and reopening it, then confirm selecting the final valid child automatically returns to the parent picker instead of leaving an empty `No matches` screen
 - [ ] Expand a picker card using its chevron: this previews its information without selecting it
-- [ ] Owned Skill and Talent cards use the same padded character-entry row on phone and desktop: the name and information control sit at the upper left, actions share a wrapping upper-right area, normal-size metadata chips sit below, and generated source text follows the metadata
+- [ ] Owned Skill and Talent cards use the same padded character-entry row on phone and desktop: the name and information control sit at the upper left, actions share a wrapping upper-right area, one row of normal-size metadata chips sits below, and the labelled lines (Gained from, then Talent effects) follow the chips
 - [ ] Each owned Skill combines its governing Characteristic and calculated value in one normal-size chip, such as `Per 31`, followed by its Basic or Advanced and training-level chips; there is no separate Total box
 - [ ] Main-page Skill cards do not receive whole-card hover/pressed styling; only their actual controls respond, while selectable cards inside pickers retain the shared whole-card interaction feedback
 - [ ] A Skill card has one information control containing both its rules and any generated effect details
@@ -168,7 +170,7 @@ appear on the main page.
 
 **Talent-supplied Skill effects:**
 
-- [ ] Add **Talented (Awareness)**: Awareness gains +10 and its card says `Talent effect: Talented (Awareness): +10`
+- [ ] Add **Talented (Awareness)**: Awareness gains +10 and its card shows a labelled **Talent effects** line reading `Talented (Awareness) (Talent): +10`, in the same size and colours as the Gained from line
 - [ ] Repeat Talented with a Skill that was not independently trained: the +10 is still shown, but Talented does not falsely record an extra Skill acquisition
 - [ ] Add **Machinator Array**: Silent Move receives −10 and names Machinator Array as the source
 - [ ] Add **Cult Briefing (Political)**: every Common Lore Skill counts as Basic while the Talent is owned, but an otherwise Untrained Common Lore Skill is not injected onto the main Skills page

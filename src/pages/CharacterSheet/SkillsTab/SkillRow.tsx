@@ -9,8 +9,6 @@ import { Chip } from "../../../ui/chips/Chip";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/reference/skillDescriptions";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { InfoSection } from "../../../ui/InfoSection";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
@@ -33,7 +31,8 @@ import { uiCardTapHeader } from "../../../ui/styles/buttonStyles";
 import { colourAmberPlain, type ChipColour } from "../../../ui/styles/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { CharacterEntryRow } from "../../../ui/CharacterEntryRow";
+import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { EntryActionButton } from "../../../ui/buttons/EntryActionButton";
 import { uiLayerLocal } from "../../../ui/styles/layerStyles";
 
 interface SkillRowProps {
@@ -249,81 +248,61 @@ export function SkillRow({
           </div>
         </div>
       ) : (
-        <CharacterEntryRow
-          name={displayName}
-          info={
-            <InfoModal
-              title={skill.name}
-              content={hasSkillInfo ? skillInfoContent : undefined}
-              as="span"
-            />
-          }
-          metadata={
-            <div className={`${uiChipRow} items-center`}>
+        <OwnedEntryRow
+          name={skill.name}
+          displayName={displayName}
+          editable={editable}
+          information={hasSkillInfo ? skillInfoContent : undefined}
+          informationAs="span"
+          chips={
+            <>
               <Chip
                 colour={characteristicChipColour(skill.characteristic)}
-                className="font-code shrink-0"
+                className="font-code"
                 aria-label={`${characteristicName} ${total}`}
               >
                 {CHAR_LABEL[skill.characteristic]} {total}
               </Chip>
-              <Chip colour={skill.advanced ? "purple" : "teal"} className="shrink-0">
+              <Chip colour={skill.advanced ? "purple" : "teal"}>
                 {skill.advanced ? "Advanced" : "Basic"}
               </Chip>
-              {!hideLevelChip && (
-                <Chip colour={levelBadgeColour} className="shrink-0">
-                  {levelLabel}
-                </Chip>
-              )}
-            </div>
-          }
-          afterMetadata={
-            <>
-              {eliteAdvancePurchase && (
-                <EntryDetailLine
-                  label="Gained from"
-                  value={`${eliteAdvancePurchase.sourceName} (Elite Advance)`}
-                />
-              )}
-              {talentSourceSummary && (
-                <p className={`text-xs leading-snug ${colourAmberPlain}`}>{talentSourceSummary}</p>
-              )}
+              {!hideLevelChip && <Chip colour={levelBadgeColour}>{levelLabel}</Chip>}
             </>
           }
+          lines={{
+            gainedFrom: eliteAdvancePurchase
+              ? `${eliteAdvancePurchase.sourceName} (Elite Advance)`
+              : undefined,
+            talentEffects: talentSourceSummary || undefined,
+          }}
           actions={
             hasUpgrade ? (
               <>
                 {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
-                  <Button size="xs" onClick={() => setUpgradeArmed(true)}>
+                  <EntryActionButton onClick={() => setUpgradeArmed(true)}>
                     Upgrade to {nextTierAccess.level}
-                  </Button>
+                  </EntryActionButton>
                 )}
                 {hasManualUpgrade && nextTierAccess?.status === "not-on-career" && (
-                  <Button size="xs" onClick={() => setManualUpgradeArmed(true)}>
+                  <EntryActionButton onClick={() => setManualUpgradeArmed(true)}>
                     Upgrade to {nextTierAccess.level}
-                  </Button>
+                  </EntryActionButton>
                 )}
               </>
             ) : undefined
           }
-          removeAction={
-            canRemove ? (
-              <RemoveEntryButton
-                kind="Skill"
-                name={skill.name}
-                onRemove={handleRemove}
-                extra={
-                  downgradeLevel
-                    ? {
-                        label: `Downgrade to ${downgradeLabel}`,
-                        message: `Downgrade ${skill.name} to ${downgradeLabel}, or remove it from this character?`,
-                        onClick: handleDowngrade,
-                      }
-                    : undefined
+          removal={{
+            kind: "Skill",
+            onRemove: handleRemove,
+            hidden: !canRemove,
+            extra: downgradeLevel
+              ? {
+                  label: `Downgrade to ${downgradeLabel}`,
+                  message: `Downgrade ${skill.name} to ${downgradeLabel}, or remove it from this character?`,
+                  onClick: handleDowngrade,
                 }
-              />
-            ) : undefined
-          }
+              : undefined,
+          }}
         />
       )}
 

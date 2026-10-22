@@ -46,10 +46,9 @@ import {
   uiSwipeableTabPanel,
 } from "../../ui/styles/segmentedTabStyles";
 import { CorruptionMalignancyPicker } from "./CorruptionMalignancyPicker";
-import { MalignancyRow } from "./MalignancyRow";
+import { CorruptionEntryRow } from "./CorruptionEntryRow";
 import { MutationPicker } from "./MutationPicker";
 import { mutationDisplayName } from "./mutationDisplay";
-import { MutationRow } from "./MutationRow";
 import {
   CORRUPTION_RULE_TEXT,
   getCorruptionMalignancyRef,
@@ -231,9 +230,10 @@ function MalignanciesList({
         {[...malignancies]
           .sort((a, b) => malignancyDisplayName(a).localeCompare(malignancyDisplayName(b)))
           .map((malignancy) => (
-            <MalignancyRow
+            <CorruptionEntryRow
               key={malignancy.id}
-              malignancy={malignancy}
+              kind="Malignancy"
+              entry={malignancy}
               editable={editable}
               onRemove={() => onRemove(malignancy.id)}
               onUpdateRolls={(rolledModifiers) => onUpdateRolls(malignancy.id, rolledModifiers)}
@@ -292,9 +292,10 @@ function MutationsList({
       {[...mutations]
         .sort((a, b) => mutationDisplayName(a).localeCompare(mutationDisplayName(b)))
         .map((mutation) => (
-          <MutationRow
+          <CorruptionEntryRow
             key={mutation.id}
-            mutation={mutation}
+            kind="Mutation"
+            entry={mutation}
             editable={editable}
             onRemove={() => onRemove(mutation.id)}
             onUpdateRolls={(rolledModifiers) => onUpdateRolls(mutation.id, rolledModifiers)}

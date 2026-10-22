@@ -6,7 +6,7 @@ import "@testing-library/jest-dom";
 
 import { CharacteristicsTab } from "../../src/pages/CharacterSheet/CharacteristicsTab";
 import { CorruptionMalignancyPicker } from "../../src/mechanics/corruption/CorruptionMalignancyPicker";
-import { MutationRow } from "../../src/mechanics/corruption/MutationRow";
+import { CorruptionEntryRow } from "../../src/mechanics/corruption/CorruptionEntryRow";
 import { getCharacteristicModifierTotals } from "../../src/mechanics/corruption/characteristicModifierTotals";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
 import type {
@@ -86,8 +86,9 @@ function EditRollsWiring() {
 
   return (
     <>
-      <MutationRow
-        mutation={corruption.minorMutations![0]}
+      <CorruptionEntryRow
+        kind="Mutation"
+        entry={corruption.minorMutations![0]}
         editable
         onRemove={() => {}}
         onUpdateRolls={(rolledModifiers) =>

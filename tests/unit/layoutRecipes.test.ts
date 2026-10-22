@@ -29,7 +29,7 @@ function hasClass(line: string, className: string) {
 }
 
 describe("shared layout recipes", () => {
-  it("keeps owned Skill and Talent entries on the shared character-entry row", () => {
+  it("keeps owned entries on the shared owned entry row", () => {
     const skillRow = readFileSync(
       join(__dirname, "../../src/pages/CharacterSheet/SkillsTab/SkillRow.tsx"),
       "utf8"
@@ -38,9 +38,19 @@ describe("shared layout recipes", () => {
       join(__dirname, "../../src/mechanics/talents/TalentEntryCards.tsx"),
       "utf8"
     );
+    const corruptionEntries = readFileSync(
+      join(__dirname, "../../src/mechanics/corruption/CorruptionEntryRow.tsx"),
+      "utf8"
+    );
+    const insanityEntries = readFileSync(
+      join(__dirname, "../../src/mechanics/insanity/InsanityEntryLists.tsx"),
+      "utf8"
+    );
 
-    expect(skillRow).toContain("<CharacterEntryRow");
-    expect(talentEntries).toContain("<CharacterEntryRow");
+    expect(skillRow).toContain("<OwnedEntryRow");
+    expect(talentEntries).toContain("<OwnedEntryRow");
+    expect(corruptionEntries).toContain("<OwnedEntryRow");
+    expect(insanityEntries).toContain("<OwnedEntryRow");
     expect(skillRow).not.toContain('"px-3 lg:px-4 py-2.5 lg:py-3"');
     expect(talentEntries).not.toContain('uiSection + " flex items-start justify-between');
   });

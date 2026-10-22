@@ -3,41 +3,25 @@ import type { TalentEntry } from "../../types/Character";
 import { TALENT_LIST } from "shared-rules";
 import { TRAIT_LIST } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
-import {
-  uiChipRow,
-  uiTextDescription,
-  uiStackBody,
-  uiStackList,
-} from "../../ui/styles/editableStyles";
-import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
-import { EntryDetailLine } from "../../ui/EntryDetailLine";
+import { uiTextDescription, uiStackBody, uiStackList } from "../../ui/styles/editableStyles";
 import { InfoParagraph, InfoSection } from "../../ui/InfoSection";
 import { Chip } from "../../ui/chips/Chip";
-import { StatusBadge } from "../../ui/chips/StatusBadge";
-import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
-import {
-  colourAmberPlain,
-  type ChipColour,
-  colourTextPrimary,
-  colourDivider,
-} from "../../ui/styles/colourTokens";
+import { type ChipColour, colourTextPrimary, colourDivider } from "../../ui/styles/colourTokens";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
-import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
 import { AccordionCard } from "../../ui/AccordionCard";
 import { normaliseSources } from "./talentUtils";
 import { hasRestorableTalentEffect } from "./talentRemovalRules";
 import { recordComponentRender } from "../../performance/performanceMetrics";
-import { CharacterEntryRow } from "../../ui/CharacterEntryRow";
+import { OwnedEntryRow } from "../../ui/OwnedEntryRow";
 
 interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
   editable: boolean;
   onRemove: (uid: string, restoreOneTimeEffects?: boolean) => void | Promise<unknown>;
   displayName?: string;
-  secondaryText?: string;
   statusChip?: string;
   statusChipColour?: ChipColour;
   removable?: boolean;
@@ -51,7 +35,6 @@ export function EntryCard({
   editable,
   onRemove,
   displayName,
-  secondaryText,
   statusChip,
   statusChipColour,
   removable = true,
@@ -83,105 +66,77 @@ export function EntryCard({
       : [];
 
   const hasInformation = Boolean(infoContent || description || entry.notes);
-  const information = (
-    <InfoModal
-      title={shownName}
-      content={
-        hasInformation
-          ? (infoContent ?? (
-              <div className={uiStackBody}>
-                {description && <InfoParagraph>{description}</InfoParagraph>}
-                {entry.notes && (
-                  <InfoSection heading="Notes">
-                    <div className={uiStackList}>
-                      {entry.notes.split("\n\n").map((group, index) => {
-                        const breakAt = group.indexOf("\n");
-                        const heading = breakAt === -1 ? group : group.slice(0, breakAt);
-                        const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
-                        return (
-                          <p key={index} className={`${uiTextDescription} whitespace-pre-line`}>
-                            <span className="font-semibold">{heading}</span>
-                            {body && `\n${body}`}
-                          </p>
-                        );
-                      })}
-                    </div>
-                  </InfoSection>
-                )}
+  const information = hasInformation
+    ? (infoContent ?? (
+        <div className={uiStackBody}>
+          {description && <InfoParagraph>{description}</InfoParagraph>}
+          {entry.notes && (
+            <InfoSection heading="Notes">
+              <div className={uiStackList}>
+                {entry.notes.split("\n\n").map((group, index) => {
+                  const breakAt = group.indexOf("\n");
+                  const heading = breakAt === -1 ? group : group.slice(0, breakAt);
+                  const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
+                  return (
+                    <p key={index} className={`${uiTextDescription} whitespace-pre-line`}>
+                      <span className="font-semibold">{heading}</span>
+                      {body && `\n${body}`}
+                    </p>
+                  );
+                })}
               </div>
-            ))
-          : undefined
-      }
-    />
-  );
+            </InfoSection>
+          )}
+        </div>
+      ))
+    : undefined;
 
-  const secondaryInformation = (
-    <>
-      {secondaryText && <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>}
-      {isGranted && (
-        <EntryDetailLine
-          label="Gained from"
-          value={`${entry.grantedByTalentName} (${entry.grantedByType})`}
-        />
-      )}
-      {eliteAdvanceSource && (
-        <EntryDetailLine label="Gained from" value={`${eliteAdvanceSource} (Elite Advance)`} />
-      )}
-    </>
-  );
+  const gainedFrom = isGranted
+    ? `${entry.grantedByTalentName} (${entry.grantedByType})`
+    : eliteAdvanceSource
+      ? `${eliteAdvanceSource} (Elite Advance)`
+      : undefined;
 
   return (
-    <>
-      <CharacterEntryRow
-        name={shownName}
-        badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
-        info={information}
-        metadata={
-          <div className={`${uiChipRow} items-center`}>
-            {refSources.map((source) => (
-              <Chip key={source} colour={sourceChipColour(source)} className="font-code">
-                {source}
-              </Chip>
-            ))}
-            {statusChip && <Chip colour={statusChipColour ?? "amber"}>{statusChip}</Chip>}
-          </div>
-        }
-        afterMetadata={secondaryInformation}
-        removeAction={
-          editable && (removable || removalBlockedMessage) && !isGranted ? (
-            <RemoveEntryButton
-              kind={removalNoun}
-              name={shownName}
-              onRemove={() => onRemove(entry.uid, false)}
-              blockedMessage={removalBlockedMessage}
-              extra={
-                hasRestorableTalentEffect(entry)
-                  ? {
-                      label: "Remove and restore recorded changes",
-                      message: `${shownName} recorded a one-time change. Remove the Talent only, or remove it and restore what that acquisition changed?`,
-                      onClick: () => onRemove(entry.uid, true),
-                    }
-                  : undefined
-              }
-            />
-          ) : undefined
-        }
-      >
-        {libraryItem && (
-          <CustomItemActionButtons
-            libraryItem={libraryItem}
-            isDM={isDM}
-            canEditDefinition={canEditDefinition}
-            busyAction={busyAction}
-            onEditDefinition={onEditDefinition}
-            onPublish={onPublish}
-            onArchive={onArchive}
-            onUpdateAllCopies={onUpdateAllCopies}
-            className="mt-1 flex flex-wrap gap-2"
-          />
-        )}
-      </CharacterEntryRow>
-    </>
+    <OwnedEntryRow
+      name={shownName}
+      editable={editable}
+      information={information}
+      chips={
+        <>
+          {refSources.map((source) => (
+            <Chip key={source} colour={sourceChipColour(source)} className="font-code">
+              {source}
+            </Chip>
+          ))}
+          {statusChip && <Chip colour={statusChipColour ?? "amber"}>{statusChip}</Chip>}
+        </>
+      }
+      lines={{ gainedFrom }}
+      library={{
+        libraryItem,
+        isDM,
+        canEditDefinition,
+        busyAction,
+        onEditDefinition,
+        onPublish,
+        onArchive,
+        onUpdateAllCopies,
+      }}
+      removal={{
+        kind: removalNoun,
+        onRemove: () => onRemove(entry.uid, false),
+        hidden: !((removable || removalBlockedMessage) && !isGranted),
+        blockedMessage: removalBlockedMessage,
+        extra: hasRestorableTalentEffect(entry)
+          ? {
+              label: "Remove and restore recorded changes",
+              message: `${shownName} recorded a one-time change. Remove the Talent only, or remove it and restore what that acquisition changed?`,
+              onClick: () => onRemove(entry.uid, true),
+            }
+          : undefined,
+      }}
+    />
   );
 }
 

@@ -51,6 +51,8 @@ export interface OwnedEntryRemoval {
 
 interface OwnedEntryRowProps {
   name: string;
+  /** The name shown in the row when it differs from `name`, which still serves the information window and the Remove pop-up. */
+  displayName?: string;
   editable: boolean;
   /** The content of the information icon, which is always shown. */
   information?: ReactNode;
@@ -71,6 +73,7 @@ interface OwnedEntryRowProps {
 /** One owned entry on a character sheet: the same layout for every kind, with only the content changing. */
 export function OwnedEntryRow({
   name,
+  displayName,
   editable,
   information,
   informationAs,
@@ -87,7 +90,7 @@ export function OwnedEntryRow({
   const libraryItem = library?.libraryItem;
   return (
     <CharacterEntryRow
-      name={name}
+      name={displayName ?? name}
       inactive={inactive}
       tone={tone}
       actions={actions}
