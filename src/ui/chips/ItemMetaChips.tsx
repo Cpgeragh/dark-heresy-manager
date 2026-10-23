@@ -41,9 +41,9 @@ function ItemMetaChipsBase({
   bare,
   size,
 }: ItemMetaChipsBaseProps) {
-  if (!weight && !value && !purchaseAmount && !availability && !source) return null;
+  const displayedWeight = weight ? formatWeightForDisplay(weight) : "";
+  if (!displayedWeight && !value && !purchaseAmount && !availability && !source) return null;
 
-  const displayedWeight = weight ? formatWeightForDisplay(weight) : undefined;
   const displayedValue =
     value !== undefined && value !== null ? formatMoneyForDisplay(value) : undefined;
 

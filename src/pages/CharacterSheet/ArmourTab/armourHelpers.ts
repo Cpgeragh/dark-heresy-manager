@@ -14,6 +14,7 @@ import {
 } from "../../../data/reference/armourUpgradeReference";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
+import { readWeightKg } from "../../../ui/format/weightFormat";
 
 export function compatibleArmourUpgrades(piece: WornArmourPiece): ArmourUpgradeRef[] {
   const reference = piece.referenceId
@@ -67,16 +68,8 @@ function formatKg(value: number): string {
   return `${Number(value.toFixed(2))} kg`;
 }
 
-function parseKg(value?: string): number {
-  const match = value?.trim().match(/^(\d+(?:\.\d+)?)\s*(?:kg)?$/i);
-  return match ? Number(match[1]) : 0;
-}
-
 function parseWeightDelta(value: string): number {
-  const trimmed = value.trim();
-  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "0") return 0;
-  const match = trimmed.match(/^([+-]?\d+(?:\.\d+)?)\s*(?:kg)?$/i);
-  return match ? Number(match[1]) : 0;
+  return readWeightKg(value) ?? 0;
 }
 
 /** Base piece weight plus every fitted upgrade's weight delta, resolved to one real number. */
@@ -84,7 +77,8 @@ export function effectiveArmourWeight(
   piece: WornArmourPiece,
   upgradeRefs: ArmourUpgradeRef[]
 ): string {
-  const baseKg = parseKg(piece.weight);
+  const baseKg = readWeightKg(piece.weight);
+  if (baseKg === null) return "";
   const deltaKg = upgradeRefs.reduce((total, ref) => total + parseWeightDelta(ref.weight), 0);
   return formatKg(baseKg + deltaKg);
 }

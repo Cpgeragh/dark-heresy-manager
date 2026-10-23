@@ -1408,6 +1408,7 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] On a phone, the Skills and Psychic power panels use the same space as the same sections on desktop
 - [ ] Every scrollbar, in a long pop-up such as Session in Progress, in a picker list, in the navigation drawer and on the page itself, is thin with a slate grey thumb, a see-through track and no arrow buttons (`src/index.css`)
 - [ ] The Wear, Stow, Activate, Deactivate and Equip buttons are extra small on a phone, taller from 640 pixels wide and larger from 768 pixels wide (`EntryActionButton.tsx`)
+- [ ] An item whose weight is a dash shows "0 kg", an item whose weight is Varies shows the word "Varies", an item whose weight has a † shows the number only, and the Sky Eye shows "4 kg case" (`weightFormat.ts`)
 
 ## 36. Waiting and Instant Saves
 

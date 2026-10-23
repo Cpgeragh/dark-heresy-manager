@@ -29,6 +29,7 @@ import {
   INTEGRATED_MELEE_NAMES,
 } from "../../../data/reference/integratedWeapons";
 import type { ChipColour } from "../../../ui/styles/colourTokens";
+import { readWeightKg } from "../../../ui/format/weightFormat";
 import type { WeaponType } from "../../../data/reference/weaponClassification";
 
 // ─── Integrated Weapon Classification ─────────────────────────────────────
@@ -172,8 +173,7 @@ function formatKg(value: number): string {
 }
 
 function parseKg(value?: string): number {
-  const match = value?.trim().match(/^(\d+(?:\.\d+)?)\s*(?:kg)?$/i);
-  return match ? Number(match[1]) : 0;
+  return Math.max(0, readWeightKg(value) ?? 0);
 }
 
 function multiplyClip(clip: string, multiplier: number): string {
@@ -209,7 +209,8 @@ export function effectiveWeaponWeight(
   weight: string | undefined,
   upgradeRefs: WeaponUpgradeRef[]
 ): string {
-  const baseWeight = parseKg(weight);
+  const baseWeight = readWeightKg(weight);
+  if (baseWeight === null) return "";
   const modifiers = upgradeRefs.map((ref) => parseWeightModifier(ref.weightModifier));
   const multiplier = modifiers.reduce((total, modifier) => total * modifier.multiplier, 1);
   const flatKg = modifiers.reduce((total, modifier) => total + modifier.flatKg, 0);
@@ -454,7 +455,7 @@ export function calcEntryWeight(
   ammoTracking: AmmoTrackingMode,
   ammunitionCapacity?: string
 ): number {
-  const weaponKg = parseFloat(weaponWeight ?? "0");
+  const weaponKg = readWeightKg(weaponWeight) ?? 0;
   if (!weaponKg) return 0;
   const clipSize = parseFloat(ammunitionCapacity ?? clip ?? "1") || 1;
   const ammoRef = entry.referenceId

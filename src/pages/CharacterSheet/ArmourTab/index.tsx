@@ -14,6 +14,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 import { wornApAt, bionicBonusAt } from "./armourHelpers";
 import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
+import { readWeightKg } from "../../../ui/format/weightFormat";
 import { ArmourPicker } from "./ArmourPicker";
 import { ForceFieldPicker } from "./ForceFieldPicker";
 import { CustomPieceForm } from "./CustomPieceForm";
@@ -88,9 +89,9 @@ function formatKg(value: number): string {
 }
 
 function halveWeight(weight: string): string {
-  const match = weight.trim().match(/^(\d+(?:\.\d+)?)\s*kg$/i);
-  if (!match) return weight;
-  return formatKg(Number(match[1]) / 2);
+  const kg = readWeightKg(weight);
+  if (kg === null) return weight;
+  return formatKg(kg / 2);
 }
 
 function applyCraftsmanshipToRef(ref: ArmourRef, craftsmanship: ArmourCraftsmanship) {

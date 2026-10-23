@@ -259,6 +259,15 @@ describe("effectiveWeaponWeight", () => {
     const asciiX = { ...upgrade("cr-compact"), weightModifier: "x1/2" };
     expect(effectiveWeaponWeight("4 kg", [asciiX])).toBe("2 kg");
   });
+
+  it("reads a weight with a footnote dagger as its number", () => {
+    expect(effectiveWeaponWeight("6 kg†", [])).toBe("6 kg");
+  });
+
+  it("reads a dash as 0 kg, and returns nothing for an unknown Varies weight", () => {
+    expect(effectiveWeaponWeight("—", [])).toBe("0 kg");
+    expect(effectiveWeaponWeight("Varies", [upgrade("cr-compact")])).toBe("");
+  });
 });
 
 // ============================================================

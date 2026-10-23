@@ -57,7 +57,7 @@ import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip, NestedChip } from "../../../ui/chips/Chip";
 import { ItemMetaChips, NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
-import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
+import { formatWeightForDisplay, readWeightKg } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { EntryDetailLine } from "../../../ui/EntryDetailLine";
@@ -707,9 +707,7 @@ export function RangedCard({
               const displayName = ammoRef ? formatAmmoName(ammoRef.name) : slot.name;
               const magazineWeight =
                 magazineCapacity > 0
-                  ? (parseFloat(effective.weight ?? "0") || 0) *
-                    0.1 *
-                    (slot.rounds / magazineCapacity)
+                  ? (readWeightKg(effective.weight) ?? 0) * 0.1 * (slot.rounds / magazineCapacity)
                   : 0;
               return (
                 <div

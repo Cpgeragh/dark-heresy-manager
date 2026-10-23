@@ -1,6 +1,9 @@
-const EMPTY_WEIGHT_VALUES = new Set(["", "-", "—", "n/a", "na", "none", "variable", "varies"]);
+const ZERO_WEIGHT_VALUES = new Set(["-", "—", "n/a", "na", "none"]);
+const VARIABLE_WEIGHT_VALUES = new Set(["variable", "varies"]);
 
 export const WEIGHT_NUMBER_INPUT_RE = /^$|^\d+(?:\.\d*)?$/;
+
+const WEIGHT_RE = /^([+-]?\d+(?:\.\d+)?)\s*(kg\b.*)?$/i;
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value) || value < 0) return "0";
@@ -21,15 +24,32 @@ export function formatWeightInput(value: string): string {
   return `${formatNumber(parsed)} kg`;
 }
 
+function cleanWeight(value?: string | null): string {
+  return (value ?? "").replace(/†+$/, "").trim();
+}
+
+/** Reads a stored weight as kilograms, or null when it holds no usable number. */
+export function readWeightKg(value?: string | null): number | null {
+  const cleaned = cleanWeight(value);
+  const lower = cleaned.toLowerCase();
+  if (ZERO_WEIGHT_VALUES.has(lower)) return 0;
+  if (!cleaned || VARIABLE_WEIGHT_VALUES.has(lower)) return null;
+  const match = cleaned.match(WEIGHT_RE);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** The weight as shown, or an empty string when it has no usable number. */
 export function formatWeightForDisplay(value?: string | null): string {
-  const trimmed = value?.trim() ?? "";
-  if (EMPTY_WEIGHT_VALUES.has(trimmed.toLowerCase())) return "0 kg";
-
-  const numeric = trimmed.match(/^([+-]?\d+(?:\.\d+)?)\s*(?:kg)?$/i);
-  if (!numeric) return "0 kg";
-
-  const parsed = Number(numeric[1]);
-  if (!Number.isFinite(parsed)) return "0 kg";
-  if (parsed < 0) return "0 kg";
-  return `${numeric[1].startsWith("+") ? "+" : ""}${formatNumber(parsed)} kg`;
+  const cleaned = cleanWeight(value);
+  if (VARIABLE_WEIGHT_VALUES.has(cleaned.toLowerCase())) return "Varies";
+  const kg = readWeightKg(cleaned);
+  if (kg === null) return "";
+  const extra = cleaned
+    .match(WEIGHT_RE)?.[2]
+    ?.replace(/^kg\s*/i, "")
+    .trim();
+  const text = `${cleaned.startsWith("+") ? "+" : ""}${formatNumber(kg)} kg`;
+  return extra ? `${text} ${extra}` : text;
 }
