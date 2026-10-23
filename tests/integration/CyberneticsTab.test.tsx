@@ -42,7 +42,14 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantPicker", () => ({
     onSelectCustomItem,
     onCustom,
   }: {
-    onSelect: (ref: unknown, craftsmanship?: string) => void;
+    onSelect: (
+      ref: unknown,
+      craftsmanship?: string,
+      bodyLocation?: unknown,
+      gmValue?: string,
+      gmRarity?: string,
+      gmWeight?: string
+    ) => void;
     onSelectCustomItem: (libraryItem: unknown) => void;
     onCustom: () => void;
   }) => (
@@ -56,6 +63,20 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantPicker", () => ({
         }
       >
         Mock Select Plain Implant
+      </button>
+      <button
+        onClick={() =>
+          onSelect(
+            { id: "auto-quill", name: "Auto-Quill", source: "CR", availability: "Rare" },
+            "Common",
+            undefined,
+            undefined,
+            undefined,
+            "3 kg"
+          )
+        }
+      >
+        Mock Select Weighted Implant
       </button>
       <button
         onClick={() =>
@@ -364,6 +385,18 @@ describe("CyberneticsTab", () => {
       ],
       { optimistic: true }
     );
+  });
+
+  it("stores the weight chosen in the picker on the new implant", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByText("Mock Select Weighted Implant"));
+
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ weight: "3 kg" })], {
+      optimistic: true,
+    });
   });
 
   it("opens the concealed-weapon installer instead of adding directly", async () => {

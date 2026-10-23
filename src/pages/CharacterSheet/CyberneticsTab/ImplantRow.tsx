@@ -103,6 +103,7 @@ export function ImplantRow({
           )}
           <ItemMetaChips
             bare
+            weight={item.weight}
             value={item.value ?? (isVariableMeta(ref?.value) ? undefined : ref?.value)}
             availability={
               item.availability ??

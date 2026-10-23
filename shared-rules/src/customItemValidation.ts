@@ -43,6 +43,7 @@ export const CUSTOM_ITEM_DATA_KEYS = {
     "notes",
     "rules",
     "value",
+    "weight",
     "availability",
     "source",
     "concealedWeapon",

@@ -33,9 +33,13 @@ import {
   uiTextDescription,
   uiDescriptionBox,
   uiStackBody,
+  uiStackField,
+  uiFormLabel,
+  editableInputClass,
 } from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
+import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { CRAFTSMANSHIP_COLOUR, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import {
@@ -60,7 +64,8 @@ interface Props {
     craftsmanship: CyberneticCraftsmanship | undefined,
     bodyLocation?: ArmourLocationKey[],
     gmValue?: string,
-    gmRarity?: string
+    gmRarity?: string,
+    gmWeight?: string
   ) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"cybernetic">) => void;
   onCustom?: () => void;
@@ -85,6 +90,8 @@ export function ImplantPicker({
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship>("Common");
   const [assignedValue, setAssignedValue] = useState<string | undefined>();
   const [assignedRarity, setAssignedRarity] = useState<string | undefined>();
+  const [weightStep, setWeightStep] = useState(false);
+  const [weight, setWeight] = useState("");
   const listScrollPositionRef = useRef(0);
   const pendingNeedsCost = pendingCost ? isVariableMeta(pendingCost.value) : false;
   const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.availability) : false;
@@ -120,15 +127,17 @@ export function ImplantPicker({
     setCraftsmanship("Common");
     setAssignedValue(undefined);
     setAssignedRarity(undefined);
+    setWeightStep(false);
+    setWeight("");
     resetAssignedItemMeta();
   };
-  const finalizeSelection = (ref: CyberneticRef, gmValue?: string, gmRarity?: string) => {
-    if (!hasQualityText(ref) && !ref.requiresLocation) {
-      onSelect(ref, undefined, undefined, gmValue, gmRarity);
-      resetPicker();
+  const asksQuality = (ref: CyberneticRef) => hasQualityText(ref) || Boolean(ref.requiresLocation);
+  const finalizeSelection = (ref: CyberneticRef) => {
+    setSelected(ref);
+    if (!asksQuality(ref)) {
+      setWeightStep(true);
       return;
     }
-    setSelected(ref);
     setCraftsmanship(defaultCraftsmanship(ref));
   };
   const selectImplant = (ref: CyberneticRef) => {
@@ -148,7 +157,7 @@ export function ImplantPicker({
     setAssignedRarity(nextRarity);
     const ref = pendingCost;
     setPendingCost(null);
-    finalizeSelection(ref, nextValue, nextRarity);
+    finalizeSelection(ref);
   };
   const implantInfo = (ref: CyberneticRef) => (
     <div className={uiStackBody}>
@@ -195,6 +204,63 @@ export function ImplantPicker({
         onConfirm={confirmCost}
         maxWidth="max-w-md lg:max-w-lg"
       />
+    );
+  }
+
+  // ── Weight step ──────────────────────────────────────────────────────────
+  if (selected && weightStep) {
+    return (
+      <ModalShell
+        ariaLabel={selected.name}
+        onClose={resetPicker}
+        className="max-w-md lg:max-w-lg overflow-y-auto"
+      >
+        <ModalHeader title={selected.name} onClose={resetPicker} />
+
+        <PickerBody>
+          <div className={uiStackField}>
+            <label htmlFor="implant-weight" className={uiFormLabel}>
+              Weight (kg)
+            </label>
+            <input
+              id="implant-weight"
+              type="text"
+              inputMode="decimal"
+              value={weight}
+              onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+              placeholder="e.g. 2"
+              className={editableInputClass(true)}
+              autoComplete="off"
+            />
+          </div>
+        </PickerBody>
+
+        <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider} flex gap-2`}>
+          <Button
+            variant="neutral"
+            onClick={() => (asksQuality(selected) ? setWeightStep(false) : resetPicker())}
+          >
+            Back
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={() => {
+              onSelect(
+                selected,
+                asksQuality(selected) ? craftsmanship : undefined,
+                location ?? undefined,
+                assignedValue,
+                assignedRarity,
+                formatWeightInput(weight)
+              );
+              resetPicker();
+            }}
+            disabled={!editable}
+          >
+            Add
+          </Button>
+        </div>
+      </ModalShell>
     );
   }
 
@@ -296,18 +362,22 @@ export function ImplantPicker({
           <Button
             className="flex-1"
             onClick={() => {
-              onSelect(
-                selected,
-                craftsmanship,
-                location ?? undefined,
-                assignedValue,
-                assignedRarity
-              );
-              resetPicker();
+              if (selected.id === "ih-concealed-weapon-bionic") {
+                onSelect(
+                  selected,
+                  craftsmanship,
+                  location ?? undefined,
+                  assignedValue,
+                  assignedRarity
+                );
+                resetPicker();
+                return;
+              }
+              setWeightStep(true);
             }}
             disabled={!editable}
           >
-            Install
+            Continue
           </Button>
         </div>
       </ModalShell>
@@ -352,6 +422,7 @@ export function ImplantPicker({
               <PickerRowChips className="text-xs lg:text-sm">
                 <ItemMetaChips
                   bare
+                  weight={entry.item.data.weight}
                   value={entry.item.data.value}
                   availability={entry.item.data.availability}
                   source={entry.item.data.source}

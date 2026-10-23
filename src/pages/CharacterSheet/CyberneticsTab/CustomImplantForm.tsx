@@ -6,8 +6,13 @@ import type {
   CyberneticCraftsmanship,
   CyberneticItem,
 } from "../../../types/Character";
-import { editableInputClass } from "../../../ui/styles/editableStyles";
+import { editableInputClass, uiFormLabel } from "../../../ui/styles/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
+import {
+  formatWeightInput,
+  readWeightKg,
+  sanitizeWeightInput,
+} from "../../../ui/format/weightFormat";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import {
@@ -62,6 +67,10 @@ export function CustomImplantForm({
   );
   const [availability, setAvailability] = useState(initialItem?.availability ?? "");
   const [value, setValue] = useState(initialItem?.value ?? "");
+  const [weight, setWeight] = useState(() => {
+    const storedKg = readWeightKg(initialItem?.weight);
+    return storedKg === null ? "" : String(storedKg);
+  });
   const [locationIndex, setLocationIndex] = useState(
     String(findLocationOptionIndex(initialItem?.bodyLocation))
   );
@@ -88,6 +97,7 @@ export function CustomImplantForm({
         name: name.trim(),
         craftsmanship,
         value: formatMoneyInput(value),
+        weight: formatWeightInput(weight),
         availability,
         source: origin,
         notes: notes.trim() || undefined,
@@ -209,6 +219,21 @@ export function CustomImplantForm({
             required
             onClick={() => setShowAvailabilityPicker(true)}
           />
+          <div>
+            <label htmlFor="custom-cybernetic-weight" className={uiFormLabel}>
+              Weight
+            </label>
+            <input
+              id="custom-cybernetic-weight"
+              type="text"
+              inputMode="decimal"
+              value={weight}
+              onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+              placeholder="e.g. 2"
+              className={editableInputClass(true) + " mt-0.5"}
+              autoComplete="off"
+            />
+          </div>
           {includeLocation && (
             <PickerField
               id="custom-cybernetic-installation"
@@ -216,7 +241,6 @@ export function CustomImplantForm({
               value={LOCATION_OPTIONS[Number(locationIndex)]?.label}
               placeholder="Not specified"
               onClick={() => setShowLocationPicker(true)}
-              className="col-span-2"
             />
           )}
         </div>

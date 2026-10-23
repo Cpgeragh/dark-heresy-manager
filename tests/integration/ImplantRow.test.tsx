@@ -227,6 +227,18 @@ describe("ImplantRow", () => {
     expect(screen.queryByText("Installed")).not.toBeInTheDocument();
   });
 
+  it("shows the weight chip when the implant has a weight", () => {
+    render(
+      <ImplantRow
+        item={item({ weight: "3 kg" })}
+        editable
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.getByText("3 kg")).toBeInTheDocument();
+  });
+
   it("has no Install button on a Concealed Weapon Bionic", () => {
     render(
       <ImplantRow

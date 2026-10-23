@@ -346,6 +346,7 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
   notes?: string; // player-added notes
   rules?: string;
   value?: string;
+  weight?: string;
   availability?: string;
   source?: string;
   /** False when the implant is owned but not installed; a missing value means installed. */

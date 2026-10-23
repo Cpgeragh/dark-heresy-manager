@@ -62,14 +62,43 @@ describe("ImplantPicker", () => {
     await user.click(row(IMPLANT_NAME));
     expect(screen.getByText("Select craftsmanship quality:")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Good" }));
-    await user.click(screen.getByRole("button", { name: "Install" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "Add" }));
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ name: IMPLANT_NAME }),
       "Good",
       undefined,
       undefined,
-      undefined
+      undefined,
+      "0 kg"
     );
+  });
+
+  it("adds the weight typed on the weight step as kilograms", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+    await user.click(row(IMPLANT_NAME));
+    await user.click(screen.getByRole("button", { name: "Good" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(screen.getByLabelText(/Weight \(kg\)/), "3");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: IMPLANT_NAME }),
+      "Good",
+      undefined,
+      undefined,
+      undefined,
+      "3 kg"
+    );
+  });
+
+  it("returns from the weight step to the craftsmanship step with Back", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await user.click(row(IMPLANT_NAME));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByText("Select craftsmanship quality:")).toBeInTheDocument();
   });
 
   it("does not open the craftsmanship step in read-only mode", async () => {
@@ -96,14 +125,16 @@ describe("ImplantPicker", () => {
     expect(screen.getByText("Select installation side:")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Left Arm" }));
     expect(screen.getByText("Select craftsmanship quality:")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Install" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "Add" }));
 
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ name: VARIABLE_LOCATION_IMPLANT_NAME }),
       "Common",
       ["leftArm"],
       "2,500 Thrones",
-      "Near Unique"
+      "Near Unique",
+      "0 kg"
     );
   });
 
@@ -123,7 +154,7 @@ describe("ImplantPicker", () => {
     expect(screen.queryByLabelText(/Rarity/)).not.toBeInTheDocument();
   });
 
-  it("skips the craftsmanship step entirely for an item with no real quality data and no location", async () => {
+  it("goes from the cost step straight to the weight step for an item with no quality data and no location", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
 
@@ -132,11 +163,42 @@ describe("ImplantPicker", () => {
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(screen.queryByText("Select craftsmanship quality:")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Add" }));
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ name: NO_QUALITY_IMPLANT_NAME }),
       undefined,
       undefined,
       "0 Thrones",
+      undefined,
+      "0 kg"
+    );
+  });
+
+  it("returns from the weight step to the list for an item with no quality step", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+
+    await user.click(row(NO_QUALITY_IMPLANT_NAME));
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "0");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(screen.getByPlaceholderText("Search implants…")).toBeInTheDocument();
+  });
+
+  it("does not ask for a weight on the Concealed Weapon Bionic", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row("Concealed Weapon Bionic"));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.queryByLabelText(/Weight/)).not.toBeInTheDocument();
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Concealed Weapon Bionic" }),
+      "Common",
+      undefined,
+      undefined,
       undefined
     );
   });

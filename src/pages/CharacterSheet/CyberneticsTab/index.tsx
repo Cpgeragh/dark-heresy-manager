@@ -208,7 +208,8 @@ export function CyberneticsTab({
       craftsmanship: CyberneticCraftsmanship | undefined,
       bodyLocation?: ArmourLocationKey[],
       gmValue?: string,
-      gmRarity?: string
+      gmRarity?: string,
+      gmWeight?: string
     ) => {
       if (!editable) return;
       if (ref.id === "ih-concealed-weapon-bionic") {
@@ -232,6 +233,7 @@ export function CyberneticsTab({
             availability: gmRarity ?? ref.availability,
             source: ref.source,
             installed: false,
+            ...(gmWeight ? { weight: gmWeight } : {}),
             ...(bodyLocation ? { bodyLocation } : {}),
           },
         ],

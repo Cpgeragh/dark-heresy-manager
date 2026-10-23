@@ -592,13 +592,15 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 - [ ] Pick Tech-Priest as Career (Background): Electro-Graft, Electoo Inductors, Respirator Unit, Cyber-Mantle, Potentia Coil, and Cranial Circuitry all appear on Cybernetics automatically, none showing a cost, rarity, or Quality badge
 - [ ] Change Career away from Tech-Priest: all six disappear from Cybernetics
 - [ ] Open the "Add Cybernetic" picker on any character (not just Tech-Priest) and find one of the six by name: it shows "Adeptus Mechanicus Only" as its rarity chip and no cost chip, with the row's small text reading "Cost assigned on add"
-- [ ] Pick one of the six from that picker: it asks only for a cost, not a rarity (rarity's already fixed), and skips the craftsmanship-quality step entirely, installing directly once the cost is confirmed
+- [ ] Pick one of the six from that picker: it asks only for a cost, not a rarity (rarity's already fixed), and skips the craftsmanship-quality step entirely, going to the weight step once the cost is confirmed
 - [ ] For an existing implant that's missing **both** cost and rarity (e.g. Landrian Revealer), the row still reads "Cost and availability assigned on add" and the assign screen still asks for both
 - [ ] For Karrikian Lock-Arm specifically (no real quality data, but does need a body location): confirm it still goes through the location step and still ends up forced to Common craftsmanship, this one's deliberately unchanged
 - [ ] **Autofill, Android:** the Cybernetics picker search box, the Name, Cost, Description and Rules fields on the custom implant form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomImplantForm.tsx`, `AssignedItemMetaFields.tsx`)
 - [ ] The Cybernetics section is named `Implants`, with an `Add implant` button (`View implants` when read-only) and the empty message `No implants.`
 - [ ] A cybernetic added from the picker, the custom form, or the campaign library, and a custom or library Archeotech item typed Cybernetic, is dimmed and shows an `Install` button; pressing it shows `Uninstall`, and a viewer sees an `Installed` chip only while it is installed (`ImplantRow.tsx`, `ArcheotechImplantRow.tsx`)
 - [ ] A cybernetic that is not installed gives no +2 bonus on the Armour tab, is missing from the Purity of Flesh removal list, and is not offered as a Bionic Arm for a Concealed Weapon Bionic
+- [ ] Picking any implant except the Concealed Weapon Bionic ends on a weight step with a `Weight (kg)` box and an `Add` button; typing 3 shows a `3 kg` chip on the implant row, leaving it blank shows a `0 kg` chip, and `Back` returns to the craftsmanship step, or to the list for an implant with no craftsmanship step
+- [ ] The custom implant form has a `Weight` field beside `Installation`; the weight typed there, or `0 kg` when it is left blank, shows on the implant row and in the picker row once the implant is in the campaign library
 - [ ] Taking Purity of Flesh removes only installed cybernetics and leaves the others on the character, and removing the talent restores what it removed
 - [ ] The Concealed Weapon Bionic has no Install button and starts installed, and a cybernetic given by a Talent, Trait, Career, or Homeworld has both an Install button and a Remove button
 

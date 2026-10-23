@@ -29,6 +29,7 @@ describe("CustomImplantForm", () => {
     await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     const textboxes = screen.getAllByRole("textbox");
     await user.type(textboxes[1], "500"); // Cost
+    await user.type(textboxes[2], "2"); // Weight
     await user.click(screen.getByText("Choose availability"));
     await user.click(screen.getByText("Scarce"));
 
@@ -41,9 +42,30 @@ describe("CustomImplantForm", () => {
         craftsmanship: "Good",
         source: "Custom",
         value: "500 Thrones",
+        weight: "2 kg",
         availability: "Scarce",
       })
     );
+  });
+
+  it("stores 0 kg when the weight box is blank", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = renderForm();
+
+    await user.type(screen.getByPlaceholderText("Cybernetic name..."), "Auto-Sanguine");
+    await user.click(screen.getByRole("button", { name: "Good" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
+    await user.type(screen.getAllByRole("textbox")[1], "500");
+    await user.click(screen.getByText("Choose availability"));
+    await user.click(screen.getByText("Scarce"));
+    await user.click(screen.getByRole("button", { name: "Add" }));
+
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ weight: "0 kg" }));
+  });
+
+  it("shows a stored weight as a plain number", () => {
+    renderForm({ initialItem: { weight: "3 kg" } });
+    expect(screen.getByLabelText(/Weight/)).toHaveValue("3");
   });
 
   it("switches the installation location via its picker", async () => {
