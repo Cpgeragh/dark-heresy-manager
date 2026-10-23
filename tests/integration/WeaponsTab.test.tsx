@@ -409,18 +409,6 @@ describe("WeaponsTab", () => {
   });
 });
 
-// Real reference rows have their own Rules InfoModal titled with the bare
-// item name, always mounted (closed) into the DOM, filter for whichever
-// match has a button row as an ancestor.
-function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
-}
-
 function addButtonIn(sectionHeading: string): HTMLElement {
   // The mobile tab bar also has a button with the same text as each section
   // heading, find the match that's inside an actual <section> (the desktop
@@ -488,7 +476,7 @@ describe("WeaponsTab add from reference", () => {
     const user = userEvent.setup();
     const { noop } = renderTab({});
     await user.click(addButtonIn("Explosives"));
-    await user.click(row("Frag Grenade"));
+    await user.click(screen.getByRole("button", { name: "Select Frag Grenade" }));
     expect(noop).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ name: "Frag Grenade" })]),
       { optimistic: true }
@@ -499,7 +487,7 @@ describe("WeaponsTab add from reference", () => {
     const user = userEvent.setup();
     const { noop } = renderTab({});
     await user.click(addButtonIn("Shields"));
-    await user.click(row("Enforcer Riot Shield"));
+    await user.click(screen.getByRole("button", { name: "Select Enforcer Riot Shield" }));
     expect(noop).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ name: "Enforcer Riot Shield" })]),
       { optimistic: true }
@@ -665,7 +653,7 @@ describe("WeaponsTab custom-item library actions", () => {
     const { noop } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add ranged weapon" }));
-    await user.click(screen.getByText("Custom Lasgun"));
+    await user.click(screen.getByRole("button", { name: "Select Custom Lasgun" }));
 
     expect(noop).toHaveBeenCalledWith(
       [

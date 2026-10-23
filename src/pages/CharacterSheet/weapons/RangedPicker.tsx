@@ -1,157 +1,34 @@
 // src/pages/CharacterSheet/weapons/RangedPicker.tsx
 
-import { useEffect, useRef, useState } from "react";
-import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
+import { useRef, useState } from "react";
+import type { WeaponCraftsmanship } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
 } from "../../../data/reference/weaponReference";
 import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import {
-  uiChipRow,
-  uiTextBody,
-  uiTextDescription,
-  uiDescriptionBox,
-} from "../../../ui/styles/editableStyles";
+import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
-import { Chip } from "../../../ui/chips/Chip";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerBody,
   PickerCustomAction,
   PickerList,
   PickerModal,
-  PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { FilterButton } from "../../../ui/pickers/FilterButton";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
-import { StatChip } from "../../../ui/chips/StatChip";
-import { DamageTypeChip } from "./weaponShared";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { RangedCard } from "./RangedCard";
-import { AccordionCard } from "../../../ui/AccordionCard";
+import { RangedPickerCard } from "./WeaponPickerCards";
+import { ammoFamilyChip, rangedCraftsmanshipDescription } from "./weaponHelpers";
 import {
-  weaponClassChip,
-  weaponTypeChip,
-  ammoFamilyChip,
-  rangedCraftsmanshipDescription,
-} from "./weaponHelpers";
-import { InfoModal } from "../../../components/InfoModal";
-
-function RangedWeaponCardPickerRow({
-  weaponReference,
-  editable,
-  onSelect,
-}: {
-  weaponReference: RangedWeaponRef;
-  editable: boolean;
-  onSelect: () => void;
-}) {
-  recordComponentRender("RangedWeaponPickerRow");
-  const [expanded, setExpanded] = useState(false);
-  const rowRef = useRef<HTMLDivElement>(null);
-  const restoreFocusRef = useRef(false);
-
-  useEffect(() => {
-    if (!restoreFocusRef.current) return;
-    restoreFocusRef.current = false;
-    const expectedLabel = `${expanded ? "Collapse" : "Expand"} ${weaponReference.name} details`;
-    const nextControl = Array.from(
-      rowRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []
-    ).find((button) => button.getAttribute("aria-label") === expectedLabel);
-    nextControl?.focus();
-  }, [expanded, weaponReference.name]);
-
-  function showDetails() {
-    restoreFocusRef.current = true;
-    setExpanded(true);
-  }
-
-  function setDetailsExpanded(nextExpanded: boolean) {
-    restoreFocusRef.current = true;
-    setExpanded(nextExpanded);
-  }
-
-  if (!expanded) {
-    const classChip = weaponClassChip(weaponReference.class);
-    const typeChip = weaponTypeChip(weaponReference.type);
-    return (
-      <div ref={rowRef}>
-        <AccordionCard
-          name={weaponReference.name}
-          label={weaponReference.name}
-          expanded={false}
-          onToggle={showDetails}
-          onSelect={editable ? onSelect : undefined}
-          info={
-            <InfoModal
-              title={weaponReference.name}
-              content={
-                weaponReference.description ? (
-                  <p className={uiTextDescription}>{weaponReference.description}</p>
-                ) : undefined
-              }
-            />
-          }
-          metadata={
-            classChip || typeChip ? (
-              <div className={`${uiChipRow} items-center`}>
-                {classChip && <Chip colour={classChip.colour}>{classChip.label}</Chip>}
-                {typeChip && <Chip colour={typeChip.colour}>{typeChip.label}</Chip>}
-              </div>
-            ) : undefined
-          }
-        />
-      </div>
-    );
-  }
-
-  const weapon: RangedWeapon = {
-    id: `picker-${weaponReference.id}`,
-    referenceId: weaponReference.id,
-    name: weaponReference.name,
-    class: weaponReference.class,
-    type: weaponReference.type,
-    range: weaponReference.range,
-    rof: weaponReference.rof,
-    damage: weaponReference.damage,
-    pen: String(weaponReference.pen),
-    clip: String(weaponReference.clip),
-    rld: weaponReference.reload,
-    specialRules: weaponReference.specialRules,
-    weight: weaponReference.weight,
-    value: weaponReference.value,
-    availability: weaponReference.availability,
-    source: weaponReference.source,
-    ammoType: weaponReference.ammoType,
-    ammoTracking: weaponReference.ammoTracking,
-    craftsmanship: "Common",
-    upgrades: [],
-    ammoEntries: [],
-  };
-  return (
-    <div ref={rowRef}>
-      <RangedCard
-        weapon={weapon}
-        editable={false}
-        expanded
-        onExpandedChange={setDetailsExpanded}
-        onSelect={editable ? onSelect : undefined}
-        onRemove={() => {}}
-        onAddUpgrade={() => {}}
-        onRemoveUpgrade={() => {}}
-        onUpdateAmmoEntries={() => {}}
-        onUpdateQuantity={() => {}}
-        allowUpgrades={false}
-      />
-    </div>
-  );
-}
+  buildRangedWeaponSnapshot,
+  previewVersionId,
+  rangedWeaponFromReference,
+} from "./weaponSnapshotHelpers";
 
 export function RangedPicker({
   editable = true,
@@ -358,9 +235,9 @@ export function RangedPicker({
           if (entry.kind === "reference") {
             const weaponReference = entry.weaponReference;
             return (
-              <RangedWeaponCardPickerRow
+              <RangedPickerCard
                 key={weaponReference.id}
-                weaponReference={weaponReference}
+                weapon={rangedWeaponFromReference(weaponReference)}
                 editable={editable}
                 onSelect={() => setSelected(weaponReference)}
               />
@@ -370,43 +247,19 @@ export function RangedPicker({
           const data = item.data;
           if (data.weaponKind !== "ranged") return null;
           return (
-            <PickerRow
+            <RangedPickerCard
               key={item.id}
-              interactive={editable}
-              onClick={() => onSelectCustomItem?.(item)}
-            >
-              <PickerRowName name={item.name} />
-              <PickerRowChips>
-                {data.range && <StatChip label="Range" value={data.range} />}
-                {data.rof && <StatChip label="ROF" value={data.rof} />}
-                {data.damage && <StatChip label="Dmg" value={data.damage} />}
-                {data.damage && <DamageTypeChip damage={data.damage} />}
-                {data.pen && <StatChip label="Pen" value={data.pen} />}
-                {data.clip && <StatChip label="Clip" value={data.clip} />}
-              </PickerRowChips>
-              <PickerRowChips>
-                {(() => {
-                  const c = weaponClassChip(data.class);
-                  return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
-                })()}
-                {(() => {
-                  const t = weaponTypeChip(data.type);
-                  return t ? <Chip colour={t.colour}>{t.label}</Chip> : null;
-                })()}
-                {(() => {
-                  const f = ammoFamilyChip(data.ammoType);
-                  return f ? <Chip colour={f.colour}>{f.label}</Chip> : null;
-                })()}
-                {item.status === "draft" && <Chip colour="amber">Draft</Chip>}
-                <Chip colour="fuchsia">Custom</Chip>
-                <ItemMetaChips
-                  weight={data.weight}
-                  value={data.value}
-                  availability={data.availability}
-                  source={data.source}
-                />
-              </PickerRowChips>
-            </PickerRow>
+              weapon={buildRangedWeaponSnapshot(
+                `picker-${item.id}`,
+                {},
+                data,
+                item.id,
+                previewVersionId(item)
+              )}
+              libraryItem={item}
+              editable={editable}
+              onSelect={() => onSelectCustomItem?.(item)}
+            />
           );
         })}
       </PickerList>

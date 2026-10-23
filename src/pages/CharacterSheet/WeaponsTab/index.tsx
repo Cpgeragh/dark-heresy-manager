@@ -79,6 +79,8 @@ import {
   buildMeleeWeaponSnapshot,
   buildGrenadeSnapshot,
   buildShieldSnapshot,
+  buildGrenadeFromReference,
+  buildShieldFromReference,
   buildFallbackWeaponLibraryItem,
   buildFallbackGrenadeLibraryItem,
   buildFallbackShieldLibraryItem,
@@ -306,27 +308,9 @@ export function WeaponsTab({
   const addFromGrenadeRef = useCallback(
     (ref: GrenadeRef) => {
       if (!editable) return;
-      onUpdateGrenades(
-        [
-          ...grenades,
-          {
-            id: crypto.randomUUID(),
-            referenceId: ref.id,
-            name: ref.name,
-            quantity: 1,
-            type: ref.type,
-            class: ref.class,
-            damage: ref.damage,
-            pen: ref.pen,
-            specialRules: ref.specialRules,
-            weight: ref.weight,
-            value: ref.value,
-            availability: ref.availability,
-            source: ref.source,
-          },
-        ],
-        { optimistic: true }
-      );
+      onUpdateGrenades([...grenades, buildGrenadeFromReference(crypto.randomUUID(), ref)], {
+        optimistic: true,
+      });
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -934,27 +918,9 @@ export function WeaponsTab({
   const addFromShieldRef = useCallback(
     (ref: ShieldRef) => {
       if (!editable || !onUpdateShields) return;
-      onUpdateShields(
-        [
-          ...(shields ?? []),
-          {
-            id: crypto.randomUUID(),
-            referenceId: ref.id,
-            name: ref.name,
-            ap: ref.ap,
-            locations: ref.locations,
-            damage: ref.damage,
-            pen: String(ref.pen),
-            specialRules: ref.specialRules,
-            notes: ref.notes,
-            weight: ref.weight,
-            value: ref.value,
-            availability: ref.availability,
-            source: ref.source,
-          },
-        ],
-        { optimistic: true }
-      );
+      onUpdateShields([...(shields ?? []), buildShieldFromReference(crypto.randomUUID(), ref)], {
+        optimistic: true,
+      });
     },
     [editable, shields, onUpdateShields]
   );

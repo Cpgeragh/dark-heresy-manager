@@ -1,7 +1,7 @@
 // src/pages/CharacterSheet/weapons/MeleePicker.tsx
 
 import { useRef, useState } from "react";
-import type { MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
+import type { WeaponCraftsmanship } from "../../../types/Character";
 import {
   MELEE_WEAPON_REFERENCE,
   type MeleeWeaponRef,
@@ -12,66 +12,23 @@ import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles"
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
-import { Chip } from "../../../ui/chips/Chip";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   PickerBody,
   PickerCustomAction,
   PickerList,
   PickerModal,
-  PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { FilterButton } from "../../../ui/pickers/FilterButton";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
-import { StatChip } from "../../../ui/chips/StatChip";
-import { DamageTypeChip } from "./weaponShared";
-import { MeleeCard } from "./MeleeCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { meleeCraftsmanshipDescription, weaponTypeChip } from "./weaponHelpers";
-
-function MeleeWeaponCardPickerRow({
-  weaponReference,
-  editable,
-  strengthBonus,
-  onSelect,
-}: {
-  weaponReference: MeleeWeaponRef;
-  editable: boolean;
-  strengthBonus: number;
-  onSelect: () => void;
-}) {
-  const weapon: MeleeWeapon = {
-    id: `picker-${weaponReference.id}`,
-    referenceId: weaponReference.id,
-    name: weaponReference.name,
-    class: weaponReference.class,
-    type: weaponReference.type,
-    damage: weaponReference.damage,
-    pen: String(weaponReference.pen),
-    specialRules: weaponReference.specialRules,
-    weight: weaponReference.weight,
-    value: weaponReference.value,
-    availability: weaponReference.availability,
-    source: weaponReference.source,
-    craftsmanship: "Common",
-    upgrades: [],
-  };
-  return (
-    <MeleeCard
-      weapon={weapon}
-      editable={false}
-      strengthBonus={strengthBonus}
-      onSelect={editable ? onSelect : undefined}
-      onRemove={() => {}}
-      onAddUpgrade={() => {}}
-      onRemoveUpgrade={() => {}}
-      onUpdateQuantity={() => {}}
-      allowUpgrades={false}
-    />
-  );
-}
+import { MeleePickerCard } from "./WeaponPickerCards";
+import { meleeCraftsmanshipDescription } from "./weaponHelpers";
+import {
+  buildMeleeWeaponSnapshot,
+  meleeWeaponFromReference,
+  previewVersionId,
+} from "./weaponSnapshotHelpers";
 
 export function MeleePicker({
   editable = true,
@@ -221,9 +178,9 @@ export function MeleePicker({
           if (entry.kind === "reference") {
             const weaponReference = entry.weaponReference;
             return (
-              <MeleeWeaponCardPickerRow
+              <MeleePickerCard
                 key={weaponReference.id}
-                weaponReference={weaponReference}
+                weapon={meleeWeaponFromReference(weaponReference)}
                 editable={editable}
                 strengthBonus={strengthBonus}
                 onSelect={() => setSelected(weaponReference)}
@@ -234,32 +191,20 @@ export function MeleePicker({
           const data = item.data;
           if (data.weaponKind !== "melee") return null;
           return (
-            <PickerRow
+            <MeleePickerCard
               key={item.id}
-              interactive={editable}
-              onClick={() => onSelectCustomItem?.(item)}
-            >
-              <PickerRowName name={item.name} />
-              <PickerRowChips>
-                {data.damage && <StatChip label="Dmg" value={data.damage} />}
-                {data.damage && <DamageTypeChip damage={data.damage} />}
-                {data.pen && <StatChip label="Pen" value={data.pen} />}
-              </PickerRowChips>
-              <PickerRowChips>
-                {(() => {
-                  const t = weaponTypeChip(data.type);
-                  return t ? <Chip colour={t.colour}>{t.label}</Chip> : null;
-                })()}
-                <ItemMetaChips
-                  weight={data.weight}
-                  value={data.value}
-                  availability={data.availability}
-                  source={data.source}
-                />
-                {item.status === "draft" && <Chip colour="amber">Draft</Chip>}
-                <Chip colour="fuchsia">Custom</Chip>
-              </PickerRowChips>
-            </PickerRow>
+              weapon={buildMeleeWeaponSnapshot(
+                `picker-${item.id}`,
+                {},
+                data,
+                item.id,
+                previewVersionId(item)
+              )}
+              libraryItem={item}
+              strengthBonus={strengthBonus}
+              editable={editable}
+              onSelect={() => onSelectCustomItem?.(item)}
+            />
           );
         })}
       </PickerList>

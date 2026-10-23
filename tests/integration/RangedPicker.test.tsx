@@ -1,6 +1,6 @@
 // tests/integration/RangedPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -219,26 +219,45 @@ describe("RangedPicker", () => {
 
   it("shows a Draft badge only for draft-status custom items", () => {
     renderPicker({
-      customItems: [makeCustomItem({ id: "draft-1", name: "Draft Blaster", status: "draft" })],
+      customItems: [makeCustomItem({ id: "draft-1", status: "draft" })],
     });
-    expect(screen.getByText("Draft Blaster")).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
-    expect(screen.getByText("Custom")).toBeInTheDocument();
+    expect(screen.getByText("Custom Blaster")).toBeInTheDocument();
+    expect(screen.getByText("draft")).toBeInTheDocument();
+    expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });
 
   it("doesn't show a Draft badge for published custom items", () => {
     renderPicker({ customItems: [makeCustomItem({ status: "published" })] });
     expect(screen.getByText("Custom Blaster")).toBeInTheDocument();
-    expect(screen.queryByText("Draft")).not.toBeInTheDocument();
-    expect(screen.getByText("Custom")).toBeInTheDocument();
+    expect(screen.queryByText("draft")).not.toBeInTheDocument();
+    expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });
 
-  it("calls onSelectCustomItem when a custom item is clicked", async () => {
+  it("calls onSelectCustomItem when a custom item is tapped", async () => {
     const user = userEvent.setup();
     const item = makeCustomItem();
     const { onSelectCustomItem } = renderPicker({ customItems: [item] });
-    await user.click(screen.getByText("Custom Blaster"));
+    await user.click(screen.getByRole("button", { name: "Select Custom Blaster" }));
     expect(onSelectCustomItem).toHaveBeenCalledWith(item);
+  });
+
+  it("shows a custom weapon's class and type chips closed and its stats once opened", async () => {
+    const user = userEvent.setup();
+    renderPicker({ customItems: [makeCustomItem()] });
+    const card = screen.getByRole("button", { name: "Select Custom Blaster" })
+      .parentElement as HTMLElement;
+    expect(within(card).getByText("Pistol")).toBeInTheDocument();
+    expect(within(card).getByText("Plasma")).toBeInTheDocument();
+    expect(screen.queryByText("30m")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand Custom Blaster details" }));
+    expect(screen.getByText("30m")).toBeInTheDocument();
+  });
+
+  it("opens a custom weapon without choosing it when the chevron is pressed", async () => {
+    const user = userEvent.setup();
+    const { onSelectCustomItem } = renderPicker({ customItems: [makeCustomItem()] });
+    await user.click(screen.getByRole("button", { name: "Expand Custom Blaster details" }));
+    expect(onSelectCustomItem).not.toHaveBeenCalled();
   });
 
   it("calls onCustom when the custom-weapon button is clicked", async () => {

@@ -154,26 +154,35 @@ describe("MeleePicker", () => {
 
   it("shows a Draft badge only for draft-status custom items", () => {
     renderPicker({
-      customItems: [makeCustomItem({ id: "draft-1", name: "Draft Cleaver", status: "draft" })],
+      customItems: [makeCustomItem({ id: "draft-1", status: "draft" })],
     });
-    expect(screen.getByText("Draft Cleaver")).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
-    expect(screen.getByText("Custom")).toBeInTheDocument();
+    expect(screen.getByText("Custom Cleaver")).toBeInTheDocument();
+    expect(screen.getByText("draft")).toBeInTheDocument();
+    expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });
 
   it("doesn't show a Draft badge for published custom items", () => {
     renderPicker({ customItems: [makeCustomItem({ status: "published" })] });
     expect(screen.getByText("Custom Cleaver")).toBeInTheDocument();
-    expect(screen.queryByText("Draft")).not.toBeInTheDocument();
-    expect(screen.getByText("Custom")).toBeInTheDocument();
+    expect(screen.queryByText("draft")).not.toBeInTheDocument();
+    expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });
 
-  it("calls onSelectCustomItem when a custom item is clicked", async () => {
+  it("calls onSelectCustomItem when a custom item is tapped", async () => {
     const user = userEvent.setup();
     const item = makeCustomItem();
     const { onSelectCustomItem } = renderPicker({ customItems: [item] });
-    await user.click(screen.getByText("Custom Cleaver"));
+    await user.click(screen.getByRole("button", { name: "Select Custom Cleaver" }));
     expect(onSelectCustomItem).toHaveBeenCalledWith(item);
+  });
+
+  it("shows a custom melee weapon's type chip closed and its damage once opened", async () => {
+    const user = userEvent.setup();
+    renderPicker({ customItems: [makeCustomItem()] });
+    expect(screen.getAllByText("Primitive").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Pen")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand Custom Cleaver details" }));
+    expect(screen.getByText("Pen")).toBeInTheDocument();
   });
 
   it("calls onCustom when the custom-weapon button is clicked", async () => {

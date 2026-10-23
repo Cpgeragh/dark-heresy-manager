@@ -9,6 +9,12 @@ import type {
   CustomGrenadeData,
   CustomWeaponData,
 } from "../../../types/CustomItems";
+import type {
+  GrenadeRef,
+  MeleeWeaponRef,
+  RangedWeaponRef,
+  ShieldRef,
+} from "../../../data/reference/weaponReference";
 import { inferCustomItemStatus } from "../../../services/customItemService";
 
 export type CustomRangedWeaponData = Extract<CustomWeaponData, { weaponKind: "ranged" }>;
@@ -98,6 +104,99 @@ export function stripArmourKind<TData extends CustomArmourData>(
 ): Omit<TData, "armourKind"> {
   const { armourKind: _armourKind, ...armourData } = data;
   return armourData;
+}
+
+export function previewVersionId(item: {
+  publishedVersionId?: string | null;
+  draftVersionId?: string | null;
+  latestVersionId: string;
+}): string {
+  return item.publishedVersionId ?? item.draftVersionId ?? item.latestVersionId;
+}
+
+export function rangedWeaponFromReference(ref: RangedWeaponRef, integrated = false): RangedWeapon {
+  return {
+    id: `picker-${ref.id}`,
+    referenceId: ref.id,
+    name: ref.name,
+    description: ref.description,
+    class: ref.class,
+    type: ref.type,
+    range: ref.range,
+    rof: ref.rof,
+    damage: ref.damage,
+    pen: String(ref.pen),
+    clip: String(ref.clip),
+    rld: ref.reload,
+    specialRules: ref.specialRules,
+    weight: ref.weight,
+    value: ref.value,
+    availability: ref.availability,
+    source: ref.source,
+    ammoType: ref.ammoType,
+    ammoTracking: ref.ammoTracking,
+    craftsmanship: "Common",
+    upgrades: [],
+    ammoEntries: [],
+    ...(integrated ? { integrated: true } : {}),
+  };
+}
+
+export function meleeWeaponFromReference(ref: MeleeWeaponRef, integrated = false): MeleeWeapon {
+  return {
+    id: `picker-${ref.id}`,
+    referenceId: ref.id,
+    name: ref.name,
+    description: ref.description,
+    class: ref.class,
+    type: ref.type,
+    damage: ref.damage,
+    pen: String(ref.pen),
+    specialRules: ref.specialRules,
+    weight: ref.weight,
+    value: ref.value,
+    availability: ref.availability,
+    source: ref.source,
+    craftsmanship: "Common",
+    upgrades: [],
+    ...(integrated ? { integrated: true } : {}),
+  };
+}
+
+export function buildGrenadeFromReference(id: string, ref: GrenadeRef): GrenadeItem {
+  return {
+    id,
+    referenceId: ref.id,
+    name: ref.name,
+    quantity: 1,
+    type: ref.type,
+    class: ref.class,
+    damage: ref.damage,
+    pen: ref.pen,
+    specialRules: ref.specialRules,
+    weight: ref.weight,
+    value: ref.value,
+    availability: ref.availability,
+    source: ref.source,
+  };
+}
+
+export function buildShieldFromReference(id: string, ref: ShieldRef): ShieldItem {
+  return {
+    id,
+    referenceId: ref.id,
+    name: ref.name,
+    ap: ref.ap,
+    locations: ref.locations,
+    damage: ref.damage,
+    pen: String(ref.pen),
+    specialRules: ref.specialRules,
+    notes: ref.notes,
+    weight: ref.weight,
+    value: ref.value,
+    availability: ref.availability,
+    source: ref.source,
+  };
 }
 
 export function buildRangedWeaponSnapshot(

@@ -40,6 +40,7 @@ export function ShieldCard({
   isEquipped = false,
   onToggleEquip,
   slotsDisabled = false,
+  onSelect,
 }: {
   item: ShieldItem;
   editable: boolean;
@@ -47,6 +48,7 @@ export function ShieldCard({
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
+  onSelect?: () => void;
 } & CustomItemLibraryActionProps<"armour">) {
   const [expanded, setExpanded] = useState(false);
 
@@ -59,6 +61,7 @@ export function ShieldCard({
       label={item.name}
       expanded={expanded}
       onToggle={() => setExpanded((e) => !e)}
+      onSelect={onSelect}
       badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       info={
         <InfoModal

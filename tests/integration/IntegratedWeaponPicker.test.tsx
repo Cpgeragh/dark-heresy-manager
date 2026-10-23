@@ -11,19 +11,14 @@ import {
 } from "../../src/pages/CharacterSheet/weapons/weaponHelpers";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
-// Real weapons with a description have their own Rules InfoModal titled with
-// the bare item name, always mounted (closed) into the DOM, filter for
-// whichever match has a button row as an ancestor.
-function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
+function selectButton(name: string): HTMLElement {
+  return screen.getByRole("button", { name: `Select ${name}` });
 }
 
-function renderPicker(customItems: CampaignCustomItem<"weapon">[] = []) {
+function renderPicker(
+  customItems: CampaignCustomItem<"weapon">[] = [],
+  props: Partial<React.ComponentProps<typeof IntegratedWeaponPicker>> = {}
+) {
   const onSelectRanged = vi.fn();
   const onSelectMelee = vi.fn();
   const onSelectCustomItem = vi.fn();
@@ -35,6 +30,7 @@ function renderPicker(customItems: CampaignCustomItem<"weapon">[] = []) {
       customItems={customItems}
       onSelectCustomItem={onSelectCustomItem}
       onClose={onClose}
+      {...props}
     />
   );
   return { onSelectRanged, onSelectMelee, onSelectCustomItem, onClose };
@@ -44,7 +40,7 @@ describe("IntegratedWeaponPicker craftsmanship description", () => {
   it("shows the ranged-specific description for an integrated ranged weapon", async () => {
     const user = userEvent.setup();
     renderPicker();
-    await user.click(row(INTEGRATED_RANGED_REFS[0].name));
+    await user.click(selectButton(INTEGRATED_RANGED_REFS[0].name));
     expect(
       screen.getByText(
         /ranged weapon has the Unreliable quality|ranged weapons are more reliable|never suffer from jamming|no additional modifier/
@@ -58,7 +54,7 @@ describe("IntegratedWeaponPicker craftsmanship description", () => {
   it("shows the melee-specific description for an integrated melee weapon", async () => {
     const user = userEvent.setup();
     renderPicker();
-    await user.click(row(INTEGRATED_MELEE_REFS[0].name));
+    await user.click(selectButton(INTEGRATED_MELEE_REFS[0].name));
     expect(
       screen.getByText(/Common craftsmanship melee weapons have no additional modifier/)
     ).toBeInTheDocument();
@@ -67,7 +63,7 @@ describe("IntegratedWeaponPicker craftsmanship description", () => {
   it("updates the description when a different craftsmanship level is picked", async () => {
     const user = userEvent.setup();
     renderPicker();
-    await user.click(row(INTEGRATED_MELEE_REFS[0].name));
+    await user.click(selectButton(INTEGRATED_MELEE_REFS[0].name));
     await user.click(screen.getByRole("button", { name: "Best" }));
     expect(
       screen.getByText(/add a \+10 bonus to Tests made to attack and add 1 to the Damage/)
@@ -106,13 +102,40 @@ describe("IntegratedWeaponPicker craftsmanship description", () => {
     } as unknown as CampaignCustomItem<"weapon">;
     const { onSelectCustomItem } = renderPicker([customItem]);
 
-    const customRow = row(customItem.name);
+    const customCard = selectButton(customItem.name);
     expect(
-      customRow.compareDocumentPosition(row(INTEGRATED_RANGED_REFS[0].name)) &
+      customCard.compareDocumentPosition(selectButton(INTEGRATED_RANGED_REFS[0].name)) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
 
-    await user.click(customRow);
+    await user.click(customCard);
     expect(onSelectCustomItem).toHaveBeenCalledWith(customItem);
+  });
+});
+
+describe("IntegratedWeaponPicker cards", () => {
+  it("shows an Integrated chip on a ranged and a melee card", () => {
+    renderPicker();
+    const rangedCard = selectButton(INTEGRATED_RANGED_REFS[0].name).parentElement as HTMLElement;
+    const meleeCard = selectButton(INTEGRATED_MELEE_REFS[0].name).parentElement as HTMLElement;
+    expect(rangedCard).toHaveTextContent("Integrated");
+    expect(meleeCard).toHaveTextContent("Integrated");
+  });
+
+  it("opens an integrated weapon without choosing it when the chevron is pressed", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    const name = INTEGRATED_MELEE_REFS[0].name;
+    await user.click(screen.getByRole("button", { name: `Expand ${name} details` }));
+    expect(screen.queryByText("Select weapon craftsmanship:")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `Collapse ${name} details` })).toBeInTheDocument();
+  });
+
+  it("uses the given Strength bonus for an opened melee card's total", async () => {
+    const user = userEvent.setup();
+    renderPicker([], { strengthBonus: 7 });
+    const name = INTEGRATED_MELEE_REFS[0].name;
+    await user.click(screen.getByRole("button", { name: `Expand ${name} details` }));
+    expect(screen.getByText("+7")).toBeInTheDocument();
   });
 });

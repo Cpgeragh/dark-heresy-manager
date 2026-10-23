@@ -8,20 +8,16 @@ import { ShieldPicker } from "../../src/pages/CharacterSheet/weapons/ShieldPicke
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 // Real reference entries (ShieldPicker has no override prop, it always reads
-// SHIELD_REFERENCE directly). Both have notes, so each has its own Rules
-// InfoModal titled with the bare item name, which always mounts (closed) into
-// the DOM outside any row, filter for whichever match has a button row
-// as an ancestor.
+// SHIELD_REFERENCE directly).
 const SHIELD_A = 'Synford-Pattern "Lockshield"';
 const SHIELD_B = "Enforcer Riot Shield";
 
-function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
+function selectButton(name: string): HTMLElement {
+  return screen.getByRole("button", { name: `Select ${name}` });
+}
+
+async function expand(user: ReturnType<typeof userEvent.setup>, name: string) {
+  await user.click(screen.getByRole("button", { name: `Expand ${name} details` }));
 }
 
 function makeCustomItem(
@@ -75,43 +71,61 @@ function renderPicker(props: Partial<React.ComponentProps<typeof ShieldPicker>> 
 describe("ShieldPicker", () => {
   it("renders shields from the reference data", () => {
     renderPicker();
-    expect(row(SHIELD_A)).toBeInTheDocument();
-    expect(row(SHIELD_B)).toBeInTheDocument();
+    expect(selectButton(SHIELD_A)).toBeInTheDocument();
+    expect(selectButton(SHIELD_B)).toBeInTheDocument();
   });
 
   it("filters the list by search query", async () => {
     const user = userEvent.setup();
     renderPicker();
     await user.type(screen.getByPlaceholderText("Search shields…"), "Enforcer");
-    expect(row(SHIELD_B)).toBeInTheDocument();
+    expect(selectButton(SHIELD_B)).toBeInTheDocument();
     expect(screen.queryAllByText(SHIELD_A)).toHaveLength(0);
   });
 
-  it("shows AP, Location, Dmg, Type and Pen stats for a shield", () => {
+  it("starts closed and shows the stats, Qualities, and Rules lines once opened", async () => {
+    const user = userEvent.setup();
     renderPicker();
-    const lockshield = row(SHIELD_A);
-    expect(within(lockshield).getByText("AP")).toBeInTheDocument();
-    expect(within(lockshield).getByText("Location")).toBeInTheDocument();
-    expect(within(lockshield).getByText("Dmg")).toBeInTheDocument();
-    expect(within(lockshield).getByText("Type")).toBeInTheDocument();
-    expect(within(lockshield).getByText("Impact")).toBeInTheDocument();
-    expect(within(lockshield).getByText("Pen")).toBeInTheDocument();
+    expect(screen.queryByText("AP")).not.toBeInTheDocument();
+    await expand(user, SHIELD_A);
+    expect(screen.getByText("AP")).toBeInTheDocument();
+    expect(screen.getByText("Location")).toBeInTheDocument();
+    expect(screen.getByText("Damage")).toBeInTheDocument();
+    expect(screen.getByText("Type")).toBeInTheDocument();
+    expect(screen.getByText("Impact")).toBeInTheDocument();
+    expect(screen.getByText("Pen")).toBeInTheDocument();
+    expect(screen.getByText("Qualities")).toBeInTheDocument();
+    expect(screen.getByText("Rules")).toBeInTheDocument();
   });
 
-  it("calls onSelect with the chosen ref when a shield is clicked", async () => {
+  it("shows the Shield chip on a closed card", () => {
+    renderPicker();
+    const card = selectButton(SHIELD_A).parentElement as HTMLElement;
+    expect(within(card).getByText("Shield")).toBeInTheDocument();
+  });
+
+  it("calls onSelect with the chosen ref when a shield is tapped", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
-    await user.click(row(SHIELD_B));
+    await user.click(selectButton(SHIELD_B));
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ id: "boj-enforcer-riot-shield" })
     );
   });
 
-  it("shows a View title in read-only mode and does not call onSelect on click", async () => {
+  it("opens a shield without choosing it when the chevron is pressed", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+    await expand(user, SHIELD_B);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("shows a View title in read-only mode and does not call onSelect on tap", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker({ editable: false });
     expect(screen.getByText("View Shields")).toBeInTheDocument();
-    await user.click(row(SHIELD_A));
+    expect(screen.queryByRole("button", { name: `Select ${SHIELD_A}` })).not.toBeInTheDocument();
+    await expand(user, SHIELD_A);
     expect(onSelect).not.toHaveBeenCalled();
   });
 
@@ -129,15 +143,15 @@ describe("ShieldPicker", () => {
 
   it("shows a status badge for custom library items", () => {
     renderPicker({ customLibraryItems: [makeCustomItem({ status: "draft" })] });
-    expect(row("Custom Buckler")).toBeInTheDocument();
+    expect(selectButton("Custom Buckler")).toBeInTheDocument();
     expect(screen.getByText("draft")).toBeInTheDocument();
   });
 
-  it("calls onSelectCustom when a custom item is clicked", async () => {
+  it("calls onSelectCustom when a custom item is tapped", async () => {
     const user = userEvent.setup();
     const item = makeCustomItem();
     const { onSelectCustom } = renderPicker({ customLibraryItems: [item] });
-    await user.click(row("Custom Buckler"));
+    await user.click(selectButton("Custom Buckler"));
     expect(onSelectCustom).toHaveBeenCalledWith(item);
   });
 });

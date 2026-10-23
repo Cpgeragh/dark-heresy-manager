@@ -5,32 +5,29 @@ import type { WeaponCraftsmanship } from "../../../types/Character";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
-import { Chip } from "../../../ui/chips/Chip";
-import { InfoModal } from "../../../components/InfoModal";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
   PickerBody,
   PickerCustomAction,
   PickerList,
   PickerModal,
-  PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowInfoLine,
-  PickerRowName,
-} from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
-import { SpecialRulesContent } from "./weaponShared";
+import { MeleePickerCard, RangedPickerCard } from "./WeaponPickerCards";
 import {
   rangedCraftsmanshipDescription,
   meleeCraftsmanshipDescription,
   INTEGRATED_RANGED_REFS,
   INTEGRATED_MELEE_REFS,
 } from "./weaponHelpers";
+import {
+  buildMeleeWeaponSnapshot,
+  buildRangedWeaponSnapshot,
+  meleeWeaponFromReference,
+  previewVersionId,
+  rangedWeaponFromReference,
+} from "./weaponSnapshotHelpers";
 
 type SelectedIntegrated =
   | { kind: "ranged"; ref: RangedWeaponRef }
@@ -38,6 +35,7 @@ type SelectedIntegrated =
 
 export function IntegratedWeaponPicker({
   editable = true,
+  strengthBonus = 0,
   onSelectRanged,
   onSelectMelee,
   customItems = [],
@@ -48,6 +46,7 @@ export function IntegratedWeaponPicker({
   suspended = false,
 }: {
   editable?: boolean;
+  strengthBonus?: number;
   onSelectRanged: (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectMelee: (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   customItems?: CampaignCustomItem<"weapon">[];
@@ -165,178 +164,74 @@ export function IntegratedWeaponPicker({
           ...ranged.map((ref) => ({
             name: ref.name,
             row: (
-              <PickerRow
+              <RangedPickerCard
                 key={ref.id}
-                interactive={editable}
-                onClick={() => setSelected({ kind: "ranged", ref })}
-              >
-                <PickerRowName name={ref.name} />
-                <PickerRowChips>
-                  <Chip colour="violet">Integrated</Chip>
-                  <Chip colour="sky">Ranged</Chip>
-                  <ItemMetaChips
-                    weight={ref.weight}
-                    value={ref.value}
-                    availability={ref.availability}
-                    source={ref.source}
-                  />
-                </PickerRowChips>
-                <PickerRowChips className={`text-xs lg:text-sm ${uiTextBody} font-code`}>
-                  <span>{ref.class}</span>
-                  <span>{ref.range}</span>
-                  <span>{ref.rof}</span>
-                  <span>{ref.damage}</span>
-                  <span>Pen {ref.pen}</span>
-                  <span>Clip {ref.clip}</span>
-                </PickerRowChips>
-                {ref.specialRules && ref.specialRules !== "—" && (
-                  <PickerRowInfoLine
-                    label="Qualities"
-                    info={
-                      <InfoModal
-                        title={`${ref.name} Qualities`}
-                        content={<SpecialRulesContent rules={ref.specialRules} />}
-                        as="span"
-                      />
-                    }
-                  >
-                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
-                  </PickerRowInfoLine>
-                )}
-                {ref.description && (
-                  <PickerRowInfoLine
-                    label="Rules"
-                    info={
-                      <InfoModal
-                        title={ref.name}
-                        content={<SpecialRulesContent rules="" description={ref.description} />}
-                        as="span"
-                      />
-                    }
-                  />
-                )}
-              </PickerRow>
+                weapon={rangedWeaponFromReference(ref, true)}
+                integrated
+                editable={editable}
+                onSelect={() => setSelected({ kind: "ranged", ref })}
+              />
             ),
           })),
           ...melee.map((ref) => ({
             name: ref.name,
             row: (
-              <PickerRow
+              <MeleePickerCard
                 key={ref.id}
-                interactive={editable}
-                onClick={() => setSelected({ kind: "melee", ref })}
-              >
-                <PickerRowName name={ref.name} />
-                <PickerRowChips>
-                  <Chip colour="violet">Integrated</Chip>
-                  <Chip colour="orange">Melee</Chip>
-                  <ItemMetaChips
-                    weight={ref.weight}
-                    value={ref.value}
-                    availability={ref.availability}
-                    source={ref.source}
-                  />
-                </PickerRowChips>
-                <PickerRowChips className={`text-xs lg:text-sm ${uiTextBody} font-code`}>
-                  <span>{ref.class}</span>
-                  <span>{ref.damage}</span>
-                  <span>Pen {ref.pen}</span>
-                </PickerRowChips>
-                {ref.specialRules && ref.specialRules !== "—" && (
-                  <PickerRowInfoLine
-                    label="Qualities"
-                    info={
-                      <InfoModal
-                        title={`${ref.name} Qualities`}
-                        content={<SpecialRulesContent rules={ref.specialRules} />}
-                        as="span"
-                      />
-                    }
-                  >
-                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
-                  </PickerRowInfoLine>
-                )}
-                {ref.description && (
-                  <PickerRowInfoLine
-                    label="Rules"
-                    info={
-                      <InfoModal
-                        title={ref.name}
-                        content={<SpecialRulesContent rules="" description={ref.description} />}
-                        as="span"
-                      />
-                    }
-                  />
-                )}
-              </PickerRow>
+                weapon={meleeWeaponFromReference(ref, true)}
+                integrated
+                strengthBonus={strengthBonus}
+                editable={editable}
+                onSelect={() => setSelected({ kind: "melee", ref })}
+              />
             ),
           })),
           ...custom.map((item) => {
             const data = item.data;
-            if (data.weaponKind !== "ranged" && data.weaponKind !== "melee") {
-              return { name: item.name, row: null };
+            if (data.weaponKind === "ranged") {
+              return {
+                name: item.name,
+                row: (
+                  <RangedPickerCard
+                    key={`custom-${item.id}`}
+                    weapon={buildRangedWeaponSnapshot(
+                      `picker-${item.id}`,
+                      {},
+                      data,
+                      item.id,
+                      previewVersionId(item)
+                    )}
+                    libraryItem={item}
+                    integrated
+                    editable={editable}
+                    onSelect={() => onSelectCustomItem?.(item)}
+                  />
+                ),
+              };
             }
-            const isRanged = data.weaponKind === "ranged";
-            return {
-              name: item.name,
-              row: (
-                <PickerRow
-                  key={`custom-${item.id}`}
-                  interactive={editable}
-                  onClick={() => onSelectCustomItem?.(item)}
-                >
-                  <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
-                  <PickerRowChips>
-                    <Chip colour="violet">Integrated</Chip>
-                    <Chip colour={isRanged ? "sky" : "orange"}>
-                      {isRanged ? "Ranged" : "Melee"}
-                    </Chip>
-                    <ItemMetaChips
-                      weight={data.weight}
-                      value={data.value}
-                      availability={data.availability}
-                      source={data.source}
-                    />
-                  </PickerRowChips>
-                  <PickerRowChips className={`text-xs lg:text-sm ${uiTextBody} font-code`}>
-                    <span>{data.class}</span>
-                    {isRanged && <span>{data.range}</span>}
-                    {isRanged && <span>{data.rof}</span>}
-                    <span>{data.damage}</span>
-                    <span>Pen {data.pen}</span>
-                    {isRanged && <span>Clip {data.clip}</span>}
-                  </PickerRowChips>
-                  {data.specialRules && data.specialRules !== "—" && (
-                    <PickerRowInfoLine
-                      label="Qualities"
-                      info={
-                        <InfoModal
-                          title={`${item.name} Qualities`}
-                          content={<SpecialRulesContent rules={data.specialRules} />}
-                          as="span"
-                        />
-                      }
-                    >
-                      <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-                        {data.specialRules}
-                      </span>
-                    </PickerRowInfoLine>
-                  )}
-                  {data.description && (
-                    <PickerRowInfoLine
-                      label="Rules"
-                      info={
-                        <InfoModal
-                          title={item.name}
-                          content={<SpecialRulesContent rules="" description={data.description} />}
-                          as="span"
-                        />
-                      }
-                    />
-                  )}
-                </PickerRow>
-              ),
-            };
+            if (data.weaponKind === "melee") {
+              return {
+                name: item.name,
+                row: (
+                  <MeleePickerCard
+                    key={`custom-${item.id}`}
+                    weapon={buildMeleeWeaponSnapshot(
+                      `picker-${item.id}`,
+                      {},
+                      data,
+                      item.id,
+                      previewVersionId(item)
+                    )}
+                    libraryItem={item}
+                    integrated
+                    strengthBonus={strengthBonus}
+                    editable={editable}
+                    onSelect={() => onSelectCustomItem?.(item)}
+                  />
+                ),
+              };
+            }
+            return { name: item.name, row: null };
           }),
         ]
           .sort((a, b) => a.name.localeCompare(b.name))

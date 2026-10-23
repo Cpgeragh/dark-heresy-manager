@@ -57,6 +57,7 @@ export function GrenadeCard({
   onToggleEquip,
   canEquipMoreTypes = true,
   isStowedCard = false,
+  onSelect,
 }: {
   item: GrenadeItem;
   editable: boolean;
@@ -67,6 +68,7 @@ export function GrenadeCard({
   onToggleEquip?: () => void;
   canEquipMoreTypes?: boolean;
   isStowedCard?: boolean;
+  onSelect?: () => void;
 } & CustomItemLibraryActionProps<"weapon">) {
   recordComponentRender("GrenadeCard");
   const [expanded, setExpanded] = useState(false);
@@ -108,6 +110,7 @@ export function GrenadeCard({
       label={item.name}
       expanded={expanded}
       onToggle={() => setExpanded((e) => !e)}
+      onSelect={onSelect}
       badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       info={
         <InfoModal
@@ -222,20 +225,22 @@ export function GrenadeCard({
       </div>
 
       {/* Quantity row */}
-      <div className="flex items-center gap-3 pt-1">
-        <span className={`text-xs lg:text-sm ${uiTextBody} uppercase tracking-wide`}>Qty</span>
-        <QuantityControl
-          quantity={item.quantity}
-          editable={editable}
-          size="lg"
-          onUpdate={onUpdateQty}
-        />
-        {isEquipped && item.quantity > 3 && (
-          <span className={`text-[10px] lg:text-xs ${colourAmberPlain} ml-1`}>
-            3 ready, rest stowed
-          </span>
-        )}
-      </div>
+      {!onSelect && (
+        <div className="flex items-center gap-3 pt-1">
+          <span className={`text-xs lg:text-sm ${uiTextBody} uppercase tracking-wide`}>Qty</span>
+          <QuantityControl
+            quantity={item.quantity}
+            editable={editable}
+            size="lg"
+            onUpdate={onUpdateQty}
+          />
+          {isEquipped && item.quantity > 3 && (
+            <span className={`text-[10px] lg:text-xs ${colourAmberPlain} ml-1`}>
+              3 ready, rest stowed
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Weight / Value / Availability / Source */}
       <ItemMetaChips

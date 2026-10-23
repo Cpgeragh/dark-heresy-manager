@@ -59,6 +59,18 @@ describe("ShieldCard rules", () => {
   });
 });
 
+describe("ShieldCard in a picker", () => {
+  it("calls onSelect when the card is tapped and not when the chevron is pressed", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    renderCard({ editable: false, isEquipped: false, onSelect }, { collapsed: true });
+    await user.click(screen.getByRole("button", { name: "Expand Custom Buckler details" }));
+    expect(onSelect).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Select Custom Buckler" }));
+    expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("ShieldCard header", () => {
   it("shows a Shield chip under the name", () => {
     renderCard();

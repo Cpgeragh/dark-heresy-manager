@@ -2,25 +2,15 @@
 
 import { useState } from "react";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weaponReference";
-import { uiTextBody, uiTextDescription } from "../../../ui/styles/editableStyles";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import {
-  PickerCustomAction,
-  PickerList,
-  PickerModal,
-  PickerRow,
-} from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowInfoLine,
-  PickerRowName,
-} from "../../../ui/pickers/PickerRowParts";
-import { InfoModal } from "../../../components/InfoModal";
-import { StatChip } from "../../../ui/chips/StatChip";
-import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { PickerCustomAction, PickerList, PickerModal } from "../../../ui/pickers/PickerModal";
+import { ShieldCard } from "./ShieldCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import {
+  buildShieldFromReference,
+  buildShieldSnapshot,
+  previewVersionId,
+} from "./weaponSnapshotHelpers";
 
 export function ShieldPicker({
   editable = true,
@@ -73,106 +63,33 @@ export function ShieldPicker({
             return {
               name: item.name,
               row: (
-                <PickerRow
+                <ShieldCard
                   key={`custom-${item.id}`}
-                  interactive={editable}
-                  onClick={() => onSelectCustom?.(item)}
-                >
-                  <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
-                  <PickerRowChips>
-                    <StatChip label="AP" value={String(data.ap)} />
-                    {data.locations && <StatChip label="Location" value={data.locations} />}
-                    {data.damage && <StatChip label="Dmg" value={data.damage} />}
-                    {data.damage && <DamageTypeChip damage={data.damage} />}
-                    {data.pen && <StatChip label="Pen" value={data.pen} />}
-                  </PickerRowChips>
-                  <PickerRowChips>
-                    <ItemMetaChips
-                      weight={data.weight}
-                      value={data.value}
-                      availability={data.availability}
-                      source={data.source}
-                    />
-                  </PickerRowChips>
-                  {data.specialRules && data.specialRules !== "—" && (
-                    <PickerRowInfoLine
-                      label="Qualities"
-                      info={
-                        <InfoModal
-                          title={`${data.name} Qualities`}
-                          content={<SpecialRulesContent rules={data.specialRules} />}
-                          as="span"
-                        />
-                      }
-                    >
-                      <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-                        {data.specialRules}
-                      </span>
-                    </PickerRowInfoLine>
+                  item={buildShieldSnapshot(
+                    `picker-${item.id}`,
+                    {},
+                    data,
+                    item.id,
+                    previewVersionId(item)
                   )}
-                  {data.notes && (
-                    <PickerRowInfoLine
-                      label="Rules"
-                      info={
-                        <InfoModal
-                          title={data.name}
-                          content={<p className={uiTextDescription}>{data.notes}</p>}
-                          as="span"
-                        />
-                      }
-                    />
-                  )}
-                </PickerRow>
+                  libraryItem={item}
+                  editable={false}
+                  onSelect={editable ? () => onSelectCustom?.(item) : undefined}
+                  onRemove={() => {}}
+                />
               ),
             };
           }),
           ...filtered.map((ref) => ({
             name: ref.name,
             row: (
-              <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-                <PickerRowName name={ref.name} />
-                <PickerRowChips>
-                  <StatChip label="AP" value={String(ref.ap)} />
-                  {ref.locations && <StatChip label="Location" value={ref.locations} />}
-                  {ref.damage && <StatChip label="Dmg" value={ref.damage} />}
-                  {ref.damage && <DamageTypeChip damage={ref.damage} />}
-                  <StatChip label="Pen" value={String(ref.pen)} />
-                </PickerRowChips>
-                <PickerRowChips>
-                  <ItemMetaChips
-                    weight={ref.weight}
-                    value={ref.value}
-                    availability={ref.availability}
-                    source={ref.source}
-                  />
-                </PickerRowChips>
-                {ref.specialRules && ref.specialRules !== "—" && (
-                  <PickerRowInfoLine
-                    label="Qualities"
-                    info={
-                      <InfoModal
-                        title={`${ref.name} Qualities`}
-                        content={<SpecialRulesContent rules={ref.specialRules} />}
-                        as="span"
-                      />
-                    }
-                  >
-                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
-                  </PickerRowInfoLine>
-                )}
-                {ref.notes && (
-                  <PickerRowInfoLine
-                    label="Rules"
-                    info={
-                      <InfoModal
-                        title={ref.name}
-                        content={<p className={uiTextDescription}>{ref.notes}</p>}
-                        as="span"
-                      />
-                    }
-                  />
-                )}
-              </PickerRow>
+              <ShieldCard
+                key={ref.id}
+                item={buildShieldFromReference(`picker-${ref.id}`, ref)}
+                editable={false}
+                onSelect={editable ? () => onSelect(ref) : undefined}
+                onRemove={() => {}}
+              />
             ),
           })),
         ]

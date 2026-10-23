@@ -920,6 +920,7 @@ export function CyberneticsTab({
       {showIntegratedPicker && (
         <IntegratedWeaponPicker
           editable={editable}
+          strengthBonus={strengthBonus}
           onSelectRanged={addIntegratedFromRangedRef}
           onSelectMelee={addIntegratedFromMeleeRef}
           customItems={campaignCustomIntegratedWeapons}

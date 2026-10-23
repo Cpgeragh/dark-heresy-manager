@@ -13,17 +13,16 @@ import type { CampaignCustomItem } from "../../src/types/CustomItems";
 const GRENADE_NAME = "Frag Grenade";
 const MINE_NAME = "Empyrian Brain Mines";
 
-// Real grenades have their own Rules InfoModal titled with the bare item name,
-// which always mounts its (closed) dialog into the DOM (outside any row), so
-// the name can match both the row and that hidden, button-less title. Filter
-// for whichever match actually has a button row as an ancestor.
-function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
+function selectButton(name: string): HTMLElement {
+  return screen.getByRole("button", { name: `Select ${name}` });
+}
+
+function card(name: string): HTMLElement {
+  return selectButton(name).parentElement as HTMLElement;
+}
+
+async function expand(user: ReturnType<typeof userEvent.setup>, name: string) {
+  await user.click(screen.getByRole("button", { name: `Expand ${name} details` }));
 }
 
 function makeCustomItem(
@@ -77,44 +76,72 @@ function renderPicker(props: Partial<React.ComponentProps<typeof GrenadePicker>>
 describe("GrenadePicker", () => {
   it("renders grenades and mines from the reference data", () => {
     renderPicker();
-    expect(row(GRENADE_NAME)).toBeInTheDocument();
-    expect(row(MINE_NAME)).toBeInTheDocument();
+    expect(selectButton(GRENADE_NAME)).toBeInTheDocument();
+    expect(selectButton(MINE_NAME)).toBeInTheDocument();
   });
 
   it("filters the list by search query", async () => {
     const user = userEvent.setup();
     renderPicker();
     await user.type(screen.getByPlaceholderText("Search grenades…"), "Frag");
-    expect(row(GRENADE_NAME)).toBeInTheDocument();
+    expect(selectButton(GRENADE_NAME)).toBeInTheDocument();
     expect(screen.queryAllByText(MINE_NAME)).toHaveLength(0);
   });
 
-  it("shows a Range stat for a grenade but not for a mine", () => {
+  it("shows a Range stat for a grenade but not for a mine once opened", async () => {
+    const user = userEvent.setup();
     renderPicker();
-    expect(within(row(GRENADE_NAME)).getByText("Range")).toBeInTheDocument();
-    expect(within(row(MINE_NAME)).queryByText("Range")).not.toBeInTheDocument();
+    await expand(user, GRENADE_NAME);
+    expect(screen.getAllByText("Range")).toHaveLength(1);
+    await expand(user, MINE_NAME);
+    expect(screen.getAllByText("Range")).toHaveLength(1);
   });
 
   it("shows Grenade/Thrown chips for a grenade and Mine/Exotic chips for a mine", () => {
     renderPicker();
-    expect(within(row(GRENADE_NAME)).getByText("Grenade")).toBeInTheDocument();
-    expect(within(row(GRENADE_NAME)).getByText("Thrown")).toBeInTheDocument();
-    expect(within(row(MINE_NAME)).getByText("Mine")).toBeInTheDocument();
-    expect(within(row(MINE_NAME)).getByText("Exotic")).toBeInTheDocument();
+    expect(within(card(GRENADE_NAME)).getByText("Grenade")).toBeInTheDocument();
+    expect(within(card(GRENADE_NAME)).getByText("Thrown")).toBeInTheDocument();
+    expect(within(card(MINE_NAME)).getByText("Mine")).toBeInTheDocument();
+    expect(within(card(MINE_NAME)).getByText("Exotic")).toBeInTheDocument();
   });
 
-  it("calls onSelect with the chosen ref when a grenade is clicked", async () => {
+  it("calls onSelect with the chosen ref when a grenade is tapped", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
-    await user.click(row(GRENADE_NAME));
+    await user.click(selectButton(GRENADE_NAME));
     expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "cr-frag-grenade" }));
   });
 
-  it("shows a View title in read-only mode and does not call onSelect on click", async () => {
+  it("opens a grenade without choosing it when the chevron is pressed", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+    await expand(user, GRENADE_NAME);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("starts closed and shows the Mishaps line only once opened", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    expect(screen.queryByText("Mishaps")).not.toBeInTheDocument();
+    await expand(user, GRENADE_NAME);
+    expect(screen.getByText("Mishaps")).toBeInTheDocument();
+  });
+
+  it("shows no quantity control on a grenade in the picker", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await expand(user, GRENADE_NAME);
+    expect(screen.queryByText("Qty")).not.toBeInTheDocument();
+  });
+
+  it("shows a View title in read-only mode and does not call onSelect on tap", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker({ editable: false });
     expect(screen.getByText("View Explosives")).toBeInTheDocument();
-    await user.click(row(GRENADE_NAME));
+    expect(
+      screen.queryByRole("button", { name: `Select ${GRENADE_NAME}` })
+    ).not.toBeInTheDocument();
+    await expand(user, GRENADE_NAME);
     expect(onSelect).not.toHaveBeenCalled();
   });
 
@@ -132,15 +159,15 @@ describe("GrenadePicker", () => {
 
   it("shows a status badge for custom library items", () => {
     renderPicker({ customLibraryItems: [makeCustomItem({ status: "draft" })] });
-    expect(row("Custom Satchel Charge")).toBeInTheDocument();
+    expect(selectButton("Custom Satchel Charge")).toBeInTheDocument();
     expect(screen.getByText("draft")).toBeInTheDocument();
   });
 
-  it("calls onSelectCustom when a custom item is clicked", async () => {
+  it("calls onSelectCustom when a custom item is tapped", async () => {
     const user = userEvent.setup();
     const item = makeCustomItem();
     const { onSelectCustom } = renderPicker({ customLibraryItems: [item] });
-    await user.click(row("Custom Satchel Charge"));
+    await user.click(selectButton("Custom Satchel Charge"));
     expect(onSelectCustom).toHaveBeenCalledWith(item);
   });
 });

@@ -76,6 +76,23 @@ describe("GrenadeCard rules", () => {
   });
 });
 
+describe("GrenadeCard in a picker", () => {
+  it("calls onSelect when the card is tapped and not when the chevron is pressed", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    renderCard({ editable: false, isEquipped: false, onSelect }, { collapsed: true });
+    await user.click(screen.getByRole("button", { name: "Expand Custom Frag details" }));
+    expect(onSelect).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Select Custom Frag" }));
+    expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows no Qty row when the card can be selected", () => {
+    renderCard({ onSelect: vi.fn() });
+    expect(screen.queryByText("Qty")).not.toBeInTheDocument();
+  });
+});
+
 describe("GrenadeCard header label", () => {
   it("shows a Grenade type chip and a Thrown class chip for a grenade", () => {
     renderCard();

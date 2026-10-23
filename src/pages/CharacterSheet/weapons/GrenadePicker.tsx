@@ -2,27 +2,15 @@
 
 import { useState } from "react";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { GRENADE_REFERENCE, type GrenadeRef } from "../../../data/reference/weaponReference";
-import { uiTextBody, uiTextDescription } from "../../../ui/styles/editableStyles";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import {
-  PickerCustomAction,
-  PickerList,
-  PickerModal,
-  PickerRow,
-} from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowInfoLine,
-  PickerRowName,
-} from "../../../ui/pickers/PickerRowParts";
-import { InfoModal } from "../../../components/InfoModal";
-import { Chip } from "../../../ui/chips/Chip";
-import { StatChip } from "../../../ui/chips/StatChip";
-import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { PickerCustomAction, PickerList, PickerModal } from "../../../ui/pickers/PickerModal";
+import { GrenadeCard } from "./GrenadeCard";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { weaponClassChip } from "./weaponHelpers";
+import {
+  buildGrenadeFromReference,
+  buildGrenadeSnapshot,
+  previewVersionId,
+} from "./weaponSnapshotHelpers";
 
 export function GrenadePicker({
   editable = true,
@@ -53,7 +41,6 @@ export function GrenadePicker({
     .filter((item) => item.data.weaponKind === "grenade")
     .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const thrownRange = `${Math.max(0, strengthBonus) * 3}m`;
 
   return (
     <PickerModal
@@ -78,140 +65,37 @@ export function GrenadePicker({
             return {
               name: item.name,
               row: (
-                <PickerRow
+                <GrenadeCard
                   key={`custom-${item.id}`}
-                  interactive={editable}
-                  onClick={() => onSelectCustom?.(item)}
-                >
-                  <PickerRowName name={item.name} badges={<StatusBadge status={item.status} />} />
-                  <PickerRowChips>
-                    <Chip
-                      colour={
-                        data.type === "Mine"
-                          ? "violet"
-                          : data.type === "Missile"
-                            ? "orange"
-                            : "cyan"
-                      }
-                    >
-                      {data.type ?? "Grenade"}
-                    </Chip>
-                    {(() => {
-                      const c = weaponClassChip(data.class);
-                      return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
-                    })()}
-                  </PickerRowChips>
-                  <PickerRowChips>
-                    {data.type !== "Mine" && data.type !== "Missile" && (
-                      <StatChip label="Range" value={thrownRange} />
-                    )}
-                    {data.damage && data.damage !== "—" && (
-                      <StatChip label="Dmg" value={data.damage} />
-                    )}
-                    {data.damage && <DamageTypeChip damage={data.damage} />}
-                    {data.pen && <StatChip label="Pen" value={data.pen} />}
-                  </PickerRowChips>
-                  <PickerRowChips>
-                    <ItemMetaChips
-                      weight={data.weight}
-                      value={data.value}
-                      availability={data.availability}
-                      source={data.source}
-                    />
-                  </PickerRowChips>
-                  {data.specialRules && data.specialRules !== "—" && (
-                    <PickerRowInfoLine
-                      label="Qualities"
-                      info={
-                        <InfoModal
-                          title={`${data.name} Qualities`}
-                          content={<SpecialRulesContent rules={data.specialRules} />}
-                          as="span"
-                        />
-                      }
-                    >
-                      <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-                        {data.specialRules}
-                      </span>
-                    </PickerRowInfoLine>
+                  item={buildGrenadeSnapshot(
+                    `picker-${item.id}`,
+                    {},
+                    data,
+                    item.id,
+                    previewVersionId(item)
                   )}
-                  {data.description && (
-                    <PickerRowInfoLine
-                      label="Rules"
-                      info={
-                        <InfoModal
-                          title={data.name}
-                          content={<p className={uiTextDescription}>{data.description}</p>}
-                          as="span"
-                        />
-                      }
-                    />
-                  )}
-                </PickerRow>
+                  libraryItem={item}
+                  editable={false}
+                  strengthBonus={strengthBonus}
+                  onSelect={editable ? () => onSelectCustom?.(item) : undefined}
+                  onRemove={() => {}}
+                  onUpdateQty={() => {}}
+                />
               ),
             };
           }),
           ...filtered.map((ref) => ({
             name: ref.name,
             row: (
-              <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-                <PickerRowName name={ref.name} />
-                <PickerRowChips>
-                  <Chip
-                    colour={
-                      ref.type === "Mine" ? "violet" : ref.type === "Missile" ? "orange" : "cyan"
-                    }
-                  >
-                    {ref.type ?? "Grenade"}
-                  </Chip>
-                  {(() => {
-                    const c = weaponClassChip(ref.class);
-                    return c ? <Chip colour={c.colour}>{c.label}</Chip> : null;
-                  })()}
-                </PickerRowChips>
-                <PickerRowChips>
-                  {ref.type !== "Mine" && ref.type !== "Missile" && (
-                    <StatChip label="Range" value={thrownRange} />
-                  )}
-                  {ref.damage !== "—" && <StatChip label="Dmg" value={ref.damage} />}
-                  <DamageTypeChip damage={ref.damage} />
-                  <StatChip label="Pen" value={ref.pen} />
-                </PickerRowChips>
-                <PickerRowChips>
-                  <ItemMetaChips
-                    weight={ref.weight}
-                    value={ref.value}
-                    availability={ref.availability}
-                    source={ref.source}
-                  />
-                </PickerRowChips>
-                {ref.specialRules && ref.specialRules !== "—" && (
-                  <PickerRowInfoLine
-                    label="Qualities"
-                    info={
-                      <InfoModal
-                        title={`${ref.name} Qualities`}
-                        content={<SpecialRulesContent rules={ref.specialRules} />}
-                        as="span"
-                      />
-                    }
-                  >
-                    <span className={`text-xs lg:text-sm ${uiTextBody}`}>{ref.specialRules}</span>
-                  </PickerRowInfoLine>
-                )}
-                {ref.description && (
-                  <PickerRowInfoLine
-                    label="Rules"
-                    info={
-                      <InfoModal
-                        title={ref.name}
-                        content={<p className={uiTextDescription}>{ref.description}</p>}
-                        as="span"
-                      />
-                    }
-                  />
-                )}
-              </PickerRow>
+              <GrenadeCard
+                key={ref.id}
+                item={buildGrenadeFromReference(`picker-${ref.id}`, ref)}
+                editable={false}
+                strengthBonus={strengthBonus}
+                onSelect={editable ? () => onSelect(ref) : undefined}
+                onRemove={() => {}}
+                onUpdateQty={() => {}}
+              />
             ),
           })),
         ]
