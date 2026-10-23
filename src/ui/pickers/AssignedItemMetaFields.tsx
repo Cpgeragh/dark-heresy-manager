@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { sanitizeMoneyInput } from "../format/moneyFormat";
+import { sanitizeWeightInput } from "../format/weightFormat";
 import {
   editableInputClass,
   uiTextBody,
@@ -18,6 +19,9 @@ export interface AssignedItemMetaFieldsProps {
   costValid: boolean;
   costPlaceholder: string;
   requiresCost?: boolean;
+  requiresWeight?: boolean;
+  gmWeight?: string;
+  setGmWeight?: (value: string) => void;
   requiresRarity: boolean;
   gmRarity: string;
   onOpenRarityPicker: () => void;
@@ -32,12 +36,16 @@ export function AssignedItemMetaFields({
   costValid,
   costPlaceholder,
   requiresCost = true,
+  requiresWeight = false,
+  gmWeight = "",
+  setGmWeight,
   requiresRarity,
   gmRarity,
   onOpenRarityPicker,
   idPrefix = "assigned-item-meta",
 }: AssignedItemMetaFieldsProps) {
   const costId = `${idPrefix}-cost`;
+  const weightId = `${idPrefix}-weight`;
   const rarityId = `${idPrefix}-rarity`;
 
   return (
@@ -66,6 +74,23 @@ export function AssignedItemMetaFields({
               Must be a whole number of 0 or more.
             </p>
           )}
+        </div>
+      )}
+
+      {requiresWeight && (
+        <div className={uiStackField}>
+          <RequiredFormLabel htmlFor={weightId}>Weight (kg)</RequiredFormLabel>
+          <input
+            id={weightId}
+            type="text"
+            required
+            inputMode="decimal"
+            value={gmWeight}
+            onChange={(event) => setGmWeight?.(sanitizeWeightInput(event.target.value))}
+            placeholder="e.g. 2"
+            className={editableInputClass(true)}
+            autoComplete="off"
+          />
         </div>
       )}
 

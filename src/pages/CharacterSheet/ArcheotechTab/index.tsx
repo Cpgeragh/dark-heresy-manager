@@ -89,7 +89,7 @@ export function ArcheotechTab({
   );
 
   const addFromRef = useCallback(
-    (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => {
+    (ref: ArcheotechRef, gmValue?: string, gmRarity?: string, gmWeight?: string) => {
       if (!editable) return;
       const next = [
         ...archeotech,
@@ -102,9 +102,10 @@ export function ArcheotechTab({
           // Store GM-assigned values directly on the item so they override "—"
           value: gmValue || undefined,
           availability: gmRarity || undefined,
+          weight: gmWeight || undefined,
         },
       ];
-      if (gmValue === undefined && gmRarity === undefined) {
+      if (gmValue === undefined && gmRarity === undefined && gmWeight === undefined) {
         onUpdate(next, { optimistic: true });
         return;
       }

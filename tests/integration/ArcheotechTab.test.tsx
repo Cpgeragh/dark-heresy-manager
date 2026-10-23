@@ -162,6 +162,7 @@ describe("ArcheotechTab", () => {
     await user.click(screen.getByRole("button", { name: "Add item" }));
     await user.click(screen.getAllByText("Cameleoline Grid")[0]);
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "5000");
+    await user.type(screen.getByLabelText(/Weight \(kg\)/), "12");
     await user.click(screen.getByLabelText(/Rarity/));
     await user.click(screen.getByRole("button", { name: "Rare" }));
     await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
@@ -171,6 +172,7 @@ describe("ArcheotechTab", () => {
         name: "Cameleoline Grid",
         value: "5,000 Thrones",
         availability: "Rare",
+        weight: "12 kg",
       }),
     ]);
   });

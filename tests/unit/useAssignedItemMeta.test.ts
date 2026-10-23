@@ -48,4 +48,19 @@ describe("useAssignedItemMeta", () => {
     expect(result.current.showRarityPicker).toBe(false);
     expect(result.current.canConfirm).toBe(false);
   });
+
+  it("requires a weight when configured and clears it on reset", () => {
+    const { result } = renderHook(() =>
+      useAssignedItemMeta({ requiresCost: false, requiresWeight: true, requiresRarity: false })
+    );
+
+    expect(result.current.canConfirm).toBe(false);
+
+    act(() => result.current.setGmWeight("2"));
+    expect(result.current.canConfirm).toBe(true);
+
+    act(() => result.current.resetAssignedItemMeta());
+    expect(result.current.gmWeight).toBe("");
+    expect(result.current.canConfirm).toBe(false);
+  });
 });

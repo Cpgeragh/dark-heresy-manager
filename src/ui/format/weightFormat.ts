@@ -28,6 +28,10 @@ function cleanWeight(value?: string | null): string {
   return (value ?? "").replace(/†+$/, "").trim();
 }
 
+export function isVariableWeight(value?: string | null): boolean {
+  return VARIABLE_WEIGHT_VALUES.has(cleanWeight(value).toLowerCase());
+}
+
 /** Reads a stored weight as kilograms, or null when it holds no usable number. */
 export function readWeightKg(value?: string | null): number | null {
   const cleaned = cleanWeight(value);
@@ -43,7 +47,7 @@ export function readWeightKg(value?: string | null): number | null {
 /** The weight as shown, or an empty string when it has no usable number. */
 export function formatWeightForDisplay(value?: string | null): string {
   const cleaned = cleanWeight(value);
-  if (VARIABLE_WEIGHT_VALUES.has(cleaned.toLowerCase())) return "Varies";
+  if (isVariableWeight(cleaned)) return "Varies";
   const kg = readWeightKg(cleaned);
   if (kg === null) return "";
   const extra = cleaned

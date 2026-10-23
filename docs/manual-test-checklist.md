@@ -713,11 +713,14 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 - [ ] The Consumable quantity control sits on the right of the row with no "Qty" label, after the trash button, at the same size as the Drug quantity control
 - [ ] A granted Gear item shows a `Gained from` line reading `[source] (type)` below its chips, and no trash button
 - [ ] Search finds items by partial name in both sections
-- [ ] An item with a listed "Varies" price (Cognomen, Forgery Kit) shows a "Cost assigned on add" note directly in the picker list, then prompts for a manually entered cost and rarity before it can actually be added
+- [ ] An item with a listed "Varies" price (Cognomen, Cilice) shows a "Cost assigned on add" note directly in the picker list, then prompts for a manually entered cost and rarity before it can actually be added
 - [ ] Lumenmould specifically (no fixed listed price) shows the same note and prompt
+- [ ] The Forgery Kit (set cost and rarity, weight "Varies") opens an `Assigned Weight` pop-up with a required `Weight (kg)` box only, and `Add to Inventory` stays disabled until a weight is typed
+- [ ] The Cilice opens an `Assigned Cost and Weight` pop-up with required `Cost (Thrones)` and `Weight (kg)` boxes, and `Add to Inventory` stays disabled until both are filled
+- [ ] A Forgery Kit or Cilice added with a weight shows that weight, for example `2 kg`, on the Gear tab, and never the word `Varies`
 - [ ] Custom gear and custom consumable creation and publishing: see §21, Custom Item Library
 - [ ] Custom gear/consumable forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
-- [ ] **Autofill, Android:** the Gear and Consumable picker search boxes, the Name, Quantity, Weight, Cost, Description and Rules fields on the custom gear and consumable forms, the GM-assigned Cost (Thrones) field and each typed consumable quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `AssignedItemMetaFields.tsx`, `QuantityControl.tsx`)
+- [ ] **Autofill, Android:** the Gear and Consumable picker search boxes, the Name, Quantity, Weight, Cost, Description and Rules fields on the custom gear and consumable forms, the GM-assigned Cost (Thrones) and Weight (kg) fields and each typed consumable quantity each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomInventoryItemForm.tsx`, `AssignedItemMetaFields.tsx`, `QuantityControl.tsx`)
 
 ## 14. Companions
 
@@ -889,7 +892,8 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 - [ ] Removing an Archeotech item, from an expandable card or a flat row, asks `Remove [name] from this character?`, shows waiting dots until the save finishes, and keeps the pop-up open and the item in place if the save is refused
 - [ ] Custom archeotech creation and publishing: see §21, Custom Item Library
 - [ ] Custom archeotech form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
-- [ ] **Autofill, Android:** the Archeotech picker search box, every field in the custom Archeotech form and the GM-assigned Cost (Thrones) field each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomArcheotechForm.tsx`, `AssignedItemMetaFields.tsx`)
+- [ ] The Cameleoline Grid opens a `GM-Assigned Values` pop-up with required `Cost (Thrones)`, `Weight (kg)` and `Rarity` fields, `Add to Inventory` stays disabled until all three are filled, and the added item shows the entered weight and never the word `Varies`
+- [ ] **Autofill, Android:** the Archeotech picker search box, every field in the custom Archeotech form and the GM-assigned Cost (Thrones) and Weight (kg) fields each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomArcheotechForm.tsx`, `AssignedItemMetaFields.tsx`)
 
 ## 20. Admin (DM only)
 

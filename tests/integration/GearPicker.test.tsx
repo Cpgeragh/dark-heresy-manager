@@ -107,6 +107,7 @@ describe("GearPicker", () => {
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ name: VARIABLE_GEAR_NAME }),
       "500 Thrones",
+      undefined,
       undefined
     );
   });
@@ -134,7 +135,58 @@ describe("GearPicker", () => {
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ name: "Sigil of Question" }),
       "0 Thrones",
-      "Rare"
+      "Rare",
+      undefined
+    );
+  });
+
+  it("asks only for a weight on the Forgery Kit, which has a set cost and rarity", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row("Forgery Kit"));
+
+    const addButton = screen.getByRole("button", { name: "Add to Inventory" });
+    const weightInput = screen.getByLabelText(/Weight \(kg\)/);
+    expect(screen.getByRole("dialog", { name: "Assigned Weight" })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Cost \(Thrones\)/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Rarity/)).not.toBeInTheDocument();
+    expect(weightInput).toBeRequired();
+    expect(addButton).toBeDisabled();
+
+    await user.type(weightInput, "abc");
+    expect(weightInput).toHaveValue("");
+
+    await user.type(weightInput, "2.5");
+    await user.click(addButton);
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Forgery Kit" }),
+      undefined,
+      undefined,
+      "2.5 kg"
+    );
+  });
+
+  it("asks for both a cost and a weight on the Cilice", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row("Cilice"));
+
+    const addButton = screen.getByRole("button", { name: "Add to Inventory" });
+    expect(screen.getByRole("dialog", { name: "Assigned Cost and Weight" })).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "500");
+    expect(addButton).toBeDisabled();
+
+    await user.type(screen.getByLabelText(/Weight \(kg\)/), "1");
+    await user.click(addButton);
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Cilice" }),
+      "500 Thrones",
+      undefined,
+      "1 kg"
     );
   });
 

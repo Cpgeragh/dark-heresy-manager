@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { formatWeightForDisplay, readWeightKg } from "../../src/ui/format/weightFormat";
+import {
+  formatWeightForDisplay,
+  isVariableWeight,
+  readWeightKg,
+} from "../../src/ui/format/weightFormat";
 
 describe("readWeightKg", () => {
   it.each([
@@ -27,6 +31,20 @@ describe("readWeightKg", () => {
   it("reads a missing weight as unknown", () => {
     expect(readWeightKg(undefined)).toBeNull();
     expect(readWeightKg(null)).toBeNull();
+  });
+});
+
+describe("isVariableWeight", () => {
+  it.each(["Varies", "varies", "variable"])("treats %j as variable", (text) => {
+    expect(isVariableWeight(text)).toBe(true);
+  });
+
+  it.each(["", "—", "4 kg", "heavy"])("does not treat %j as variable", (text) => {
+    expect(isVariableWeight(text)).toBe(false);
+  });
+
+  it("does not treat a missing weight as variable", () => {
+    expect(isVariableWeight(undefined)).toBe(false);
   });
 });
 

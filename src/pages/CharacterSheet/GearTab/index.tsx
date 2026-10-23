@@ -359,7 +359,7 @@ export function GearTab({
   // ── Gear handlers ────────────────────────────────────────────────────────
 
   const addFromRef = useCallback(
-    (ref: GearRef, gmValue?: string, gmRarity?: string) => {
+    (ref: GearRef, gmValue?: string, gmRarity?: string, gmWeight?: string) => {
       if (!editable) return;
       const next = [
         ...gear,
@@ -369,13 +369,13 @@ export function GearTab({
           name: ref.name,
           description: ref.description,
           rules: ref.rules,
-          weight: ref.weight,
+          weight: gmWeight ?? ref.weight,
           value: gmValue ?? ref.value,
           availability: gmRarity ?? ref.availability,
           source: ref.source,
         },
       ];
-      if (gmValue === undefined) {
+      if (gmValue === undefined && gmWeight === undefined) {
         onUpdate(next, { optimistic: true });
         return;
       }

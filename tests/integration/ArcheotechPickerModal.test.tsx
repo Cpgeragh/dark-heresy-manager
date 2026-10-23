@@ -80,7 +80,7 @@ describe("ArcheotechPickerModal", () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it("requires and submits both assigned cost and rarity", async () => {
+  it("requires and submits the assigned cost, weight, and rarity", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
 
@@ -88,6 +88,9 @@ describe("ArcheotechPickerModal", () => {
 
     const addButton = screen.getByRole("button", { name: "Add to Inventory" });
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "5000");
+    expect(addButton).toBeDisabled();
+
+    await user.type(screen.getByLabelText(/Weight \(kg\)/), "12");
     expect(addButton).toBeDisabled();
 
     await user.click(screen.getByLabelText(/Rarity/));
@@ -98,7 +101,8 @@ describe("ArcheotechPickerModal", () => {
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ name: GM_ITEM_NAME }),
       "5,000 Thrones",
-      "Rare"
+      "Rare",
+      "12 kg"
     );
   });
 

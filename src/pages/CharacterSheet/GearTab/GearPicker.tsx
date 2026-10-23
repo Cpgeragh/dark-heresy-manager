@@ -17,6 +17,7 @@ import {
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { uiTextGMNote } from "../../../ui/styles/editableStyles";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
+import { formatWeightInput, isVariableWeight } from "../../../ui/format/weightFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
@@ -26,7 +27,12 @@ import { recordComponentRender } from "../../../performance/performanceMetrics";
 interface Props {
   editable?: boolean;
   customItems?: CampaignCustomItem<"gear">[];
-  onSelect: (ref: GearRef, gmValue?: string, gmRarity?: string) => void | Promise<boolean | void>;
+  onSelect: (
+    ref: GearRef,
+    gmValue?: string,
+    gmRarity?: string,
+    gmWeight?: string
+  ) => void | Promise<boolean | void>;
   onSelectCustomItem?: (item: CampaignCustomItem<"gear">) => void | Promise<boolean | void>;
   onCustom: () => void;
   onClose: () => void;
@@ -59,9 +65,13 @@ export function GearPicker({
     ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
   ].sort((a, b) => a.name.localeCompare(b.name));
   const pendingNeedsRarity = pending ? isVariableMeta(pending.availability) : false;
+  const pendingNeedsCost = pending ? isVariableMeta(pending.value) : true;
+  const pendingNeedsWeight = pending ? isVariableWeight(pending.weight) : false;
   const {
     gmCost,
     setGmCost,
+    gmWeight,
+    setGmWeight,
     gmRarity,
     setGmRarity,
     showRarityPicker,
@@ -69,12 +79,16 @@ export function GearPicker({
     costValid,
     canConfirm,
     resetAssignedItemMeta,
-  } = useAssignedItemMeta({ requiresRarity: pendingNeedsRarity });
+  } = useAssignedItemMeta({
+    requiresCost: pendingNeedsCost,
+    requiresWeight: pendingNeedsWeight,
+    requiresRarity: pendingNeedsRarity,
+  });
   const isEmpty = !pending && filtered.length === 0 && filteredCustom.length === 0;
 
   function handleSelect(ref: GearRef) {
     if (!editable) return;
-    if (isVariableMeta(ref.value)) {
+    if (isVariableMeta(ref.value) || isVariableWeight(ref.weight)) {
       setPending(ref);
       resetAssignedItemMeta();
       return;
@@ -89,20 +103,41 @@ export function GearPicker({
 
   async function handleConfirm() {
     if (!pending || !canConfirm) return;
-    await onSelect(pending, formatMoneyInput(gmCost), pendingNeedsRarity ? gmRarity : undefined);
+    await onSelect(
+      pending,
+      pendingNeedsCost ? formatMoneyInput(gmCost) : undefined,
+      pendingNeedsRarity ? gmRarity : undefined,
+      pendingNeedsWeight ? formatWeightInput(gmWeight) : undefined
+    );
     handleAssignedBack();
   }
 
   if (pending) {
+    const assignedTitle =
+      pendingNeedsCost && pendingNeedsWeight
+        ? "Assigned Cost and Weight"
+        : pendingNeedsWeight
+          ? "Assigned Weight"
+          : "Assigned Cost";
+    const assignedExplanation =
+      pendingNeedsCost && pendingNeedsWeight
+        ? "has a variable cost and weight. Enter the values assigned for this item."
+        : pendingNeedsWeight
+          ? "has a variable weight. Enter the weight assigned for this item."
+          : "has a variable or unlisted cost. Enter the value assigned for this item.";
     return (
       <AssignedItemMetaScreen
-        title="Assigned Cost"
+        title={assignedTitle}
         itemName={pending.name}
-        explanation="has a variable or unlisted cost. Enter the value assigned for this item."
+        explanation={assignedExplanation}
         gmCost={gmCost}
         setGmCost={setGmCost}
         costValid={costValid}
         costPlaceholder="e.g. 500"
+        requiresCost={pendingNeedsCost}
+        requiresWeight={pendingNeedsWeight}
+        gmWeight={gmWeight}
+        setGmWeight={setGmWeight}
         requiresRarity={pendingNeedsRarity}
         gmRarity={gmRarity}
         setGmRarity={setGmRarity}

@@ -22,6 +22,7 @@ import { InfoParagraph } from "../../../ui/InfoSection";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
+import { formatWeightInput, isVariableWeight } from "../../../ui/format/weightFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
@@ -33,7 +34,8 @@ interface Props {
   onSelect: (
     ref: ArcheotechRef,
     gmValue?: string,
-    gmRarity?: string
+    gmRarity?: string,
+    gmWeight?: string
   ) => void | Promise<boolean | void>;
   onSelectCustomItem?: (item: CampaignCustomItem<"archeotech">) => void | Promise<boolean | void>;
   onCustom: () => void;
@@ -53,9 +55,12 @@ export function ArcheotechPickerModal({
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<ArcheotechRef | null>(null);
   const listScrollPositionRef = useRef(0);
+  const pendingNeedsWeight = pending ? isVariableWeight(pending.weight) : false;
   const {
     gmCost,
     setGmCost,
+    gmWeight,
+    setGmWeight,
     gmRarity,
     setGmRarity,
     showRarityPicker,
@@ -63,7 +68,7 @@ export function ArcheotechPickerModal({
     costValid,
     canConfirm,
     resetAssignedItemMeta,
-  } = useAssignedItemMeta({ requiresRarity: true });
+  } = useAssignedItemMeta({ requiresWeight: pendingNeedsWeight, requiresRarity: true });
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -94,7 +99,7 @@ export function ArcheotechPickerModal({
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   const needsGmInput = (ref: ArcheotechRef) =>
-    isVariableMeta(ref.value) || isVariableMeta(ref.availability);
+    isVariableMeta(ref.value) || isVariableMeta(ref.availability) || isVariableWeight(ref.weight);
 
   function handleRowClick(ref: ArcheotechRef) {
     if (!editable) return;
@@ -113,7 +118,12 @@ export function ArcheotechPickerModal({
 
   async function handleConfirm() {
     if (!pending || !canConfirm) return;
-    await onSelect(pending, formatMoneyInput(gmCost), gmRarity);
+    await onSelect(
+      pending,
+      formatMoneyInput(gmCost),
+      gmRarity,
+      pendingNeedsWeight ? formatWeightInput(gmWeight) : undefined
+    );
     handleAssignedBack();
   }
 
@@ -122,11 +132,18 @@ export function ArcheotechPickerModal({
       <AssignedItemMetaScreen
         title="GM-Assigned Values"
         itemName={pending.name}
-        explanation="has no standard cost or availability. Enter the values the GM has assigned."
+        explanation={
+          pendingNeedsWeight
+            ? "has no standard cost, availability, or weight. Enter the values the GM has assigned."
+            : "has no standard cost or availability. Enter the values the GM has assigned."
+        }
         gmCost={gmCost}
         setGmCost={setGmCost}
         costValid={costValid}
         costPlaceholder="e.g. 5000"
+        requiresWeight={pendingNeedsWeight}
+        gmWeight={gmWeight}
+        setGmWeight={setGmWeight}
         requiresRarity
         gmRarity={gmRarity}
         setGmRarity={setGmRarity}
