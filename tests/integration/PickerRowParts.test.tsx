@@ -6,7 +6,6 @@ import { describe, expect, it, vi } from "vitest";
 import { PickerRow } from "../../src/ui/pickers/PickerModal";
 import {
   PickerRowChips,
-  PickerRowInfoLine,
   PickerRowLine,
   PickerRowName,
   PickerRowRulesLine,
@@ -16,40 +15,24 @@ import {
 describe("PickerRowName", () => {
   it("shows the name with the hover style, then the badges and the info icon", () => {
     render(
-      <PickerRowName
-        name="Frag Grenade"
-        badges={<span>Draft</span>}
-        info={<button type="button">About</button>}
-      />
+      <PickerRowName name="Frag Grenade" badges={<span>Draft</span>} infoTitle="Frag Grenade" />
     );
 
     const name = screen.getByText("Frag Grenade");
     expect(name).toHaveClass("font-medium", "group-hover:text-white");
     expect(name.parentElement).toHaveClass("flex", "flex-wrap", "min-w-0", "gap-1.5");
-    const order = Array.from(name.parentElement!.children).map((child) => child.textContent);
-    expect(order).toEqual(["Frag Grenade", "Draft", "About"]);
+    const children = Array.from(name.parentElement!.children);
+    expect(children).toHaveLength(3);
+    expect(children.slice(0, 2).map((child) => child.textContent)).toEqual([
+      "Frag Grenade",
+      "Draft",
+    ]);
   });
 
   it("does not render an info wrapper when there is no info icon", () => {
     render(<PickerRowName name="Frag Grenade" />);
 
     expect(screen.getByText("Frag Grenade").parentElement?.children).toHaveLength(1);
-  });
-
-  it("opens the info icon without selecting the row", async () => {
-    const user = userEvent.setup();
-    const onSelect = vi.fn();
-    const onInfo = vi.fn();
-    render(
-      <PickerRow onClick={onSelect}>
-        <PickerRowName name="Frag Grenade" info={<span onClick={onInfo}>About</span>} />
-      </PickerRow>
-    );
-
-    await user.click(screen.getByText("About"));
-
-    expect(onInfo).toHaveBeenCalledTimes(1);
-    expect(onSelect).not.toHaveBeenCalled();
   });
 
   it("always shows the info icon for an item, with the empty message when nothing is recorded", async () => {
@@ -100,37 +83,6 @@ describe("PickerRowChips", () => {
       "items-center",
       "gap-1.5"
     );
-  });
-});
-
-describe("PickerRowInfoLine", () => {
-  it("shows the label, then the text, then the info icon, with the chip row spacing", () => {
-    render(
-      <PickerRowInfoLine label="Qualities" info={<span>About</span>}>
-        <span>Blast (4)</span>
-      </PickerRowInfoLine>
-    );
-
-    const label = screen.getByText("Qualities");
-    expect(label.parentElement).toHaveClass("mt-1", "flex", "flex-wrap", "items-center", "gap-1.5");
-    const order = Array.from(label.parentElement!.children).map((child) => child.textContent);
-    expect(order).toEqual(["Qualities", "Blast (4)", "About"]);
-  });
-
-  it("opens the info icon without selecting the row", async () => {
-    const user = userEvent.setup();
-    const onSelect = vi.fn();
-    const onInfo = vi.fn();
-    render(
-      <PickerRow onClick={onSelect}>
-        <PickerRowInfoLine label="Rules" info={<span onClick={onInfo}>About</span>} />
-      </PickerRow>
-    );
-
-    await user.click(screen.getByText("About"));
-
-    expect(onInfo).toHaveBeenCalledTimes(1);
-    expect(onSelect).not.toHaveBeenCalled();
   });
 });
 

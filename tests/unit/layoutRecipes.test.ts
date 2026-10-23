@@ -96,6 +96,55 @@ describe("shared layout recipes", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("keeps every picker row on the shared row name", () => {
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      if (!file.endsWith(".tsx")) continue;
+      const source = ts.createSourceFile(
+        file,
+        readFileSync(file, "utf8"),
+        ts.ScriptTarget.Latest,
+        true,
+        ts.ScriptKind.TSX
+      );
+
+      function containsRowName(node: ts.Node): boolean {
+        let found = false;
+        function look(child: ts.Node) {
+          if (
+            (ts.isJsxOpeningElement(child) || ts.isJsxSelfClosingElement(child)) &&
+            child.tagName.getText(source) === "PickerRowName"
+          ) {
+            found = true;
+          }
+          if (!found) ts.forEachChild(child, look);
+        }
+        look(node);
+        return found;
+      }
+
+      function inspect(node: ts.Node) {
+        const line = source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1;
+        if (ts.isJsxSelfClosingElement(node) && node.tagName.getText(source) === "PickerRow") {
+          offenders.push(`${file}:${line}`);
+        }
+        if (
+          ts.isJsxElement(node) &&
+          node.openingElement.tagName.getText(source) === "PickerRow" &&
+          !containsRowName(node)
+        ) {
+          offenders.push(`${file}:${line}`);
+        }
+        ts.forEachChild(node, inspect);
+      }
+
+      inspect(source);
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
   it("defines the standard row and field layouts", () => {
     expect(uiChipRow).toBe("flex flex-wrap gap-1.5");
     expect(uiInlineRow).toBe("flex items-center gap-2");
