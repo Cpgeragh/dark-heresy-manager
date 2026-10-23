@@ -56,12 +56,13 @@ import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamag
 import {
   addSpecialRule,
   ammoFamilyChip,
-  calcEntryWeight,
+  alternateRangedAmmoEntriesOf,
   effectiveMeleeStats,
   getCompatibleUpgrades,
   meleeClassChips,
   meleeCraftsmanshipDescription,
   meleeDamageForCraftsmanship,
+  pistolAmmoEntryWeightKg,
   removeSpecialRule,
   weaponTypeChip,
 } from "./weaponHelpers";
@@ -160,22 +161,7 @@ export function MeleeCard({
   const displayedMeleeDamage = activeMeleeProfile?.damage ?? effectiveDamage;
   const displayedMeleePen = activeMeleeProfile?.pen ?? effective.pen;
   const displayedMeleeRules = activeMeleeProfile?.specialRules;
-  const pistolAmmoEntries =
-    weapon.alternateRangedAmmoEntries ??
-    (weapon.alternateRangedAmmoReferenceId
-      ? [
-          {
-            id: "legacy-alternate-ammo",
-            referenceId: weapon.alternateRangedAmmoReferenceId,
-            name:
-              AMMO_REFERENCE.find((ammo) => ammo.id === weapon.alternateRangedAmmoReferenceId)
-                ?.name ?? "Ammo",
-            clips: 1,
-            rounds: 0,
-            loaded: true,
-          },
-        ]
-      : []);
+  const pistolAmmoEntries = alternateRangedAmmoEntriesOf(weapon);
   const loadedPistolAmmoEntry =
     pistolAmmoEntries.find((entry) => entry.id === weapon.loadedAlternateRangedAmmoId) ??
     pistolAmmoEntries.find((entry) => entry.loaded);
@@ -524,11 +510,10 @@ export function MeleeCard({
                   editable={editable}
                   clipSize={String(pistolProfile.clip)}
                   ammoTracking="loose"
-                  weightKg={calcEntryWeight(
+                  weightKg={pistolAmmoEntryWeightKg(
                     effective.weight,
                     String(pistolProfile.clip),
-                    entry,
-                    "loose"
+                    entry
                   )}
                   onSetLoaded={() => handleSetLoadedPistolAmmo(entry.id)}
                   onRemove={() => handleRemovePistolAmmo(entry.id)}

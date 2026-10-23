@@ -85,6 +85,7 @@ import {
   rangedRulesForCraftsmanship,
   removeSpecialRule,
   calcEntryWeight,
+  resolveAmmoEntryTracking,
 } from "./weaponHelpers";
 import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
@@ -817,18 +818,8 @@ export function RangedCard({
           ) : (
             <div className={uiStackList}>
               {visibleAmmoEntries.map((entry) => {
-                const entryAmmoRef = entry.referenceId
-                  ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
-                  : undefined;
-                const entryAmmoTracking: AmmoTrackingMode =
-                  isSoldAsFullClip(entryAmmoRef) || entryAmmoRef?.isBackpackFeed
-                    ? "clip"
-                    : ammoTracking;
-                const entryCapacity = ammoCapacityForWeapon(
-                  entryAmmoRef,
-                  weapon.referenceId,
-                  effective.clip
-                );
+                const { ammoTracking: entryAmmoTracking, capacity: entryCapacity } =
+                  resolveAmmoEntryTracking(entry, weapon.referenceId, effective.clip, ammoTracking);
                 return (
                   <AmmoEntryRow
                     key={entry.id}

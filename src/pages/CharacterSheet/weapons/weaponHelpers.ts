@@ -9,6 +9,8 @@ import type {
 } from "../../../types/Character";
 import {
   AMMO_REFERENCE,
+  ammoCapacityForWeapon,
+  isSoldAsFullClip,
   usesUnitAmmoTracking,
   type AmmoRef,
 } from "../../../data/reference/ammoReference";
@@ -472,6 +474,63 @@ export function calcEntryWeight(
     return entry.clips * (clipWeight / clipSize);
   }
   return entry.clips * clipWeight + (entry.rounds / clipSize) * clipWeight;
+}
+
+export function resolveAmmoEntryTracking(
+  entry: WeaponAmmoEntry,
+  weaponReferenceId: string | undefined,
+  weaponClip: string | undefined,
+  weaponAmmoTracking: AmmoTrackingMode
+): { ammoTracking: AmmoTrackingMode; capacity: string | undefined } {
+  const ammoRef = entry.referenceId
+    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
+    : undefined;
+  return {
+    ammoTracking:
+      isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? "clip" : weaponAmmoTracking,
+    capacity: ammoCapacityForWeapon(ammoRef, weaponReferenceId, weaponClip),
+  };
+}
+
+export function ammoEntryWeightKg(
+  entry: WeaponAmmoEntry,
+  weaponReferenceId: string | undefined,
+  weaponWeight: string | undefined,
+  weaponClip: string | undefined,
+  weaponAmmoTracking: AmmoTrackingMode
+): number {
+  const { ammoTracking, capacity } = resolveAmmoEntryTracking(
+    entry,
+    weaponReferenceId,
+    weaponClip,
+    weaponAmmoTracking
+  );
+  return calcEntryWeight(weaponWeight, weaponClip, entry, ammoTracking, capacity);
+}
+
+export function pistolAmmoEntryWeightKg(
+  weaponWeight: string | undefined,
+  pistolClip: string,
+  entry: WeaponAmmoEntry
+): number {
+  return calcEntryWeight(weaponWeight, pistolClip, entry, "loose");
+}
+
+export function alternateRangedAmmoEntriesOf(weapon: MeleeWeapon): WeaponAmmoEntry[] {
+  if (weapon.alternateRangedAmmoEntries) return weapon.alternateRangedAmmoEntries;
+  if (!weapon.alternateRangedAmmoReferenceId) return [];
+  return [
+    {
+      id: "legacy-alternate-ammo",
+      referenceId: weapon.alternateRangedAmmoReferenceId,
+      name:
+        AMMO_REFERENCE.find((ammo) => ammo.id === weapon.alternateRangedAmmoReferenceId)?.name ??
+        "Ammo",
+      clips: 1,
+      rounds: 0,
+      loaded: true,
+    },
+  ];
 }
 
 const WEAPON_CLASS_COLOURS: Record<string, ChipColour> = {
