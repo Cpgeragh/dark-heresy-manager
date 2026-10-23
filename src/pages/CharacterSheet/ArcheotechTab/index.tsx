@@ -133,7 +133,14 @@ export function ArcheotechTab({
 
         await onUpdate([
           ...archeotech,
-          buildArcheotechSnapshot(item.id, item.equipped, data, customItemId, versionId),
+          buildArcheotechSnapshot(
+            item.id,
+            item.equipped,
+            data,
+            customItemId,
+            versionId,
+            item.type === "Cybernetic" ? false : undefined
+          ),
         ]);
         setShowCustomForm(false);
         setShowPicker(true);
@@ -168,7 +175,8 @@ export function ArcheotechTab({
             undefined,
             libraryItem.data,
             libraryItem.id,
-            versionId
+            versionId,
+            libraryItem.data.type === "Cybernetic" ? false : undefined
           ),
         ],
         { optimistic: true }
@@ -197,7 +205,8 @@ export function ArcheotechTab({
                 archeotechItem.equipped,
                 data,
                 editingArcheotechDefinition.libraryItem.id,
-                versionId
+                versionId,
+                archeotechItem.installed
               )
             : archeotechItem
         );
@@ -376,6 +385,7 @@ function toCustomArcheotechData(item: ArcheotechItem): CustomArcheotechData {
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
     equipped: _equipped,
+    installed: _installed,
     ...data
   } = item;
 
@@ -387,7 +397,8 @@ function buildArcheotechSnapshot(
   equipped: boolean | undefined,
   data: CustomArcheotechData,
   customLibraryId: string,
-  customLibraryVersionId: string
+  customLibraryVersionId: string,
+  installed?: boolean
 ): ArcheotechItem {
   return {
     id,
@@ -395,6 +406,7 @@ function buildArcheotechSnapshot(
     customLibraryId,
     customLibraryVersionId,
     ...(equipped !== undefined ? { equipped } : {}),
+    ...(installed !== undefined ? { installed } : {}),
   };
 }
 

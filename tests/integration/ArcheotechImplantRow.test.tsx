@@ -12,7 +12,14 @@ function item(over: Partial<ArcheotechItem> = {}): ArcheotechItem {
 
 describe("ArcheotechImplantRow", () => {
   it("renders the item name and the Archeotech badge by default", () => {
-    render(<ArcheotechImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+    render(
+      <ArcheotechImplantRow
+        item={item()}
+        editable={true}
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
     expect(screen.getByText("Auto-Quill")).toBeInTheDocument();
     expect(screen.getByText("Archeotech")).toBeInTheDocument();
   });
@@ -22,6 +29,7 @@ describe("ArcheotechImplantRow", () => {
       <ArcheotechImplantRow
         item={item()}
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
         highlightAsArcheotech={false}
       />
@@ -34,6 +42,7 @@ describe("ArcheotechImplantRow", () => {
       <ArcheotechImplantRow
         item={item({ craftsmanship: "Good" })}
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -45,6 +54,7 @@ describe("ArcheotechImplantRow", () => {
       <ArcheotechImplantRow
         item={item({ bodyLocation: ["rightArm"] })}
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -55,7 +65,12 @@ describe("ArcheotechImplantRow", () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     const { rerender } = render(
-      <ArcheotechImplantRow item={item()} editable={true} onRemove={onRemove} />
+      <ArcheotechImplantRow
+        item={item()}
+        editable={true}
+        onToggleInstalled={vi.fn()}
+        onRemove={onRemove}
+      />
     );
 
     await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
@@ -63,8 +78,62 @@ describe("ArcheotechImplantRow", () => {
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(onRemove).toHaveBeenCalled();
 
-    rerender(<ArcheotechImplantRow item={item()} editable={false} onRemove={onRemove} />);
+    rerender(
+      <ArcheotechImplantRow
+        item={item()}
+        editable={false}
+        onToggleInstalled={vi.fn()}
+        onRemove={onRemove}
+      />
+    );
     expect(screen.queryByRole("button", { name: "Remove Auto-Quill" })).not.toBeInTheDocument();
+  });
+
+  it("shows Uninstall on an installed item, Install on one that is not, and calls the handler", async () => {
+    const user = userEvent.setup();
+    const onToggleInstalled = vi.fn();
+    const { rerender } = render(
+      <ArcheotechImplantRow
+        item={item()}
+        editable
+        onToggleInstalled={onToggleInstalled}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Uninstall" })).toBeInTheDocument();
+
+    rerender(
+      <ArcheotechImplantRow
+        item={item({ installed: false })}
+        editable
+        onToggleInstalled={onToggleInstalled}
+        onRemove={vi.fn()}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Install" }));
+    expect(onToggleInstalled).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a viewer an Installed chip only while the item is installed", () => {
+    const { rerender } = render(
+      <ArcheotechImplantRow
+        item={item()}
+        editable={false}
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.getByText("Installed")).toBeInTheDocument();
+
+    rerender(
+      <ArcheotechImplantRow
+        item={item({ installed: false })}
+        editable={false}
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.queryByText("Installed")).not.toBeInTheDocument();
   });
 });
 
@@ -74,6 +143,7 @@ describe("ArcheotechImplantRow shared entry pieces", () => {
       <ArcheotechImplantRow
         item={item({ craftsmanship: "Good" })}
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -84,7 +154,14 @@ describe("ArcheotechImplantRow shared entry pieces", () => {
 
   it("always has an information icon and an empty Rules line", async () => {
     const user = userEvent.setup();
-    render(<ArcheotechImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+    render(
+      <ArcheotechImplantRow
+        item={item()}
+        editable={true}
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
     expect(screen.getByText("Rules")).toBeInTheDocument();
     expect(screen.getByText("-")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Show information about Auto-Quill" }));
@@ -95,7 +172,9 @@ describe("ArcheotechImplantRow shared entry pieces", () => {
 describe("ArcheotechImplantRow shared layout", () => {
   it("names the Remove pop-up after an Archeotech Item", async () => {
     const user = userEvent.setup();
-    render(<ArcheotechImplantRow item={item()} editable onRemove={vi.fn()} />);
+    render(
+      <ArcheotechImplantRow item={item()} editable onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
 
@@ -103,7 +182,14 @@ describe("ArcheotechImplantRow shared layout", () => {
   });
 
   it("shows the source chip when the item has a source", () => {
-    render(<ArcheotechImplantRow item={item({ source: "IH" })} editable onRemove={vi.fn()} />);
+    render(
+      <ArcheotechImplantRow
+        item={item({ source: "IH" })}
+        editable
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
 
     expect(screen.getByText("IH")).toBeInTheDocument();
   });

@@ -19,6 +19,9 @@ import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
 import { craftsmanshipAvailability, craftsmanshipValue } from "./cyberneticsHelpers";
 import { Button } from "../../../ui/buttons/Button";
+import { AddButton } from "../../../ui/buttons/AddButton";
+import { ViewButton } from "../../../ui/buttons/ViewButton";
+import { isInstalled } from "../../../utils/cyberneticInstalled";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import {
@@ -228,6 +231,7 @@ export function CyberneticsTab({
                 : {}),
             availability: gmRarity ?? ref.availability,
             source: ref.source,
+            installed: false,
             ...(bodyLocation ? { bodyLocation } : {}),
           },
         ],
@@ -253,6 +257,7 @@ export function CyberneticsTab({
             value: craftsmanshipValue(ref, craftsmanship),
             availability: craftsmanshipAvailability(ref, craftsmanship),
             source: ref.source,
+            installed: true,
             concealedWeapon: { armId, weaponId: weapon.id, weaponType: weapon.type },
           },
         ],
@@ -311,7 +316,7 @@ export function CyberneticsTab({
 
         await onUpdate([
           ...cybernetics,
-          buildCyberneticSnapshot(item.id, item.bodyLocation, data, customItemId, versionId),
+          buildCyberneticSnapshot(item.id, item.bodyLocation, data, customItemId, versionId, false),
         ]);
         setShowCustomForm(false);
         setShowPicker(true);
@@ -356,7 +361,8 @@ export function CyberneticsTab({
             item.bodyLocation,
             libraryItem.data,
             libraryItem.id,
-            versionId
+            versionId,
+            false
           ),
         ],
         { optimistic: true }
@@ -387,7 +393,8 @@ export function CyberneticsTab({
                 cybernetic.bodyLocation,
                 data,
                 editingCyberneticDefinition.libraryItem.id,
-                versionId
+                versionId,
+                cybernetic.installed
               )
             : cybernetic
         );
@@ -446,6 +453,32 @@ export function CyberneticsTab({
       onUpdateRanged,
       rangedWeapons,
     ]
+  );
+
+  const toggleInstalled = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdate(
+        cybernetics.map((item) =>
+          item.id === id ? { ...item, installed: !isInstalled(item) } : item
+        ),
+        { optimistic: true }
+      );
+    },
+    [editable, cybernetics, onUpdate]
+  );
+
+  const toggleArcheotechInstalled = useCallback(
+    (id: string) => {
+      if (!editable || !onUpdateArcheotech) return;
+      onUpdateArcheotech(
+        (archeotech ?? []).map((item) =>
+          item.id === id ? { ...item, installed: !isInstalled(item) } : item
+        ),
+        { optimistic: true }
+      );
+    },
+    [editable, archeotech, onUpdateArcheotech]
   );
 
   // ── Integrated weapons ─────────────────────────────────────────────────────
@@ -706,6 +739,7 @@ export function CyberneticsTab({
           linkedWeaponName={linkedWeapon?.name}
           linkedWeaponType={item.concealedWeapon?.weaponType}
           editable={editable}
+          onToggleInstalled={toggleInstalled}
           libraryItem={libraryItem}
           isDM={isDM && editable}
           canEditDefinition={canEditDefinition}
@@ -734,6 +768,7 @@ export function CyberneticsTab({
       publishCyberneticDefinition,
       rangedWeapons,
       removeImplant,
+      toggleInstalled,
       updateAllCyberneticCopies,
       userId,
     ]
@@ -749,10 +784,11 @@ export function CyberneticsTab({
           key={item.id}
           item={item}
           editable={editable}
+          onToggleInstalled={() => toggleArcheotechInstalled(item.id)}
           onRemove={() => removeArcheotech(item.id)}
         />
       )),
-    [archeotechCyberneticItems, editable, removeArcheotech]
+    [archeotechCyberneticItems, editable, removeArcheotech, toggleArcheotechInstalled]
   );
   const integratedWeaponCards = useMemo(
     () =>
@@ -903,14 +939,16 @@ export function CyberneticsTab({
 
       <section className={uiStackSection}>
         <div className="flex items-center justify-between">
-          <SectionHeader>Installed Implants</SectionHeader>
-          <Button size="sm" onClick={() => setShowPicker(true)}>
-            {editable ? "+ Install" : "View"}
-          </Button>
+          <SectionHeader>Implants</SectionHeader>
+          {editable ? (
+            <AddButton label="Add implant" onClick={() => setShowPicker(true)} />
+          ) : (
+            <ViewButton label="View implants" onClick={() => setShowPicker(true)} />
+          )}
         </div>
 
         {cybernetics.length === 0 && archeotechCyberneticItems.length === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No cybernetics installed.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No implants.</p>
         )}
 
         <IndependentCardGrid items={implantRows} />
@@ -995,8 +1033,7 @@ export function CyberneticsTab({
 
       {installingCustomCybernetic && (
         <CustomImplantForm
-          title="Install Custom Cybernetic"
-          submitLabel="Install"
+          title="Add Custom Cybernetic"
           initialItem={{
             ...installingCustomCybernetic.data,
             customLibraryId: installingCustomCybernetic.id,

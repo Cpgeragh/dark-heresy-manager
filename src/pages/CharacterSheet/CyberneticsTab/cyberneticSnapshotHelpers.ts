@@ -9,6 +9,7 @@ export function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticDa
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
     bodyLocation: _bodyLocation,
+    installed: _installed,
     ...data
   } = item;
 
@@ -20,7 +21,8 @@ export function buildCyberneticSnapshot(
   bodyLocation: ArmourLocationKey[] | undefined,
   data: CustomCyberneticData,
   customLibraryId: string,
-  customLibraryVersionId: string
+  customLibraryVersionId: string,
+  installed?: boolean
 ): CyberneticItem {
   return {
     id,
@@ -28,6 +30,7 @@ export function buildCyberneticSnapshot(
     customLibraryId,
     customLibraryVersionId,
     ...(bodyLocation ? { bodyLocation } : {}),
+    ...(installed !== undefined ? { installed } : {}),
   };
 }
 

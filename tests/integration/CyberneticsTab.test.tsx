@@ -87,9 +87,11 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantPicker", () => ({
 vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow", () => ({
   ImplantRow: ({
     item,
+    onToggleInstalled,
     onRemove,
   }: {
     item: { id: string; name: string };
+    onToggleInstalled: (id: string) => void;
     onRemove: (id: string) => unknown;
   }) => {
     recordComponentRenderMock("ImplantRow");
@@ -97,6 +99,7 @@ vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow", () => ({
     return (
       <div>
         <span>{item.name}</span>
+        <button onClick={() => onToggleInstalled(item.id)}>Toggle {item.name}</button>
         <button onClick={async () => setRefused((await onRemove(item.id)) === false)}>
           Remove {item.name}
         </button>
@@ -294,10 +297,10 @@ describe("CyberneticsTab", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
-  it("shows both empty messages when nothing is installed", () => {
+  it("shows both empty messages when there is nothing to list", () => {
     renderTab();
     expect(screen.getByText("No integrated weapons installed.")).toBeInTheDocument();
-    expect(screen.getByText("No cybernetics installed.")).toBeInTheDocument();
+    expect(screen.getByText("No implants.")).toBeInTheDocument();
   });
 
   it("shows Mechanicus Implants only for a Tech-Priest career", () => {
@@ -347,8 +350,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    // Two "+ Install" buttons exist (Integrated Weapons, then Installed Implants).
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[1]);
+    await user.click(screen.getByRole("button", { name: "Add implant" }));
     await user.click(screen.getByText("Mock Select Plain Implant"));
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -357,6 +359,7 @@ describe("CyberneticsTab", () => {
           referenceId: "auto-quill",
           name: "Auto-Quill",
           craftsmanship: "Common",
+          installed: false,
         }),
       ],
       { optimistic: true }
@@ -367,8 +370,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    // Two "+ Install" buttons exist (Integrated Weapons, then Installed Implants).
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[1]);
+    await user.click(screen.getByRole("button", { name: "Add implant" }));
     await user.click(screen.getByText("Mock Select Concealed Weapon Bionic"));
 
     expect(onUpdate).not.toHaveBeenCalled();
@@ -385,8 +387,7 @@ describe("CyberneticsTab", () => {
     };
     const { onUpdate, onUpdateRanged } = renderTab({ rangedWeapons: [rangedWeapon] });
 
-    // Two "+ Install" buttons exist (Integrated Weapons, then Installed Implants).
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[1]);
+    await user.click(screen.getByRole("button", { name: "Add implant" }));
     await user.click(screen.getByText("Mock Select Concealed Weapon Bionic"));
     await user.click(screen.getByText("Mock Complete Concealed Install"));
 
@@ -394,6 +395,7 @@ describe("CyberneticsTab", () => {
       [
         expect.objectContaining({
           name: "Concealed Weapon Bionic",
+          installed: true,
           concealedWeapon: { armId: "arm-1", weaponId: "ranged-1", weaponType: "ranged" },
         }),
       ],
@@ -414,13 +416,18 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    // Two "+ Install" buttons exist (Integrated Weapons, then Installed Implants).
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[1]);
+    await user.click(screen.getByRole("button", { name: "Add implant" }));
     await user.click(screen.getByText("Mock Select Library Implant"));
     await user.click(screen.getByText("Mock Submit Custom Implant"));
 
     expect(onUpdate).toHaveBeenCalledWith(
-      [expect.objectContaining({ customLibraryId: "custom-lib-1", customLibraryVersionId: "v1" })],
+      [
+        expect.objectContaining({
+          customLibraryId: "custom-lib-1",
+          customLibraryVersionId: "v1",
+          installed: false,
+        }),
+      ],
       { optimistic: true }
     );
   });
@@ -430,8 +437,7 @@ describe("CyberneticsTab", () => {
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });
     const { onUpdate } = renderTab();
 
-    // Two "+ Install" buttons exist (Integrated Weapons, then Installed Implants).
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[1]);
+    await user.click(screen.getByRole("button", { name: "Add implant" }));
     await user.click(screen.getByText("Mock Add Custom Implant Trigger"));
     await user.click(screen.getByText("Mock Submit Custom Implant"));
 
@@ -439,7 +445,11 @@ describe("CyberneticsTab", () => {
       expect.objectContaining({ campaignId: "campaign-1", category: "cybernetic" })
     );
     expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ customLibraryId: "lib-1", customLibraryVersionId: "v1" }),
+      expect.objectContaining({
+        customLibraryId: "lib-1",
+        customLibraryVersionId: "v1",
+        installed: false,
+      }),
     ]);
   });
 
@@ -447,8 +457,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ userId: null });
 
-    // Two "+ Install" buttons exist (Integrated Weapons, then Installed Implants).
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[1]);
+    await user.click(screen.getByRole("button", { name: "Add implant" }));
     await user.click(screen.getByText("Mock Add Custom Implant Trigger"));
     await user.click(screen.getByText("Mock Submit Custom Implant"));
 
@@ -464,6 +473,35 @@ describe("CyberneticsTab", () => {
     await user.click(screen.getAllByText("Remove Auto-Quill")[0]);
 
     await waitFor(() => expect(onUpdate).toHaveBeenCalledWith([]));
+  });
+
+  it("flips an implant between installed and not installed", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({
+      cybernetics: [{ id: "c1", name: "Auto-Quill", installed: false }],
+    });
+
+    await user.click(screen.getAllByText("Toggle Auto-Quill")[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith([{ id: "c1", name: "Auto-Quill", installed: true }], {
+      optimistic: true,
+    });
+  });
+
+  it("flips an Archeotech cybernetic between installed and not installed", async () => {
+    const user = userEvent.setup();
+    const onUpdateArcheotech = vi.fn();
+    renderTab({
+      archeotech: [{ id: "a1", name: "Cortex Lattice", type: "Cybernetic", installed: false }],
+      onUpdateArcheotech,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Install" }));
+
+    expect(onUpdateArcheotech).toHaveBeenCalledWith(
+      [{ id: "a1", name: "Cortex Lattice", type: "Cybernetic", installed: true }],
+      { optimistic: true }
+    );
   });
 
   it("passes a refused implant removal back to the row", async () => {

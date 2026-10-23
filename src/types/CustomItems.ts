@@ -58,7 +58,7 @@ export type CustomDrugData = Omit<
 
 export type CustomCyberneticData = Omit<
   CyberneticItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "bodyLocation"
+  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "bodyLocation" | "installed"
 >;
 
 export type CustomRangedWeaponData = Omit<
@@ -119,7 +119,7 @@ export type CustomArmourData =
 
 export type CustomArcheotechData = Omit<
   ArcheotechItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "equipped"
+  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "equipped" | "installed"
 >;
 
 export type CustomPsychicPowerData = Omit<

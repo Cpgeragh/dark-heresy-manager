@@ -36,6 +36,21 @@ describe("ConcealedWeaponBionicInstaller", () => {
     ).toBeInTheDocument();
   });
 
+  it("does not list a Bionic Arm that is not installed", () => {
+    const spare: CyberneticItem = {
+      id: "arm-2",
+      name: "Spare Bionic Arm",
+      referenceId: BIONIC_ARM_REF_ID,
+      installed: false,
+    };
+    renderInstaller({ cybernetics: [spare] });
+
+    expect(screen.queryByText("Spare Bionic Arm")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Install a Bionic Arm before installing this upgrade.")
+    ).toBeInTheDocument();
+  });
+
   it("only lists cybernetics matching the real Bionic Arm reference id", () => {
     const arm: CyberneticItem = { id: "arm-1", name: "Bionic Arm", referenceId: BIONIC_ARM_REF_ID };
     const other: CyberneticItem = { id: "c1", name: "Auto-Quill", referenceId: "auto-quill" };

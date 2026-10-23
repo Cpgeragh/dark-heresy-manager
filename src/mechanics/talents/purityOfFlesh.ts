@@ -9,6 +9,7 @@ import {
   isIntegratedMeleeWeapon,
   isIntegratedRangedWeapon,
 } from "../../pages/CharacterSheet/weapons/weaponHelpers";
+import { isInstalled } from "../../utils/cyberneticInstalled";
 
 export interface PurityRemovalItem {
   key: string;
@@ -29,7 +30,7 @@ export function isMechadendrite(item: CyberneticItem): boolean {
 }
 
 export function isPurityArcheotech(item: ArcheotechItem): boolean {
-  return item.type === "Cybernetic" || item.type === "Integrated Weapon";
+  return (item.type === "Cybernetic" && isInstalled(item)) || item.type === "Integrated Weapon";
 }
 
 export function getPurityRemovalInventory(
@@ -39,7 +40,7 @@ export function getPurityRemovalInventory(
   archeotech: readonly ArcheotechItem[]
 ): PurityRemovalItem[] {
   return [
-    ...cybernetics.map((item) => ({
+    ...cybernetics.filter(isInstalled).map((item) => ({
       key: `cybernetic:${item.id}`,
       name: item.name,
       kind: "Implant" as const,

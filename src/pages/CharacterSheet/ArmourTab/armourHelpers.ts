@@ -15,6 +15,7 @@ import {
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { readWeightKg } from "../../../ui/format/weightFormat";
+import { isInstalled } from "../../../utils/cyberneticInstalled";
 
 export function compatibleArmourUpgrades(piece: WornArmourPiece): ArmourUpgradeRef[] {
   const reference = piece.referenceId
@@ -44,7 +45,7 @@ export function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): numbe
 
 /** +2 TB bonus for each bionic limb installed at this location */
 export function bionicBonusAt(loc: ArmourLocationKey, cybernetics: CyberneticItem[]): number {
-  return cybernetics.some((c) => c.bodyLocation?.includes(loc)) ? 2 : 0;
+  return cybernetics.some((c) => isInstalled(c) && c.bodyLocation?.includes(loc)) ? 2 : 0;
 }
 
 /** Flat AP from the Natural Armour trait (its specialisation stores the AP value), applies to all locations */

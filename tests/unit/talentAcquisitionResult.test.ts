@@ -256,6 +256,27 @@ describe("buildTalentAcquisitionResult Purity of Flesh", () => {
     expect(result.additionalTalentEntries).toBeUndefined();
   });
 
+  it("leaves implants that are not installed on the character", () => {
+    const spare: CyberneticItem = { id: "spare", name: "Spare Bionic Eye", installed: false };
+    const spareArcheotech: ArcheotechItem = {
+      id: "spare-archeotech",
+      name: "Spare Ancient Implant",
+      type: "Cybernetic",
+      installed: false,
+    };
+    const result = acquire(talent("purity-of-flesh"), {
+      cybernetics: [bionic, spare],
+      archeotech: [purityArcheotech, spareArcheotech],
+    });
+
+    expect(result.entry.acquisition?.purity).toMatchObject({
+      removedCyberneticIds: ["bionic"],
+      removedArcheotech: [purityArcheotech],
+    });
+    expect(result.cybernetics).toEqual([spare]);
+    expect(result.archeotech).toEqual([spareArcheotech]);
+  });
+
   it("creates one deterministic Reformed Skin record per fatal removal", () => {
     const result = acquire(talent("purity-of-flesh"), {
       cybernetics: [bionic],

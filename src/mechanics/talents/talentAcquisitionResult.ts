@@ -21,6 +21,7 @@ import {
   getPurityRemovalInventory,
   isPurityArcheotech,
 } from "./purityOfFlesh";
+import { isInstalled } from "../../utils/cyberneticInstalled";
 import { getPsyRatingAcquisitionGrants } from "./talentUtils";
 
 export interface TalentAcquisitionResult {
@@ -224,7 +225,8 @@ export function buildTalentAcquisitionResult({
       acquisition: { touchedByFatesPoints: Math.ceil(willpowerBonus / 2) },
     };
   } else if (entry.talentId === "purity-of-flesh") {
-    const removedCyberneticIds = new Set(cybernetics.map((item) => item.id));
+    const installedCybernetics = cybernetics.filter(isInstalled);
+    const removedCyberneticIds = new Set(installedCybernetics.map((item) => item.id));
     const removedIntegratedRangedWeapons = rangedWeapons.filter(isIntegratedRangedWeapon);
     const removedIntegratedMeleeWeapons = meleeWeapons.filter(isIntegratedMeleeWeapon);
     const removedArcheotech = archeotech.filter(isPurityArcheotech);
@@ -256,8 +258,8 @@ export function buildTalentAcquisitionResult({
       ...entry,
       acquisition: {
         purity: {
-          removedCyberneticIds: cybernetics.map((item) => item.id),
-          removedCybernetics: cybernetics,
+          removedCyberneticIds: installedCybernetics.map((item) => item.id),
+          removedCybernetics: installedCybernetics,
           ...(removedIntegratedRangedWeapons.length > 0 ? { removedIntegratedRangedWeapons } : {}),
           ...(removedIntegratedMeleeWeapons.length > 0 ? { removedIntegratedMeleeWeapons } : {}),
           ...(removedArcheotech.length > 0 ? { removedArcheotech } : {}),
@@ -268,7 +270,7 @@ export function buildTalentAcquisitionResult({
         },
       },
     };
-    nextCybernetics = [];
+    nextCybernetics = cybernetics.filter((item) => !isInstalled(item));
     nextRangedWeapons = rangedWeapons
       .filter((weapon) => !isIntegratedRangedWeapon(weapon))
       .map((weapon) =>

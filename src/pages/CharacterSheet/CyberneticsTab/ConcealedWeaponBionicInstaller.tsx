@@ -14,6 +14,7 @@ import { ImplantRow } from "./ImplantRow";
 import { RangedCard } from "../weapons/RangedCard";
 import { MeleeCard } from "../weapons/MeleeCard";
 import { colourDivider } from "../../../ui/styles/colourTokens";
+import { isInstalled } from "../../../utils/cyberneticInstalled";
 
 type WeaponChoice = { id: string; type: "ranged" | "melee"; name: string };
 
@@ -33,7 +34,9 @@ export function ConcealedWeaponBionicInstaller({
   onClose: () => void;
 }) {
   const [armId, setArmId] = useState<string | null>(null);
-  const arms = cybernetics.filter((item) => item.referenceId === "cr-bionic-arm");
+  const arms = cybernetics.filter(
+    (item) => item.referenceId === "cr-bionic-arm" && isInstalled(item)
+  );
   const weapons: WeaponChoice[] = [
     ...rangedWeapons
       .filter((weapon) => weapon.class?.toLowerCase().includes("pistol") && !weapon.concealedBionic)
@@ -68,7 +71,12 @@ export function ConcealedWeaponBionicInstaller({
         {selectingArm
           ? arms.map((item) => (
               <div key={item.id} className={uiStackList}>
-                <ImplantRow item={item} editable={false} onRemove={() => {}} />
+                <ImplantRow
+                  item={item}
+                  editable={false}
+                  onToggleInstalled={() => {}}
+                  onRemove={() => {}}
+                />
                 <Button size="sm" onClick={() => setArmId(item.id)}>
                   Select Bionic Arm
                 </Button>

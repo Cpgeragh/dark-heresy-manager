@@ -40,6 +40,23 @@ describe("Purity of Flesh removal inventory", () => {
     expect(getPurityFatePoints(inventory)).toBe(2);
   });
 
+  it("leaves out implants that are not installed", () => {
+    const inventory = getPurityRemovalInventory(
+      [
+        { id: "arm", name: "Bionic Arm" },
+        { id: "spare", name: "Spare Bionic Eye", installed: false },
+      ],
+      [],
+      [],
+      [
+        { id: "arch-installed", name: "Ancient Eye", type: "Cybernetic" },
+        { id: "arch-spare", name: "Spare Ancient Eye", type: "Cybernetic", installed: false },
+      ]
+    );
+
+    expect(inventory.map((item) => item.name)).toEqual(["Bionic Arm", "Ancient Eye"]);
+  });
+
   it("recognises a custom Mechadendrite by name", () => {
     const inventory = getPurityRemovalInventory(
       [{ id: "custom", name: "Custom Utility Mechadendrite", craftsmanship: "Common" }],

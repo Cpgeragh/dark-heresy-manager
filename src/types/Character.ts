@@ -348,6 +348,8 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
   value?: string;
   availability?: string;
   source?: string;
+  /** False when the implant is owned but not installed; a missing value means installed. */
+  installed?: boolean;
   /** Specific body locations where this implant is installed (e.g. ["rightArm"]) */
   bodyLocation?: ArmourLocationKey[];
   concealedWeapon?: { armId: string; weaponId: string; weaponType: "ranged" | "melee" };
@@ -390,6 +392,8 @@ export interface ArcheotechItem extends CustomLibraryLinkFields {
   availability?: string;
   source?: string;
   equipped?: boolean;
+  /** For items typed Cybernetic: false when owned but not installed; a missing value means installed. */
+  installed?: boolean;
   // Weapon / Integrated Weapon / Grenade / Mine
   weaponClass?: "Ranged" | "Melee";
   damage?: string;

@@ -9,10 +9,13 @@ import { InfoParagraph } from "../../../ui/InfoSection";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
+import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
+import { isInstalled } from "../../../utils/cyberneticInstalled";
 
 interface Props {
   item: ArcheotechItem;
   editable: boolean;
+  onToggleInstalled: () => void;
   onRemove: () => void;
   highlightAsArcheotech?: boolean;
 }
@@ -20,6 +23,7 @@ interface Props {
 export function ArcheotechImplantRow({
   item,
   editable,
+  onToggleInstalled,
   onRemove,
   highlightAsArcheotech = true,
 }: Props) {
@@ -27,11 +31,13 @@ export function ArcheotechImplantRow({
   const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId);
   const description = item.description ?? ref?.description;
   const rules = item.rules?.trim() || ref?.rules;
+  const installed = isInstalled(item);
 
   return (
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      inactive={!installed}
       badge={highlightAsArcheotech ? <Chip colour="amber">Archeotech</Chip> : undefined}
       tone={highlightAsArcheotech ? "archeotech" : "default"}
       information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
@@ -63,6 +69,19 @@ export function ArcheotechImplantRow({
           ) : undefined,
         },
       }}
+      actions={
+        <StateToggleButton
+          active={installed}
+          activeLabel="Uninstall"
+          inactiveLabel="Install"
+          activeBusyLabel="Uninstalling"
+          inactiveBusyLabel="Installing"
+          statusLabel="Installed"
+          disabled={false}
+          editable={editable}
+          onChange={onToggleInstalled}
+        />
+      }
       removal={{ kind: "Archeotech Item", onRemove }}
     />
   );

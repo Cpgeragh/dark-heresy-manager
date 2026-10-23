@@ -3,6 +3,8 @@
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/chips/Chip";
+import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
+import { isInstalled } from "../../../utils/cyberneticInstalled";
 import { uiChipRow, uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
@@ -24,6 +26,7 @@ interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   linkedWeaponName?: string;
   linkedWeaponType?: "ranged" | "melee";
   editable: boolean;
+  onToggleInstalled: (id: string) => void;
   onRemove: (id: string) => void;
 }
 
@@ -33,6 +36,7 @@ export function ImplantRow({
   linkedWeaponName,
   linkedWeaponType,
   editable,
+  onToggleInstalled,
   libraryItem,
   isDM = false,
   canEditDefinition = false,
@@ -56,12 +60,29 @@ export function ImplantRow({
       : craftsmanshipDescription(ref, displayedCraftsmanship)
     : (item.notes ?? "No rules recorded.");
   const isConcealedWeaponBionic = ref?.id === "ih-concealed-weapon-bionic";
+  const installed = isInstalled(item);
   const rules = isConcealedWeaponBionic ? undefined : item.rules?.trim() || ref?.notes;
 
   return (
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      inactive={!installed}
+      actions={
+        isConcealedWeaponBionic ? undefined : (
+          <StateToggleButton
+            active={installed}
+            activeLabel="Uninstall"
+            inactiveLabel="Install"
+            activeBusyLabel="Uninstalling"
+            inactiveBusyLabel="Installing"
+            statusLabel="Installed"
+            disabled={false}
+            editable={editable}
+            onChange={() => onToggleInstalled(item.id)}
+          />
+        )
+      }
       information={
         item.notes ? (
           ref ? (
@@ -141,7 +162,6 @@ export function ImplantRow({
       removal={{
         kind: "Implant",
         onRemove: () => onRemove(item.id),
-        hidden: Boolean(item.grantedByTalentEntryUid),
       }}
     />
   );

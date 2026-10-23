@@ -18,14 +18,22 @@ function item(over: Partial<CyberneticItem> = {}): CyberneticItem {
 
 describe("ImplantRow", () => {
   it("renders the item name", () => {
-    render(<ImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+    render(
+      <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
+    );
     expect(screen.getByText("Auto-Quill")).toBeInTheDocument();
   });
 
   it("shows a status badge when linked to a campaign library item", () => {
     const libraryItem = { status: "published" } as CampaignCustomItem<"cybernetic">;
     render(
-      <ImplantRow item={item()} libraryItem={libraryItem} editable={true} onRemove={vi.fn()} />
+      <ImplantRow
+        item={item()}
+        libraryItem={libraryItem}
+        editable={true}
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
     );
     expect(screen.getByText(/published/i)).toBeInTheDocument();
   });
@@ -38,6 +46,7 @@ describe("ImplantRow", () => {
         linkedWeaponName="Laspistol"
         linkedWeaponType="ranged"
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -50,6 +59,7 @@ describe("ImplantRow", () => {
       <ImplantRow
         item={item({ referenceId: CONCEALED_WEAPON_BIONIC_ID, craftsmanship: "Common" })}
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -65,6 +75,7 @@ describe("ImplantRow", () => {
       <ImplantRow
         item={item({ name: "Bionic Arm", referenceId: "cr-bionic-arm" })}
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -90,6 +101,7 @@ describe("ImplantRow", () => {
         linkedWeaponName="Laspistol"
         linkedWeaponType="ranged"
         editable={true}
+        onToggleInstalled={vi.fn()}
         onRemove={vi.fn()}
       />
     );
@@ -103,35 +115,47 @@ describe("ImplantRow", () => {
 
   it("always shows the information icon and says nothing was recorded without player notes", async () => {
     const user = userEvent.setup();
-    render(<ImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+    render(
+      <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
+    );
 
     await user.click(screen.getByRole("button", { name: "Show information about Auto-Quill" }));
     expect(screen.getByText("No description recorded.")).toBeInTheDocument();
   });
 
   it("puts the Remove button first in the action area", () => {
-    render(<ImplantRow item={item()} editable={true} onRemove={vi.fn()} />);
+    render(
+      <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
+    );
 
     const button = screen.getByRole("button", { name: "Remove Auto-Quill" });
     expect(button.parentElement?.parentElement?.firstElementChild?.contains(button)).toBe(true);
   });
 
-  it("hides Remove for a talent-granted implant, even when editable", () => {
+  it("shows Remove for a talent-granted implant", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
     render(
       <ImplantRow
         item={item({ grantedByTalentEntryUid: "t1", grantedByTalentName: "Skin of Iron" })}
         editable={true}
-        onRemove={vi.fn()}
+        onToggleInstalled={vi.fn()}
+        onRemove={onRemove}
       />
     );
-    expect(screen.queryByRole("button", { name: "Remove Auto-Quill" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onRemove).toHaveBeenCalledWith("c1");
     expect(screen.getByText(/Skin of Iron/)).toBeInTheDocument();
   });
 
   it("calls onRemove for a normal implant only after confirmation", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<ImplantRow item={item()} editable={true} onRemove={onRemove} />);
+    render(
+      <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={onRemove} />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
     expect(onRemove).not.toHaveBeenCalled();
@@ -142,12 +166,76 @@ describe("ImplantRow", () => {
   it("keeps the Remove pop-up open when the removal is refused", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn().mockResolvedValue(false);
-    render(<ImplantRow item={item()} editable={true} onRemove={onRemove} />);
+    render(
+      <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={onRemove} />
+    );
 
     await user.click(screen.getByRole("button", { name: "Remove Auto-Quill" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     await waitFor(() => expect(onRemove).toHaveBeenCalledWith("c1"));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("shows Uninstall on an installed implant and Install on one that is not", () => {
+    const { rerender } = render(
+      <ImplantRow item={item()} editable onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
+    );
+    expect(screen.getByRole("button", { name: "Uninstall" })).toBeInTheDocument();
+
+    rerender(
+      <ImplantRow
+        item={item({ installed: false })}
+        editable
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Install" })).toBeInTheDocument();
+  });
+
+  it("calls onToggleInstalled with the implant id", async () => {
+    const user = userEvent.setup();
+    const onToggleInstalled = vi.fn();
+    render(
+      <ImplantRow
+        item={item({ installed: false })}
+        editable
+        onToggleInstalled={onToggleInstalled}
+        onRemove={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Install" }));
+    expect(onToggleInstalled).toHaveBeenCalledWith("c1");
+  });
+
+  it("shows a viewer an Installed chip only while the implant is installed", () => {
+    const { rerender } = render(
+      <ImplantRow item={item()} editable={false} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
+    );
+    expect(screen.getByText("Installed")).toBeInTheDocument();
+
+    rerender(
+      <ImplantRow
+        item={item({ installed: false })}
+        editable={false}
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.queryByText("Installed")).not.toBeInTheDocument();
+  });
+
+  it("has no Install button on a Concealed Weapon Bionic", () => {
+    render(
+      <ImplantRow
+        item={item({ referenceId: CONCEALED_WEAPON_BIONIC_ID, installed: true })}
+        editable
+        onToggleInstalled={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.queryByRole("button", { name: /^(Install|Uninstall)$/ })).not.toBeInTheDocument();
   });
 });

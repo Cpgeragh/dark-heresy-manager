@@ -201,6 +201,26 @@ describe("ArcheotechTab", () => {
     );
   });
 
+  it("adds a library archeotech item typed Cybernetic as not installed", async () => {
+    const user = userEvent.setup();
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [
+        { ...libraryItem("Custom Eye"), data: { name: "Custom Eye", type: "Cybernetic" } },
+      ] as never,
+      loading: false,
+      error: null,
+    });
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getAllByText("Custom Eye")[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: "Custom Eye", type: "Cybernetic", installed: false })],
+      { optimistic: true }
+    );
+  });
+
   it("creates a custom archeotech item, updates the character, and returns to the picker", async () => {
     const user = userEvent.setup();
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });

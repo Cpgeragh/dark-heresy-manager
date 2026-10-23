@@ -40,6 +40,7 @@ import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers
 import { PickerRowName, PickerRowText } from "../../ui/pickers/PickerRowParts";
 import { getGrantedTalentEntries, getGrantedWeaponTrainingIds } from "./talentEffects";
 import { getPurityFatePoints, getPurityRemovalInventory } from "./purityOfFlesh";
+import { isInstalled } from "../../utils/cyberneticInstalled";
 import { getPsyRatingAcquisitionGrants } from "./talentUtils";
 import { HomeworldTraitAcquisitionModal } from "../../pages/CharacterSheet/HomeworldTraitAcquisitionModal";
 import { homeworldNeedsTraitAcquisition } from "../traits/traitEffects";
@@ -182,7 +183,9 @@ export function TalentAcquisitionModal({
   const selectedCybernetic = CYBERNETICS_REFERENCE.find((item) => item.id === primaryChoice);
   const selectedLocations = locationOptions(selectedCybernetic?.requiresLocation);
   const selectingConcealedWeapon = selectedCybernetic?.id === "ih-concealed-weapon-bionic";
-  const bionicArms = cybernetics.filter((item) => item.referenceId === "cr-bionic-arm");
+  const bionicArms = cybernetics.filter(
+    (item) => item.referenceId === "cr-bionic-arm" && isInstalled(item)
+  );
   const eligibleConcealedWeapons = [
     ...rangedWeapons
       .filter(
