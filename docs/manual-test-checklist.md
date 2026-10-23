@@ -692,6 +692,7 @@ Psychic Power, and Psy Rating selections without spending them.
 - [ ] Optional description text saves and reappears in the information popup
 - [ ] A valid custom power is added as a campaign draft and remains attached to the character after refresh
 - [ ] Edit the custom power: the form is pre-filled and saving updates that character power rather than creating a duplicate
+- [ ] A custom power shows its status badge next to its name, in the Add Psychic Power picker and on the Psychic tab
 - [ ] Standard reference powers have no Edit control; Custom and 2nd Ed powers have the permitted definition controls
 - [ ] As DM, publish a draft, select the published power from the campaign library on another eligible character, update all copies, and archive it; existing character copies remain readable while the archived definition disappears from add pickers
 - [ ] **Autofill, Android:** the power picker search box and the Power name, numeric and Rules text fields on the custom power form each show no autofill suggestion row above the keyboard (`PickerModal.tsx`, `CustomPowerForm.tsx`)

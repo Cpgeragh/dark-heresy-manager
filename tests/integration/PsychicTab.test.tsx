@@ -427,6 +427,63 @@ describe("PsychicTab", () => {
     );
   });
 
+  it("shows the status badge on a draft custom power in the picker", async () => {
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [
+        libraryPower({
+          status: "draft",
+          publishedVersionId: null,
+          draftVersionId: "lib-version-1",
+        }),
+      ],
+      loading: false,
+      error: null,
+    });
+    const user = userEvent.setup();
+    renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Add Major Power" })[0]);
+    await screen.findByRole("button", { name: "Select Library Power" });
+    expect(screen.getByText("draft")).toBeInTheDocument();
+  });
+
+  it("shows the status badge on a draft custom power the character already has", () => {
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [
+        libraryPower({
+          status: "draft",
+          publishedVersionId: null,
+          draftVersionId: "lib-version-1",
+        }),
+      ],
+      loading: false,
+      error: null,
+    });
+    renderTab({
+      psychic: {
+        psyRating: 2,
+        minorPowers: [],
+        majorPowers: [
+          {
+            id: "char-power-1",
+            name: "Library Power",
+            discipline: "Telepathy",
+            threshold: "12",
+            focusTime: "Half Action",
+            range: "20m",
+            sustained: "No",
+            isMinor: false,
+            custom: true,
+            origin: "Custom",
+            known: true,
+            customLibraryId: "lib-power-1",
+            customLibraryVersionId: "lib-version-1",
+          },
+        ],
+      },
+    });
+    expect(screen.getAllByText("draft").length).toBeGreaterThan(0);
+  });
+
   it("shows Publish and Archive to the DM for a draft custom power still on the character", async () => {
     const user = userEvent.setup();
     useCampaignCustomItemsMock.mockReturnValue({

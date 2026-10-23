@@ -13,6 +13,7 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { AccordionCard } from "../../../ui/AccordionCard";
+import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { InfoParagraph } from "../../../ui/InfoSection";
 
@@ -108,6 +109,7 @@ export function PowerCard({
       onToggle={() => setExpanded((value) => !value)}
       onSelect={onSelect}
       selectLabel={selectLabel}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       info={
         <InfoModal
           as="span"

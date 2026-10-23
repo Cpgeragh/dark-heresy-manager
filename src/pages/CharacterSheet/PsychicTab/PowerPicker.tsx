@@ -178,6 +178,7 @@ export function PowerPicker({
             <PowerCard
               key={`custom-${entry.item.id}`}
               power={customPowerPreview(entry.item)}
+              libraryItem={entry.item}
               editable={false}
               onRemove={() => undefined}
               onSelect={
