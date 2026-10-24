@@ -172,7 +172,7 @@ export function InsanityTraumaPicker({
               setCustomOrigin("");
             }}
           >
-            + Add custom trauma
+            Add Custom Trauma
           </PickerCustomAction>
         )
       }

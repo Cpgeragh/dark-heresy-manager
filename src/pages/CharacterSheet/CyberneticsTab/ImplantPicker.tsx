@@ -397,7 +397,7 @@ export function ImplantPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom cybernetic</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Cybernetic</PickerCustomAction>
         ) : undefined
       }
     >

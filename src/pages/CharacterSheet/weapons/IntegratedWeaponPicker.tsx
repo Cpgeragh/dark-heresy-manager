@@ -150,10 +150,14 @@ export function IntegratedWeaponPicker({
         editable && (onCustomRanged || onCustomMelee) ? (
           <div className="grid grid-cols-2 gap-2">
             {onCustomRanged && (
-              <PickerCustomAction onClick={onCustomRanged}>+ Custom ranged</PickerCustomAction>
+              <PickerCustomAction onClick={onCustomRanged}>
+                Add Custom Ranged Weapon
+              </PickerCustomAction>
             )}
             {onCustomMelee && (
-              <PickerCustomAction onClick={onCustomMelee}>+ Custom melee</PickerCustomAction>
+              <PickerCustomAction onClick={onCustomMelee}>
+                Add Custom Melee Weapon
+              </PickerCustomAction>
             )}
           </div>
         ) : undefined

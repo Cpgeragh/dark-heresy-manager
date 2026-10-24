@@ -147,13 +147,13 @@ describe("GrenadePicker", () => {
 
   it("hides the custom-item button in read-only mode", () => {
     renderPicker({ editable: false });
-    expect(screen.queryByText("Add custom grenade or mine")).not.toBeInTheDocument();
+    expect(screen.queryByText("Add Custom Grenade or Mine")).not.toBeInTheDocument();
   });
 
   it("calls onCustom when the custom explosive button is clicked", async () => {
     const user = userEvent.setup();
     const { onCustom } = renderPicker();
-    await user.click(screen.getByText("Add custom grenade or mine"));
+    await user.click(screen.getByText("Add Custom Grenade or Mine"));
     expect(onCustom).toHaveBeenCalled();
   });
 

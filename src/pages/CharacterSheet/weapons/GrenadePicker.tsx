@@ -53,7 +53,7 @@ export function GrenadePicker({
       isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom grenade or mine</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Grenade or Mine</PickerCustomAction>
         ) : undefined
       }
     >

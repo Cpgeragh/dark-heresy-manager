@@ -196,7 +196,7 @@ describe("DrugsTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add drug" }));
-    await user.click(screen.getByRole("button", { name: "Add custom drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Drug" }));
     await user.click(screen.getByText("Mock Submit Custom Drug"));
 
     expect(createDraftCustomItemMock).toHaveBeenCalledWith(
@@ -213,7 +213,7 @@ describe("DrugsTab", () => {
     const { onUpdate } = renderTab({ userId: null });
 
     await user.click(screen.getByRole("button", { name: "Add drug" }));
-    await user.click(screen.getByRole("button", { name: "Add custom drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Drug" }));
     await user.click(screen.getByText("Mock Submit Custom Drug"));
 
     expect(createDraftCustomItemMock).not.toHaveBeenCalled();

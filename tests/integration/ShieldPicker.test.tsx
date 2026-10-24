@@ -131,13 +131,13 @@ describe("ShieldPicker", () => {
 
   it("hides the custom-item button in read-only mode", () => {
     renderPicker({ editable: false });
-    expect(screen.queryByRole("button", { name: "Add custom shield" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Custom Shield" })).not.toBeInTheDocument();
   });
 
   it("calls onCustom when the custom-shield button is clicked", async () => {
     const user = userEvent.setup();
     const { onCustom } = renderPicker();
-    await user.click(screen.getByRole("button", { name: "Add custom shield" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Shield" }));
     expect(onCustom).toHaveBeenCalled();
   });
 

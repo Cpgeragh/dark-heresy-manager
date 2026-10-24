@@ -131,7 +131,7 @@ export function ArmourPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom piece</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Piece</PickerCustomAction>
         ) : undefined
       }
     >

@@ -200,7 +200,7 @@ export function CorruptionMalignancyPicker({
               setCustomOrigin("");
             }}
           >
-            + Add custom malignancy
+            Add Custom Malignancy
           </PickerCustomAction>
         )
       }

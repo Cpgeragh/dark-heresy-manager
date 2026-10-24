@@ -441,7 +441,7 @@ export function TraitsTab({
                     }
                   : undefined
               }
-              customActionLabel="Custom Trait"
+              customActionLabel="Add Custom Trait"
             />
           )}
           {customTraitOpen && (

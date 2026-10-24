@@ -226,7 +226,7 @@ export function RangedPicker({
       }
       footer={
         editable && showCustom ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom weapon</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Ranged Weapon</PickerCustomAction>
         ) : undefined
       }
     >

@@ -77,7 +77,7 @@ describe("CorruptionMalignancyPicker roll-capture sub-screen", () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Add custom malignancy" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Malignancy" }));
     const addButton = screen.getByRole("button", { name: "Add Malignancy" });
     expect(addButton).toBeDisabled();
 
@@ -111,7 +111,7 @@ describe("CorruptionMalignancyPicker editable=false", () => {
     const { onAdd } = setup(false);
 
     expect(screen.getByRole("dialog", { name: "View Malignancies" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add custom malignancy" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Custom Malignancy" })).not.toBeInTheDocument();
 
     await user.click(screen.getByText("Witch-mark", { selector: "span" }));
     expect(onAdd).not.toHaveBeenCalled();

@@ -51,7 +51,7 @@ export function ShieldPicker({
       isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom shield</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Shield</PickerCustomAction>
         ) : undefined
       }
     >

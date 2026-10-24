@@ -210,7 +210,7 @@ export function MutationPicker({
               setCustomOrigin("");
             }}
           >
-            Add custom {title.toLowerCase()}
+            Add Custom {title}
           </PickerCustomAction>
         )
       }

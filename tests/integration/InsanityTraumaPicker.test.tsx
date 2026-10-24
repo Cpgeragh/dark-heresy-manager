@@ -93,7 +93,7 @@ describe("InsanityTraumaPicker custom trauma", () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Add custom trauma" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Trauma" }));
     const addButton = screen.getByRole("button", { name: "Add Trauma" });
     expect(addButton).toBeDisabled();
 
@@ -127,7 +127,7 @@ describe("InsanityTraumaPicker editable=false", () => {
     const { onAdd } = setup(false);
 
     expect(screen.getByRole("dialog", { name: "View Temporary Trauma" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add custom trauma" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Custom Trauma" })).not.toBeInTheDocument();
 
     await user.click(screen.getByText("Withdrawn and Quiet", { selector: "span" }));
     expect(onAdd).not.toHaveBeenCalled();

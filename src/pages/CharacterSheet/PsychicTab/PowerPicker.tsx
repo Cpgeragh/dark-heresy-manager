@@ -167,7 +167,7 @@ export function PowerPicker({
       footer={
         editable && !selectionLocked ? (
           <PickerCustomAction onClick={onCustom}>
-            {minorOnly ? "Custom Minor Power" : "Custom Major Power"}
+            {minorOnly ? "Add Custom Minor Power" : "Add Custom Major Power"}
           </PickerCustomAction>
         ) : undefined
       }

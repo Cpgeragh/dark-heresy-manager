@@ -113,8 +113,6 @@ export function PickerCustomAction({
   type = "button",
   ...props
 }: PickerCustomActionProps) {
-  const label = typeof children === "string" ? children.trim().replace(/^\+\s*/, "") : children;
-
   return (
     <button
       type={type}
@@ -122,8 +120,8 @@ export function PickerCustomAction({
       {...props}
     >
       <PlusIcon className="h-4 w-4 shrink-0" />
-      <span className="font-bold capitalize" style={{ WebkitTextStroke: "0.35px currentColor" }}>
-        {label}
+      <span className="font-bold" style={{ WebkitTextStroke: "0.35px currentColor" }}>
+        {children}
       </span>
     </button>
   );
@@ -154,7 +152,7 @@ interface Props {
   filterRow?: ReactNode;
   /**
    * Optional footer rendered below the list.
-   * Use for "+ Add custom …" buttons or specialisation confirm forms.
+   * Use for "Add Custom …" buttons or specialisation confirm forms.
    */
   footer?: ReactNode;
   /** Override the container max-height. Defaults to "max-h-[85vh]". */
@@ -266,7 +264,7 @@ export function PickerModal({
         {children}
       </div>
 
-      {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
+      {/* Optional footer (e.g. "Add Custom" button or specialisation form) */}
       {footer && (
         <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider}`}>{footer}</div>
       )}

@@ -171,7 +171,7 @@ export function ArcheotechPickerModal({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom item</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Archeotech Item</PickerCustomAction>
         ) : undefined
       }
     >

@@ -70,13 +70,15 @@ describe("ForceFieldPicker custom creation", () => {
   it("calls onCustom when the custom-field button is clicked", async () => {
     const user = userEvent.setup();
     const { onCustom } = renderPicker();
-    await user.click(screen.getByRole("button", { name: "Add custom field" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Force Field" }));
     expect(onCustom).toHaveBeenCalled();
   });
 
   it("hides the custom-field button in read-only mode", () => {
     renderPicker({ editable: false });
-    expect(screen.queryByRole("button", { name: "Add custom field" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Add Custom Force Field" })
+    ).not.toBeInTheDocument();
   });
 });
 

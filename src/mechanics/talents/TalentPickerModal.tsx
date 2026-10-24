@@ -70,7 +70,7 @@ export function TalentPickerModal({
   customItems = [],
   onSelectCustomItem,
   onCustomAction,
-  customActionLabel = "Custom",
+  customActionLabel,
   showAllLabel = "Show all",
   initialShowOverflow = false,
   overflowBackCloses = false,
@@ -439,7 +439,8 @@ export function TalentPickerModal({
         scrollPositionRef={overflowScrollPositionRef}
         isEmpty={overflowFiltered.length === 0 && filteredCustom.length === 0}
         footer={
-          onCustomAction && (
+          onCustomAction &&
+          customActionLabel && (
             <PickerCustomAction onClick={onCustomAction}>{customActionLabel}</PickerCustomAction>
           )
         }
@@ -648,7 +649,8 @@ export function TalentPickerModal({
         )
       }
       footer={
-        onCustomAction && (
+        onCustomAction &&
+        customActionLabel && (
           <PickerCustomAction onClick={onCustomAction}>{customActionLabel}</PickerCustomAction>
         )
       }

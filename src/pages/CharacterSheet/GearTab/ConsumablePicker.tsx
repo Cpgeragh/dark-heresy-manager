@@ -66,7 +66,7 @@ export function ConsumablePicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom consumable</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Consumable</PickerCustomAction>
         ) : undefined
       }
     >

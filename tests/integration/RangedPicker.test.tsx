@@ -263,14 +263,16 @@ describe("RangedPicker", () => {
   it("calls onCustom when the custom-weapon button is clicked", async () => {
     const user = userEvent.setup();
     const { onCustom } = renderPicker();
-    await user.click(screen.getByRole("button", { name: "Add custom weapon" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Ranged Weapon" }));
     expect(onCustom).toHaveBeenCalled();
   });
 
   it("shows a View title and hides the custom-weapon button in read-only mode", () => {
     renderPicker({ editable: false });
     expect(screen.getByText("View Ranged Weapons")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add custom weapon" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Add Custom Ranged Weapon" })
+    ).not.toBeInTheDocument();
   });
 
   it("does not open the craftsmanship screen when clicking a weapon in read-only mode", async () => {

@@ -227,7 +227,7 @@ describe("ArcheotechTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add item" }));
-    await user.click(screen.getByRole("button", { name: "Add custom item" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Archeotech Item" }));
     await user.click(screen.getByText("Mock Submit Custom Archeotech"));
 
     expect(createDraftCustomItemMock).toHaveBeenCalledWith(
@@ -244,7 +244,7 @@ describe("ArcheotechTab", () => {
     const { onUpdate } = renderTab({ userId: null });
 
     await user.click(screen.getByRole("button", { name: "Add item" }));
-    await user.click(screen.getByRole("button", { name: "Add custom item" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Archeotech Item" }));
     await user.click(screen.getByText("Mock Submit Custom Archeotech"));
 
     expect(createDraftCustomItemMock).not.toHaveBeenCalled();
@@ -257,7 +257,7 @@ describe("ArcheotechTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add item" }));
-    await user.click(screen.getByRole("button", { name: "Add custom item" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Archeotech Item" }));
     await user.click(screen.getByText("Mock Submit Custom Archeotech"));
 
     await screen.findByText("Mock Submit Custom Archeotech");

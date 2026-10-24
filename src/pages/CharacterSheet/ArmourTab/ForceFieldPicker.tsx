@@ -132,7 +132,7 @@ export function ForceFieldPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom field</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Force Field</PickerCustomAction>
         ) : undefined
       }
     >

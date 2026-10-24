@@ -328,7 +328,7 @@ describe("GearTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add item" }));
-    await user.click(screen.getByRole("button", { name: "Add custom item" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Item" }));
     await user.click(screen.getByText("Mock Submit Custom Gear"));
 
     expect(createDraftCustomItemMock).toHaveBeenCalledWith(
@@ -346,7 +346,7 @@ describe("GearTab", () => {
     const { onUpdateConsumables } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add consumable" }));
-    await user.click(screen.getByRole("button", { name: "Add custom consumable" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Consumable" }));
     await user.click(screen.getByText("Mock Submit Custom Consumable"));
 
     expect(createDraftCustomItemMock).toHaveBeenCalledWith(
@@ -363,7 +363,7 @@ describe("GearTab", () => {
     const { onUpdate } = renderTab({ userId: null });
 
     await user.click(screen.getByRole("button", { name: "Add item" }));
-    await user.click(screen.getByRole("button", { name: "Add custom item" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Item" }));
     await user.click(screen.getByText("Mock Submit Custom Gear"));
 
     expect(createDraftCustomItemMock).not.toHaveBeenCalled();

@@ -304,7 +304,7 @@ export function InsanityDisorderPicker({
               setCustomOrigin("");
             }}
           >
-            + Add custom disorder
+            Add Custom Disorder
           </PickerCustomAction>
         )
       }

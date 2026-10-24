@@ -343,7 +343,7 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(await screen.findByRole("button", { name: "Custom Minor Power" }));
+    await user.click(await screen.findByRole("button", { name: "Add Custom Minor Power" }));
     await user.type(screen.getByPlaceholderText("Power name..."), "Homebrew Whisper");
     await user.click(screen.getByRole("button", { name: "Half" }));
     await user.type(screen.getByPlaceholderText("e.g. 8"), "6");
@@ -385,7 +385,7 @@ describe("PsychicTab", () => {
     const { onUpdate } = renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
     await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
-    await user.click(await screen.findByRole("button", { name: "Custom Minor Power" }));
+    await user.click(await screen.findByRole("button", { name: "Add Custom Minor Power" }));
     await user.type(screen.getByPlaceholderText("Power name..."), "Purchased Whisper");
     await user.click(screen.getByRole("button", { name: "Half" }));
     await user.type(screen.getByPlaceholderText("e.g. 8"), "6");
@@ -739,7 +739,7 @@ describe("PsychicTab", () => {
     );
 
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(screen.getByRole("button", { name: "Custom Minor Power" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Minor Power" }));
     await user.type(screen.getByPlaceholderText("Power name..."), "  dull pain  ");
 
     expect(screen.getByText("That power is already on this character.")).toBeInTheDocument();

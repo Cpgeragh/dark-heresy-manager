@@ -136,7 +136,7 @@ describe("MutationPicker roll-capture sub-screen", () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Add custom minor mutation" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Minor Mutation" }));
     const addButton = screen.getByRole("button", { name: "Add Minor Mutation" });
     expect(addButton).toBeDisabled();
 
@@ -168,7 +168,7 @@ describe("MutationPicker editable=false", () => {
 
     expect(screen.getByRole("dialog", { name: "View Minor Mutations" })).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Add custom minor mutation" })
+      screen.queryByRole("button", { name: "Add Custom Minor Mutation" })
     ).not.toBeInTheDocument();
 
     await user.click(screen.getByText("Tough Hide", { selector: "span" }));

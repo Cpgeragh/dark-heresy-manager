@@ -119,7 +119,7 @@ describe("ArmourPicker read-only", () => {
 
   it("hides the custom-piece button in read-only mode", () => {
     renderPicker({ editable: false });
-    expect(screen.queryByText("Add custom piece")).not.toBeInTheDocument();
+    expect(screen.queryByText("Add Custom Piece")).not.toBeInTheDocument();
   });
 });
 
@@ -127,7 +127,7 @@ describe("ArmourPicker custom pieces", () => {
   it("calls onCustom when the custom-piece button is clicked", async () => {
     const user = userEvent.setup();
     const { onCustom } = renderPicker();
-    await user.click(screen.getByText("Add custom piece"));
+    await user.click(screen.getByText("Add Custom Piece"));
     expect(onCustom).toHaveBeenCalled();
   });
 

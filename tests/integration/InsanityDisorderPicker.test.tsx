@@ -109,7 +109,7 @@ describe("InsanityDisorderPicker", () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Add custom disorder" }));
+    await user.click(screen.getByRole("button", { name: "Add Custom Disorder" }));
     expect(screen.getByRole("button", { name: "Add Disorder" })).toBeDisabled();
 
     // Type defaults to "Delusion", the alphabetically-first real disorder type.
@@ -146,7 +146,7 @@ describe("InsanityDisorderPicker editable=false", () => {
     const { onAdd } = setup(new Set(), false);
 
     expect(screen.getByRole("dialog", { name: "View Disorders" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add custom disorder" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Custom Disorder" })).not.toBeInTheDocument();
 
     await user.click(screen.getByText("Fear of the Dead", { selector: "span" }));
     expect(onAdd).not.toHaveBeenCalled();

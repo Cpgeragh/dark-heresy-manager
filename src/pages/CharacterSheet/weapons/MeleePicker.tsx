@@ -169,7 +169,7 @@ export function MeleePicker({
       }
       footer={
         editable && showCustom ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom weapon</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Melee Weapon</PickerCustomAction>
         ) : undefined
       }
     >

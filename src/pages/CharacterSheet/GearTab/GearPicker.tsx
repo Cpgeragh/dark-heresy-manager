@@ -165,7 +165,7 @@ export function GearPicker({
       isEmpty={isEmpty}
       footer={
         editable ? (
-          <PickerCustomAction onClick={onCustom}>+ Add custom item</PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>Add Custom Item</PickerCustomAction>
         ) : undefined
       }
     >
