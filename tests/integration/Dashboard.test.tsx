@@ -150,11 +150,11 @@ describe("Dashboard DM campaign list", () => {
     renderDashboard();
 
     expect(screen.queryByLabelText("Campaign Name *")).not.toBeInTheDocument();
-    expect(screen.queryByText("Create Campaign")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    expect(screen.queryByRole("dialog", { name: "Create Campaign" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
-    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+    await user.click(within(form).getByRole("button", { name: "Create Campaign" }));
 
     expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined, expect.any(String));
     await waitFor(() =>
@@ -166,11 +166,11 @@ describe("Dashboard DM campaign list", () => {
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
     await user.type(within(form).getByLabelText(/Inquisitor Name/), "Inquisitor Vail");
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
-    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+    await user.click(within(form).getByRole("button", { name: "Create Campaign" }));
 
     expect(createCampaignMock).toHaveBeenCalledWith(
       "New Crusade",
@@ -183,7 +183,7 @@ describe("Dashboard DM campaign list", () => {
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
 
     for (const field of [
@@ -199,10 +199,10 @@ describe("Dashboard DM campaign list", () => {
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
 
-    expect(within(form).getByRole("button", { name: "Create campaign" })).toBeDisabled();
+    expect(within(form).getByRole("button", { name: "Create Campaign" })).toBeDisabled();
     expect(createCampaignMock).not.toHaveBeenCalled();
     expect(mockToastWarning).not.toHaveBeenCalled();
   });
@@ -211,7 +211,7 @@ describe("Dashboard DM campaign list", () => {
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     await user.type(screen.getByLabelText("Campaign Name *"), "New Crusade{Enter}");
 
     expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", undefined, expect.any(String));
@@ -225,10 +225,10 @@ describe("Dashboard DM campaign list", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
-    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+    await user.click(within(form).getByRole("button", { name: "Create Campaign" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith(
@@ -246,10 +246,10 @@ describe("Dashboard DM campaign list", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
-    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+    await user.click(within(form).getByRole("button", { name: "Create Campaign" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith(
@@ -265,10 +265,10 @@ describe("Dashboard DM campaign list", () => {
       .mockResolvedValueOnce(undefined);
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
-    const createButton = within(form).getByRole("button", { name: "Create campaign" });
+    const createButton = within(form).getByRole("button", { name: "Create Campaign" });
     await user.click(createButton);
     await waitFor(() => expect(mockToastError).toHaveBeenCalled());
 
@@ -294,11 +294,11 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
-        name: "Edit campaign",
+        name: "Edit Campaign",
       })
     );
     const editDialog = screen.getByRole("dialog", { name: "Edit Campaign" });
-    const input = within(editDialog).getByLabelText("Edit campaign name");
+    const input = within(editDialog).getByLabelText("Edit Campaign Name");
     await user.clear(input);
     await user.type(input, "Renamed Crusade");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -321,10 +321,10 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
-        name: "Edit campaign",
+        name: "Edit Campaign",
       })
     );
-    const input = screen.getByLabelText("Edit campaign name");
+    const input = screen.getByLabelText("Edit Campaign Name");
     await user.clear(input);
     await user.type(input, "Renamed Crusade{Enter}");
 
@@ -337,10 +337,10 @@ describe("Dashboard DM campaign list", () => {
     createCampaignMock.mockReturnValueOnce(new Promise<void>((resolve) => (finish = resolve)));
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Create campaign" }));
+    await user.click(screen.getByRole("button", { name: "Create Campaign" }));
     const form = screen.getByRole("dialog", { name: "Create Campaign" });
     await user.type(within(form).getByLabelText("Campaign Name *"), "New Crusade");
-    await user.click(within(form).getByRole("button", { name: "Create campaign" }));
+    await user.click(within(form).getByRole("button", { name: "Create Campaign" }));
     await user.keyboard("{Escape}");
 
     expect(screen.getByRole("dialog", { name: "Create Campaign" })).toBeVisible();
@@ -365,10 +365,10 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
-        name: "Edit campaign",
+        name: "Edit Campaign",
       })
     );
-    const inquisitorInput = screen.getByLabelText("Edit Inquisitor name");
+    const inquisitorInput = screen.getByLabelText("Edit Inquisitor Name");
     expect(inquisitorInput).toHaveValue("Inquisitor Vail");
     await user.clear(inquisitorInput);
     await user.type(inquisitorInput, "Inquisitor Rey");
@@ -396,7 +396,7 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
-        name: "Archive campaign",
+        name: "Archive Campaign",
       })
     );
     const archiveDialog = screen.getByRole("dialog", { name: "Archive Campaign" });
@@ -421,17 +421,17 @@ describe("Dashboard DM campaign list", () => {
     await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
     await user.click(
       within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
-        name: "Delete campaign",
+        name: "Delete Campaign",
       })
     );
     const deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
-    expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeDisabled();
+    expect(within(deleteDialog).getByRole("button", { name: "Delete Permanently" })).toBeDisabled();
 
     await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
     await waitFor(() =>
-      expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled()
+      expect(within(deleteDialog).getByRole("button", { name: "Delete Permanently" })).toBeEnabled()
     );
-    await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
+    await user.click(within(deleteDialog).getByRole("button", { name: "Delete Permanently" }));
 
     expect(deleteCampaignMock).toHaveBeenCalledWith("job-1");
   });
@@ -451,18 +451,18 @@ describe("Dashboard DM campaign list", () => {
 
     await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
     const manageDialog = screen.getByRole("dialog", { name: "Manage The Lathe Run" });
-    await user.click(within(manageDialog).getByRole("button", { name: "Delete campaign" }));
+    await user.click(within(manageDialog).getByRole("button", { name: "Delete Campaign" }));
     let deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
     await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
     await waitFor(() =>
-      expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled()
+      expect(within(deleteDialog).getByRole("button", { name: "Delete Permanently" })).toBeEnabled()
     );
     await user.click(within(deleteDialog).getByRole("button", { name: "Cancel" }));
 
-    await user.click(within(manageDialog).getByRole("button", { name: "Delete campaign" }));
+    await user.click(within(manageDialog).getByRole("button", { name: "Delete Campaign" }));
     deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
     await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
-    expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled();
+    expect(within(deleteDialog).getByRole("button", { name: "Delete Permanently" })).toBeEnabled();
     expect(preflightCampaignDeletionMock).toHaveBeenCalledTimes(1);
   });
 
@@ -488,9 +488,9 @@ describe("Dashboard DM campaign list", () => {
 
     await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
     await waitFor(() =>
-      expect(within(deleteDialog).getByRole("button", { name: "Delete permanently" })).toBeEnabled()
+      expect(within(deleteDialog).getByRole("button", { name: "Delete Permanently" })).toBeEnabled()
     );
-    await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
+    await user.click(within(deleteDialog).getByRole("button", { name: "Delete Permanently" }));
     expect(preflightCampaignDeletionMock).toHaveBeenCalledWith("campaign-2");
     expect(deleteCampaignMock).toHaveBeenCalledWith("archived-job");
   });
@@ -526,17 +526,17 @@ describe("Dashboard DM campaign list", () => {
       await user.click(screen.getByRole("button", { name: "Manage The Lathe Run" }));
       await user.click(
         within(screen.getByRole("dialog", { name: "Manage The Lathe Run" })).getByRole("button", {
-          name: "Delete campaign",
+          name: "Delete Campaign",
         })
       );
       const deleteDialog = screen.getByRole("dialog", { name: "Delete Campaign" });
       await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
       await waitFor(() =>
         expect(
-          within(deleteDialog).getByRole("button", { name: "Delete permanently" })
+          within(deleteDialog).getByRole("button", { name: "Delete Permanently" })
         ).toBeEnabled()
       );
-      await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
+      await user.click(within(deleteDialog).getByRole("button", { name: "Delete Permanently" }));
     }
 
     it("asks about the DM's chats once a campaign that has chats is deleted", async () => {
@@ -552,7 +552,7 @@ describe("Dashboard DM campaign list", () => {
 
       expect(await screen.findByRole("dialog", { name: "Keep your chats?" })).toBeInTheDocument();
       expect(screen.getByText(/You have 2 chats about this campaign/)).toBeInTheDocument();
-      await user.click(screen.getByRole("button", { name: "Keep my chats" }));
+      await user.click(screen.getByRole("button", { name: "Keep My Chats" }));
       expect(screen.queryByRole("dialog", { name: "Keep your chats?" })).not.toBeInTheDocument();
     });
 
@@ -609,10 +609,10 @@ describe("Dashboard DM campaign list", () => {
       await user.type(within(deleteDialog).getByPlaceholderText("DELETE"), "DELETE");
       await waitFor(() =>
         expect(
-          within(deleteDialog).getByRole("button", { name: "Delete permanently" })
+          within(deleteDialog).getByRole("button", { name: "Delete Permanently" })
         ).toBeEnabled()
       );
-      await user.click(within(deleteDialog).getByRole("button", { name: "Delete permanently" }));
+      await user.click(within(deleteDialog).getByRole("button", { name: "Delete Permanently" }));
 
       expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
     });
@@ -651,7 +651,7 @@ describe("Dashboard player section", () => {
       "border-slate-500",
       "bg-slate-900/60"
     );
-    expect(screen.getByRole("button", { name: "Claim a character" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Claim a Character" })).toBeVisible();
     expect(screen.queryByText("No archived campaigns.")).not.toBeInTheDocument();
   });
 
@@ -731,7 +731,7 @@ describe("Dashboard claim-a-character flow", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Claim a character" }));
+    await user.click(screen.getByRole("button", { name: "Claim a Character" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("No character found with this recovery code.")
@@ -745,7 +745,7 @@ describe("Dashboard claim-a-character flow", () => {
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Claim a character" }));
+    await user.click(screen.getByRole("button", { name: "Claim a Character" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(resetRecoveryLookupMock).toHaveBeenCalledOnce();
@@ -763,7 +763,7 @@ describe("Dashboard claim-a-character flow", () => {
     });
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Claim a character" }));
+    await user.click(screen.getByRole("button", { name: "Claim a Character" }));
     await user.type(screen.getByLabelText("Recovery Code *"), "AAAABBBB{Enter}");
 
     expect(lookup).toHaveBeenCalledWith("DH-AAAA-BBBB");
@@ -782,7 +782,7 @@ describe("Dashboard claim-a-character flow", () => {
     renderDashboard();
 
     expect(screen.queryByText("Mock ClaimPreview: Vex")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Claim a character" }));
+    await user.click(screen.getByRole("button", { name: "Claim a Character" }));
     const form = screen.getByRole("dialog", { name: "Claim a Character" });
     expect(within(form).getByText("Mock ClaimPreview: Vex")).toBeInTheDocument();
     await user.click(within(form).getByText("Mock Claim"));
@@ -803,7 +803,7 @@ describe("Dashboard claim-a-character flow", () => {
     claimCharacterMock.mockRejectedValue(new Error("Already claimed"));
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Claim a character" }));
+    await user.click(screen.getByRole("button", { name: "Claim a Character" }));
     const form = screen.getByRole("dialog", { name: "Claim a Character" });
     await user.click(within(form).getByText("Mock Claim"));
 

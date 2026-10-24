@@ -36,12 +36,12 @@ describe("Alternate Rank replacement", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Add basic skill" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Basic Skill" })[0]);
     let picker = within(screen.getByRole("dialog", { name: "Available Untrained Basic Skills" }));
     expect(picker.queryByText("Disguise")).not.toBeInTheDocument();
     await user.click(picker.getByRole("button", { name: "Close" }));
 
-    await user.click(screen.getAllByRole("button", { name: "Add advanced skill" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Advanced Skill" })[0]);
     picker = within(screen.getByRole("dialog", { name: "Available Untrained Advanced Skills" }));
     await user.click(picker.getByText("Forbidden Lore"));
 

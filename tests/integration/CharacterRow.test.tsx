@@ -91,8 +91,8 @@ describe("CharacterRow display", () => {
     expect(screen.getByText("Claimed")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Manage Vex" })).toBeInTheDocument();
     expect(screen.queryByText(/DH-/)).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "View history" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Delete character" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "View History" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Delete Character" })).not.toBeInTheDocument();
   });
 
   it("shows Unclaimed when unowned", () => {
@@ -116,10 +116,10 @@ describe("CharacterRow display", () => {
     expect(within(dialog).getByText("History")).toBeInTheDocument();
     expect(within(dialog).getByText("Delete Character")).toBeInTheDocument();
     expect(
-      within(dialog).getByRole("button", { name: "Reveal recovery code" })
+      within(dialog).getByRole("button", { name: "Reveal Recovery Code" })
     ).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "View history" })).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Delete character" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "View History" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Delete Character" })).toBeInTheDocument();
   });
 
   it("does not follow the card link when the Manage button is pressed", async () => {
@@ -170,7 +170,7 @@ describe("CharacterRow Message button", () => {
 describe("CharacterRow reveal flow", () => {
   async function revealCode(user: ReturnType<typeof userEvent.setup>) {
     const dialog = await openManage(user);
-    await user.click(within(dialog).getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(within(dialog).getByRole("button", { name: "Reveal Recovery Code" }));
     return screen.findByRole("dialog", { name: "Reveal Code" });
   }
 
@@ -186,10 +186,10 @@ describe("CharacterRow reveal flow", () => {
     const manage = await openManage(user);
 
     expect(mockRevealRecoveryCode).not.toHaveBeenCalled();
-    await user.click(within(manage).getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(within(manage).getByRole("button", { name: "Reveal Recovery Code" }));
 
     expect(mockRevealRecoveryCode).toHaveBeenCalledWith("campaign-1", "char-1");
-    expect(within(manage).getByRole("button", { name: "Reveal recovery code" })).toBeDisabled();
+    expect(within(manage).getByRole("button", { name: "Reveal Recovery Code" })).toBeDisabled();
 
     resolveReveal!("DH-AAAA-BBBB");
     const reveal = await screen.findByRole("dialog", { name: "Reveal Code" });
@@ -209,11 +209,11 @@ describe("CharacterRow reveal flow", () => {
     renderRow();
     const manage = await openManage(user);
 
-    await user.click(within(manage).getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(within(manage).getByRole("button", { name: "Reveal Recovery Code" }));
 
     await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Network unreachable"));
     expect(screen.queryByRole("dialog", { name: "Reveal Code" })).not.toBeInTheDocument();
-    expect(within(manage).getByRole("button", { name: "Reveal recovery code" })).toBeEnabled();
+    expect(within(manage).getByRole("button", { name: "Reveal Recovery Code" })).toBeEnabled();
   });
 
   it("hides the code again when the window is closed", async () => {
@@ -285,7 +285,7 @@ describe("CharacterRow reveal flow", () => {
 
 async function startDelete(user: ReturnType<typeof userEvent.setup>) {
   const dialog = await openManage(user);
-  await user.click(within(dialog).getByRole("button", { name: "Delete character" }));
+  await user.click(within(dialog).getByRole("button", { name: "Delete Character" }));
   return screen.findByRole("dialog", { name: "Delete Character" });
 }
 
@@ -305,7 +305,7 @@ describe("CharacterRow delete flow", () => {
     renderRow();
     const dialog = await openManage(user);
 
-    await user.click(within(dialog).getByRole("button", { name: "Delete character" }));
+    await user.click(within(dialog).getByRole("button", { name: "Delete Character" }));
 
     expect(screen.queryByText("Checking affected documents…")).not.toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Delete Character" })).not.toBeInTheDocument();
@@ -319,13 +319,13 @@ describe("CharacterRow delete flow", () => {
     ).toBeInTheDocument();
   });
 
-  it("asks for DELETE to be typed before Delete permanently is available", async () => {
+  it("asks for DELETE to be typed before Delete Permanently is available", async () => {
     const user = userEvent.setup();
     mockPreflightCharacterDeletion.mockResolvedValue({ jobId: "job-1", totalCount: 3 });
     renderRow();
 
     const confirm = await startDelete(user);
-    const button = within(confirm).getByRole("button", { name: "Delete permanently" });
+    const button = within(confirm).getByRole("button", { name: "Delete Permanently" });
     expect(
       within(confirm).getByText("Type DELETE to permanently delete this character")
     ).toBeInTheDocument();
@@ -336,7 +336,7 @@ describe("CharacterRow delete flow", () => {
     expect(button).toBeEnabled();
   });
 
-  it("shows an error and never enables Delete permanently when the preflight check fails", async () => {
+  it("shows an error and never enables Delete Permanently when the preflight check fails", async () => {
     const user = userEvent.setup();
     mockPreflightCharacterDeletion.mockRejectedValue(new Error("Network unreachable"));
     renderRow();
@@ -345,7 +345,7 @@ describe("CharacterRow delete flow", () => {
     await typeDelete(user, confirm);
 
     expect(within(confirm).getByText("Network unreachable")).toBeInTheDocument();
-    expect(within(confirm).getByRole("button", { name: "Delete permanently" })).toBeDisabled();
+    expect(within(confirm).getByRole("button", { name: "Delete Permanently" })).toBeDisabled();
   });
 
   it("closes the confirmation again when Cancel is pressed", async () => {
@@ -374,7 +374,7 @@ describe("CharacterRow delete flow", () => {
     const confirm = await startDelete(user);
     await typeDelete(user, confirm);
 
-    await user.click(within(confirm).getByRole("button", { name: "Delete permanently" }));
+    await user.click(within(confirm).getByRole("button", { name: "Delete Permanently" }));
 
     expect(mockDeleteCharacter).toHaveBeenCalledWith("job-1");
     await waitFor(() =>
@@ -395,7 +395,7 @@ describe("CharacterRow delete flow", () => {
     const confirm = await startDelete(user);
     await typeDelete(user, confirm);
 
-    await user.click(within(confirm).getByRole("button", { name: "Delete permanently" }));
+    await user.click(within(confirm).getByRole("button", { name: "Delete Permanently" }));
 
     await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Chunk failed"));
   });
@@ -405,7 +405,7 @@ describe("CharacterRow after a delete", () => {
   async function confirmDelete(user: ReturnType<typeof userEvent.setup>) {
     const confirm = await startDelete(user);
     await typeDelete(user, confirm);
-    await user.click(within(confirm).getByRole("button", { name: "Delete permanently" }));
+    await user.click(within(confirm).getByRole("button", { name: "Delete Permanently" }));
   }
 
   it("tells the page which character was deleted once the delete job has finished", async () => {
@@ -449,7 +449,7 @@ describe("CharacterRow after a delete", () => {
 describe("CharacterRow history modal", () => {
   async function openHistory(user: ReturnType<typeof userEvent.setup>) {
     const dialog = await openManage(user);
-    await user.click(within(dialog).getByRole("button", { name: "View history" }));
+    await user.click(within(dialog).getByRole("button", { name: "View History" }));
   }
 
   it("only subscribes to claim logs once the DM opens History", async () => {

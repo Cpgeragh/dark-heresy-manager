@@ -32,8 +32,8 @@ interface ConfirmInlineProps {
   requireText?: string;
   /** Prompt shown above the input in type-to-confirm mode. */
   requirePrompt?: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
+  confirmLabel: string;
+  cancelLabel: string;
   /** Label shown with the loading dots on the confirm button. Defaults to the confirm label. */
   busyLabel?: string;
 }
@@ -52,8 +52,8 @@ export function ConfirmInline({
   size = "md",
   requireText,
   requirePrompt,
-  confirmLabel = "Yes",
-  cancelLabel = "No",
+  confirmLabel,
+  cancelLabel,
   busyLabel,
 }: ConfirmInlineProps) {
   const [armed, setArmed] = useState(false);

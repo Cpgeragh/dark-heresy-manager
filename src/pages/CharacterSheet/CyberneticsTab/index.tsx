@@ -18,7 +18,6 @@ import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
 import { craftsmanshipAvailability, craftsmanshipValue } from "./cyberneticsHelpers";
-import { Button } from "../../../ui/buttons/Button";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { isInstalled } from "../../../utils/cyberneticInstalled";
@@ -896,9 +895,19 @@ export function CyberneticsTab({
       <section className={uiStackSection}>
         <div className="flex items-center justify-between">
           <SectionHeader>Integrated Weapons</SectionHeader>
-          <Button size="sm" onClick={() => setShowIntegratedPicker(true)}>
-            {editable ? "+ Install" : "View"}
-          </Button>
+          {editable ? (
+            <AddButton
+              label="Add Integrated Weapon"
+              size="sm"
+              onClick={() => setShowIntegratedPicker(true)}
+            />
+          ) : (
+            <ViewButton
+              label="View Integrated Weapons"
+              size="sm"
+              onClick={() => setShowIntegratedPicker(true)}
+            />
+          )}
         </div>
 
         {integratedRanged.length === 0 &&
@@ -943,9 +952,9 @@ export function CyberneticsTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Implants</SectionHeader>
           {editable ? (
-            <AddButton label="Add implant" onClick={() => setShowPicker(true)} />
+            <AddButton label="Add Implant" onClick={() => setShowPicker(true)} />
           ) : (
-            <ViewButton label="View implants" onClick={() => setShowPicker(true)} />
+            <ViewButton label="View Implants" onClick={() => setShowPicker(true)} />
           )}
         </div>
 

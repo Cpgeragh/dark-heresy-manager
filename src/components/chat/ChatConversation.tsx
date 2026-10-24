@@ -147,8 +147,10 @@ export function ChatConversation({ accountId, target, chat, onCleared }: ChatCon
             Export chat
           </Button>
           <ConfirmInline
-            triggerLabel="Delete chat"
-            question="Move to Recently deleted?"
+            triggerLabel="Move to Recently Deleted"
+            question="Move this chat to Recently Deleted?"
+            confirmLabel="Move to Recently Deleted"
+            cancelLabel="Cancel"
             variant="warning"
             size="sm"
             busyLabel="Deleting"

@@ -653,7 +653,7 @@ export function ArmourTab({
               setShowPicker(true);
             }}
           >
-            {editable ? "+ Equip" : "View"}
+            {editable ? "Equip Armour" : "View"}
           </Button>
         </div>
         {worn.length === 0 && archeotechArmourWorn.length === 0 && (
@@ -689,7 +689,7 @@ export function ArmourTab({
               setShowPicker(true);
             }}
           >
-            {editable ? "+ Stow" : "View"}
+            {editable ? "Stow Armour" : "View"}
           </Button>
         </div>
         {stowed.length === 0 && archeotechArmourStowed.length === 0 && (
@@ -719,9 +719,9 @@ export function ArmourTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Force Fields</SectionHeader>
           {editable ? (
-            <AddButton label="Add force field" onClick={() => setShowFieldPicker(true)} />
+            <AddButton label="Add Force Field" onClick={() => setShowFieldPicker(true)} />
           ) : (
-            <ViewButton label="View force fields" onClick={() => setShowFieldPicker(true)} />
+            <ViewButton label="View Force Fields" onClick={() => setShowFieldPicker(true)} />
           )}
         </div>
         {forceFields.length === 0 && archeotechForceFieldItems.length === 0 && (

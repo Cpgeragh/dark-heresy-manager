@@ -142,6 +142,8 @@ export function CustomItemAdminRow({
               triggerLoading={busyAction === "archive"}
               triggerLoadingLabel="Archiving"
               question="Archive and remove copies?"
+              confirmLabel="Archive"
+              cancelLabel="Cancel"
               variant="warning"
               size="xs"
               busy={busy}
@@ -155,6 +157,8 @@ export function CustomItemAdminRow({
               triggerLoading={busyAction === "updateAll"}
               triggerLoadingLabel="Updating"
               question="Publish and update copies?"
+              confirmLabel="Update All Copies"
+              cancelLabel="Cancel"
               variant="warning"
               size="xs"
               busy={busy}
@@ -177,6 +181,10 @@ export function CustomItemAdminRow({
             <ConfirmInline
               triggerLabel="Delete"
               question="Permanently delete?"
+              requireText="DELETE"
+              requirePrompt="Type DELETE to permanently delete this custom definition"
+              confirmLabel="Delete Permanently"
+              cancelLabel="Cancel"
               onConfirm={handleDelete}
               busy={busyAction === "delete"}
               busyLabel="Deleting"

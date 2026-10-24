@@ -447,14 +447,14 @@ function DmCampaignList({
         <CampaignListLimitNotice />
       )}
 
-      <Button onClick={() => setShowCreateForm(true)}>Create campaign</Button>
+      <Button onClick={() => setShowCreateForm(true)}>Create Campaign</Button>
 
       {showCreateForm && (
         <CustomFormShell
           title="Create Campaign"
           scrollPositionRef={createFormScrollPositionRef}
           canSubmit={campaignNameValid && inquisitorNameValid}
-          submitLabel="Create campaign"
+          submitLabel="Create Campaign"
           savingLabel="Creating"
           saving={creating}
           onSubmit={handleCreate}
@@ -577,7 +577,7 @@ function DmCampaignList({
             info="Change this campaign's name and Inquisitor name."
           >
             <EditButton
-              label="Edit campaign"
+              label="Edit Campaign"
               onClick={() => {
                 setEditingId(actionsCampaign.id);
                 setEditName(actionsCampaign.name);
@@ -590,7 +590,7 @@ function DmCampaignList({
             info="Remove this campaign from the active list. You can restore it later."
           >
             <ArchiveButton
-              label="Archive campaign"
+              label="Archive Campaign"
               onClick={() =>
                 setPendingCampaignAction({
                   campaignId: actionsCampaign.id,
@@ -605,7 +605,7 @@ function DmCampaignList({
             info="Permanently delete this campaign and its data. This cannot be undone."
           >
             <RemoveButton
-              label="Delete campaign"
+              label="Delete Campaign"
               onClick={async () => {
                 await loadDeletePreflight(actionsCampaign.id);
                 setPendingCampaignAction({
@@ -672,7 +672,7 @@ function DmCampaignList({
                   }}
                   disabled={editing}
                   placeholder="Inquisitor Name"
-                  aria-label="Edit Inquisitor name"
+                  aria-label="Edit Inquisitor Name"
                   autoComplete="off"
                 />
               </div>
@@ -693,7 +693,7 @@ function DmCampaignList({
                   }}
                   disabled={editing}
                   autoFocus
-                  aria-label="Edit campaign name"
+                  aria-label="Edit Campaign Name"
                   autoComplete="off"
                 />
               </div>
@@ -861,14 +861,14 @@ function ClaimCharacterSection() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Claim a character</Button>
+      <Button onClick={() => setOpen(true)}>Claim a Character</Button>
 
       {open && (
         <CustomFormShell
           title="Claim a Character"
           scrollPositionRef={formScrollPositionRef}
           canSubmit={codeValid && !loading}
-          submitLabel="Find character"
+          submitLabel="Find Character"
           savingLabel="Checking"
           saving={loading}
           onSubmit={handleLookup}

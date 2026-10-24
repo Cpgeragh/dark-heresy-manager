@@ -14,10 +14,18 @@ describe("ConfirmInline", () => {
     });
     const onConfirm = vi.fn(() => pending);
     const user = userEvent.setup();
-    render(<ConfirmInline triggerLabel="Delete" question="Delete?" onConfirm={onConfirm} />);
+    render(
+      <ConfirmInline
+        triggerLabel="Delete"
+        question="Delete?"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={onConfirm}
+      />
+    );
 
     await user.click(screen.getByText("Delete"));
-    const confirm = screen.getByText("Yes");
+    const confirm = screen.getByRole("button", { name: "Delete" });
     fireEvent.click(confirm);
     fireEvent.click(confirm);
 
@@ -30,39 +38,63 @@ describe("ConfirmInline", () => {
   it("arms from the trigger and confirms (simple)", async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
-    render(<ConfirmInline triggerLabel="Delete" question="Delete?" onConfirm={onConfirm} />);
+    render(
+      <ConfirmInline
+        triggerLabel="Delete"
+        question="Delete?"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={onConfirm}
+      />
+    );
 
     expect(screen.queryByText("Delete?")).not.toBeInTheDocument();
     await user.click(screen.getByText("Delete"));
     expect(screen.getByText("Delete?")).toBeInTheDocument();
-    await user.click(screen.getByText("Yes"));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
   it("cancel disarms without confirming", async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
-    render(<ConfirmInline triggerLabel="Delete" question="Delete?" onConfirm={onConfirm} />);
+    render(
+      <ConfirmInline
+        triggerLabel="Delete"
+        question="Delete?"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={onConfirm}
+      />
+    );
 
     await user.click(screen.getByText("Delete"));
-    await user.click(screen.getByText("No"));
+    await user.click(screen.getByText("Cancel"));
     expect(onConfirm).not.toHaveBeenCalled();
     expect(screen.getByText("Delete")).toBeInTheDocument(); // back to the resting trigger
   });
 
-  it("type-to-confirm keeps Yes disabled until the text matches", async () => {
+  it("keeps the permanent deletion action disabled until the text matches", async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
-    render(<ConfirmInline triggerLabel="Clear" requireText="DELETE" onConfirm={onConfirm} />);
+    render(
+      <ConfirmInline
+        triggerLabel="Delete"
+        requireText="DELETE"
+        confirmLabel="Delete Permanently"
+        cancelLabel="Cancel"
+        onConfirm={onConfirm}
+      />
+    );
 
-    await user.click(screen.getByText("Clear"));
-    const yes = screen.getByText("Yes");
-    expect(yes).toBeDisabled();
+    await user.click(screen.getByText("Delete"));
+    const confirm = screen.getByText("Delete Permanently");
+    expect(confirm).toBeDisabled();
 
     await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
-    expect(yes).toBeEnabled();
+    expect(confirm).toBeEnabled();
 
-    await user.click(yes);
+    await user.click(confirm);
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
@@ -74,6 +106,8 @@ describe("ConfirmInline", () => {
       <ConfirmInline
         triggerLabel="Delete"
         question="Delete?"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
         onArm={onArm}
         details={<span>Checking affected documents…</span>}
         confirmDisabled
@@ -84,17 +118,19 @@ describe("ConfirmInline", () => {
     await user.click(screen.getByText("Delete"));
     expect(onArm).toHaveBeenCalledOnce();
     expect(screen.getByText("Checking affected documents…")).toBeInTheDocument();
-    expect(screen.getByText("Yes")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
 
     rerender(
       <ConfirmInline
         triggerLabel="Delete"
         question="Delete?"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
         details={<span>Affects 4 documents.</span>}
         onConfirm={onConfirm}
       />
     );
     expect(screen.getByText("Affects 4 documents.")).toBeInTheDocument();
-    expect(screen.getByText("Yes")).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled();
   });
 });

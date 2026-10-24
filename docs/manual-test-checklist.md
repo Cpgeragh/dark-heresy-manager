@@ -601,6 +601,7 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 - [ ] A cybernetic that is not installed gives no +2 bonus on the Armour tab, is missing from the Purity of Flesh removal list, and is not offered as a Bionic Arm for a Concealed Weapon Bionic
 - [ ] Picking any implant except the Concealed Weapon Bionic ends on a weight step with a `Weight (kg)` box and an `Add` button; typing 3 shows a `3 kg` chip on the implant row, leaving it blank shows a `0 kg` chip, and `Back` returns to the craftsmanship step, or to the list for an implant with no craftsmanship step
 - [ ] The custom implant form has a `Weight` field beside `Installation`; the weight typed there, or `0 kg` when it is left blank, shows on the implant row and in the picker row once the implant is in the campaign library
+- [ ] Saving a custom implant that has a weight, for example `3`, adds it to the campaign library as a draft without an error, and it keeps its `3 kg` weight after the page is reloaded (`CustomImplantForm.tsx`, `customItemValidation.ts`)
 - [ ] Taking Purity of Flesh removes only installed cybernetics and leaves the others on the character, and removing the talent restores what it removed
 - [ ] The Concealed Weapon Bionic has no Install button and starts installed, and a cybernetic given by a Talent, Trait, Career, or Homeworld has both an Install button and a Remove button
 

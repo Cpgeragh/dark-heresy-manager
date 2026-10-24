@@ -16,7 +16,6 @@ import {
 import { ModalHeader } from "../modals/ModalHeader";
 import { ModalShell } from "../modals/ModalShell";
 import { ArrowRight } from "../icons/PickerArrows";
-import { PlusIcon } from "../icons/PlusIcon";
 import {
   uiDisabledControl,
   uiFocusRing,
@@ -119,7 +118,6 @@ export function PickerCustomAction({
       className={`group ${uiInlineRow} w-full justify-center ${uiCorner} border ${colourPickerCustomAction} py-2.5 text-sm transition ${uiDisabledControl} lg:text-base ${uiPressFeedback(!props.disabled)} ${uiFocusRing} ${className}`.trim()}
       {...props}
     >
-      <PlusIcon className="h-4 w-4 shrink-0" />
       <span className="font-bold" style={{ WebkitTextStroke: "0.35px currentColor" }}>
         {children}
       </span>

@@ -648,9 +648,9 @@ export function GearTab({
             <SectionHeader>Items</SectionHeader>
             {!showCustomForm &&
               (editable ? (
-                <AddButton label="Add item" onClick={() => setShowGearPicker(true)} />
+                <AddButton label="Add Item" onClick={() => setShowGearPicker(true)} />
               ) : (
-                <ViewButton label="View items" onClick={() => setShowGearPicker(true)} />
+                <ViewButton label="View Items" onClick={() => setShowGearPicker(true)} />
               ))}
           </div>
 
@@ -670,9 +670,9 @@ export function GearTab({
           <div className="flex items-center justify-between">
             <SectionHeader>Consumables</SectionHeader>
             {editable ? (
-              <AddButton label="Add consumable" onClick={() => setShowConsumablePicker(true)} />
+              <AddButton label="Add Consumable" onClick={() => setShowConsumablePicker(true)} />
             ) : (
-              <ViewButton label="View consumables" onClick={() => setShowConsumablePicker(true)} />
+              <ViewButton label="View Consumables" onClick={() => setShowConsumablePicker(true)} />
             )}
           </div>
 

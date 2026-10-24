@@ -57,12 +57,12 @@ describe("DeleteConfirmModal", () => {
     return props;
   }
 
-  it("says what will be deleted and keeps Delete permanently disabled until DELETE is typed", async () => {
+  it("says what will be deleted and keeps Delete Permanently disabled until DELETE is typed", async () => {
     const user = userEvent.setup();
     const props = renderModal();
 
     const dialog = await screen.findByRole("dialog", { name: "Delete Thing" });
-    const button = within(dialog).getByRole("button", { name: "Delete permanently" });
+    const button = within(dialog).getByRole("button", { name: "Delete Permanently" });
     expect(within(dialog).getByText(props.message)).toBeInTheDocument();
     expect(within(dialog).getByText(props.typedLabel)).toBeInTheDocument();
     expect(button).toBeDisabled();
@@ -86,7 +86,7 @@ describe("DeleteConfirmModal", () => {
     await user.type(within(dialog).getByPlaceholderText("DELETE"), "DELETE");
 
     expect(within(dialog).getByText("Unable to check this deletion.")).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Delete permanently" })).toBeDisabled();
+    expect(within(dialog).getByRole("button", { name: "Delete Permanently" })).toBeDisabled();
   });
 
   it("calls onCancel from Cancel, and blocks Cancel while deleting", async () => {

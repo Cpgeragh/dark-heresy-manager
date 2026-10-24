@@ -108,7 +108,7 @@ describe("ArcheotechTab", () => {
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
   });
@@ -138,15 +138,15 @@ describe("ArcheotechTab", () => {
 
   it("shows View instead of Add item when not editable", () => {
     renderTab({ editable: false });
-    expect(screen.getByRole("button", { name: "View items" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add item" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View Items" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Item" })).not.toBeInTheDocument();
   });
 
   it("adds a weapon-typed item from the reference picker without crashing the weapon-card routing", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getAllByText(GRENADE_NAME)[0]);
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -159,7 +159,7 @@ describe("ArcheotechTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getAllByText("Cameleoline Grid")[0]);
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "5000");
     await user.type(screen.getByLabelText(/Weight \(kg\)/), "12");
@@ -186,7 +186,7 @@ describe("ArcheotechTab", () => {
     });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getAllByText("Custom Relic")[0]);
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -212,7 +212,7 @@ describe("ArcheotechTab", () => {
     });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getAllByText("Custom Eye")[0]);
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -226,7 +226,7 @@ describe("ArcheotechTab", () => {
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Archeotech Item" }));
     await user.click(screen.getByText("Mock Submit Custom Archeotech"));
 
@@ -243,7 +243,7 @@ describe("ArcheotechTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ userId: null });
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Archeotech Item" }));
     await user.click(screen.getByText("Mock Submit Custom Archeotech"));
 
@@ -256,7 +256,7 @@ describe("ArcheotechTab", () => {
     createDraftCustomItemMock.mockRejectedValue(new Error("network error"));
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Archeotech Item" }));
     await user.click(screen.getByText("Mock Submit Custom Archeotech"));
 

@@ -841,8 +841,8 @@ export function PsychicTab({
               <PowerRouteCard
                 title={
                   purchaseChoiceTarget === "minor"
-                    ? "Add independent Minor power"
-                    : "Add independent Major power"
+                    ? "Add Independent Minor Power"
+                    : "Add Independent Major Power"
                 }
                 status="No selection used"
                 statusColour="slate"

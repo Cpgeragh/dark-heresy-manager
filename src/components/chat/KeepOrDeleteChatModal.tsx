@@ -41,16 +41,16 @@ export function KeepOrDeleteChatModal({
         <p className={`text-sm lg:text-base ${uiTextBody}`}>{message}</p>
         <div className="flex gap-2">
           <Button variant="neutral" className="flex-1" onClick={onKeep} disabled={busy}>
-            {many ? "Keep my chats" : "Keep my chat"}
+            {many ? "Keep My Chats" : "Keep My Chat"}
           </Button>
           <Button
             variant="danger"
             className="flex-1"
             onClick={onDelete}
             loading={busy}
-            loadingLabel="Deleting"
+            loadingLabel="Moving"
           >
-            {many ? "Delete my chats" : "Delete my chat"}
+            {many ? "Move My Chats to Recently Deleted" : "Move My Chat to Recently Deleted"}
           </Button>
         </div>
       </div>

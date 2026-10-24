@@ -1,7 +1,7 @@
 // src/ui/modals/DeleteConfirmModal.tsx
 // The permanent delete confirmation: says what will be deleted and asks for DELETE to be typed.
 
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Button } from "../buttons/Button";
 import { PickerBody, PickerModal } from "../pickers/PickerModal";
 import { colourAmberPlain } from "../styles/colourTokens";
@@ -14,6 +14,7 @@ interface DeleteConfirmModalProps {
   typedLabel: string;
   /** An error from counting what the deletion affects. */
   error?: string;
+  details?: ReactNode;
   /** True once the count has loaded, so the deletion can start. */
   ready: boolean;
   deleting: boolean;
@@ -26,6 +27,7 @@ export function DeleteConfirmModal({
   message,
   typedLabel,
   error,
+  details,
   ready,
   deleting,
   onConfirm,
@@ -71,7 +73,7 @@ export function DeleteConfirmModal({
               loadingLabel="Deleting"
               onClick={onConfirm}
             >
-              Delete permanently
+              Delete Permanently
             </Button>
             <Button variant="neutral" disabled={deleting} onClick={onCancel}>
               Cancel
@@ -82,6 +84,7 @@ export function DeleteConfirmModal({
     >
       <PickerBody>
         <p className={`text-sm lg:text-base ${uiTextBody}`}>{message}</p>
+        {details}
         {error && <span className={`text-xs ${uiTextError}`}>{error}</span>}
       </PickerBody>
     </PickerModal>

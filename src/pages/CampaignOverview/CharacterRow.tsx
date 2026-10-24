@@ -238,19 +238,19 @@ export function CharacterRow({
             label="Recovery Code"
             info="Show this character's Recovery Code so its player can claim it."
           >
-            <ViewButton label="Reveal recovery code" onClick={handleReveal} />
+            <ViewButton label="Reveal Recovery Code" onClick={handleReveal} />
           </ManageActionRow>
           <ManageActionRow
             label="History"
             info="See when this character was claimed, released or reassigned."
           >
-            <HistoryButton label="View history" onClick={() => setHistoryRequested(true)} />
+            <HistoryButton label="View History" onClick={() => setHistoryRequested(true)} />
           </ManageActionRow>
           <ManageActionRow
             label="Delete Character"
             info="Permanently delete this character and its data. This cannot be undone."
           >
-            <RemoveButton label="Delete character" onClick={loadDeletePreflight} />
+            <RemoveButton label="Delete Character" onClick={loadDeletePreflight} />
           </ManageActionRow>
         </ManageModal>
       )}

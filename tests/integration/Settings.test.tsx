@@ -83,14 +83,14 @@ describe("Settings display name", () => {
   it("pre-fills the input with the current first name", async () => {
     const user = userEvent.setup();
     renderSettings();
-    await user.click(screen.getByRole("button", { name: "Edit display name" }));
+    await user.click(screen.getByRole("button", { name: "Edit Display Name" }));
     expect(screen.getByPlaceholderText("e.g. David")).toHaveValue("Alice");
   });
 
   it("disables Save until the draft actually changes", async () => {
     const user = userEvent.setup();
     renderSettings();
-    await user.click(screen.getByRole("button", { name: "Edit display name" }));
+    await user.click(screen.getByRole("button", { name: "Edit Display Name" }));
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
 
@@ -98,7 +98,7 @@ describe("Settings display name", () => {
     const user = userEvent.setup();
     saveFirstNameMock.mockResolvedValue(undefined);
     renderSettings();
-    await user.click(screen.getByRole("button", { name: "Edit display name" }));
+    await user.click(screen.getByRole("button", { name: "Edit Display Name" }));
 
     const input = screen.getByPlaceholderText("e.g. David");
     await user.clear(input);
@@ -112,7 +112,7 @@ describe("Settings display name", () => {
   it("strips spaces as they're typed", async () => {
     const user = userEvent.setup();
     renderSettings();
-    await user.click(screen.getByRole("button", { name: "Edit display name" }));
+    await user.click(screen.getByRole("button", { name: "Edit Display Name" }));
 
     const input = screen.getByPlaceholderText("e.g. David");
     await user.clear(input);
@@ -124,7 +124,7 @@ describe("Settings display name", () => {
   it("capitalizes the first letter as it is typed", async () => {
     const user = userEvent.setup();
     renderSettings();
-    await user.click(screen.getByRole("button", { name: "Edit display name" }));
+    await user.click(screen.getByRole("button", { name: "Edit Display Name" }));
 
     const input = screen.getByPlaceholderText("e.g. David");
     await user.clear(input);
@@ -137,7 +137,7 @@ describe("Settings display name", () => {
     const user = userEvent.setup();
     saveFirstNameMock.mockRejectedValue(new Error("network"));
     renderSettings();
-    await user.click(screen.getByRole("button", { name: "Edit display name" }));
+    await user.click(screen.getByRole("button", { name: "Edit Display Name" }));
 
     const input = screen.getByPlaceholderText("e.g. David");
     await user.clear(input);
@@ -158,7 +158,7 @@ describe("Settings recovery code", () => {
     getRecoveryCodeMock.mockResolvedValue("DH-AAAA-BBBB");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Account Recovery Code" }));
 
     expect(await screen.findByText("DH-AAAA-BBBB")).toBeInTheDocument();
     expect(rotateRecoveryCodeMock).not.toHaveBeenCalled();
@@ -171,7 +171,7 @@ describe("Settings recovery code", () => {
     rotateRecoveryCodeMock.mockResolvedValue("DH-CCCC-DDDD");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Account Recovery Code" }));
 
     expect(await screen.findByText("DH-CCCC-DDDD")).toBeInTheDocument();
     expect(mockToastSuccess).toHaveBeenCalledWith("Recovery code generated.");
@@ -182,7 +182,7 @@ describe("Settings recovery code", () => {
     getRecoveryCodeMock.mockRejectedValue(new Error("network"));
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Account Recovery Code" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("Failed to load recovery code.")
@@ -194,13 +194,15 @@ describe("Settings recovery code", () => {
     getRecoveryCodeMock.mockResolvedValue("DH-AAAA-BBBB");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Account Recovery Code" }));
     await screen.findByText("DH-AAAA-BBBB");
     const revealDialog = screen.getByRole("dialog", { name: "Reveal Code" });
     await user.click(within(revealDialog).getByRole("button", { name: "Close" }));
 
     expect(screen.queryByText("DH-AAAA-BBBB")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reveal recovery code" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reveal Account Recovery Code" })
+    ).toBeInTheDocument();
   });
 
   it("rotates the code on confirm, replacing the revealed value", async () => {
@@ -209,7 +211,7 @@ describe("Settings recovery code", () => {
     rotateRecoveryCodeMock.mockResolvedValue("DH-EEEE-FFFF");
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Account Recovery Code" }));
     await screen.findByText("DH-AAAA-BBBB");
     await user.click(screen.getByRole("button", { name: "Rotate Code" }));
     await user.click(screen.getByRole("button", { name: "Rotate" }));
@@ -227,7 +229,7 @@ describe("Settings recovery code", () => {
     rotateRecoveryCodeMock.mockRejectedValue(new Error("network"));
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Account Recovery Code" }));
     await screen.findByText("DH-AAAA-BBBB");
     await user.click(screen.getByRole("button", { name: "Rotate Code" }));
     await user.click(screen.getByRole("button", { name: "Rotate" }));
@@ -246,7 +248,7 @@ describe("Settings linked device", () => {
     const user = userEvent.setup();
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(screen.getByRole("button", { name: "Manage Devices" }));
 
     expect(await screen.findByRole("dialog", { name: "Manage Devices" })).toBeVisible();
     expect(screen.getByText("Phone")).toBeVisible();
@@ -259,14 +261,14 @@ describe("Settings linked device", () => {
 
   it("reports a device-list error when Manage Devices is requested", async () => {
     renderSettings({ devices: null, deviceListError: new Error("network") });
-    expect(screen.getByRole("button", { name: "Manage devices" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Manage Devices" })).toBeDisabled();
   });
 
   it("updates the open list when a linked device changes elsewhere", async () => {
     const user = userEvent.setup();
     const view = renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(screen.getByRole("button", { name: "Manage Devices" }));
     view.rerender(
       <Settings
         effectiveUserId="user-1"
@@ -294,7 +296,7 @@ describe("Settings linked device", () => {
     const user = userEvent.setup();
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(screen.getByRole("button", { name: "Manage Devices" }));
     await user.click(await screen.findByRole("button", { name: "Rename Old laptop" }));
     const input = screen.getByPlaceholderText("e.g. Cormac's phone");
     await user.clear(input);
@@ -309,7 +311,7 @@ describe("Settings linked device", () => {
     const user = userEvent.setup();
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(screen.getByRole("button", { name: "Manage Devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Old laptop" }));
     await user.click(screen.getByRole("button", { name: "Unlink" }));
 
@@ -322,7 +324,7 @@ describe("Settings linked device", () => {
 
     getRecoveryCodeMock.mockResolvedValue("DH-NEWW-CODE");
     await user.click(within(manageDevices).getByRole("button", { name: "Close" }));
-    await user.click(screen.getByRole("button", { name: "Reveal recovery code" }));
+    await user.click(screen.getByRole("button", { name: "Reveal Account Recovery Code" }));
     expect(await screen.findByText("DH-NEWW-CODE")).toBeVisible();
   });
 
@@ -330,7 +332,7 @@ describe("Settings linked device", () => {
     const user = userEvent.setup();
     const { disconnect } = renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(screen.getByRole("button", { name: "Manage Devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Phone" }));
     await user.click(screen.getByRole("button", { name: "Unlink" }));
 
@@ -342,7 +344,7 @@ describe("Settings linked device", () => {
     const disconnect = vi.fn().mockRejectedValue(new Error("network"));
     renderSettings({ disconnect });
 
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(screen.getByRole("button", { name: "Manage Devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Phone" }));
     await user.click(screen.getByRole("button", { name: "Unlink" }));
 
@@ -359,7 +361,7 @@ describe("Settings linked device", () => {
     ];
     const { disconnect } = renderSettings({ devices: singleDevice });
 
-    await user.click(screen.getByRole("button", { name: "Manage devices" }));
+    await user.click(screen.getByRole("button", { name: "Manage Devices" }));
     await user.click(await screen.findByRole("button", { name: "Unlink Phone" }));
 
     expect(await screen.findByRole("heading", { name: "Unlink Last Device" })).toBeVisible();
@@ -377,8 +379,8 @@ describe("Settings account deletion", () => {
     deleteCurrentAccountMock.mockResolvedValue(undefined);
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Delete account" }));
-    const confirm = screen.getByRole("button", { name: "Delete permanently" });
+    await user.click(screen.getByRole("button", { name: "Delete Account" }));
+    const confirm = screen.getByRole("button", { name: "Delete Permanently" });
     expect(confirm).toBeDisabled();
     await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
     await user.click(confirm);
@@ -389,7 +391,7 @@ describe("Settings account deletion", () => {
   it("offers account deletion on every connected device", () => {
     renderSettings();
 
-    expect(screen.getByRole("button", { name: "Delete account" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete Account" })).toBeInTheDocument();
   });
 
   it("shows the server rejection when account deletion is blocked", async () => {
@@ -399,9 +401,9 @@ describe("Settings account deletion", () => {
     );
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Delete account" }));
+    await user.click(screen.getByRole("button", { name: "Delete Account" }));
     await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
-    await user.click(screen.getByRole("button", { name: "Delete permanently" }));
+    await user.click(screen.getByRole("button", { name: "Delete Permanently" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith(

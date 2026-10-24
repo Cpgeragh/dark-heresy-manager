@@ -163,7 +163,7 @@ describe("WeaponsTab upgrades", () => {
     renderTab({ rangedWeapons: [], meleeWeapons: [customMelee], onUpdateMelee });
 
     await user.click(screen.getByRole("button", { name: "Expand Custom Chainsword details" }));
-    await user.click(screen.getByRole("button", { name: "Add upgrade" }));
+    await user.click(screen.getByRole("button", { name: "Add Upgrade" }));
     await user.click(screen.getByText("Mono"));
 
     expect(onUpdateMelee).toHaveBeenCalledWith(
@@ -283,7 +283,7 @@ describe("WeaponsTab", () => {
       ).length;
     const initialCardRenderCount = cardRenderCount();
 
-    await user.click(screen.getByRole("button", { name: "Add ranged weapon" }));
+    await user.click(screen.getByRole("button", { name: "Add Ranged Weapon" }));
     expect(screen.getAllByText("Lasgun").length).toBeGreaterThan(0);
     await user.keyboard("{Escape}");
 
@@ -309,7 +309,7 @@ describe("WeaponsTab", () => {
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
 
-    await user.click(screen.getByRole("button", { name: "Add ranged weapon" }));
+    await user.click(screen.getByRole("button", { name: "Add Ranged Weapon" }));
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
   });
@@ -652,7 +652,7 @@ describe("WeaponsTab custom-item library actions", () => {
     });
     const { noop } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add ranged weapon" }));
+    await user.click(screen.getByRole("button", { name: "Add Ranged Weapon" }));
     await user.click(screen.getByRole("button", { name: "Select Custom Lasgun" }));
 
     expect(noop).toHaveBeenCalledWith(
@@ -699,7 +699,7 @@ describe("WeaponsTab custom-item library actions", () => {
     renderTab({ isDM: true, rangedWeapons: [linkedWeapon], meleeWeapons: [] });
     await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Archive" }));
-    await user.click(await screen.findByRole("button", { name: "Yes" }));
+    await user.click(await screen.findByRole("button", { name: "Archive" }));
     expect(archiveCustomItemMock).toHaveBeenCalledWith(
       expect.objectContaining({ customItemId: "lib1" })
     );

@@ -168,7 +168,7 @@ describe("useReleaseFlow", () => {
     const { onFinished } = setup();
 
     await startAndConfirm(user);
-    await user.click(await screen.findByRole("button", { name: "Keep my chat" }));
+    await user.click(await screen.findByRole("button", { name: "Keep My Chat" }));
 
     expect(clearChatMock).not.toHaveBeenCalled();
     expect(onFinished).toHaveBeenCalledOnce();
@@ -180,7 +180,9 @@ describe("useReleaseFlow", () => {
     const { onFinished } = setup();
 
     await startAndConfirm(user);
-    await user.click(await screen.findByRole("button", { name: "Delete my chat" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Move My Chat to Recently Deleted" })
+    );
 
     await waitFor(() => expect(onFinished).toHaveBeenCalledOnce());
     expect(clearChatMock).toHaveBeenCalledWith("player-1", CHAT_ID);
@@ -194,7 +196,9 @@ describe("useReleaseFlow", () => {
     const { onFinished } = setup();
 
     await startAndConfirm(user);
-    await user.click(await screen.findByRole("button", { name: "Delete my chat" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Move My Chat to Recently Deleted" })
+    );
 
     await waitFor(() =>
       expect(toastErrorMock).toHaveBeenCalledWith("Failed to delete the chat. Please try again.")
@@ -202,7 +206,7 @@ describe("useReleaseFlow", () => {
     expect(screen.getByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
     expect(onFinished).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
     expect(onFinished).toHaveBeenCalledOnce();
   });
 
@@ -274,7 +278,7 @@ describe("useReleaseFlow", () => {
     await screen.findByRole("dialog", { name: "Keep your chat?" });
     expect(screen.getByText("flow active")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
     expect(screen.getByText("flow idle")).toBeInTheDocument();
   });
 

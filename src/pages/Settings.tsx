@@ -15,7 +15,6 @@ import { useToast } from "../components/Toast";
 import { InfoModal } from "../components/InfoModal";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
-  colourAmberPlain,
   colourMetadataLabelText,
   colourTextPrimary,
   colourDivider,
@@ -39,6 +38,7 @@ import { EditButton } from "../ui/buttons/EditButton";
 import { UnlinkButton } from "../ui/buttons/UnlinkButton";
 import { PickerModal, PickerBody } from "../ui/pickers/PickerModal";
 import { RevealCodeModal } from "../ui/modals/RevealCodeModal";
+import { DeleteConfirmModal } from "../ui/modals/DeleteConfirmModal";
 import { formatFirstNameInput } from "../utils/firstName";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
@@ -95,7 +95,6 @@ export default function Settings({
   const [deletingAccount, setDeletingAccount] = useState(false);
   const deletingAccountRef = useRef(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   useEffect(() => {
     if (!devices || legacyRenamePromptedRef.current) return;
@@ -312,7 +311,7 @@ export default function Settings({
             </span>
           </div>
           <EditButton
-            label="Edit display name"
+            label="Edit Display Name"
             className="justify-self-end"
             onClick={() => setEditNameOpen(true)}
           />
@@ -369,17 +368,17 @@ export default function Settings({
         <section className={settingsRowClass}>
           <div>
             <span className="flex items-center gap-1.5">
-              <span className={settingsLabelClass}>View Account Recovery Code</span>
+              <span className={settingsLabelClass}>Reveal Account Recovery Code</span>
               <span className={uiInfoModalWrapper}>
                 <InfoModal
-                  title="View Account Recovery Code"
+                  title="Reveal Account Recovery Code"
                   content="Use this code to reconnect to your campaigns and characters if no device is still connected. Keep it somewhere safe and private."
                 />
               </span>
             </span>
           </div>
           <ViewButton
-            label="Reveal recovery code"
+            label="Reveal Account Recovery Code"
             className="justify-self-end"
             onClick={handleReveal}
             disabled={revealing}
@@ -411,7 +410,7 @@ export default function Settings({
             </span>
           </div>
           <ManageDevicesButton
-            label="Manage devices"
+            label="Manage Devices"
             className="justify-self-end"
             onClick={handleOpenManageDevices}
             disabled={!devices || !!deviceListError}
@@ -678,74 +677,24 @@ export default function Settings({
             </span>
           </div>
           <RemoveButton
-            label="Delete account"
+            label="Delete Account"
             className="justify-self-end"
             onClick={() => setDeleteConfirmOpen(true)}
           />
         </section>
 
         {deleteConfirmOpen && (
-          <PickerModal
+          <DeleteConfirmModal
             title="Delete Account"
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => {
-              if (deletingAccount) return;
-              setDeleteConfirmOpen(false);
-              setDeleteConfirmText("");
+            message="This permanently deletes your account. This cannot be undone."
+            typedLabel="Type DELETE to permanently delete this account"
+            ready
+            deleting={deletingAccount}
+            onConfirm={async () => {
+              if (await handleDeleteAccount()) setDeleteConfirmOpen(false);
             }}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-sm"
-            footer={
-              <div className={uiStackList}>
-                <p className={`text-xs lg:text-sm ${colourAmberPlain} text-center`}>
-                  Type DELETE to permanently delete this account
-                </p>
-                <input
-                  type="text"
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  disabled={deletingAccount}
-                  placeholder="DELETE"
-                  className={editableInputClass(true)}
-                  autoComplete="off"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="primary"
-                    disabled={deleteConfirmText !== "DELETE"}
-                    loading={deletingAccount}
-                    loadingLabel="Deleting"
-                    onClick={async () => {
-                      if (await handleDeleteAccount()) {
-                        setDeleteConfirmOpen(false);
-                        setDeleteConfirmText("");
-                      }
-                    }}
-                  >
-                    Delete permanently
-                  </Button>
-                  <Button
-                    variant="neutral"
-                    disabled={deletingAccount}
-                    onClick={() => {
-                      setDeleteConfirmOpen(false);
-                      setDeleteConfirmText("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            }
-          >
-            <PickerBody>
-              <p className={`text-sm lg:text-base ${uiTextBody}`}>
-                This permanently deletes your account. This cannot be undone.
-              </p>
-            </PickerBody>
-          </PickerModal>
+            onCancel={() => setDeleteConfirmOpen(false)}
+          />
         )}
       </div>
 

@@ -275,7 +275,7 @@ describe("CyberneticsTab", () => {
       ([name]) => name === "ImplantRow"
     ).length;
 
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+    await user.click(screen.getByRole("button", { name: "Add Integrated Weapon" }));
 
     expect(screen.getAllByText("Auto-Quill").length).toBeGreaterThan(0);
     expect(initialRenderCount).toBeGreaterThan(0);
@@ -290,7 +290,7 @@ describe("CyberneticsTab", () => {
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
 
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+    await user.click(screen.getByRole("button", { name: "Add Integrated Weapon" }));
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
   });
@@ -371,7 +371,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByRole("button", { name: "Add Implant" }));
     await user.click(screen.getByText("Mock Select Plain Implant"));
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -391,7 +391,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByRole("button", { name: "Add Implant" }));
     await user.click(screen.getByText("Mock Select Weighted Implant"));
 
     expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ weight: "3 kg" })], {
@@ -403,7 +403,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByRole("button", { name: "Add Implant" }));
     await user.click(screen.getByText("Mock Select Concealed Weapon Bionic"));
 
     expect(onUpdate).not.toHaveBeenCalled();
@@ -420,7 +420,7 @@ describe("CyberneticsTab", () => {
     };
     const { onUpdate, onUpdateRanged } = renderTab({ rangedWeapons: [rangedWeapon] });
 
-    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByRole("button", { name: "Add Implant" }));
     await user.click(screen.getByText("Mock Select Concealed Weapon Bionic"));
     await user.click(screen.getByText("Mock Complete Concealed Install"));
 
@@ -449,7 +449,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByRole("button", { name: "Add Implant" }));
     await user.click(screen.getByText("Mock Select Library Implant"));
     await user.click(screen.getByText("Mock Submit Custom Implant"));
 
@@ -470,7 +470,7 @@ describe("CyberneticsTab", () => {
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByRole("button", { name: "Add Implant" }));
     await user.click(screen.getByText("Mock Add Custom Implant Trigger"));
     await user.click(screen.getByText("Mock Submit Custom Implant"));
 
@@ -490,7 +490,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ userId: null });
 
-    await user.click(screen.getByRole("button", { name: "Add implant" }));
+    await user.click(screen.getByRole("button", { name: "Add Implant" }));
     await user.click(screen.getByText("Mock Add Custom Implant Trigger"));
     await user.click(screen.getByText("Mock Submit Custom Implant"));
 
@@ -659,8 +659,7 @@ describe("CyberneticsTab", () => {
     const user = userEvent.setup();
     const { onUpdateRanged } = renderTab();
 
-    // First "+ Install" is the Integrated Weapons section's trigger.
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+    await user.click(screen.getByRole("button", { name: "Add Integrated Weapon" }));
     await user.click(screen.getByText("Mock Select Integrated Ranged"));
 
     expect(onUpdateRanged).toHaveBeenCalledWith(
@@ -680,7 +679,7 @@ describe("CyberneticsTab", () => {
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-3", versionId: "v3" });
     const { onUpdateRanged } = renderTab();
 
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+    await user.click(screen.getByRole("button", { name: "Add Integrated Weapon" }));
     await user.click(screen.getByText("Mock Add Custom Integrated Ranged Trigger"));
     await user.click(screen.getByText("Mock Submit Custom Integrated Ranged"));
 
@@ -708,7 +707,7 @@ describe("CyberneticsTab", () => {
     );
     renderTab({ onUpdateRanged });
 
-    await user.click(screen.getAllByRole("button", { name: "+ Install" })[0]);
+    await user.click(screen.getByRole("button", { name: "Add Integrated Weapon" }));
     await user.click(screen.getByText("Mock Add Custom Integrated Ranged Trigger"));
     await user.click(screen.getByText("Mock Submit Custom Integrated Ranged"));
 

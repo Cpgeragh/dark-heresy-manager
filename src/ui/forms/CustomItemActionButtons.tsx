@@ -56,6 +56,8 @@ export function CustomItemActionButtons({
           size="xs"
           variant="warning"
           question="Archive and remove copies?"
+          confirmLabel="Archive"
+          cancelLabel="Cancel"
           busy={busy}
           busyLabel="Archiving"
           onConfirm={() => onArchive?.()}
@@ -69,6 +71,8 @@ export function CustomItemActionButtons({
           size="xs"
           variant="warning"
           question="Publish and update copies?"
+          confirmLabel="Update All Copies"
+          cancelLabel="Cancel"
           busy={busy}
           busyLabel="Updating"
           onConfirm={() => onUpdateAllCopies?.()}

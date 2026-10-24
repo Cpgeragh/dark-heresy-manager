@@ -135,13 +135,13 @@ export function PieceRow({
                 <span className={uiTextLabel}>Upgrades</span>
                 {editable ? (
                   <AddButton
-                    label="Add upgrade"
+                    label="Add Upgrade"
                     size="sm"
                     onClick={() => setShowUpgradePicker(true)}
                   />
                 ) : (
                   <ViewButton
-                    label="View upgrades"
+                    label="View Upgrades"
                     size="sm"
                     onClick={() => setShowUpgradePicker(true)}
                   />

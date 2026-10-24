@@ -394,19 +394,19 @@ export function SkillsTab({
               {activeView === "basic" ? (
                 editable ? (
                   <AddButton
-                    label="Add basic skill"
+                    label="Add Basic Skill"
                     onClick={() => setIsUntrainedBasicOpen(true)}
                   />
                 ) : (
                   <ViewButton
-                    label="View basic skills"
+                    label="View Basic Skills"
                     onClick={() => setIsUntrainedBasicOpen(true)}
                   />
                 )
               ) : editable ? (
-                <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
+                <AddButton label="Add Advanced Skill" onClick={() => setIsAddOpen(true)} />
               ) : (
-                <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
+                <ViewButton label="View Advanced Skills" onClick={() => setIsAddOpen(true)} />
               )}
             </div>
             {activeView === "basic" ? (
@@ -426,10 +426,10 @@ export function SkillsTab({
             <div className="flex items-center justify-between">
               <SkillTypeHeading type="basic" />
               {editable ? (
-                <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
+                <AddButton label="Add Basic Skill" onClick={() => setIsUntrainedBasicOpen(true)} />
               ) : (
                 <ViewButton
-                  label="View basic skills"
+                  label="View Basic Skills"
                   onClick={() => setIsUntrainedBasicOpen(true)}
                 />
               )}
@@ -440,9 +440,9 @@ export function SkillsTab({
             <div className="flex items-center justify-between">
               <SkillTypeHeading type="advanced" />
               {editable ? (
-                <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
+                <AddButton label="Add Advanced Skill" onClick={() => setIsAddOpen(true)} />
               ) : (
-                <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
+                <ViewButton label="View Advanced Skills" onClick={() => setIsAddOpen(true)} />
               )}
             </div>
             {advancedItems.length === 0 ? (

@@ -9,8 +9,8 @@ interface Props {
   xpAwarded: number;
   attendeeNames: string[];
   busy: boolean;
-  onYes: () => void;
-  onNo: () => void;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 function joinNames(names: string[]): string {
@@ -18,7 +18,13 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 }
 
-export function CloseSessionConfirmModal({ xpAwarded, attendeeNames, busy, onYes, onNo }: Props) {
+export function CloseSessionConfirmModal({
+  xpAwarded,
+  attendeeNames,
+  busy,
+  onConfirm,
+  onCancel,
+}: Props) {
   const givesXp = xpAwarded > 0 && attendeeNames.length > 0;
   const sortedNames = [...attendeeNames].sort((a, b) => a.localeCompare(b));
 
@@ -28,18 +34,18 @@ export function CloseSessionConfirmModal({ xpAwarded, attendeeNames, busy, onYes
       query=""
       onQueryChange={() => undefined}
       onClose={() => {
-        if (!busy) onNo();
+        if (!busy) onCancel();
       }}
       isEmpty={false}
       hideSearch
       maxWidth="max-w-sm"
       footer={
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="primary" loading={busy} loadingLabel="Closing" onClick={onYes}>
-            Yes
+          <Button variant="primary" loading={busy} loadingLabel="Closing" onClick={onConfirm}>
+            Close Session
           </Button>
-          <Button variant="neutral" disabled={busy} onClick={onNo}>
-            No
+          <Button variant="neutral" disabled={busy} onClick={onCancel}>
+            Cancel
           </Button>
         </div>
       }

@@ -166,7 +166,7 @@ describe("GearTab", () => {
       ).length;
     const initialRowRenderCount = rowRenderCount();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     expect(screen.getByText("Auspex")).toBeInTheDocument();
     await user.keyboard("{Escape}");
 
@@ -195,7 +195,7 @@ describe("GearTab", () => {
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
   });
@@ -229,17 +229,17 @@ describe("GearTab", () => {
 
   it("shows View instead of Add for both sections when not editable", () => {
     renderTab({ editable: false });
-    expect(screen.getByRole("button", { name: "View items" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "View consumables" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add item" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add consumable" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View Items" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View Consumables" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Item" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Consumable" })).not.toBeInTheDocument();
   });
 
   it("adds a real gear item from the reference picker", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByText(GEAR_NAME));
 
     expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })], {
@@ -251,7 +251,7 @@ describe("GearTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByText(VARIABLE_GEAR_NAME));
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "500");
     await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
@@ -265,7 +265,7 @@ describe("GearTab", () => {
     const user = userEvent.setup();
     const { onUpdateConsumables } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByRole("button", { name: "Add Consumable" }));
     await user.click(screen.getByText(CONSUMABLE_NAME));
 
     expect(onUpdateConsumables).toHaveBeenCalledWith(
@@ -283,7 +283,7 @@ describe("GearTab", () => {
     });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByText("Custom Rope"));
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -307,7 +307,7 @@ describe("GearTab", () => {
     });
     const { onUpdateConsumables } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByRole("button", { name: "Add Consumable" }));
     await user.click(screen.getByText("Custom Tonic"));
 
     expect(onUpdateConsumables).toHaveBeenCalledWith(
@@ -327,7 +327,7 @@ describe("GearTab", () => {
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Item" }));
     await user.click(screen.getByText("Mock Submit Custom Gear"));
 
@@ -345,7 +345,7 @@ describe("GearTab", () => {
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-2", versionId: "v2" });
     const { onUpdateConsumables } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByRole("button", { name: "Add Consumable" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Consumable" }));
     await user.click(screen.getByText("Mock Submit Custom Consumable"));
 
@@ -362,7 +362,7 @@ describe("GearTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ userId: null });
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Item" }));
     await user.click(screen.getByText("Mock Submit Custom Gear"));
 
@@ -408,7 +408,7 @@ describe("GearTab", () => {
     );
     renderTab({ onUpdate });
 
-    await user.click(screen.getByRole("button", { name: "Add item" }));
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
     await user.click(screen.getByText(GEAR_NAME));
 
     const row = screen.getByText(GEAR_NAME).closest("button");
@@ -432,7 +432,7 @@ describe("GearTab", () => {
     );
     renderTab({ onUpdateConsumables });
 
-    await user.click(screen.getByRole("button", { name: "Add consumable" }));
+    await user.click(screen.getByRole("button", { name: "Add Consumable" }));
     await user.click(screen.getByText(CONSUMABLE_NAME));
 
     const row = screen.getByText(CONSUMABLE_NAME).closest("button");

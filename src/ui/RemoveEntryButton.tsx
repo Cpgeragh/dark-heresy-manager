@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "./buttons/Button";
 import { RemoveButton } from "./buttons/RemoveButton";
+import { DeleteConfirmModal } from "./modals/DeleteConfirmModal";
 import { PickerBody, PickerModal } from "./pickers/PickerModal";
 import { uiTextBody } from "./styles/editableStyles";
 
@@ -32,7 +33,10 @@ export function RemoveEntryButton({
   className,
 }: RemoveEntryButtonProps) {
   const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  const [deleting, setDeleting] = useState(false);
+  const close = () => {
+    if (!deleting) setOpen(false);
+  };
   const title = blockedMessage
     ? `Cannot ${verb} ${kind}`
     : extra
@@ -42,11 +46,30 @@ export function RemoveEntryButton({
   const run = (action: () => unknown) => async () => {
     if ((await action()) !== false) close();
   };
+  const runDelete = async () => {
+    setDeleting(true);
+    try {
+      if ((await onRemove()) !== false) setOpen(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <>
       <RemoveButton label={`${verb} ${name}`} className={className} onClick={() => setOpen(true)} />
-      {open && (
+      {open && verb === "Delete" && (
+        <DeleteConfirmModal
+          title={`Delete ${kind}`}
+          message={`This permanently deletes ${name} from ${from}. This cannot be undone.`}
+          typedLabel={`Type DELETE to permanently delete ${name}`}
+          ready
+          deleting={deleting}
+          onConfirm={runDelete}
+          onCancel={close}
+        />
+      )}
+      {open && verb === "Remove" && (
         <PickerModal
           title={title}
           query=""

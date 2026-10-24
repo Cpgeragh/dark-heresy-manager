@@ -323,14 +323,14 @@ describe("SkillsTab", () => {
 
   it("shows the add affordance when editable", () => {
     renderTab();
-    expect(screen.getAllByRole("button", { name: "Add basic skill" }).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Add advanced skill" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Add Basic Skill" }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Add Advanced Skill" })).toBeInTheDocument();
   });
 
   it("keeps the Skill picker open and uses separated source-labelled cards", async () => {
     const user = userEvent.setup();
     render(<StatefulSkillsTab initialSkills={[]} />);
-    await user.click(screen.getAllByRole("button", { name: "Add basic skill" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Basic Skill" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Available Untrained Basic Skills" });
     const list = within(dialog).getByTestId("skill-picker-card-list");
     expect(list).toHaveClass("space-y-2", "p-3");
@@ -350,7 +350,7 @@ describe("SkillsTab", () => {
   it("restores the Skill list position after returning from a grouped category", async () => {
     const user = userEvent.setup();
     render(<StatefulSkillsTab initialSkills={[]} />);
-    await user.click(screen.getByRole("button", { name: "Add advanced skill" }));
+    await user.click(screen.getByRole("button", { name: "Add Advanced Skill" }));
 
     const dialog = screen.getByRole("dialog", { name: "Available Untrained Advanced Skills" });
     const list = dialog.querySelector<HTMLElement>(".overflow-y-auto");
@@ -378,7 +378,7 @@ describe("SkillsTab", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Add basic skill" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Basic Skill" })[0]);
     const availableDialog = screen.getByRole("dialog", {
       name: "Available Untrained Basic Skills",
     });
@@ -441,7 +441,7 @@ describe("SkillsTab", () => {
       />
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Add basic skill" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Basic Skill" })[0]);
     await user.click(screen.getByRole("button", { name: /Common Lore/ }));
     await user.click(screen.getByRole("button", { name: "Select Common Lore (Imperial Creed)" }));
     await user.click(screen.getByRole("button", { name: "Select Common Lore (Imperium)" }));
@@ -472,12 +472,12 @@ describe("SkillsTab", () => {
 
   it("shows 'View Skills' and no add button in read-only mode", () => {
     renderTab({ editable: false });
-    expect(screen.getAllByRole("button", { name: "View basic skills" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "View advanced skills" }).length).toBeGreaterThan(
+    expect(screen.getAllByRole("button", { name: "View Basic Skills" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "View Advanced Skills" }).length).toBeGreaterThan(
       0
     );
-    expect(screen.queryByRole("button", { name: "Add basic skill" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add advanced skill" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Basic Skill" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Advanced Skill" })).not.toBeInTheDocument();
   });
 
   it("shows the empty message when there are no trained skills", () => {

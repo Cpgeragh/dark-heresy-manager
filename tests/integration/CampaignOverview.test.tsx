@@ -372,14 +372,14 @@ describe("CampaignOverview: sections and the section menu", () => {
     await user.click(screen.getByRole("button", { name: "Go to Session History" }));
     expect(screen.getByRole("heading", { name: "Session History" })).toBeInTheDocument();
     expect(screen.getByText("No sessions recorded yet.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Create character" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create Character" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Go to Custom Item Library" }));
     expect(screen.getByRole("heading", { name: "Custom Item Library" })).toBeInTheDocument();
     expect(screen.getByText("Mock CustomItemLibraryAdmin")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Go to Party" }));
-    expect(screen.getByRole("button", { name: "Create character" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create Character" })).toBeInTheDocument();
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" });
   });
 
@@ -400,7 +400,7 @@ describe("CampaignOverview: sections and the section menu", () => {
     renderPage("dm-1", "nonsense");
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Party" })).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Create character" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create Character" })).toBeInTheDocument();
   });
 });
 
@@ -427,7 +427,7 @@ describe("CampaignOverview: the DM's Party section", () => {
   });
 
   async function openCreateWindow(user: ReturnType<typeof userEvent.setup>) {
-    await user.click(screen.getByRole("button", { name: "Create character" }));
+    await user.click(screen.getByRole("button", { name: "Create Character" }));
     return screen.findByRole("dialog", { name: "Create Character" });
   }
 
@@ -500,12 +500,12 @@ describe("CampaignOverview: the DM's Party section", () => {
       error: null,
     });
     renderPage("player-1");
-    expect(screen.queryByRole("button", { name: "Create character" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create Character" })).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Search…")).not.toBeInTheDocument();
     expect(screen.queryByText("Mock CharacterRow: Vex")).not.toBeInTheDocument();
 
     renderPage("dm-1");
-    expect(screen.getByRole("button", { name: "Create character" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create Character" })).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Search…")).toBeInTheDocument();
   });
 
@@ -839,7 +839,7 @@ describe("CampaignOverview: chats after a character is deleted", () => {
     await user.click(screen.getByRole("button", { name: "Mock Delete Vex" }));
 
     expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
     expect(screen.queryByRole("dialog", { name: "Keep your chat?" })).not.toBeInTheDocument();
   });
 

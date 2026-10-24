@@ -102,6 +102,11 @@ function confirmDialog() {
   return within(screen.getByRole("dialog", { name: "Delete Session" }));
 }
 
+function closeConfirmationDialog() {
+  const dialogs = screen.getAllByRole("dialog", { name: "Close Session" });
+  return within(dialogs[dialogs.length - 1]);
+}
+
 describe("SessionCard delete pop-up", () => {
   it("opens the Delete Session pop-up and calls onDelete(false) when XP was never applied", async () => {
     const user = userEvent.setup();
@@ -112,12 +117,15 @@ describe("SessionCard delete pop-up", () => {
     );
 
     expect(screen.queryByRole("dialog", { name: "Delete Session" })).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
 
-    expect(confirmDialog().getByText(/Delete the session on/)).toBeInTheDocument();
+    expect(
+      confirmDialog().getByText(/This permanently deletes the session on/)
+    ).toBeInTheDocument();
     expect(screen.queryByText(/won't remove that XP/)).not.toBeInTheDocument();
 
-    await user.click(confirmDialog().getByRole("button", { name: "Delete" }));
+    await user.type(confirmDialog().getByPlaceholderText("DELETE"), "DELETE");
+    await user.click(confirmDialog().getByRole("button", { name: "Delete Permanently" }));
 
     expect(onDelete).toHaveBeenCalledWith(false);
     await waitFor(() =>
@@ -137,7 +145,7 @@ describe("SessionCard delete pop-up", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
 
     expect(confirmDialog().getByText(/already applied/)).toBeInTheDocument();
     expect(confirmDialog().getByText(/Also remove 200 XP from attendees/)).toBeInTheDocument();
@@ -159,7 +167,7 @@ describe("SessionCard delete pop-up", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
     await user.click(confirmDialog().getByRole("checkbox"));
     expect(confirmDialog().getByRole("checkbox")).toBeChecked();
 
@@ -175,8 +183,9 @@ describe("SessionCard delete pop-up", () => {
       <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
-    await user.click(confirmDialog().getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
+    await user.type(confirmDialog().getByPlaceholderText("DELETE"), "DELETE");
+    await user.click(confirmDialog().getByRole("button", { name: "Delete Permanently" }));
 
     expect(onDelete).toHaveBeenCalledWith(false);
   });
@@ -189,9 +198,10 @@ describe("SessionCard delete pop-up", () => {
       <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
     await user.click(confirmDialog().getByRole("checkbox"));
-    await user.click(confirmDialog().getByRole("button", { name: "Delete" }));
+    await user.type(confirmDialog().getByPlaceholderText("DELETE"), "DELETE");
+    await user.click(confirmDialog().getByRole("button", { name: "Delete Permanently" }));
 
     expect(onDelete).toHaveBeenCalledWith(true);
   });
@@ -204,7 +214,7 @@ describe("SessionCard delete pop-up", () => {
       <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
     await user.click(confirmDialog().getByRole("checkbox"));
     await user.click(confirmDialog().getByRole("button", { name: "Cancel" }));
 
@@ -212,7 +222,7 @@ describe("SessionCard delete pop-up", () => {
     expect(screen.queryByRole("dialog", { name: "Delete Session" })).not.toBeInTheDocument();
 
     // Reopening should start unchecked again, not remember the discarded state.
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
     expect(confirmDialog().getByRole("checkbox")).not.toBeChecked();
   });
 
@@ -223,7 +233,7 @@ describe("SessionCard delete pop-up", () => {
       <SessionCard session={session} characters={characters} isDM={false} onDelete={onDelete} />
     );
 
-    expect(screen.queryByRole("button", { name: "Delete session" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Delete Session" })).not.toBeInTheDocument();
   });
 });
 
@@ -318,7 +328,7 @@ describe("SessionCard open session", () => {
     renderOpen();
 
     expect(screen.getByText("In progress")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete session" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete Session" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
     expect(screen.queryByText(/XP$/)).not.toBeInTheDocument();
   });
@@ -345,7 +355,7 @@ describe("SessionCard open session", () => {
     const user = userEvent.setup();
     renderOpen();
 
-    await user.click(screen.getByRole("button", { name: "Delete session" }));
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
 
     expect(screen.getByRole("dialog", { name: "Delete Session" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Session in Progress" })).not.toBeInTheDocument();
@@ -374,7 +384,7 @@ describe("SessionCard open session", () => {
     expect(screen.queryByRole("dialog", { name: "Session in Progress" })).not.toBeInTheDocument();
   });
 
-  it("closes the session only after Yes in the confirmation, with the final values", async () => {
+  it("closes the session only after action-specific confirmation with final values", async () => {
     const user = userEvent.setup();
     const { onCloseSession } = renderOpen({
       session: { ...openSession, summary: "A bloody night." },
@@ -389,7 +399,7 @@ describe("SessionCard open session", () => {
     expect(onCloseSession).not.toHaveBeenCalled();
     expect(screen.getByText("Give 150 XP to Brother Corvus. Is that correct?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(closeConfirmationDialog().getByRole("button", { name: "Close Session" }));
 
     expect(onCloseSession).toHaveBeenCalledWith({
       xpAwarded: 150,
@@ -400,7 +410,7 @@ describe("SessionCard open session", () => {
     );
   });
 
-  it("cancels the save when the answer is No and keeps the typed values", async () => {
+  it("cancels the save while preserving the previously typed values", async () => {
     const user = userEvent.setup();
     const { onCloseSession } = renderOpen({ session: { ...openSession, summary: "Recap" } });
 
@@ -409,7 +419,7 @@ describe("SessionCard open session", () => {
     await user.type(closeDialog.getByLabelText(/^XP Awarded/), "150");
     await user.click(closeDialog.getByRole("button", { name: "Close Session" }));
 
-    await user.click(screen.getByRole("button", { name: "No" }));
+    await user.click(closeConfirmationDialog().getByRole("button", { name: "Cancel" }));
 
     expect(onCloseSession).not.toHaveBeenCalled();
     expect(screen.queryByText(/Is that correct/)).not.toBeInTheDocument();

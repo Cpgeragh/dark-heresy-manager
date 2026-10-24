@@ -109,8 +109,15 @@ describe("RemoveEntryButton", () => {
     await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
 
     const dialog = screen.getByRole("dialog", { name: "Delete Note" });
-    expect(within(dialog).getByText("Delete Session 12 from the archive?")).toBeInTheDocument();
-    await user.click(within(dialog).getByRole("button", { name: "Delete" }));
+    expect(
+      within(dialog).getByText(
+        "This permanently deletes Session 12 from the archive. This cannot be undone."
+      )
+    ).toBeInTheDocument();
+    const confirm = within(dialog).getByRole("button", { name: "Delete Permanently" });
+    expect(confirm).toBeDisabled();
+    await user.type(within(dialog).getByPlaceholderText("DELETE"), "DELETE");
+    await user.click(confirm);
     expect(onRemove).toHaveBeenCalledOnce();
   });
 });

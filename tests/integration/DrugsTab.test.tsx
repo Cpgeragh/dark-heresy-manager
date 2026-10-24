@@ -102,7 +102,7 @@ describe("DrugsTab", () => {
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
 
-    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Drug" }));
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
   });
@@ -136,15 +136,15 @@ describe("DrugsTab", () => {
 
   it("shows View instead of Add drug when not editable", () => {
     renderTab({ editable: false });
-    expect(screen.getByRole("button", { name: "View drugs" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add drug" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View Drugs" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Drug" })).not.toBeInTheDocument();
   });
 
   it("adds a real drug from the reference picker", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Drug" }));
     await user.click(screen.getByText(DRUG_NAME));
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -159,7 +159,7 @@ describe("DrugsTab", () => {
     const unweighed = DRUGS_REFERENCE.find((drug) => drug.weight === undefined);
     expect(unweighed).toBeDefined();
 
-    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Drug" }));
     await user.click(screen.getByText(unweighed!.name));
 
     const added = onUpdate.mock.calls[0][0][0] as DrugItem;
@@ -175,7 +175,7 @@ describe("DrugsTab", () => {
     });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Drug" }));
     await user.click(screen.getByText("Custom Stimm"));
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -195,7 +195,7 @@ describe("DrugsTab", () => {
     createDraftCustomItemMock.mockResolvedValue({ customItemId: "lib-1", versionId: "v1" });
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Drug" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Drug" }));
     await user.click(screen.getByText("Mock Submit Custom Drug"));
 
@@ -212,7 +212,7 @@ describe("DrugsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ userId: null });
 
-    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Drug" }));
     await user.click(screen.getByRole("button", { name: "Add Custom Drug" }));
     await user.click(screen.getByText("Mock Submit Custom Drug"));
 
@@ -256,7 +256,7 @@ describe("DrugsTab", () => {
     );
     renderTab({ onUpdate });
 
-    await user.click(screen.getByRole("button", { name: "Add drug" }));
+    await user.click(screen.getByRole("button", { name: "Add Drug" }));
     await user.click(screen.getByText(DRUG_NAME));
 
     const row = screen.getByText(DRUG_NAME).closest("button");

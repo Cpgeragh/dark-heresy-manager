@@ -23,27 +23,29 @@ describe("KeepOrDeleteChatModal", () => {
   it("offers Keep and Delete and no Cancel", () => {
     renderModal();
 
-    expect(screen.getByRole("button", { name: "Keep my chat" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete my chat" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Keep My Chat" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Move My Chat to Recently Deleted" })
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
   });
 
-  it("keeps the chat when Keep my chat is pressed", async () => {
+  it("keeps the chat when Keep My Chat is pressed", async () => {
     const user = userEvent.setup();
     const { onKeep, onDelete } = renderModal();
 
-    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
 
     expect(onKeep).toHaveBeenCalledOnce();
     expect(onDelete).not.toHaveBeenCalled();
   });
 
-  it("deletes the chat when Delete my chat is pressed", async () => {
+  it("deletes the chat when Move My Chat to Recently Deleted is pressed", async () => {
     const user = userEvent.setup();
     const { onKeep, onDelete } = renderModal();
 
-    await user.click(screen.getByRole("button", { name: "Delete my chat" }));
+    await user.click(screen.getByRole("button", { name: "Move My Chat to Recently Deleted" }));
 
     expect(onDelete).toHaveBeenCalledOnce();
     expect(onKeep).not.toHaveBeenCalled();
@@ -65,8 +67,10 @@ describe("KeepOrDeleteChatModal", () => {
     expect(screen.getByRole("dialog", { name: "Keep your chats?" })).toBeInTheDocument();
     expect(screen.getByText(/You have 3 chats about this character/)).toBeInTheDocument();
     expect(screen.getByText(/restore them for 7 days/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Keep my chats" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete my chats" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Keep My Chats" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Move My Chats to Recently Deleted" })
+    ).toBeInTheDocument();
   });
 
   it("names the campaign when the chats are about a campaign", () => {
@@ -94,7 +98,7 @@ describe("KeepOrDeleteChatModal", () => {
   it("disables Keep and shows the deleting label while the delete runs", () => {
     renderModal(true);
 
-    expect(screen.getByRole("button", { name: "Keep my chat" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Deleting/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Keep My Chat" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Moving/ })).toBeDisabled();
   });
 });

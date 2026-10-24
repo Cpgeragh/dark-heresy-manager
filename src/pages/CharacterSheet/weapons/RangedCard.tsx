@@ -801,9 +801,9 @@ export function RangedCard({
           <div className="flex items-center justify-between">
             <span className={uiTextLabel}>Ammo</span>
             {editable ? (
-              <AddButton label="Add ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
+              <AddButton label="Add Ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
             ) : (
-              <ViewButton label="View ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
+              <ViewButton label="View Ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
             )}
           </div>
 
@@ -863,13 +863,13 @@ export function RangedCard({
               : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
               (editable ? (
                 <AddButton
-                  label="Add upgrade"
+                  label="Add Upgrade"
                   size="sm"
                   onClick={() => setShowUpgradePicker(true)}
                 />
               ) : (
                 <ViewButton
-                  label="View upgrades"
+                  label="View Upgrades"
                   size="sm"
                   onClick={() => setShowUpgradePicker(true)}
                 />

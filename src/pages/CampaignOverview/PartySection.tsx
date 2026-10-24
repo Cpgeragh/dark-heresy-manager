@@ -16,7 +16,6 @@ import {
   uiStackList,
   uiTextPlaceholder,
 } from "../../ui/styles/editableStyles";
-import { AddButton } from "../../ui/buttons/AddButton";
 import { Button } from "../../ui/buttons/Button";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
@@ -146,7 +145,9 @@ export function PartySection({
               spellCheck={false}
             />
           </div>
-          <AddButton label="Create character" onClick={() => setCreateOpen(true)} />
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            Create Character
+          </Button>
         </div>
 
         <div className={uiStackList}>

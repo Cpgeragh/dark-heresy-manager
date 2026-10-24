@@ -654,7 +654,7 @@ describe("CharacterSheet release pop-ups", () => {
     expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
     expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
 
     expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
   });
@@ -683,7 +683,7 @@ describe("CharacterSheet release pop-ups", () => {
     expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
     expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
 
     expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
   });
@@ -724,7 +724,7 @@ describe("CharacterSheet release pop-ups", () => {
 
     expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Keep my chat" }));
+    await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
 
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByText("Mock AdminTab")).toBeInTheDocument();

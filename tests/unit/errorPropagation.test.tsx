@@ -94,7 +94,7 @@ function renderCodeStep(onComplete = vi.fn()) {
       <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={onComplete} />
     </MemoryRouter>
   );
-  fireEvent.click(screen.getByRole("button", { name: "View recovery code" }));
+  fireEvent.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
   return onComplete;
 }
 
@@ -267,13 +267,13 @@ describe("onboarding error propagation", () => {
 
     await browserUser.type(screen.getByLabelText("First Name"), "david");
     await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop");
-    await browserUser.click(screen.getByRole("button", { name: "Create new account" }));
+    await browserUser.click(screen.getByRole("button", { name: "Create New Account" }));
 
     expect(await screen.findByText("NEW-CODE")).toBeVisible();
     expect(screen.getByRole("button", { name: "Back" })).toBeEnabled();
   });
 
-  it("shows loading only on Create new account while the account is being created", async () => {
+  it("shows loading only on Create New Account while the account is being created", async () => {
     let finishCreate: (value: { accountId: string; code: string }) => void = () => undefined;
     mockCreateAccount.mockReturnValue(
       new Promise((resolve) => {
@@ -289,7 +289,7 @@ describe("onboarding error propagation", () => {
 
     await browserUser.type(screen.getByLabelText("First Name"), "david");
     await browserUser.type(screen.getByPlaceholderText("e.g. My phone"), "My laptop");
-    await browserUser.click(screen.getByRole("button", { name: "Create new account" }));
+    await browserUser.click(screen.getByRole("button", { name: "Create New Account" }));
 
     expect(await screen.findByRole("button", { name: "Setting up" })).toHaveAttribute(
       "aria-busy",
@@ -325,7 +325,7 @@ describe("onboarding error propagation", () => {
       "aria-busy",
       "true"
     );
-    const create = screen.getByRole("button", { name: "Create new account" });
+    const create = screen.getByRole("button", { name: "Create New Account" });
     expect(create).toBeDisabled();
     expect(create).not.toHaveAttribute("aria-busy");
 
@@ -341,7 +341,7 @@ describe("onboarding error propagation", () => {
         <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
       </MemoryRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: "View recovery code" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
     await screen.findByText("RECOVERY-CODE");
 
     await browserUser.click(screen.getByRole("button", { name: "Browser back" }));
@@ -385,7 +385,7 @@ describe("onboarding error propagation", () => {
         <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
       </MemoryRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: "View recovery code" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reveal Recovery Code" }));
     await screen.findByText("RECOVERY-CODE");
     await browserUser.click(screen.getByRole("checkbox"));
     await browserUser.click(screen.getByRole("button", { name: "Continue to dashboard" }));
@@ -433,7 +433,7 @@ describe("onboarding error propagation", () => {
         "Couldn't load your recovery code. Please try again."
       )
     );
-    expect(screen.getByRole("button", { name: "View recovery code" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Reveal Recovery Code" })).toBeEnabled();
   });
 });
 

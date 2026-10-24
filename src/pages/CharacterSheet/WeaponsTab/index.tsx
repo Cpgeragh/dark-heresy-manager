@@ -1537,9 +1537,9 @@ export function WeaponsTab({
             <SectionHeader>Ranged</SectionHeader>
             {!showCustomRanged &&
               (editable ? (
-                <AddButton label="Add ranged weapon" onClick={() => setPicker("ranged")} />
+                <AddButton label="Add Ranged Weapon" onClick={() => setPicker("ranged")} />
               ) : (
-                <ViewButton label="View ranged weapons" onClick={() => setPicker("ranged")} />
+                <ViewButton label="View Ranged Weapons" onClick={() => setPicker("ranged")} />
               ))}
           </div>
 
@@ -1571,9 +1571,9 @@ export function WeaponsTab({
             <SectionHeader>Melee</SectionHeader>
             {!showCustomMelee &&
               (editable ? (
-                <AddButton label="Add melee weapon" onClick={() => setPicker("melee")} />
+                <AddButton label="Add Melee Weapon" onClick={() => setPicker("melee")} />
               ) : (
-                <ViewButton label="View melee weapons" onClick={() => setPicker("melee")} />
+                <ViewButton label="View Melee Weapons" onClick={() => setPicker("melee")} />
               ))}
           </div>
 
@@ -1605,9 +1605,9 @@ export function WeaponsTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Explosives</SectionHeader>
           {editable ? (
-            <AddButton label="Add explosive" onClick={() => setPicker("grenades")} />
+            <AddButton label="Add Explosive" onClick={() => setPicker("grenades")} />
           ) : (
-            <ViewButton label="View explosives" onClick={() => setPicker("grenades")} />
+            <ViewButton label="View Explosives" onClick={() => setPicker("grenades")} />
           )}
         </div>
 
@@ -1630,9 +1630,9 @@ export function WeaponsTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Shields</SectionHeader>
           {editable ? (
-            <AddButton label="Add shield" onClick={() => setPicker("shields")} />
+            <AddButton label="Add Shield" onClick={() => setPicker("shields")} />
           ) : (
-            <ViewButton label="View shields" onClick={() => setPicker("shields")} />
+            <ViewButton label="View Shields" onClick={() => setPicker("shields")} />
           )}
         </div>
 

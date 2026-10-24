@@ -315,9 +315,9 @@ export function ArcheotechTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Inventory ({archeotech.length})</SectionHeader>
           {editable ? (
-            <AddButton label="Add item" onClick={() => setShowPicker(true)} />
+            <AddButton label="Add Item" onClick={() => setShowPicker(true)} />
           ) : (
-            <ViewButton label="View items" onClick={() => setShowPicker(true)} />
+            <ViewButton label="View Items" onClick={() => setShowPicker(true)} />
           )}
         </div>
 

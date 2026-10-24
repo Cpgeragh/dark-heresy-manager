@@ -6,19 +6,19 @@ import "@testing-library/jest-dom";
 import { CloseSessionConfirmModal } from "../../src/pages/CampaignOverview/CloseSessionConfirmModal";
 
 function renderModal(props: Partial<React.ComponentProps<typeof CloseSessionConfirmModal>> = {}) {
-  const onYes = vi.fn();
-  const onNo = vi.fn();
+  const onConfirm = vi.fn();
+  const onCancel = vi.fn();
   render(
     <CloseSessionConfirmModal
       xpAwarded={150}
       attendeeNames={["Cormac", "Libby"]}
       busy={false}
-      onYes={onYes}
-      onNo={onNo}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
       {...props}
     />
   );
-  return { onYes, onNo };
+  return { onConfirm, onCancel };
 }
 
 describe("CloseSessionConfirmModal", () => {
@@ -48,20 +48,20 @@ describe("CloseSessionConfirmModal", () => {
     expect(screen.getByText("No XP will be given. Close the session?")).toBeInTheDocument();
   });
 
-  it("calls onYes for Yes and onNo for No", async () => {
+  it("calls the action-specific confirmation and cancellation handlers", async () => {
     const user = userEvent.setup();
-    const { onYes, onNo } = renderModal();
+    const { onConfirm, onCancel } = renderModal();
 
-    await user.click(screen.getByRole("button", { name: "Yes" }));
-    await user.click(screen.getByRole("button", { name: "No" }));
+    await user.click(screen.getByRole("button", { name: "Close Session" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(onYes).toHaveBeenCalledOnce();
-    expect(onNo).toHaveBeenCalledOnce();
+    expect(onConfirm).toHaveBeenCalledOnce();
+    expect(onCancel).toHaveBeenCalledOnce();
   });
 
-  it("disables No while the session is closing", () => {
+  it("disables cancellation while the session is closing", () => {
     renderModal({ busy: true });
 
-    expect(screen.getByRole("button", { name: "No" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
   });
 });

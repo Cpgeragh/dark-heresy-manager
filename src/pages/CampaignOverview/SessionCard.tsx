@@ -15,12 +15,11 @@ import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { Chip } from "../../ui/chips/Chip";
 import { CheckIcon } from "../../ui/icons/CheckIcon";
 import { uiLayerLocal } from "../../ui/styles/layerStyles";
-import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
+import { DeleteConfirmModal } from "../../ui/modals/DeleteConfirmModal";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import {
   uiInlineRow,
   uiSection,
-  uiStackBody,
   uiStackList,
   uiTextBody,
   uiTextError,
@@ -195,7 +194,7 @@ export function SessionCard({
               </Button>
             )}
             {isDM && onDelete && (
-              <RemoveButton label="Delete session" onClick={() => setConfirmingDelete(true)} />
+              <RemoveButton label="Delete Session" onClick={() => setConfirmingDelete(true)} />
             )}
           </div>
         </div>
@@ -244,8 +243,8 @@ export function SessionCard({
           xpAwarded={pendingClose.xpAwarded}
           attendeeNames={pendingClose.attendees.map((id) => nameById[id] ?? id)}
           busy={closing}
-          onYes={() => void handleConfirmClose()}
-          onNo={() => setPendingClose(null)}
+          onConfirm={() => void handleConfirmClose()}
+          onCancel={() => setPendingClose(null)}
         />
       )}
 
@@ -260,60 +259,39 @@ export function SessionCard({
       )}
 
       {confirmingDelete && (
-        <PickerModal
+        <DeleteConfirmModal
           title="Delete Session"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={closeDelete}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                loading={deleting}
-                loadingLabel="Deleting"
-                onClick={() => handleDelete()}
-              >
-                Delete
-              </Button>
-              <Button variant="neutral" disabled={deleting} onClick={closeDelete}>
-                Cancel
-              </Button>
-            </div>
+          message={`This permanently deletes the session on ${dateStr}. This cannot be undone.`}
+          typedLabel="Type DELETE to permanently delete this session"
+          ready
+          deleting={deleting}
+          onConfirm={handleDelete}
+          onCancel={closeDelete}
+          details={
+            session.xpApplied === true ? (
+              <>
+                <p className={`text-xs lg:text-sm ${uiTextError}`}>
+                  This session's XP was already applied. Deleting it won't remove that XP unless
+                  checked below.
+                </p>
+                <label
+                  className={`flex items-center gap-1.5 text-xs lg:text-sm ${uiTextBody} cursor-pointer`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={reverseXp}
+                    onChange={(e) => setReverseXp(e.target.checked)}
+                    disabled={deleting}
+                  />
+                  Also remove {session.xpAwarded} XP from attendees
+                </label>
+                <p className={uiTextMeta}>
+                  This will affect {reverseXp ? xpAffectedDocuments : 2} documents.
+                </p>
+              </>
+            ) : undefined
           }
-        >
-          <PickerBody>
-            <div className={uiStackBody}>
-              <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-                Delete the session on {dateStr}?
-              </p>
-              {session.xpApplied === true && (
-                <>
-                  <p className={`text-xs lg:text-sm ${uiTextError}`}>
-                    This session's XP was already applied. Deleting it won't remove that XP unless
-                    checked below.
-                  </p>
-                  <label
-                    className={`flex items-center gap-1.5 text-xs lg:text-sm ${uiTextBody} cursor-pointer`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={reverseXp}
-                      onChange={(e) => setReverseXp(e.target.checked)}
-                      disabled={deleting}
-                    />
-                    Also remove {session.xpAwarded} XP from attendees
-                  </label>
-                  <p className={uiTextMeta}>
-                    This will affect {reverseXp ? xpAffectedDocuments : 2} documents.
-                  </p>
-                </>
-              )}
-            </div>
-          </PickerBody>
-        </PickerModal>
+        />
       )}
     </div>
   );

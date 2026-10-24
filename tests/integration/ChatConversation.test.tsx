@@ -340,44 +340,46 @@ describe("ChatConversation", () => {
     expect(loadOlder).toHaveBeenCalled();
   });
 
-  it("offers Delete chat for a chat that has an entry", () => {
+  it("offers Move to Recently Deleted for a chat that has an entry", () => {
     renderConversation();
 
-    expect(screen.getByRole("button", { name: "Delete chat" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Move to Recently Deleted" })).toBeInTheDocument();
   });
 
-  it("does not offer Delete chat before the chat has started", () => {
+  it("does not offer Move to Recently Deleted before the chat has started", () => {
     renderConversation({ chat: null });
 
-    expect(screen.queryByRole("button", { name: "Delete chat" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Move to Recently Deleted" })
+    ).not.toBeInTheDocument();
   });
 
-  it("still offers Delete chat for a closed chat", () => {
+  it("still offers Move to Recently Deleted for a closed chat", () => {
     renderConversation({ chat: chat({ closed: true }) });
 
-    expect(screen.getByRole("button", { name: "Delete chat" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Move to Recently Deleted" })).toBeInTheDocument();
   });
 
-  it("moves the chat to Recently deleted after a Yes, tells the user and calls back", async () => {
+  it("moves the chat after action-specific confirmation, then reports success", async () => {
     const user = userEvent.setup();
     const onCleared = vi.fn();
     renderConversation({ onCleared });
 
-    await user.click(screen.getByRole("button", { name: "Delete chat" }));
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(screen.getByRole("button", { name: "Move to Recently Deleted" }));
+    await user.click(screen.getByRole("button", { name: "Move to Recently Deleted" }));
 
     expect(clearChatMock).toHaveBeenCalledWith("player-1", CHAT_ID);
     expect(mockToastSuccess).toHaveBeenCalledWith(expect.stringContaining("Recently deleted"));
     expect(onCleared).toHaveBeenCalledOnce();
   });
 
-  it("does nothing when the user answers No", async () => {
+  it("does nothing when the user cancels moving the chat", async () => {
     const user = userEvent.setup();
     const onCleared = vi.fn();
     renderConversation({ onCleared });
 
-    await user.click(screen.getByRole("button", { name: "Delete chat" }));
-    await user.click(screen.getByRole("button", { name: "No" }));
+    await user.click(screen.getByRole("button", { name: "Move to Recently Deleted" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(clearChatMock).not.toHaveBeenCalled();
     expect(onCleared).not.toHaveBeenCalled();
@@ -390,8 +392,8 @@ describe("ChatConversation", () => {
     const onCleared = vi.fn();
     renderConversation({ onCleared });
 
-    await user.click(screen.getByRole("button", { name: "Delete chat" }));
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(screen.getByRole("button", { name: "Move to Recently Deleted" }));
+    await user.click(screen.getByRole("button", { name: "Move to Recently Deleted" }));
 
     expect(mockToastError).toHaveBeenCalledWith("Failed to delete the chat. Please try again.");
     expect(onCleared).not.toHaveBeenCalled();

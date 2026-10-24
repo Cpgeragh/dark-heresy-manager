@@ -75,7 +75,7 @@ describe("ArmourTab", () => {
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(false);
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Equip" }));
+    fireEvent.click(screen.getByRole("button", { name: "Equip Armour" }));
 
     expect(useCampaignCustomItemsMock.mock.lastCall?.[0].enabled).toBe(true);
   });
@@ -132,14 +132,14 @@ describe("ArmourTab", () => {
 
   it("shows equip/stow add affordances when editable", () => {
     renderTab();
-    expect(screen.getByText("+ Equip")).toBeInTheDocument();
-    expect(screen.getByText("+ Stow")).toBeInTheDocument();
+    expect(screen.getByText("Equip Armour")).toBeInTheDocument();
+    expect(screen.getByText("Stow Armour")).toBeInTheDocument();
   });
 
   it("shows 'View' instead of add affordances in read-only mode", () => {
     renderTab({ editable: false, armour: [] });
     expect(screen.getAllByText("View").length).toBeGreaterThanOrEqual(2);
-    expect(screen.queryByText("+ Equip")).not.toBeInTheDocument();
+    expect(screen.queryByText("Equip Armour")).not.toBeInTheDocument();
   });
 
   it("shows empty states when there is no armour", () => {
@@ -157,7 +157,7 @@ describe("ArmourTab", () => {
     });
     const { onUpdate } = renderTab({ armour: [] });
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Equip" }));
+    fireEvent.click(screen.getByRole("button", { name: "Equip Armour" }));
     fireEvent.click(screen.getByText("Custom Coat"));
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -184,7 +184,7 @@ describe("ArmourTab", () => {
     const { onUpdate } = renderTab({ armour });
 
     const upgradeHeader = screen.getAllByText("Upgrades").at(-1)!.parentElement!;
-    fireEvent.click(within(upgradeHeader).getByRole("button", { name: "Add upgrade" }));
+    fireEvent.click(within(upgradeHeader).getByRole("button", { name: "Add Upgrade" }));
     fireEvent.click(screen.getByText("Hexagramatic Wards"));
 
     expect(onUpdate).toHaveBeenCalledWith(

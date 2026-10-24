@@ -443,7 +443,7 @@ describe("WeaponTrainingTab", () => {
       within(screen.getByRole("dialog", { name: "Exotic Weapon Training" })).getByText("Web Pistol")
     );
     await user.type(screen.getByPlaceholderText("0"), "0");
-    await user.click(screen.getByRole("button", { name: "+ Add Exotic" }));
+    await user.click(screen.getByRole("button", { name: "Add Exotic" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;

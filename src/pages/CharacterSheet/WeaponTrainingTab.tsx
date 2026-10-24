@@ -608,7 +608,7 @@ export function WeaponTrainingTab({
           maxWidth="max-w-sm"
           footer={
             <Button className="w-full" disabled={!canConfirmExotic} onClick={confirmAddExotic}>
-              + Add Exotic
+              Add Exotic
             </Button>
           }
         >

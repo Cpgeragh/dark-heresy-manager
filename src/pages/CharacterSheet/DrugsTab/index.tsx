@@ -289,9 +289,9 @@ export function DrugsTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Carried</SectionHeader>
           {editable ? (
-            <AddButton label="Add drug" onClick={() => setShowPicker(true)} />
+            <AddButton label="Add Drug" onClick={() => setShowPicker(true)} />
           ) : (
-            <ViewButton label="View drugs" onClick={() => setShowPicker(true)} />
+            <ViewButton label="View Drugs" onClick={() => setShowPicker(true)} />
           )}
         </div>
 

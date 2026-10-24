@@ -33,7 +33,6 @@ import {
   colourTextPrimary,
   colourDivider,
 } from "../../../ui/styles/colourTokens";
-import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
@@ -490,9 +489,7 @@ export function MeleeCard({
           <div className={`${uiSplitRow}`}>
             <span className={uiTextLabel}>Ammo</span>
             {editable && (
-              <Button size="xs" onClick={() => setShowPistolAmmoPicker(true)}>
-                + Add
-              </Button>
+              <AddButton label="Add Ammo" size="sm" onClick={() => setShowPistolAmmoPicker(true)} />
             )}
           </div>
           {pistolAmmoFamily && (
@@ -551,13 +548,13 @@ export function MeleeCard({
               : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
               (editable ? (
                 <AddButton
-                  label="Add upgrade"
+                  label="Add Upgrade"
                   size="sm"
                   onClick={() => setShowUpgradePicker(true)}
                 />
               ) : (
                 <ViewButton
-                  label="View upgrades"
+                  label="View Upgrades"
                   size="sm"
                   onClick={() => setShowUpgradePicker(true)}
                 />

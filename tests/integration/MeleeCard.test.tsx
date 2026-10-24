@@ -73,7 +73,7 @@ describe("MeleeCard upgrades", () => {
   it("opens the upgrade picker and adds a compatible upgrade", async () => {
     const user = userEvent.setup();
     const { onAddUpgrade } = renderCard();
-    await user.click(screen.getByRole("button", { name: "Add upgrade" }));
+    await user.click(screen.getByRole("button", { name: "Add Upgrade" }));
     expect(screen.getByText("Add Upgrade")).toBeInTheDocument();
     await user.click(screen.getByText("Mono"));
     expect(onAddUpgrade).toHaveBeenCalledWith("cr-mono");

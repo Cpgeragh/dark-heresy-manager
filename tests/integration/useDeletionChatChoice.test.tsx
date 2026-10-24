@@ -145,7 +145,9 @@ describe("useDeletionChatChoice", () => {
     setup();
 
     await user.click(screen.getByRole("button", { name: "go" }));
-    await user.click(await screen.findByRole("button", { name: "Delete my chat" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Move My Chat to Recently Deleted" })
+    );
 
     await waitFor(() => expect(screen.getByText("finished")).toBeInTheDocument());
     expect(clearChatMock).toHaveBeenCalledOnce();
@@ -157,7 +159,7 @@ describe("useDeletionChatChoice", () => {
     setup();
 
     await user.click(screen.getByRole("button", { name: "go" }));
-    await user.click(await screen.findByRole("button", { name: "Keep my chat" }));
+    await user.click(await screen.findByRole("button", { name: "Keep My Chat" }));
 
     expect(await screen.findByText("finished")).toBeInTheDocument();
     expect(clearChatMock).not.toHaveBeenCalled();
@@ -170,7 +172,9 @@ describe("useDeletionChatChoice", () => {
     setup({ campaignId: "c1" }, "campaign");
 
     await user.click(screen.getByRole("button", { name: "go" }));
-    await user.click(await screen.findByRole("button", { name: "Delete my chats" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Move My Chats to Recently Deleted" })
+    );
 
     expect(await screen.findByText("finished")).toBeInTheDocument();
     expect(clearChatMock).toHaveBeenCalledTimes(2);
@@ -190,7 +194,9 @@ describe("useDeletionChatChoice", () => {
     setup({ campaignId: "c1" }, "campaign");
 
     await user.click(screen.getByRole("button", { name: "go" }));
-    await user.click(await screen.findByRole("button", { name: "Delete my chats" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Move My Chats to Recently Deleted" })
+    );
 
     await waitFor(() =>
       expect(toastErrorMock).toHaveBeenCalledWith("Failed to delete the chat. Please try again.")
@@ -200,7 +206,7 @@ describe("useDeletionChatChoice", () => {
 
     offline = false;
     clearChatMock.mockClear();
-    await user.click(screen.getByRole("button", { name: "Delete my chat" }));
+    await user.click(screen.getByRole("button", { name: "Move My Chat to Recently Deleted" }));
 
     expect(await screen.findByText("finished")).toBeInTheDocument();
     expect(clearChatMock).toHaveBeenCalledOnce();

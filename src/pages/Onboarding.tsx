@@ -363,7 +363,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                   loading={busyAction === "create"}
                   loadingLabel="Setting up"
                 >
-                  Create new account
+                  Create New Account
                 </Button>
 
                 <Button
@@ -519,7 +519,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                     loading={codeLoading}
                     loadingLabel="Loading recovery code"
                   >
-                    View recovery code
+                    Reveal Recovery Code
                   </Button>
                 </div>
               )}

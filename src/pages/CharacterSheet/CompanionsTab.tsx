@@ -318,9 +318,9 @@ export function CompanionsTab({
       <div className="flex items-center justify-between">
         <SectionHeader>Companions</SectionHeader>
         {editable ? (
-          <AddButton label="Add companion" onClick={() => setShowPicker(true)} />
+          <AddButton label="Add Companion" onClick={() => setShowPicker(true)} />
         ) : (
-          <ViewButton label="View companions" onClick={() => setShowPicker(true)} />
+          <ViewButton label="View Companions" onClick={() => setShowPicker(true)} />
         )}
       </div>
 
