@@ -1,13 +1,12 @@
 import { useState } from "react";
 import type { HomeworldTraitChoices } from "../../types/Character";
-import { Button } from "../../ui/buttons/Button";
-import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { editableInputClass, uiStackBody } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
 import { FormLabel } from "../../ui/forms/FormLabel";
+import { CustomFormFooter } from "../../ui/forms/CustomFormFooter";
 
 const NOBLE_PEER_OPTIONS: readonly PickerOption[] = [
   "Academics",
@@ -146,11 +145,10 @@ export function HomeworldTraitAcquisitionModal({
               />
             </div>
           )}
-          <RequiredFieldsNote />
-          <Button
-            fullWidth
-            disabled={!canSubmit}
-            onClick={() =>
+          <CustomFormFooter
+            canSubmit={canSubmit}
+            submitLabel="Apply Homeworld"
+            onSubmit={() =>
               onComplete({
                 ...(peerGroup ? { peerGroup } : {}),
                 ...(basicWeaponGroup ? { basicWeaponGroup } : {}),
@@ -158,9 +156,8 @@ export function HomeworldTraitAcquisitionModal({
                 ...(homeworldId === "mind-cleansed" ? { startingInsanity: insanityValue } : {}),
               })
             }
-          >
-            Apply Homeworld
-          </Button>
+            onCancel={onClose}
+          />
         </div>
       </PickerBody>
     </PickerModal>

@@ -15,7 +15,7 @@ export function RequiredFieldsNote() {
 interface CustomFormFooterProps {
   canSubmit: boolean;
   submitLabel: string;
-  onSubmit: () => void | Promise<void>;
+  onSubmit: () => unknown;
   onCancel: () => void;
   saving?: boolean;
   savingLabel?: string;

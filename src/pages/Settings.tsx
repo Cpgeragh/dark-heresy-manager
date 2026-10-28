@@ -17,7 +17,6 @@ import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
   colourMetadataLabelText,
   colourTextPrimary,
-  colourDivider,
   colourDivideList,
 } from "../ui/styles/colourTokens";
 import {
@@ -656,54 +655,35 @@ export default function Settings({
       </div>
 
       {lastDeviceWarningOpen && (
-        <ModalShell
-          ariaLabel="Unlink Last Device"
-          onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
-          className="max-w-lg"
+        <ConfirmModal
+          title="Unlink Last Device"
+          confirmLabel="Unlink anyway"
+          cancelLabel="Keep connected"
+          busy={disconnectingDevice}
+          loadingLabel="Unlinking"
+          onConfirm={() => void handleDisconnectDevice(true)}
+          onCancel={() => setLastDeviceWarningOpen(false)}
         >
-          <ModalHeader
-            title="Unlink Last Device"
-            onClose={() => !disconnectingDevice && setLastDeviceWarningOpen(false)}
-          />
-          <div className={`${uiStackBody} p-4 lg:p-5`}>
-            <dl className={`${uiStackList} text-sm lg:text-base`}>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                <dd className={uiTextBody}>{currentDeviceName}</dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                <dd className={uiTextBody}>
-                  This device will lose access to the account and return to Create Your Account. No
-                  devices will remain connected.
-                </dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Access</dt>
-                <dd className={uiTextBody}>
-                  You will need the account recovery code to connect a device again.
-                </dd>
-              </div>
-            </dl>
-            <div className={`grid grid-cols-2 gap-3 border-t ${colourDivider} pt-4`}>
-              <Button
-                variant="neutral"
-                onClick={() => setLastDeviceWarningOpen(false)}
-                disabled={disconnectingDevice}
-              >
-                Keep connected
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => void handleDisconnectDevice(true)}
-                loading={disconnectingDevice}
-                loadingLabel="Unlinking"
-              >
-                Unlink anyway
-              </Button>
+          <dl className={`${uiStackList} text-sm lg:text-base`}>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
+              <dd className={uiTextBody}>{currentDeviceName}</dd>
             </div>
-          </div>
-        </ModalShell>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
+              <dd className={uiTextBody}>
+                This device will lose access to the account and return to Create Your Account. No
+                devices will remain connected.
+              </dd>
+            </div>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Access</dt>
+              <dd className={uiTextBody}>
+                You will need the account recovery code to connect a device again.
+              </dd>
+            </div>
+          </dl>
+        </ConfirmModal>
       )}
     </ModalShell>
   );

@@ -20,7 +20,6 @@ import type {
 } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import {
   editableInputClass,
   uiCell,
@@ -48,6 +47,7 @@ import {
   type TalentAcquisitionResult,
 } from "./talentAcquisitionResult";
 import { FormLabel } from "../../ui/forms/FormLabel";
+import { CustomFormFooter } from "../../ui/forms/CustomFormFooter";
 
 export type { TalentAcquisitionResult } from "./talentAcquisitionResult";
 
@@ -567,18 +567,18 @@ export function TalentAcquisitionModal({
       scrollPositionRef={acquisitionScrollPositionRef}
       footer={
         <div className={uiStackList}>
-          <RequiredFieldsNote />
-          <Button
-            fullWidth
-            onClick={handleApply}
-            disabled={!canComplete}
-            loading={saving}
-            loadingLabel="Saving"
-          >
-            {entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals
-              ? "Continue to Reformed Skin"
-              : "Apply and add Talent"}
-          </Button>
+          <CustomFormFooter
+            canSubmit={canComplete}
+            submitLabel={
+              entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals
+                ? "Continue to Reformed Skin"
+                : "Apply and add Talent"
+            }
+            onSubmit={handleApply}
+            onCancel={onClose}
+            saving={saving}
+            savingLabel="Saving"
+          />
         </div>
       }
     >
@@ -644,7 +644,9 @@ export function TalentAcquisitionModal({
               onClick={() => setActivePicker("heretek-talent")}
               required
             />
-            <p className={`text-sm ${uiTextBody}`}>Tech-Use will also count as Trained.</p>
+            <p className={`text-sm lg:text-base ${uiTextBody}`}>
+              Tech-Use will also count as Trained.
+            </p>
           </>
         )}
 
@@ -719,7 +721,7 @@ export function TalentAcquisitionModal({
 
         {entry.talentId === "purity-of-flesh" && purityStage === "purity" && (
           <>
-            <p className={`text-sm ${uiTextBody}`}>
+            <p className={`text-sm lg:text-base ${uiTextBody}`}>
               All {purityInventory.length} installed cybernetics, bionics, and integrated weapons
               will be removed.
             </p>
@@ -768,7 +770,7 @@ export function TalentAcquisitionModal({
 
         {entry.talentId === "purity-of-flesh" && purityStage === "reformed-skin" && (
           <>
-            <p className={`text-sm ${uiTextBody}`}>
+            <p className={`text-sm lg:text-base ${uiTextBody}`}>
               Record one immediate Reformed Skin replacement for each life-critical removal.
             </p>
             {fatalRemovalItems.map((item) => (
@@ -812,7 +814,7 @@ export function TalentAcquisitionModal({
               required
             />
             {primaryChoice === "purity" && (
-              <p className={`text-sm ${uiTextBody}`}>
+              <p className={`text-sm lg:text-base ${uiTextBody}`}>
                 All Fate Points gained from Purity of Flesh will be lost.
               </p>
             )}
@@ -821,7 +823,7 @@ export function TalentAcquisitionModal({
 
         {entry.talentId === "rite-of-pure-thought" && (
           <>
-            <p className={`text-sm ${uiTextBody}`}>
+            <p className={`text-sm lg:text-base ${uiTextBody}`}>
               Select only disorders the GM says are no longer relevant. Each must be replaced at the
               same severity.
             </p>

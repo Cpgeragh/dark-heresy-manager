@@ -225,7 +225,7 @@ function XpTransactionModal({
   };
 
   return (
-    <ModalShell ariaLabel={title} onClose={onClose} className="max-w-md overflow-y-auto">
+    <ModalShell ariaLabel={title} onClose={onClose} className="max-w-sm overflow-y-auto">
       <ModalHeader title={modalTitle} onClose={onClose} />
       <div className={`${uiStackBody} p-4 lg:p-5`}>
         {!isSpend && (
@@ -288,12 +288,9 @@ function XpTransactionModal({
           </p>
         )}
 
-        <div className={`${uiStackList} border-t ${colourDivider} pt-4`}>
+        <div className={uiStackList}>
           <RequiredFieldsNote />
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="neutral" onClick={onClose} disabled={saving}>
-              Cancel
-            </Button>
+          <div className="grid grid-cols-2 gap-2">
             <Button
               variant={isSpend ? "primary" : isRemove ? "warningOutline" : "successOutline"}
               onClick={submit}
@@ -306,6 +303,9 @@ function XpTransactionModal({
                 : isSpend
                   ? "Confirm Spend"
                   : `Confirm ${title}`}
+            </Button>
+            <Button variant="neutral" onClick={onClose} disabled={saving}>
+              Cancel
             </Button>
           </div>
         </div>
@@ -685,10 +685,7 @@ function RankUpModal({
             </section>
           )}
 
-          <div className={`grid grid-cols-2 gap-3 border-t ${colourDivider} pt-4`}>
-            <Button variant="neutral" onClick={cancel} disabled={saving}>
-              Cancel
-            </Button>
+          <div className="grid grid-cols-2 gap-2">
             <Button
               onClick={confirm}
               disabled={
@@ -699,6 +696,9 @@ function RankUpModal({
               loadingLabel="Saving"
             >
               Confirm Rank Up
+            </Button>
+            <Button variant="neutral" onClick={cancel} disabled={saving}>
+              Cancel
             </Button>
           </div>
         </div>

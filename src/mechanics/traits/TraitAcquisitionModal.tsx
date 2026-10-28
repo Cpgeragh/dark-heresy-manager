@@ -12,9 +12,7 @@ import type {
   SanctioningAcquisition,
   TalentEntry,
 } from "../../types/Character";
-import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import {
   editableInputClass,
   uiTextBody,
@@ -29,6 +27,7 @@ import { PickerField } from "../../ui/pickers/PickerField";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
 import { FormLabel } from "../../ui/forms/FormLabel";
+import { CustomFormFooter } from "../../ui/forms/CustomFormFooter";
 
 export interface TraitAcquisitionResult {
   entry: TalentEntry;
@@ -297,11 +296,10 @@ export function TraitAcquisitionModal({
                 );
               })}
             </div>
-            <RequiredFieldsNote />
-            <Button
-              fullWidth
-              disabled={!canSubmit}
-              onClick={() =>
+            <CustomFormFooter
+              canSubmit={canSubmit}
+              submitLabel="Apply and add Trait"
+              onSubmit={() =>
                 onComplete({
                   entry: {
                     ...entry,
@@ -313,9 +311,8 @@ export function TraitAcquisitionModal({
                   },
                 })
               }
-            >
-              Apply and add Trait
-            </Button>
+              onCancel={onClose}
+            />
           </div>
         </PickerBody>
       </PickerModal>
@@ -410,11 +407,10 @@ export function TraitAcquisitionModal({
                 />
               </div>
             )}
-            <RequiredFieldsNote />
-            <Button
-              fullWidth
-              disabled={!canSubmit}
-              onClick={() =>
+            <CustomFormFooter
+              canSubmit={canSubmit}
+              submitLabel="Apply and add Trait"
+              onSubmit={() =>
                 onComplete({
                   entry: {
                     ...entry,
@@ -438,9 +434,8 @@ export function TraitAcquisitionModal({
                   },
                 })
               }
-            >
-              Apply and add Trait
-            </Button>
+              onCancel={onClose}
+            />
           </div>
         </PickerBody>
       </PickerModal>
@@ -511,11 +506,10 @@ export function TraitAcquisitionModal({
                 autoComplete="off"
               />
             </div>
-            <RequiredFieldsNote />
-            <Button
-              fullWidth
-              disabled={!canSubmit}
-              onClick={() => {
+            <CustomFormFooter
+              canSubmit={canSubmit}
+              submitLabel="Apply and add Trait"
+              onSubmit={() => {
                 if (!selectedSanction) return;
                 const sanctioning: SanctioningAcquisition = {
                   resultId: selectedSanction.id,
@@ -590,9 +584,8 @@ export function TraitAcquisitionModal({
                   ],
                 });
               }}
-            >
-              Apply and add Trait
-            </Button>
+              onCancel={onClose}
+            />
           </div>
         </PickerBody>
       </PickerModal>
@@ -682,11 +675,10 @@ export function TraitAcquisitionModal({
               )}
             </>
           )}
-          <RequiredFieldsNote />
-          <Button
-            fullWidth
-            disabled={!canSubmitSkin}
-            onClick={() => {
+          <CustomFormFooter
+            canSubmit={canSubmitSkin}
+            submitLabel="Apply and add Trait"
+            onSubmit={() => {
               if (skinKind === "upgrade") {
                 if (!selectedUpgrade) return;
                 return onComplete({
@@ -749,9 +741,8 @@ export function TraitAcquisitionModal({
                 cybernetics: [...cybernetics, item],
               });
             }}
-          >
-            Apply and add Trait
-          </Button>
+            onCancel={onClose}
+          />
         </div>
       </PickerBody>
     </PickerModal>

@@ -48,7 +48,7 @@ export function CareerStartingChoiceModal({
       onClose={onClose}
       isEmpty={false}
       hideSearch
-      maxWidth="max-w-md"
+      maxWidth="max-w-sm"
       footer={
         <Button
           variant="primary"

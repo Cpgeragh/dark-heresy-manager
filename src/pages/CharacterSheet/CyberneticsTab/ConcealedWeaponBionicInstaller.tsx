@@ -13,7 +13,6 @@ import {
 import { ImplantRow } from "./ImplantRow";
 import { RangedCard } from "../weapons/RangedCard";
 import { MeleeCard } from "../weapons/MeleeCard";
-import { colourDivider } from "../../../ui/styles/colourTokens";
 import { isInstalled } from "../../../utils/cyberneticInstalled";
 
 type WeaponChoice = { id: string; type: "ranged" | "melee"; name: string };
@@ -57,7 +56,7 @@ export function ConcealedWeaponBionicInstaller({
     >
       <ModalHeader title="Concealed Weapon Bionic" onClose={onClose} />
       <div className={`p-4 lg:p-5 ${uiStackBody}`}>
-        <p className={`text-sm ${uiTextBody}`}>
+        <p className={`text-sm lg:text-base ${uiTextBody}`}>
           {selectingArm
             ? "Choose the existing Bionic Arm that will house the weapon."
             : "Choose an unmodified pistol or one-handed melee weapon."}
@@ -126,13 +125,9 @@ export function ConcealedWeaponBionicInstaller({
               );
             })}
       </div>
-      <div className={`p-4 border-t ${colourDivider} flex gap-2`}>
-        {!selectingArm && (
-          <Button size="sm" onClick={() => setArmId(null)}>
-            Back
-          </Button>
-        )}
-        <Button variant="neutral" size="sm" onClick={onClose}>
+      <div className={`grid gap-2 p-4 ${selectingArm ? "grid-cols-1" : "grid-cols-2"}`}>
+        {!selectingArm && <Button onClick={() => setArmId(null)}>Back</Button>}
+        <Button variant="neutral" onClick={onClose}>
           Cancel
         </Button>
       </div>

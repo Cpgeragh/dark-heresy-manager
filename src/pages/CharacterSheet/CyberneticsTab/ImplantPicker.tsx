@@ -53,7 +53,6 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
 import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
-import { colourDivider } from "../../../ui/styles/colourTokens";
 import { FormLabel } from "../../../ui/forms/FormLabel";
 
 interface Props {
@@ -233,15 +232,8 @@ export function ImplantPicker({
           </div>
         </PickerBody>
 
-        <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider} flex gap-2`}>
+        <div className="grid grid-cols-2 gap-2 px-4 lg:px-5 py-3 lg:py-4">
           <Button
-            variant="neutral"
-            onClick={() => (asksQuality(selected) ? setWeightStep(false) : resetPicker())}
-          >
-            Back
-          </Button>
-          <Button
-            className="flex-1"
             onClick={() => {
               onSelect(
                 selected,
@@ -256,6 +248,12 @@ export function ImplantPicker({
             disabled={!editable}
           >
             Add
+          </Button>
+          <Button
+            variant="neutral"
+            onClick={() => (asksQuality(selected) ? setWeightStep(false) : resetPicker())}
+          >
+            Back
           </Button>
         </div>
       </ModalShell>
@@ -286,7 +284,7 @@ export function ImplantPicker({
         <ModalHeader title={selected.name} onClose={resetPicker} />
 
         <PickerList>
-          <p className={`text-xs lg:text-sm ${uiTextBody}`}>Select installation side:</p>
+          <p className={`text-sm lg:text-base ${uiTextBody}`}>Select installation side:</p>
           {options.map((opt) => (
             <PickerRow key={opt.label} opensScreen onClick={() => setLocation(opt.value)}>
               <PickerRowName name={opt.label} />
@@ -294,8 +292,8 @@ export function ImplantPicker({
           ))}
         </PickerList>
 
-        <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider}`}>
-          <Button variant="neutral" onClick={resetPicker}>
+        <div className="px-4 lg:px-5 py-3 lg:py-4">
+          <Button fullWidth variant="neutral" onClick={resetPicker}>
             Back
           </Button>
         </div>
@@ -325,7 +323,9 @@ export function ImplantPicker({
           )}
 
           <div>
-            <p className={`text-xs lg:text-sm ${uiTextBody} mb-2`}>Select craftsmanship quality:</p>
+            <p className={`text-sm lg:text-base ${uiTextBody} mb-2`}>
+              Select craftsmanship quality:
+            </p>
             <div className="flex gap-2">
               {qualities.map((q) => (
                 <ToggleButton
@@ -353,12 +353,8 @@ export function ImplantPicker({
           />
         </PickerBody>
 
-        <div className={`px-4 lg:px-5 py-3 lg:py-4 border-t ${colourDivider} flex gap-2`}>
-          <Button variant="neutral" onClick={resetPicker}>
-            Back
-          </Button>
+        <div className="grid grid-cols-2 gap-2 px-4 lg:px-5 py-3 lg:py-4">
           <Button
-            className="flex-1"
             onClick={() => {
               if (selected.id === "ih-concealed-weapon-bionic") {
                 onSelect(
@@ -376,6 +372,9 @@ export function ImplantPicker({
             disabled={!editable}
           >
             Continue
+          </Button>
+          <Button variant="neutral" onClick={resetPicker}>
+            Back
           </Button>
         </div>
       </ModalShell>
