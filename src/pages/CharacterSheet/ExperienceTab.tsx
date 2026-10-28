@@ -24,7 +24,7 @@ import {
   editableInputClass,
   readOnlyBadgeClass,
   uiInfoModalWrapper,
-  uiItemName,
+  uiCardTitle,
   uiSection,
   uiSectionShell,
   uiTextBody,
@@ -67,7 +67,6 @@ import {
   type ChipColour,
   colourDivider,
   colourMetadataLabelText,
-  colourHeadingAccent,
   colourErrorText,
 } from "../../ui/styles/colourTokens";
 import {
@@ -644,9 +643,7 @@ function RankUpModal({
           {appliedRankUpCosts.length === 0 ? (
             <section className={`${uiSectionShell} ${uiStackSection} p-3`}>
               <div>
-                <div className={`text-sm font-semibold ${colourHeadingAccent} lg:text-base`}>
-                  Final XP adjustments
-                </div>
+                <SectionHeader as="h3">Final XP adjustments</SectionHeader>
                 <p className={`mt-1 text-sm lg:text-base ${uiTextBody}`}>
                   The DM may apply an XP cost to ranking up.
                 </p>
@@ -861,11 +858,7 @@ function RankLedgerSection({
   return (
     <section className={`${uiSectionShell} ${uiStackSection} p-3 lg:p-4 ${className}`.trim()}>
       <div className="flex items-baseline justify-between gap-3">
-        <h4
-          className={`text-sm font-semibold uppercase tracking-wide ${colourHeadingAccent} lg:text-base`}
-        >
-          {title}
-        </h4>
+        <SectionHeader as="h3">{title}</SectionHeader>
         <span className={`shrink-0 font-code text-sm ${uiTextBody}`}>{total} XP</span>
       </div>
       {groupCareerPurchases ? (
@@ -1174,11 +1167,7 @@ export function ExperienceTab({
                 <article key={card.rankId} aria-label={`${card.name} Rank Card`}>
                   <AccordionCard
                     tone={card.isCurrent ? "red" : "default"}
-                    name={
-                      <h3 className={`${uiItemName} text-lg ${colourHeadingAccent} lg:text-xl`}>
-                        {card.name}
-                      </h3>
-                    }
+                    name={<h3 className={`${uiCardTitle} text-lg lg:text-xl`}>{card.name}</h3>}
                     label={`${card.name} Rank Card`}
                     expanded={expanded}
                     onToggle={() => toggleRankCard(card.rankId)}

@@ -12,6 +12,11 @@ function NotesWiring({ initial, editable = true }: { initial: NoteEntry[]; edita
   return <NotesTab notes={notes} editable={editable} onSave={setNotes} />;
 }
 
+async function confirmTypedDelete(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
+  await user.click(screen.getByRole("button", { name: "Delete Permanently" }));
+}
+
 describe("NotesTab adding notes", () => {
   it("adds a note directly when there's no legacy text", async () => {
     const user = userEvent.setup();
@@ -210,14 +215,19 @@ describe("NotesTab editing and deleting", () => {
 
     await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
     expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
-    expect(screen.getByText("Delete Session 12 from this character?")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "This permanently deletes Session 12 from this character. This cannot be undone."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete Permanently" })).toBeDisabled();
     expect(screen.getByText("Session 12")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.getByText("Session 12")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await confirmTypedDelete(user);
     expect(screen.queryByText("Session 12")).not.toBeInTheDocument();
     expect(screen.getByText("No notes yet.")).toBeInTheDocument();
   });
@@ -260,11 +270,11 @@ describe("NotesTab editing and deleting", () => {
     render(<NotesTab notes={oneEntry()} editable onSave={onSave} />);
 
     await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await confirmTypedDelete(user);
 
     expect(onSave).toHaveBeenCalledWith([]);
     expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Deleting/ })).toBeDisabled();
 
     await act(async () => finish());
     expect(screen.queryByRole("dialog", { name: "Delete Note" })).not.toBeInTheDocument();
@@ -276,7 +286,7 @@ describe("NotesTab editing and deleting", () => {
     render(<NotesTab notes={oneEntry()} editable onSave={onSave} />);
 
     await user.click(screen.getByRole("button", { name: "Delete Session 12" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await confirmTypedDelete(user);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith([]));
     expect(screen.getByRole("dialog", { name: "Delete Note" })).toBeInTheDocument();

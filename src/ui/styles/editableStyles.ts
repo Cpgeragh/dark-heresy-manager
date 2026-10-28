@@ -189,14 +189,13 @@ export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]
 export const uiSpinner = `rounded-full border-2 ${colourSplashRule} border-t-red-600 animate-spin`;
 export const uiSubheading = `text-xs lg:text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`;
 const uiItemNameTypography = "text-sm lg:text-base font-medium";
-const uiCardTitleTypography = "text-sm lg:text-base font-semibold";
 /** Base and hover colour placed on content directly following a CardOverlayButton. */
 export const uiOverlayPeerHoverText = `${colourTextPrimary} ${colourPeerHoverTextStrong}`;
 export const uiItemName = `${uiItemNameTypography} ${colourTextPrimary}`;
 export const uiItemNameHover = `${uiItemName} ${colourGroupHoverTextStrong}`;
 export const uiOverlayItemNameHover = `${uiItemNameTypography} text-inherit`;
-export const uiCardTitle = `${uiCardTitleTypography} ${colourTextPrimary}`;
-export const uiCardTitleHover = `${uiCardTitle} ${colourGroupHoverTextStrong}`;
+/** The title of a card: the same style as an item name. */
+export const uiCardTitle = uiItemName;
 /** Rule name or section heading inside an info modal. */
 export const uiRuleName = `text-sm lg:text-base font-semibold uppercase tracking-wide ${colourMetadataLabelText}`;
 

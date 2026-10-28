@@ -801,6 +801,7 @@ Use two profiles: the owning player and the DM. Begin on a character with enough
 - [ ] **Autofill, Android:** the Amount and Reason fields in the Add XP, Remove XP and Spend XP forms each show no autofill suggestion row above the keyboard (`ExperienceTab.tsx`)
 - [ ] The Spend XP, Change XP Cost, Add XP and Remove XP pop-ups all have a red title, with no amber or green title (`CenteredTitleHeader.tsx`, `ExperienceTab.tsx`)
 - [ ] The Complete Background pop-up has a red title in the same header as the other pop-ups and no close button, and Character Found in the Claim a Character form, and Ownership and Claim History on the Admin tab, are red section headings with the red bar (`SectionHeader`)
+- [ ] On the Experience tab, rank card titles are grey-white and larger than other card titles; "Career Purchases from This Rank", "Additional XP Spent" and "Final XP adjustments" are red headings with a left bar; the Party roster character names are medium weight (`ExperienceTab.tsx`, `PartyRosterTile.tsx`)
 
 **Watch for:** there is no player-submitted proposal or DM-approval workflow
 on this page: XP changes are either real purchases or direct DM actions. If

@@ -174,6 +174,17 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(
       screen.getByRole("button", { name: "Expand Veteran Rank Card details" })
     ).toHaveAttribute("aria-expanded", "false");
+    const scoutTitle = within(screen.getByRole("article", { name: "Scout Rank Card" })).getByRole(
+      "heading",
+      { name: "Scout" }
+    );
+    expect(scoutTitle).toHaveClass("text-slate-200", "font-medium");
+    expect(scoutTitle).not.toHaveClass("text-red-500");
+    expect(
+      within(screen.getByRole("article", { name: "Scout Rank Card" })).getAllByRole("heading", {
+        name: "Career Purchases from This Rank",
+      })[0]
+    ).toHaveClass("border-l-2", "text-red-500");
   });
 
   it("displays the selected Alternate Rank in progression and the Rank ledger", () => {
@@ -745,7 +756,10 @@ describe("ExperienceTab named Career Rank ledger", () => {
     dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
     expect(dialog.getByRole("button", { name: "Confirm Rank Up" })).toBeDisabled();
     expect(dialog.getByRole("button", { name: "Scout" })).toHaveAttribute("aria-pressed", "false");
-    expect(dialog.getByText("Final XP adjustments")).toBeInTheDocument();
+    expect(dialog.getByRole("heading", { name: "Final XP adjustments" })).toHaveClass(
+      "border-l-2",
+      "text-red-500"
+    );
     expect(dialog.queryByText("Applied Rank Up XP Cost")).not.toBeInTheDocument();
     expect(dialog.queryByText("Draft cost")).not.toBeInTheDocument();
   });
