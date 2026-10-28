@@ -149,7 +149,7 @@ describe("TraitsTab", () => {
     const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
     renderTab({ talents: makeTalents({ traits: [entry] }) });
     expect(screen.getByText("Traits")).toBeInTheDocument();
-    expect(screen.getByText("Plain Trait")).toBeInTheDocument();
+    expect(screen.getAllByText("Plain Trait")[0]).toBeInTheDocument();
   });
 
   it("uses the shared Add and View controls", () => {
@@ -199,8 +199,8 @@ describe("TraitsTab", () => {
       cybernetics: [{ id: "lungs", name: "Bionic Respiratory System", craftsmanship: "Good" }],
       onUpdateCybernetics,
     });
-    expect(screen.getByText("Owned: 2/4")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Remove Skin of Iron" }));
+    expect(screen.getAllByText("Owned: 2/4")[0]).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Remove Skin of Iron" })[0]);
     await user.click(
       within(screen.getByRole("dialog", { name: "Remove Trait" })).getByRole("button", {
         name: "Remove",
@@ -237,7 +237,7 @@ describe("TraitsTab", () => {
       onUpdateCharacter,
     });
 
-    await user.click(screen.getByRole("button", { name: "Remove Skin of Iron" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Skin of Iron" })[0]);
     await user.click(
       within(screen.getByRole("dialog", { name: "Remove Trait" })).getByRole("button", {
         name: "Remove",
@@ -267,7 +267,7 @@ describe("TraitsTab", () => {
     const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
     renderTab({ talents: makeTalents({ traits: [entry] }), onUpdateCharacter });
 
-    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Plain Trait" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Remove Trait" });
     await user.click(within(dialog).getByRole("button", { name: "Remove" }));
 
@@ -286,7 +286,7 @@ describe("TraitsTab", () => {
     const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
     renderTab({ talents: makeTalents({ traits: [entry] }), onUpdateCharacter });
 
-    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Plain Trait" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Remove Trait" });
     await user.click(within(dialog).getByRole("button", { name: "Remove" }));
 
@@ -353,18 +353,18 @@ describe("TraitsTab", () => {
     const entry: TalentEntry = { uid: "t1", talentId: "plain-trait", name: "Plain Trait" };
     const { onUpdateTalents } = renderTab({ talents: makeTalents({ traits: [entry] }) });
 
-    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Plain Trait" })[0]);
     expect(screen.getByRole("dialog", { name: "Remove Trait" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onUpdateTalents).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Remove Plain Trait" }));
+    await user.click(screen.getAllByRole("button", { name: "Remove Plain Trait" })[0]);
     await user.click(screen.getByRole("button", { name: "Remove" }));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
     expect(next.traits).toHaveLength(0);
   });
 
-  it("shows repeated Unnatural Characteristics once with an Owned count", () => {
+  it("shows repeated Unnatural Characteristics as one card with an Owned count", () => {
     renderTab({
       talents: makeTalents({
         traits: [
@@ -383,8 +383,8 @@ describe("TraitsTab", () => {
         ],
       }),
     });
-    expect(screen.getAllByText("Unnatural Characteristic (Weapon Skill)")).toHaveLength(1);
-    expect(screen.getByText("Owned: 2")).toBeInTheDocument();
+    expect(screen.getAllByText("Unnatural Characteristic (Weapon Skill)")).toHaveLength(2);
+    expect(screen.getAllByText("Owned: 2")).toHaveLength(2);
   });
 
   it("groups different Unnatural Characteristics into expandable children", async () => {
@@ -416,7 +416,7 @@ describe("TraitsTab", () => {
 
     expect(screen.queryByText("Unnatural Characteristic (Weapon Skill)")).not.toBeInTheDocument();
     await user.click(
-      screen.getByRole("button", { name: "Expand Unnatural Characteristic details" })
+      screen.getAllByRole("button", { name: "Expand Unnatural Characteristic details" })[0]
     );
     expect(screen.getByText("Unnatural Characteristic (Weapon Skill)")).toBeInTheDocument();
     expect(screen.getByText("Unnatural Characteristic (Perception)")).toBeInTheDocument();
@@ -465,7 +465,7 @@ describe("TraitsTab", () => {
     const { onUpdateTalents } = renderTab({ talents: makeTalents({ traits }) });
 
     await user.click(
-      screen.getByRole("button", { name: "Remove Unnatural Characteristic (Weapon Skill)" })
+      screen.getAllByRole("button", { name: "Remove Unnatural Characteristic (Weapon Skill)" })[0]
     );
     await user.click(screen.getByRole("button", { name: "Remove" }));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
@@ -606,12 +606,9 @@ describe("TraitsTab", () => {
         traits: [{ uid: "t1", talentId: "plain-trait", name: "Plain Trait" }],
       }),
     });
-    const list = screen.getByTestId("trait-card-list");
-    expect(list).toHaveClass("grid-cols-1", "lg:grid-cols-2", "items-start");
-    const columns = screen.getAllByTestId("trait-card-column");
-    expect(columns).toHaveLength(2);
-    expect(columns[0]).toHaveClass("space-y-2");
-    expect(columns[1]).toHaveClass("space-y-2");
+    const copies = screen.getAllByText("Plain Trait");
+    const list = copies[copies.length - 1].closest(".lg\\:grid");
+    expect(list).toHaveClass("lg:grid-cols-2", "lg:items-start");
   });
 
   it("shows The Flesh is Weak's Machine Trait as a read-only grant", () => {
@@ -623,9 +620,9 @@ describe("TraitsTab", () => {
         ],
       }),
     });
-    expect(screen.getByText("Machine (2)")).toBeInTheDocument();
-    expect(screen.getByText("Gained from")).toBeInTheDocument();
-    expect(screen.getByText("The Flesh is Weak (Talent)")).toBeInTheDocument();
+    expect(screen.getAllByText("Machine (2)")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Gained from")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("The Flesh is Weak (Talent)")[0]).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove Machine (2)" })).not.toBeInTheDocument();
   });
 });

@@ -3,6 +3,7 @@
 import { CHAT_LIMITS } from "shared-rules";
 import { Button } from "../../ui/buttons/Button";
 import { ConfirmModal } from "../../ui/modals/ConfirmModal";
+import { uiTwoColumnGrid } from "../../ui/styles/editableStyles";
 
 interface KeepOrDeleteChatModalProps {
   busy: boolean;
@@ -33,7 +34,7 @@ export function KeepOrDeleteChatModal({
       dismissible={false}
       onCancel={() => undefined}
       actions={
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <Button variant="neutral" onClick={onKeep} disabled={busy}>
             {many ? "Keep My Chats" : "Keep My Chat"}
           </Button>

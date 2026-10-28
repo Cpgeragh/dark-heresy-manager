@@ -23,6 +23,8 @@ import {
 } from "../../ui/styles/colourTokens";
 import {
   uiChipRow,
+  uiSummaryGrid,
+  uiSectionColumns,
   uiInfoModalWrapper,
   uiTextBody,
   uiTextLabel,
@@ -118,7 +120,7 @@ function InsanityStatusChips({ points }: { points: number }) {
           Character retires from play
         </p>
       ) : (
-        <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${colourDivider}`}>
+        <div className={`${uiSummaryGrid} grid-cols-2 pt-3 border-t ${colourDivider}`}>
           <div className={`flex flex-col items-center ${uiStackField}`}>
             <span className={uiTextLabel}>Status</span>
             <div className={`${uiChipRow} justify-center`}>
@@ -360,7 +362,7 @@ export function InsanityPanel({
       </div>
 
       {/* Desktop: side by side */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+      <div className={`${uiSectionColumns} hidden lg:grid lg:grid-cols-2`}>
         <section className={`${sectionClassName} ${uiStackList}`}>
           <TraumaHeader editable={editable} onAdd={() => setShowTraumaPicker(true)} />
           <TraumaList trauma={structuredTrauma} editable={editable} onRemove={handleRemoveTrauma} />

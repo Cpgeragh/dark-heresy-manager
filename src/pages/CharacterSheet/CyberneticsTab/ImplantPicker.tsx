@@ -27,6 +27,7 @@ import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import {
   uiInlineRow,
+  uiTwoColumnGrid,
   uiTextBody,
   uiTextLabel,
   uiTextGMNote,
@@ -232,7 +233,7 @@ export function ImplantPicker({
           </div>
         </PickerBody>
 
-        <div className="grid grid-cols-2 gap-2 px-4 lg:px-5 py-3 lg:py-4">
+        <div className={`${uiTwoColumnGrid} px-4 lg:px-5 py-3 lg:py-4`}>
           <Button
             onClick={() => {
               onSelect(
@@ -353,7 +354,7 @@ export function ImplantPicker({
           />
         </PickerBody>
 
-        <div className="grid grid-cols-2 gap-2 px-4 lg:px-5 py-3 lg:py-4">
+        <div className={`${uiTwoColumnGrid} px-4 lg:px-5 py-3 lg:py-4`}>
           <Button
             onClick={() => {
               if (selected.id === "ih-concealed-weapon-bionic") {

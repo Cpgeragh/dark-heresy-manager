@@ -30,6 +30,8 @@ import {
 } from "shared-rules";
 import {
   uiInlineRow,
+  uiStatGrid,
+  uiSectionColumns,
   uiSection,
   uiCell,
   uiCellLabel,
@@ -420,7 +422,7 @@ export function CharacteristicsTab({
       {/* Stats */}
       <div>
         <SectionHeader className="mb-2">Stats</SectionHeader>
-        <div className="grid grid-cols-9 gap-1">
+        <div className={`${uiStatGrid} grid-cols-9`}>
           {(
             [
               { label: "WS", key: "ws" },
@@ -457,7 +459,7 @@ export function CharacteristicsTab({
             />
           </span>
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className={`${uiStatGrid} grid-cols-7`}>
           {[
             { label: "SB", value: SB },
             { label: "TB", value: TB },
@@ -512,7 +514,7 @@ export function CharacteristicsTab({
             />
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-1">
+        <div className={`${uiStatGrid} grid-cols-4`}>
           {[
             { label: "Half", value: movementAB },
             { label: "Full", value: movementAB * MOVEMENT_FULL_MULTIPLIER },
@@ -527,7 +529,7 @@ export function CharacteristicsTab({
         </div>
         {movementEffects.modes.length > 0 && (
           <div className={`mt-2 ${uiStackList}`}>
-            <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
+            <div className={`${uiStatGrid} grid-cols-1 sm:grid-cols-3`}>
               {movementEffects.modes.map((mode) => (
                 <div
                   key={`${mode.name}:${mode.source}`}
@@ -603,7 +605,7 @@ export function CharacteristicsTab({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className={`${uiSectionColumns} grid grid-cols-3`}>
           {STAT_KEYS.map((key) => (
             <StatBlock
               key={key}

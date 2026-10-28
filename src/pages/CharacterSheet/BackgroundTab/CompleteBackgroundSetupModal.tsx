@@ -8,7 +8,7 @@ import type {
 import { Button } from "../../../ui/buttons/Button";
 import { ModalShell } from "../../../ui/modals/ModalShell";
 import { CenteredTitleHeader } from "../../../ui/CenteredTitleHeader";
-import { uiStackBody } from "../../../ui/styles/editableStyles";
+import { uiTwoColumnGrid, uiStackBody } from "../../../ui/styles/editableStyles";
 import {
   colourAmberPlain,
   colourTextPrimary,
@@ -86,7 +86,7 @@ export function CompleteBackgroundSetupModal({
         )}
       </div>
 
-      <div className={`grid grid-cols-2 gap-2 border-t ${colourDivider} px-4 py-4 lg:px-6 lg:py-5`}>
+      <div className={`${uiTwoColumnGrid} border-t ${colourDivider} px-4 py-4 lg:px-6 lg:py-5`}>
         <Button variant="neutral" onClick={onReturnToDashboard} disabled={saving}>
           Return
         </Button>

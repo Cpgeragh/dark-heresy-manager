@@ -15,7 +15,8 @@ import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
   uiChipRow,
   uiInlineRow,
-  uiFieldGrid,
+  uiTwoColumnGrid,
+  uiOptionGrid,
   editableInputClass,
   editableTextareaClass,
   uiTextError,
@@ -217,7 +218,7 @@ export function CustomPowerForm({
           )}
         </fieldset>
 
-        <div className={`${uiFieldGrid}`}>
+        <div className={`${uiTwoColumnGrid}`}>
           <div className={uiStackField}>
             <FormLabel htmlFor="custom-power-pt" required>
               PT
@@ -239,7 +240,7 @@ export function CustomPowerForm({
             <FormLabel as="legend" required>
               Action
             </FormLabel>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className={`${uiOptionGrid} grid-cols-2`}>
               {(["Half Action", "Full Action"] as const).map((action) => (
                 <ToggleButton
                   key={action}
@@ -259,7 +260,7 @@ export function CustomPowerForm({
           <FormLabel as="legend" required>
             Range
           </FormLabel>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <div className={`${uiOptionGrid} grid-cols-2 sm:grid-cols-4`}>
             {[
               ["meters", "Metres"],
               ["km-radius", "km radius"],
@@ -299,12 +300,12 @@ export function CustomPowerForm({
           )}
         </fieldset>
 
-        <div className={`${uiFieldGrid}`}>
+        <div className={`${uiTwoColumnGrid}`}>
           <fieldset aria-required="true" className={uiStackField}>
             <FormLabel as="legend" required>
               Sustained
             </FormLabel>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className={`${uiOptionGrid} grid-cols-2`}>
               {(["Yes", "No"] as const).map((value) => (
                 <ToggleButton
                   key={value}

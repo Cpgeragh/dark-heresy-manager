@@ -1438,6 +1438,8 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] Every scrollbar, in a long pop-up such as Session in Progress, in a picker list, in the navigation drawer and on the page itself, is thin with a slate grey thumb, a see-through track and no arrow buttons (`src/index.css`)
 - [ ] The Wear, Stow, Activate, Deactivate and Equip buttons are extra small on a phone, taller from 640 pixels wide and larger from 768 pixels wide (`EntryActionButton.tsx`)
 - [ ] An item whose weight is a dash shows "0 kg", an item whose weight is Varies shows the word "Varies", an item whose weight has a † shows the number only, and the Sky Eye shows "4 kg case" (`weightFormat.ts`)
+- [ ] Form fields and pop-up footer buttons sit in two equal columns with the same gap at every width, including Age, Height and Weight on the Background tab on a phone; option buttons in the custom forms, the Experience rank choices and the Ranged picker filters share one tighter gap; and the side-by-side sections on Skills, Experience, Gear and Weapons sit the same distance apart and start at the top (`uiTwoColumnGrid`, `uiOptionGrid`, `uiSectionColumns`)
+- [ ] Notes, Traits, Talents and the Archeotech armour lists flow into independent columns that do not line up in rows, and Notes is a single column on a phone (`IndependentCardGrid`)
 
 ## 36. Waiting and Instant Saves
 

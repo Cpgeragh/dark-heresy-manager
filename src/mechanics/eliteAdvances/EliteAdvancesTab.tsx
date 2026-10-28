@@ -961,7 +961,7 @@ export function EliteAdvancesTab({
             No standalone Elite Advances purchased.
           </p>
         )}
-        <div className="grid grid-cols-1 gap-2">
+        <div className={uiStackList}>
           {[...entries]
             .sort((left, right) => left.name.localeCompare(right.name, "en-GB"))
             .map((entry) => {

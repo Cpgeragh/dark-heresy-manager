@@ -15,7 +15,9 @@ import type {
 import { TALENT_LIST, type TalentData } from "shared-rules";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
+import { IndependentCardGrid } from "../../ui/layout/IndependentCardGrid";
 import {
+  uiSectionColumns,
   uiSection,
   uiTextPlaceholder,
   uiStackList,
@@ -122,15 +124,13 @@ function FaithTalentSection({
         {entries.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
         )}
-        <div className="grid grid-cols-1 gap-2">
-          <TalentCards
-            entries={entries}
-            psychic={psychic}
-            editable={editable}
-            onRemove={onRemove}
-            getStatusChip={(talentId) => getFaithTalentGroupChip(TALENT_BY_ID.get(talentId))}
-          />
-        </div>
+        <TalentCards
+          entries={entries}
+          psychic={psychic}
+          editable={editable}
+          onRemove={onRemove}
+          getStatusChip={(talentId) => getFaithTalentGroupChip(TALENT_BY_ID.get(talentId))}
+        />
         {showPicker && (
           <TalentPickerModal
             title={editable ? "Add Faith Talent" : "View Faith Talents"}
@@ -158,12 +158,14 @@ const TalentCards = memo(function TalentCards({
   editable,
   onRemove,
   getStatusChip,
+  columns = 1,
 }: {
   entries: TalentEntry[];
   psychic: PsychicBlock;
   editable: boolean;
   onRemove: (uid: string, restoreOneTimeEffects?: boolean) => void | Promise<unknown>;
   getStatusChip?: (talentId: string) => FaithTalentGroupChip | undefined;
+  columns?: 1 | 2;
 }) {
   recordComponentRender("TalentCards");
   const groups = new Map<string, TalentEntry[]>();
@@ -173,7 +175,7 @@ const TalentCards = memo(function TalentCards({
     groups.set(entry.talentId, current);
   }
 
-  return [...groups.entries()]
+  const cards = [...groups.entries()]
     .sort(([aId, aEntries], [bId, bEntries]) =>
       (TALENT_BY_ID.get(aId)?.name ?? aEntries[0].name).localeCompare(
         TALENT_BY_ID.get(bId)?.name ?? bEntries[0].name
@@ -266,6 +268,12 @@ const TalentCards = memo(function TalentCards({
         />
       ));
     });
+
+  return columns === 2 ? (
+    <IndependentCardGrid items={cards} breakpoint="lg" />
+  ) : (
+    <div className={uiStackList}>{cards}</div>
+  );
 });
 
 function RegularTalentSection({
@@ -308,14 +316,13 @@ function RegularTalentSection({
         {entries.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
         )}
-        <div className={`grid gap-2 ${columns === 2 ? "lg:grid-cols-2" : "grid-cols-1"}`}>
-          <TalentCards
-            entries={entries}
-            psychic={psychic}
-            editable={editable}
-            onRemove={onRemove}
-          />
-        </div>
+        <TalentCards
+          entries={entries}
+          psychic={psychic}
+          editable={editable}
+          onRemove={onRemove}
+          columns={columns}
+        />
         {showPicker && (
           <TalentPickerModal
             title={editable ? "Add Talent" : "View Talents"}
@@ -499,7 +506,7 @@ export function TalentsTab({
       </div>
 
       <div
-        className={`hidden lg:grid lg:gap-6 lg:items-start ${showFaith ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}
+        className={`${uiSectionColumns} hidden lg:grid ${showFaith ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}
       >
         <RegularTalentSection
           entries={regularEntries}

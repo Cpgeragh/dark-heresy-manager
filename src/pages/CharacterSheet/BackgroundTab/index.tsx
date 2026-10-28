@@ -15,6 +15,8 @@ import { FormField } from "../../../components/FormField";
 import { InfoModal } from "../../../components/InfoModal";
 import {
   uiChipRow,
+  uiTwoColumnGrid,
+  uiSectionColumns,
   uiInlineRow,
   editableInputClass,
   uiInfoModalWrapper,
@@ -255,7 +257,7 @@ export function BackgroundTab({
     <div>
       <SectionHeader className="mb-3">Appearance</SectionHeader>
       <section className={`${uiSection} ${uiStackBody}`}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className={`${uiTwoColumnGrid} sm:grid-cols-3`}>
           <div className={uiStackField}>
             <div className="flex items-center gap-1.5">
               <FormLabel htmlFor="background-age">Age</FormLabel>
@@ -368,7 +370,7 @@ export function BackgroundTab({
 
         <div className={`border-t ${colourDivider}`} />
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className={`${uiTwoColumnGrid} sm:grid-cols-4`}>
           <BackgroundPickerField
             label="Gender"
             selected={!!header.gender}
@@ -588,7 +590,7 @@ export function BackgroundTab({
       </div>
 
       {/* Desktop: side by side */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+      <div className={`${uiSectionColumns} hidden lg:grid lg:grid-cols-2`}>
         {appearanceSection}
         {backgroundSection}
       </div>

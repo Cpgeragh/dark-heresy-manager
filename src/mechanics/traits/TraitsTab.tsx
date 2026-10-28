@@ -15,6 +15,7 @@ import { TalentPickerModal } from "../talents/TalentPickerModal";
 import { getActiveTraitEntries } from "./traitEffects";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";
+import { IndependentCardGrid } from "../../ui/layout/IndependentCardGrid";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { AccordionCard } from "../../ui/AccordionCard";
 import {
@@ -388,8 +389,6 @@ export function TraitsTab({
         ]
       : []),
   ].sort((a, b) => a.sortName.localeCompare(b.sortName));
-  const columnSplit = Math.ceil(cards.length / 2);
-  const cardColumns = [cards.slice(0, columnSplit), cards.slice(columnSplit)];
 
   return (
     <div className={uiStackPage}>
@@ -406,18 +405,12 @@ export function TraitsTab({
           {displayTraits.length === 0 && (
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>
           )}
-          <div
-            className="grid grid-cols-1 items-start gap-2 lg:grid-cols-2"
-            data-testid="trait-card-list"
-          >
-            {cardColumns.map((column, index) => (
-              <div key={index} className={uiStackList} data-testid="trait-card-column">
-                {column.map((card) => (
-                  <div key={card.key}>{card.node}</div>
-                ))}
-              </div>
+          <IndependentCardGrid
+            breakpoint="lg"
+            items={cards.map((card) => (
+              <div key={card.key}>{card.node}</div>
             ))}
-          </div>
+          />
           {showPicker && (
             <TalentPickerModal
               title={editable ? "Add Trait" : "View Traits"}

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "../buttons/Button";
 import { PickerBody, PickerModal } from "../pickers/PickerModal";
 import { colourAmberPlain } from "../styles/colourTokens";
-import { uiCodeBox, uiCodeText } from "../styles/editableStyles";
+import { uiTwoColumnGrid, uiCodeBox, uiCodeText } from "../styles/editableStyles";
 import { ConfirmModal } from "./ConfirmModal";
 
 interface RevealCodeModalProps {
@@ -38,7 +38,7 @@ export function RevealCodeModal({
         maxWidth="max-w-sm"
         suspended={rotateConfirmOpen}
         footer={
-          <div className="grid grid-cols-2 gap-2">
+          <div className={uiTwoColumnGrid}>
             <Button variant="primary" onClick={() => void onCopy()}>
               Copy code
             </Button>

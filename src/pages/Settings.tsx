@@ -22,6 +22,7 @@ import {
 import {
   editableInputClass,
   uiInfoModalWrapper,
+  uiTwoColumnGrid,
   uiActionRowLabel,
   uiSection,
   uiTextBody,
@@ -517,7 +518,7 @@ export default function Settings({
                   className={editableInputClass(true)}
                   autoFocus
                 />
-                <div className="grid grid-cols-2 gap-2">
+                <div className={uiTwoColumnGrid}>
                   <Button
                     type="submit"
                     variant="primary"

@@ -101,9 +101,9 @@ describe("ExperienceTab named Career Rank ledger", () => {
   it("shows the Total, Spent, and Remaining XP summary", () => {
     renderTab();
     expect(screen.getByText("Total XP").closest("section")).toHaveClass(
-      "grid-cols-3",
-      "gap-2",
-      "sm:gap-4"
+      "grid",
+      "gap-3",
+      "grid-cols-3"
     );
     expect(screen.getByText("Remaining XP")).toHaveClass(
       "w-full",

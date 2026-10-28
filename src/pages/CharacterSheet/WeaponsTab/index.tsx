@@ -49,7 +49,12 @@ import {
   meleeDamageForCraftsmanship,
 } from "../weapons/weaponHelpers";
 import { SectionHeader } from "../../../ui/SectionHeader";
-import { uiTextPlaceholder, uiStackSection, uiStackPage } from "../../../ui/styles/editableStyles";
+import {
+  uiSectionColumns,
+  uiTextPlaceholder,
+  uiStackSection,
+  uiStackPage,
+} from "../../../ui/styles/editableStyles";
 import {
   colourActiveEmerald,
   colourActiveOrange,
@@ -1040,7 +1045,8 @@ export function WeaponsTab({
         : "hidden lg:block",
     ].join(" ");
   const weaponPairClass = [
-    "grid grid-cols-1 lg:grid-cols-2 gap-8",
+    uiSectionColumns,
+    "grid grid-cols-1 lg:grid-cols-2",
     activeWeaponSection === "ranged" || activeWeaponSection === "melee" ? "" : "hidden lg:grid",
   ].join(" ");
 

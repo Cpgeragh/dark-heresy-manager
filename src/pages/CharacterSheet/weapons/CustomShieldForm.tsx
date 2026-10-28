@@ -2,7 +2,11 @@
 
 import { useRef, useState } from "react";
 import type { ShieldItem } from "../../../types/Character";
-import { editableInputClass } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  uiTwoColumnGrid,
+  uiInputRowGrid,
+} from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -171,7 +175,7 @@ export function CustomShieldForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div className="col-span-2">
             <FormLabel htmlFor="custom-shield-name" required>
               Name
@@ -207,7 +211,7 @@ export function CustomShieldForm({
       </CustomFormSection>
 
       <CustomFormSection title="Combat">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor="custom-shield-ap" required>
               AP
@@ -242,7 +246,7 @@ export function CustomShieldForm({
             <FormLabel as="legend" required>
               Bash Damage
             </FormLabel>
-            <div className="grid grid-cols-3 gap-2 mt-0.5">
+            <div className={`${uiInputRowGrid} mt-0.5`}>
               <input
                 aria-label="Bash damage dice"
                 required
@@ -277,7 +281,7 @@ export function CustomShieldForm({
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor="custom-shield-weight" required>
               Weight
@@ -321,7 +325,7 @@ export function CustomShieldForm({
       </CustomFormSection>
 
       <CustomFormSection title="Description, Rules, & Qualities">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <WeaponQualitySelector
             selected={selectedQualities}
             pendingQuality={qualityPicker.pendingQuality}

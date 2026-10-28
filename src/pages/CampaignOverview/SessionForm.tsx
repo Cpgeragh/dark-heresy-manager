@@ -16,6 +16,7 @@ import { toSessionInputDate } from "../../utils/sessionDate";
 import {
   editableInputClass,
   editableTextareaClass,
+  uiTwoColumnGrid,
   uiTextNotice,
 } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -119,7 +120,7 @@ export function SessionForm({
     >
       {showSession && (
         <CustomFormSection title="Session">
-          <div className="grid grid-cols-2 gap-2">
+          <div className={uiTwoColumnGrid}>
             {mode === "edit" && (
               <div>
                 <FormLabel htmlFor="session-date" required>

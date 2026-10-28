@@ -8,7 +8,7 @@ import {
 } from "../../../data/reference/weaponReference";
 import { WEAPON_TYPES } from "../../../data/reference/weaponClassification";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
+import { uiOptionGrid, uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
@@ -212,7 +212,7 @@ export function RangedPicker({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
-        <div className="grid grid-cols-1 gap-2 w-full sm:grid-cols-3">
+        <div className={`${uiOptionGrid} grid-cols-1 w-full sm:grid-cols-3`}>
           <FilterButton className="flex-1" onClick={() => setShowClassFilterPicker(true)}>
             {classFilter ?? "All Classes"}
           </FilterButton>

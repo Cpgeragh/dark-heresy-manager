@@ -1,7 +1,7 @@
 import { Button } from "../buttons/Button";
 import { colourRequiredText } from "../styles/colourTokens";
 import { RequiredMark } from "./RequiredMark";
-import { uiStackList } from "../styles/editableStyles";
+import { uiTwoColumnGrid, uiStackList } from "../styles/editableStyles";
 
 /** Shared footer key for forms that mark mandatory controls with a red asterisk. */
 export function RequiredFieldsNote() {
@@ -37,7 +37,7 @@ export function CustomFormFooter({
   return (
     <div className={`${uiStackList} ${className}`.trim()}>
       <RequiredFieldsNote />
-      <div className="grid grid-cols-2 gap-2">
+      <div className={uiTwoColumnGrid}>
         <Button
           type={formId ? "submit" : "button"}
           form={formId}

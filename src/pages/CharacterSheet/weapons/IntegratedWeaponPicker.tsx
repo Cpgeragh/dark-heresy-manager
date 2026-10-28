@@ -12,7 +12,7 @@ import {
   PickerModal,
 } from "../../../ui/pickers/PickerModal";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
-import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
+import { uiTwoColumnGrid, uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { MeleePickerCard, RangedPickerCard } from "./WeaponPickerCards";
 import {
@@ -148,7 +148,7 @@ export function IntegratedWeaponPicker({
       isEmpty={isEmpty}
       footer={
         editable && (onCustomRanged || onCustomMelee) ? (
-          <div className="grid grid-cols-2 gap-2">
+          <div className={uiTwoColumnGrid}>
             {onCustomRanged && (
               <PickerCustomAction onClick={onCustomRanged}>
                 Add Custom Ranged Weapon

@@ -31,7 +31,6 @@ import {
   uiInfoModalWrapper,
   uiStackPage,
   uiStackSection,
-  uiStackList,
 } from "../../../ui/styles/editableStyles";
 import {
   uiTable,
@@ -663,10 +662,8 @@ export function ArmourTab({
           <IndependentCardGrid items={worn.map((piece) => renderArmourRow(piece, true))} />
         )}
         {archeotechArmourWorn.length > 0 && (
-          <div
-            className={`${uiStackList} sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start`}
-          >
-            {archeotechArmourWorn.map((item) => (
+          <IndependentCardGrid
+            items={archeotechArmourWorn.map((item) => (
               <ArcheotechArmourRow
                 key={item.id}
                 item={item}
@@ -675,7 +672,7 @@ export function ArmourTab({
                 onRemove={() => removeArcheotech(item.id)}
               />
             ))}
-          </div>
+          />
         )}
       </section>
 
@@ -699,10 +696,8 @@ export function ArmourTab({
           <IndependentCardGrid items={stowed.map((piece) => renderArmourRow(piece, false))} />
         )}
         {archeotechArmourStowed.length > 0 && (
-          <div
-            className={`${uiStackList} sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start`}
-          >
-            {archeotechArmourStowed.map((item) => (
+          <IndependentCardGrid
+            items={archeotechArmourStowed.map((item) => (
               <ArcheotechArmourRow
                 key={item.id}
                 item={item}
@@ -711,7 +706,7 @@ export function ArmourTab({
                 onRemove={() => removeArcheotech(item.id)}
               />
             ))}
-          </div>
+          />
         )}
       </section>
 

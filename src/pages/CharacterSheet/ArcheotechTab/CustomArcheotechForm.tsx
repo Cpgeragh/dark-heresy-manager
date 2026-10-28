@@ -8,6 +8,7 @@ import type {
 } from "../../../types/Character";
 import {
   uiInlineRow,
+  uiTwoColumnGrid,
   editableInputClass,
   editableTextareaClass,
   uiTextBody,
@@ -300,7 +301,7 @@ export function CustomArcheotechForm({
               autoComplete="off"
             />
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className={uiTwoColumnGrid}>
             <div>
               <FormLabel htmlFor="custom-archeotech-weight">Weight</FormLabel>
               <input
@@ -359,7 +360,7 @@ export function CustomArcheotechForm({
                 </div>
               </fieldset>
             )}
-            <div className="grid grid-cols-2 gap-2">
+            <div className={uiTwoColumnGrid}>
               <div>
                 <FormLabel htmlFor="custom-archeotech-damage">Damage</FormLabel>
                 <input
@@ -387,7 +388,7 @@ export function CustomArcheotechForm({
             </div>
             {showRangedStats && (
               <>
-                <div className="grid grid-cols-2 gap-2">
+                <div className={uiTwoColumnGrid}>
                   <div>
                     <FormLabel htmlFor="custom-archeotech-range">Range</FormLabel>
                     <input
@@ -413,7 +414,7 @@ export function CustomArcheotechForm({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className={uiTwoColumnGrid}>
                   <div>
                     <FormLabel htmlFor="custom-archeotech-clip">Clip</FormLabel>
                     <input
@@ -529,7 +530,7 @@ export function CustomArcheotechForm({
                 autoComplete="off"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className={uiTwoColumnGrid}>
               <div>
                 <FormLabel htmlFor="custom-archeotech-shield-damage">Damage</FormLabel>
                 <input

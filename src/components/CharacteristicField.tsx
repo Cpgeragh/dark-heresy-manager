@@ -10,6 +10,7 @@ import {
 import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
 import {
   uiInlineRow,
+  uiStatGrid,
   editableInputColour,
   uiSection,
   uiTextError,
@@ -185,7 +186,7 @@ export function CharacteristicField({
           <span className={`shrink-0 pt-1 text-sm lg:text-base ${colourMetadataLabelText}`}>
             Advances:
           </span>
-          <div className="grid min-w-0 flex-1 grid-cols-4 gap-1">
+          <div className={`${uiStatGrid} min-w-0 flex-1 grid-cols-4`}>
             {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
               const filled = idx < advances;
               const cost = tierCosts?.[idx];

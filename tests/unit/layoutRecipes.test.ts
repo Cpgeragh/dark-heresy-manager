@@ -5,14 +5,19 @@ import { describe, expect, it } from "vitest";
 
 import {
   uiChipRow,
-  uiFieldGrid,
   uiInlineRow,
+  uiInputRowGrid,
+  uiOptionGrid,
+  uiSectionColumns,
   uiSplitRow,
   uiStackBody,
   uiStackField,
   uiStackList,
   uiStackPage,
   uiStackSection,
+  uiStatGrid,
+  uiSummaryGrid,
+  uiTwoColumnGrid,
 } from "../../src/ui/styles/editableStyles";
 
 function sourceFiles(directory: string): string[] {
@@ -149,7 +154,12 @@ describe("shared layout recipes", () => {
     expect(uiChipRow).toBe("flex flex-wrap gap-1.5");
     expect(uiInlineRow).toBe("flex items-center gap-2");
     expect(uiSplitRow).toBe("flex items-center justify-between gap-2");
-    expect(uiFieldGrid).toBe("grid grid-cols-1 gap-3 sm:grid-cols-2");
+    expect(uiTwoColumnGrid).toBe("grid grid-cols-2 gap-2");
+    expect(uiSummaryGrid).toBe("grid gap-3");
+    expect(uiOptionGrid).toBe("grid gap-1.5");
+    expect(uiInputRowGrid).toBe("grid grid-cols-3 gap-2");
+    expect(uiStatGrid).toBe("grid gap-1");
+    expect(uiSectionColumns).toBe("gap-6 items-start");
   });
 
   it("leaves no hand-written copy in the source", () => {
@@ -157,7 +167,13 @@ describe("shared layout recipes", () => {
       ["flex", "flex-wrap", "gap-1.5"],
       ["flex", "items-center", "gap-2"],
       ["flex", "items-center", "justify-between", "gap-2"],
-      ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2"],
+      ["grid", "grid-cols-2", "gap-2"],
+      ["grid", "grid-cols-3", "gap-2"],
+      ["grid", "grid-cols-2", "gap-3"],
+      ["grid", "grid-cols-3", "gap-3"],
+      ["grid", "gap-1.5"],
+      ["grid", "gap-1"],
+      ["gap-6", "items-start"],
     ];
     const offenders: string[] = [];
 

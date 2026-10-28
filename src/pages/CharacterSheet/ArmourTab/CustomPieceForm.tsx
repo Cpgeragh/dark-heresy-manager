@@ -7,6 +7,8 @@ import type {
 } from "../../../types/Character";
 import {
   editableInputClass,
+  uiTwoColumnGrid,
+  uiOptionGrid,
   uiInfoModalWrapper,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
@@ -196,7 +198,7 @@ export function CustomPieceForm({
           <FormLabel as="legend" required>
             Craftsmanship
           </FormLabel>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className={`${uiOptionGrid} grid-cols-4`}>
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
               <ToggleButton
                 key={option}
@@ -218,7 +220,7 @@ export function CustomPieceForm({
             <FormLabel as="legend" required>
               Locations
             </FormLabel>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className={`${uiOptionGrid} grid-cols-3`}>
               {(
                 [
                   "leftArm",
@@ -281,7 +283,7 @@ export function CustomPieceForm({
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor="custom-armour-weight" required>
               Weight
@@ -339,7 +341,7 @@ export function CustomPieceForm({
               </span>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className={`${uiOptionGrid} grid-cols-3`}>
               {WORN_ARMOUR_QUALITY_OPTIONS.map((q) => (
                 <ToggleButton
                   key={q}

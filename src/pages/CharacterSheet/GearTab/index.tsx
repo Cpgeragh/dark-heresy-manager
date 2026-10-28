@@ -16,6 +16,7 @@ import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import {
+  uiSectionColumns,
   uiTextPlaceholder,
   uiStackSection,
   uiStackPage,
@@ -637,7 +638,7 @@ export function GearTab({
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className={`${uiSectionColumns} grid grid-cols-1 lg:grid-cols-2`}>
         <section
           id={segmentedTabPanelId(GEAR_TABS_ID, "items")}
           aria-labelledby={segmentedTabId(GEAR_TABS_ID, "items")}

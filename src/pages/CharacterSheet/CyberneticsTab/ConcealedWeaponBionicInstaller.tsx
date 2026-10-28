@@ -5,6 +5,7 @@ import { Button } from "../../../ui/buttons/Button";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
 import { ModalShell } from "../../../ui/modals/ModalShell";
 import {
+  uiTwoColumnGrid,
   uiTextBody,
   uiTextError,
   uiStackBody,
@@ -125,9 +126,13 @@ export function ConcealedWeaponBionicInstaller({
               );
             })}
       </div>
-      <div className={`grid gap-2 p-4 ${selectingArm ? "grid-cols-1" : "grid-cols-2"}`}>
+      <div className={`${uiTwoColumnGrid} p-4`}>
         {!selectingArm && <Button onClick={() => setArmId(null)}>Back</Button>}
-        <Button variant="neutral" onClick={onClose}>
+        <Button
+          variant="neutral"
+          onClick={onClose}
+          className={selectingArm ? "col-span-2" : undefined}
+        >
           Cancel
         </Button>
       </div>

@@ -11,6 +11,7 @@ import { IMPORTANT_TOAST_DURATION } from "../../constants/ui";
 import { PRODUCT_LIMITS } from "../../constants/productLimits";
 import {
   editableInputClass,
+  uiTwoColumnGrid,
   uiSplitRow,
   uiStackBody,
   uiStackList,
@@ -183,7 +184,7 @@ export function PartySection({
             hideSearch
             maxWidth="max-w-sm"
             footer={
-              <div className="grid grid-cols-2 gap-2">
+              <div className={uiTwoColumnGrid}>
                 <Button
                   type="submit"
                   form="create-character-form"

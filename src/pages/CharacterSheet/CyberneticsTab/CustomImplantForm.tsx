@@ -6,7 +6,11 @@ import type {
   CyberneticCraftsmanship,
   CyberneticItem,
 } from "../../../types/Character";
-import { editableInputClass } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  uiOptionGrid,
+  uiTwoColumnGrid,
+} from "../../../ui/styles/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import {
   formatWeightInput,
@@ -155,7 +159,7 @@ export function CustomImplantForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div className="col-span-2">
             <FormLabel htmlFor="custom-cybernetic-name" required>
               Name
@@ -174,7 +178,7 @@ export function CustomImplantForm({
             <FormLabel as="legend" required>
               Craftsmanship
             </FormLabel>
-            <div className="mt-0.5 grid grid-cols-3 gap-1.5">
+            <div className={`mt-0.5 ${uiOptionGrid} grid-cols-3`}>
               {CYBERNETIC_CRAFTSMANSHIP_OPTIONS.map((option) => (
                 <ToggleButton
                   key={option}
@@ -201,7 +205,7 @@ export function CustomImplantForm({
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor="custom-cybernetic-cost" required>
               Cost
@@ -251,7 +255,7 @@ export function CustomImplantForm({
       </CustomFormSection>
 
       <CustomFormSection title="Description & Rules">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <DescriptionAndRulesFields
             idPrefix="custom-cybernetic"
             description={notes}

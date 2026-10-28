@@ -6,7 +6,7 @@ import { formatMoneyInput, sanitizeMoneyInput } from "../format/moneyFormat";
 import { formatWeightInput, sanitizeWeightInput } from "../format/weightFormat";
 import { OptionPickerScreen } from "../pickers/OptionPickerScreen";
 import { PickerField } from "../pickers/PickerField";
-import { editableInputClass } from "../styles/editableStyles";
+import { editableInputClass, uiTwoColumnGrid } from "../styles/editableStyles";
 import { CustomFormSection } from "./CustomFormSection";
 import { CustomFormShell } from "./CustomFormShell";
 import { DescriptionAndRulesFields } from "./DescriptionAndRulesFields";
@@ -144,7 +144,7 @@ export function CustomInventoryItemForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div className="col-span-2">
             <FormLabel htmlFor={`${fieldIdPrefix}-name`} required>
               Name
@@ -190,7 +190,7 @@ export function CustomInventoryItemForm({
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor={`${fieldIdPrefix}-weight`} required>
               Weight
@@ -234,7 +234,7 @@ export function CustomInventoryItemForm({
       </CustomFormSection>
 
       <CustomFormSection title="Description & Rules">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <DescriptionAndRulesFields
             idPrefix={fieldIdPrefix}
             description={description}

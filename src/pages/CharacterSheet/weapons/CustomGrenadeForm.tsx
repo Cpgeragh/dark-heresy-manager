@@ -2,7 +2,12 @@
 
 import { useRef, useState } from "react";
 import type { GrenadeItem } from "../../../types/Character";
-import { editableInputClass } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  uiTwoColumnGrid,
+  uiInputRowGrid,
+  uiOptionGrid,
+} from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { colourToggleSelected } from "../../../ui/styles/colourTokens";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
@@ -223,7 +228,7 @@ export function CustomGrenadeForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div className="col-span-2">
             <FormLabel htmlFor="custom-grenade-name" required>
               Name
@@ -274,7 +279,7 @@ export function CustomGrenadeForm({
       </CustomFormSection>
 
       <CustomFormSection title="Combat">
-        <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Damage mode">
+        <div className={`${uiOptionGrid} grid-cols-3`} role="group" aria-label="Damage mode">
           {(["damage", "special", "none"] as const).map((option) => (
             <ToggleButton
               key={option}
@@ -292,7 +297,7 @@ export function CustomGrenadeForm({
             <FormLabel as="legend" required>
               Damage
             </FormLabel>
-            <div className="grid grid-cols-3 gap-2 mt-0.5">
+            <div className={`${uiInputRowGrid} mt-0.5`}>
               <input
                 aria-label="Damage dice"
                 required
@@ -342,7 +347,7 @@ export function CustomGrenadeForm({
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor="custom-grenade-weight" required>
               Weight
@@ -386,7 +391,7 @@ export function CustomGrenadeForm({
       </CustomFormSection>
 
       <CustomFormSection title="Description, Rules, & Qualities">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <WeaponQualitySelector
             selected={selectedQualities}
             pendingQuality={qualityPicker.pendingQuality}

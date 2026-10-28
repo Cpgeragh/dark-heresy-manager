@@ -4,7 +4,7 @@ import { toggleButtonClass } from "../buttons/ToggleButton";
 import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
 import { colourToggleSelected } from "../styles/colourTokens";
 import { uiDisabledLook, uiFocusWithinRing } from "../styles/buttonStyles";
-import { uiStackField } from "../styles/editableStyles";
+import { uiOptionGrid, uiStackField } from "../styles/editableStyles";
 
 interface OriginSelectorProps {
   name: string;
@@ -32,7 +32,7 @@ export function OriginSelector({
       <FormLabel as="legend" required className={hideLabel ? "sr-only" : ""}>
         Origin
       </FormLabel>
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className={`${uiOptionGrid} grid-cols-2`}>
         {CUSTOM_ITEM_ORIGIN_OPTIONS.map((option) => {
           const selected = value === option;
 

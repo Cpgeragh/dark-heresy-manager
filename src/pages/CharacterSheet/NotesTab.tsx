@@ -9,6 +9,7 @@ import { Chip } from "../../ui/chips/Chip";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
+import { IndependentCardGrid } from "../../ui/layout/IndependentCardGrid";
 import { FormLabel } from "../../ui/forms/FormLabel";
 import {
   uiInlineRow,
@@ -20,7 +21,6 @@ import {
   uiTextPlaceholder,
   uiTextDescription,
   uiStackSection,
-  uiStackList,
 } from "../../ui/styles/editableStyles";
 import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import { uiLayerLocal } from "../../ui/styles/layerStyles";
@@ -147,64 +147,57 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       ) : filtered.length === 0 ? (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No notes match your search.</p>
       ) : (
-        <div className="grid grid-cols-2 items-start gap-3">
-          {[
-            filtered.slice(0, Math.ceil(filtered.length / 2)),
-            filtered.slice(Math.ceil(filtered.length / 2)),
-          ].map((column, index) => (
-            <div key={index} className={uiStackList}>
-              {column.map((entry) => (
-                <div
-                  key={entry.id}
-                  className={`${uiSectionShell} ${uiCardTapHeader} relative p-4 lg:p-5`}
-                >
-                  <CardOverlayButton
-                    label={`Open note ${entry.title}`}
-                    onClick={() => openView(entry)}
-                  />
-                  <CharacterEntryRowContent
-                    interactive
-                    name={entry.title}
-                    nameClassName={uiOverlayItemNameHover}
-                    metadata={
-                      <>
-                        <p
-                          className={`mt-2 text-sm ${uiTextBody} leading-relaxed line-clamp-3 min-h-[4.3rem]`}
-                        >
-                          {entry.text}
-                        </p>
-                        <div>
-                          <Chip colour="cyan" className="mt-2">
-                            {formatDate(entry.updatedAt)}
-                          </Chip>
-                        </div>
-                      </>
-                    }
-                    removeAction={
-                      editable ? (
-                        <RemoveEntryButton
-                          kind="Note"
-                          name={entry.title}
-                          verb="Delete"
-                          onRemove={() => deleteEntry(entry)}
-                        />
-                      ) : undefined
-                    }
-                    actions={
-                      editable ? (
-                        <div className={`pointer-events-auto relative ${uiLayerLocal}`}>
-                          <Button size="xs" onClick={() => openEdit(entry)}>
-                            Edit
-                          </Button>
-                        </div>
-                      ) : undefined
-                    }
-                  />
-                </div>
-              ))}
+        <IndependentCardGrid
+          items={filtered.map((entry) => (
+            <div
+              key={entry.id}
+              className={`${uiSectionShell} ${uiCardTapHeader} relative p-4 lg:p-5`}
+            >
+              <CardOverlayButton
+                label={`Open note ${entry.title}`}
+                onClick={() => openView(entry)}
+              />
+              <CharacterEntryRowContent
+                interactive
+                name={entry.title}
+                nameClassName={uiOverlayItemNameHover}
+                metadata={
+                  <>
+                    <p
+                      className={`mt-2 text-sm ${uiTextBody} leading-relaxed line-clamp-3 min-h-[4.3rem]`}
+                    >
+                      {entry.text}
+                    </p>
+                    <div>
+                      <Chip colour="cyan" className="mt-2">
+                        {formatDate(entry.updatedAt)}
+                      </Chip>
+                    </div>
+                  </>
+                }
+                removeAction={
+                  editable ? (
+                    <RemoveEntryButton
+                      kind="Note"
+                      name={entry.title}
+                      verb="Delete"
+                      onRemove={() => deleteEntry(entry)}
+                    />
+                  ) : undefined
+                }
+                actions={
+                  editable ? (
+                    <div className={`pointer-events-auto relative ${uiLayerLocal}`}>
+                      <Button size="xs" onClick={() => openEdit(entry)}>
+                        Edit
+                      </Button>
+                    </div>
+                  ) : undefined
+                }
+              />
             </div>
           ))}
-        </div>
+        />
       )}
 
       {(mode === "add" || mode === "edit") && (

@@ -1,7 +1,11 @@
 // src/mechanics/traits/CustomTraitForm.tsx
 
 import { useRef, useState } from "react";
-import { editableInputClass, editableTextareaClass } from "../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiTwoColumnGrid,
+} from "../../ui/styles/editableStyles";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../ui/forms/OriginSelector";
@@ -51,7 +55,7 @@ export function CustomTraitForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div className="col-span-2">
             <FormLabel htmlFor="custom-trait-name" required>
               Name
@@ -74,7 +78,7 @@ export function CustomTraitForm({
       </CustomFormSection>
 
       <CustomFormSection title="Rules">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div className="col-span-2">
             <FormLabel htmlFor="custom-trait-rules" required>
               Rules Text

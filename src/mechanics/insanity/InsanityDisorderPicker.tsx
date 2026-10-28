@@ -24,8 +24,8 @@ import {
   uiChipRow,
   editableInputClass,
   editableTextareaClass,
-  uiFormLabel,
   uiDescriptionBox,
+  uiTextBody,
 } from "../../ui/styles/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import {
@@ -255,9 +255,7 @@ export function InsanityDisorderPicker({
       >
         <PickerBody>
           <div>
-            <p className={`${uiFormLabel} mb-2 text-center normal-case !text-[15px] lg:!text-base`}>
-              Choose Severity
-            </p>
+            <p className={`mb-2 text-sm lg:text-base ${uiTextBody} text-center`}>Choose Severity</p>
             <div className="flex gap-2">
               {selected.severityOptions.map((option) => (
                 <ToggleButton

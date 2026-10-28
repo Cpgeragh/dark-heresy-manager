@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Button, type ButtonVariant } from "../buttons/Button";
 import { CenteredTitleHeader } from "../CenteredTitleHeader";
-import { uiStackBody, uiTextBody } from "../styles/editableStyles";
+import { uiTwoColumnGrid, uiStackBody, uiTextBody } from "../styles/editableStyles";
 import { ModalHeader } from "./ModalHeader";
 import { ModalShell } from "./ModalShell";
 
@@ -88,7 +88,7 @@ export function ConfirmModal({
         )}
         {actions ??
           (onConfirm ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className={uiTwoColumnGrid}>
               <Button
                 variant={confirmVariant}
                 loading={waiting}

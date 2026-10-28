@@ -11,6 +11,7 @@ import {
 } from "../../../data/reference/psychicReference";
 import {
   uiChipRow,
+  uiSectionColumns,
   uiSection,
   uiTextPlaceholder,
   uiTextDescription,
@@ -685,7 +686,7 @@ export function PsychicTab({
           </section>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-6 items-start">
+        <div className={`${uiSectionColumns} grid grid-cols-2`}>
           <section className={`${uiSection} ${uiStackSection}`}>
             <div className="flex items-center justify-between">
               <PowerSectionHeading

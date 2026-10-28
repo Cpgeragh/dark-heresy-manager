@@ -23,6 +23,8 @@ import {
 } from "../../ui/styles/colourTokens";
 import {
   uiChipRow,
+  uiSummaryGrid,
+  uiSectionColumns,
   uiSplitRow,
   uiInfoModalWrapper,
   uiTextLabel,
@@ -129,7 +131,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
           Character removed from play
         </p>
       ) : (
-        <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${colourDivider}`}>
+        <div className={`${uiSummaryGrid} grid-cols-2 pt-3 border-t ${colourDivider}`}>
           <div className={`flex flex-col items-center ${uiStackField}`}>
             <span className={uiTextLabel}>Status</span>
             <div className={`${uiChipRow} justify-center`}>
@@ -548,7 +550,7 @@ export function CorruptionPanel({
       </div>
 
       {/* Desktop: side by side */}
-      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
+      <div className={`${uiSectionColumns} hidden lg:grid lg:grid-cols-3`}>
         <section className={`${sectionClassName} ${uiStackList}`}>
           {renderGroup("malignancies")}
         </section>

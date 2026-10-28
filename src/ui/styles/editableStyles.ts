@@ -70,8 +70,23 @@ export const uiInlineRow = "flex items-center gap-2";
 /** Inline row with its contents split between the two ends. */
 export const uiSplitRow = "flex items-center justify-between gap-2";
 
-/** Two-column form field grid which collapses to one column on a phone. */
-export const uiFieldGrid = "grid grid-cols-1 gap-3 sm:grid-cols-2";
+/** Two-column grid at every width, for form fields or for the buttons of a pop-up or form footer. */
+export const uiTwoColumnGrid = "grid grid-cols-2 gap-2";
+
+/** Grid of summary values in a card; the caller sets the column count. */
+export const uiSummaryGrid = "grid gap-3";
+
+/** Grid of option buttons; the caller sets the column count. */
+export const uiOptionGrid = "grid gap-1.5";
+
+/** Row of three inputs inside a fieldset, such as a damage roll. */
+export const uiInputRowGrid = "grid grid-cols-3 gap-2";
+
+/** Grid of compact stat cells; the caller sets the column count. */
+export const uiStatGrid = "grid gap-1";
+
+/** Gap and top alignment for sections shown side by side; the caller sets display and column count. */
+export const uiSectionColumns = "gap-6 items-start";
 
 /** Gap between the top-level sections of a tab or page. */
 export const uiStackPage = "space-y-6";

@@ -2,7 +2,13 @@
 
 import { useRef, useState } from "react";
 import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import { editableInputClass, uiStackField } from "../../../ui/styles/editableStyles";
+import {
+  editableInputClass,
+  uiTwoColumnGrid,
+  uiInputRowGrid,
+  uiOptionGrid,
+  uiStackField,
+} from "../../../ui/styles/editableStyles";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -321,7 +327,7 @@ export function CustomRangedForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div className="col-span-2">
             <FormLabel htmlFor="custom-ranged-name" required>
               Name
@@ -360,7 +366,7 @@ export function CustomRangedForm({
           <FormLabel as="legend" required>
             Craftsmanship
           </FormLabel>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className={`${uiOptionGrid} grid-cols-4`}>
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
               <ToggleButton
                 key={option}
@@ -378,7 +384,7 @@ export function CustomRangedForm({
       </CustomFormSection>
 
       <CustomFormSection title="Combat">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor="custom-ranged-range" required>
               Range (m)
@@ -408,7 +414,7 @@ export function CustomRangedForm({
             <FormLabel as="legend" required>
               Rate of Fire
             </FormLabel>
-            <div className="grid grid-cols-3 gap-2 mt-0.5">
+            <div className={`${uiOptionGrid} grid-cols-3 mt-0.5`}>
               <ToggleButton
                 selected={singleShot}
                 selectedClassName={colourToggleSelected.slate}
@@ -444,7 +450,7 @@ export function CustomRangedForm({
             <FormLabel as="legend" required>
               Damage
             </FormLabel>
-            <div className="grid grid-cols-3 gap-2 mt-0.5">
+            <div className={`${uiInputRowGrid} mt-0.5`}>
               <input
                 aria-label="Damage dice"
                 required
@@ -515,7 +521,7 @@ export function CustomRangedForm({
             <FormLabel as="legend" required>
               Reload
             </FormLabel>
-            <div className="grid grid-cols-2 gap-2 mt-0.5">
+            <div className={`${uiTwoColumnGrid} mt-0.5`}>
               <input
                 aria-label="Reload amount"
                 type="text"
@@ -559,7 +565,7 @@ export function CustomRangedForm({
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <div>
             <FormLabel htmlFor="custom-ranged-weight" required>
               Weight
@@ -604,7 +610,7 @@ export function CustomRangedForm({
       </CustomFormSection>
 
       <CustomFormSection title="Description, Rules, & Qualities">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={uiTwoColumnGrid}>
           <WeaponQualitySelector
             selected={selectedQualities}
             pendingQuality={qualityPicker.pendingQuality}

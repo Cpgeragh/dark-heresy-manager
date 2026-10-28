@@ -25,7 +25,7 @@ import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import {
   uiChipRow,
-  uiFieldGrid,
+  uiTwoColumnGrid,
   uiItemName,
   uiSection,
   uiTextPlaceholder,
@@ -925,7 +925,7 @@ export function CyberneticsTab({
       {career === "Tech-Priest" && (
         <section className={uiStackSection}>
           <SectionHeader>Mechanicus Implants</SectionHeader>
-          <div className={`${uiFieldGrid}`}>
+          <div className={`${uiTwoColumnGrid}`}>
             {[
               "Electro-Graft",
               "Electoo Inductors",

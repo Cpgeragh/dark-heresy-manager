@@ -37,6 +37,10 @@ import {
   uiStackList,
   uiStackSection,
   uiStackPage,
+  uiTwoColumnGrid,
+  uiSummaryGrid,
+  uiOptionGrid,
+  uiSectionColumns,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/chips/Chip";
@@ -290,7 +294,7 @@ function XpTransactionModal({
 
         <div className={uiStackList}>
           <RequiredFieldsNote />
-          <div className="grid grid-cols-2 gap-2">
+          <div className={uiTwoColumnGrid}>
             <Button
               variant={isSpend ? "primary" : isRemove ? "warningOutline" : "successOutline"}
               onClick={submit}
@@ -332,7 +336,7 @@ function RankTitleChoice({
   return (
     <div className={uiStackField}>
       <div className={uiTextLabel}>Rank title</div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className={`${uiOptionGrid} grid-cols-1 sm:grid-cols-2`}>
         {choices.map(({ title, label }) => (
           <Button
             key={title || "career-name"}
@@ -533,7 +537,7 @@ function RankUpModal({
               {progression.requiresBranchChoice ? "Choose the next Career path" : "Next Rank"}
             </div>
             <div
-              className={`grid grid-cols-1 gap-2 ${progression.nextRanks.length > 1 ? "sm:grid-cols-2" : ""}`}
+              className={`${uiOptionGrid} grid-cols-1 ${progression.nextRanks.length > 1 ? "sm:grid-cols-2" : ""}`}
             >
               {progression.nextRanks.length === 1 ? (
                 <div className={ACTIVE_RANK_CHOICE_CLASS} data-testid="single-next-rank">
@@ -561,7 +565,7 @@ function RankUpModal({
           {availableAlternateRanks.length === 1 && (
             <div className={uiStackField}>
               <div className={uiTextLabel}>Rank type</div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className={`${uiOptionGrid} grid-cols-1 sm:grid-cols-2`}>
                 <Button
                   variant={selectedAlternateRankId === "" ? "careerPath" : "careerPathMuted"}
                   onClick={() => selectAlternateRank("")}
@@ -615,7 +619,7 @@ function RankUpModal({
           {selectedMeleeWeaponChoice && (
             <div className={uiStackField}>
               <div className={uiTextLabel}>Choose {selectedMeleeWeaponChoice.label}</div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className={`${uiOptionGrid} grid-cols-1 sm:grid-cols-3`}>
                 {selectedMeleeWeaponChoice.referenceIds.map((referenceId) => {
                   const weapon = MELEE_WEAPON_REFERENCE.find(
                     (reference) => reference.id === referenceId
@@ -685,7 +689,7 @@ function RankUpModal({
             </section>
           )}
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className={uiTwoColumnGrid}>
             <Button
               onClick={confirm}
               disabled={
@@ -920,7 +924,7 @@ function RankDetailsSwitcher({ card }: { card: RankCard }) {
         </section>
       </div>
 
-      <div className="hidden gap-3 lg:grid lg:grid-cols-2">
+      <div className={`${uiSectionColumns} hidden lg:grid lg:grid-cols-2`}>
         {renderSection("career")}
         {renderSection("additional")}
       </div>
@@ -1002,7 +1006,7 @@ export function ExperienceTab({
     <div className={uiStackPage}>
       {!editable && <span className={readOnlyBadgeClass}>Read-only</span>}
 
-      <section className="grid grid-cols-3 gap-2 sm:gap-4">
+      <section className={`${uiSummaryGrid} grid-cols-3`}>
         <div
           className={`${uiSectionShell} flex min-w-0 flex-col items-center justify-center p-2 text-center sm:p-3 lg:p-4`}
         >
@@ -1120,7 +1124,7 @@ export function ExperienceTab({
 
             {canAddXp && (
               <div
-                className={`grid gap-2 border-t ${colourDivider} pt-4 ${canManageRank ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2"}`}
+                className={`${uiTwoColumnGrid} border-t ${colourDivider} pt-4 ${canManageRank ? "sm:grid-cols-3" : ""}`}
               >
                 <Button variant="successOutline" onClick={() => setXpAction("add")}>
                   Add XP

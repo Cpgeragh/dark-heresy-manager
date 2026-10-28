@@ -30,6 +30,8 @@ import {
 import type { CampaignWithId } from "../types/Firestore";
 import {
   uiInlineRow,
+  uiTwoColumnGrid,
+  uiSectionColumns,
   uiSection,
   editableInputClass,
   uiTextPlaceholder,
@@ -627,7 +629,7 @@ function DmCampaignList({
           hideSearch
           maxWidth="max-w-sm"
           footer={
-            <div className="grid grid-cols-2 gap-2">
+            <div className={uiTwoColumnGrid}>
               <Button
                 type="submit"
                 form="edit-campaign-form"
@@ -935,7 +937,7 @@ export default function Dashboard({ user, effectiveUserId, firstName }: Props) {
       />
 
       {isDesktopLayout ? (
-        <div className="grid grid-cols-2 items-start gap-6">
+        <div className={`${uiSectionColumns} grid grid-cols-2`}>
           <div className={`${uiSection} min-w-0`}>{yourCampaignsSection}</div>
           <div className={`${uiSection} min-w-0`}>{playingCampaignsSection}</div>
         </div>

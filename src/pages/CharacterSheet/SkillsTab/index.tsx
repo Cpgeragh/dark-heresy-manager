@@ -35,6 +35,7 @@ import {
   uiSwipeableTabPanel,
 } from "../../../ui/styles/segmentedTabStyles";
 import {
+  uiSectionColumns,
   uiInfoModalWrapper,
   uiSection,
   uiTextPlaceholder,
@@ -421,7 +422,7 @@ export function SkillsTab({
           </section>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 items-start">
+        <div className={`${uiSectionColumns} grid grid-cols-2`}>
           <section className={`${uiSection} ${uiStackSection}`}>
             <div className="flex items-center justify-between">
               <SkillTypeHeading type="basic" />

@@ -16,6 +16,7 @@ import {
 } from "../../mechanics/talents/talentEffects";
 import {
   editableInputColour,
+  uiSummaryGrid,
   uiSection,
   uiCell,
   uiCellValue,
@@ -136,7 +137,7 @@ export function VitalsTab({
       <div>
         <SectionHeader className="mb-2">Combat Status</SectionHeader>
         <section className={uiSection}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className={`${uiSummaryGrid} grid-cols-2 sm:grid-cols-4`}>
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div
                 className={`flex items-center justify-center gap-1 text-xs lg:text-base ${colourTextPrimary} mb-2`}
@@ -285,7 +286,7 @@ export function VitalsTab({
           </span>
         </div>
         <section className={uiSection}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`${uiSummaryGrid} grid-cols-2`}>
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div
                 className={`flex items-center justify-center gap-1 text-xs lg:text-base ${colourTextPrimary} mb-2`}
