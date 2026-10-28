@@ -32,7 +32,6 @@ import {
   uiInlineRow,
   uiSection,
   editableInputClass,
-  uiTextBody,
   uiTextPlaceholder,
   uiInactiveItem,
   uiStackSection,
@@ -90,6 +89,7 @@ import {
 } from "../ui/styles/segmentedTabStyles";
 import { createLocalId } from "../utils/createLocalId";
 import { uiCorner } from "../ui/styles/shapeStyles";
+import { ConfirmModal } from "../ui/modals/ConfirmModal";
 
 interface Props {
   user: User;
@@ -697,49 +697,21 @@ function DmCampaignList({
       )}
 
       {pendingCampaignAction?.kind === "archive" && (
-        <PickerModal
+        <ConfirmModal
           title="Archive Campaign"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => {
-            if (archiving) return;
-            setPendingCampaignAction(null);
+          message={`This archives this campaign: ${pendingCampaignAction.campaignName}. You can restore it later.`}
+          confirmLabel="Archive"
+          busy={archiving}
+          loadingLabel="Archiving"
+          onConfirm={async () => {
+            const succeeded = await handleArchive(pendingCampaignAction.campaignId);
+            if (succeeded) {
+              setPendingCampaignAction(null);
+              setOpenActionsId(null);
+            }
           }}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                loading={archiving}
-                loadingLabel="Archiving"
-                onClick={async () => {
-                  const succeeded = await handleArchive(pendingCampaignAction.campaignId);
-                  if (succeeded) {
-                    setPendingCampaignAction(null);
-                    setOpenActionsId(null);
-                  }
-                }}
-              >
-                Archive
-              </Button>
-              <Button
-                variant="neutral"
-                disabled={archiving}
-                onClick={() => setPendingCampaignAction(null)}
-              >
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody}`}>
-              {`This archives this campaign: ${pendingCampaignAction.campaignName}. You can restore it later.`}
-            </p>
-          </PickerBody>
-        </PickerModal>
+          onCancel={() => setPendingCampaignAction(null)}
+        />
       )}
 
       {pendingCampaignAction?.kind === "delete" && (

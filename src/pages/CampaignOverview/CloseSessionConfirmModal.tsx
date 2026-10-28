@@ -1,9 +1,7 @@
 // src/pages/CampaignOverview/CloseSessionConfirmModal.tsx
 // Asks whether the XP is right before the session is closed. No cancels the save.
 
-import { Button } from "../../ui/buttons/Button";
-import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { uiTextBody } from "../../ui/styles/editableStyles";
+import { ConfirmModal } from "../../ui/modals/ConfirmModal";
 
 interface Props {
   xpAwarded: number;
@@ -29,34 +27,18 @@ export function CloseSessionConfirmModal({
   const sortedNames = [...attendeeNames].sort((a, b) => a.localeCompare(b));
 
   return (
-    <PickerModal
+    <ConfirmModal
       title="Close Session"
-      query=""
-      onQueryChange={() => undefined}
-      onClose={() => {
-        if (!busy) onCancel();
-      }}
-      isEmpty={false}
-      hideSearch
-      maxWidth="max-w-sm"
-      footer={
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="primary" loading={busy} loadingLabel="Closing" onClick={onConfirm}>
-            Close Session
-          </Button>
-          <Button variant="neutral" disabled={busy} onClick={onCancel}>
-            Cancel
-          </Button>
-        </div>
+      message={
+        givesXp
+          ? `Give ${xpAwarded} XP to ${joinNames(sortedNames)}. Is that correct?`
+          : "No XP will be given. Close the session?"
       }
-    >
-      <PickerBody>
-        <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-          {givesXp
-            ? `Give ${xpAwarded} XP to ${joinNames(sortedNames)}. Is that correct?`
-            : "No XP will be given. Close the session?"}
-        </p>
-      </PickerBody>
-    </PickerModal>
+      confirmLabel="Close Session"
+      busy={busy}
+      loadingLabel="Closing"
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />
   );
 }

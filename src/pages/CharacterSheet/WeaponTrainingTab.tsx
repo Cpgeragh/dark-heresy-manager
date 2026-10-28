@@ -21,10 +21,8 @@ import {
   MELEE_WEAPON_REFERENCE,
   RANGED_WEAPON_REFERENCE,
 } from "../../data/reference/weaponReference";
-import { Button } from "../../ui/buttons/Button";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
-import { uiChipRow, uiTextBody, uiStackPage } from "../../ui/styles/editableStyles";
-import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
+import { uiChipRow, uiStackPage } from "../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../utils/dmGatedPurchase";
 import {
@@ -47,6 +45,7 @@ import {
 import { uiCorner } from "../../ui/styles/shapeStyles";
 import { XpCostForm } from "../../ui/forms/XpCostForm";
 import { FormLabel } from "../../ui/forms/FormLabel";
+import { ConfirmModal } from "../../ui/modals/ConfirmModal";
 
 const EXOTIC_WEAPON_TRAINING_OPTIONS = Array.from(
   new Set(
@@ -424,32 +423,13 @@ export function WeaponTrainingTab({
       </fieldset>
 
       {pendingTrain && (
-        <PickerModal
+        <ConfirmModal
           title="Train Weapon Group"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setPendingTrain(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmTrain}>
-                Train
-              </Button>
-              <Button variant="neutral" onClick={() => setPendingTrain(null)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Train {pendingTrain.group} ({pendingTrain.display}) for {pendingTrain.purchase.cost}{" "}
-              XP?
-            </p>
-          </PickerBody>
-        </PickerModal>
+          message={`Train ${pendingTrain.group} (${pendingTrain.display}) for ${pendingTrain.purchase.cost} XP?`}
+          confirmLabel="Train"
+          onConfirm={confirmTrain}
+          onCancel={() => setPendingTrain(null)}
+        />
       )}
 
       {pendingManualTrain && (
@@ -465,88 +445,33 @@ export function WeaponTrainingTab({
       )}
 
       {pendingRemoveTraining && (
-        <PickerModal
+        <ConfirmModal
           title="Remove Weapon Training"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setPendingRemoveTraining(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmRemoveTraining}>
-                Remove
-              </Button>
-              <Button variant="neutral" onClick={() => setPendingRemoveTraining(null)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Remove {pendingRemoveTraining.group} ({pendingRemoveTraining.display})?
-            </p>
-          </PickerBody>
-        </PickerModal>
+          message={`Remove ${pendingRemoveTraining.group} (${pendingRemoveTraining.display})?`}
+          confirmLabel="Remove"
+          onConfirm={confirmRemoveTraining}
+          onCancel={() => setPendingRemoveTraining(null)}
+        />
       )}
 
       {pendingRemoveExotic && (
-        <PickerModal
+        <ConfirmModal
           title="Remove Exotic Weapon"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setPendingRemoveExotic(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmRemoveExotic}>
-                Remove
-              </Button>
-              <Button variant="neutral" onClick={() => setPendingRemoveExotic(null)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Remove {pendingRemoveExotic.name}?
-            </p>
-          </PickerBody>
-        </PickerModal>
+          message={`Remove ${pendingRemoveExotic.name}?`}
+          confirmLabel="Remove"
+          onConfirm={confirmRemoveExotic}
+          onCancel={() => setPendingRemoveExotic(null)}
+        />
       )}
 
       {pendingExoticPurchase && (
-        <PickerModal
+        <ConfirmModal
           title="Train Exotic Weapon"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setPendingExoticPurchase(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmExoticPurchase}>
-                Train
-              </Button>
-              <Button variant="neutral" onClick={() => setPendingExoticPurchase(null)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Train Exotic Weapon Training ({pendingExoticPurchase.name}) for{" "}
-              {pendingExoticPurchase.purchase.cost} XP?
-            </p>
-          </PickerBody>
-        </PickerModal>
+          message={`Train Exotic Weapon Training (${pendingExoticPurchase.name}) for ${pendingExoticPurchase.purchase.cost} XP?`}
+          confirmLabel="Train"
+          onConfirm={confirmExoticPurchase}
+          onCancel={() => setPendingExoticPurchase(null)}
+        />
       )}
 
       {showExoticPicker && (

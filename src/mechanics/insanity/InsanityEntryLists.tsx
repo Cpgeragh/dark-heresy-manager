@@ -7,18 +7,15 @@ import type {
   InsanityTraumaEntry,
 } from "../../types/Character";
 import { AddButton } from "../../ui/buttons/AddButton";
-import { Button } from "../../ui/buttons/Button";
 import { EntryActionButton } from "../../ui/buttons/EntryActionButton";
 import { OwnedEntryRow } from "../../ui/OwnedEntryRow";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { Chip } from "../../ui/chips/Chip";
 import { RollChip } from "../../ui/chips/RollChip";
-import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
   uiSplitRow,
   uiInfoModalWrapper,
-  uiTextBody,
   uiTextPlaceholder,
   uiTextDescription,
   uiStackList,
@@ -33,6 +30,7 @@ import {
   INSANITY_SEVERITIES,
 } from "./insanityReference";
 import { disorderTypeChipColour, severityChipColour } from "./insanityUi";
+import { ConfirmModal } from "../../ui/modals/ConfirmModal";
 
 function severityDescription(severity: InsanityDisorderSeverity): string {
   return INSANITY_SEVERITIES.find((entry) => entry.severity === severity)?.description ?? "";
@@ -98,37 +96,16 @@ function DisorderRow({
         removal={{ kind: "Disorder", onRemove }}
       />
       {escalateArmed && nextSeverity && (
-        <PickerModal
+        <ConfirmModal
           title={`Escalate to ${nextSeverity}`}
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setEscalateArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                onClick={async () => {
-                  const saved = await onEscalate(nextSeverity);
-                  if (saved !== false) setEscalateArmed(false);
-                }}
-              >
-                Escalate
-              </Button>
-              <Button variant="neutral" onClick={() => setEscalateArmed(false)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Escalate {disorder.name} to {nextSeverity}?
-            </p>
-          </PickerBody>
-        </PickerModal>
+          message={`Escalate ${disorder.name} to ${nextSeverity}?`}
+          confirmLabel="Escalate"
+          onConfirm={async () => {
+            const saved = await onEscalate(nextSeverity);
+            if (saved !== false) setEscalateArmed(false);
+          }}
+          onCancel={() => setEscalateArmed(false)}
+        />
       )}
     </>
   );

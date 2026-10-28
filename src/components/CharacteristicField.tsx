@@ -8,13 +8,10 @@ import {
   CHARACTERISTIC_ADVANCE_INCREMENT,
 } from "../constants/gameRules";
 import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
-import { Button } from "../ui/buttons/Button";
-import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
 import {
   uiInlineRow,
   editableInputColour,
   uiSection,
-  uiTextBody,
   uiTextError,
 } from "../ui/styles/editableStyles";
 import {
@@ -27,6 +24,7 @@ import {
 import { uiDisabledLook, uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import { uiCornerSmall } from "../ui/styles/shapeStyles";
+import { ConfirmModal } from "../ui/modals/ConfirmModal";
 
 interface Props {
   label: string;
@@ -246,27 +244,10 @@ export function CharacteristicField({
       </div>
 
       {pendingAdvances !== null && (
-        <PickerModal
+        <ConfirmModal
           title={isUpgrade ? "Upgrade Characteristic" : "Downgrade Characteristic"}
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setPendingAdvances(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={confirmAdvanceChange}>
-                {isUpgrade ? "Upgrade" : "Downgrade"}
-              </Button>
-              <Button variant="neutral" onClick={() => setPendingAdvances(null)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+          message={
+            <>
               {isUpgrade ? "Upgrade" : "Downgrade"} {label} from {advances} to {pendingAdvances}{" "}
               {pendingAdvances === 1 ? "advance" : "advances"}
               {changedXp !== undefined
@@ -275,9 +256,12 @@ export function CharacteristicField({
                   : ` and refund ${changedXp} XP`
                 : ""}
               ?
-            </p>
-          </PickerBody>
-        </PickerModal>
+            </>
+          }
+          confirmLabel={isUpgrade ? "Upgrade" : "Downgrade"}
+          onConfirm={confirmAdvanceChange}
+          onCancel={() => setPendingAdvances(null)}
+        />
       )}
     </>
   );

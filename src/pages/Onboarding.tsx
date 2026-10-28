@@ -15,7 +15,6 @@ import {
   uiCodeBox,
   uiCodeText,
   uiInfoModalWrapper,
-  uiTextBody,
   uiTextMeta,
   uiStackBody,
   uiStackList,
@@ -40,9 +39,8 @@ import {
 } from "../ui/styles/colourTokens";
 import { RequiredFieldsNote } from "../ui/forms/CustomFormFooter";
 import { RequiredMark } from "../ui/forms/RequiredMark";
-import { ModalShell } from "../ui/modals/ModalShell";
-import { ModalHeader } from "../ui/modals/ModalHeader";
 import { FormLabel } from "../ui/forms/FormLabel";
+import { ConfirmModal } from "../ui/modals/ConfirmModal";
 
 type Step = "welcome" | "show-code" | "link";
 
@@ -525,30 +523,16 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
       </main>
 
       {cancelSetupOpen && code && (
-        <ModalShell
-          ariaLabel="Cancel New Account Setup"
-          onClose={closeCancelSetup}
-          className="max-w-lg overflow-y-auto"
-        >
-          <ModalHeader title="Cancel New Account Setup" onClose={closeCancelSetup} />
-          <div className={`${uiStackBody} p-4 lg:p-5`}>
-            <p className={`text-sm ${uiTextBody} lg:text-base`}>
-              Cancel new account setup? This recovery code will no longer work.
-            </p>
-            <div className={`grid grid-cols-2 gap-3 border-t ${colourDivider} pt-4`}>
-              <Button variant="neutral" onClick={closeCancelSetup} disabled={discardingSetup}>
-                Keep setting up
-              </Button>
-              <Button
-                onClick={() => void handleDiscardSetup()}
-                loading={discardingSetup}
-                loadingLabel="Cancelling"
-              >
-                Cancel account setup
-              </Button>
-            </div>
-          </div>
-        </ModalShell>
+        <ConfirmModal
+          title="Cancel New Account Setup"
+          message="Cancel new account setup? This recovery code will no longer work."
+          confirmLabel="Cancel account setup"
+          cancelLabel="Keep setting up"
+          busy={discardingSetup}
+          loadingLabel="Cancelling"
+          onConfirm={() => void handleDiscardSetup()}
+          onCancel={closeCancelSetup}
+        />
       )}
     </div>
   );

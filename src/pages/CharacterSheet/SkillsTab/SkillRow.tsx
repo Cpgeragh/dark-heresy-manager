@@ -6,9 +6,6 @@ import { CHAR_FULL_LABEL, CHAR_LABEL, type SkillWithComputed } from "./skillsCon
 import type { SkillTierAccess } from "shared-rules";
 import { characteristicChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
-import { Button } from "../../../ui/buttons/Button";
-import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
-import { uiTextBody } from "../../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
@@ -20,6 +17,7 @@ import {
   skillLevelLabel,
 } from "./skillRowShared";
 import { XpCostForm } from "../../../ui/forms/XpCostForm";
+import { ConfirmModal } from "../../../ui/modals/ConfirmModal";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -140,37 +138,16 @@ export function SkillRow({
       />
 
       {upgradeArmed && nextTierAccess?.status === "unlocked" && (
-        <PickerModal
+        <ConfirmModal
           title="Upgrade Skill"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => setUpgradeArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                onClick={async () => {
-                  const saved = await updateLevel(skill.id, nextTierAccess.level);
-                  if (saved !== false) setUpgradeArmed(false);
-                }}
-              >
-                Upgrade
-              </Button>
-              <Button variant="neutral" onClick={() => setUpgradeArmed(false)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Upgrade {skill.name} to {nextTierAccess.level} for {nextTierAccess.cost} XP?
-            </p>
-          </PickerBody>
-        </PickerModal>
+          message={`Upgrade ${skill.name} to ${nextTierAccess.level} for ${nextTierAccess.cost} XP?`}
+          confirmLabel="Upgrade"
+          onConfirm={async () => {
+            const saved = await updateLevel(skill.id, nextTierAccess.level);
+            if (saved !== false) setUpgradeArmed(false);
+          }}
+          onCancel={() => setUpgradeArmed(false)}
+        />
       )}
 
       {isDM && manualUpgradeArmed && nextTierAccess?.status === "not-on-career" && (

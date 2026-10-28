@@ -5,7 +5,8 @@ import { useState } from "react";
 import { Button } from "../buttons/Button";
 import { PickerBody, PickerModal } from "../pickers/PickerModal";
 import { colourAmberPlain } from "../styles/colourTokens";
-import { uiCodeBox, uiCodeText, uiTextBody } from "../styles/editableStyles";
+import { uiCodeBox, uiCodeText } from "../styles/editableStyles";
+import { ConfirmModal } from "./ConfirmModal";
 
 interface RevealCodeModalProps {
   code: string;
@@ -58,42 +59,17 @@ export function RevealCodeModal({
       </PickerModal>
 
       {rotateConfirmOpen && (
-        <PickerModal
+        <ConfirmModal
           title="Rotate Code"
-          query=""
-          onQueryChange={() => undefined}
-          onClose={() => !rotating && setRotateConfirmOpen(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                loading={rotating}
-                loadingLabel="Rotating"
-                onClick={async () => {
-                  if (await onRotate()) setRotateConfirmOpen(false);
-                }}
-              >
-                Rotate
-              </Button>
-              <Button
-                variant="neutral"
-                disabled={rotating}
-                onClick={() => setRotateConfirmOpen(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody}`}>
-              Rotate code? A new one is generated and the old one stops working immediately.
-            </p>
-          </PickerBody>
-        </PickerModal>
+          message="Rotate code? A new one is generated and the old one stops working immediately."
+          confirmLabel="Rotate"
+          busy={rotating}
+          loadingLabel="Rotating"
+          onConfirm={async () => {
+            if (await onRotate()) setRotateConfirmOpen(false);
+          }}
+          onCancel={() => setRotateConfirmOpen(false)}
+        />
       )}
     </>
   );
