@@ -20,6 +20,18 @@ describe("ClaimPreview", () => {
     expect(screen.getByText("The Calixis Conspiracy")).toBeInTheDocument();
   });
 
+  it("shows Character Found as a red section heading", () => {
+    render(
+      <ClaimPreview
+        characterName={characterName}
+        campaignName={campaignName}
+        ownership="unclaimed"
+        onClaim={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("heading", { name: "Character Found" })).toHaveClass("text-red-500");
+  });
+
   it("shows available message and enabled button when unclaimed", () => {
     render(
       <ClaimPreview

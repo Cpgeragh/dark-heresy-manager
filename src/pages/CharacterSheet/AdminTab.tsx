@@ -6,6 +6,7 @@ import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { Button } from "../../ui/buttons/Button";
 import { ErrorState } from "../../ui/ErrorState";
 import { PendingOverlay } from "../../ui/PendingOverlay";
+import { SectionHeader } from "../../ui/SectionHeader";
 import {
   uiSection,
   readOnlyBadgeClass,
@@ -17,11 +18,7 @@ import {
   uiStackList,
 } from "../../ui/styles/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
-import {
-  colourMetadataLabelText,
-  colourTextPrimary,
-  colourHeadingAccent,
-} from "../../ui/styles/colourTokens";
+import { colourMetadataLabelText, colourTextPrimary } from "../../ui/styles/colourTokens";
 
 interface AdminTabProps {
   campaignId: string;
@@ -83,7 +80,7 @@ export function AdminTab({
       {/* OWNERSHIP */}
       <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
-          <h3 className={`font-semibold ${colourHeadingAccent}`}>Ownership</h3>
+          <SectionHeader as="h3">Ownership</SectionHeader>
           <span className={readOnlyBadgeClass}>DM authority</span>
         </div>
 
@@ -156,7 +153,7 @@ export function AdminTab({
       {/* CLAIM HISTORY */}
       <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold">Claim History</h3>
+          <SectionHeader as="h3">Claim History</SectionHeader>
           <span className={readOnlyBadgeClass}>Immutable</span>
         </div>
 

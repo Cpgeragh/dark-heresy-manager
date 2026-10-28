@@ -227,13 +227,7 @@ function XpTransactionModal({
 
   return (
     <ModalShell ariaLabel={title} onClose={onClose} className="max-w-md overflow-y-auto">
-      <ModalHeader
-        title={modalTitle}
-        titleClassName={
-          isSpend ? colourHeadingAccent : isRemove ? colourAmberPlain : colourSuccessPlain
-        }
-        onClose={onClose}
-      />
+      <ModalHeader title={modalTitle} onClose={onClose} />
       <div className={`${uiStackBody} p-4 lg:p-5`}>
         {!isSpend && (
           <p className={`text-sm ${uiTextBody} lg:text-base`}>

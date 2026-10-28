@@ -851,6 +851,15 @@ describe("ExperienceTab named Career Rank ledger", () => {
       "border-emerald-500",
       "text-emerald-500"
     );
+    expect(dialog.getByRole("heading", { name: "Add XP" })).toHaveClass("text-red-500");
+  });
+
+  it("gives the Remove XP dialog the same red title as the other XP dialogs", async () => {
+    const user = userEvent.setup();
+    renderTab();
+    await user.click(screen.getByRole("button", { name: "Remove XP" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Remove XP" }));
+    expect(dialog.getByRole("heading", { name: "Remove XP" })).toHaveClass("text-red-500");
   });
 
   it("lets an editable player add and remove XP but keeps Rank Up hidden", async () => {

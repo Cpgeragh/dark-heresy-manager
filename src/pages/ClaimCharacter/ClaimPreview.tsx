@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { OwnershipState } from "../../types/Recovery";
 import { Button } from "../../ui/buttons/Button";
+import { SectionHeader } from "../../ui/SectionHeader";
 import {
   uiSection,
   uiTextBody,
@@ -14,7 +15,6 @@ import {
   colourAmberPlain,
   colourSuccessPlain,
   colourMetadataLabelText,
-  colourTextPrimary,
 } from "../../ui/styles/colourTokens";
 
 interface ClaimPreviewProps {
@@ -61,7 +61,7 @@ export function ClaimPreview({
 
   return (
     <div className={`${uiSection} ${uiStackBody}`}>
-      <h2 className={`text-xl lg:text-2xl font-semibold ${colourTextPrimary}`}>Character Found</h2>
+      <SectionHeader as="h3">Character Found</SectionHeader>
 
       <div className={`${uiTextBody} text-sm lg:text-base ${uiStackField}`}>
         <p>

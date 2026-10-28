@@ -7,7 +7,8 @@ import type {
 } from "../../../types/Character";
 import { Button } from "../../../ui/buttons/Button";
 import { ModalShell } from "../../../ui/modals/ModalShell";
-import { uiModalTitle, uiStackBody } from "../../../ui/styles/editableStyles";
+import { CenteredTitleHeader } from "../../../ui/CenteredTitleHeader";
+import { uiStackBody } from "../../../ui/styles/editableStyles";
 import {
   colourAmberPlain,
   colourTextPrimary,
@@ -57,9 +58,7 @@ export function CompleteBackgroundSetupModal({
       viewportAware
       className="max-h-[calc(100dvh-2rem)] max-w-2xl overflow-y-auto"
     >
-      <div className={`border-b ${colourDivider} px-4 py-4 text-center lg:px-6 lg:py-5`}>
-        <h2 className={`${uiModalTitle} text-base lg:text-lg`}>Complete Background</h2>
-      </div>
+      <CenteredTitleHeader size="page" title="Complete Background" />
 
       <div className={`${uiStackBody} px-4 py-4 lg:px-6 lg:py-5`}>
         <p className={`text-sm ${colourTextPrimary} lg:text-base`}>

@@ -11,7 +11,6 @@ interface ModalHeaderProps {
   className?: string;
   onClose: () => void;
   title: ReactNode;
-  titleClassName?: string;
 }
 
 export function ModalHeader({
@@ -20,13 +19,11 @@ export function ModalHeader({
   className = "",
   onClose,
   title,
-  titleClassName,
 }: ModalHeaderProps) {
   return (
     <CenteredTitleHeader
       className={className}
       title={title}
-      titleClassName={titleClassName}
       right={
         action === undefined ? (
           <CloseButton onClick={onClose} className="justify-self-end" />

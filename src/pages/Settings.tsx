@@ -546,13 +546,13 @@ export default function Settings({
 
         {remoteDisconnectTarget && (
           <PickerModal
-            title="Unlink Device?"
+            title="Unlink Other Device?"
             query=""
             onQueryChange={() => undefined}
             onClose={() => !disconnectingOtherDevice && setRemoteDisconnectTarget(null)}
             isEmpty={false}
             hideSearch
-            maxWidth="max-w-sm"
+            maxWidth="max-w-md"
             footer={
               <div className="grid grid-cols-2 gap-2">
                 <Button

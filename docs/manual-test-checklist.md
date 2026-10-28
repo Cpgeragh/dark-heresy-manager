@@ -799,6 +799,8 @@ Use two profiles: the owning player and the DM. Begin on a character with enough
 - [ ] In player Edit mode, the player sees Add XP but never Remove XP or Rank Up; in View mode no XP or Rank actions are interactive for either role
 - [ ] Refresh after several purchases, DM transactions, and a branch Rank Up: totals, transaction attribution, current Rank, and Career path all persist unchanged
 - [ ] **Autofill, Android:** the Amount and Reason fields in the Add XP, Remove XP and Spend XP forms each show no autofill suggestion row above the keyboard (`ExperienceTab.tsx`)
+- [ ] The Spend XP, Change XP Cost, Add XP and Remove XP pop-ups all have a red title, with no amber or green title (`CenteredTitleHeader.tsx`, `ExperienceTab.tsx`)
+- [ ] The Complete Background pop-up has a red title in the same header as the other pop-ups and no close button, and Character Found in the Claim a Character form, and Ownership and Claim History on the Admin tab, are red section headings with the red bar (`SectionHeader`)
 
 **Watch for:** there is no player-submitted proposal or DM-approval workflow
 on this page: XP changes are either real purchases or direct DM actions. If
@@ -1163,6 +1165,7 @@ Use one disposable account and several fresh browser profiles. Every browser is 
 - [ ] Rename the current device and another device, close and reopen Manage Devices, and confirm both saved names remain
 - [ ] Unlink This Device removes only this device's connection and returns it to Create Your Account; no hidden earlier account or data reappears
 - [ ] Unlink another device while it is open elsewhere: it returns to Create Your Account, loses access to the shared account, and every other connected device remains usable
+- [ ] Unlinking another device from the device list asks `Unlink Other Device?` in a pop-up the same width as `Unlink This Device?`, and its Recovery code row says the code will be replaced
 - [ ] Remote unlink automatically rotates the account recovery code in the same operation, displays the replacement code for saving or copying, and makes the previous code fail immediately
 - [ ] Unlink the final connected device: a second warning explains that the recovery code is required to regain access; cancelling leaves the connection intact and confirming returns this device to Create Your Account without deleting the account
 - [ ] Delete Account is available from every connected device, releases claimed characters, disconnects all devices, revokes recovery, and remains blocked until every owned campaign is deleted or transferred

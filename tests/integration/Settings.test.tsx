@@ -319,7 +319,7 @@ describe("Settings linked device", () => {
     const manageDevices = screen.getByRole("dialog", { name: "Manage Devices" });
     expect(manageDevices).toBeVisible();
     expect(within(manageDevices).getByText("Phone")).toBeVisible();
-    expect(screen.queryByRole("dialog", { name: "Unlink Device?" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Unlink Other Device?" })).not.toBeInTheDocument();
     expect(mockToastSuccess).toHaveBeenCalledWith("Device unlinked and recovery code rotated.");
 
     getRecoveryCodeMock.mockResolvedValue("DH-NEWW-CODE");
