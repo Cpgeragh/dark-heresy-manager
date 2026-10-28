@@ -272,15 +272,18 @@ describe("CampaignOverview", () => {
   it("shows a message when no campaign is selected", () => {
     useParamsMock.mockReturnValue({ campaignId: undefined });
     renderPage();
-    expect(screen.getByText("No campaign selected.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "No Campaign Selected" })).toBeInTheDocument();
   });
 
   it("shows safe recovery actions when campaign data fails to load", () => {
     useCampaignMock.mockReturnValue({ campaign: undefined, loading: false, error: new Error("x") });
     renderPage();
     expect(
+      screen.getByRole("heading", { name: "Unable to Load This Campaign" })
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
-        "Unable to load this campaign. You may no longer have access, or there may be a temporary connection problem."
+        "You may no longer have access, or there may be a temporary connection problem."
       )
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
@@ -300,8 +303,8 @@ describe("CampaignOverview", () => {
 
   function expectNothingShown() {
     expect(screen.queryByText("Loading campaign…")).not.toBeInTheDocument();
-    expect(screen.queryByText("Campaign not found.")).not.toBeInTheDocument();
-    expect(screen.queryByText("No campaign selected.")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Campaign Not Found" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "No Campaign Selected" })).not.toBeInTheDocument();
   }
 
   it("shows nothing, not even loading text, while the campaign loads", () => {
@@ -335,18 +338,18 @@ describe("CampaignOverview", () => {
     expect(screen.queryByText("No sessions recorded yet.")).not.toBeInTheDocument();
   });
 
-  it("shows Campaign not found once loading finishes with no campaign", () => {
+  it("shows Campaign Not Found once loading finishes with no campaign", () => {
     useCampaignMock.mockReturnValue({ campaign: undefined, loading: false, error: null });
     renderPage();
-    expect(screen.getByText("Campaign not found.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Campaign Not Found" })).toBeInTheDocument();
   });
 });
 
 describe("CampaignOverview: sections and the section menu", () => {
   it("opens on Party by default, with the campaign name as the page title", () => {
     renderPage("dm-1");
-    expect(screen.getByRole("heading", { name: "The Lathe Run" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Party" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "The Lathe Run" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Party" })).toBeInTheDocument();
   });
 
   it("lists Party, Custom Item Library and Session History for the DM", () => {

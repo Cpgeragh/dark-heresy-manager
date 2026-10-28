@@ -1066,6 +1066,8 @@ Custom Item Library (DM only, §21) and Session History.
 Use a disposable campaign with at least two players, several characters, one applied session, one unapplied session, and custom items. Exercise character operations and JSON import/export before sessions. Refresh after every mutation and verify the owning player's view as well as the DM's.
 
 - [ ] The campaign page opens on Party, with the campaign name as the page title, the section name in the toolbar; the GM and Inquisitor plaques sit at the top of the Party section only, and the Custom Item Library and Session History pages start straight under the toolbar (`CampaignOverview.tsx`, `PartySection.tsx`)
+- [ ] The campaign name is the only top-level page heading, in grey-white, and the section name in the toolbar is the smaller red heading below it (`PageShell`, `TitleToolbar`)
+- [ ] A missing or unreachable campaign shows a grey-white page-title heading: `No Campaign Selected`, `Campaign Not Found`, or `Unable to Load This Campaign`. The last has a red sentence and two buttons under it, while the same load error inside the Party section keeps the single red sentence with its buttons and no big heading (`ErrorPage`, `RouteLoadError`)
 - [ ] The burger menu in the toolbar lists Party, Custom Item Library and Session History for the DM, and only Party and Session History for a player, as a plain list with no categories (`SectionDrawer.tsx`, `sections.ts`)
 - [ ] Choosing a section switches in place, changes the toolbar title, puts `?section=` in the address, scrolls to the top and keeps the header back button going to the Dashboard
 - [ ] Opening the page with `?section=custom-items` as a player, or with an unknown section value as either role, ends up on Party
@@ -1203,6 +1205,8 @@ These behaviours sit around all twenty sheet tabs rather than belonging to one r
 
 Use one editable character and one read-only character. Open the sheet on phone and desktop widths. Work through portrait changes first, then every section-drawer destination, header action, browser navigation, and refresh.
 
+- [ ] The sheet opens with the character's name as a grey-white page title (`Unnamed Character` when there is no name yet) above the DM View bar, with the tab name in the smaller red toolbar heading below it, and the parts of the page are spaced the same as on the campaign page (`PageShell`, `TitleToolbar`)
+- [ ] An invalid or unreachable character route shows a grey-white page-title heading: `Invalid Character Route` or `Unable to Load This Character`, the latter with a red sentence and two buttons under it (`ErrorPage`, `RouteLoadError`)
 - [ ] Upload every supported portrait format, position/crop at each edge, confirm the saved output is square at the intended 256 px size, then refresh and compare the image in the sheet header and Campaign Overview
 - [ ] Replace an existing portrait and confirm every visible copy updates; if removal is supported, remove it and confirm the default placeholder returns everywhere without leaving stale cached images
 - [ ] Open every one of the twenty sections from the drawer on phone and desktop: the correct title/content becomes active, the drawer closes appropriately, and no prior page's modal or temporary state overlays the new section

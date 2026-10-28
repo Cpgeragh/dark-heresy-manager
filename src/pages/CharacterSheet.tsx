@@ -80,6 +80,8 @@ import { RouteLoadError } from "../ui/RouteLoadError";
 import { recordComponentRender } from "../performance/performanceMetrics";
 import type { PatchOptions } from "../hooks/useOptimisticOverlay";
 import { TitleToolbar } from "../ui/TitleToolbar";
+import { PageShell } from "../ui/PageShell";
+import { ErrorPage } from "../ui/ErrorPage";
 import { ChevronUpIcon } from "../ui/icons/ChevronUpIcon";
 import {
   uiSectionShell,
@@ -88,7 +90,6 @@ import {
   uiTextMeta,
   uiStackBody,
 } from "../ui/styles/editableStyles";
-import { ErrorState } from "../ui/ErrorState";
 import {
   CampaignCustomItemsScope,
   useCampaignCustomItemsRaw,
@@ -660,7 +661,7 @@ export default function CharacterSheet({
   // ================================================================
 
   if (!path) {
-    return <ErrorState className="py-10 text-center">Invalid character route.</ErrorState>;
+    return <ErrorPage title="Invalid Character Route" />;
   }
 
   const releaseModals = (
@@ -680,11 +681,11 @@ export default function CharacterSheet({
   }
 
   if (characterLoading || isDMLoading || customItemsLoading) {
-    return routeTimedOut ? <RouteLoadError resource="character" /> : null;
+    return routeTimedOut ? <RouteLoadError resource="character" fullPage /> : null;
   }
 
   if (characterError || customItemsError) {
-    return <RouteLoadError resource="character" />;
+    return <RouteLoadError resource="character" fullPage />;
   }
 
   if (!character) {
@@ -758,16 +759,16 @@ export default function CharacterSheet({
       mode={isDM ? "admin" : "picker"}
       result={{ items: customItems, loading: customItemsLoading, error: customItemsError }}
     >
-      <div>
+      <PageShell title={characterDisplayName?.trim() || "Unnamed Character"}>
         {ownerProfileError && (
-          <p className={`mb-4 text-sm lg:text-base ${colourAmberPlain}`}>
+          <p className={`text-sm lg:text-base ${colourAmberPlain}`}>
             Unable to refresh the owner&apos;s profile name; showing the stored name.
           </p>
         )}
 
         {/* DM NAV / OVERRIDE BAR */}
         {isDM && (
-          <div className={`${uiSectionShell} flex items-center justify-between mb-4 p-2`}>
+          <div className={`${uiSectionShell} flex items-center justify-between p-2`}>
             <span className={uiTextMeta}>DM View</span>
 
             <ToggleButton
@@ -784,7 +785,6 @@ export default function CharacterSheet({
 
         {/* Balanced page toolbar: navigation, centred title, matching spacer */}
         <TitleToolbar
-          className="mb-4"
           title={TAB_TITLES[activeTab]}
           left={
             <SectionDrawer
@@ -1158,7 +1158,7 @@ export default function CharacterSheet({
         )}
 
         {releaseModals}
-      </div>
+      </PageShell>
     </CampaignCustomItemsScope>
   );
 }

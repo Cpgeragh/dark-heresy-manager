@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
 import { WarningIcon } from "../ui/icons/WarningIcon";
 import {
+  uiPageTitle,
   uiSection,
   uiTextError,
   uiTextBody,
@@ -16,7 +17,6 @@ import {
   colourHoverTextBody,
   colourPageBackground,
   colourStateRed,
-  colourTextPrimary,
 } from "../ui/styles/colourTokens";
 import { uiLayerBackdrop } from "../ui/styles/layerStyles";
 
@@ -107,7 +107,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
 
         {/* Error Message */}
         <div className={`text-center ${uiStackList}`}>
-          <h1 className={`text-2xl font-bold ${colourTextPrimary}`}>Something went wrong</h1>
+          <h1 className={uiPageTitle}>Something Went Wrong</h1>
           <p className={uiTextError}>The application encountered an unexpected error.</p>
         </div>
 

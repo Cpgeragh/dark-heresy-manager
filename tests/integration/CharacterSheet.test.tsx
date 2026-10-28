@@ -253,10 +253,10 @@ function renderSheet(initialPath = "/campaign/campaign-1/character/char-1?tab=st
 }
 
 describe("CharacterSheet loading/error states", () => {
-  it("shows Invalid character route when path is null", () => {
+  it("shows Invalid Character Route when path is null", () => {
     useCharacterSheetMock.mockReturnValue(baseSheetResult({ path: null }));
     renderSheet();
-    expect(screen.getByText("Invalid character route.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Invalid Character Route" })).toBeInTheDocument();
   });
 
   function expectNothingShown() {
@@ -295,7 +295,9 @@ describe("CharacterSheet loading/error states", () => {
 
     expect(await screen.findByRole("status", { name: "Loading" })).toBeInTheDocument();
     expect(screen.queryByText("Releasing character…")).not.toBeInTheDocument();
-    expect(screen.queryByText(/Unable to load this character/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Unable to Load This Character" })
+    ).not.toBeInTheDocument();
   });
 
   it("shows an error state", () => {
@@ -307,8 +309,11 @@ describe("CharacterSheet loading/error states", () => {
     );
     renderSheet();
     expect(
+      screen.getByRole("heading", { name: "Unable to Load This Character" })
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
-        "Unable to load this character. You may no longer have access, or there may be a temporary connection problem."
+        "You may no longer have access, or there may be a temporary connection problem."
       )
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
@@ -330,7 +335,9 @@ describe("CharacterSheet loading/error states", () => {
     rerenderSheet();
 
     expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
-    expect(screen.queryByText(/Unable to load this character/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Unable to Load This Character" })
+    ).not.toBeInTheDocument();
   });
 
   it("shows Character not found when there is no character", () => {
@@ -447,6 +454,32 @@ describe("CharacterSheet tabs", () => {
     await user.click(screen.getByRole("button", { name: "Mock Switch To Skills" }));
 
     expect(screen.getByText("Mock SkillsTab")).toBeInTheDocument();
+  });
+
+  it("shows the character's name as the page title and the tab name as the subordinate heading", () => {
+    renderSheet("/campaign/campaign-1/character/char-1?tab=stats");
+
+    expect(screen.getByRole("heading", { level: 1, name: "Vex" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Characteristics" })).toBeInTheDocument();
+  });
+
+  it("shows Unnamed Character as the page title when the character has no name yet", () => {
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({
+        character: character({
+          header: {
+            characterName: "",
+            career: "Guardsman",
+            rank: "Trooper",
+          } as Character["header"],
+        }),
+      })
+    );
+    renderSheet("/campaign/campaign-1/character/char-1?tab=stats");
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Unnamed Character" })
+    ).toBeInTheDocument();
   });
 
   it("only renders the Admin tab for the DM", () => {

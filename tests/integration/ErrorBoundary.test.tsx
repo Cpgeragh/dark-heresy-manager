@@ -53,7 +53,9 @@ describe("ErrorBoundary", () => {
         <AlwaysThrows />
       </ErrorBoundary>
     );
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Something Went Wrong" })
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Go to Home" })).toBeInTheDocument();
   });
@@ -65,20 +67,20 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
     expect(screen.getByText("Custom fallback")).toBeInTheDocument();
-    expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument();
+    expect(screen.queryByText("Something Went Wrong")).not.toBeInTheDocument();
   });
 
   it("recovers and renders children again after Try Again, once they no longer throw", async () => {
     const user = userEvent.setup();
     render(<RecoverableTree />);
 
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.getByText("Something Went Wrong")).toBeInTheDocument();
 
     // Fix the underlying cause first, the boundary still shows the fallback
     // until it's explicitly reset, same as real usage (Try Again is meant to
     // be clicked after whatever caused the error is actually resolved).
     await user.click(screen.getByRole("button", { name: "Fix the underlying issue" }));
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.getByText("Something Went Wrong")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Try Again" }));
 

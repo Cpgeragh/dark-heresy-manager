@@ -25,7 +25,7 @@ import { Button } from "../ui/buttons/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { TitleToolbar } from "../ui/TitleToolbar";
-import { ErrorState } from "../ui/ErrorState";
+import { ErrorPage } from "../ui/ErrorPage";
 import { useRouteActive, useRouteLoading, useRouteLoadTimedOut } from "../context/useRouteReady";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 import { RouteLoadError } from "../ui/RouteLoadError";
@@ -205,19 +205,19 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   ]);
 
   if (!campaignId) {
-    return <ErrorState className="py-10 text-center">No campaign selected.</ErrorState>;
+    return <ErrorPage title="No Campaign Selected" />;
   }
 
   if (campaignError) {
-    return <RouteLoadError resource="campaign" />;
+    return <RouteLoadError resource="campaign" fullPage />;
   }
 
   if (campaignLoading) {
-    return routeTimedOut ? <RouteLoadError resource="campaign" /> : null;
+    return routeTimedOut ? <RouteLoadError resource="campaign" fullPage /> : null;
   }
 
   if (!campaign) {
-    return <ErrorState className="py-10 text-center">Campaign not found.</ErrorState>;
+    return <ErrorPage title="Campaign Not Found" />;
   }
 
   return (
