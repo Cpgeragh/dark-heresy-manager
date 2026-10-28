@@ -13,12 +13,8 @@ import {
 } from "shared-rules";
 import { formatRecoveryCodeInputChange } from "../../utils/recoveryCode";
 import { validateRecoveryCode } from "../../utils/validation";
-import {
-  editableInputClass,
-  editableInputColour,
-  uiSectionHeader,
-  uiTextMeta,
-} from "../styles/editableStyles";
+import { editableInputClass, editableInputColour, uiTextMeta } from "../styles/editableStyles";
+import { FormLabel } from "./FormLabel";
 import { colourSuccessPlain } from "../styles/colourTokens";
 
 const RECOVERY_CODE_FORMATTED_LENGTH =
@@ -30,7 +26,7 @@ interface RecoveryCodeInputProps {
   disabled?: boolean;
   label?: ReactNode | null;
   labelAside?: ReactNode;
-  labelClassName?: string;
+  required?: boolean;
   ariaLabel?: string;
   placeholder?: string;
   size?: "standard" | "large";
@@ -42,9 +38,9 @@ export function RecoveryCodeInput({
   value,
   onValueChange,
   disabled = false,
-  label = "Recovery code",
+  label = "Recovery Code",
   labelAside,
-  labelClassName = uiSectionHeader,
+  required = false,
   ariaLabel,
   placeholder = "DH-XXXX-XXXX",
   size = "standard",
@@ -91,6 +87,7 @@ export function RecoveryCodeInput({
       spellCheck={false}
       maxLength={RECOVERY_CODE_FORMATTED_LENGTH}
       disabled={disabled}
+      required={required}
       aria-label={label ? undefined : ariaLabel}
       className={
         appearance === "form"
@@ -104,9 +101,9 @@ export function RecoveryCodeInput({
     <div>
       {label && (
         <div className="mb-1 flex items-center gap-1.5">
-          <label htmlFor={inputId}>
-            <span className={labelClassName}>{label}</span>
-          </label>
+          <FormLabel htmlFor={inputId} required={required}>
+            {label}
+          </FormLabel>
           {labelAside}
         </div>
       )}

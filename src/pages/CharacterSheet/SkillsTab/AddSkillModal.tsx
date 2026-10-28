@@ -9,16 +9,15 @@ import {
 import type { SkillSource } from "../../../types/SkillSource";
 import { characteristicChipColour, sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
-import { Button } from "../../../ui/buttons/Button";
 import { FilterButton } from "../../../ui/pickers/FilterButton";
-import { PickerList, PickerModal, PickerBody, PickerRow } from "../../../ui/pickers/PickerModal";
+import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { SkillPickerRow } from "./SkillPickerRow";
-import { editableInputClass, uiFormLabel } from "../../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
+import { XpCostForm } from "../../../ui/forms/XpCostForm";
 
 interface AddSkillModalProps {
   isOpen: boolean;
@@ -128,46 +127,22 @@ export function AddSkillModal({
 
   if (pendingManualSkill) {
     const cost = Number(manualCost);
-    const canConfirm = manualCost.trim() !== "";
     return (
-      <PickerModal
+      <XpCostForm
         title={`Train ${pendingManualSkill.name}`}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
-        query=""
-        onQueryChange={() => undefined}
+        submitLabel={`Train ${pendingManualSkill.name}`}
+        showBack
+        cost={manualCost}
+        onCostChange={(value) => setManualCost(sanitizeNonNegativeIntegerInput(value))}
         onClose={() => setPendingManualSkill(null)}
-        isEmpty={false}
-        hideSearch
-        footer={
-          <Button
-            className="w-full"
-            disabled={!canConfirm}
-            onClick={async () => {
-              const saved = await onAdd(pendingManualSkill.id, cost);
-              if (saved !== false) {
-                setPendingManualSkill(null);
-                setManualCost("");
-              }
-            }}
-          >
-            Train {pendingManualSkill.name}
-          </Button>
-        }
-      >
-        <PickerBody>
-          <label className={uiFormLabel}>XP Cost</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={manualCost}
-            onChange={(event) => setManualCost(sanitizeNonNegativeIntegerInput(event.target.value))}
-            placeholder="0"
-            className={editableInputClass(true) + " mt-0.5"}
-            autoComplete="off"
-          />
-        </PickerBody>
-      </PickerModal>
+        onSubmit={async () => {
+          const saved = await onAdd(pendingManualSkill.id, cost);
+          if (saved !== false) {
+            setPendingManualSkill(null);
+            setManualCost("");
+          }
+        }}
+      />
     );
   }
 

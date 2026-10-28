@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
-import { editableInputClass, uiFormLabel } from "../../ui/styles/editableStyles";
+import { editableInputClass } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 function qualifierOf(base: string, value?: string): string {
   const prefix = `${base} (`;
@@ -63,9 +64,7 @@ export function AppearanceTraitPicker({
       >
         <PickerBody>
           <div>
-            <label className={uiFormLabel} htmlFor="appearance-qualifier">
-              Colour
-            </label>
+            <FormLabel htmlFor="appearance-qualifier">Colour</FormLabel>
             <input
               id="appearance-qualifier"
               type="text"

@@ -24,10 +24,10 @@ describe("TraitAcquisitionModal", () => {
   it("records the chosen Soul-bound entity, consequence and roll", async () => {
     const user = userEvent.setup();
     const onComplete = renderAcquisition("soul-bound");
-    await user.type(screen.getByLabelText(/Bound entity/), "The Emperor");
-    await user.click(screen.getByRole("button", { name: /Permanent consequence/ }));
+    await user.type(screen.getByLabelText(/Bound Entity/), "The Emperor");
+    await user.click(screen.getByRole("button", { name: /Permanent Consequence/ }));
     await user.click(screen.getByText("Gain 1d10 Insanity Points"));
-    await user.type(screen.getByLabelText(/Rolled result/), "6");
+    await user.type(screen.getByLabelText(/Rolled Result/), "6");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
     expect(onComplete).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -62,9 +62,9 @@ describe("TraitAcquisitionModal", () => {
   it("records a Sanctioning result and age roll", async () => {
     const user = userEvent.setup();
     const onComplete = renderAcquisition("sanctioned-psyker");
-    await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
+    await user.click(screen.getByRole("button", { name: /Sanctioning Side Effect/ }));
     await user.click(screen.getByText("Witch Prickling"));
-    await user.type(screen.getByLabelText(/Starting age increase/), "18");
+    await user.type(screen.getByLabelText(/Starting Age Increase/), "18");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
     expect(onComplete.mock.calls[0][0].entry.acquisition.trait.sanctioning).toEqual(
       expect.objectContaining({
@@ -77,9 +77,9 @@ describe("TraitAcquisitionModal", () => {
   it("grants Carven Dentures when Dental Probes is rolled", async () => {
     const user = userEvent.setup();
     const onComplete = renderAcquisition("sanctioned-psyker");
-    await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
+    await user.click(screen.getByRole("button", { name: /Sanctioning Side Effect/ }));
     await user.click(screen.getByText("Dental Probes"));
-    await user.type(screen.getByLabelText(/Starting age increase/), "12");
+    await user.type(screen.getByLabelText(/Starting Age Increase/), "12");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
     expect(onComplete.mock.calls[0][0].gear).toEqual([
       expect.objectContaining({ name: "Carven Dentures", referenceId: "cr-carven-dentures" }),
@@ -89,9 +89,9 @@ describe("TraitAcquisitionModal", () => {
   it("grants a Chattallium Ring when Throne Wed is rolled", async () => {
     const user = userEvent.setup();
     const onComplete = renderAcquisition("sanctioned-psyker");
-    await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
+    await user.click(screen.getByRole("button", { name: /Sanctioning Side Effect/ }));
     await user.click(screen.getByText("Throne Wed"));
-    await user.type(screen.getByLabelText(/Starting age increase/), "20");
+    await user.type(screen.getByLabelText(/Starting Age Increase/), "20");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
     expect(onComplete.mock.calls[0][0].gear).toEqual([
       expect.objectContaining({ name: "Chattallium Ring", referenceId: "cr-chattallium-ring" }),
@@ -101,9 +101,9 @@ describe("TraitAcquisitionModal", () => {
   it("notes the Willpower Test requirement when Tongue Bound is rolled", async () => {
     const user = userEvent.setup();
     const onComplete = renderAcquisition("sanctioned-psyker");
-    await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
+    await user.click(screen.getByRole("button", { name: /Sanctioning Side Effect/ }));
     await user.click(screen.getByText("Tongue Bound"));
-    await user.type(screen.getByLabelText(/Starting age increase/), "10");
+    await user.type(screen.getByLabelText(/Starting Age Increase/), "10");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
     expect(onComplete.mock.calls[0][0].entry.notes).toContain("Hard (–20) Willpower Test");
   });
@@ -140,9 +140,9 @@ describe("TraitAcquisitionModal", () => {
         onClose={vi.fn()}
       />
     );
-    await user.click(screen.getByRole("button", { name: /Rank 3 benefit/ }));
+    await user.click(screen.getByRole("button", { name: /Rank 3 Benefit/ }));
     await user.click(screen.getByText("Upgrade an existing cybernetic to Good"));
-    await user.click(screen.getByRole("button", { name: /Cybernetic to upgrade/ }));
+    await user.click(screen.getByRole("button", { name: /Cybernetic to Upgrade/ }));
     await user.click(screen.getByText("Bionic Respiratory System (Common)"));
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
     expect(onComplete.mock.calls[0][0]).toEqual(

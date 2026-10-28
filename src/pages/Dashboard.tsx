@@ -32,7 +32,6 @@ import {
   uiInlineRow,
   uiSection,
   editableInputClass,
-  uiFormLabel,
   uiTextBody,
   uiTextPlaceholder,
   uiInactiveItem,
@@ -81,7 +80,6 @@ import {
   colourTextMuted,
   colourHoverTextBody,
 } from "../ui/styles/colourTokens";
-import { RequiredMark } from "../ui/forms/RequiredMark";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../hooks/useMediaQuery";
 import { useSwipeableTabs } from "../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../ui/SegmentedTabs";
@@ -485,9 +483,7 @@ function DmCampaignList({
             </div>
 
             <div>
-              <label htmlFor="new-inquisitor-name" className={uiFormLabel}>
-                Inquisitor Name
-              </label>
+              <FormLabel htmlFor="new-inquisitor-name">Inquisitor Name</FormLabel>
               <input
                 id="new-inquisitor-name"
                 name="new-inquisitor-name"
@@ -658,9 +654,7 @@ function DmCampaignList({
               }}
             >
               <div>
-                <label htmlFor="edit-inquisitor-name" className={uiFormLabel}>
-                  Inquisitor Name
-                </label>
+                <FormLabel htmlFor="edit-inquisitor-name">Inquisitor Name</FormLabel>
                 <input
                   id="edit-inquisitor-name"
                   className={`${editableInputClass(true)} mt-0.5`}
@@ -679,9 +673,7 @@ function DmCampaignList({
                 />
               </div>
               <div>
-                <label htmlFor="edit-campaign-name" className={uiFormLabel}>
-                  Campaign Name
-                </label>
+                <FormLabel htmlFor="edit-campaign-name">Campaign Name</FormLabel>
                 <input
                   id="edit-campaign-name"
                   className={`${editableInputClass(true)} mt-0.5`}
@@ -884,12 +876,7 @@ function ClaimCharacterSection() {
               onValueChange={setCode}
               disabled={loading || claiming}
               appearance="form"
-              label={
-                <>
-                  Recovery Code <RequiredMark />
-                </>
-              }
-              labelClassName={uiFormLabel}
+              required
             />
           </CustomFormSection>
 

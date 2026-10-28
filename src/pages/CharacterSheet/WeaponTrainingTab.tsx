@@ -23,15 +23,8 @@ import {
 } from "../../data/reference/weaponReference";
 import { Button } from "../../ui/buttons/Button";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
-import {
-  uiChipRow,
-  editableInputClass,
-  uiFormLabel,
-  uiTextBody,
-  uiStackPage,
-} from "../../ui/styles/editableStyles";
+import { uiChipRow, uiTextBody, uiStackPage } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../utils/dmGatedPurchase";
 import {
@@ -52,6 +45,8 @@ import {
   uiPressFeedback,
 } from "../../ui/styles/buttonStyles";
 import { uiCorner } from "../../ui/styles/shapeStyles";
+import { XpCostForm } from "../../ui/forms/XpCostForm";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 const EXOTIC_WEAPON_TRAINING_OPTIONS = Array.from(
   new Set(
@@ -290,8 +285,10 @@ export function WeaponTrainingTab({
   return (
     <div className={`${uiStackPage} text-center`}>
       {WEAPON_TRAINING_GROUPS.map((group) => (
-        <div key={group.label}>
-          <p className={`${uiFormLabel} mb-1.5`}>{group.label}</p>
+        <fieldset key={group.label}>
+          <FormLabel as="legend" className="block w-full mb-1.5">
+            {group.label}
+          </FormLabel>
           <div className={`${uiChipRow} justify-center`}>
             {group.items.map(({ id, display }) => {
               const trainingId = id as WeaponTrainingTalentId;
@@ -368,11 +365,13 @@ export function WeaponTrainingTab({
                 Knave of Pistols prevents acquiring new training in this group.
               </p>
             )}
-        </div>
+        </fieldset>
       ))}
 
-      <div>
-        <p className={`${uiFormLabel} mb-1.5`}>Exotic Weapon Training</p>
+      <fieldset>
+        <FormLabel as="legend" className="block w-full mb-1.5">
+          Exotic Weapon Training
+        </FormLabel>
 
         <div className={`${uiChipRow} justify-center items-center max-w-xl mx-auto`}>
           {weaponTraining.exoticWeapons.map((weapon, index) => (
@@ -422,7 +421,7 @@ export function WeaponTrainingTab({
             Granted by Sicarius Tutoring (Guardsman)
           </p>
         )}
-      </div>
+      </fieldset>
 
       {pendingTrain && (
         <PickerModal
@@ -454,46 +453,15 @@ export function WeaponTrainingTab({
       )}
 
       {pendingManualTrain && (
-        <PickerModal
-          title="Train Weapon Group"
-          query=""
-          onQueryChange={() => undefined}
+        <XpCostForm
+          title={`Train ${pendingManualTrain.group} (${pendingManualTrain.display})`}
+          submitLabel="Train"
+          cost={manualTrainCost}
+          onCostChange={(value) => setManualTrainCost(sanitizeNonNegativeIntegerInput(value))}
+          canSubmit={canConfirmManualTrain}
           onClose={() => setPendingManualTrain(null)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                disabled={!canConfirmManualTrain}
-                onClick={confirmManualTrain}
-              >
-                Train
-              </Button>
-              <Button variant="neutral" onClick={() => setPendingManualTrain(null)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <label className={uiFormLabel}>
-              XP Cost to train {pendingManualTrain.group} ({pendingManualTrain.display})
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={manualTrainCost}
-              onChange={(event) =>
-                setManualTrainCost(sanitizeNonNegativeIntegerInput(event.target.value))
-              }
-              placeholder="0"
-              className={editableInputClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </PickerBody>
-        </PickerModal>
+          onSubmit={confirmManualTrain}
+        />
       )}
 
       {pendingRemoveTraining && (
@@ -596,44 +564,22 @@ export function WeaponTrainingTab({
       )}
 
       {showExoticForm && (
-        <PickerModal
-          title="Add Exotic Weapon"
-          closeLabel={<ArrowLeft />}
-          closeAriaLabel="Back"
-          query=""
-          onQueryChange={() => undefined}
+        <XpCostForm
+          title={`Add ${newExoticName}`}
+          submitLabel="Add Exotic"
+          showBack
+          cost={newExoticCost}
+          onCostChange={(value) => setNewExoticCost(sanitizeNonNegativeIntegerInput(value))}
+          canSubmit={canConfirmExotic}
           onClose={closeExoticForm}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <Button className="w-full" disabled={!canConfirmExotic} onClick={confirmAddExotic}>
-              Add Exotic
-            </Button>
-          }
+          onSubmit={confirmAddExotic}
         >
-          <PickerBody>
-            <label className={uiFormLabel}>Weapon Name</label>
-            <p className={`text-sm lg:text-base ${uiTextBody}`}>{newExoticName}</p>
-            {hasKnaveOfPistols && (
-              <p className={`text-xs ${colourAmberPlain}`}>
-                Knave of Pistols limits this list to pistol-only specialisations.
-              </p>
-            )}
-            <label className={uiFormLabel}>XP Cost</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={newExoticCost}
-              onChange={(event) =>
-                setNewExoticCost(sanitizeNonNegativeIntegerInput(event.target.value))
-              }
-              placeholder="0"
-              className={editableInputClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </PickerBody>
-        </PickerModal>
+          {hasKnaveOfPistols && (
+            <p className={`text-xs ${colourAmberPlain}`}>
+              Knave of Pistols limits this list to pistol-only specialisations.
+            </p>
+          )}
+        </XpCostForm>
       )}
     </div>
   );

@@ -7,7 +7,6 @@ import type {
 } from "../../../types/Character";
 import {
   editableInputClass,
-  uiFormLabel,
   uiInfoModalWrapper,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
@@ -326,14 +325,10 @@ export function CustomPieceForm({
       </CustomFormSection>
 
       <CustomFormSection title="Description, Rules, & Qualities">
-        <div
-          className={uiStackField}
-          role={forceField ? undefined : "group"}
-          aria-labelledby={forceField ? undefined : "custom-armour-qualities-label"}
-        >
-          <p id="custom-armour-qualities-label" className={`${uiFormLabel} block mb-1.5`}>
+        <fieldset className={uiStackField}>
+          <FormLabel as="legend" className="block mb-1.5">
             Qualities
-          </p>
+          </FormLabel>
           {forceField ? (
             <div className="flex items-center gap-1.5">
               <Chip colour="amber" className="w-fit">
@@ -358,7 +353,7 @@ export function CustomPieceForm({
               ))}
             </div>
           )}
-        </div>
+        </fieldset>
         <DescriptionAndRulesFields
           idPrefix="custom-armour"
           description={description}

@@ -11,8 +11,6 @@ import {
   editableInputClass,
   editableTextareaClass,
   uiTextBody,
-  uiFormLabel,
-  uiFormLabelHint,
 } from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -304,9 +302,7 @@ export function CustomArcheotechForm({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label htmlFor="custom-archeotech-weight" className={uiFormLabel}>
-                Weight
-              </label>
+              <FormLabel htmlFor="custom-archeotech-weight">Weight</FormLabel>
               <input
                 id="custom-archeotech-weight"
                 type="text"
@@ -319,9 +315,7 @@ export function CustomArcheotechForm({
               />
             </div>
             <div>
-              <label htmlFor="custom-archeotech-value" className={uiFormLabel}>
-                Value
-              </label>
+              <FormLabel htmlFor="custom-archeotech-value">Value</FormLabel>
               <input
                 id="custom-archeotech-value"
                 type="text"
@@ -349,7 +343,7 @@ export function CustomArcheotechForm({
           <CustomFormSection title="Stats">
             {isWeaponType && (
               <fieldset>
-                <legend className={uiFormLabel}>Class</legend>
+                <FormLabel as="legend">Class</FormLabel>
                 <div className="flex gap-2 mt-0.5">
                   {(["Ranged", "Melee"] as const).map((cls) => (
                     <ToggleButton
@@ -367,9 +361,7 @@ export function CustomArcheotechForm({
             )}
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label htmlFor="custom-archeotech-damage" className={uiFormLabel}>
-                  Damage
-                </label>
+                <FormLabel htmlFor="custom-archeotech-damage">Damage</FormLabel>
                 <input
                   id="custom-archeotech-damage"
                   type="text"
@@ -381,9 +373,7 @@ export function CustomArcheotechForm({
                 />
               </div>
               <div>
-                <label htmlFor="custom-archeotech-pen" className={uiFormLabel}>
-                  Pen
-                </label>
+                <FormLabel htmlFor="custom-archeotech-pen">Pen</FormLabel>
                 <input
                   id="custom-archeotech-pen"
                   type="text"
@@ -399,9 +389,7 @@ export function CustomArcheotechForm({
               <>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label htmlFor="custom-archeotech-range" className={uiFormLabel}>
-                      Range
-                    </label>
+                    <FormLabel htmlFor="custom-archeotech-range">Range</FormLabel>
                     <input
                       id="custom-archeotech-range"
                       type="text"
@@ -413,9 +401,7 @@ export function CustomArcheotechForm({
                     />
                   </div>
                   <div>
-                    <label htmlFor="custom-archeotech-rof" className={uiFormLabel}>
-                      RoF
-                    </label>
+                    <FormLabel htmlFor="custom-archeotech-rof">RoF</FormLabel>
                     <input
                       id="custom-archeotech-rof"
                       type="text"
@@ -429,9 +415,7 @@ export function CustomArcheotechForm({
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label htmlFor="custom-archeotech-clip" className={uiFormLabel}>
-                      Clip
-                    </label>
+                    <FormLabel htmlFor="custom-archeotech-clip">Clip</FormLabel>
                     <input
                       id="custom-archeotech-clip"
                       type="text"
@@ -443,9 +427,7 @@ export function CustomArcheotechForm({
                     />
                   </div>
                   <div>
-                    <label htmlFor="custom-archeotech-reload" className={uiFormLabel}>
-                      Rld
-                    </label>
+                    <FormLabel htmlFor="custom-archeotech-reload">Rld</FormLabel>
                     <input
                       id="custom-archeotech-reload"
                       type="text"
@@ -460,9 +442,9 @@ export function CustomArcheotechForm({
               </>
             )}
             <div>
-              <label htmlFor="custom-archeotech-special-rules" className={uiFormLabel}>
-                Qualities <span className={uiFormLabelHint}>(optional)</span>
-              </label>
+              <FormLabel htmlFor="custom-archeotech-special-rules" supportingText="(optional)">
+                Qualities
+              </FormLabel>
               <input
                 id="custom-archeotech-special-rules"
                 type="text"
@@ -480,9 +462,7 @@ export function CustomArcheotechForm({
         {selectedType === "Armour" && (
           <CustomFormSection title="Stats">
             <div>
-              <label htmlFor="custom-archeotech-armour-ap" className={uiFormLabel}>
-                AP
-              </label>
+              <FormLabel htmlFor="custom-archeotech-armour-ap">AP</FormLabel>
               <input
                 id="custom-archeotech-armour-ap"
                 type="text"
@@ -495,7 +475,9 @@ export function CustomArcheotechForm({
               />
             </div>
             <fieldset>
-              <legend className={`${uiFormLabel} block mb-1.5`}>Locations</legend>
+              <FormLabel as="legend" className="block mb-1.5">
+                Locations
+              </FormLabel>
               <div className="flex flex-wrap gap-2">
                 {ARMOUR_LOCATION_ORDER.map((loc) => (
                   <ToggleButton
@@ -535,9 +517,7 @@ export function CustomArcheotechForm({
         {selectedType === "Shield" && (
           <CustomFormSection title="Stats">
             <div>
-              <label htmlFor="custom-archeotech-shield-ap" className={uiFormLabel}>
-                AP
-              </label>
+              <FormLabel htmlFor="custom-archeotech-shield-ap">AP</FormLabel>
               <input
                 id="custom-archeotech-shield-ap"
                 type="text"
@@ -551,9 +531,7 @@ export function CustomArcheotechForm({
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label htmlFor="custom-archeotech-shield-damage" className={uiFormLabel}>
-                  Damage
-                </label>
+                <FormLabel htmlFor="custom-archeotech-shield-damage">Damage</FormLabel>
                 <input
                   id="custom-archeotech-shield-damage"
                   type="text"
@@ -565,9 +543,7 @@ export function CustomArcheotechForm({
                 />
               </div>
               <div>
-                <label htmlFor="custom-archeotech-shield-pen" className={uiFormLabel}>
-                  Pen
-                </label>
+                <FormLabel htmlFor="custom-archeotech-shield-pen">Pen</FormLabel>
                 <input
                   id="custom-archeotech-shield-pen"
                   type="text"
@@ -580,9 +556,12 @@ export function CustomArcheotechForm({
               </div>
             </div>
             <div>
-              <label htmlFor="custom-archeotech-shield-special-rules" className={uiFormLabel}>
-                Qualities <span className={uiFormLabelHint}>(optional)</span>
-              </label>
+              <FormLabel
+                htmlFor="custom-archeotech-shield-special-rules"
+                supportingText="(optional)"
+              >
+                Qualities
+              </FormLabel>
               <input
                 id="custom-archeotech-shield-special-rules"
                 type="text"
@@ -608,9 +587,9 @@ export function CustomArcheotechForm({
               onClick={() => setShowCraftsmanshipPicker(true)}
             />
             <fieldset>
-              <legend className={`${uiFormLabel} block mb-1.5`}>
-                Body Location <span className={uiFormLabelHint}>(optional)</span>
-              </legend>
+              <FormLabel as="legend" className="block mb-1.5" supportingText="(optional)">
+                Body Location
+              </FormLabel>
               <div className="flex flex-wrap gap-2">
                 {ARMOUR_LOCATION_ORDER.map((loc) => (
                   <ToggleButton
@@ -632,9 +611,7 @@ export function CustomArcheotechForm({
         {selectedType === "Force Field" && (
           <CustomFormSection title="Stats">
             <div>
-              <label htmlFor="custom-archeotech-protection-rating" className={uiFormLabel}>
-                Protection Rating
-              </label>
+              <FormLabel htmlFor="custom-archeotech-protection-rating">Protection Rating</FormLabel>
               <input
                 id="custom-archeotech-protection-rating"
                 type="text"
@@ -659,9 +636,9 @@ export function CustomArcheotechForm({
             descriptionPlaceholder="What it is, how it looks, where it came from…"
           />
           <div>
-            <label htmlFor="custom-archeotech-notes" className={uiFormLabel}>
-              Notes <span className={uiFormLabelHint}>(optional)</span>
-            </label>
+            <FormLabel htmlFor="custom-archeotech-notes" supportingText="(optional)">
+              Notes
+            </FormLabel>
             <textarea
               id="custom-archeotech-notes"
               value={notes}

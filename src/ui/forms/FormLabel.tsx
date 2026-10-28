@@ -19,6 +19,10 @@ type FormLabelProps = SharedFormLabelProps &
         as: "legend";
         htmlFor?: never;
       }
+    | {
+        as: "span";
+        htmlFor?: never;
+      }
   );
 
 function FormLabelContent({
@@ -44,7 +48,8 @@ function FormLabelContent({
  * The one label for a form control.
  *
  * Use the default label with htmlFor for one control. Use as="legend" when
- * naming a group of controls inside a fieldset. Set required for a required
+ * naming a group of controls inside a fieldset, and as="span" for text that
+ * names a value or a layout with no single control. Set required for a required
  * control, which adds the star after the text and before any hint; the control
  * itself must also use the native required attribute or aria-required.
  */
@@ -58,6 +63,10 @@ export function FormLabel(props: FormLabelProps) {
 
   if (props.as === "legend") {
     return <legend className={className}>{content}</legend>;
+  }
+
+  if (props.as === "span") {
+    return <span className={className}>{content}</span>;
   }
 
   return (

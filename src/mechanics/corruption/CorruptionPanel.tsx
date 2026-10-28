@@ -24,7 +24,6 @@ import {
 import {
   uiChipRow,
   uiSplitRow,
-  uiFormLabel,
   uiInfoModalWrapper,
   uiTextLabel,
   uiTextBody,
@@ -63,6 +62,7 @@ import {
   corruptionMutationLevelLabel,
   corruptionStepperClass,
 } from "./corruptionUi";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 interface CorruptionPanelProps {
   corruption?: CorruptionBlock;
@@ -514,7 +514,7 @@ export function CorruptionPanel({
     <div className={uiStackPage}>
       <div className={`${sectionClassName} flex flex-col items-center ${uiStackSection}`}>
         <div className="inline-flex flex-col items-center gap-2">
-          <span className={uiFormLabel}>Points</span>
+          <FormLabel as="span">Points</FormLabel>
           <Stepper
             value={value.points}
             max={100}

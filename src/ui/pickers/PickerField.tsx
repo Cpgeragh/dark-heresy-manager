@@ -1,10 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  editableInputClass,
-  uiFormLabel,
-  uiFormLabelHint,
-  uiTextPlaceholder,
-} from "../styles/editableStyles";
+import { editableInputClass, uiTextPlaceholder } from "../styles/editableStyles";
 import { ArrowRight } from "../icons/PickerArrows";
 import { FormLabel } from "../forms/FormLabel";
 import { uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
@@ -49,17 +44,11 @@ export function PickerField({
 }: PickerFieldProps) {
   return (
     <div className={className}>
-      {label &&
-        (required ? (
-          <FormLabel htmlFor={id} required supportingText={supportingText}>
-            {label}
-          </FormLabel>
-        ) : (
-          <label htmlFor={id} className={uiFormLabel}>
-            {label}
-            {supportingText && <span className={uiFormLabelHint}>{supportingText}</span>}
-          </label>
-        ))}
+      {label && (
+        <FormLabel htmlFor={id} required={required} supportingText={supportingText}>
+          {label}
+        </FormLabel>
+      )}
       <button
         id={id}
         type="button"

@@ -69,9 +69,9 @@ describe("EliteAdvancesTab", () => {
 
     await user.click(within(picker).getByText("Encarta Maleficarum"));
     const purchase = screen.getByRole("dialog", { name: "Buy Encarta Maleficarum" });
-    await user.type(within(purchase).getByLabelText("Insanity gained (1d5)"), "1");
-    await user.type(within(purchase).getByLabelText("Permanent Toughness reduction (1d5)"), "2");
-    await user.type(within(purchase).getByLabelText("Permanent Fellowship reduction (1d5)"), "3");
+    await user.type(within(purchase).getByLabelText("Insanity Gained (1d5)"), "1");
+    await user.type(within(purchase).getByLabelText("Permanent Toughness Reduction (1d5)"), "2");
+    await user.type(within(purchase).getByLabelText("Permanent Fellowship Reduction (1d5)"), "3");
     await user.click(within(purchase).getByRole("button", { name: "Buy for 500 XP" }));
 
     await user.click(screen.getByRole("button", { name: "Back" }));

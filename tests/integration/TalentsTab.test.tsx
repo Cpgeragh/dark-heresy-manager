@@ -641,7 +641,7 @@ describe("TalentsTab", () => {
         name: "Noble Born",
       })
     );
-    await user.click(screen.getByRole("button", { name: /Additional Peer group/ }));
+    await user.click(screen.getByRole("button", { name: /Additional Peer Group/ }));
     await user.click(screen.getByText("Mercantile"));
     await user.click(screen.getByRole("button", { name: "Apply Homeworld" }));
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));

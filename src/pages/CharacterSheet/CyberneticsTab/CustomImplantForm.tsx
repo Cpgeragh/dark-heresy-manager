@@ -6,7 +6,7 @@ import type {
   CyberneticCraftsmanship,
   CyberneticItem,
 } from "../../../types/Character";
-import { editableInputClass, uiFormLabel } from "../../../ui/styles/editableStyles";
+import { editableInputClass } from "../../../ui/styles/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import {
   formatWeightInput,
@@ -226,9 +226,7 @@ export function CustomImplantForm({
             onClick={() => setShowAvailabilityPicker(true)}
           />
           <div>
-            <label htmlFor="custom-cybernetic-weight" className={uiFormLabel}>
-              Weight
-            </label>
+            <FormLabel htmlFor="custom-cybernetic-weight">Weight</FormLabel>
             <input
               id="custom-cybernetic-weight"
               type="text"

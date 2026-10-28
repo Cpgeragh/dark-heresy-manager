@@ -1,4 +1,5 @@
-import { editableTextareaClass, uiFormLabel } from "../styles/editableStyles";
+import { editableTextareaClass } from "../styles/editableStyles";
+import { FormLabel } from "./FormLabel";
 
 interface DescriptionAndRulesFieldsProps {
   idPrefix: string;
@@ -23,9 +24,7 @@ export function DescriptionAndRulesFields({
   return (
     <>
       <div className="col-span-2">
-        <label htmlFor={`${idPrefix}-description`} className={uiFormLabel}>
-          Description
-        </label>
+        <FormLabel htmlFor={`${idPrefix}-description`}>Description</FormLabel>
         <textarea
           id={`${idPrefix}-description`}
           value={description}
@@ -37,9 +36,7 @@ export function DescriptionAndRulesFields({
         />
       </div>
       <div className="col-span-2">
-        <label htmlFor={`${idPrefix}-rules`} className={uiFormLabel}>
-          Rules
-        </label>
+        <FormLabel htmlFor={`${idPrefix}-rules`}>Rules</FormLabel>
         <textarea
           id={`${idPrefix}-rules`}
           value={rules}

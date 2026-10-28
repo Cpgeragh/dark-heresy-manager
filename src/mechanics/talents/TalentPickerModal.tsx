@@ -5,7 +5,6 @@ import type { TraitData } from "../../data/reference/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
-  uiFormLabel,
   uiTextError,
   uiTextPlaceholder,
   uiStackBody,
@@ -51,6 +50,7 @@ import {
   normaliseSources,
 } from "./talentUtils";
 import { getFaithTalentGroupChip } from "./faithTalentGroups";
+import { XpCostForm } from "../../ui/forms/XpCostForm";
 
 export type AnyListItem = TalentData | TraitData;
 
@@ -372,56 +372,30 @@ export function TalentPickerModal({
 
   if (pendingManualCost && canMakeManualPurchase) {
     const cost = Number(manualCostInput);
-    const canConfirm = manualCostInput.trim() !== "";
     return (
-      <PickerModal
+      <XpCostForm
         title={`Buy ${pendingManualCost.talent.name}`}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
-        query=""
-        onQueryChange={() => undefined}
+        submitLabel={`Buy ${pendingManualCost.talent.name}`}
+        showBack
+        cost={manualCostInput}
+        onCostChange={(value) => setManualCostInput(sanitizeNonNegativeIntegerInput(value))}
         onClose={() => setPendingManualCost(null)}
-        isEmpty={false}
-        hideSearch
-        footer={
-          <Button
-            className="w-full"
-            disabled={!canConfirm}
-            onClick={async () => {
-              const shouldReturnToChoicePicker = pendingManualCost.returnToChoicePicker === true;
-              const saved = await onAdd({
-                ...makeTalentEntry(
-                  pendingManualCost.talent as TalentData,
-                  pendingManualCost.specialisation,
-                  cost
-                ),
-                xpPurchase: makeCurrentRankPurchase(career, rank, cost),
-              });
-              if (saved === false) return;
-              setPendingManualCost(null);
-              if (shouldReturnToChoicePicker) returnToChoicePicker();
-              else resetPicked();
-            }}
-          >
-            Buy {pendingManualCost.talent.name}
-          </Button>
-        }
-      >
-        <PickerBody>
-          <label className={uiFormLabel}>XP Cost</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={manualCostInput}
-            onChange={(event) =>
-              setManualCostInput(sanitizeNonNegativeIntegerInput(event.target.value))
-            }
-            placeholder="0"
-            className={editableInputClass(true) + " mt-0.5"}
-            autoComplete="off"
-          />
-        </PickerBody>
-      </PickerModal>
+        onSubmit={async () => {
+          const shouldReturnToChoicePicker = pendingManualCost.returnToChoicePicker === true;
+          const saved = await onAdd({
+            ...makeTalentEntry(
+              pendingManualCost.talent as TalentData,
+              pendingManualCost.specialisation,
+              cost
+            ),
+            xpPurchase: makeCurrentRankPurchase(career, rank, cost),
+          });
+          if (saved === false) return;
+          setPendingManualCost(null);
+          if (shouldReturnToChoicePicker) returnToChoicePicker();
+          else resetPicked();
+        }}
+      />
     );
   }
 

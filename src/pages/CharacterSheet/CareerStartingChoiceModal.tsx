@@ -6,7 +6,8 @@ import { Button } from "../../ui/buttons/Button";
 import { ToggleButton } from "../../ui/buttons/ToggleButton";
 import { colourToggleSelected } from "../../ui/styles/colourTokens";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { uiFormLabel, uiStackBody, uiStackField } from "../../ui/styles/editableStyles";
+import { FormLabel } from "../../ui/forms/FormLabel";
+import { uiStackBody, uiStackField } from "../../ui/styles/editableStyles";
 
 const skillNameById = new Map(DEFAULT_SKILLS.map((skill) => [skill.id, skill.name]));
 const talentNameById = new Map(TALENT_LIST.map((talent) => [talent.id, talent.name]));
@@ -61,8 +62,8 @@ export function CareerStartingChoiceModal({
       <PickerBody>
         <div className={uiStackBody}>
           {skillGrants.map(({ grant, index }) => (
-            <div key={`skill-${index}`} className={uiStackField}>
-              <label className={uiFormLabel}>Starting Skill</label>
+            <fieldset key={`skill-${index}`} className={uiStackField}>
+              <FormLabel as="legend">Starting Skill</FormLabel>
               <div className="flex flex-wrap gap-2">
                 {grant.options.map((option, optionIndex) => (
                   <ToggleButton
@@ -76,11 +77,11 @@ export function CareerStartingChoiceModal({
                   </ToggleButton>
                 ))}
               </div>
-            </div>
+            </fieldset>
           ))}
           {talentGrants.map(({ grant, index }) => (
-            <div key={`talent-${index}`} className={uiStackField}>
-              <label className={uiFormLabel}>Starting Talent</label>
+            <fieldset key={`talent-${index}`} className={uiStackField}>
+              <FormLabel as="legend">Starting Talent</FormLabel>
               <div className="flex flex-wrap gap-2">
                 {grant.options.map((option, optionIndex) => (
                   <ToggleButton
@@ -94,7 +95,7 @@ export function CareerStartingChoiceModal({
                   </ToggleButton>
                 ))}
               </div>
-            </div>
+            </fieldset>
           ))}
         </div>
       </PickerBody>

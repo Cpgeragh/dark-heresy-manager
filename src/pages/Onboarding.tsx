@@ -15,7 +15,6 @@ import {
   uiCodeBox,
   uiCodeText,
   uiInfoModalWrapper,
-  uiSectionHeader,
   uiTextBody,
   uiTextMeta,
   uiStackBody,
@@ -43,6 +42,7 @@ import { RequiredFieldsNote } from "../ui/forms/CustomFormFooter";
 import { RequiredMark } from "../ui/forms/RequiredMark";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
+import { FormLabel } from "../ui/forms/FormLabel";
 
 type Step = "welcome" | "show-code" | "link";
 
@@ -304,9 +304,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
               >
                 <div>
                   <div className="mb-1 flex items-center gap-1.5">
-                    <label htmlFor="onboarding-first-name">
-                      <span className={uiSectionHeader}>First Name</span>
-                    </label>
+                    <FormLabel htmlFor="onboarding-first-name">First Name</FormLabel>
                     <span className={uiInfoModalWrapper}>
                       <InfoModal
                         title="First Name"
@@ -330,11 +328,9 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
 
                 <div>
                   <div className="mb-1 flex items-center gap-1.5">
-                    <label htmlFor="onboarding-device-name">
-                      <span className={uiSectionHeader}>
-                        Device Name <RequiredMark />
-                      </span>
-                    </label>
+                    <FormLabel htmlFor="onboarding-device-name" required>
+                      Device Name
+                    </FormLabel>
                     <span className={uiInfoModalWrapper}>
                       <InfoModal
                         title="Device Name"

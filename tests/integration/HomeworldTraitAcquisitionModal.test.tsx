@@ -15,7 +15,7 @@ describe("HomeworldTraitAcquisitionModal", () => {
         onClose={vi.fn()}
       />
     );
-    await user.click(screen.getByRole("button", { name: /Additional Peer group/ }));
+    await user.click(screen.getByRole("button", { name: /Additional Peer Group/ }));
     await user.click(screen.getByText("Mercantile"));
     await user.click(screen.getByRole("button", { name: "Apply Homeworld" }));
     expect(onComplete).toHaveBeenCalledWith({ peerGroup: "Mercantile" });

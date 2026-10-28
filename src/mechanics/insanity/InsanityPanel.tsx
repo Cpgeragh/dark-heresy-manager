@@ -23,7 +23,6 @@ import {
 } from "../../ui/styles/colourTokens";
 import {
   uiChipRow,
-  uiFormLabel,
   uiInfoModalWrapper,
   uiTextBody,
   uiTextLabel,
@@ -59,6 +58,7 @@ import {
   insanityDisorderLevelLabel,
   insanityStepperClass,
 } from "./insanityUi";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 interface InsanityPanelProps {
   insanity?: InsanityBlock;
@@ -288,7 +288,7 @@ export function InsanityPanel({
       <div className={`${sectionClassName} flex flex-col items-center ${uiStackSection}`}>
         <div className="inline-flex flex-col items-center gap-2">
           <span className="inline-flex items-center gap-1">
-            <span className={uiFormLabel}>Points</span>
+            <FormLabel as="span">Points</FormLabel>
             {recordedSources.length > 0 && (
               <span className={uiInfoModalWrapper}>
                 <InfoModal

@@ -45,7 +45,6 @@ import {
 import { SKILL_DESCRIPTIONS } from "../../data/reference/skillDescriptions";
 import {
   editableInputClass,
-  uiFormLabel,
   uiSection,
   uiTextBody,
   uiTextLabel,
@@ -67,6 +66,8 @@ import {
   type MissedRankSkillOption,
   type MissedRankTalentOption,
 } from "./eliteAdvanceAccess";
+import { XpCostForm } from "../../ui/forms/XpCostForm";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 interface EliteAdvancesTabProps {
   talents: TalentsAndTraitsBlock;
@@ -385,9 +386,12 @@ function SpecialAdvancePurchaseModal({
     validRoll(fellowship, needsFellowship);
 
   const rollInput = (label: string, value: string, setValue: (next: string) => void) => (
-    <label className="block">
-      <span className={uiFormLabel}>{label}</span>
+    <div>
+      <FormLabel htmlFor={`elite-roll-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+        {label}
+      </FormLabel>
       <input
+        id={`elite-roll-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
         type="number"
         inputMode="numeric"
         min={1}
@@ -398,7 +402,7 @@ function SpecialAdvancePurchaseModal({
         className={`${editableInputClass(true)} mt-1`}
         autoComplete="off"
       />
-    </label>
+    </div>
   );
 
   return (
@@ -435,11 +439,11 @@ function SpecialAdvancePurchaseModal({
     >
       <PickerBody>
         <EliteAdvanceDetails advance={advance} />
-        {needsInsanity && rollInput("Insanity gained (1d5)", insanity, setInsanity)}
+        {needsInsanity && rollInput("Insanity Gained (1d5)", insanity, setInsanity)}
         {needsToughness &&
-          rollInput("Permanent Toughness reduction (1d5)", toughness, setToughness)}
+          rollInput("Permanent Toughness Reduction (1d5)", toughness, setToughness)}
         {needsFellowship &&
-          rollInput("Permanent Fellowship reduction (1d5)", fellowship, setFellowship)}
+          rollInput("Permanent Fellowship Reduction (1d5)", fellowship, setFellowship)}
       </PickerBody>
     </PickerModal>
   );
@@ -499,47 +503,24 @@ function SkillAdvancePicker({
   if (manualSkill) {
     const cost = Number(manualCost);
     return (
-      <PickerModal
+      <XpCostForm
         title={`Buy ${manualSkill.skill.name}`}
-        query=""
-        onQueryChange={() => undefined}
+        submitLabel={`Buy ${manualSkill.skill.name}`}
+        showBack
+        cost={manualCost}
+        onCostChange={(value) => setManualCost(sanitizeNonNegativeIntegerInput(value))}
         onClose={() => setManualSkill(null)}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
-        isEmpty={false}
-        hideSearch
-        footer={
-          <Button
-            fullWidth
-            disabled={manualCost.trim() === ""}
-            onClick={async () => {
-              const saved = await onBuy(manualSkill.skill.id, manualSkill.level, cost, {
-                source: "gm-approved",
-                cost,
-                sourceName: "GM-approved Skill",
-              });
-              if (saved === false) return;
-              setManualSkill(null);
-              setManualCost("");
-            }}
-          >
-            Buy {manualSkill.skill.name}
-          </Button>
-        }
-      >
-        <PickerBody>
-          <label className={uiFormLabel}>XP Cost</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={manualCost}
-            onChange={(event) => setManualCost(sanitizeNonNegativeIntegerInput(event.target.value))}
-            placeholder="0"
-            className={`${editableInputClass(true)} mt-1`}
-            autoComplete="off"
-          />
-        </PickerBody>
-      </PickerModal>
+        onSubmit={async () => {
+          const saved = await onBuy(manualSkill.skill.id, manualSkill.level, cost, {
+            source: "gm-approved",
+            cost,
+            sourceName: "GM-approved Skill",
+          });
+          if (saved === false) return;
+          setManualSkill(null);
+          setManualCost("");
+        }}
+      />
     );
   }
 

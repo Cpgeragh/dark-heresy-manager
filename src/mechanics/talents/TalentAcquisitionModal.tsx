@@ -24,7 +24,6 @@ import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import {
   editableInputClass,
   uiCell,
-  uiFormLabel,
   uiSectionShell,
   uiTextBody,
   uiTextError,
@@ -48,6 +47,7 @@ import {
   buildTalentAcquisitionResult,
   type TalentAcquisitionResult,
 } from "./talentAcquisitionResult";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 export type { TalentAcquisitionResult } from "./talentAcquisitionResult";
 
@@ -112,7 +112,7 @@ interface AcquisitionPickerConfig {
 function ResultRow({ label, value }: { label: string; value: number }) {
   return (
     <div className={`${uiSectionShell} flex items-center justify-between gap-3 px-3 py-2`}>
-      <span className={uiFormLabel}>{label}</span>
+      <FormLabel as="span">{label}</FormLabel>
       <Chip size="lg" colour="amber">
         {value}
       </Chip>
@@ -773,8 +773,9 @@ export function TalentAcquisitionModal({
             </p>
             {fatalRemovalItems.map((item) => (
               <div key={item.key} className={`${uiStackField} ${uiCell} p-3`}>
-                <label className={uiFormLabel}>{item.name}</label>
+                <FormLabel htmlFor={`fatal-replacement-${item.key}`}>{item.name}</FormLabel>
                 <input
+                  id={`fatal-replacement-${item.key}`}
                   className={editableInputClass(true)}
                   value={fatalReplacements[item.key] ?? ""}
                   onChange={(event) =>

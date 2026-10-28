@@ -15,10 +15,8 @@ import type {
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
-import { RequiredMark } from "../../ui/forms/RequiredMark";
 import {
   editableInputClass,
-  uiFormLabel,
   uiTextBody,
   uiTextError,
   uiStackBody,
@@ -30,6 +28,7 @@ import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 export interface TraitAcquisitionResult {
   entry: TalentEntry;
@@ -345,9 +344,9 @@ export function TraitAcquisitionModal({
         <PickerBody>
           <div className={uiStackBody}>
             <div>
-              <label htmlFor="soul-bound-entity" className={uiFormLabel}>
-                Bound entity <RequiredMark />
-              </label>
+              <FormLabel htmlFor="soul-bound-entity" required>
+                Bound Entity
+              </FormLabel>
               <input
                 id="soul-bound-entity"
                 value={entity}
@@ -359,7 +358,7 @@ export function TraitAcquisitionModal({
             </div>
             <PickerField
               id="soul-bound-consequence"
-              label="Permanent consequence"
+              label="Permanent Consequence"
               value={SOUL_CONSEQUENCES.find((option) => option.value === consequence)?.label ?? ""}
               placeholder="Choose consequence…"
               required
@@ -379,9 +378,9 @@ export function TraitAcquisitionModal({
             )}
             {rollRequired && (
               <div>
-                <label htmlFor="soul-bound-roll" className={uiFormLabel}>
-                  Rolled result (1d10) <RequiredMark />
-                </label>
+                <FormLabel htmlFor="soul-bound-roll" required>
+                  Rolled Result (1d10)
+                </FormLabel>
                 <input
                   id="soul-bound-roll"
                   type="text"
@@ -398,9 +397,9 @@ export function TraitAcquisitionModal({
             )}
             {consequence === "mutation" && (
               <div>
-                <label htmlFor="soul-bound-mutation" className={uiFormLabel}>
-                  Mutation <RequiredMark />
-                </label>
+                <FormLabel htmlFor="soul-bound-mutation" required>
+                  Mutation
+                </FormLabel>
                 <input
                   id="soul-bound-mutation"
                   value={mutationName}
@@ -470,7 +469,7 @@ export function TraitAcquisitionModal({
           <div className={uiStackBody}>
             <PickerField
               id="sanctioning-result"
-              label="Sanctioning side effect"
+              label="Sanctioning Side Effect"
               value={selectedSanction ? `${selectedSanction.roll} — ${selectedSanction.name}` : ""}
               placeholder="Choose result…"
               required
@@ -478,9 +477,9 @@ export function TraitAcquisitionModal({
             />
             {sanctionRange && (
               <div>
-                <label htmlFor="sanction-roll" className={uiFormLabel}>
-                  {sanctionRange.label} <RequiredMark />
-                </label>
+                <FormLabel htmlFor="sanction-roll" required>
+                  {sanctionRange.label}
+                </FormLabel>
                 <input
                   id="sanction-roll"
                   type="text"
@@ -496,9 +495,9 @@ export function TraitAcquisitionModal({
               </div>
             )}
             <div>
-              <label htmlFor="sanction-age" className={uiFormLabel}>
-                Starting age increase (3d10) <RequiredMark />
-              </label>
+              <FormLabel htmlFor="sanction-age" required>
+                Starting Age Increase (3d10)
+              </FormLabel>
               <input
                 id="sanction-age"
                 type="text"
@@ -623,7 +622,7 @@ export function TraitAcquisitionModal({
           ) : (
             <PickerField
               id="skin-kind"
-              label={`Rank ${skinRank} benefit`}
+              label={`Rank ${skinRank} Benefit`}
               value={
                 skinKind === "new"
                   ? "Gain a new Common cybernetic"
@@ -647,7 +646,7 @@ export function TraitAcquisitionModal({
               {selectedCybernetic?.requiresLocation && (
                 <PickerField
                   id="skin-location"
-                  label="Body location"
+                  label="Body Location"
                   value={
                     skinLocation
                       ? skinLocation
@@ -665,7 +664,7 @@ export function TraitAcquisitionModal({
             <>
               <PickerField
                 id="skin-upgrade"
-                label="Cybernetic to upgrade"
+                label="Cybernetic to Upgrade"
                 value={
                   selectedUpgrade
                     ? `${selectedUpgrade.name} (${selectedUpgrade.craftsmanship})`

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Button } from "../../../ui/buttons/Button";
-import { uiFormLabel, uiSectionShell, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { uiSectionShell, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 
 interface BackgroundPickerFieldProps {
   label: string;
@@ -30,7 +31,7 @@ export function BackgroundPickerField({
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className={uiFormLabel}>{label}</span>
+          <FormLabel as="span">{label}</FormLabel>
           {info}
         </div>
         {showAction && (

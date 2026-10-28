@@ -3,14 +3,9 @@ import type { IdentityRecoveryFlow } from "../hooks/useIdentityRecoveryFlow";
 import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
-import { RequiredMark } from "../ui/forms/RequiredMark";
+import { FormLabel } from "../ui/forms/FormLabel";
 import { validateRecoveryCode } from "../utils/validation";
-import {
-  editableInputClass,
-  uiSectionHeader,
-  uiTextBody,
-  uiStackBody,
-} from "../ui/styles/editableStyles";
+import { editableInputClass, uiTextBody, uiStackBody } from "../ui/styles/editableStyles";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 interface IdentityRecoveryFormProps {
@@ -76,9 +71,9 @@ export function IdentityRecoveryForm({
       />
 
       <div>
-        <label htmlFor="identity-device-name" className={uiSectionHeader}>
-          Device Name <RequiredMark />
-        </label>
+        <FormLabel htmlFor="identity-device-name" required>
+          Device Name
+        </FormLabel>
         <input
           id="identity-device-name"
           type="text"

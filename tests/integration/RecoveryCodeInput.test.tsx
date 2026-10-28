@@ -14,7 +14,7 @@ describe("RecoveryCodeInput", () => {
     const user = userEvent.setup();
     render(<ControlledRecoveryCodeInput />);
 
-    const input = screen.getByLabelText("Recovery code");
+    const input = screen.getByLabelText("Recovery Code");
     expect(input).toHaveValue("");
 
     await user.click(input);
@@ -26,7 +26,7 @@ describe("RecoveryCodeInput", () => {
     const user = userEvent.setup();
     render(<ControlledRecoveryCodeInput />);
 
-    const input = screen.getByLabelText("Recovery code");
+    const input = screen.getByLabelText("Recovery Code");
     await user.click(input);
     await user.keyboard("{Backspace}");
 
@@ -37,7 +37,7 @@ describe("RecoveryCodeInput", () => {
     const user = userEvent.setup();
     render(<ControlledRecoveryCodeInput />);
 
-    const input = screen.getByLabelText("Recovery code");
+    const input = screen.getByLabelText("Recovery Code");
     await user.click(input);
     await user.paste("DH-ABCD-1234");
 
@@ -48,7 +48,7 @@ describe("RecoveryCodeInput", () => {
     const user = userEvent.setup();
     render(<ControlledRecoveryCodeInput />);
 
-    const input = screen.getByLabelText("Recovery code");
+    const input = screen.getByLabelText("Recovery Code");
     await user.click(input);
     await user.paste("DH3A9K2B");
 
@@ -59,7 +59,7 @@ describe("RecoveryCodeInput", () => {
     const user = userEvent.setup();
     render(<ControlledRecoveryCodeInput />);
 
-    const input = screen.getByLabelText("Recovery code");
+    const input = screen.getByLabelText("Recovery Code");
     await user.type(input, "DH-ABCD-1234");
 
     expect(input).toHaveValue("DH-ABCD-1234");

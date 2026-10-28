@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
-import { editableInputClass, uiFormLabel } from "../../ui/styles/editableStyles";
+import { editableInputClass } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 const GENDER_OPTIONS = ["Male", "Female", "Other"] as const;
 
@@ -54,9 +55,7 @@ export function GenderPicker({
       >
         <PickerBody>
           <div>
-            <label className={uiFormLabel} htmlFor="gender-custom-name">
-              Rename
-            </label>
+            <FormLabel htmlFor="gender-custom-name">Rename</FormLabel>
             <input
               id="gender-custom-name"
               type="text"

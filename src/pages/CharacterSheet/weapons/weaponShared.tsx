@@ -24,7 +24,6 @@ import {
   uiCell,
   uiTextLabel,
   uiTextPlaceholder,
-  uiFormLabel,
   uiInfoModalWrapper,
   uiRuleName,
   uiTextDescription,
@@ -35,6 +34,7 @@ import {
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 
 export function WeaponQualitySelector({
   selected,
@@ -59,7 +59,7 @@ export function WeaponQualitySelector({
 }) {
   return (
     <div className={`col-span-2 ${uiStackField}`}>
-      <label className={uiFormLabel}>Qualities</label>
+      <FormLabel htmlFor="weapon-quality-picker">Qualities</FormLabel>
       <div className="flex gap-2">
         <PickerField
           id="weapon-quality-picker"

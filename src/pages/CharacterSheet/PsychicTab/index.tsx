@@ -12,7 +12,6 @@ import {
 import {
   uiChipRow,
   uiSection,
-  uiFormLabel,
   uiTextPlaceholder,
   uiTextDescription,
   uiStackPage,
@@ -64,6 +63,7 @@ import { normalisePowerName, toCustomPowerData } from "./psychicPowerHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../../hooks/useMediaQuery";
 import { uiCorner, uiCornerSmall } from "../../../ui/styles/shapeStyles";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -558,7 +558,7 @@ export function PsychicTab({
       <div className={`${uiSection} flex flex-col items-center ${uiStackSection}`}>
         {/* Psy Rating: derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-2">
-          <span className={uiFormLabel}>Psy Rating</span>
+          <FormLabel as="span">Psy Rating</FormLabel>
           <div className="relative inline-flex">
             <div
               className={`w-[26px] h-[26px] flex items-center justify-center ${uiCornerSmall} border ${colourGlowActive.indigo} transition-shadow${
@@ -586,8 +586,10 @@ export function PsychicTab({
         </div>
 
         {/* Disciplines: read-only status chips activated through Psy Rating Talents */}
-        <div>
-          <p className={`${uiFormLabel} mb-1.5 text-center`}>Disciplines</p>
+        <fieldset>
+          <FormLabel as="legend" className="block w-full mb-1.5 text-center">
+            Disciplines
+          </FormLabel>
           <div className={`${uiChipRow} justify-center`}>
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
@@ -607,7 +609,7 @@ export function PsychicTab({
               );
             })}
           </div>
-        </div>
+        </fieldset>
       </div>
 
       {!isDesktopLayout ? (

@@ -9,7 +9,7 @@ import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
-import { RequiredMark } from "../../../ui/forms/RequiredMark";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
@@ -18,9 +18,7 @@ import {
   uiFieldGrid,
   editableInputClass,
   editableTextareaClass,
-  uiFormLabel,
   uiTextError,
-  uiFormLabelHint,
   uiTextMeta,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
@@ -167,10 +165,12 @@ export function CustomPowerForm({
     >
       <PickerBody>
         <div className={uiStackField}>
-          <label className={uiFormLabel}>
-            Name <RequiredMark />
-          </label>
+          <FormLabel htmlFor="custom-power-name" required>
+            Name
+          </FormLabel>
           <input
+            id="custom-power-name"
+            required
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -186,10 +186,10 @@ export function CustomPowerForm({
           )}
         </div>
 
-        <div className={uiStackField}>
-          <label className={uiFormLabel}>
-            Discipline <RequiredMark />
-          </label>
+        <fieldset aria-required="true" className={uiStackField}>
+          <FormLabel as="legend" required>
+            Discipline
+          </FormLabel>
           {target === "minor" || requiredDiscipline ? (
             <Chip
               colour={
@@ -215,14 +215,16 @@ export function CustomPowerForm({
               ))}
             </div>
           )}
-        </div>
+        </fieldset>
 
         <div className={`${uiFieldGrid}`}>
           <div className={uiStackField}>
-            <label className={uiFormLabel}>
-              PT <RequiredMark />
-            </label>
+            <FormLabel htmlFor="custom-power-pt" required>
+              PT
+            </FormLabel>
             <input
+              id="custom-power-pt"
+              required
               type="text"
               inputMode="numeric"
               value={threshold}
@@ -233,10 +235,10 @@ export function CustomPowerForm({
             />
           </div>
 
-          <div className={uiStackField}>
-            <label className={uiFormLabel}>
-              Action <RequiredMark />
-            </label>
+          <fieldset aria-required="true" className={uiStackField}>
+            <FormLabel as="legend" required>
+              Action
+            </FormLabel>
             <div className="grid grid-cols-2 gap-1.5">
               {(["Half Action", "Full Action"] as const).map((action) => (
                 <ToggleButton
@@ -250,13 +252,13 @@ export function CustomPowerForm({
                 </ToggleButton>
               ))}
             </div>
-          </div>
+          </fieldset>
         </div>
 
-        <div className={uiStackField}>
-          <label className={uiFormLabel}>
-            Range <RequiredMark />
-          </label>
+        <fieldset aria-required="true" className={uiStackField}>
+          <FormLabel as="legend" required>
+            Range
+          </FormLabel>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             {[
               ["meters", "Metres"],
@@ -295,13 +297,13 @@ export function CustomPowerForm({
               </span>
             </div>
           )}
-        </div>
+        </fieldset>
 
         <div className={`${uiFieldGrid}`}>
-          <div className={uiStackField}>
-            <label className={uiFormLabel}>
-              Sustained <RequiredMark />
-            </label>
+          <fieldset aria-required="true" className={uiStackField}>
+            <FormLabel as="legend" required>
+              Sustained
+            </FormLabel>
             <div className="grid grid-cols-2 gap-1.5">
               {(["Yes", "No"] as const).map((value) => (
                 <ToggleButton
@@ -315,16 +317,17 @@ export function CustomPowerForm({
                 </ToggleButton>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           <OriginSelector name="custom-power-origin" value={origin} onChange={setOrigin} />
         </div>
 
         <div className={uiStackField}>
-          <label className={uiFormLabel}>
-            Description <span className={uiFormLabelHint}>(optional)</span>
-          </label>
+          <FormLabel htmlFor="custom-power-description" supportingText="(optional)">
+            Description
+          </FormLabel>
           <textarea
+            id="custom-power-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Rules text, notes, overbleed..."

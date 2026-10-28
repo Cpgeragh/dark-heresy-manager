@@ -8,7 +8,7 @@ import { characteristicChipColour } from "../../../ui/styles/sourceStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { Button } from "../../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
-import { editableInputClass, uiFormLabel, uiTextBody } from "../../../ui/styles/editableStyles";
+import { uiTextBody } from "../../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
@@ -19,6 +19,7 @@ import {
   getTalentSourceSummary,
   skillLevelLabel,
 } from "./skillRowShared";
+import { XpCostForm } from "../../../ui/forms/XpCostForm";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -173,56 +174,25 @@ export function SkillRow({
       )}
 
       {isDM && manualUpgradeArmed && nextTierAccess?.status === "not-on-career" && (
-        <PickerModal
-          title="Upgrade Skill"
-          query=""
-          onQueryChange={() => undefined}
+        <XpCostForm
+          title={`Upgrade ${skill.name} to ${nextTierAccess.level}`}
+          submitLabel="Upgrade"
+          cost={manualUpgradeCost}
+          onCostChange={(value) => setManualUpgradeCost(sanitizeNonNegativeIntegerInput(value))}
+          canSubmit={canConfirmManualUpgrade}
           onClose={() => setManualUpgradeArmed(false)}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                disabled={!canConfirmManualUpgrade}
-                onClick={async () => {
-                  const saved = await onManualUpgrade?.(
-                    skill.id,
-                    nextTierAccess.level,
-                    manualUpgradeCostNumber
-                  );
-                  if (saved !== false) {
-                    setManualUpgradeArmed(false);
-                    setManualUpgradeCost("");
-                  }
-                }}
-              >
-                Upgrade
-              </Button>
-              <Button variant="neutral" onClick={() => setManualUpgradeArmed(false)}>
-                Cancel
-              </Button>
-            </div>
-          }
-        >
-          <PickerBody>
-            <label className={uiFormLabel}>
-              XP Cost to upgrade {skill.name} to {nextTierAccess.level}
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={manualUpgradeCost}
-              onChange={(event) =>
-                setManualUpgradeCost(sanitizeNonNegativeIntegerInput(event.target.value))
-              }
-              placeholder="0"
-              className={editableInputClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </PickerBody>
-        </PickerModal>
+          onSubmit={async () => {
+            const saved = await onManualUpgrade?.(
+              skill.id,
+              nextTierAccess.level,
+              manualUpgradeCostNumber
+            );
+            if (saved !== false) {
+              setManualUpgradeArmed(false);
+              setManualUpgradeCost("");
+            }
+          }}
+        />
       )}
     </>
   );

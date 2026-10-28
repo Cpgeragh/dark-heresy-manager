@@ -16,7 +16,6 @@ import { toSessionInputDate } from "../../utils/sessionDate";
 import {
   editableInputClass,
   editableTextareaClass,
-  uiFormLabel,
   uiTextNotice,
 } from "../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../performance/performanceMetrics";
@@ -185,9 +184,7 @@ export function SessionForm({
             />
           </div>
           <div>
-            <label htmlFor="session-dm-notes" className={uiFormLabel}>
-              DM Notes (private)
-            </label>
+            <FormLabel htmlFor="session-dm-notes">DM Notes (Private)</FormLabel>
             <textarea
               id="session-dm-notes"
               value={dmNotes}

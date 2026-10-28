@@ -20,7 +20,6 @@ import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { FilterButton } from "../../ui/pickers/FilterButton";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { FormLabel } from "../../ui/forms/FormLabel";
-import { RequiredMark } from "../../ui/forms/RequiredMark";
 import {
   uiChipRow,
   editableInputClass,
@@ -187,10 +186,10 @@ export function InsanityDisorderPicker({
         </CustomFormSection>
 
         <CustomFormSection title="Rules">
-          <div>
-            <p className={uiFormLabel}>
-              Severity <RequiredMark />
-            </p>
+          <fieldset aria-required="true">
+            <FormLabel as="legend" required>
+              Severity
+            </FormLabel>
             <div className={`mt-1 ${uiChipRow}`}>
               {customSeverityOptions.map((option) => (
                 <Chip
@@ -204,7 +203,7 @@ export function InsanityDisorderPicker({
                 </Chip>
               ))}
             </div>
-          </div>
+          </fieldset>
           <div>
             <FormLabel htmlFor="custom-disorder-rules" required>
               Rules Text

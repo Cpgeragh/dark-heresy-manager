@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { HomeworldTraitChoices } from "../../types/Character";
 import { Button } from "../../ui/buttons/Button";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
-import { RequiredMark } from "../../ui/forms/RequiredMark";
-import { editableInputClass, uiFormLabel, uiStackBody } from "../../ui/styles/editableStyles";
+import { editableInputClass, uiStackBody } from "../../ui/styles/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
+import { FormLabel } from "../../ui/forms/FormLabel";
 
 const NOBLE_PEER_OPTIONS: readonly PickerOption[] = [
   "Academics",
@@ -100,7 +100,7 @@ export function HomeworldTraitAcquisitionModal({
           {homeworldId === "noble-born" && (
             <PickerField
               id="noble-peer-group"
-              label="Additional Peer group"
+              label="Additional Peer Group"
               value={peerGroup}
               placeholder="Choose Peer group…"
               required
@@ -129,9 +129,9 @@ export function HomeworldTraitAcquisitionModal({
           )}
           {homeworldId === "mind-cleansed" && (
             <div>
-              <label htmlFor="mind-cleansed-insanity" className={uiFormLabel}>
-                Starting Insanity Points <RequiredMark />
-              </label>
+              <FormLabel htmlFor="mind-cleansed-insanity" required>
+                Starting Insanity Points
+              </FormLabel>
               <input
                 id="mind-cleansed-insanity"
                 type="text"

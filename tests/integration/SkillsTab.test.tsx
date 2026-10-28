@@ -497,7 +497,7 @@ describe("SkillsTab", () => {
     });
     await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
 
-    const costInput = screen.getByRole("textbox");
+    const costInput = screen.getByPlaceholderText("0");
     await user.type(costInput, "150");
     await user.click(screen.getByRole("button", { name: "Upgrade" }));
 
@@ -533,18 +533,20 @@ describe("SkillsTab", () => {
       />
     );
     await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
-    await user.type(screen.getByRole("textbox"), "150");
+    await user.type(screen.getByPlaceholderText("0"), "150");
     await user.click(screen.getByRole("button", { name: "Upgrade" }));
 
     expect(onUpdate.mock.calls[0]).toHaveLength(1);
-    const dialog = screen.getByRole("dialog", { name: "Upgrade Skill" });
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Awareness to +10" });
     await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
 
     await act(async () => {
       settle(true);
     });
     await waitFor(() =>
-      expect(screen.queryByRole("dialog", { name: "Upgrade Skill" })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("dialog", { name: "Upgrade Awareness to +10" })
+      ).not.toBeInTheDocument()
     );
   });
 
@@ -568,13 +570,13 @@ describe("SkillsTab", () => {
       />
     );
     await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
-    await user.type(screen.getByRole("textbox"), "150");
+    await user.type(screen.getByPlaceholderText("0"), "150");
     await user.click(screen.getByRole("button", { name: "Upgrade" }));
     await act(async () => {
       settle(false);
     });
 
-    const dialog = screen.getByRole("dialog", { name: "Upgrade Skill" });
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Awareness to +10" });
     expect(dialog.querySelector('[aria-busy="true"]')).toBeNull();
   });
 
@@ -613,7 +615,7 @@ describe("SkillsTab", () => {
     const confirmButton = screen.getByRole("button", { name: "Upgrade" });
     expect(confirmButton).toBeDisabled();
 
-    await user.type(screen.getByRole("textbox"), "0");
+    await user.type(screen.getByPlaceholderText("0"), "0");
     expect(confirmButton).toBeEnabled();
     await user.click(confirmButton);
 

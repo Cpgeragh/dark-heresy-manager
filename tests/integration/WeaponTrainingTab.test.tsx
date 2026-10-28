@@ -149,7 +149,9 @@ describe("WeaponTrainingTab", () => {
     expect(button).not.toBeDisabled();
     await user.click(button);
 
-    expect(screen.getByText(/XP Cost to train Basic Weapon Training \(Bolt\)/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "Train Basic Weapon Training (Bolt)" })
+    ).toBeInTheDocument();
     await user.type(screen.getByPlaceholderText("0"), "0");
     await user.click(screen.getByRole("button", { name: "Train" }));
 

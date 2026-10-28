@@ -1,7 +1,8 @@
 // src/components/FormField.tsx
 
 import { useCallback } from "react";
-import { uiFormLabel, uiTextError } from "../ui/styles/editableStyles";
+import { uiTextError } from "../ui/styles/editableStyles";
+import { FormLabel } from "../ui/forms/FormLabel";
 import { colourMetadataLabelText } from "../ui/styles/colourTokens";
 import { fieldControlClass } from "../ui/styles/fieldStyles";
 import { useDebouncedDraft } from "../hooks/useDebouncedDraft";
@@ -67,8 +68,8 @@ export function FormField({
   const displayedValue = debounceMs > 0 ? draft : value;
 
   return (
-    <label htmlFor={inputId} className={`flex flex-col gap-0.5 ${className}`}>
-      <span className={uiFormLabel}>{label}</span>
+    <div className={`flex flex-col gap-0.5 ${className}`}>
+      <FormLabel htmlFor={inputId}>{label}</FormLabel>
 
       {type === "textarea" ? (
         <textarea
@@ -130,6 +131,6 @@ export function FormField({
           {description}
         </span>
       )}
-    </label>
+    </div>
   );
 }

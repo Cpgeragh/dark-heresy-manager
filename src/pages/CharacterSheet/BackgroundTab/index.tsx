@@ -17,7 +17,6 @@ import {
   uiChipRow,
   uiInlineRow,
   editableInputClass,
-  uiFormLabel,
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
@@ -60,6 +59,7 @@ import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";
 import { uiCorner } from "../../../ui/styles/shapeStyles";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 
 interface BackgroundTabProps {
   header: CharacterHeader;
@@ -257,29 +257,28 @@ export function BackgroundTab({
       <section className={`${uiSection} ${uiStackBody}`}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className={uiStackField}>
-            <label className={uiFormLabel}>
-              <span className="flex items-center gap-1.5">
-                Age
-                {sanctioningAgeIncrease && (
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title="Age"
-                      content={
-                        <div>
-                          <div className={`font-semibold ${colourTextPrimary}`}>Modifiers</div>
-                          <ul className={`mt-1 ${uiStackField}`}>
-                            <li>Sanctioned Psyker: +{sanctioningAgeIncrease}</li>
-                          </ul>
-                        </div>
-                      }
-                    />
-                  </span>
-                )}
-              </span>
-            </label>
+            <div className="flex items-center gap-1.5">
+              <FormLabel htmlFor="background-age">Age</FormLabel>
+              {sanctioningAgeIncrease && (
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal
+                    title="Age"
+                    content={
+                      <div>
+                        <div className={`font-semibold ${colourTextPrimary}`}>Modifiers</div>
+                        <ul className={`mt-1 ${uiStackField}`}>
+                          <li>Sanctioned Psyker: +{sanctioningAgeIncrease}</li>
+                        </ul>
+                      </div>
+                    }
+                  />
+                </span>
+              )}
+            </div>
             {editingAge ? (
               <input
                 type="text"
+                id="background-age"
                 inputMode="numeric"
                 aria-label="Age"
                 value={ageDraft}
@@ -304,6 +303,7 @@ export function BackgroundTab({
             ) : (
               <button
                 type="button"
+                id="background-age"
                 disabled={!editable}
                 aria-label="Age"
                 onClick={() => {
@@ -321,9 +321,10 @@ export function BackgroundTab({
             )}
           </div>
           <div className={uiStackField}>
-            <label className={uiFormLabel}>Height</label>
+            <FormLabel htmlFor="background-height">Height</FormLabel>
             <div className={`${uiInlineRow}`}>
               <input
+                id="background-height"
                 type="text"
                 inputMode="decimal"
                 disabled={!editable}
@@ -342,9 +343,10 @@ export function BackgroundTab({
             </div>
           </div>
           <div className={uiStackField}>
-            <label className={uiFormLabel}>Weight</label>
+            <FormLabel htmlFor="background-weight">Weight</FormLabel>
             <div className={`${uiInlineRow}`}>
               <input
+                id="background-weight"
                 type="text"
                 inputMode="numeric"
                 disabled={!editable}
@@ -412,7 +414,7 @@ export function BackgroundTab({
         <div className={`border-t ${colourDivider}`} />
 
         <div>
-          <p className={`${uiFormLabel} mb-1.5`}>
+          <FormLabel as="span" className="block mb-1.5">
             <span className="relative">
               Quirks
               {editable && (
@@ -424,7 +426,7 @@ export function BackgroundTab({
                 />
               )}
             </span>
-          </p>
+          </FormLabel>
           {(header.quirks ?? []).length === 0 && !editable && (
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
           )}

@@ -34,7 +34,6 @@ import {
   uiDescriptionBox,
   uiStackBody,
   uiStackField,
-  uiFormLabel,
   editableInputClass,
 } from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -55,6 +54,7 @@ import { isVariableMeta } from "../../../data/reference/referenceMeta";
 import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
 import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
 import { colourDivider } from "../../../ui/styles/colourTokens";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 
 interface Props {
   editable?: boolean;
@@ -219,9 +219,7 @@ export function ImplantPicker({
 
         <PickerBody>
           <div className={uiStackField}>
-            <label htmlFor="implant-weight" className={uiFormLabel}>
-              Weight (kg)
-            </label>
+            <FormLabel htmlFor="implant-weight">Weight (kg)</FormLabel>
             <input
               id="implant-weight"
               type="text"
