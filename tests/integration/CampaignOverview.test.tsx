@@ -841,9 +841,9 @@ describe("CampaignOverview: chats after a character is deleted", () => {
 
     await user.click(screen.getByRole("button", { name: "Mock Delete Vex" }));
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
-    expect(screen.queryByRole("dialog", { name: "Keep your chat?" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Keep Your Chat?" })).not.toBeInTheDocument();
   });
 
   it("asks nothing when the deleted character had no chat", async () => {
@@ -853,6 +853,6 @@ describe("CampaignOverview: chats after a character is deleted", () => {
 
     await user.click(screen.getByRole("button", { name: "Mock Delete Thrun" }));
 
-    expect(screen.queryByRole("dialog", { name: /Keep your chat/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /Keep Your Chat/ })).not.toBeInTheDocument();
   });
 });

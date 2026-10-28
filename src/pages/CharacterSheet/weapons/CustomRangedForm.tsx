@@ -583,7 +583,7 @@ export function CustomRangedForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Description, Rules, and Qualities">
+      <CustomFormSection title="Description, Rules, & Qualities">
         <div className="grid grid-cols-2 gap-2">
           <WeaponQualitySelector
             selected={selectedQualities}

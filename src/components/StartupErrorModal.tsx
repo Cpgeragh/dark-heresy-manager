@@ -13,7 +13,7 @@ export function StartupErrorModal() {
       onClose={() => undefined}
       className="max-w-md"
     >
-      <CenteredTitleHeader title="Unable to load" />
+      <CenteredTitleHeader title="Unable to Load" />
       <div className={`${uiStackBody} px-4 py-5 text-center lg:px-5`}>
         <ErrorState>
           Your account could not be loaded. There may be a temporary connection problem.

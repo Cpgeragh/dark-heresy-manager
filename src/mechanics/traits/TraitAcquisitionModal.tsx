@@ -334,7 +334,7 @@ export function TraitAcquisitionModal({
       (consequence !== "mutation" || mutationName.trim().length > 0);
     return (
       <PickerModal
-        title="Soul-bound Acquisition"
+        title="Soul-Bound Acquisition"
         query=""
         onQueryChange={() => undefined}
         onClose={onClose}
@@ -606,7 +606,7 @@ export function TraitAcquisitionModal({
       : !!selectedCybernetic && (!selectedCybernetic.requiresLocation || !!skinLocation);
   return (
     <PickerModal
-      title={`Skin of Iron — Rank ${skinRank}`}
+      title={`Skin of Iron: Rank ${skinRank}`}
       query=""
       onQueryChange={() => undefined}
       onClose={onClose}

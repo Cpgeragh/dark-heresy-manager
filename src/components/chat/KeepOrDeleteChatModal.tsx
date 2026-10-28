@@ -22,7 +22,7 @@ export function KeepOrDeleteChatModal({
   onDelete,
 }: KeepOrDeleteChatModalProps) {
   const many = count > 1;
-  const title = many ? "Keep your chats?" : "Keep your chat?";
+  const title = many ? "Keep Your Chats?" : "Keep Your Chat?";
   const days = CHAT_LIMITS.binRetentionDays;
   const message = many
     ? `You have ${count} chats about this ${about}. You can keep them, or move them to Recently deleted, where you can restore them for ${days} days.`

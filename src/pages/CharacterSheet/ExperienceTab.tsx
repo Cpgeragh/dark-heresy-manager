@@ -643,7 +643,7 @@ function RankUpModal({
           {appliedRankUpCosts.length === 0 ? (
             <section className={`${uiSectionShell} ${uiStackSection} p-3`}>
               <div>
-                <SectionHeader as="h3">Final XP adjustments</SectionHeader>
+                <SectionHeader as="h3">Final XP Adjustments</SectionHeader>
                 <p className={`mt-1 text-sm lg:text-base ${uiTextBody}`}>
                   The DM may apply an XP cost to ranking up.
                 </p>

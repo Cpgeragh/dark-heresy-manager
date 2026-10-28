@@ -635,7 +635,7 @@ Psychic Power, and Psy Rating selections without spending them.
 
 - [ ] When matching selections exist, pressing plus first opens a route menu rather than immediately adding a power
 - [ ] The route menu shows **Use Minor Psychic Power/Psychic Power selection** only when that matching Talent purchase is available
-- [ ] It shows **Use Psy Rating selection** only when that kind of selection is available
+- [ ] It shows **Use Psy Rating Selection** only when that kind of selection is available
 - [ ] It always offers **Add independent Minor/Major power**, labelled `No selection used`
 - [ ] Talent availability uses the amber chip; Psy Rating availability uses the indigo chip; the independent route uses a neutral chip
 - [ ] Each route card has a forward arrow and visible pressed feedback on only the touched card
@@ -801,7 +801,8 @@ Use two profiles: the owning player and the DM. Begin on a character with enough
 - [ ] **Autofill, Android:** the Amount and Reason fields in the Add XP, Remove XP and Spend XP forms each show no autofill suggestion row above the keyboard (`ExperienceTab.tsx`)
 - [ ] The Spend XP, Change XP Cost, Add XP and Remove XP pop-ups all have a red title, with no amber or green title (`CenteredTitleHeader.tsx`, `ExperienceTab.tsx`)
 - [ ] The Complete Background pop-up has a red title in the same header as the other pop-ups and no close button, and Character Found in the Claim a Character form, and Ownership and Claim History on the Admin tab, are red section headings with the red bar (`SectionHeader`)
-- [ ] On the Experience tab, rank card titles are grey-white and larger than other card titles; "Career Purchases from This Rank", "Additional XP Spent" and "Final XP adjustments" are red headings with a left bar; the Party roster character names are medium weight (`ExperienceTab.tsx`, `PartyRosterTile.tsx`)
+- [ ] On the Experience tab, rank card titles are grey-white and larger than other card titles; "Career Purchases from This Rank", "Additional XP Spent" and "Final XP Adjustments" are red headings with a left bar; the Party roster character names are medium weight (`ExperienceTab.tsx`, `PartyRosterTile.tsx`)
+- [ ] Pop-up titles and headings use Title Case with small words such as "to", "of", and "and" in lowercase, "&" in place of "and", and no em dash, for example "Unable to Load", "Keep Your Chat?", "Description & Rules", and "Skin of Iron: Rank 2"
 
 **Watch for:** there is no player-submitted proposal or DM-approval workflow
 on this page: XP changes are either real purchases or direct DM actions. If
@@ -1142,9 +1143,9 @@ Use a disposable campaign with a DM and two players on separate profiles, plus a
 - [ ] **Staging only:** after 7 days the daily purge (03:00 UK time) deletes the old messages and the entry; a restore during a purge wins; one manual run deletes only chats older than 7 days
 - [ ] Export chat downloads a text file with an export ID, creation time and time zone, the participants, the message count and a SHA-256 fingerprint, then every message with local date and time and the sender's name marked (DM) or (Player); a deleted chat exports only the messages after deletion
 - [ ] An export over 2 MB shows a clear error; the eleventh export within an hour is refused with a clear message; each export leaves a receipt that holds no message text
-- [ ] As a player, Release Character in the sheet menu asks "Release this character?" with Release and Cancel; Cancel does nothing; with a live chat, "Keep your chat?" follows with Keep my chat and Delete my chat, no Cancel, no close button, and Escape and the backdrop do nothing; the page waits for the answer; with no chat the page goes straight to the Dashboard
-- [ ] As DM, Force Release Ownership asks "Force release this character?", then asks the DM the same keep-or-delete question, and the DM stays on the sheet
-- [ ] Deleting a character from Campaign Overview asks the DM "Keep your chat?" afterwards when a live chat exists; deleting a campaign, active or archived, asks "Keep your chats?" with the count; players' copies are closed but never deleted; if some deletes fail, only those chats stay in the question
+- [ ] As a player, Release Character in the sheet menu asks "Release This Character?" with Release and Cancel; Cancel does nothing; with a live chat, "Keep Your Chat?" follows with Keep my chat and Delete my chat, no Cancel, no close button, and Escape and the backdrop do nothing; the page waits for the answer; with no chat the page goes straight to the Dashboard
+- [ ] As DM, Force Release Ownership asks "Force Release This Character?", then asks the DM the same keep-or-delete question, and the DM stays on the sheet
+- [ ] Deleting a character from Campaign Overview asks the DM "Keep Your Chat?" afterwards when a live chat exists; deleting a campaign, active or archived, asks "Keep Your Chats?" with the count; players' copies are closed but never deleted; if some deletes fail, only those chats stay in the question
 - [ ] Deleting a player's account removes that player's chats and messages and leaves the DM's copy closed with its messages kept
 - [ ] At startup the logo screen waits for the chats list, so the badge never pops in; a chats failure or a load over 30 seconds shows the same error screen as campaigns
 - [ ] On a phone width the pop-up fits, the list scrolls inside a fixed height, the reply box stays visible with the keyboard open, and there is no loading text anywhere

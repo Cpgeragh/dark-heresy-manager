@@ -224,7 +224,7 @@ describe("BackgroundTab", () => {
     const picker = within(screen.getByRole("dialog", { name: "Advance Scheme" }));
     await user.click(picker.getByRole("button", { name: "Warden of the Divisio Immoralis" }));
 
-    const acquisition = within(screen.getByRole("dialog", { name: "Insanity gained (1d5)" }));
+    const acquisition = within(screen.getByRole("dialog", { name: "Insanity Gained (1d5)" }));
     await user.click(acquisition.getByRole("button", { name: "3 Insanity Points" }));
 
     expect(onUpdateExperience).toHaveBeenCalledWith({

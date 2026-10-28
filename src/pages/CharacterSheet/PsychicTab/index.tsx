@@ -791,8 +791,8 @@ export function PsychicTab({
                 <PowerRouteCard
                   title={
                     purchaseChoiceTarget === "minor"
-                      ? "Use Minor Psychic Power selection"
-                      : "Use Psychic Power selection"
+                      ? "Use Minor Psychic Power Selection"
+                      : "Use Psychic Power Selection"
                   }
                   status={`Available: ${
                     purchaseChoiceTarget === "minor"
@@ -818,7 +818,7 @@ export function PsychicTab({
                 : availableMajorPsyRatingGrants
               ).length > 0 && (
                 <PowerRouteCard
-                  title="Use Psy Rating selection"
+                  title="Use Psy Rating Selection"
                   status={`Available: ${
                     purchaseChoiceTarget === "minor"
                       ? availableMinorPsyRatingCount

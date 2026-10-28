@@ -79,7 +79,7 @@ describe("AdminTab Force Assign", () => {
 
     await user.click(screen.getByRole("button", { name: "Force Assign To…" }));
 
-    expect(screen.getByText("Assign To")).toBeInTheDocument();
+    expect(screen.getByText("Assign to")).toBeInTheDocument();
   });
 
   it("calls onDMForceAssign with the selected uid and closes the picker", async () => {
@@ -92,7 +92,7 @@ describe("AdminTab Force Assign", () => {
     await user.click(screen.getAllByText("Bob")[0]);
 
     expect(onDMForceAssign).toHaveBeenCalledWith("uid-1");
-    expect(screen.queryByText("Assign To")).not.toBeInTheDocument();
+    expect(screen.queryByText("Assign to")).not.toBeInTheDocument();
   });
 
   it("closes the picker without calling onDMForceAssign when dismissed", async () => {
@@ -104,7 +104,7 @@ describe("AdminTab Force Assign", () => {
     await user.click(screen.getByRole("button", { name: "Close" }));
 
     expect(onDMForceAssign).not.toHaveBeenCalled();
-    expect(screen.queryByText("Assign To")).not.toBeInTheDocument();
+    expect(screen.queryByText("Assign to")).not.toBeInTheDocument();
   });
 
   it("shows Assigning… and disables the button while isDmForceAssigning is true", () => {

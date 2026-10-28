@@ -10,7 +10,7 @@ function renderModal(over: Partial<React.ComponentProps<typeof ReleaseConfirmMod
   const onCancel = vi.fn();
   render(
     <ReleaseConfirmModal
-      title="Release this character?"
+      title="Release This Character?"
       message="It will be unlinked from your account."
       confirmLabel="Release"
       busy={false}
@@ -26,7 +26,7 @@ describe("ReleaseConfirmModal", () => {
   it("shows the title, the message and both buttons", () => {
     renderModal();
 
-    expect(screen.getByRole("dialog", { name: "Release this character?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Release This Character?" })).toBeInTheDocument();
     expect(screen.getByText("It will be unlinked from your account.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Release" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();

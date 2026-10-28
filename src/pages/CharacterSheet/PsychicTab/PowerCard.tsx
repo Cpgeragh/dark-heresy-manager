@@ -135,13 +135,13 @@ export function PowerCard({
       {onLinkPurchase && (
         <Button size="sm" onClick={onLinkPurchase}>
           {power.isMinor || power.discipline === "Minor"
-            ? "Use Minor Psychic Power selection"
-            : "Use Psychic Power selection"}
+            ? "Use Minor Psychic Power Selection"
+            : "Use Psychic Power Selection"}
         </Button>
       )}
       {onLinkPsyRatingGrant && (
         <Button size="sm" variant="secondary" onClick={onLinkPsyRatingGrant}>
-          Use Psy Rating selection
+          Use Psy Rating Selection
         </Button>
       )}
 

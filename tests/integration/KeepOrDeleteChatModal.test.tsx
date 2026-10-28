@@ -16,7 +16,7 @@ describe("KeepOrDeleteChatModal", () => {
   it("asks whether to keep the chat and says how long a deleted chat can be restored", () => {
     renderModal();
 
-    expect(screen.getByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(screen.getByText(/restore it for 7 days/)).toBeInTheDocument();
   });
 
@@ -56,7 +56,7 @@ describe("KeepOrDeleteChatModal", () => {
 
     fireEvent(screen.getByRole("dialog"), new Event("cancel", { cancelable: true }));
 
-    expect(screen.getByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(onKeep).not.toHaveBeenCalled();
     expect(onDelete).not.toHaveBeenCalled();
   });
@@ -64,7 +64,7 @@ describe("KeepOrDeleteChatModal", () => {
   it("uses the plural title, count and buttons when there are several chats", () => {
     render(<KeepOrDeleteChatModal busy={false} count={3} onKeep={vi.fn()} onDelete={vi.fn()} />);
 
-    expect(screen.getByRole("dialog", { name: "Keep your chats?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Keep Your Chats?" })).toBeInTheDocument();
     expect(screen.getByText(/You have 3 chats about this character/)).toBeInTheDocument();
     expect(screen.getByText(/restore them for 7 days/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Keep My Chats" })).toBeInTheDocument();

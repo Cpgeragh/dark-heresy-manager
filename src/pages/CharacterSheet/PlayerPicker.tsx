@@ -55,7 +55,7 @@ export function PlayerPicker({ memberIds, onSelect, onClose }: Props) {
 
   return (
     <PickerModal
-      title="Assign To"
+      title="Assign to"
       query=""
       onQueryChange={() => {}}
       onClose={onClose}

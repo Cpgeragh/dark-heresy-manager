@@ -225,7 +225,7 @@ export function CustomInventoryItemForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Description and Rules">
+      <CustomFormSection title="Description & Rules">
         <div className="grid grid-cols-2 gap-2">
           <DescriptionAndRulesFields
             idPrefix={fieldIdPrefix}

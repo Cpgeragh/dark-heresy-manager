@@ -653,7 +653,7 @@ describe("CharacterSheet release pop-ups", () => {
 
     await openPlayerRelease(user);
 
-    expect(screen.getByRole("dialog", { name: "Release this character?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Release This Character?" })).toBeInTheDocument();
     expect(releaseCharacter).not.toHaveBeenCalled();
   });
 
@@ -684,7 +684,7 @@ describe("CharacterSheet release pop-ups", () => {
     await openPlayerRelease(user);
     await user.click(screen.getByRole("button", { name: "Release" }));
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
@@ -713,7 +713,7 @@ describe("CharacterSheet release pop-ups", () => {
     await openPlayerRelease(user);
     await user.click(screen.getByRole("button", { name: "Release" }));
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
@@ -732,7 +732,7 @@ describe("CharacterSheet release pop-ups", () => {
     await user.click(screen.getByText("Mock Force Release"));
 
     expect(
-      screen.getByRole("dialog", { name: "Force release this character?" })
+      screen.getByRole("dialog", { name: "Force Release This Character?" })
     ).toBeInTheDocument();
     expect(dmForceRelease).not.toHaveBeenCalled();
 
@@ -755,7 +755,7 @@ describe("CharacterSheet release pop-ups", () => {
     await user.click(screen.getByText("Mock Force Release"));
     await user.click(screen.getByRole("button", { name: "Force release" }));
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
 

@@ -313,7 +313,7 @@ export function CustomPieceForm({
         </div>
       </CustomFormSection>
 
-      <CustomFormSection title="Description, Rules, and Qualities">
+      <CustomFormSection title="Description, Rules, & Qualities">
         <div
           className={uiStackField}
           role={forceField ? undefined : "group"}

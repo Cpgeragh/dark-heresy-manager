@@ -113,7 +113,7 @@ describe("useDeletionChatChoice", () => {
 
     await user.click(screen.getByRole("button", { name: "go" }));
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(screen.queryByText("finished")).not.toBeInTheDocument();
   });
 
@@ -124,7 +124,7 @@ describe("useDeletionChatChoice", () => {
 
     await user.click(screen.getByRole("button", { name: "go" }));
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chats?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chats?" })).toBeInTheDocument();
     expect(screen.getByText(/You have 2 chats about this campaign/)).toBeInTheDocument();
   });
 
@@ -201,7 +201,7 @@ describe("useDeletionChatChoice", () => {
     await waitFor(() =>
       expect(toastErrorMock).toHaveBeenCalledWith("Failed to delete the chat. Please try again.")
     );
-    expect(screen.getByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(screen.queryByText("finished")).not.toBeInTheDocument();
 
     offline = false;
@@ -224,6 +224,6 @@ describe("useDeletionChatChoice", () => {
     );
     await user.click(screen.getByRole("button", { name: "go" }));
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
   });
 });

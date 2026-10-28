@@ -73,7 +73,7 @@ function Harness({
     release,
     onFinished,
     confirm: {
-      title: "Release this character?",
+      title: "Release This Character?",
       message: "It will be unlinked from your account.",
       confirmLabel: "Release",
     },
@@ -113,7 +113,7 @@ describe("useReleaseFlow", () => {
 
     await user.click(screen.getByRole("button", { name: "start" }));
 
-    expect(screen.getByRole("dialog", { name: "Release this character?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Release This Character?" })).toBeInTheDocument();
   });
 
   it("does nothing if the person cancels", async () => {
@@ -159,7 +159,7 @@ describe("useReleaseFlow", () => {
 
     await startAndConfirm(user);
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(onFinished).not.toHaveBeenCalled();
   });
 
@@ -203,7 +203,7 @@ describe("useReleaseFlow", () => {
     await waitFor(() =>
       expect(toastErrorMock).toHaveBeenCalledWith("Failed to delete the chat. Please try again.")
     );
-    expect(screen.getByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     expect(onFinished).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Keep My Chat" }));
@@ -221,7 +221,7 @@ describe("useReleaseFlow", () => {
 
     await startAndConfirm(user);
 
-    expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
   });
 
   it("carries on straight away when there is no chat to decide about", async () => {
@@ -275,7 +275,7 @@ describe("useReleaseFlow", () => {
     expect(screen.getByText("flow idle")).toBeInTheDocument();
 
     await startAndConfirm(user);
-    await screen.findByRole("dialog", { name: "Keep your chat?" });
+    await screen.findByRole("dialog", { name: "Keep Your Chat?" });
     expect(screen.getByText("flow active")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Keep My Chat" }));

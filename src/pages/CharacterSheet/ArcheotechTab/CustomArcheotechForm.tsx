@@ -647,7 +647,7 @@ export function CustomArcheotechForm({
           </CustomFormSection>
         )}
 
-        <CustomFormSection title="Description and Rules">
+        <CustomFormSection title="Description & Rules">
           <DescriptionAndRulesFields
             idPrefix="custom-archeotech"
             description={description}

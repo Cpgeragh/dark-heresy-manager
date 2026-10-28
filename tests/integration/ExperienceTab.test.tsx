@@ -688,7 +688,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(dialog.getByText("Applied Rank Up XP Cost")).toBeInTheDocument();
     expect(dialog.getByText("100 XP")).toHaveClass("text-slate-200");
     expect(dialog.getByText("Rank ceremony")).toBeInTheDocument();
-    expect(dialog.queryByText("Final XP adjustments")).not.toBeInTheDocument();
+    expect(dialog.queryByText("Final XP Adjustments")).not.toBeInTheDocument();
     expect(
       dialog.queryByText("The DM may apply an XP cost to ranking up.")
     ).not.toBeInTheDocument();
@@ -756,7 +756,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
     expect(dialog.getByRole("button", { name: "Confirm Rank Up" })).toBeDisabled();
     expect(dialog.getByRole("button", { name: "Scout" })).toHaveAttribute("aria-pressed", "false");
-    expect(dialog.getByRole("heading", { name: "Final XP adjustments" })).toHaveClass(
+    expect(dialog.getByRole("heading", { name: "Final XP Adjustments" })).toHaveClass(
       "border-l-2",
       "text-red-500"
     );

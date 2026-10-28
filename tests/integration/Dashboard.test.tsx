@@ -550,10 +550,10 @@ describe("Dashboard DM campaign list", () => {
 
       await deleteActiveCampaign(user);
 
-      expect(await screen.findByRole("dialog", { name: "Keep your chats?" })).toBeInTheDocument();
+      expect(await screen.findByRole("dialog", { name: "Keep Your Chats?" })).toBeInTheDocument();
       expect(screen.getByText(/You have 2 chats about this campaign/)).toBeInTheDocument();
       await user.click(screen.getByRole("button", { name: "Keep My Chats" }));
-      expect(screen.queryByRole("dialog", { name: "Keep your chats?" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog", { name: "Keep Your Chats?" })).not.toBeInTheDocument();
     });
 
     it("asks nothing when the deleted campaign has no chats, or only other campaigns do", async () => {
@@ -568,7 +568,7 @@ describe("Dashboard DM campaign list", () => {
       await deleteActiveCampaign(user);
 
       await waitFor(() => expect(deleteCampaignMock).toHaveBeenCalledWith("job-1"));
-      expect(screen.queryByRole("dialog", { name: /Keep your chat/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog", { name: /Keep Your Chat/ })).not.toBeInTheDocument();
     });
 
     it("asks nothing when the delete fails", async () => {
@@ -584,7 +584,7 @@ describe("Dashboard DM campaign list", () => {
       await deleteActiveCampaign(user);
 
       await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Chunk failed"));
-      expect(screen.queryByRole("dialog", { name: /Keep your chat/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog", { name: /Keep Your Chat/ })).not.toBeInTheDocument();
     });
 
     it("also asks after an archived campaign is deleted", async () => {
@@ -614,7 +614,7 @@ describe("Dashboard DM campaign list", () => {
       );
       await user.click(within(deleteDialog).getByRole("button", { name: "Delete Permanently" }));
 
-      expect(await screen.findByRole("dialog", { name: "Keep your chat?" })).toBeInTheDocument();
+      expect(await screen.findByRole("dialog", { name: "Keep Your Chat?" })).toBeInTheDocument();
     });
   });
 

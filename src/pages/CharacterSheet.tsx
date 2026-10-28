@@ -420,7 +420,7 @@ export default function CharacterSheet({
       navigate(ROUTES.DASHBOARD, { replace: true });
     },
     confirm: {
-      title: "Release this character?",
+      title: "Release This Character?",
       message:
         "Unlinks this character from your account. To move devices, connect the new device with your account recovery code instead.",
       confirmLabel: "Release",
@@ -433,7 +433,7 @@ export default function CharacterSheet({
     release: dmForceRelease,
     onFinished: () => undefined,
     confirm: {
-      title: "Force release this character?",
+      title: "Force Release This Character?",
       message:
         "This removes the player's ownership at once. They lose access to the character and your chat with them is closed, but the messages stay.",
       confirmLabel: "Force release",

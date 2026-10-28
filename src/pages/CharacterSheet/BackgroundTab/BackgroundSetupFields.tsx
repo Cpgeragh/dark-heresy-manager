@@ -515,7 +515,7 @@ export function BackgroundSetupFields({
 
       {pendingAdvanceSchemeId && (
         <PickerModal
-          title="Insanity gained (1d5)"
+          title="Insanity Gained (1d5)"
           query=""
           onQueryChange={() => undefined}
           onClose={() => setPendingAdvanceSchemeId(null)}

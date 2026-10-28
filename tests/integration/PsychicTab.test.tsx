@@ -253,10 +253,10 @@ describe("PsychicTab", () => {
     expect(screen.getByRole("dialog", { name: "View Psychic Powers" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Add Minor Power" })).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Use Minor Psychic Power selection" })
+      screen.queryByRole("button", { name: "Use Minor Psychic Power Selection" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Use Psy Rating selection" })
+      screen.queryByRole("button", { name: "Use Psy Rating Selection" })
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Add Independent Minor Power" })
@@ -299,7 +299,7 @@ describe("PsychicTab", () => {
     renderTab({ talents, onUpdate: vi.fn(() => new Promise<void>(() => undefined)) });
 
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power Selection" }));
     await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
 
     expect(screen.queryByRole("dialog", { name: "Add Psychic Power" })).not.toBeInTheDocument();
@@ -384,7 +384,7 @@ describe("PsychicTab", () => {
     };
     const { onUpdate } = renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power Selection" }));
     await user.click(await screen.findByRole("button", { name: "Add Custom Minor Power" }));
     await user.type(screen.getByPlaceholderText("Power name..."), "Purchased Whisper");
     await user.click(screen.getByRole("button", { name: "Half" }));
@@ -664,22 +664,22 @@ describe("PsychicTab", () => {
     const { onUpdate } = renderTab({ talents });
 
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    const talentRoute = screen.getByRole("button", { name: "Use Minor Psychic Power selection" });
+    const talentRoute = screen.getByRole("button", { name: "Use Minor Psychic Power Selection" });
     expect(talentRoute).toHaveClass("rounded-lg", "border-slate-500");
     expect(within(talentRoute).getByText("Available: 1")).toHaveClass("text-amber-300");
     const independentRoute = screen.getByRole("button", { name: "Add Independent Minor Power" });
     expect(within(independentRoute).getByText("No selection used")).toHaveClass("text-slate-300");
     expect(independentRoute.querySelector('[data-picker-arrow="right"]')).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power Selection" }));
     const powerPicker = screen.getByRole("dialog", { name: "Add Psychic Power" });
     expect(within(powerPicker).getByRole("button", { name: "Back" })).toBeInTheDocument();
     expect(within(powerPicker).queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("dialog", { name: "Add Minor Power" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Use Minor Psychic Power selection" })
+      screen.getByRole("button", { name: "Use Minor Psychic Power Selection" })
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power Selection" }));
     await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
@@ -702,20 +702,20 @@ describe("PsychicTab", () => {
     render(<StatefulPsychicTab talents={talents} />);
 
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power Selection" }));
     await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
 
     const activePowerPicker = screen.getByRole("dialog", { name: "Add Psychic Power" });
     expect(activePowerPicker).toBeInTheDocument();
     expect(
-      within(activePowerPicker).queryByRole("button", { name: "Use Minor Psychic Power selection" })
+      within(activePowerPicker).queryByRole("button", { name: "Use Minor Psychic Power Selection" })
     ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Select Second Fake Minor Power" }));
 
     expect(screen.getByRole("dialog", { name: "Add Minor Power" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Add Psychic Power" })).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Use Minor Psychic Power selection" })
+      screen.queryByRole("button", { name: "Use Minor Psychic Power Selection" })
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add Independent Minor Power" })).toBeInTheDocument();
     expect(screen.queryByText("All selections used")).not.toBeInTheDocument();
@@ -777,7 +777,7 @@ describe("PsychicTab", () => {
     const { unmount } = render(<StatefulPsychicTab talents={talents} />);
     expect(screen.getAllByText("Available: 1").length).toBeGreaterThan(0);
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power Selection" }));
     await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
     expect(screen.queryByText("Available: 1")).not.toBeInTheDocument();
 
@@ -857,7 +857,7 @@ describe("PsychicTab", () => {
     const { onUpdate } = renderTab({ talents, psychic });
 
     await user.click(screen.getAllByRole("button", { name: "Expand Existing Major details" })[0]);
-    await user.click(screen.getAllByRole("button", { name: "Use Psychic Power selection" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Use Psychic Power Selection" })[0]);
 
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -930,10 +930,10 @@ describe("PsychicTab", () => {
 
     expect(screen.getAllByText("Available: 2").length).toBeGreaterThan(0);
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    const psyRatingRoute = screen.getByRole("button", { name: "Use Psy Rating selection" });
+    const psyRatingRoute = screen.getByRole("button", { name: "Use Psy Rating Selection" });
     expect(psyRatingRoute).toHaveClass("rounded-lg", "border-slate-500");
     expect(within(psyRatingRoute).getByText("Available: 2")).toHaveClass("text-indigo-300");
-    await user.click(screen.getByRole("button", { name: "Use Psy Rating selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Psy Rating Selection" }));
     await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
 
     const linked = onUpdate.mock.calls[0][0] as PsychicBlock;
@@ -967,14 +967,14 @@ describe("PsychicTab", () => {
     render(<StatefulPsychicTab talents={talents} />);
 
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(screen.getByRole("button", { name: "Use Psy Rating selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Psy Rating Selection" }));
     await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
     await user.click(await screen.findByRole("button", { name: "Select Second Fake Minor Power" }));
 
     expect(screen.getByRole("dialog", { name: "Add Minor Power" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Add Psychic Power" })).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Use Psy Rating selection" })
+      screen.queryByRole("button", { name: "Use Psy Rating Selection" })
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add Independent Minor Power" })).toBeInTheDocument();
     expect(screen.queryByText("All selections used")).not.toBeInTheDocument();
@@ -1006,7 +1006,7 @@ describe("PsychicTab", () => {
     };
     const { onUpdate } = renderTab({ talents, psychic });
     await user.click(screen.getAllByRole("button", { name: "Expand Existing Major details" })[0]);
-    await user.click(screen.getByRole("button", { name: "Use Psy Rating selection" }));
+    await user.click(screen.getByRole("button", { name: "Use Psy Rating Selection" }));
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         majorPowers: [expect.objectContaining({ psyRatingTalentEntryUid: "psy-rating-purchase" })],
