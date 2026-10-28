@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { Button } from "./buttons/Button";
 import { RemoveButton } from "./buttons/RemoveButton";
+import { ConfirmModal } from "./modals/ConfirmModal";
 import { DeleteConfirmModal } from "./modals/DeleteConfirmModal";
-import { PickerBody, PickerModal } from "./pickers/PickerModal";
-import { uiTextBody } from "./styles/editableStyles";
 
 export interface RemoveEntryExtra {
   label: string;
@@ -69,46 +67,20 @@ export function RemoveEntryButton({
           onCancel={close}
         />
       )}
-      {open && verb === "Remove" && (
-        <PickerModal
-          title={title}
-          query=""
-          onQueryChange={() => undefined}
-          onClose={close}
-          isEmpty={false}
-          hideSearch
-          maxWidth="max-w-sm"
-          footer={
-            blockedMessage ? (
-              <Button fullWidth variant="ghost" onClick={close}>
-                Close
-              </Button>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {extra && (
-                  <Button variant="warningOutline" onClick={run(extra.onClick)}>
-                    {extra.label}
-                  </Button>
-                )}
-                <Button variant="primary" onClick={run(onRemove)}>
-                  {extra ? `${verb} ${kind}` : verb}
-                </Button>
-                <Button
-                  className={extra ? "col-span-2" : undefined}
-                  variant="neutral"
-                  onClick={close}
-                >
-                  Cancel
-                </Button>
-              </div>
-            )
-          }
-        >
-          <PickerBody>
-            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>{message}</p>
-          </PickerBody>
-        </PickerModal>
-      )}
+      {open &&
+        verb === "Remove" &&
+        (blockedMessage ? (
+          <ConfirmModal title={title} message={message} onCancel={close} />
+        ) : (
+          <ConfirmModal
+            title={title}
+            message={message}
+            confirmLabel={extra ? `${verb} ${kind}` : verb}
+            onConfirm={run(onRemove)}
+            extraAction={extra ? { label: extra.label, onClick: run(extra.onClick) } : undefined}
+            onCancel={close}
+          />
+        ))}
     </>
   );
 }

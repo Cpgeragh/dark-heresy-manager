@@ -2,10 +2,9 @@
 // The permanent delete confirmation: says what will be deleted and asks for DELETE to be typed.
 
 import { useId, useState, type ReactNode } from "react";
-import { Button } from "../buttons/Button";
-import { PickerBody, PickerModal } from "../pickers/PickerModal";
 import { colourAmberPlain } from "../styles/colourTokens";
-import { editableInputClass, uiStackList, uiTextBody, uiTextError } from "../styles/editableStyles";
+import { editableInputClass, uiStackList, uiTextError } from "../styles/editableStyles";
+import { ConfirmModal } from "./ConfirmModal";
 
 interface DeleteConfirmModalProps {
   title: string;
@@ -37,56 +36,36 @@ export function DeleteConfirmModal({
   const inputId = useId();
 
   return (
-    <PickerModal
+    <ConfirmModal
       title={title}
-      query=""
-      onQueryChange={() => undefined}
-      onClose={() => {
-        if (!deleting) onCancel();
-      }}
-      isEmpty={false}
-      hideSearch
-      maxWidth="max-w-sm"
-      footer={
-        <div className={uiStackList}>
-          <label
-            htmlFor={inputId}
-            className={`block text-center text-xs lg:text-sm ${colourAmberPlain}`}
-          >
-            {typedLabel}
-          </label>
-          <input
-            id={inputId}
-            type="text"
-            value={typed}
-            onChange={(event) => setTyped(event.target.value)}
-            disabled={deleting}
-            placeholder="DELETE"
-            className={editableInputClass(true)}
-            autoComplete="off"
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="primary"
-              disabled={typed !== "DELETE" || !ready}
-              loading={deleting}
-              loadingLabel="Deleting"
-              onClick={onConfirm}
-            >
-              Delete Permanently
-            </Button>
-            <Button variant="neutral" disabled={deleting} onClick={onCancel}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
+      message={message}
+      confirmLabel="Delete Permanently"
+      confirmDisabled={typed !== "DELETE" || !ready}
+      busy={deleting}
+      loadingLabel="Deleting"
+      onConfirm={onConfirm}
+      onCancel={onCancel}
     >
-      <PickerBody>
-        <p className={`text-sm lg:text-base ${uiTextBody}`}>{message}</p>
-        {details}
-        {error && <span className={`text-xs ${uiTextError}`}>{error}</span>}
-      </PickerBody>
-    </PickerModal>
+      {details}
+      {error && <span className={`text-xs ${uiTextError}`}>{error}</span>}
+      <div className={uiStackList}>
+        <label
+          htmlFor={inputId}
+          className={`block text-center text-xs lg:text-sm ${colourAmberPlain}`}
+        >
+          {typedLabel}
+        </label>
+        <input
+          id={inputId}
+          type="text"
+          value={typed}
+          onChange={(event) => setTyped(event.target.value)}
+          disabled={deleting}
+          placeholder="DELETE"
+          className={editableInputClass(true)}
+          autoComplete="off"
+        />
+      </div>
+    </ConfirmModal>
   );
 }

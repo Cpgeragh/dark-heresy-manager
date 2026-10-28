@@ -2,9 +2,7 @@
 
 import { CHAT_LIMITS } from "shared-rules";
 import { Button } from "../../ui/buttons/Button";
-import { CenteredTitleHeader } from "../../ui/CenteredTitleHeader";
-import { ModalShell } from "../../ui/modals/ModalShell";
-import { uiStackBody, uiTextBody } from "../../ui/styles/editableStyles";
+import { ConfirmModal } from "../../ui/modals/ConfirmModal";
 
 interface KeepOrDeleteChatModalProps {
   busy: boolean;
@@ -29,31 +27,21 @@ export function KeepOrDeleteChatModal({
     : `You have a chat about this ${about}. You can keep it, or move it to Recently deleted, where you can restore it for ${days} days.`;
 
   return (
-    <ModalShell
-      ariaLabel={title}
-      onClose={() => undefined}
-      closeOnBackdrop={false}
-      closeOnEscape={false}
-      className="max-w-xs lg:max-w-sm"
-    >
-      <CenteredTitleHeader title={title} />
-      <div className={`p-4 lg:p-5 ${uiStackBody}`}>
-        <p className={`text-sm lg:text-base ${uiTextBody}`}>{message}</p>
-        <div className="flex gap-2">
-          <Button variant="neutral" className="flex-1" onClick={onKeep} disabled={busy}>
+    <ConfirmModal
+      title={title}
+      message={message}
+      dismissible={false}
+      onCancel={() => undefined}
+      actions={
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="neutral" onClick={onKeep} disabled={busy}>
             {many ? "Keep My Chats" : "Keep My Chat"}
           </Button>
-          <Button
-            variant="danger"
-            className="flex-1"
-            onClick={onDelete}
-            loading={busy}
-            loadingLabel="Moving"
-          >
+          <Button variant="danger" onClick={onDelete} loading={busy} loadingLabel="Moving">
             {many ? "Move My Chats to Recently Deleted" : "Move My Chat to Recently Deleted"}
           </Button>
         </div>
-      </div>
-    </ModalShell>
+      }
+    />
   );
 }

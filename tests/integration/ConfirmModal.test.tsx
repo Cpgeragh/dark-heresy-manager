@@ -108,4 +108,50 @@ describe("ConfirmModal", () => {
     );
     expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
   });
+
+  it("shows extra content and keeps the confirm button off while told to", () => {
+    renderModal({
+      confirmDisabled: true,
+      children: <p>Type DELETE to continue</p>,
+    });
+
+    expect(screen.getByText("Type DELETE to continue")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Rotate" })).toBeDisabled();
+  });
+
+  it("shows a single full-width Close button when there is nothing to confirm", async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    render(
+      <ConfirmModal title="Cannot Remove Skill" message="It is in use." onCancel={onCancel} />
+    );
+
+    const closeButtons = screen.getAllByRole("button", { name: "Close" });
+    await user.click(closeButtons[closeButtons.length - 1]);
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs the extra action above the buttons", async () => {
+    const user = userEvent.setup();
+    const onExtra = vi.fn();
+    renderModal({ extraAction: { label: "Remove and Restore", onClick: onExtra } });
+
+    await user.click(screen.getByRole("button", { name: "Remove and Restore" }));
+    expect(onExtra).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the caller's own two answers in place of the default buttons", () => {
+    renderModal({
+      dismissible: false,
+      actions: (
+        <div>
+          <button type="button">Keep My Chat</button>
+          <button type="button">Move My Chat to Recently Deleted</button>
+        </div>
+      ),
+    });
+
+    expect(screen.getByRole("button", { name: "Keep My Chat" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+  });
 });

@@ -52,10 +52,11 @@ describe("ReleaseConfirmModal", () => {
     expect(onCancel).toHaveBeenCalledTimes(2);
   });
 
-  it("has no close cross, only Cancel", () => {
+  it("has a close cross and a Cancel button", () => {
     renderModal();
 
-    expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
   it("cannot be cancelled while the release is running", () => {

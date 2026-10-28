@@ -1,9 +1,6 @@
 // src/components/chat/ReleaseConfirmModal.tsx
 
-import { Button } from "../../ui/buttons/Button";
-import { CenteredTitleHeader } from "../../ui/CenteredTitleHeader";
-import { ModalShell } from "../../ui/modals/ModalShell";
-import { uiStackBody, uiTextBody } from "../../ui/styles/editableStyles";
+import { ConfirmModal } from "../../ui/modals/ConfirmModal";
 
 interface ReleaseConfirmModalProps {
   title: string;
@@ -23,31 +20,15 @@ export function ReleaseConfirmModal({
   onCancel,
 }: ReleaseConfirmModalProps) {
   return (
-    <ModalShell
-      ariaLabel={title}
-      onClose={onCancel}
-      closeOnBackdrop={!busy}
-      closeOnEscape={!busy}
-      className="max-w-xs lg:max-w-sm"
-    >
-      <CenteredTitleHeader title={title} />
-      <div className={`p-4 lg:p-5 ${uiStackBody}`}>
-        <p className={`text-sm lg:text-base ${uiTextBody}`}>{message}</p>
-        <div className="flex gap-2">
-          <Button
-            variant="danger"
-            className="flex-1"
-            onClick={onConfirm}
-            loading={busy}
-            loadingLabel="Releasing"
-          >
-            {confirmLabel}
-          </Button>
-          <Button variant="neutral" className="flex-1" onClick={onCancel} disabled={busy}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    </ModalShell>
+    <ConfirmModal
+      title={title}
+      message={message}
+      confirmLabel={confirmLabel}
+      confirmVariant="danger"
+      busy={busy}
+      loadingLabel="Releasing"
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />
   );
 }

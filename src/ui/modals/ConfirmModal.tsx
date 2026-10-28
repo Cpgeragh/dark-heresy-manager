@@ -7,11 +7,19 @@ import { ModalShell } from "./ModalShell";
 
 interface ConfirmModalProps {
   title: string;
-  message: ReactNode;
-  confirmLabel: string;
-  onConfirm: () => unknown;
-  onCancel: () => void;
+  message?: ReactNode;
+  /** Content between the sentence and the buttons, such as a typed box or a details list. */
+  children?: ReactNode;
+  confirmLabel?: string;
+  /** Leave out for a pop-up that only shows a message and a single Close button. */
+  onConfirm?: () => unknown;
+  confirmDisabled?: boolean;
   confirmVariant?: ButtonVariant;
+  /** A full-width extra action above the two buttons. */
+  extraAction?: { label: string; onClick: () => unknown };
+  /** Replaces the confirm and cancel buttons, for two answers that fill the same two columns. */
+  actions?: ReactNode;
+  onCancel: () => void;
   cancelLabel?: string;
   /** The caller's own waiting flag, for a save the caller tracks itself. */
   busy?: boolean;
@@ -24,21 +32,25 @@ interface ConfirmModalProps {
 export function ConfirmModal({
   title,
   message,
+  children,
   confirmLabel,
   onConfirm,
-  onCancel,
+  confirmDisabled = false,
   confirmVariant = "primary",
-  cancelLabel = "Cancel",
+  extraAction,
+  actions,
+  onCancel,
+  cancelLabel,
   busy = false,
   loadingLabel,
   dismissible = true,
 }: ConfirmModalProps) {
   const [pending, setPending] = useState(false);
   const waiting = busy || pending;
-  const confirm = async () => {
+  const run = (action: () => unknown) => async () => {
     setPending(true);
     try {
-      await onConfirm();
+      await action();
     } finally {
       setPending(false);
     }
@@ -46,6 +58,7 @@ export function ConfirmModal({
   const close = () => {
     if (!waiting) onCancel();
   };
+  const dismissLabel = cancelLabel ?? (onConfirm ? "Cancel" : "Close");
 
   return (
     <ModalShell
@@ -61,20 +74,39 @@ export function ConfirmModal({
         <CenteredTitleHeader title={title} />
       )}
       <div className={`p-4 lg:p-5 ${uiStackBody}`}>
-        <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>{message}</p>
-        <div className="grid grid-cols-2 gap-2">
+        {message && <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>{message}</p>}
+        {children}
+        {extraAction && (
           <Button
-            variant={confirmVariant}
-            loading={waiting}
-            loadingLabel={loadingLabel ?? confirmLabel}
-            onClick={confirm}
+            fullWidth
+            variant="warningOutline"
+            disabled={waiting}
+            onClick={run(extraAction.onClick)}
           >
-            {confirmLabel}
+            {extraAction.label}
           </Button>
-          <Button variant="neutral" disabled={waiting} onClick={onCancel}>
-            {cancelLabel}
-          </Button>
-        </div>
+        )}
+        {actions ??
+          (onConfirm ? (
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant={confirmVariant}
+                loading={waiting}
+                loadingLabel={loadingLabel ?? confirmLabel}
+                disabled={confirmDisabled}
+                onClick={run(onConfirm)}
+              >
+                {confirmLabel}
+              </Button>
+              <Button variant="neutral" disabled={waiting} onClick={onCancel}>
+                {dismissLabel}
+              </Button>
+            </div>
+          ) : (
+            <Button fullWidth variant="neutral" onClick={onCancel}>
+              {dismissLabel}
+            </Button>
+          ))}
       </div>
     </ModalShell>
   );

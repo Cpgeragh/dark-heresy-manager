@@ -42,6 +42,7 @@ import { DeleteConfirmModal } from "../ui/modals/DeleteConfirmModal";
 import { formatFirstNameInput } from "../utils/firstName";
 import { ModalShell } from "../ui/modals/ModalShell";
 import { ModalHeader } from "../ui/modals/ModalHeader";
+import { ConfirmModal } from "../ui/modals/ConfirmModal";
 
 interface Props {
   effectiveUserId: string;
@@ -545,123 +546,79 @@ export default function Settings({
         )}
 
         {remoteDisconnectTarget && (
-          <PickerModal
+          <ConfirmModal
             title="Unlink Other Device?"
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => !disconnectingOtherDevice && setRemoteDisconnectTarget(null)}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-md"
-            footer={
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="primary"
-                  loading={disconnectingOtherDevice}
-                  loadingLabel="Unlinking"
-                  onClick={() => void handleDisconnectOtherDevice()}
-                >
-                  Unlink
-                </Button>
-                <Button
-                  variant="neutral"
-                  disabled={disconnectingOtherDevice}
-                  onClick={() => setRemoteDisconnectTarget(null)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            }
+            confirmLabel="Unlink"
+            busy={disconnectingOtherDevice}
+            loadingLabel="Unlinking"
+            onConfirm={() => void handleDisconnectOtherDevice()}
+            onCancel={() => setRemoteDisconnectTarget(null)}
           >
-            <PickerBody>
-              <dl className={`${uiStackList} text-sm lg:text-base`}>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                  <dd className={uiTextBody}>{remoteDisconnectTarget.name ?? "Unnamed device"}</dd>
-                </div>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                  <dd className={uiTextBody}>
-                    This device will lose access to the account and return to Create Your Account.
-                  </dd>
-                </div>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
-                  <dd className={uiTextBody}>
-                    Campaigns and characters remain available on the other connected devices.
-                  </dd>
-                </div>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Recovery code</dt>
-                  <dd className={uiTextBody}>
-                    The code will be replaced. The replacement remains available under View Account
-                    Recovery Code in Settings.
-                  </dd>
-                </div>
-              </dl>
-            </PickerBody>
-          </PickerModal>
+            <dl className={`${uiStackList} text-sm lg:text-base`}>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
+                <dd className={uiTextBody}>{remoteDisconnectTarget.name ?? "Unnamed device"}</dd>
+              </div>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
+                <dd className={uiTextBody}>
+                  This device will lose access to the account and return to Create Your Account.
+                </dd>
+              </div>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
+                <dd className={uiTextBody}>
+                  Campaigns and characters remain available on the other connected devices.
+                </dd>
+              </div>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Recovery code</dt>
+                <dd className={uiTextBody}>
+                  The code will be replaced. The replacement remains available under View Account
+                  Recovery Code in Settings.
+                </dd>
+              </div>
+            </dl>
+          </ConfirmModal>
         )}
 
         {disconnectConfirmOpen && (
-          <PickerModal
+          <ConfirmModal
             title="Unlink This Device?"
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => !disconnectingDevice && setDisconnectConfirmOpen(false)}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-md"
-            footer={
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="primary"
-                  loading={disconnectingDevice}
-                  loadingLabel="Unlinking"
-                  onClick={async () => {
-                    const result = await handleDisconnectDevice(false);
-                    if (result !== "failed") setDisconnectConfirmOpen(false);
-                  }}
-                >
-                  Unlink
-                </Button>
-                <Button
-                  variant="neutral"
-                  disabled={disconnectingDevice}
-                  onClick={() => setDisconnectConfirmOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            }
+            confirmLabel="Unlink"
+            busy={disconnectingDevice}
+            loadingLabel="Unlinking"
+            onConfirm={async () => {
+              const result = await handleDisconnectDevice(false);
+              if (result !== "failed") setDisconnectConfirmOpen(false);
+            }}
+            onCancel={() => setDisconnectConfirmOpen(false)}
           >
-            <PickerBody>
-              <dl className={`${uiStackList} text-sm lg:text-base`}>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                  <dd className={uiTextBody}>{currentDeviceName}</dd>
-                </div>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                  <dd className={uiTextBody}>
-                    This device will lose access to the account and return to Create Your Account.
-                  </dd>
-                </div>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
-                  <dd className={uiTextBody}>
-                    Campaigns and characters remain available on the other connected devices.
-                  </dd>
-                </div>
-                <div>
-                  <dt className={`font-semibold ${colourMetadataLabelText}`}>Reconnect</dt>
-                  <dd className={uiTextBody}>
-                    Use the account recovery code to connect this device again.
-                  </dd>
-                </div>
-              </dl>
-            </PickerBody>
-          </PickerModal>
+            <dl className={`${uiStackList} text-sm lg:text-base`}>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
+                <dd className={uiTextBody}>{currentDeviceName}</dd>
+              </div>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
+                <dd className={uiTextBody}>
+                  This device will lose access to the account and return to Create Your Account.
+                </dd>
+              </div>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
+                <dd className={uiTextBody}>
+                  Campaigns and characters remain available on the other connected devices.
+                </dd>
+              </div>
+              <div>
+                <dt className={`font-semibold ${colourMetadataLabelText}`}>Reconnect</dt>
+                <dd className={uiTextBody}>
+                  Use the account recovery code to connect this device again.
+                </dd>
+              </div>
+            </dl>
+          </ConfirmModal>
         )}
 
         <section className={settingsRowClass}>
