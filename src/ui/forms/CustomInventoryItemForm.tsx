@@ -11,7 +11,7 @@ import { CustomFormSection } from "./CustomFormSection";
 import { CustomFormShell } from "./CustomFormShell";
 import { DescriptionAndRulesFields } from "./DescriptionAndRulesFields";
 import { OriginSelector } from "./OriginSelector";
-import { RequiredFormLabel } from "./RequiredFormLabel";
+import { FormLabel } from "./FormLabel";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 
 interface InitialValue {
@@ -146,7 +146,9 @@ export function CustomInventoryItemForm({
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor={`${fieldIdPrefix}-name`}>Name</RequiredFormLabel>
+            <FormLabel htmlFor={`${fieldIdPrefix}-name`} required>
+              Name
+            </FormLabel>
             <input
               id={`${fieldIdPrefix}-name`}
               required
@@ -159,7 +161,9 @@ export function CustomInventoryItemForm({
           </div>
           {quantityConfig?.visible && (
             <div>
-              <RequiredFormLabel htmlFor={`${fieldIdPrefix}-quantity`}>Quantity</RequiredFormLabel>
+              <FormLabel htmlFor={`${fieldIdPrefix}-quantity`} required>
+                Quantity
+              </FormLabel>
               <input
                 id={`${fieldIdPrefix}-quantity`}
                 required
@@ -188,7 +192,9 @@ export function CustomInventoryItemForm({
       <CustomFormSection title="Details">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor={`${fieldIdPrefix}-weight`}>Weight</RequiredFormLabel>
+            <FormLabel htmlFor={`${fieldIdPrefix}-weight`} required>
+              Weight
+            </FormLabel>
             <input
               id={`${fieldIdPrefix}-weight`}
               required
@@ -201,7 +207,9 @@ export function CustomInventoryItemForm({
             />
           </div>
           <div>
-            <RequiredFormLabel htmlFor={`${fieldIdPrefix}-cost`}>Cost</RequiredFormLabel>
+            <FormLabel htmlFor={`${fieldIdPrefix}-cost`} required>
+              Cost
+            </FormLabel>
             <input
               id={`${fieldIdPrefix}-cost`}
               required

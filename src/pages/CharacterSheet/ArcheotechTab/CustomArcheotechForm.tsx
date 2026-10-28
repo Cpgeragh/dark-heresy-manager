@@ -37,7 +37,7 @@ import { CustomFormSection } from "../../../ui/forms/CustomFormSection";
 import { DescriptionAndRulesFields } from "../../../ui/forms/DescriptionAndRulesFields";
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { PickerField } from "../../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { uiFocusRing, uiPressFeedback } from "../../../ui/styles/buttonStyles";
 import { uiCornerSmall } from "../../../ui/styles/shapeStyles";
 
@@ -287,7 +287,9 @@ export function CustomArcheotechForm({
       <>
         <CustomFormSection title="Identity">
           <div>
-            <RequiredFormLabel htmlFor="custom-archeotech-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-archeotech-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-archeotech-name"
               required

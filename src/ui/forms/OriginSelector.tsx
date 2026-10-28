@@ -1,4 +1,4 @@
-import { RequiredFormLabel } from "./RequiredFormLabel";
+import { FormLabel } from "./FormLabel";
 import { sourceChipColour } from "../styles/sourceStyles";
 import { toggleButtonClass } from "../buttons/ToggleButton";
 import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
@@ -29,9 +29,9 @@ export function OriginSelector({
       className={`${hideLabel ? "" : uiStackField} ${className}`.trim()}
       disabled={disabled}
     >
-      <RequiredFormLabel as="legend" className={hideLabel ? "sr-only" : ""}>
+      <FormLabel as="legend" required className={hideLabel ? "sr-only" : ""}>
         Origin
-      </RequiredFormLabel>
+      </FormLabel>
       <div className="grid grid-cols-2 gap-1.5">
         {CUSTOM_ITEM_ORIGIN_OPTIONS.map((option) => {
           const selected = value === option;

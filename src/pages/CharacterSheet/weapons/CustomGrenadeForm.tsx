@@ -14,7 +14,7 @@ import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import {
   sanitizeDiceInput,
@@ -225,7 +225,9 @@ export function CustomGrenadeForm({
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-grenade-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-grenade-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-grenade-name"
               required
@@ -244,7 +246,9 @@ export function CustomGrenadeForm({
             onClick={() => setShowTypePicker(true)}
           />
           <div>
-            <RequiredFormLabel htmlFor="custom-grenade-quantity">Quantity</RequiredFormLabel>
+            <FormLabel htmlFor="custom-grenade-quantity" required>
+              Quantity
+            </FormLabel>
             <input
               id="custom-grenade-quantity"
               required
@@ -285,7 +289,9 @@ export function CustomGrenadeForm({
         </div>
         {damageMode === "damage" && (
           <fieldset aria-required="true">
-            <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Damage
+            </FormLabel>
             <div className="grid grid-cols-3 gap-2 mt-0.5">
               <input
                 aria-label="Damage dice"
@@ -319,7 +325,9 @@ export function CustomGrenadeForm({
           </fieldset>
         )}
         <div>
-          <RequiredFormLabel htmlFor="custom-grenade-pen">Pen</RequiredFormLabel>
+          <FormLabel htmlFor="custom-grenade-pen" required>
+            Pen
+          </FormLabel>
           <input
             id="custom-grenade-pen"
             required
@@ -336,7 +344,9 @@ export function CustomGrenadeForm({
       <CustomFormSection title="Details">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-grenade-weight">Weight</RequiredFormLabel>
+            <FormLabel htmlFor="custom-grenade-weight" required>
+              Weight
+            </FormLabel>
             <input
               id="custom-grenade-weight"
               required
@@ -349,7 +359,9 @@ export function CustomGrenadeForm({
             />
           </div>
           <div>
-            <RequiredFormLabel htmlFor="custom-grenade-cost">Cost</RequiredFormLabel>
+            <FormLabel htmlFor="custom-grenade-cost" required>
+              Cost
+            </FormLabel>
             <input
               id="custom-grenade-cost"
               required

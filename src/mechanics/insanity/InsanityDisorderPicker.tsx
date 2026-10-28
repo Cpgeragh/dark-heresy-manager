@@ -19,7 +19,7 @@ import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { FilterButton } from "../../ui/pickers/FilterButton";
 import { PickerField } from "../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { RequiredMark } from "../../ui/forms/RequiredMark";
 import {
   uiChipRow,
@@ -162,7 +162,9 @@ export function InsanityDisorderPicker({
             onClick={() => setShowTypePicker(true)}
           />
           <div>
-            <RequiredFormLabel htmlFor="custom-disorder-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-disorder-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-disorder-name"
               type="text"
@@ -204,7 +206,9 @@ export function InsanityDisorderPicker({
             </div>
           </div>
           <div>
-            <RequiredFormLabel htmlFor="custom-disorder-rules">Rules Text</RequiredFormLabel>
+            <FormLabel htmlFor="custom-disorder-rules" required>
+              Rules Text
+            </FormLabel>
             <textarea
               id="custom-disorder-rules"
               required

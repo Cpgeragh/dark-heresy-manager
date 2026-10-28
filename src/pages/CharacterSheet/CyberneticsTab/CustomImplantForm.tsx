@@ -25,7 +25,7 @@ import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 
 interface Props {
@@ -157,7 +157,9 @@ export function CustomImplantForm({
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-cybernetic-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-cybernetic-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-cybernetic-name"
               required
@@ -169,7 +171,9 @@ export function CustomImplantForm({
             />
           </div>
           <fieldset aria-required="true" className="col-span-2">
-            <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Craftsmanship
+            </FormLabel>
             <div className="mt-0.5 grid grid-cols-3 gap-1.5">
               {CYBERNETIC_CRAFTSMANSHIP_OPTIONS.map((option) => (
                 <ToggleButton
@@ -199,7 +203,9 @@ export function CustomImplantForm({
       <CustomFormSection title="Details">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-cybernetic-cost">Cost</RequiredFormLabel>
+            <FormLabel htmlFor="custom-cybernetic-cost" required>
+              Cost
+            </FormLabel>
             <input
               id="custom-cybernetic-cost"
               required

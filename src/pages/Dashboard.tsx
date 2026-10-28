@@ -70,7 +70,7 @@ import { useRecoveryLookup } from "../hooks/useRecoveryLookup";
 import { claimCharacter } from "../services/characterService";
 import { CustomFormShell } from "../ui/forms/CustomFormShell";
 import { CustomFormSection } from "../ui/forms/CustomFormSection";
-import { RequiredFormLabel } from "../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../ui/forms/FormLabel";
 import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
 import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import {
@@ -464,7 +464,9 @@ function DmCampaignList({
         >
           <CustomFormSection title="Campaign Details">
             <div>
-              <RequiredFormLabel htmlFor="new-campaign-name">Campaign Name</RequiredFormLabel>
+              <FormLabel htmlFor="new-campaign-name" required>
+                Campaign Name
+              </FormLabel>
               <input
                 id="new-campaign-name"
                 name="new-campaign-name"

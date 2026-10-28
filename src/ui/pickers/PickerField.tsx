@@ -6,7 +6,7 @@ import {
   uiTextPlaceholder,
 } from "../styles/editableStyles";
 import { ArrowRight } from "../icons/PickerArrows";
-import { RequiredFormLabel } from "../forms/RequiredFormLabel";
+import { FormLabel } from "../forms/FormLabel";
 import { uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
 
 interface SharedPickerFieldProps {
@@ -51,9 +51,9 @@ export function PickerField({
     <div className={className}>
       {label &&
         (required ? (
-          <RequiredFormLabel htmlFor={id} supportingText={supportingText}>
+          <FormLabel htmlFor={id} required supportingText={supportingText}>
             {label}
-          </RequiredFormLabel>
+          </FormLabel>
         ) : (
           <label htmlFor={id} className={uiFormLabel}>
             {label}

@@ -14,7 +14,7 @@ import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { sanitizeDiceInput, sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { WeaponQualitySelector } from "./weaponShared";
@@ -204,7 +204,9 @@ export function CustomMeleeForm({
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-melee-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-melee-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-melee-name"
               required
@@ -237,7 +239,9 @@ export function CustomMeleeForm({
 
       <CustomFormSection title="Craftsmanship & Origin">
         <fieldset aria-required="true" className={uiStackField}>
-          <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+          <FormLabel as="legend" required>
+            Craftsmanship
+          </FormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
               <ToggleButton
@@ -258,7 +262,9 @@ export function CustomMeleeForm({
       <CustomFormSection title="Combat">
         <div className="grid grid-cols-2 gap-2">
           <fieldset aria-required="true" className="col-span-2">
-            <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Damage
+            </FormLabel>
             <div className="grid grid-cols-3 gap-2 mt-0.5">
               <input
                 aria-label="Damage dice"
@@ -295,7 +301,9 @@ export function CustomMeleeForm({
           </fieldset>
 
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-melee-pen">Pen</RequiredFormLabel>
+            <FormLabel htmlFor="custom-melee-pen" required>
+              Pen
+            </FormLabel>
             <input
               id="custom-melee-pen"
               required
@@ -313,7 +321,9 @@ export function CustomMeleeForm({
       <CustomFormSection title="Details">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-melee-weight">Weight</RequiredFormLabel>
+            <FormLabel htmlFor="custom-melee-weight" required>
+              Weight
+            </FormLabel>
             <input
               id="custom-melee-weight"
               required
@@ -327,7 +337,9 @@ export function CustomMeleeForm({
           </div>
 
           <div>
-            <RequiredFormLabel htmlFor="custom-melee-cost">Cost</RequiredFormLabel>
+            <FormLabel htmlFor="custom-melee-cost" required>
+              Cost
+            </FormLabel>
             <input
               id="custom-melee-cost"
               required

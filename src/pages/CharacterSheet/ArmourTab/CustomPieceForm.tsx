@@ -23,7 +23,7 @@ import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { InfoModal } from "../../../components/InfoModal";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
@@ -172,7 +172,9 @@ export function CustomPieceForm({
     >
       <CustomFormSection title="Identity">
         <div>
-          <RequiredFormLabel htmlFor="custom-armour-name">Name</RequiredFormLabel>
+          <FormLabel htmlFor="custom-armour-name" required>
+            Name
+          </FormLabel>
           <input
             id="custom-armour-name"
             required
@@ -192,7 +194,9 @@ export function CustomPieceForm({
 
       <CustomFormSection title="Craftsmanship">
         <fieldset aria-required="true" className={uiStackField}>
-          <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+          <FormLabel as="legend" required>
+            Craftsmanship
+          </FormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
               <ToggleButton
@@ -212,7 +216,9 @@ export function CustomPieceForm({
       <CustomFormSection title="Stats">
         {!forceField && (
           <fieldset aria-required="true" className={uiStackField}>
-            <RequiredFormLabel as="legend">Locations</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Locations
+            </FormLabel>
             <div className="grid grid-cols-3 gap-1.5">
               {(
                 [
@@ -240,9 +246,9 @@ export function CustomPieceForm({
 
         {forceField ? (
           <div>
-            <RequiredFormLabel htmlFor="custom-armour-protection-rating">
+            <FormLabel htmlFor="custom-armour-protection-rating" required>
               Protection Rating
-            </RequiredFormLabel>
+            </FormLabel>
             <input
               id="custom-armour-protection-rating"
               required
@@ -257,7 +263,9 @@ export function CustomPieceForm({
           </div>
         ) : (
           <div>
-            <RequiredFormLabel htmlFor="custom-armour-ap">AP</RequiredFormLabel>
+            <FormLabel htmlFor="custom-armour-ap" required>
+              AP
+            </FormLabel>
             <input
               id="custom-armour-ap"
               required
@@ -276,7 +284,9 @@ export function CustomPieceForm({
       <CustomFormSection title="Details">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-armour-weight">Weight</RequiredFormLabel>
+            <FormLabel htmlFor="custom-armour-weight" required>
+              Weight
+            </FormLabel>
             <input
               id="custom-armour-weight"
               required
@@ -289,7 +299,9 @@ export function CustomPieceForm({
             />
           </div>
           <div>
-            <RequiredFormLabel htmlFor="custom-armour-cost">Cost</RequiredFormLabel>
+            <FormLabel htmlFor="custom-armour-cost" required>
+              Cost
+            </FormLabel>
             <input
               id="custom-armour-cost"
               required

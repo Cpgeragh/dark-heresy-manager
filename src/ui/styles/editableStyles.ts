@@ -16,7 +16,6 @@ import {
   colourMetadataLabelText,
   colourTextBody,
   colourTextGMNote,
-  colourTextMuted,
   colourTextPlaceholder,
   colourTextPrimary,
 } from "./colourTokens";
@@ -179,8 +178,6 @@ export const uiActionRowLabel = `font-cinzel text-sm font-semibold uppercase tra
 // ─── Form tokens ──────────────────────────────────────────────────────────────
 
 export const uiFormLabel = `text-xs lg:text-sm font-medium uppercase tracking-wide ${colourTextPrimary}`;
-export const uiFormLabelBlue = `text-xs lg:text-sm font-medium uppercase tracking-wide ${colourMetadataLabelText}`;
-export const uiFormLabelSecondary = `block text-xs lg:text-sm ${colourTextMuted} mb-1`;
 /** The small hint beside a form label, such as "(optional)". */
 export const uiFormLabelHint = `ml-1 normal-case tracking-normal ${colourMetadataLabelText}`;
 export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]";

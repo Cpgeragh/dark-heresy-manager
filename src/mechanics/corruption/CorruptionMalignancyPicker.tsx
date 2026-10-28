@@ -14,7 +14,7 @@ import {
 } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
 import { editableInputClass, editableTextareaClass } from "../../ui/styles/editableStyles";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
@@ -88,7 +88,9 @@ export function CorruptionMalignancyPicker({
       >
         <CustomFormSection title="Identity">
           <div>
-            <RequiredFormLabel htmlFor="custom-malignancy-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-malignancy-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-malignancy-name"
               required
@@ -111,7 +113,9 @@ export function CorruptionMalignancyPicker({
 
         <CustomFormSection title="Rules">
           <div>
-            <RequiredFormLabel htmlFor="custom-malignancy-rules">Rules Text</RequiredFormLabel>
+            <FormLabel htmlFor="custom-malignancy-rules" required>
+              Rules Text
+            </FormLabel>
             <textarea
               id="custom-malignancy-rules"
               required

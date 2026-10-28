@@ -8,7 +8,7 @@ import type { CloseSessionData, SessionUpdateData } from "../../services/session
 import type { SessionListDocument } from "../../types/Firestore";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { RequiredMark } from "../../ui/forms/RequiredMark";
 import { PRODUCT_LIMITS } from "../../constants/productLimits";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
@@ -123,7 +123,9 @@ export function SessionForm({
           <div className="grid grid-cols-2 gap-2">
             {mode === "edit" && (
               <div>
-                <RequiredFormLabel htmlFor="session-date">Date</RequiredFormLabel>
+                <FormLabel htmlFor="session-date" required>
+                  Date
+                </FormLabel>
                 <input
                   id="session-date"
                   type="date"
@@ -136,7 +138,9 @@ export function SessionForm({
               </div>
             )}
             <div>
-              <RequiredFormLabel htmlFor="session-xp">XP Awarded</RequiredFormLabel>
+              <FormLabel htmlFor="session-xp" required>
+                XP Awarded
+              </FormLabel>
               <input
                 id="session-xp"
                 type="text"
@@ -166,7 +170,9 @@ export function SessionForm({
       {showNotes && (
         <CustomFormSection title="Notes">
           <div>
-            <RequiredFormLabel htmlFor="session-summary">Summary</RequiredFormLabel>
+            <FormLabel htmlFor="session-summary" required>
+              Summary
+            </FormLabel>
             <textarea
               id="session-summary"
               required

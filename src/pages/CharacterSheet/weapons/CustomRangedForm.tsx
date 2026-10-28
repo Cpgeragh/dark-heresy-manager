@@ -15,7 +15,7 @@ import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import {
   sanitizeDiceInput,
@@ -323,7 +323,9 @@ export function CustomRangedForm({
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-ranged-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-ranged-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-ranged-name"
               required
@@ -355,7 +357,9 @@ export function CustomRangedForm({
 
       <CustomFormSection title="Craftsmanship & Origin">
         <fieldset aria-required="true" className={uiStackField}>
-          <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+          <FormLabel as="legend" required>
+            Craftsmanship
+          </FormLabel>
           <div className="grid grid-cols-4 gap-1.5">
             {CRAFTSMANSHIP_OPTIONS.map((option) => (
               <ToggleButton
@@ -376,7 +380,9 @@ export function CustomRangedForm({
       <CustomFormSection title="Combat">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-ranged-range">Range (m)</RequiredFormLabel>
+            <FormLabel htmlFor="custom-ranged-range" required>
+              Range (m)
+            </FormLabel>
             <input
               id="custom-ranged-range"
               required
@@ -399,7 +405,9 @@ export function CustomRangedForm({
           />
 
           <fieldset aria-required="true" className="col-span-2">
-            <RequiredFormLabel as="legend">Rate of Fire</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Rate of Fire
+            </FormLabel>
             <div className="grid grid-cols-3 gap-2 mt-0.5">
               <ToggleButton
                 selected={singleShot}
@@ -433,7 +441,9 @@ export function CustomRangedForm({
           </fieldset>
 
           <fieldset aria-required="true" className="col-span-2">
-            <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Damage
+            </FormLabel>
             <div className="grid grid-cols-3 gap-2 mt-0.5">
               <input
                 aria-label="Damage dice"
@@ -470,7 +480,9 @@ export function CustomRangedForm({
           </fieldset>
 
           <div>
-            <RequiredFormLabel htmlFor="custom-ranged-pen">Pen</RequiredFormLabel>
+            <FormLabel htmlFor="custom-ranged-pen" required>
+              Pen
+            </FormLabel>
             <input
               id="custom-ranged-pen"
               required
@@ -484,7 +496,9 @@ export function CustomRangedForm({
           </div>
 
           <div>
-            <RequiredFormLabel htmlFor="custom-ranged-clip">Clip</RequiredFormLabel>
+            <FormLabel htmlFor="custom-ranged-clip" required>
+              Clip
+            </FormLabel>
             <input
               id="custom-ranged-clip"
               required
@@ -498,7 +512,9 @@ export function CustomRangedForm({
           </div>
 
           <fieldset aria-required="true" className="col-span-2">
-            <RequiredFormLabel as="legend">Reload</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Reload
+            </FormLabel>
             <div className="grid grid-cols-2 gap-2 mt-0.5">
               <input
                 aria-label="Reload amount"
@@ -545,7 +561,9 @@ export function CustomRangedForm({
       <CustomFormSection title="Details">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-ranged-weight">Weight</RequiredFormLabel>
+            <FormLabel htmlFor="custom-ranged-weight" required>
+              Weight
+            </FormLabel>
             <input
               id="custom-ranged-weight"
               required
@@ -559,7 +577,9 @@ export function CustomRangedForm({
           </div>
 
           <div>
-            <RequiredFormLabel htmlFor="custom-ranged-cost">Cost</RequiredFormLabel>
+            <FormLabel htmlFor="custom-ranged-cost" required>
+              Cost
+            </FormLabel>
             <input
               id="custom-ranged-cost"
               required

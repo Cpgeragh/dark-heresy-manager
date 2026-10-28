@@ -12,7 +12,7 @@ import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/pickers/PickerField";
-import { RequiredFormLabel } from "../../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../../ui/forms/FormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { sanitizeDiceInput, sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { WeaponQualitySelector } from "./weaponShared";
@@ -173,7 +173,9 @@ export function CustomShieldForm({
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-shield-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-shield-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-shield-name"
               required
@@ -184,7 +186,9 @@ export function CustomShieldForm({
             />
           </div>
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-shield-locations">Locations</RequiredFormLabel>
+            <FormLabel htmlFor="custom-shield-locations" required>
+              Locations
+            </FormLabel>
             <input
               id="custom-shield-locations"
               required
@@ -205,7 +209,9 @@ export function CustomShieldForm({
       <CustomFormSection title="Combat">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-shield-ap">AP</RequiredFormLabel>
+            <FormLabel htmlFor="custom-shield-ap" required>
+              AP
+            </FormLabel>
             <input
               id="custom-shield-ap"
               required
@@ -218,7 +224,9 @@ export function CustomShieldForm({
             />
           </div>
           <div>
-            <RequiredFormLabel htmlFor="custom-shield-pen">Pen</RequiredFormLabel>
+            <FormLabel htmlFor="custom-shield-pen" required>
+              Pen
+            </FormLabel>
             <input
               id="custom-shield-pen"
               required
@@ -231,7 +239,9 @@ export function CustomShieldForm({
             />
           </div>
           <fieldset aria-required="true" className="col-span-2">
-            <RequiredFormLabel as="legend">Bash Damage</RequiredFormLabel>
+            <FormLabel as="legend" required>
+              Bash Damage
+            </FormLabel>
             <div className="grid grid-cols-3 gap-2 mt-0.5">
               <input
                 aria-label="Bash damage dice"
@@ -269,7 +279,9 @@ export function CustomShieldForm({
       <CustomFormSection title="Details">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <RequiredFormLabel htmlFor="custom-shield-weight">Weight</RequiredFormLabel>
+            <FormLabel htmlFor="custom-shield-weight" required>
+              Weight
+            </FormLabel>
             <input
               id="custom-shield-weight"
               required
@@ -282,7 +294,9 @@ export function CustomShieldForm({
             />
           </div>
           <div>
-            <RequiredFormLabel htmlFor="custom-shield-cost">Cost</RequiredFormLabel>
+            <FormLabel htmlFor="custom-shield-cost" required>
+              Cost
+            </FormLabel>
             <input
               id="custom-shield-cost"
               required

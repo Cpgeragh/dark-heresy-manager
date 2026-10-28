@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { useToast } from "../../components/Toast";
 import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { RequiredMark } from "../../ui/forms/RequiredMark";
 import { AttendeePicker } from "./AttendeePicker";
 import { editableInputClass } from "../../ui/styles/editableStyles";
@@ -57,7 +57,9 @@ export function BeginSessionForm({ characters, onBegin, onClose }: Props) {
     >
       <CustomFormSection title="Session">
         <div>
-          <RequiredFormLabel htmlFor="begin-session-date">Date</RequiredFormLabel>
+          <FormLabel htmlFor="begin-session-date" required>
+            Date
+          </FormLabel>
           <input
             id="begin-session-date"
             type="date"

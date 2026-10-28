@@ -13,7 +13,7 @@ import {
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
 import {
   editableInputClass,
@@ -112,7 +112,9 @@ export function InsanityTraumaPicker({
       >
         <CustomFormSection title="Identity">
           <div>
-            <RequiredFormLabel htmlFor="custom-trauma-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-trauma-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-trauma-name"
               type="text"
@@ -136,7 +138,9 @@ export function InsanityTraumaPicker({
 
         <CustomFormSection title="Rules">
           <div>
-            <RequiredFormLabel htmlFor="custom-trauma-rules">Rules Text</RequiredFormLabel>
+            <FormLabel htmlFor="custom-trauma-rules" required>
+              Rules Text
+            </FormLabel>
             <textarea
               id="custom-trauma-rules"
               required

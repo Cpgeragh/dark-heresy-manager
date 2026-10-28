@@ -18,7 +18,7 @@ import {
 } from "../../ui/styles/editableStyles";
 import { Button } from "../../ui/buttons/Button";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { ErrorState } from "../../ui/ErrorState";
 import { RouteLoadError } from "../../ui/RouteLoadError";
@@ -210,7 +210,9 @@ export function PartySection({
                 }}
               >
                 <div>
-                  <RequiredFormLabel htmlFor="new-character-name">Character Name</RequiredFormLabel>
+                  <FormLabel htmlFor="new-character-name" required>
+                    Character Name
+                  </FormLabel>
                   <input
                     id="new-character-name"
                     className={`${editableInputClass(true)} mt-0.5`}

@@ -43,7 +43,7 @@ import { Chip } from "../../ui/chips/Chip";
 import { Button } from "../../ui/buttons/Button";
 import { ModalShell } from "../../ui/modals/ModalShell";
 import { ModalHeader } from "../../ui/modals/ModalHeader";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { InfoModal } from "../../components/InfoModal";
 import { AccordionCard } from "../../ui/AccordionCard";
@@ -237,9 +237,9 @@ function XpTransactionModal({
         )}
 
         <div className={`block ${uiStackField}`}>
-          <RequiredFormLabel htmlFor={`${action}-xp-amount`} tone="blue">
+          <FormLabel htmlFor={`${action}-xp-amount`} required>
             Amount
-          </RequiredFormLabel>
+          </FormLabel>
           <input
             id={`${action}-xp-amount`}
             type="text"
@@ -257,9 +257,9 @@ function XpTransactionModal({
         </div>
 
         <div className={`block ${uiStackField}`}>
-          <RequiredFormLabel htmlFor={`${action}-xp-reason`} tone="blue">
+          <FormLabel htmlFor={`${action}-xp-reason`} required>
             Reason
-          </RequiredFormLabel>
+          </FormLabel>
           <input
             id={`${action}-xp-reason`}
             type="text"

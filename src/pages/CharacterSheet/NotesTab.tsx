@@ -9,7 +9,7 @@ import { Chip } from "../../ui/chips/Chip";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
 import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import {
   uiInlineRow,
   editableInputClass,
@@ -217,7 +217,9 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
           onSubmit={mode === "add" ? submitAdd : submitEdit}
         >
           <div>
-            <RequiredFormLabel htmlFor="note-title">Title</RequiredFormLabel>
+            <FormLabel htmlFor="note-title" required>
+              Title
+            </FormLabel>
             <input
               id="note-title"
               type="text"
@@ -230,7 +232,9 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
             />
           </div>
           <div>
-            <RequiredFormLabel htmlFor="note-text">Note</RequiredFormLabel>
+            <FormLabel htmlFor="note-text" required>
+              Note
+            </FormLabel>
             <textarea
               id="note-text"
               required

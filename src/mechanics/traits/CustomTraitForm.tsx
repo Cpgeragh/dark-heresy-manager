@@ -6,7 +6,7 @@ import { CustomFormSection } from "../../ui/forms/CustomFormSection";
 import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../constants/customItems";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import type { CustomTraitData } from "../../types/CustomItems";
 
 export function CustomTraitForm({
@@ -53,7 +53,9 @@ export function CustomTraitForm({
       <CustomFormSection title="Identity">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-trait-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-trait-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-trait-name"
               required
@@ -74,7 +76,9 @@ export function CustomTraitForm({
       <CustomFormSection title="Rules">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <RequiredFormLabel htmlFor="custom-trait-rules">Rules Text</RequiredFormLabel>
+            <FormLabel htmlFor="custom-trait-rules" required>
+              Rules Text
+            </FormLabel>
             <textarea
               id="custom-trait-rules"
               required

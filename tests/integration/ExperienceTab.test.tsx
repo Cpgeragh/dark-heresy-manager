@@ -671,8 +671,8 @@ describe("ExperienceTab named Career Rank ledger", () => {
     await user.click(costInfo.getByRole("button", { name: "Close" }));
     expect(spendAmount).toBeRequired();
     expect(spendReason).toBeRequired();
-    expect(spendDialog.getByText("Amount").closest("label")).toHaveClass("text-sky-300/85");
-    expect(spendDialog.getByText("Reason").closest("label")).toHaveClass("text-sky-300/85");
+    expect(spendDialog.getByText("Amount").closest("label")).toHaveClass("text-slate-200");
+    expect(spendDialog.getByText("Reason").closest("label")).toHaveClass("text-slate-200");
     expect(spendDialog.getByText("Required").closest("p")).toHaveClass("text-red-500");
     await user.type(spendAmount, "100");
     expect(spendDialog.getByRole("button", { name: "Confirm Spend" })).toBeDisabled();

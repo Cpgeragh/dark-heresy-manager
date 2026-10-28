@@ -7,7 +7,7 @@ import {
   uiTextError,
   uiStackField,
 } from "../styles/editableStyles";
-import { RequiredFormLabel } from "../forms/RequiredFormLabel";
+import { FormLabel } from "../forms/FormLabel";
 import { PickerField } from "./PickerField";
 import { colourTextPrimary } from "../styles/colourTokens";
 
@@ -56,7 +56,9 @@ export function AssignedItemMetaFields({
 
       {requiresCost && (
         <div className={uiStackField}>
-          <RequiredFormLabel htmlFor={costId}>Cost (Thrones)</RequiredFormLabel>
+          <FormLabel htmlFor={costId} required>
+            Cost (Thrones)
+          </FormLabel>
           <input
             id={costId}
             type="text"
@@ -79,7 +81,9 @@ export function AssignedItemMetaFields({
 
       {requiresWeight && (
         <div className={uiStackField}>
-          <RequiredFormLabel htmlFor={weightId}>Weight (kg)</RequiredFormLabel>
+          <FormLabel htmlFor={weightId} required>
+            Weight (kg)
+          </FormLabel>
           <input
             id={weightId}
             type="text"

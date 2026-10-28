@@ -14,7 +14,7 @@ import {
 } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { ArrowLeft } from "../../ui/icons/PickerArrows";
-import { RequiredFormLabel } from "../../ui/forms/RequiredFormLabel";
+import { FormLabel } from "../../ui/forms/FormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
 import { editableInputClass, editableTextareaClass } from "../../ui/styles/editableStyles";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
@@ -98,7 +98,9 @@ export function MutationPicker({
       >
         <CustomFormSection title="Identity">
           <div>
-            <RequiredFormLabel htmlFor="custom-mutation-name">Name</RequiredFormLabel>
+            <FormLabel htmlFor="custom-mutation-name" required>
+              Name
+            </FormLabel>
             <input
               id="custom-mutation-name"
               required
@@ -121,7 +123,9 @@ export function MutationPicker({
 
         <CustomFormSection title="Rules">
           <div>
-            <RequiredFormLabel htmlFor="custom-mutation-rules">Rules Text</RequiredFormLabel>
+            <FormLabel htmlFor="custom-mutation-rules" required>
+              Rules Text
+            </FormLabel>
             <textarea
               id="custom-mutation-rules"
               required
