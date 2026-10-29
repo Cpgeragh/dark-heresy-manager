@@ -12,6 +12,9 @@ describe("InfoModal", () => {
     expect(
       screen.getByRole("button", { name: "Show information about Frag Grenade" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show information about Frag Grenade" })).toHaveClass(
+      "transition"
+    );
   });
 
   it("opens the dialog and shows title/content when the default button is clicked", async () => {

@@ -6,7 +6,7 @@
 import type { ButtonHTMLAttributes } from "react";
 import {
   uiDisabledControl,
-  uiFocusRing,
+  uiFocusRingInset,
   uiHoverSurface,
   uiPressFeedback,
 } from "../styles/buttonStyles";
@@ -41,7 +41,7 @@ export function CardOverlayButton({
       aria-expanded={expanded}
       aria-busy={pending || undefined}
       disabled={disabled || pending}
-      className={`peer absolute inset-0 w-full ${uiCorner} ${uiHoverSurface} transition focus-visible:ring-inset ${uiFocusRing} ${uiPressFeedback(
+      className={`peer absolute inset-0 w-full ${uiCorner} ${uiHoverSurface} transition ${uiFocusRingInset} ${uiPressFeedback(
         !disabled && !pending
       )} ${pending ? "cursor-wait" : uiDisabledControl}`.trim()}
       onClick={handleClick}

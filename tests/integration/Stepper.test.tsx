@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -74,6 +74,63 @@ describe("Stepper", () => {
 
     await user.keyboard("{Enter}");
     expect(onChange).toHaveBeenCalledWith(42);
+  });
+
+  it("reaches the value with the keyboard, edits it, and returns focus after Enter", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Stepper value={5} editable onChange={onChange} />);
+
+    await user.tab();
+    await user.tab();
+    expect(screen.getByRole("button", { name: /Edit value/ })).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    const input = screen.getByRole("textbox");
+    await user.clear(input);
+    await user.type(input, "8");
+    await user.keyboard("{Enter}");
+
+    expect(onChange).toHaveBeenCalledWith(8);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("button", { name: /Edit value/ })).toHaveFocus());
+  });
+
+  it("returns focus after Escape without committing, but not after clicking away", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <>
+        <Stepper value={5} editable onChange={onChange} />
+        <button>elsewhere</button>
+      </>
+    );
+
+    await user.click(screen.getByRole("button", { name: /Edit value/ }));
+    await user.keyboard("{Escape}");
+    expect(onChange).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByRole("button", { name: /Edit value/ })).toHaveFocus());
+
+    await user.click(screen.getByRole("button", { name: /Edit value/ }));
+    await user.click(screen.getByText("elsewhere"));
+    expect(screen.getByText("elsewhere")).toHaveFocus();
+  });
+
+  it("shows the value as plain text when not editable and draws the focus ring inside the pill", () => {
+    const { rerender } = render(<Stepper value={5} editable onChange={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /Edit value/ })).toHaveClass(
+      "focus-visible:ring-inset"
+    );
+    expect(screen.getByRole("button", { name: "Decrease" })).toHaveClass(
+      "focus-visible:ring-inset"
+    );
+    expect(screen.getByRole("button", { name: "Increase" })).toHaveClass(
+      "focus-visible:ring-inset"
+    );
+
+    rerender(<Stepper value={5} editable={false} onChange={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: /Edit value/ })).not.toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
   });
 
   it("cancels the edit on Escape without committing", async () => {

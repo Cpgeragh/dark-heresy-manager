@@ -687,6 +687,10 @@ describe("BackgroundTab", () => {
       },
     });
     expect(screen.getAllByRole("button", { name: "Age" })[0]).toHaveTextContent("30");
+    expect(screen.getAllByRole("button", { name: "Age" })[0]).toHaveClass(
+      "enabled:hover:bg-slate-800",
+      "active:scale-press"
+    );
 
     await user.click(screen.getAllByRole("button", { name: "Age" })[0]);
     const ageInput = screen.getAllByRole("textbox", { name: "Age" })[0];

@@ -83,7 +83,7 @@ describe("SectionDrawer", () => {
       "text-sm",
       "transition",
       "hover:bg-slate-800",
-      "active:scale-[0.98]",
+      "active:scale-press",
       "focus-visible:ring-2",
       "focus-visible:ring-red-500",
     ];

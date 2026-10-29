@@ -22,7 +22,7 @@ import {
   colourOnAmberDim,
   colourTextPrimary,
 } from "../../ui/styles/colourTokens";
-import { uiFocusRing, uiPressFeedback } from "../../ui/styles/buttonStyles";
+import { uiFocusRing, uiOpacityHover, uiPressFeedback } from "../../ui/styles/buttonStyles";
 import { uiCorner } from "../../ui/styles/shapeStyles";
 
 interface ChatMessageListProps {
@@ -61,9 +61,9 @@ export function ChatMessageList({
       {hasOlderMessages && (
         <button
           type="button"
-          className={`self-center text-xs lg:text-sm ${colourAmberPlain} ${uiPressFeedback(
-            !loadingOlder
-          )} ${uiFocusRing} ${loadingOlder ? "cursor-wait" : ""}`}
+          className={`self-center text-xs lg:text-sm ${colourAmberPlain} transition ${
+            loadingOlder ? "cursor-wait" : uiOpacityHover
+          } ${uiPressFeedback(!loadingOlder)} ${uiFocusRing}`}
           onClick={onLoadOlder}
           disabled={loadingOlder}
         >

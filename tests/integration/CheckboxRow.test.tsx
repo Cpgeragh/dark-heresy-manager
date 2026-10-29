@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { CheckboxRow } from "../../src/ui/forms/CheckboxRow";
+import { uiFocusRing } from "../../src/ui/styles/buttonStyles";
 import { colourInputAccent } from "../../src/ui/styles/colourTokens";
 import { uiTextBody } from "../../src/ui/styles/editableStyles";
 
@@ -38,7 +39,13 @@ describe("CheckboxRow", () => {
       </CheckboxRow>
     );
 
-    expect(screen.getByRole("checkbox")).toHaveClass("h-4", "w-4", "shrink-0", colourInputAccent);
+    expect(screen.getByRole("checkbox")).toHaveClass(
+      "h-4",
+      "w-4",
+      "shrink-0",
+      colourInputAccent,
+      ...uiFocusRing.split(" ")
+    );
     expect(screen.getByText("Keep this").closest("label")).toHaveClass(
       "text-sm",
       "lg:text-base",

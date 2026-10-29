@@ -1,15 +1,31 @@
 import { readdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  uiCardOverlayLinkFeedback,
+  uiDismissButton,
   uiDisabledControl,
   uiDisabledLook,
+  uiFieldButtonFeedback,
   uiFocusRing,
+  uiFocusRingInset,
   uiFocusWithinRing,
   uiHoverSurface,
+  uiInfoButton,
+  uiOpacityHover,
   uiPressFeedback,
+  uiStepButtonColour,
+  uiTextButton,
 } from "../../src/ui/styles/buttonStyles";
+import {
+  colourEnabledHoverSlateSurface,
+  colourHoverSurface,
+  colourOverlayHoverSurface,
+} from "../../src/ui/styles/colourTokens";
+
+const tailwindConfig = createRequire(import.meta.url)("../../tailwind.config.cjs");
 
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -21,7 +37,7 @@ function sourceFiles(directory: string): string[] {
 
 describe("shared interaction states", () => {
   it("defines one press, hover, focus and disabled treatment", () => {
-    expect(uiPressFeedback()).toBe("active:scale-[0.98] motion-reduce:active:scale-100");
+    expect(uiPressFeedback()).toBe("active:scale-press motion-reduce:active:scale-100");
     expect(uiPressFeedback(false)).toBe("");
     expect(uiHoverSurface).toBe("hover:bg-slate-800");
     expect(uiFocusRing).toBe("focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500");
@@ -30,6 +46,33 @@ describe("shared interaction states", () => {
     );
     expect(uiDisabledControl).toBe("disabled:cursor-not-allowed disabled:opacity-50");
     expect(uiDisabledLook).toBe("cursor-not-allowed opacity-50");
+  });
+
+  it("defines the press scale once in the Tailwind theme and uses it for cards and controls", () => {
+    expect(tailwindConfig.theme.extend.scale.press).toBe("0.98");
+    expect(uiCardOverlayLinkFeedback).toContain("has-[a:active]:scale-press");
+    expect(uiCardOverlayLinkFeedback).not.toContain("0.98");
+  });
+
+  it("draws the inset focus ring from the standard ring", () => {
+    expect(uiFocusRingInset).toBe(`${uiFocusRing} focus-visible:ring-inset`);
+  });
+
+  it("gives the card overlay the same hover fill as other controls", () => {
+    expect(colourOverlayHoverSurface.replace("has-[a:hover]:", "")).toBe(
+      colourHoverSurface.replace("hover:", "")
+    );
+  });
+
+  it("fades every shared control state and gives field buttons their hover and press", () => {
+    for (const token of [uiDismissButton, uiInfoButton, uiStepButtonColour, uiTextButton]) {
+      expect(token.split(" ")).toContain("transition");
+    }
+    expect(uiOpacityHover).toBe("hover:opacity-80");
+    expect(uiFieldButtonFeedback(true)).toBe(
+      `${colourEnabledHoverSlateSurface} ${uiPressFeedback()}`
+    );
+    expect(uiFieldButtonFeedback(false)).toBe("");
   });
 
   it("keeps state colours and shared state copies out of call sites", () => {

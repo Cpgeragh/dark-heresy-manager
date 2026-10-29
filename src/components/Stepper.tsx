@@ -1,11 +1,13 @@
 // src/components/Stepper.tsx
 
 import { useState, useCallback } from "react";
+import { useReturnFocusAfterEdit } from "../hooks/useReturnFocusAfterEdit";
 import { MinusIcon } from "../ui/icons/MinusIcon";
 import { PlusIcon } from "../ui/icons/PlusIcon";
 import {
   uiEditableValueHover,
   uiFocusRing,
+  uiFocusRingInset,
   uiStepButtonColour,
   uiStepButtonDisabled,
 } from "../ui/styles/buttonStyles";
@@ -45,6 +47,7 @@ export function Stepper({
 }: StepperProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
+  const { valueRef, markReturn } = useReturnFocusAfterEdit(editing);
 
   const commit = useCallback(
     (raw: string) => {
@@ -83,9 +86,12 @@ export function Stepper({
   );
 
   const btnClass = `flex items-center justify-center h-full w-7 sm:w-8 lg:w-10 text-lg lg:text-2xl font-bold leading-none pt-0.5 transition select-none ${
-    editable ? uiStepButtonColour : uiStepButtonDisabled
+    editable ? `${uiStepButtonColour} ${uiFocusRingInset}` : uiStepButtonDisabled
   }`;
   const dividerClass = `h-full w-px ${editable ? colourControlDivider : colourControlDividerDisabled}`;
+  const valueClass = `flex items-center justify-center h-full min-w-7 sm:min-w-8 lg:min-w-10 px-1.5 text-center text-xl lg:text-2xl font-semibold font-code select-none transition-colors ${
+    dangerClassName || colourTextPrimary
+  }`;
 
   return (
     <div
@@ -120,20 +126,26 @@ export function Stepper({
             setDraft(digitsOnly);
           }}
           onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            markReturn(e);
+            handleKeyDown(e);
+          }}
           className={`h-full px-1 text-center bg-transparent text-base lg:text-lg font-code ${colourTextPrimary} ${uiFocusRing} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           autoComplete="off"
         />
-      ) : (
-        <span
+      ) : editable ? (
+        <button
+          ref={valueRef}
+          type="button"
           onClick={handleClick}
-          title={editable ? "Click to edit" : undefined}
-          className={`flex items-center justify-center h-full min-w-7 sm:min-w-8 lg:min-w-10 px-1.5 text-center text-xl lg:text-2xl font-semibold font-code select-none transition-colors ${
-            dangerClassName || colourTextPrimary
-          } ${editable ? `cursor-pointer ${uiEditableValueHover}` : ""}`}
+          aria-label={`Edit value, currently ${value}`}
+          title="Click to edit"
+          className={`${valueClass} cursor-pointer ${uiEditableValueHover} ${uiFocusRingInset}`}
         >
           {value}
-        </span>
+        </button>
+      ) : (
+        <span className={valueClass}>{value}</span>
       )}
 
       <div className={dividerClass} />

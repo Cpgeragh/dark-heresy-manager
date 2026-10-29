@@ -18,6 +18,7 @@ import {
   colourPageBackground,
   colourStateRed,
 } from "../ui/styles/colourTokens";
+import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { uiLayerBackdrop } from "../ui/styles/layerStyles";
 
 interface Props {
@@ -119,7 +120,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
             {error.stack && (
               <details className="mt-2">
                 <summary
-                  className={`text-xs ${uiTextPlaceholder} cursor-pointer ${colourHoverTextBody}`}
+                  className={`text-xs ${uiTextPlaceholder} cursor-pointer transition ${colourHoverTextBody} ${uiPressFeedback()} ${uiFocusRing}`}
                 >
                   Stack trace
                 </summary>

@@ -10,7 +10,14 @@ describe("FilterButton", () => {
     render(<FilterButton onClick={() => undefined}>All Classes</FilterButton>);
 
     const button = screen.getByRole("button", { name: "All Classes" });
-    expect(button).toHaveClass("text-center", "rounded-lg", "border-slate-500", "bg-slate-900/60");
+    expect(button).toHaveClass(
+      "text-center",
+      "rounded-lg",
+      "border-slate-500",
+      "bg-slate-900/60",
+      "transition",
+      "hover:bg-slate-800"
+    );
     expect(button.querySelector("svg")).toBeNull();
   });
 

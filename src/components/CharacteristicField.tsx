@@ -207,7 +207,7 @@ export function CharacteristicField({
                     }`}
                     aria-pressed={filled}
                     tabIndex={clickable ? 0 : -1}
-                    className={`aspect-square w-full max-w-7 sm:max-w-6 lg:max-w-8 border ${uiCornerSmall} flex items-center justify-center
+                    className={`aspect-square w-full max-w-7 sm:max-w-6 lg:max-w-8 border ${uiCornerSmall} flex items-center justify-center transition
                       ${filled ? colourAdvanceFilled : colourAdvanceEmpty}
                       ${
                         clickable

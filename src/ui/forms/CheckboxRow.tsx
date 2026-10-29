@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { uiFocusRing } from "../styles/buttonStyles";
 import { colourInputAccent } from "../styles/colourTokens";
 import { uiTextBody } from "../styles/editableStyles";
+import { uiCornerSmall } from "../styles/shapeStyles";
 import { RequiredMark } from "./RequiredMark";
 
 interface CheckboxRowProps {
@@ -34,7 +36,7 @@ export function CheckboxRow({
         disabled={disabled}
         required={required}
         onChange={(event) => onChange(event.target.checked)}
-        className={`mt-0.5 h-4 w-4 shrink-0 lg:mt-1 ${colourInputAccent}`}
+        className={`mt-0.5 h-4 w-4 shrink-0 lg:mt-1 ${uiCornerSmall} ${colourInputAccent} ${uiFocusRing}`}
       />
       <span>
         {children}

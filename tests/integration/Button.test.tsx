@@ -13,7 +13,7 @@ describe("Button", () => {
 
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("button", { name: "Save" })).toHaveClass(
-      "active:scale-[0.98]",
+      "active:scale-press",
       "focus-visible:ring-red-500"
     );
   });

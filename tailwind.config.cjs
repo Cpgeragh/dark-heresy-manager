@@ -13,6 +13,9 @@ module.exports = {
         code: ["'IM Fell English'", 'Georgia', 'serif'],
       cinzel: ["'Cinzel'", 'serif'],
       },
+      scale: {
+        press: '0.98',
+      },
       keyframes: {
         psyPulse: {
           '0%, 100%': { boxShadow: 'var(--glow-lo)' },

@@ -221,7 +221,7 @@ export function PortraitUpload({
                 step={0.01}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className={`flex-1 ${colourInputAccent}`}
+                className={`flex-1 ${colourInputAccent} ${uiFocusRing}`}
               />
             </div>
 

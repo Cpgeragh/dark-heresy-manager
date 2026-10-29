@@ -77,6 +77,23 @@ describe("ArcheotechTab CustomArcheotechForm", () => {
     );
   });
 
+  it("leaves Armour stacking unticked by default and saves a ticked choice", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = renderForm();
+
+    await user.click(screen.getByText("Armour"));
+    await user.type(screen.getByPlaceholderText("Item name…"), "Plate Bionic");
+    const stacks = screen.getByRole("checkbox", { name: /Stacks with worn armour/ });
+    expect(stacks).not.toBeChecked();
+
+    await user.click(stacks);
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
+
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Plate Bionic", type: "Armour", stacks: true })
+    );
+  });
+
   it("calls onCancel when Cancel is clicked", async () => {
     const user = userEvent.setup();
     const { onCancel } = renderForm();

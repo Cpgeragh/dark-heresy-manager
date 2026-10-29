@@ -15,7 +15,7 @@ export function FilterButton({ children, onClick, className = "" }: FilterButton
     <button
       type="button"
       onClick={onClick}
-      className={`${uiSectionShell} px-2 py-1 text-center text-xs lg:text-sm ${colourTextPrimary} ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} ${className}`.trim()}
+      className={`${uiSectionShell} px-2 py-1 text-center text-xs lg:text-sm ${colourTextPrimary} transition ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} ${className}`.trim()}
     >
       {children}
     </button>

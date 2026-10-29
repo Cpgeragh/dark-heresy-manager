@@ -7,11 +7,9 @@ import type {
   CyberneticCraftsmanship,
 } from "../../../types/Character";
 import {
-  uiInlineRow,
   uiTwoColumnGrid,
   editableInputClass,
   editableTextareaClass,
-  uiTextBody,
 } from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
@@ -19,16 +17,9 @@ import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerMo
 import { PickerRowName, PickerRowText } from "../../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
-import { CheckIcon } from "../../../ui/icons/CheckIcon";
 import { ITEM_TYPES, type ItemType } from "./archeotechConstants";
 import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
-import {
-  chipColours,
-  colourControlSurface,
-  colourToggleSelected,
-  colourErrorText,
-  colourStateRed,
-} from "../../../ui/styles/colourTokens";
+import { chipColours, colourToggleSelected } from "../../../ui/styles/colourTokens";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
@@ -37,8 +28,7 @@ import { DescriptionAndRulesFields } from "../../../ui/forms/DescriptionAndRules
 import { CustomFormShell } from "../../../ui/forms/CustomFormShell";
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { FormLabel } from "../../../ui/forms/FormLabel";
-import { uiFocusRing, uiPressFeedback } from "../../../ui/styles/buttonStyles";
-import { uiCornerSmall } from "../../../ui/styles/shapeStyles";
+import { CheckboxRow } from "../../../ui/forms/CheckboxRow";
 
 const TYPE_DESCRIPTIONS: Record<ItemType, string> = {
   Weapon: "Ranged or melee weapon",
@@ -493,24 +483,9 @@ export function CustomArcheotechForm({
                 ))}
               </div>
             </fieldset>
-            <div className={`${uiInlineRow}`}>
-              <button
-                type="button"
-                onClick={() => setStacks(!stacks)}
-                className={[
-                  `w-4 h-4 ${uiCornerSmall} border flex items-center justify-center transition shrink-0 ${uiPressFeedback()} ${uiFocusRing}`,
-                  stacks ? colourStateRed : colourControlSurface,
-                ].join(" ")}
-                aria-label="Stacks with worn armour"
-                aria-pressed={stacks}
-              >
-                {stacks && <CheckIcon className={`h-[10px] w-[10px] ${colourErrorText}`} />}
-              </button>
-              <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-                Stacks with worn armour{" "}
-                <span className={uiTextBody}>(default: take higher value)</span>
-              </span>
-            </div>
+            <CheckboxRow checked={stacks} onChange={setStacks}>
+              Stacks with worn armour (default: take higher value)
+            </CheckboxRow>
           </CustomFormSection>
         )}
 

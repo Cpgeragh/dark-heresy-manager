@@ -2,9 +2,10 @@
 // Inline quantity editor: decrement button, click-to-type display, increment button.
 
 import { useQuantityEdit } from "../hooks/useQuantityEdit";
+import { useReturnFocusAfterEdit } from "../hooks/useReturnFocusAfterEdit";
 import { MinusIcon } from "./icons/MinusIcon";
 import { PlusIcon } from "./icons/PlusIcon";
-import { uiEditableValueHover, uiStepButtonColour } from "./styles/buttonStyles";
+import { uiEditableValueHover, uiFocusRing, uiStepButtonColour } from "./styles/buttonStyles";
 import { editableInputColour } from "./styles/editableStyles";
 import { colourTextPrimary } from "./styles/colourTokens";
 import { uiCornerSmall } from "./styles/shapeStyles";
@@ -51,6 +52,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
     quantity,
     onUpdate
   );
+  const { valueRef, markReturn } = useReturnFocusAfterEdit(editing);
 
   return (
     <div className="flex items-center gap-1">
@@ -73,18 +75,26 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           inputMode="numeric"
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
           onBlur={commit}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            markReturn(e);
+            handleKeyDown(e);
+          }}
           className={`${sizeStyles.input} border text-center font-code ${editableInputColour(true)}`}
           autoComplete="off"
         />
-      ) : (
-        <span
-          onClick={editable ? start : undefined}
-          title={editable ? "Click to set quantity" : undefined}
-          className={`${sizeStyles.display} font-code ${colourTextPrimary} text-center ${
-            editable ? `cursor-pointer ${uiEditableValueHover}` : ""
-          }`}
+      ) : editable ? (
+        <button
+          ref={valueRef}
+          type="button"
+          onClick={start}
+          aria-label={`Edit quantity, currently ${quantity}`}
+          title="Click to set quantity"
+          className={`${sizeStyles.display} font-code ${colourTextPrimary} text-center cursor-pointer ${uiEditableValueHover} ${uiCornerSmall} ${uiFocusRing}`}
         >
+          {quantity}
+        </button>
+      ) : (
+        <span className={`${sizeStyles.display} font-code ${colourTextPrimary} text-center`}>
           {quantity}
         </span>
       )}

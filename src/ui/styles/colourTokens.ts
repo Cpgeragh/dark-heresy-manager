@@ -89,6 +89,8 @@ export const colourDotIdle = colourControlDivider;
 export const colourIconMuted = colourTextMuted;
 export const colourTextPlaceholder = "text-slate-500";
 export const colourHoverSurface = "hover:bg-slate-800";
+/** The same hover fill for a card whose link sits in an overlay, so the card reacts to the link under it. */
+export const colourOverlayHoverSurface = "has-[a:hover]:bg-slate-800";
 export const colourHoverRaised = "hover:bg-slate-600";
 export const colourHoverTextPrimary = "hover:text-slate-200";
 export const colourHoverTextBody = "hover:text-slate-300";

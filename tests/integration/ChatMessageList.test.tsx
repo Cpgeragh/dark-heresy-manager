@@ -106,6 +106,38 @@ describe("ChatMessageList", () => {
     expect(onLoadOlder).toHaveBeenCalled();
   });
 
+  it("fades, dims on hover and shrinks on press for Load older messages, but not while loading", () => {
+    const { rerender } = render(
+      <ChatMessageList
+        messages={[message()]}
+        currentAccountId="dm-1"
+        onLoadOlder={vi.fn()}
+        loadingOlder={false}
+        hasOlderMessages
+        olderError={null}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Load older messages" })).toHaveClass(
+      "transition",
+      "hover:opacity-80",
+      "active:scale-press"
+    );
+
+    rerender(
+      <ChatMessageList
+        messages={[message()]}
+        currentAccountId="dm-1"
+        onLoadOlder={vi.fn()}
+        loadingOlder
+        hasOlderMessages
+        olderError={null}
+      />
+    );
+    const loading = screen.getByRole("button");
+    expect(loading).not.toHaveClass("hover:opacity-80");
+    expect(loading).not.toHaveClass("active:scale-press");
+  });
+
   it("hides the Load older messages button when there is nothing older", () => {
     renderList({ messages: [message()] });
 

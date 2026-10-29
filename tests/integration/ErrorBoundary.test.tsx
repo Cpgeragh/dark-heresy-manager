@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import "@testing-library/jest-dom";
 import { ErrorBoundary } from "../../src/components/ErrorBoundary";
+import { uiFocusRing } from "../../src/ui/styles/buttonStyles";
 
 function MaybeThrows({ shouldThrow }: { shouldThrow: boolean }) {
   if (shouldThrow) throw new Error("Boom");
@@ -45,6 +46,20 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
     expect(screen.getByText("Safe content")).toBeInTheDocument();
+  });
+
+  it("gives the dev-only Stack trace summary the shared focus ring", () => {
+    render(
+      <ErrorBoundary>
+        <AlwaysThrows />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText("Stack trace")).toHaveClass(
+      ...uiFocusRing.split(" "),
+      "transition",
+      "active:scale-press"
+    );
   });
 
   it("renders the default fallback UI when a child throws", () => {

@@ -76,6 +76,7 @@ describe("PortraitUpload", () => {
     );
     expect(screen.getByText("Mock Cropper")).toBeInTheDocument();
     expect(screen.getByRole("slider")).toHaveClass("accent-red-500");
+    expect(screen.getByRole("slider")).toHaveClass("focus-visible:ring-red-500");
     expect(screen.getByRole("slider")).not.toHaveClass("accent-red-600");
   });
 

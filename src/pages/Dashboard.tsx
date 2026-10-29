@@ -52,6 +52,7 @@ import {
   uiCardLinkFeedback,
   uiCardOverlayLinkFeedback,
   uiFocusRing,
+  uiFocusRingInset,
   uiPressFeedback,
 } from "../ui/styles/buttonStyles";
 import { IconButton } from "../ui/buttons/IconButton";
@@ -422,7 +423,7 @@ function DmCampaignList({
               <Link
                 to={buildRoute.campaignOverview(campaign.id)}
                 aria-label={campaign.name}
-                className={`absolute inset-0 ${uiCorner} focus-visible:ring-inset ${uiFocusRing}`}
+                className={`absolute inset-0 ${uiCorner} ${uiFocusRingInset}`}
               />
               <span
                 className={`pointer-events-none min-w-0 flex-1 font-medium ${colourTextPrimary} lg:text-lg`}

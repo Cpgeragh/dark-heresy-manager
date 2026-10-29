@@ -29,6 +29,7 @@ import {
   uiStackPage,
 } from "../../../ui/styles/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { uiFieldButtonFeedback } from "../../../ui/styles/buttonStyles";
 import {
   findDivinationByResult,
   type DivinationData,
@@ -306,7 +307,7 @@ export function BackgroundTab({
                   setAgeDraft(header.age !== undefined ? String(header.age) : "");
                   setEditingAge(true);
                 }}
-                className={editableInputClass(editable) + " font-code text-left"}
+                className={`${editableInputClass(editable)} ${uiFieldButtonFeedback(editable)} font-code text-left`}
               >
                 {displayedAge !== undefined ? (
                   displayedAge

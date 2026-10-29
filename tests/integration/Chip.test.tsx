@@ -116,6 +116,15 @@ describe("Chip", () => {
     expect(screen.getByText("Still").style.getPropertyValue("--glow-lo")).toBe("");
   });
 
+  it("fades the dismiss button of a removable chip", () => {
+    render(<RemovableChip name="Accurate" onRemove={vi.fn()} />);
+
+    expect(screen.getByRole("button", { name: "Remove Accurate" })).toHaveClass(
+      "transition",
+      "active:scale-press"
+    );
+  });
+
   it("removes an unfinished form choice immediately", async () => {
     const onRemove = vi.fn();
     render(<RemovableChip name="Accurate" onRemove={onRemove} />);

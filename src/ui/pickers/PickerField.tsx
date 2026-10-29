@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { editableInputClass, uiSplitRow, uiTextPlaceholder } from "../styles/editableStyles";
 import { ArrowRight } from "../icons/PickerArrows";
 import { FormLabel } from "../forms/FormLabel";
-import { uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
+import { uiFieldButtonFeedback, uiFocusRing } from "../styles/buttonStyles";
 
 interface SharedPickerFieldProps {
   id: string;
@@ -59,7 +59,7 @@ export function PickerField({
         onClick={onClick}
         className={`${editableInputClass(!disabled)} ${
           label ? "mt-0.5" : ""
-        } appearance-none text-left ${uiSplitRow} ${uiPressFeedback(!disabled)} ${uiFocusRing} ${buttonClassName}`.trim()}
+        } appearance-none text-left ${uiSplitRow} ${uiFieldButtonFeedback(!disabled)} ${uiFocusRing} ${buttonClassName}`.trim()}
       >
         <span className={value ? "" : uiTextPlaceholder}>{value || placeholder}</span>
         <ArrowRight />

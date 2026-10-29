@@ -81,7 +81,7 @@ describe("ToggleButton", () => {
       "focus-visible:ring-red-500",
       "disabled:opacity-50"
     );
-    expect(screen.getByRole("button", { name: "Good" })).not.toHaveClass("active:scale-[0.98]");
+    expect(screen.getByRole("button", { name: "Good" })).not.toHaveClass("active:scale-press");
   });
 });
 

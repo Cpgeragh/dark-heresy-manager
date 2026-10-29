@@ -50,6 +50,21 @@ describe("CharacteristicField", () => {
     }
   });
 
+  it("fades an advance square when its colour changes", () => {
+    render(
+      <CharacteristicField
+        label="Weapon Skill"
+        value={{ base: 30, advances: 3 }}
+        editable
+        onChange={() => {}}
+      />
+    );
+
+    expect(screen.getAllByRole("button", { name: /Weapon Skill advance 1 of/ })[0]).toHaveClass(
+      "transition"
+    );
+  });
+
   it("calls onChange when values change", () => {
     const value = { base: 30, advances: 3 };
     const onChange = vi.fn();
