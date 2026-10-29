@@ -441,7 +441,7 @@ describe("new-device linking", () => {
   it("links without reclaiming and waits for the shared profile before completing", async () => {
     const { rerender, onComplete } = renderLinkStep();
 
-    fireEvent.change(screen.getByLabelText("Recovery code"), {
+    fireEvent.change(screen.getByLabelText("Recovery Code"), {
       target: { value: "DH-C0DE-0001" },
     });
     fireEvent.change(screen.getByPlaceholderText("e.g. My phone"), {
@@ -496,7 +496,7 @@ describe("new-device linking", () => {
   it("uses one direct connection action without a reclaim branch", async () => {
     renderLinkStep();
 
-    fireEvent.change(screen.getByLabelText("Recovery code"), {
+    fireEvent.change(screen.getByLabelText("Recovery Code"), {
       target: { value: "DH-C0DE-0001" },
     });
     fireEvent.change(screen.getByPlaceholderText("e.g. My phone"), {

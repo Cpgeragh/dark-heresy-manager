@@ -13,7 +13,12 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
-import { uiTextPlaceholder, uiStackPage, uiStackSection } from "../../../ui/styles/editableStyles";
+import {
+  uiSplitRow,
+  uiTextPlaceholder,
+  uiStackPage,
+  uiStackSection,
+} from "../../../ui/styles/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
@@ -312,7 +317,7 @@ export function ArcheotechTab({
     <div className={uiStackPage}>
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
       <section className={uiStackSection}>
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Inventory ({archeotech.length})</SectionHeader>
           {editable ? (
             <AddButton label="Add Item" onClick={() => setShowPicker(true)} />

@@ -12,6 +12,7 @@ import {
   uiTextDescription,
   uiStackBody,
   uiStackList,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -36,7 +37,7 @@ export function HomeworldInfoContent({ homeworld }: { homeworld: HomeworldData }
         <section className={uiStackList}>
           <p className={`${uiTextLabel} font-semibold`}>Skills</p>
           {homeworld.skills.map((skill) => (
-            <div key={skill.name} className="flex items-center justify-between gap-3">
+            <div key={skill.name} className={uiSplitRow}>
               <div className="flex min-w-0 items-center gap-1.5">
                 <span className={`text-sm lg:text-base ${uiTextBody}`}>{skill.name}</span>
                 {SKILL_DESCRIPTIONS[skill.name] && (

@@ -19,6 +19,7 @@ import {
   uiStackSection,
   uiStackBody,
   uiStackList,
+  uiSplitRow,
 } from "../../../ui/styles/editableStyles";
 import { colourGlowActive, colourPsychicText } from "../../../ui/styles/colourTokens";
 import { AddButton } from "../../../ui/buttons/AddButton";
@@ -630,7 +631,7 @@ export function PsychicTab({
             className={[uiStackSection, uiSwipeableTabPanel, transitionClass].join(" ")}
             role="tabpanel"
           >
-            <div className="flex items-center justify-between">
+            <div className={uiSplitRow}>
               <PowerSectionHeading
                 title={activeTitle}
                 availableSelections={
@@ -688,7 +689,7 @@ export function PsychicTab({
       ) : (
         <div className={`${uiSectionColumns} grid grid-cols-2`}>
           <section className={`${uiSection} ${uiStackSection}`}>
-            <div className="flex items-center justify-between">
+            <div className={uiSplitRow}>
               <PowerSectionHeading
                 title="Minor Powers"
                 availableSelections={availableMinorPurchases.length + availableMinorPsyRatingCount}
@@ -727,7 +728,7 @@ export function PsychicTab({
 
           {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
           <section className={`${uiSection} ${uiStackSection}`}>
-            <div className="flex items-center justify-between">
+            <div className={uiSplitRow}>
               <PowerSectionHeading
                 title="Major Powers"
                 availableSelections={availableMajorPurchases.length + availableMajorPsyRatingCount}

@@ -7,27 +7,21 @@ import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { Chip, NestedChip } from "../../../ui/chips/Chip";
 import { ItemMetaChips, NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
-import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { UpgradeEntryCard } from "../../../ui/UpgradeEntryCard";
 import { CloseIcon } from "../../../ui/icons/CloseIcon";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import {
   uiChipRow,
-  uiSplitRow,
   editableInputColour,
-  uiCell,
-  uiTextLabel,
   uiTextPlaceholder,
-  uiInfoModalWrapper,
   uiRuleName,
   uiTextDescription,
-  uiTextBody,
   uiStackField,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
@@ -188,45 +182,32 @@ export function UpgradeCard({
   const displayedWeightModifier = formatWeightModifier(upgrade.weightModifier);
 
   return (
-    <div className={`${uiCell} px-2 lg:px-3 py-1.5 lg:py-2`}>
-      <div className={`${uiSplitRow}`}>
-        <span className={`text-xs lg:text-sm font-medium ${uiTextBody}`}>{upgrade.name}</span>
-        {editable && (
-          <RemoveEntryButton
-            kind="Upgrade"
-            name={upgrade.name}
-            from="this weapon"
-            onRemove={() => onRemove(upgrade.id)}
+    <UpgradeEntryCard
+      name={upgrade.name}
+      removeFrom="this weapon"
+      editable={editable}
+      onRemove={() => onRemove(upgrade.id)}
+      chips={
+        <div className="flex flex-wrap gap-1 mt-1">
+          <NestedChip colour="slate">
+            <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+            <span className="leading-none">{displayedWeightModifier}</span>
+          </NestedChip>
+          <NestedItemMetaChips
+            value={upgrade.value}
+            availability={upgrade.availability}
+            source={upgrade.source}
+            bare
           />
-        )}
-      </div>
-      <div className="flex flex-wrap gap-1 mt-1">
-        <NestedChip colour="slate">
-          <WeightIcon className="h-[1em] w-[1em] shrink-0" />
-          <span className="leading-none">{displayedWeightModifier}</span>
-        </NestedChip>
-        <NestedItemMetaChips
-          value={upgrade.value}
-          availability={upgrade.availability}
-          source={upgrade.source}
-          bare
-        />
-      </div>
-      <div className="flex items-center gap-1.5 mt-1">
-        <span className={uiTextLabel}>Rules</span>
-        <span className={uiInfoModalWrapper}>
-          <InfoModal
-            title={upgrade.name}
-            content={
-              <div className={uiStackBody}>
-                <p className={uiTextDescription}>{upgrade.description}</p>
-                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
-              </div>
-            }
-          />
-        </span>
-      </div>
-    </div>
+        </div>
+      }
+      rules={
+        <div className={uiStackBody}>
+          <p className={uiTextDescription}>{upgrade.description}</p>
+          <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
+        </div>
+      }
+    />
   );
 }
 

@@ -29,6 +29,8 @@ import {
   uiTextPlaceholder,
   uiStackList,
   uiStackField,
+  uiSplitRow,
+  uiSplitRowTop,
 } from "../../ui/styles/editableStyles";
 import { colourAmberPlain } from "../../ui/styles/colourTokens";
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
@@ -111,7 +113,7 @@ interface AcquisitionPickerConfig {
 
 function ResultRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className={`${uiSectionShell} flex items-center justify-between gap-3 px-3 py-2`}>
+    <div className={`${uiSectionShell} ${uiSplitRow} px-3 py-2`}>
       <FormLabel as="span">{label}</FormLabel>
       <Chip size="lg" colour="amber">
         {value}
@@ -732,7 +734,7 @@ export function TalentAcquisitionModal({
             ) : (
               <div className={`${uiStackList} ${uiCell} p-3`}>
                 {purityInventory.map((item) => (
-                  <div key={item.key} className="flex items-start justify-between gap-3 text-sm">
+                  <div key={item.key} className={`${uiSplitRowTop} text-sm`}>
                     <div className="min-w-0">
                       <p className={uiTextBody}>{item.name}</p>
                       <p className={colourAmberPlain}>{item.kind}</p>

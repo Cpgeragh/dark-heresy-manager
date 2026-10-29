@@ -16,6 +16,7 @@ import {
   uiStackPage,
   uiStackField,
   uiStackList,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
 import { colourMetadataLabelText, colourTextPrimary } from "../../ui/styles/colourTokens";
@@ -79,7 +80,7 @@ export function AdminTab({
 
       {/* OWNERSHIP */}
       <section className={uiSection}>
-        <div className="flex items-center justify-between mb-2">
+        <div className={`${uiSplitRow} mb-2`}>
           <SectionHeader as="h3">Ownership</SectionHeader>
           <span className={readOnlyBadgeClass}>DM authority</span>
         </div>
@@ -152,7 +153,7 @@ export function AdminTab({
 
       {/* CLAIM HISTORY */}
       <section className={uiSection}>
-        <div className="flex items-center justify-between mb-2">
+        <div className={`${uiSplitRow} mb-2`}>
           <SectionHeader as="h3">Claim History</SectionHeader>
           <span className={readOnlyBadgeClass}>Immutable</span>
         </div>

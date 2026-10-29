@@ -31,6 +31,7 @@ import {
   uiInfoModalWrapper,
   uiStackPage,
   uiStackSection,
+  uiSplitRow,
 } from "../../../ui/styles/editableStyles";
 import {
   uiTable,
@@ -643,7 +644,7 @@ export function ArmourTab({
       </section>
 
       <section className={uiStackSection}>
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Worn</SectionHeader>
           <Button
             size="sm"
@@ -677,7 +678,7 @@ export function ArmourTab({
       </section>
 
       <section className={uiStackSection}>
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Stowed</SectionHeader>
           <Button
             size="sm"
@@ -711,7 +712,7 @@ export function ArmourTab({
       </section>
 
       <section className={uiStackSection}>
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Force Fields</SectionHeader>
           {editable ? (
             <AddButton label="Add Force Field" onClick={() => setShowFieldPicker(true)} />

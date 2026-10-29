@@ -54,6 +54,7 @@ import {
   uiTextPlaceholder,
   uiStackSection,
   uiStackPage,
+  uiSplitRow,
 } from "../../../ui/styles/editableStyles";
 import {
   colourActiveEmerald,
@@ -1539,7 +1540,7 @@ export function WeaponsTab({
           className={visibleWeaponSectionClass("ranged")}
           role="tabpanel"
         >
-          <div className="flex items-center justify-between">
+          <div className={uiSplitRow}>
             <SectionHeader>Ranged</SectionHeader>
             {!showCustomRanged &&
               (editable ? (
@@ -1573,7 +1574,7 @@ export function WeaponsTab({
           className={visibleWeaponSectionClass("melee")}
           role="tabpanel"
         >
-          <div className="flex items-center justify-between">
+          <div className={uiSplitRow}>
             <SectionHeader>Melee</SectionHeader>
             {!showCustomMelee &&
               (editable ? (
@@ -1608,7 +1609,7 @@ export function WeaponsTab({
         className={visibleWeaponSectionClass("grenades")}
         role="tabpanel"
       >
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Explosives</SectionHeader>
           {editable ? (
             <AddButton label="Add Explosive" onClick={() => setPicker("grenades")} />
@@ -1633,7 +1634,7 @@ export function WeaponsTab({
         className={visibleWeaponSectionClass("shields")}
         role="tabpanel"
       >
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Shields</SectionHeader>
           {editable ? (
             <AddButton label="Add Shield" onClick={() => setPicker("shields")} />

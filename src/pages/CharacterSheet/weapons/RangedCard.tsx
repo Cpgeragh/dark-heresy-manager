@@ -636,7 +636,7 @@ export function RangedCard({
       {/* Thrown weapon: quantity counter */}
       {isThrown && (
         <div className={`border-t ${colourDivider} pt-2 ${uiSplitRow}`}>
-          <span className={uiTextLabel}>{isThrown ? "Quantity" : "Rounds"}</span>
+          <span className={uiTextLabel}>Quantity</span>
           <QuantityControl
             quantity={weapon.quantity ?? 0}
             editable={editable}
@@ -798,7 +798,7 @@ export function RangedCard({
       {/* Regular weapon: ammo entries */}
       {hasAmmo && !usesMagazineSlots && (
         <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-          <div className="flex items-center justify-between">
+          <div className={uiSplitRow}>
             <span className={uiTextLabel}>Ammo</span>
             {editable ? (
               <AddButton label="Add Ammo" size="sm" onClick={() => setShowAmmoPicker(true)} />
@@ -856,7 +856,7 @@ export function RangedCard({
       {/* Upgrades */}
       {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
         <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-          <div className="flex items-center justify-between">
+          <div className={uiSplitRow}>
             <span className={uiTextLabel}>Upgrades</span>
             {(editable
               ? visibleCompatible.length > 0

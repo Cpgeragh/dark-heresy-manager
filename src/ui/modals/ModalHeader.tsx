@@ -26,7 +26,7 @@ export function ModalHeader({
       title={title}
       right={
         action === undefined ? (
-          <CloseButton onClick={onClose} className="justify-self-end" />
+          <CloseButton onClick={onClose} />
         ) : (
           <TitleHeaderActionButton onClick={onClose} aria-label={actionAriaLabel}>
             {action}

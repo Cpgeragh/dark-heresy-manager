@@ -42,6 +42,7 @@ import {
   uiStackList,
   uiStackField,
   uiStackPage,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import {
   colourSuccessPlain,
@@ -99,7 +100,7 @@ function StatBlock({
   return (
     <div className={`${uiSection} ${uiStackList}`}>
       {/* Header */}
-      <div className="flex items-baseline justify-between">
+      <div className={uiSplitRow}>
         <span className="flex items-center gap-1">
           <span className={`text-sm lg:text-base ${colourTextPrimary}`}>{label}</span>
           {adjustment !== 0 && (

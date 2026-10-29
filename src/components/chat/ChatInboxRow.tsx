@@ -10,6 +10,7 @@ import {
   uiOverlayPeerHoverText,
   uiSectionShell,
   uiTextMeta,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import { formatChatListTime } from "../../utils/formatChatListTime";
 import { ChatAvatar, type ChatAvatarPicture } from "./ChatAvatar";
@@ -39,7 +40,7 @@ export function ChatInboxRow({ chat, picture, onOpen }: ChatInboxRowProps) {
     >
       <CardOverlayButton label={label} onClick={onOpen} />
       <div
-        className={`pointer-events-none relative ${uiLayerLocal} flex min-w-0 flex-1 items-center gap-3 ${uiOverlayPeerHoverText}`}
+        className={`pointer-events-none relative ${uiLayerLocal} ${uiSplitRow} min-w-0 flex-1 ${uiOverlayPeerHoverText}`}
       >
         <ChatAvatar name={avatarName} picture={picture} />
         <div className="min-w-0 flex-1">

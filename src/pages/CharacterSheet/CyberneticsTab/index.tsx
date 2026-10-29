@@ -31,6 +31,7 @@ import {
   uiTextPlaceholder,
   uiStackPage,
   uiStackSection,
+  uiSplitRow,
 } from "../../../ui/styles/editableStyles";
 import { Chip } from "../../../ui/chips/Chip";
 import { sourceChipColour } from "../../../ui/styles/sourceStyles";
@@ -893,7 +894,7 @@ export function CyberneticsTab({
     <div className={uiStackPage}>
       {/* ── INTEGRATED WEAPONS ────────────────────────────────────────────── */}
       <section className={uiStackSection}>
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Integrated Weapons</SectionHeader>
           {editable ? (
             <AddButton
@@ -949,7 +950,7 @@ export function CyberneticsTab({
       )}
 
       <section className={uiStackSection}>
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Implants</SectionHeader>
           {editable ? (
             <AddButton label="Add Implant" onClick={() => setShowPicker(true)} />

@@ -67,8 +67,6 @@ export function uiChipButtonState(interactive = true): string {
 
 export const uiEditableValueHover = `${colourHoverTextPrimary} hover:underline decoration-slate-500 decoration-dotted underline-offset-2`;
 
-export const uiExpandButton = "flex-1 min-w-0 text-left";
-
 /** Header of a tappable card whose hover feedback belongs to its overlay button. */
 export const uiCardTapHeader = "transition";
 

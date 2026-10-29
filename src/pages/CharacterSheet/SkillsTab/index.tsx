@@ -44,6 +44,7 @@ import {
   uiStackList,
   uiStackPage,
   uiStackSection,
+  uiSplitRow,
 } from "../../../ui/styles/editableStyles";
 import { SkillRow } from "./SkillRow";
 import { SkillGroupRow } from "./SkillGroupRow";
@@ -390,7 +391,7 @@ export function SkillsTab({
             role="tabpanel"
             className={[uiStackSection, uiSwipeableTabPanel, transitionClass].join(" ")}
           >
-            <div className="flex items-center justify-between">
+            <div className={uiSplitRow}>
               <SkillTypeHeading type={activeView} />
               {activeView === "basic" ? (
                 editable ? (
@@ -424,7 +425,7 @@ export function SkillsTab({
       ) : (
         <div className={`${uiSectionColumns} grid grid-cols-2`}>
           <section className={`${uiSection} ${uiStackSection}`}>
-            <div className="flex items-center justify-between">
+            <div className={uiSplitRow}>
               <SkillTypeHeading type="basic" />
               {editable ? (
                 <AddButton label="Add Basic Skill" onClick={() => setIsUntrainedBasicOpen(true)} />
@@ -438,7 +439,7 @@ export function SkillsTab({
             {renderBasicSection()}
           </section>
           <section className={`${uiSection} ${uiStackSection}`}>
-            <div className="flex items-center justify-between">
+            <div className={uiSplitRow}>
               <SkillTypeHeading type="advanced" />
               {editable ? (
                 <AddButton label="Add Advanced Skill" onClick={() => setIsAddOpen(true)} />

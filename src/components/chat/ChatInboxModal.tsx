@@ -74,18 +74,12 @@ export function ChatInboxModal({ accountId }: { accountId: string }) {
         title={title}
         left={
           target ? (
-            <TitleHeaderActionButton
-              align="start"
-              aria-label="Back to messages"
-              onClick={openInbox}
-            >
+            <TitleHeaderActionButton aria-label="Back to messages" onClick={openInbox}>
               <ArrowLeft />
             </TitleHeaderActionButton>
           ) : undefined
         }
-        right={
-          <CloseButton ariaLabel="Close messages" onClick={close} className="justify-self-end" />
-        }
+        right={<CloseButton ariaLabel="Close messages" onClick={close} />}
       />
       {target ? (
         <ChatConversation

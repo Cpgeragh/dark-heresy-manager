@@ -4,7 +4,13 @@ import { useState } from "react";
 import type { CampaignCustomItem, CustomItemCategory } from "../../types/CustomItems";
 import { Button } from "../../ui/buttons/Button";
 import { Chip } from "../../ui/chips/Chip";
-import { uiChipRow, uiInlineRow, uiSection, uiTextError } from "../../ui/styles/editableStyles";
+import {
+  uiChipRow,
+  uiInlineRow,
+  uiSection,
+  uiSplitRowTop,
+  uiTextError,
+} from "../../ui/styles/editableStyles";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {
@@ -111,7 +117,7 @@ export function CustomItemAdminRow({
 
   return (
     <div className={`${uiSection} relative`}>
-      <div className="flex items-start justify-between gap-3">
+      <div className={uiSplitRowTop}>
         <div className="min-w-0">
           <div className={`${uiChipRow} items-center`}>
             <span className={`text-sm font-medium ${colourTextPrimary}`}>{item.name}</span>

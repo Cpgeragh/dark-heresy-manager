@@ -20,6 +20,7 @@ import { uiCardTapHeader } from "../../ui/styles/buttonStyles";
 import {
   uiInlineRow,
   uiSection,
+  uiSplitRow,
   uiStackList,
   uiTextBody,
   uiTextError,
@@ -154,7 +155,7 @@ export function SessionCard({
       <div
         className={`${uiStackList}${tappable ? ` pointer-events-none relative ${uiLayerLocal}` : ""}`}
       >
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <span className="font-semibold lg:text-lg">{dateStr}</span>
           <div
             className={`${uiInlineRow}${tappable ? ` pointer-events-auto relative ${uiLayerLocal}` : ""}`}

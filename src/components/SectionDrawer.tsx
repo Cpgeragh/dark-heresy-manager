@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
 import { DrawerBackdrop } from "../ui/DrawerBackdrop";
 import { SectionDrawerRow } from "../ui/SectionDrawerRow";
 import { colourTextPrimary, colourPopoverSurface, colourDivider } from "../ui/styles/colourTokens";
+import { uiSplitRow } from "../ui/styles/editableStyles";
 import { uiLayerForeground } from "../ui/styles/layerStyles";
 
 // ================================================================
@@ -161,9 +162,7 @@ function SectionDrawerContent({
         inert={!isOpen}
       >
         {/* Drawer header */}
-        <div
-          className={`flex items-center justify-between px-4 py-3 border-b ${colourDivider} shrink-0`}
-        >
+        <div className={`${uiSplitRow} px-4 py-3 border-b ${colourDivider} shrink-0`}>
           <span className={`text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`}>
             Navigate
           </span>

@@ -40,6 +40,7 @@ import {
   uiStackBody,
   uiStackList,
   uiStackPage,
+  uiSplitRow,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { EditButton } from "../ui/buttons/EditButton";
@@ -416,7 +417,7 @@ function DmCampaignList({
           {campaigns.map((campaign) => (
             <div
               key={campaign.id}
-              className={`${uiSection} relative flex items-center gap-3 ${uiCardOverlayLinkFeedback}`}
+              className={`${uiSection} relative ${uiSplitRow} ${uiCardOverlayLinkFeedback}`}
             >
               <Link
                 to={buildRoute.campaignOverview(campaign.id)}
@@ -524,7 +525,7 @@ function DmCampaignList({
               {archivedCampaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className={`${uiSection} relative ${uiInlineRow} ${uiInactiveItem}`}
+                  className={`${uiSection} relative ${uiSplitRow} ${uiInactiveItem}`}
                 >
                   <span className={`flex-1 ${colourTextMuted} lg:text-lg`}>{campaign.name}</span>
 

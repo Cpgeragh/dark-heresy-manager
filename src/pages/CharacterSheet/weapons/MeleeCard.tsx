@@ -541,7 +541,7 @@ export function MeleeCard({
       {/* Upgrades */}
       {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
         <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-          <div className="flex items-center justify-between">
+          <div className={uiSplitRow}>
             <span className={uiTextLabel}>Upgrades</span>
             {(editable
               ? visibleCompatible.length > 0

@@ -89,6 +89,7 @@ import {
   uiTextError,
   uiTextMeta,
   uiStackBody,
+  uiSplitRow,
 } from "../ui/styles/editableStyles";
 import {
   CampaignCustomItemsScope,
@@ -768,7 +769,7 @@ export default function CharacterSheet({
 
         {/* DM NAV / OVERRIDE BAR */}
         {isDM && (
-          <div className={`${uiSectionShell} flex items-center justify-between p-2`}>
+          <div className={`${uiSectionShell} ${uiSplitRow} p-2`}>
             <span className={uiTextMeta}>DM View</span>
 
             <ToggleButton

@@ -2,7 +2,7 @@
 
 import type { ChatSummaryWithId } from "../../types/Firestore";
 import { Button } from "../../ui/buttons/Button";
-import { uiItemName, uiSectionShell, uiTextMeta } from "../../ui/styles/editableStyles";
+import { uiItemName, uiSectionShell, uiSplitRow, uiTextMeta } from "../../ui/styles/editableStyles";
 import { daysLeftInBin, isChatBinned } from "../../utils/chatBin";
 import { ChatAvatar } from "./ChatAvatar";
 
@@ -22,7 +22,7 @@ export function ChatBinRow({ chat, onRestore }: ChatBinRowProps) {
   const status = isChatBinned(chat) ? "Deleted" : "Earlier messages deleted";
 
   return (
-    <div className={`${uiSectionShell} flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5`}>
+    <div className={`${uiSectionShell} ${uiSplitRow} px-3 lg:px-4 py-2 lg:py-2.5`}>
       <ChatAvatar name={avatarName} picture={{ status: "none" }} />
       <div className="min-w-0 flex-1">
         <span className={`${uiItemName} block truncate`}>{chat.characterName}</span>

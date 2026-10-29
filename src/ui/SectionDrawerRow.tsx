@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { colourNavigationActiveText, colourTextPrimary } from "./styles/colourTokens";
 import { uiFocusRing, uiHoverSurface, uiPressFeedback } from "./styles/buttonStyles";
-import { uiInlineRow } from "./styles/editableStyles";
+import { uiSplitRow } from "./styles/editableStyles";
 
 interface SectionDrawerRowProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;
@@ -21,7 +21,7 @@ export function SectionDrawerRow({
     <button
       type={type}
       aria-current={active ? "page" : undefined}
-      className={`${uiInlineRow} w-full px-4 py-3 text-left text-sm transition ${
+      className={`${uiSplitRow} w-full px-4 py-3 text-left text-sm transition ${
         active ? colourNavigationActiveText : colourTextPrimary
       } ${uiHoverSurface} ${uiPressFeedback()} ${uiFocusRing} ${className}`.trim()}
       {...props}

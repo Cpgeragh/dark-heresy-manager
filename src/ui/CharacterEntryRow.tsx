@@ -10,6 +10,7 @@ import {
   uiSection,
   uiSplitRow,
   uiStackField,
+  uiSplitRowTop,
 } from "./styles/editableStyles";
 import { uiLayerLocal } from "./styles/layerStyles";
 
@@ -52,7 +53,7 @@ export function CharacterEntryRowContent({
 }: CharacterEntryRowContentProps) {
   return (
     <div
-      className={`w-full ${interactive ? `${uiSplitRow} relative ${uiLayerLocal} pointer-events-none ${uiOverlayPeerHoverText}` : "flex items-start justify-between gap-2"}`}
+      className={`w-full ${interactive ? `${uiSplitRow} relative ${uiLayerLocal} pointer-events-none ${uiOverlayPeerHoverText}` : uiSplitRowTop}`}
     >
       {leading && <div className="shrink-0">{leading}</div>}
       <div className={`min-w-0 flex-1 ${uiStackField}`}>

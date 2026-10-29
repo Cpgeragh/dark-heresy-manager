@@ -1,6 +1,11 @@
 import { useState } from "react";
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiTextLabel, uiTextPlaceholder, uiStackList } from "../../../ui/styles/editableStyles";
+import {
+  uiSplitRow,
+  uiTextLabel,
+  uiTextPlaceholder,
+  uiStackList,
+} from "../../../ui/styles/editableStyles";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -131,7 +136,7 @@ export function PieceRow({
         body={
           upgradeRefs.length > 0 || addableCompatible.length > 0 ? (
             <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-              <div className="flex items-center justify-between">
+              <div className={uiSplitRow}>
                 <span className={uiTextLabel}>Upgrades</span>
                 {editable ? (
                   <AddButton

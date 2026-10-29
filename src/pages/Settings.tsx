@@ -12,23 +12,17 @@ import {
 } from "../services/deviceLinkService";
 import { saveFirstName } from "../services/profileService";
 import { useToast } from "../components/Toast";
-import { InfoModal } from "../components/InfoModal";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import {
-  colourMetadataLabelText,
-  colourTextPrimary,
-  colourDivideList,
-} from "../ui/styles/colourTokens";
+import { colourMetadataLabelText, colourTextPrimary } from "../ui/styles/colourTokens";
 import {
   editableInputClass,
-  uiInfoModalWrapper,
   uiTwoColumnGrid,
-  uiActionRowLabel,
   uiSection,
   uiTextBody,
   uiTextMeta,
   uiStackBody,
   uiStackList,
+  uiSplitRow,
 } from "../ui/styles/editableStyles";
 import { Button } from "../ui/buttons/Button";
 import { ManageDevicesButton } from "../ui/buttons/ManageDevicesButton";
@@ -40,8 +34,8 @@ import { PickerModal, PickerBody } from "../ui/pickers/PickerModal";
 import { RevealCodeModal } from "../ui/modals/RevealCodeModal";
 import { DeleteConfirmModal } from "../ui/modals/DeleteConfirmModal";
 import { formatFirstNameInput } from "../utils/firstName";
-import { ModalShell } from "../ui/modals/ModalShell";
-import { ModalHeader } from "../ui/modals/ModalHeader";
+import { ManageModal } from "../ui/modals/ManageModal";
+import { ManageActionRow } from "../ui/modals/ManageActionRow";
 import { ConfirmModal } from "../ui/modals/ConfirmModal";
 
 interface Props {
@@ -52,9 +46,6 @@ interface Props {
   disconnect: (confirmLastDevice?: boolean) => Promise<void>;
   onClose: () => void;
 }
-
-const settingsRowClass = "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4 lg:py-5";
-const settingsLabelClass = uiActionRowLabel;
 
 export default function Settings({
   effectiveUserId,
@@ -289,371 +280,325 @@ export default function Settings({
     devices?.find((device) => device.isCurrentDevice)?.name ?? "Current device";
 
   return (
-    <ModalShell
+    <ManageModal
+      title="Manage Account"
       ariaLabel="Manage Account"
       onClose={() => !settingsBusy && onClose()}
       suspended={childModalOpen}
-      className="min-h-0 max-h-[85vh] max-w-md flex flex-col overflow-hidden"
-      viewportAware
     >
-      <ModalHeader title="Manage Account" onClose={() => !settingsBusy && onClose()} />
-      <div className={`min-h-0 flex-1 divide-y ${colourDivideList} overflow-y-auto px-4 lg:px-6`}>
-        {/* ── Display Name ───────────────────────────────────────────────── */}
-        <section className={settingsRowClass}>
-          <div>
-            <span className="flex items-center gap-1.5">
-              <span className={settingsLabelClass}>Edit Display Name</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal
-                  title="Edit Display Name"
-                  content="Shown on your dashboard and character sheets. If you DM a campaign, it's also shown to your players as the GM's name."
-                />
-              </span>
-            </span>
-          </div>
-          <EditButton
-            label="Edit Display Name"
-            className="justify-self-end"
-            onClick={() => setEditNameOpen(true)}
-          />
-        </section>
+      {/* ── Display Name ───────────────────────────────────────────────── */}
+      <ManageActionRow
+        label="Edit Display Name"
+        info="Shown on your dashboard and character sheets. If you DM a campaign, it's also shown to your players as the GM's name."
+      >
+        <EditButton label="Edit Display Name" onClick={() => setEditNameOpen(true)} />
+      </ManageActionRow>
 
-        {editNameOpen && (
-          <PickerModal
-            title="Edit Display Name"
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => !savingName && setEditNameOpen(false)}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-sm"
-          >
-            <PickerBody>
-              <form
-                className="flex gap-2"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void (async () => {
-                    if (await handleSaveName()) setEditNameOpen(false);
-                  })();
-                }}
+      {editNameOpen && (
+        <PickerModal
+          title="Edit Display Name"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => !savingName && setEditNameOpen(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+        >
+          <PickerBody>
+            <form
+              className="flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void (async () => {
+                  if (await handleSaveName()) setEditNameOpen(false);
+                })();
+              }}
+            >
+              <input
+                id="settings-first-name"
+                type="text"
+                aria-label="First Name"
+                autoComplete="off"
+                autoCapitalize="words"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(formatFirstNameInput(e.target.value))}
+                placeholder="e.g. David"
+                disabled={savingName}
+                maxLength={PRODUCT_LIMITS.firstNameCharacters}
+                className={`${editableInputClass(true)} min-w-0 flex-1`}
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={!nameDraft.trim() || nameDraft.trim() === firstName}
+                loading={savingName}
+                loadingLabel="Saving"
               >
-                <input
-                  id="settings-first-name"
-                  type="text"
-                  aria-label="First Name"
-                  autoComplete="off"
-                  autoCapitalize="words"
-                  value={nameDraft}
-                  onChange={(e) => setNameDraft(formatFirstNameInput(e.target.value))}
-                  placeholder="e.g. David"
-                  disabled={savingName}
-                  maxLength={PRODUCT_LIMITS.firstNameCharacters}
-                  className={`${editableInputClass(true)} min-w-0 flex-1`}
-                />
+                Save
+              </Button>
+            </form>
+          </PickerBody>
+        </PickerModal>
+      )}
+
+      {/* ── Recovery Code ───────────────────────────────────────────────── */}
+      <ManageActionRow
+        label="Reveal Account Recovery Code"
+        info="Use this code to reconnect to your campaigns and characters if no device is still connected. Keep it somewhere safe and private."
+      >
+        <ViewButton
+          label="Reveal Account Recovery Code"
+          onClick={handleReveal}
+          disabled={revealing}
+          loading={revealing}
+        />
+      </ManageActionRow>
+
+      {revealedCode && (
+        <RevealCodeModal
+          code={revealedCode}
+          rotating={rotating}
+          onCopy={handleCopyRecoveryCode}
+          onRotate={handleRotate}
+          onClose={() => setRevealedCode(null)}
+        />
+      )}
+
+      {/* ── Manage Devices ──────────────────────────────────────────────── */}
+      <ManageActionRow
+        label="Manage Devices"
+        info="View and rename every device connected to your account, or unlink a device you no longer use. Unlinking another device also rotates your recovery code."
+      >
+        <ManageDevicesButton
+          label="Manage Devices"
+          onClick={handleOpenManageDevices}
+          disabled={!devices || !!deviceListError}
+        />
+      </ManageActionRow>
+
+      {manageDevicesOpen && devices && (
+        <PickerModal
+          title="Manage Devices"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setManageDevicesOpen(false)}
+          isEmpty={devices.length === 0}
+          emptyMessage="No connected devices found."
+          hideSearch
+          maxWidth="max-w-md"
+          suspended={
+            renameTarget !== null ||
+            remoteDisconnectTarget !== null ||
+            disconnectConfirmOpen ||
+            lastDeviceWarningOpen
+          }
+        >
+          <PickerBody>
+            {devices.map((device) => (
+              <div key={device.uid} className={uiSection}>
+                <div className={uiSplitRow}>
+                  <div className="min-w-0">
+                    <p className={`truncate font-semibold ${colourTextPrimary}`}>
+                      {device.name ?? "Unnamed device"}
+                    </p>
+                    <p className={`mt-1 ${uiTextMeta}`}>
+                      {device.linkedAt
+                        ? `Linked ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(device.linkedAt)}`
+                        : "Link date unavailable"}
+                    </p>
+                    {device.isCurrentDevice && (
+                      <p className={`mt-1 ${uiTextMeta}`}>Current device</p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <EditButton
+                      label={`Rename ${device.name ?? "unnamed device"}`}
+                      onClick={() => openRenameDevice(device)}
+                    />
+                    <UnlinkButton
+                      label={`Unlink ${device.name ?? "unnamed device"}`}
+                      onClick={() => {
+                        if (device.isCurrentDevice) {
+                          if (devices.length === 1) setLastDeviceWarningOpen(true);
+                          else setDisconnectConfirmOpen(true);
+                        } else {
+                          setRemoteDisconnectTarget(device);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </PickerBody>
+        </PickerModal>
+      )}
+
+      {renameTarget && (
+        <PickerModal
+          title={renameTarget.name ? "Rename Device" : "Name This Device"}
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => {
+            if (renamingDevice) return;
+            setRenameTarget(null);
+            setRenameDraft("");
+          }}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+        >
+          <PickerBody>
+            {!renameTarget.name && (
+              <p className={`text-sm ${uiTextBody} lg:text-base`}>
+                Give this device a name so you can recognise it in your connected devices list.
+              </p>
+            )}
+            <form
+              className={uiStackBody}
+              onSubmit={(event) => {
+                event.preventDefault();
+                void handleRenameDevice();
+              }}
+            >
+              <label htmlFor="settings-device-name" className="sr-only">
+                Device name
+              </label>
+              <input
+                id="settings-device-name"
+                type="text"
+                value={renameDraft}
+                onChange={(event) => setRenameDraft(event.target.value)}
+                disabled={renamingDevice}
+                maxLength={PRODUCT_LIMITS.deviceNameCharacters}
+                placeholder="e.g. Cormac's phone"
+                autoComplete="off"
+                className={editableInputClass(true)}
+                autoFocus
+              />
+              <div className={uiTwoColumnGrid}>
                 <Button
                   type="submit"
                   variant="primary"
-                  disabled={!nameDraft.trim() || nameDraft.trim() === firstName}
-                  loading={savingName}
+                  disabled={!renameDraft.trim() || renameDraft.trim() === renameTarget.name}
+                  loading={renamingDevice}
                   loadingLabel="Saving"
                 >
                   Save
                 </Button>
-              </form>
-            </PickerBody>
-          </PickerModal>
-        )}
-
-        {/* ── Recovery Code ───────────────────────────────────────────────── */}
-        <section className={settingsRowClass}>
-          <div>
-            <span className="flex items-center gap-1.5">
-              <span className={settingsLabelClass}>Reveal Account Recovery Code</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal
-                  title="Reveal Account Recovery Code"
-                  content="Use this code to reconnect to your campaigns and characters if no device is still connected. Keep it somewhere safe and private."
-                />
-              </span>
-            </span>
-          </div>
-          <ViewButton
-            label="Reveal Account Recovery Code"
-            className="justify-self-end"
-            onClick={handleReveal}
-            disabled={revealing}
-            loading={revealing}
-          />
-        </section>
-
-        {revealedCode && (
-          <RevealCodeModal
-            code={revealedCode}
-            rotating={rotating}
-            onCopy={handleCopyRecoveryCode}
-            onRotate={handleRotate}
-            onClose={() => setRevealedCode(null)}
-          />
-        )}
-
-        {/* ── Manage Devices ──────────────────────────────────────────────── */}
-        <section className={settingsRowClass}>
-          <div>
-            <span className="flex items-center gap-1.5">
-              <span className={settingsLabelClass}>Manage Devices</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal
-                  title="Manage Devices"
-                  content="View and rename every device connected to your account, or unlink a device you no longer use. Unlinking another device also rotates your recovery code."
-                />
-              </span>
-            </span>
-          </div>
-          <ManageDevicesButton
-            label="Manage Devices"
-            className="justify-self-end"
-            onClick={handleOpenManageDevices}
-            disabled={!devices || !!deviceListError}
-          />
-        </section>
-
-        {manageDevicesOpen && devices && (
-          <PickerModal
-            title="Manage Devices"
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => setManageDevicesOpen(false)}
-            isEmpty={devices.length === 0}
-            emptyMessage="No connected devices found."
-            hideSearch
-            maxWidth="max-w-md"
-            suspended={
-              renameTarget !== null ||
-              remoteDisconnectTarget !== null ||
-              disconnectConfirmOpen ||
-              lastDeviceWarningOpen
-            }
-          >
-            <PickerBody>
-              {devices.map((device) => (
-                <div key={device.uid} className={uiSection}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className={`truncate font-semibold ${colourTextPrimary}`}>
-                        {device.name ?? "Unnamed device"}
-                      </p>
-                      <p className={`mt-1 ${uiTextMeta}`}>
-                        {device.linkedAt
-                          ? `Linked ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(device.linkedAt)}`
-                          : "Link date unavailable"}
-                      </p>
-                      {device.isCurrentDevice && (
-                        <p className={`mt-1 ${uiTextMeta}`}>Current device</p>
-                      )}
-                    </div>
-                    <div className="flex shrink-0 gap-2">
-                      <EditButton
-                        label={`Rename ${device.name ?? "unnamed device"}`}
-                        onClick={() => openRenameDevice(device)}
-                      />
-                      <UnlinkButton
-                        label={`Unlink ${device.name ?? "unnamed device"}`}
-                        onClick={() => {
-                          if (device.isCurrentDevice) {
-                            if (devices.length === 1) setLastDeviceWarningOpen(true);
-                            else setDisconnectConfirmOpen(true);
-                          } else {
-                            setRemoteDisconnectTarget(device);
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </PickerBody>
-          </PickerModal>
-        )}
-
-        {renameTarget && (
-          <PickerModal
-            title={renameTarget.name ? "Rename Device" : "Name This Device"}
-            query=""
-            onQueryChange={() => undefined}
-            onClose={() => {
-              if (renamingDevice) return;
-              setRenameTarget(null);
-              setRenameDraft("");
-            }}
-            isEmpty={false}
-            hideSearch
-            maxWidth="max-w-sm"
-          >
-            <PickerBody>
-              {!renameTarget.name && (
-                <p className={`text-sm ${uiTextBody} lg:text-base`}>
-                  Give this device a name so you can recognise it in your connected devices list.
-                </p>
-              )}
-              <form
-                className={uiStackBody}
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void handleRenameDevice();
-                }}
-              >
-                <label htmlFor="settings-device-name" className="sr-only">
-                  Device name
-                </label>
-                <input
-                  id="settings-device-name"
-                  type="text"
-                  value={renameDraft}
-                  onChange={(event) => setRenameDraft(event.target.value)}
+                <Button
+                  type="button"
+                  variant="neutral"
                   disabled={renamingDevice}
-                  maxLength={PRODUCT_LIMITS.deviceNameCharacters}
-                  placeholder="e.g. Cormac's phone"
-                  autoComplete="off"
-                  className={editableInputClass(true)}
-                  autoFocus
-                />
-                <div className={uiTwoColumnGrid}>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={!renameDraft.trim() || renameDraft.trim() === renameTarget.name}
-                    loading={renamingDevice}
-                    loadingLabel="Saving"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="neutral"
-                    disabled={renamingDevice}
-                    onClick={() => {
-                      setRenameTarget(null);
-                      setRenameDraft("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </PickerBody>
-          </PickerModal>
-        )}
+                  onClick={() => {
+                    setRenameTarget(null);
+                    setRenameDraft("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </PickerBody>
+        </PickerModal>
+      )}
 
-        {remoteDisconnectTarget && (
-          <ConfirmModal
-            title="Unlink Other Device?"
-            confirmLabel="Unlink"
-            busy={disconnectingOtherDevice}
-            loadingLabel="Unlinking"
-            onConfirm={() => void handleDisconnectOtherDevice()}
-            onCancel={() => setRemoteDisconnectTarget(null)}
-          >
-            <dl className={`${uiStackList} text-sm lg:text-base`}>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                <dd className={uiTextBody}>{remoteDisconnectTarget.name ?? "Unnamed device"}</dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                <dd className={uiTextBody}>
-                  This device will lose access to the account and return to Create Your Account.
-                </dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
-                <dd className={uiTextBody}>
-                  Campaigns and characters remain available on the other connected devices.
-                </dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Recovery code</dt>
-                <dd className={uiTextBody}>
-                  The code will be replaced. The replacement remains available under View Account
-                  Recovery Code in Settings.
-                </dd>
-              </div>
-            </dl>
-          </ConfirmModal>
-        )}
+      {remoteDisconnectTarget && (
+        <ConfirmModal
+          title="Unlink Other Device?"
+          confirmLabel="Unlink"
+          busy={disconnectingOtherDevice}
+          loadingLabel="Unlinking"
+          onConfirm={() => void handleDisconnectOtherDevice()}
+          onCancel={() => setRemoteDisconnectTarget(null)}
+        >
+          <dl className={`${uiStackList} text-sm lg:text-base`}>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
+              <dd className={uiTextBody}>{remoteDisconnectTarget.name ?? "Unnamed device"}</dd>
+            </div>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
+              <dd className={uiTextBody}>
+                This device will lose access to the account and return to Create Your Account.
+              </dd>
+            </div>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
+              <dd className={uiTextBody}>
+                Campaigns and characters remain available on the other connected devices.
+              </dd>
+            </div>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Recovery code</dt>
+              <dd className={uiTextBody}>
+                The code will be replaced. The replacement remains available under View Account
+                Recovery Code in Settings.
+              </dd>
+            </div>
+          </dl>
+        </ConfirmModal>
+      )}
 
-        {disconnectConfirmOpen && (
-          <ConfirmModal
-            title="Unlink This Device?"
-            confirmLabel="Unlink"
-            busy={disconnectingDevice}
-            loadingLabel="Unlinking"
-            onConfirm={async () => {
-              const result = await handleDisconnectDevice(false);
-              if (result !== "failed") setDisconnectConfirmOpen(false);
-            }}
-            onCancel={() => setDisconnectConfirmOpen(false)}
-          >
-            <dl className={`${uiStackList} text-sm lg:text-base`}>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
-                <dd className={uiTextBody}>{currentDeviceName}</dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
-                <dd className={uiTextBody}>
-                  This device will lose access to the account and return to Create Your Account.
-                </dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
-                <dd className={uiTextBody}>
-                  Campaigns and characters remain available on the other connected devices.
-                </dd>
-              </div>
-              <div>
-                <dt className={`font-semibold ${colourMetadataLabelText}`}>Reconnect</dt>
-                <dd className={uiTextBody}>
-                  Use the account recovery code to connect this device again.
-                </dd>
-              </div>
-            </dl>
-          </ConfirmModal>
-        )}
+      {disconnectConfirmOpen && (
+        <ConfirmModal
+          title="Unlink This Device?"
+          confirmLabel="Unlink"
+          busy={disconnectingDevice}
+          loadingLabel="Unlinking"
+          onConfirm={async () => {
+            const result = await handleDisconnectDevice(false);
+            if (result !== "failed") setDisconnectConfirmOpen(false);
+          }}
+          onCancel={() => setDisconnectConfirmOpen(false)}
+        >
+          <dl className={`${uiStackList} text-sm lg:text-base`}>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Device</dt>
+              <dd className={uiTextBody}>{currentDeviceName}</dd>
+            </div>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>What happens</dt>
+              <dd className={uiTextBody}>
+                This device will lose access to the account and return to Create Your Account.
+              </dd>
+            </div>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Account data</dt>
+              <dd className={uiTextBody}>
+                Campaigns and characters remain available on the other connected devices.
+              </dd>
+            </div>
+            <div>
+              <dt className={`font-semibold ${colourMetadataLabelText}`}>Reconnect</dt>
+              <dd className={uiTextBody}>
+                Use the account recovery code to connect this device again.
+              </dd>
+            </div>
+          </dl>
+        </ConfirmModal>
+      )}
 
-        <section className={settingsRowClass}>
-          <div>
-            <span className="flex items-center gap-1.5">
-              <span className={settingsLabelClass}>Delete Account</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal
-                  title="Delete Account"
-                  content="This releases your claimed characters, removes your profile and linked devices, revokes account recovery, and permanently deletes this anonymous account. You must delete or transfer every campaign you own first."
-                />
-              </span>
-            </span>
-          </div>
-          <RemoveButton
-            label="Delete Account"
-            className="justify-self-end"
-            onClick={() => setDeleteConfirmOpen(true)}
-          />
-        </section>
+      <ManageActionRow
+        label="Delete Account"
+        info="This releases your claimed characters, removes your profile and linked devices, revokes account recovery, and permanently deletes this anonymous account. You must delete or transfer every campaign you own first."
+      >
+        <RemoveButton label="Delete Account" onClick={() => setDeleteConfirmOpen(true)} />
+      </ManageActionRow>
 
-        {deleteConfirmOpen && (
-          <DeleteConfirmModal
-            title="Delete Account"
-            message="This permanently deletes your account. This cannot be undone."
-            typedLabel="Type DELETE to permanently delete this account"
-            ready
-            deleting={deletingAccount}
-            onConfirm={async () => {
-              if (await handleDeleteAccount()) setDeleteConfirmOpen(false);
-            }}
-            onCancel={() => setDeleteConfirmOpen(false)}
-          />
-        )}
-      </div>
+      {deleteConfirmOpen && (
+        <DeleteConfirmModal
+          title="Delete Account"
+          message="This permanently deletes your account. This cannot be undone."
+          typedLabel="Type DELETE to permanently delete this account"
+          ready
+          deleting={deletingAccount}
+          onConfirm={async () => {
+            if (await handleDeleteAccount()) setDeleteConfirmOpen(false);
+          }}
+          onCancel={() => setDeleteConfirmOpen(false)}
+        />
+      )}
 
       {lastDeviceWarningOpen && (
         <ConfirmModal
@@ -686,6 +631,6 @@ export default function Settings({
           </dl>
         </ConfirmModal>
       )}
-    </ModalShell>
+    </ManageModal>
   );
 }

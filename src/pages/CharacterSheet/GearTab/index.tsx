@@ -21,6 +21,7 @@ import {
   uiStackSection,
   uiStackPage,
   uiStackList,
+  uiSplitRow,
 } from "../../../ui/styles/editableStyles";
 import { colourActiveSky, colourActiveRose } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -645,7 +646,7 @@ export function GearTab({
           className={visibleGearSectionClass("items")}
           role="tabpanel"
         >
-          <div className="flex items-center justify-between">
+          <div className={uiSplitRow}>
             <SectionHeader>Items</SectionHeader>
             {!showCustomForm &&
               (editable ? (
@@ -668,7 +669,7 @@ export function GearTab({
           className={visibleGearSectionClass("consumables")}
           role="tabpanel"
         >
-          <div className="flex items-center justify-between">
+          <div className={uiSplitRow}>
             <SectionHeader>Consumables</SectionHeader>
             {editable ? (
               <AddButton label="Add Consumable" onClick={() => setShowConsumablePicker(true)} />

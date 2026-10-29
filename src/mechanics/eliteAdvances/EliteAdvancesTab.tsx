@@ -52,6 +52,7 @@ import {
   uiStackBody,
   uiStackField,
   uiStackList,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
@@ -947,7 +948,7 @@ export function EliteAdvancesTab({
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
+      <div className={`${uiSplitRow} mb-3`}>
         <SectionHeader>Elite Advances</SectionHeader>
         {editable ? (
           <AddButton label="Add Elite Advance" onClick={() => setShowPicker(true)} />

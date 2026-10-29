@@ -22,6 +22,7 @@ import {
   uiTextPlaceholder,
   uiStackList,
   uiStackPage,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
@@ -112,7 +113,7 @@ function FaithTalentSection({
   const [showPicker, setShowPicker] = useState(false);
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
+      <div className={`${uiSplitRow} mb-3`}>
         <SectionHeader>Faith Talents</SectionHeader>
         {editable ? (
           <AddButton label="Add Faith Talent" onClick={() => setShowPicker(true)} />
@@ -304,7 +305,7 @@ function RegularTalentSection({
   const [showPicker, setShowPicker] = useState(false);
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
+      <div className={`${uiSplitRow} mb-3`}>
         <SectionHeader>Talents</SectionHeader>
         {editable ? (
           <AddButton label="Add Talent" onClick={() => setShowPicker(true)} />

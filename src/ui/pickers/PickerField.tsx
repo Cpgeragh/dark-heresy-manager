@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { editableInputClass, uiTextPlaceholder } from "../styles/editableStyles";
+import { editableInputClass, uiSplitRow, uiTextPlaceholder } from "../styles/editableStyles";
 import { ArrowRight } from "../icons/PickerArrows";
 import { FormLabel } from "../forms/FormLabel";
 import { uiFocusRing, uiPressFeedback } from "../styles/buttonStyles";
@@ -59,7 +59,7 @@ export function PickerField({
         onClick={onClick}
         className={`${editableInputClass(!disabled)} ${
           label ? "mt-0.5" : ""
-        } appearance-none text-left flex items-center justify-between ${uiPressFeedback(!disabled)} ${uiFocusRing} ${buttonClassName}`.trim()}
+        } appearance-none text-left ${uiSplitRow} ${uiPressFeedback(!disabled)} ${uiFocusRing} ${buttonClassName}`.trim()}
       >
         <span className={value ? "" : uiTextPlaceholder}>{value || placeholder}</span>
         <ArrowRight />

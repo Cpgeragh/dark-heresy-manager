@@ -41,6 +41,8 @@ import {
   uiSummaryGrid,
   uiOptionGrid,
   uiSectionColumns,
+  uiSplitRow,
+  uiSplitRowTop,
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/chips/Chip";
@@ -781,8 +783,8 @@ function RankEntryList({
           key={entry.id}
           className={
             boxed
-              ? `${uiSection} flex items-start justify-between gap-3`
-              : `flex items-start justify-between gap-3 border-b ${colourDivider} pb-2 last:border-b-0 last:pb-0`
+              ? `${uiSection} ${uiSplitRowTop}`
+              : `${uiSplitRowTop} border-b ${colourDivider} pb-2 last:border-b-0 last:pb-0`
           }
         >
           <div className={`min-w-0 ${uiStackField}`}>
@@ -861,7 +863,7 @@ function RankLedgerSection({
 }) {
   return (
     <section className={`${uiSectionShell} ${uiStackSection} p-3 lg:p-4 ${className}`.trim()}>
-      <div className="flex items-baseline justify-between gap-3">
+      <div className={uiSplitRow}>
         <SectionHeader as="h3">{title}</SectionHeader>
         <span className={`shrink-0 font-code text-sm ${uiTextBody}`}>{total} XP</span>
       </div>

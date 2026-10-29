@@ -17,6 +17,7 @@ import {
   uiTextPlaceholder,
   uiStackPage,
   uiStackSection,
+  uiSplitRow,
 } from "../../../ui/styles/editableStyles";
 import { colourNoticeViolet, colourDrugNoticeText } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -286,7 +287,7 @@ export function DrugsTab({
 
       {/* Carried drugs */}
       <section className={uiStackSection}>
-        <div className="flex items-center justify-between">
+        <div className={uiSplitRow}>
           <SectionHeader>Carried</SectionHeader>
           {editable ? (
             <AddButton label="Add Drug" onClick={() => setShowPicker(true)} />

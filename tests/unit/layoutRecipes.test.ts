@@ -10,6 +10,7 @@ import {
   uiOptionGrid,
   uiSectionColumns,
   uiSplitRow,
+  uiSplitRowTop,
   uiStackBody,
   uiStackField,
   uiStackList,
@@ -154,6 +155,7 @@ describe("shared layout recipes", () => {
     expect(uiChipRow).toBe("flex flex-wrap gap-1.5");
     expect(uiInlineRow).toBe("flex items-center gap-2");
     expect(uiSplitRow).toBe("flex items-center justify-between gap-2");
+    expect(uiSplitRowTop).toBe("flex items-start justify-between gap-2");
     expect(uiTwoColumnGrid).toBe("grid grid-cols-2 gap-2");
     expect(uiSummaryGrid).toBe("grid gap-3");
     expect(uiOptionGrid).toBe("grid gap-1.5");
@@ -166,7 +168,8 @@ describe("shared layout recipes", () => {
     const recipes = [
       ["flex", "flex-wrap", "gap-1.5"],
       ["flex", "items-center", "gap-2"],
-      ["flex", "items-center", "justify-between", "gap-2"],
+      ["flex", "items-center", "justify-between"],
+      ["flex", "items-start", "justify-between"],
       ["grid", "grid-cols-2", "gap-2"],
       ["grid", "grid-cols-3", "gap-2"],
       ["grid", "grid-cols-2", "gap-3"],

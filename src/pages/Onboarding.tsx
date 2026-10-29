@@ -384,7 +384,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                 title="Connect Existing Account"
                 left={
                   <TitleHeaderActionButton
-                    align="start"
                     aria-label="Back"
                     disabled={recoveryBusy}
                     onClick={() => {
@@ -432,7 +431,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                 title="Save Your Recovery Code"
                 left={
                   <TitleHeaderActionButton
-                    align="start"
                     aria-label="Back"
                     disabled={busy || (!code && codeLoading) || discardingSetup}
                     onClick={() => setCancelSetupOpen(true)}

@@ -22,6 +22,7 @@ import {
   uiStackSection,
   uiStackBody,
   uiStackList,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import { SKILL_DESCRIPTIONS } from "../../data/reference/skillDescriptions";
 import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
@@ -315,7 +316,7 @@ export function CompanionsTab({
 
   return (
     <div className={uiStackSection}>
-      <div className="flex items-center justify-between">
+      <div className={uiSplitRow}>
         <SectionHeader>Companions</SectionHeader>
         {editable ? (
           <AddButton label="Add Companion" onClick={() => setShowPicker(true)} />

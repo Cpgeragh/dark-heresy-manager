@@ -23,6 +23,7 @@ import {
   uiTextPlaceholder,
   uiStackList,
   uiStackPage,
+  uiSplitRow,
 } from "../../ui/styles/editableStyles";
 import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
 import { CustomTraitForm } from "./CustomTraitForm";
@@ -393,7 +394,7 @@ export function TraitsTab({
   return (
     <div className={uiStackPage}>
       <div>
-        <div className="mb-3 flex items-center justify-between">
+        <div className={`${uiSplitRow} mb-3`}>
           <SectionHeader>Traits</SectionHeader>
           {editable ? (
             <AddButton label="Add Trait" onClick={() => setShowPicker(true)} />

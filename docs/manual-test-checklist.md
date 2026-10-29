@@ -1440,6 +1440,8 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] An item whose weight is a dash shows "0 kg", an item whose weight is Varies shows the word "Varies", an item whose weight has a † shows the number only, and the Sky Eye shows "4 kg case" (`weightFormat.ts`)
 - [ ] Form fields and pop-up footer buttons sit in two equal columns with the same gap at every width, including Age, Height and Weight on the Background tab on a phone; option buttons in the custom forms, the Experience rank choices and the Ranged picker filters share one tighter gap; and the side-by-side sections on Skills, Experience, Gear and Weapons sit the same distance apart and start at the top (`uiTwoColumnGrid`, `uiOptionGrid`, `uiSectionColumns`)
 - [ ] Notes, Traits, Talents and the Archeotech armour lists flow into independent columns that do not line up in rows, and Notes is a single column on a phone (`IndependentCardGrid`)
+- [ ] Every row with a name or heading on the left and a button, chip or value on the right, such as the Add buttons beside section headings, the Upgrades and Ammo rows in weapon cards, the Experience entry rows, the device rows in Settings and the chat inbox rows, keeps its two sides at opposite ends with the same gap, and an entry whose left side runs to several lines keeps its buttons at the top (`uiSplitRow`, `uiSplitRowTop`)
+- [ ] The Manage Account window in Settings looks and behaves like the Manage windows for a campaign or character, with the same header, divider lines and rows, and an armour upgrade and a weapon upgrade card look alike apart from their chips and information (`ManageModal`, `ManageActionRow`, `UpgradeEntryCard`)
 
 ## 36. Waiting and Instant Saves
 

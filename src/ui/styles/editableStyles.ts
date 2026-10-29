@@ -70,6 +70,9 @@ export const uiInlineRow = "flex items-center gap-2";
 /** Inline row with its contents split between the two ends. */
 export const uiSplitRow = "flex items-center justify-between gap-2";
 
+/** Split row whose left side runs to several lines, so its right side stays at the top. */
+export const uiSplitRowTop = "flex items-start justify-between gap-2";
+
 /** Two-column grid at every width, for form fields or for the buttons of a pop-up or form footer. */
 export const uiTwoColumnGrid = "grid grid-cols-2 gap-2";
 
