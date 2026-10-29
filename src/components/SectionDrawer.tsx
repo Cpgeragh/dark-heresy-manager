@@ -7,7 +7,12 @@ import { MenuIcon } from "../ui/icons/MenuIcon";
 import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
 import { DrawerBackdrop } from "../ui/DrawerBackdrop";
 import { SectionDrawerRow } from "../ui/SectionDrawerRow";
-import { colourTextPrimary, colourPopoverSurface, colourDivider } from "../ui/styles/colourTokens";
+import {
+  colourTextPrimary,
+  colourPopoverSurface,
+  colourDivider,
+  colourShadowStrong,
+} from "../ui/styles/colourTokens";
 import { uiSplitRow } from "../ui/styles/editableStyles";
 import { uiLayerForeground } from "../ui/styles/layerStyles";
 
@@ -154,7 +159,7 @@ function SectionDrawerContent({
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 ${uiLayerForeground} w-72 max-w-[85vw] ${colourPopoverSurface} border-r flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 ${uiLayerForeground} w-72 max-w-[85vw] ${colourPopoverSurface} border-r flex flex-col ${colourShadowStrong} transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="Section navigation"

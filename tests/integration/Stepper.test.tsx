@@ -4,11 +4,18 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { Stepper } from "../../src/components/Stepper";
+import { colourControlShadow } from "../../src/ui/styles/colourTokens";
 
 describe("Stepper", () => {
   it("renders the current value", () => {
     render(<Stepper value={5} editable onChange={vi.fn()} />);
     expect(screen.getByText("5")).toBeInTheDocument();
+  });
+
+  it("carries the shared control shadow", () => {
+    const { container } = render(<Stepper value={5} editable onChange={vi.fn()} />);
+
+    expect(container.firstElementChild).toHaveClass(...colourControlShadow.split(" "));
   });
 
   it("increments and decrements by 1 via the +/- buttons", async () => {

@@ -8,6 +8,7 @@ import {
   colourModalBackdrop,
   colourModalBackdropSuspended,
   colourModalSurface,
+  colourShadowStrong,
   colourTextPrimary,
 } from "../styles/colourTokens";
 import { uiCorner } from "../styles/shapeStyles";
@@ -179,7 +180,7 @@ export function ModalShell({
       onClose={() => {
         if (!unmountingRef.current) onClose();
       }}
-      className={`m-auto w-[calc(100%-2rem)] ${colourModalSurface} border ${uiCorner} shadow-2xl p-0 ${colourTextPrimary} ${
+      className={`m-auto w-[calc(100%-2rem)] ${colourModalSurface} border ${uiCorner} ${colourShadowStrong} p-0${colourTextPrimary} ${
         suspended
           ? `invisible ${colourModalBackdropSuspended} backdrop:backdrop-blur-none`
           : `${colourModalBackdrop} backdrop:backdrop-blur-sm`

@@ -24,9 +24,10 @@ describe("KeepOrDeleteChatModal", () => {
     renderModal();
 
     expect(screen.getByRole("button", { name: "Keep My Chat" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Move My Chat to Recently Deleted" })
-    ).toBeInTheDocument();
+    const move = screen.getByRole("button", { name: "Move My Chat to Recently Deleted" });
+    expect(move).toBeInTheDocument();
+    expect(move).toHaveClass("border-amber-500", "text-amber-500");
+    expect(move).not.toHaveClass("bg-red-900/40");
     expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
   });

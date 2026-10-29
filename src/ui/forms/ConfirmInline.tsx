@@ -62,8 +62,8 @@ export function ConfirmInline({
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
 
-  const triggerVariant = variant === "warning" ? "warningOutline" : "primary";
-  const confirmVariant = variant === "warning" ? "warningOutline" : "primary";
+  const triggerVariant = variant === "warning" ? "warningOutline" : "danger";
+  const confirmVariant = variant === "warning" ? "warningOutline" : "danger";
   const accent = variant === "warning" ? colourAmberPlain : colourErrorText;
 
   const handle = (fn: () => void | Promise<void>) => (e: React.MouseEvent) => {

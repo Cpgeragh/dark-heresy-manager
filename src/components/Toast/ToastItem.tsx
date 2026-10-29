@@ -9,7 +9,11 @@ import { CopyIcon } from "../../ui/icons/CopyIcon";
 import { ExclamationIcon } from "../../ui/icons/ExclamationIcon";
 import { InfoIcon } from "../../ui/icons/InfoIcon";
 import { WarningIcon } from "../../ui/icons/WarningIcon";
-import { colourHoverToastControl, toastColours } from "../../ui/styles/colourTokens";
+import {
+  colourHoverToastControl,
+  colourShadowRaised,
+  toastColours,
+} from "../../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../../ui/styles/buttonStyles";
 import { uiCorner } from "../../ui/styles/shapeStyles";
 
@@ -52,7 +56,7 @@ export function ToastItem({ toast }: ToastItemProps) {
       aria-atomic="true"
       className={`
         ${toastColours[toast.type]}
-        border ${uiCorner} p-4 shadow-lg
+        border ${uiCorner} p-4 ${colourShadowRaised}
         backdrop-blur-sm
         animate-slide-in-right
         grid ${gridColumns} items-center gap-3 overflow-hidden

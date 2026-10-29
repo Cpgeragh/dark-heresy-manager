@@ -87,9 +87,13 @@ describe("ConfirmInline", () => {
       />
     );
 
-    await user.click(screen.getByText("Delete"));
+    const trigger = screen.getByRole("button", { name: "Delete" });
+    expect(trigger).toHaveClass("bg-red-900/40", "text-red-400");
+    await user.click(trigger);
+
     const confirm = screen.getByText("Delete Permanently");
     expect(confirm).toBeDisabled();
+    expect(confirm).toHaveClass("bg-red-900/40", "text-red-400");
 
     await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
     expect(confirm).toBeEnabled();

@@ -12,7 +12,7 @@ import { QrModal } from "../ui/modals/QrModal";
 import { uiIconButton, uiIconButtonIconSize, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { AppHeaderShell } from "./AppHeaderShell";
 import { HeaderMessagesButton } from "./chat/HeaderMessagesButton";
-import { colourPopoverSurface } from "../ui/styles/colourTokens";
+import { colourPopoverSurface, colourShadowStrong } from "../ui/styles/colourTokens";
 import { uiLayerForeground } from "../ui/styles/layerStyles";
 import { uiCorner } from "../ui/styles/shapeStyles";
 
@@ -96,7 +96,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
 
                 {kebabOpen && (
                   <div
-                    className={`absolute right-0 top-full mt-2 ${uiLayerForeground} w-72 ${colourPopoverSurface} border ${uiCorner} shadow-2xl p-4`}
+                    className={`absolute right-0 top-full mt-2 ${uiLayerForeground} w-72 ${colourPopoverSurface} border ${uiCorner} ${colourShadowStrong} p-4`}
                   >
                     {kebabContent}
                   </div>

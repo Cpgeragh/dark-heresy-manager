@@ -4,7 +4,7 @@
 import type { CSSProperties } from "react";
 import type { PsychicDiscipline } from "../../../data/reference/psychicReference";
 import type { GlowChipColour } from "../../../ui/chips/GlowChip";
-import type { ChipColour } from "../../../ui/styles/colourTokens";
+import { colourGlowPulseRgb, type ChipColour } from "../../../ui/styles/colourTokens";
 
 export const disciplineColours: Record<string, ChipColour> = {
   Minor: "violet",
@@ -53,7 +53,7 @@ export function psyRatingPulseVars(psyRating: number): CSSProperties {
   const [loBlur, loOpacity] = lo[capped];
   const [hiBlur, hiOpacity] = hi[capped];
   return {
-    "--glow-lo": `0 0 ${loBlur}px rgba(129,140,248,${loOpacity})`,
-    "--glow-hi": `0 0 ${hiBlur}px rgba(129,140,248,${hiOpacity})`,
+    "--glow-lo": `0 0 ${loBlur}px rgba(${colourGlowPulseRgb.indigo},${loOpacity})`,
+    "--glow-hi": `0 0 ${hiBlur}px rgba(${colourGlowPulseRgb.indigo},${hiOpacity})`,
   } as CSSProperties;
 }

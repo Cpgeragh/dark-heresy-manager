@@ -6,7 +6,12 @@ import "@testing-library/jest-dom";
 import { Chip, NestedChip } from "../../src/ui/chips/Chip";
 import { GlowChip } from "../../src/ui/chips/GlowChip";
 import { RemovableChip } from "../../src/ui/chips/RemovableChip";
-import { chipColours, type ChipColour } from "../../src/ui/styles/colourTokens";
+import {
+  chipColours,
+  colourGlowPulseCore,
+  colourGlowPulseRgb,
+  type ChipColour,
+} from "../../src/ui/styles/colourTokens";
 import { uiCorner } from "../../src/ui/styles/shapeStyles";
 
 describe("Chip", () => {
@@ -78,6 +83,37 @@ describe("Chip", () => {
       "font-semibold"
     );
     expect(screen.getByText("Unknown")).toHaveClass("px-2.5", "py-1", "text-fuchsia-400/50");
+  });
+
+  it.each(Object.keys(colourGlowPulseRgb) as (keyof typeof colourGlowPulseRgb)[])(
+    "pulses a %s glow chip in the glow of its own colour",
+    (colour) => {
+      const rgb = colourGlowPulseRgb[colour];
+      render(
+        <GlowChip active={false} colour={colour} pulsing>
+          Pulse
+        </GlowChip>
+      );
+
+      const chip = screen.getByText("Pulse");
+      expect(chip).toHaveClass("animate-psy-pulse");
+      expect(chip.style.getPropertyValue("--glow-lo")).toBe(
+        `0 0 1px rgba(${colourGlowPulseCore},1), 0 0 4px rgba(${rgb},1), 0 0 14px rgba(${rgb},0.8)`
+      );
+      expect(chip.style.getPropertyValue("--glow-hi")).toBe(
+        `0 0 2px rgba(${colourGlowPulseCore},1), 0 0 6px rgba(${rgb},1), 0 0 22px rgba(${rgb},0.9)`
+      );
+    }
+  );
+
+  it("sets no pulse variables on a chip that is not pulsing", () => {
+    render(
+      <GlowChip active colour="teal">
+        Still
+      </GlowChip>
+    );
+
+    expect(screen.getByText("Still").style.getPropertyValue("--glow-lo")).toBe("");
   });
 
   it("removes an unfinished form choice immediately", async () => {

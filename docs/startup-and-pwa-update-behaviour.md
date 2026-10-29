@@ -74,6 +74,8 @@ After React owns the shell, `src/components/StartupGate.tsx` decides when the si
 
 `index.html` contains the same splash as `src/components/SplashScreen.tsx` inside `#root`, so the first paint after any page load, including an update reload, matches the splash. `public/splash-label.js` runs before the application starts and writes "Updating…" into the splash when `pwa-just-upgraded` is present.
 
+The static splash uses the same red-500 title and spinner as the React splash. The page background, the browser theme colour and the manifest `theme_color` and `background_color` are all slate-950 (`#020617`), so the browser bar, the installed app's launch screen, the static splash and the React splash show one background.
+
 ## Verification
 
 Use `npm run performance:pwa` for controlled revisions and stalled-asset behaviour.

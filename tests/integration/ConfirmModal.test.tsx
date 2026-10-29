@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { ConfirmModal } from "../../src/ui/modals/ConfirmModal";
+import { colourShadowStrong } from "../../src/ui/styles/colourTokens";
 
 function renderModal(props: Partial<Parameters<typeof ConfirmModal>[0]> = {}) {
   const onConfirm = vi.fn();
@@ -29,6 +30,12 @@ describe("ConfirmModal", () => {
     expect(screen.getByText("Rotate code?")).toHaveClass("text-center");
     expect(screen.getByRole("button", { name: "Rotate" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+  });
+
+  it("carries the shared strong shadow", () => {
+    renderModal();
+
+    expect(screen.getByRole("dialog", { name: "Rotate Code" })).toHaveClass(colourShadowStrong);
   });
 
   it("puts the confirm button before the cancel button", () => {

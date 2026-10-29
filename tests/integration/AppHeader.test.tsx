@@ -13,6 +13,7 @@ vi.mock("../../src/context/useHeaderExtension", () => ({
 import { AppHeader } from "../../src/components/AppHeader";
 import { ChatInboxProvider } from "../../src/context/ChatInboxProvider";
 import { useChatInbox } from "../../src/context/useChatInbox";
+import { colourShadowStrong } from "../../src/ui/styles/colourTokens";
 
 function InboxViewProbe() {
   const { view } = useChatInbox();
@@ -101,6 +102,21 @@ describe("AppHeader", () => {
     await user.click(document.body);
 
     expect(screen.queryByText("Kebab options here")).not.toBeInTheDocument();
+  });
+
+  it("gives the open kebab menu the shared strong shadow", async () => {
+    const user = userEvent.setup();
+    useHeaderExtensionMock.mockReturnValue({
+      backHref: null,
+      kebabContent: <div>Kebab options here</div>,
+    });
+    renderHeader("/");
+
+    await user.click(screen.getByRole("button", { name: "Options" }));
+
+    expect(
+      screen.getByText("Kebab options here").closest(`.${colourShadowStrong}`)
+    ).toBeInTheDocument();
   });
 
   it("closes the open kebab menu with Escape", async () => {

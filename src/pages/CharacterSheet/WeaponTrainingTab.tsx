@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet/WeaponTrainingTab.tsx
 
-import { useState, useCallback, type CSSProperties } from "react";
+import { useState, useCallback } from "react";
 import type {
   AlternateRankSelection,
   TalentsAndTraitsBlock,
@@ -47,14 +47,6 @@ const EXOTIC_WEAPON_TRAINING_OPTIONS = Array.from(
   )
 ).sort((a, b) => a.localeCompare(b));
 
-const WEAPON_TRAINING_GROUP_RGB: Record<string, string> = {
-  "Basic Weapon Training": "45,212,191", // teal-400
-  "Heavy Weapon Training": "167,139,250", // violet-400
-  "Melee Weapon Training": "251,146,60", // orange-400
-  "Pistol Training": "56,189,248", // sky-400
-  "Thrown Weapon Training": "251,191,36", // amber-400
-};
-
 const WEAPON_TRAINING_GROUP_COLOUR: Record<string, GlowChipColour> = {
   "Basic Weapon Training": "teal",
   "Heavy Weapon Training": "violet",
@@ -63,15 +55,6 @@ const WEAPON_TRAINING_GROUP_COLOUR: Record<string, GlowChipColour> = {
   "Thrown Weapon Training": "amber",
 };
 
-const EXOTIC_WEAPON_TRAINING_RGB = "232,121,249";
-
-/** CSS custom properties driving the shared `animate-psy-pulse` keyframe (see tailwind.config.cjs). */
-function weaponTrainingPulseVars(rgb: string): CSSProperties {
-  return {
-    "--glow-lo": `0 0 1px rgba(255,255,255,1), 0 0 4px rgba(${rgb},1), 0 0 14px rgba(${rgb},0.8)`,
-    "--glow-hi": `0 0 2px rgba(255,255,255,1), 0 0 6px rgba(${rgb},1), 0 0 22px rgba(${rgb},0.9)`,
-  } as CSSProperties;
-}
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
   editable: boolean;
@@ -312,11 +295,6 @@ export function WeaponTrainingTab({
                   onClick={handleClick}
                   aria-pressed={active}
                   aria-label={`${display}${typeof cost === "number" ? `, ${cost} XP` : ""}`}
-                  style={
-                    pulsing
-                      ? weaponTrainingPulseVars(WEAPON_TRAINING_GROUP_RGB[group.label])
-                      : undefined
-                  }
                 >
                   {display}
                 </GlowChip>
@@ -377,7 +355,6 @@ export function WeaponTrainingTab({
               onClick={() => setPendingExoticPurchase(entry)}
               aria-pressed="false"
               aria-label={`${entry.name}, ${entry.purchase.cost} XP`}
-              style={weaponTrainingPulseVars(EXOTIC_WEAPON_TRAINING_RGB)}
             >
               {entry.name}
             </GlowChip>

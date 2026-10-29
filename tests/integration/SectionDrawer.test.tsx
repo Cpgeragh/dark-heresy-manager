@@ -3,8 +3,21 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { SectionDrawer } from "../../src/components/SectionDrawer";
 import { getSheetNavigation } from "../../src/pages/CharacterSheet/sectionNavigation";
+import { colourShadowStrong } from "../../src/ui/styles/colourTokens";
 
 describe("SectionDrawer", () => {
+  it("carries the shared strong shadow", () => {
+    render(
+      <SectionDrawer
+        navigation={getSheetNavigation(false)}
+        activePage="stats"
+        onPageChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByLabelText("Section navigation")).toHaveClass(colourShadowStrong);
+  });
+
   it("includes Elite Advances under Abilities", async () => {
     const user = userEvent.setup();
     const onPageChange = vi.fn();

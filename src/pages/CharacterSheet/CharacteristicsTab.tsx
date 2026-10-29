@@ -49,6 +49,7 @@ import {
   colourTextPrimary,
   colourDivider,
   colourErrorText,
+  colourGlowSilver,
 } from "../../ui/styles/colourTokens";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
@@ -571,7 +572,7 @@ export function CharacteristicsTab({
               />
             </div>
             <div
-              className={`${uiCorner} shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]`}
+              className={`${uiCorner} ${colourGlowSilver}`}
               style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
             >
               <StatBlock

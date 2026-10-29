@@ -7,6 +7,7 @@ import "@testing-library/jest-dom";
 import { CharacteristicsTab } from "../../src/pages/CharacterSheet/CharacteristicsTab";
 import { getCharacteristicModifierTotals } from "../../src/mechanics/corruption/characteristicModifierTotals";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
+import { colourGlowSilver } from "../../src/ui/styles/colourTokens";
 import type { CharField } from "../../src/types/Character";
 import type { Characteristics, CorruptionBlock } from "../../src/types/Character";
 
@@ -383,5 +384,11 @@ describe("CharacteristicsTab mobile peek carousel", () => {
       .getAllByText("Ballistic Skill (BS)")
       .find((el) => el.closest('[aria-hidden="true"]'));
     expect(bsPeek).toBeInTheDocument();
+  });
+
+  it("gives the active characteristic the shared silver glow", () => {
+    renderTab();
+
+    expect(document.getElementsByClassName(colourGlowSilver)).toHaveLength(1);
   });
 });

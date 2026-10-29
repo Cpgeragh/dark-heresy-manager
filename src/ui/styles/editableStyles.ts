@@ -8,6 +8,7 @@ import {
   colourBorderSurface,
   colourFillCard,
   colourFillInset,
+  colourSpinnerAccent,
   colourSplashRule,
   colourErrorText,
   colourHeadingAccent,
@@ -199,7 +200,7 @@ export const uiFormLabelHint = `ml-1 normal-case tracking-normal ${colourMetadat
 export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]";
 
 /** Small circular loading spinner. Set its size with width and height classes where it is used. */
-export const uiSpinner = `rounded-full border-2 ${colourSplashRule} border-t-red-600 animate-spin`;
+export const uiSpinner = `rounded-full border-2 ${colourSplashRule} ${colourSpinnerAccent} animate-spin`;
 export const uiSubheading = `text-xs lg:text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`;
 const uiItemNameTypography = "text-sm lg:text-base font-medium";
 /** Base and hover colour placed on content directly following a CardOverlayButton. */

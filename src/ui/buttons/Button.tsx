@@ -7,7 +7,7 @@
 
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import {
-  colourButtonDangerGhost,
+  colourButtonDanger,
   colourButtonGhost,
   colourButtonNeutralOutline,
   colourButtonPrimary,
@@ -35,7 +35,6 @@ export type ButtonVariant =
   | "ghost"
   | "neutral"
   | "danger"
-  | "dangerGhost"
   | "warning"
   | "warningOutline"
   | "warningGhost"
@@ -66,8 +65,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   secondary: colourButtonSecondary,
   ghost: colourButtonGhost,
   neutral: colourButtonNeutralOutline,
-  danger: colourButtonPrimary,
-  dangerGhost: colourButtonDangerGhost,
+  danger: colourButtonDanger,
   warning: colourButtonWarningOutline,
   warningOutline: colourButtonWarningOutline,
   warningGhost: colourButtonWarningGhost,

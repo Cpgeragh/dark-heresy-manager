@@ -66,6 +66,7 @@ describe("DeleteConfirmModal", () => {
     expect(within(dialog).getByText(props.message)).toBeInTheDocument();
     expect(within(dialog).getByText(props.typedLabel)).toBeInTheDocument();
     expect(button).toBeDisabled();
+    expect(button).toHaveClass("bg-red-900/40", "text-red-400");
 
     await user.type(within(dialog).getByPlaceholderText("DELETE"), "delete");
     expect(button).toBeDisabled();

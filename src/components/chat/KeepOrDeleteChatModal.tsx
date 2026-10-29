@@ -38,7 +38,7 @@ export function KeepOrDeleteChatModal({
           <Button variant="neutral" onClick={onKeep} disabled={busy}>
             {many ? "Keep My Chats" : "Keep My Chat"}
           </Button>
-          <Button variant="danger" onClick={onDelete} loading={busy} loadingLabel="Moving">
+          <Button variant="warning" onClick={onDelete} loading={busy} loadingLabel="Moving">
             {many ? "Move My Chats to Recently Deleted" : "Move My Chat to Recently Deleted"}
           </Button>
         </div>

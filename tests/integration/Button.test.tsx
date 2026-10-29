@@ -18,6 +18,18 @@ describe("Button", () => {
     );
   });
 
+  it("uses the stronger dark red fill for danger actions", () => {
+    render(<Button variant="danger">Delete</Button>);
+
+    expect(screen.getByRole("button", { name: "Delete" })).toHaveClass(
+      "border-transparent",
+      "bg-red-900/40",
+      "text-red-400",
+      "enabled:hover:bg-red-900/70"
+    );
+    expect(screen.getByRole("button", { name: "Delete" })).not.toHaveClass("border-red-500");
+  });
+
   it("shows the loading label, marks itself busy and ignores clicks while loading", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

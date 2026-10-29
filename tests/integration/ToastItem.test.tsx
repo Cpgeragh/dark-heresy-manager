@@ -20,6 +20,7 @@ vi.mock("../../src/components/Toast/ToastContext", async () => {
 
 import { ToastItem } from "../../src/components/Toast/ToastItem";
 import type { Toast } from "../../src/components/Toast/ToastContext";
+import { colourShadowRaised } from "../../src/ui/styles/colourTokens";
 
 function toast(over: Partial<Toast> = {}): Toast {
   return { id: "t1", message: "Saved successfully.", type: "success", ...over };
@@ -39,6 +40,12 @@ describe("ToastItem", () => {
   it("renders the message", () => {
     render(<ToastItem toast={toast({ message: "Character created." })} />);
     expect(screen.getByText("Character created.")).toBeInTheDocument();
+  });
+
+  it("carries the shared raised shadow", () => {
+    render(<ToastItem toast={toast()} />);
+
+    expect(screen.getByRole("alert")).toHaveClass(colourShadowRaised);
   });
 
   it("calls removeToast with this toast's id from Dismiss", async () => {

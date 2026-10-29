@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, HTMLAttributes, ReactNode } from "react";
 import {
   uiDisabledControl,
   uiFocusRing,
@@ -6,7 +6,12 @@ import {
   uiPressFeedback,
 } from "../styles/buttonStyles";
 import { chipClassName } from "../styles/chipStyles";
-import { colourGlowActive, colourGlowInactive } from "../styles/colourTokens";
+import {
+  colourGlowActive,
+  colourGlowInactive,
+  colourGlowPulseCore,
+  colourGlowPulseRgb,
+} from "../styles/colourTokens";
 
 export type GlowChipColour = keyof typeof colourGlowActive;
 
@@ -28,6 +33,15 @@ type GlowButtonProps = GlowChipOptions &
   };
 
 type GlowChipProps = GlowSpanProps | GlowButtonProps;
+
+/** CSS custom properties driving the `animate-psy-pulse` keyframe (see tailwind.config.cjs). */
+function glowPulseVars(colour: GlowChipColour): CSSProperties {
+  const rgb = colourGlowPulseRgb[colour];
+  return {
+    "--glow-lo": `0 0 1px rgba(${colourGlowPulseCore},1), 0 0 4px rgba(${rgb},1), 0 0 14px rgba(${rgb},0.8)`,
+    "--glow-hi": `0 0 2px rgba(${colourGlowPulseCore},1), 0 0 6px rgba(${rgb},1), 0 0 22px rgba(${rgb},0.9)`,
+  } as CSSProperties;
+}
 
 function glowChipClassName({
   active,
@@ -66,6 +80,7 @@ export function GlowChip(props: GlowChipProps) {
       colour,
       pulsing = false,
       className,
+      style,
       children,
       disabled,
       ...buttonProps
@@ -86,6 +101,7 @@ export function GlowChip(props: GlowChipProps) {
           className,
           children,
         })}
+        style={pulsing ? { ...glowPulseVars(colour), ...style } : style}
         {...buttonProps}
       >
         {children}
@@ -93,7 +109,16 @@ export function GlowChip(props: GlowChipProps) {
     );
   }
 
-  const { as: _as, active, colour, pulsing = false, className, children, ...spanProps } = props;
+  const {
+    as: _as,
+    active,
+    colour,
+    pulsing = false,
+    className,
+    style,
+    children,
+    ...spanProps
+  } = props;
   void _as;
 
   return (
@@ -107,6 +132,7 @@ export function GlowChip(props: GlowChipProps) {
         className,
         children,
       })}
+      style={pulsing ? { ...glowPulseVars(colour), ...style } : style}
       {...spanProps}
     >
       {children}

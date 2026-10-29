@@ -43,6 +43,8 @@ export const colourDivider = "border-slate-700";
 export const colourBorderControl = "border-slate-600";
 export const colourBorderSurface = "border-slate-500";
 export const colourBorderRed = "border-red-500";
+export const colourSpinnerAccent = "border-t-red-500";
+export const colourInputAccent = "accent-red-500";
 export const colourFillControl = "bg-slate-800";
 export const colourFillPanel = "bg-slate-900";
 export const colourFillRaised = "bg-slate-700";
@@ -54,7 +56,13 @@ export const colourPopoverSurface = `${colourFillPanel} ${colourDivider}`;
 export const colourPageBackground = "bg-slate-950";
 export const colourControlSurfaceDisabled = `${colourDivider} bg-slate-800/50`;
 export const colourControlDividerDisabled = colourFillRaised;
-export const colourControlShadow = "shadow-lg shadow-black/40";
+/** Shadow under menus, drawers and pop-ups. */
+export const colourShadowStrong = "shadow-2xl";
+/** Shadow under toasts and floating buttons. */
+export const colourShadowRaised = "shadow-lg";
+export const colourControlShadow = `${colourShadowRaised} shadow-black/40`;
+/** Silver glow around the active Characteristics block. */
+export const colourGlowSilver = "shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]";
 export const colourSplashRule = "border-slate-800";
 export const colourEditOverrideSurface = `border-amber-400 ${colourFillAmberFaint}`;
 export const colourOverlayBackdrop = "bg-slate-950/60";
@@ -97,7 +105,7 @@ export const colourNoticeAmberTitle = "text-amber-200";
 export const colourNoticeAmberText = "text-amber-100/80";
 export const colourAmberFill = "bg-amber-500 text-slate-900";
 export const colourOnAmberDim = "text-amber-900/70";
-export const colourSplashTitle = "text-red-600";
+export const colourSplashTitle = colourHeadingAccent;
 export const colourTerminalText = chipTextColours.rose;
 export const colourPsychicText = chipTextColours.indigo;
 export const colourDrugNoticeText = "text-violet-400";
@@ -117,7 +125,7 @@ export const colourEnabledHoverSlateSurface = "enabled:hover:bg-slate-800";
 export const colourButtonPrimary = `border ${colourBorderRed} ${colourHeadingAccent} ${colourEnabledHoverRedTint}`;
 export const colourButtonSecondary = `border border-transparent ${colourFillRaised} ${colourTextBody} enabled:hover:bg-slate-600`;
 export const colourButtonGhost = `border ${colourBorderControl} ${colourTextMuted} ${colourEnabledHoverSlateSurface}`;
-export const colourButtonDangerGhost = `border border-transparent bg-red-900/40 ${colourErrorText} enabled:hover:bg-red-900/70`;
+export const colourButtonDanger = `border border-transparent bg-red-900/40 ${colourErrorText} enabled:hover:bg-red-900/70`;
 export const colourButtonWarningOutline = `border ${colourBorderAmber} text-amber-500 enabled:hover:bg-amber-500/10`;
 export const colourButtonWarningGhost =
   "border border-transparent bg-amber-900/40 text-amber-400 enabled:hover:bg-amber-900/70";
@@ -221,6 +229,20 @@ export const colourGlowInactive = {
   fuchsia: "border-fuchsia-700/50 bg-fuchsia-950/15 text-fuchsia-400/50",
   indigo: "border-indigo-700/50 bg-indigo-950/15 text-indigo-400/50",
 } as const;
+/** RGB of the white core shared by every glow pulse. */
+export const colourGlowPulseCore = "255,255,255";
+/** RGB of each colour's glow pulse, the 400 shade of that colour. */
+export const colourGlowPulseRgb = {
+  teal: "45,212,191",
+  violet: "167,139,250",
+  orange: "251,146,60",
+  sky: "56,189,248",
+  amber: "251,191,36",
+  emerald: "52,211,153",
+  cyan: "34,211,238",
+  fuchsia: "232,121,249",
+  indigo: "129,140,248",
+} as const satisfies Record<keyof typeof colourGlowActive, string>;
 
 /** Selected look of a pick-one button: the chip look of its colour in semi-bold text. */
 export const colourToggleSelected = Object.fromEntries(

@@ -102,6 +102,7 @@ import {
   colourEditOverrideSurface,
   colourToggleSelected,
   colourFillFloating,
+  colourShadowRaised,
 } from "../ui/styles/colourTokens";
 import { uiCorner } from "../ui/styles/shapeStyles";
 
@@ -1153,7 +1154,7 @@ export default function CharacterSheet({
           <IconButton
             label="Scroll to top"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className={`fixed bottom-6 right-4 ${uiLayerForeground} h-9 w-9 ${colourFillFloating} shadow-lg`}
+            className={`fixed bottom-6 right-4 ${uiLayerForeground} h-9 w-9 ${colourFillFloating} ${colourShadowRaised}`}
             icon={<ChevronUpIcon className="h-5 w-5" />}
           />
         )}

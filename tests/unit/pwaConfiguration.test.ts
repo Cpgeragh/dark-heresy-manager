@@ -13,6 +13,13 @@ describe("PWA build configuration", () => {
     expect(options.manifest.icons.every(({ purpose }) => purpose === "any maskable")).toBe(true);
   });
 
+  it("uses the page background for the browser theme and the install splash", () => {
+    const { manifest } = createPwaOptions("production");
+
+    expect(manifest.theme_color).toBe("#020617");
+    expect(manifest.background_color).toBe("#020617");
+  });
+
   it("adds the deterministic revision resource only to guarded performance builds", () => {
     expect(createPwaOptions("performance", "revision-a").workbox.additionalManifestEntries).toEqual(
       [{ url: "__performance_revision__", revision: "revision-a" }]

@@ -21,6 +21,7 @@ import {
   colourBorderRed,
   colourFillControl,
   colourHoverAccentTint,
+  colourInputAccent,
 } from "../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { uiCorner } from "../ui/styles/shapeStyles";
@@ -215,7 +216,7 @@ export function PortraitUpload({
                 step={0.01}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="flex-1 accent-red-600"
+                className={`flex-1 ${colourInputAccent}`}
               />
             </div>
 

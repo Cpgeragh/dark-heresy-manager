@@ -1446,6 +1446,13 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] Notes, Traits, Talents and the Archeotech armour lists flow into independent columns that do not line up in rows, and Notes is a single column on a phone (`IndependentCardGrid`)
 - [ ] Every row with a name or heading on the left and a button, chip or value on the right, such as the Add buttons beside section headings, the Upgrades and Ammo rows in weapon cards, the Experience entry rows, the device rows in Settings and the chat inbox rows, keeps its two sides at opposite ends with the same gap, and an entry whose left side runs to several lines keeps its buttons at the top (`uiSplitRow`, `uiSplitRowTop`)
 - [ ] The Manage Account window in Settings looks and behaves like the Manage windows for a campaign or character, with the same header, divider lines and rows, and an armour upgrade and a weapon upgrade card look alike apart from their chips and information (`ManageModal`, `ManageActionRow`, `UpgradeEntryCard`)
+- [ ] Delete Permanently on a custom item, the confirm button of every typed DELETE pop-up, Force Release Ownership, Release Character and the Revoke button in the character options menu all use the same dark red button with red text and no outline that brightens on hover, while Remove buttons keep the red outline (`colourButtonDanger`, `Button`)
+- [ ] The Move to Recently Deleted button in a conversation and the Move My Chat to Recently Deleted button in the Keep Your Chat pop-up use the amber outline, not the dark red button, because the chat can be restored (`ConfirmInline`, `KeepOrDeleteChatModal`)
+- [ ] The loading spinner and the Position Portrait zoom slider use the same red as the page titles (`colourSpinnerAccent`, `colourInputAccent`)
+- [ ] The header menus, the section drawer and every pop-up share one strong shadow, and toasts and the Scroll to top button share one lighter shadow (`colourShadowStrong`, `colourShadowRaised`)
+- [ ] The middle Characteristics block on a phone keeps its soft silver glow, and the counters keep their darker shadow (`colourGlowSilver`, `colourControlShadow`)
+- [ ] A pulsing Weapon Training pill glows in the colour of its group, a pulsing exotic pill glows fuchsia, and the Psy Rating square pulses harder at a higher rating, in the same indigo at every rating (`GlowChip`, `colourGlowPulseRgb`)
+- [ ] Opening the installed app or reloading the page shows the same near-black background in the browser bar, the launch screen, the static splash and the app, with the same red title and spinner before and after React loads (`index.html`, `src/index.css`, `pwaOptions.ts`)
 
 ## 36. Waiting and Instant Saves
 

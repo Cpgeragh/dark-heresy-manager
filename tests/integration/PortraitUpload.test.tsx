@@ -74,6 +74,8 @@ describe("PortraitUpload", () => {
       expect(screen.getByRole("dialog", { name: "Position Portrait" })).toBeInTheDocument()
     );
     expect(screen.getByText("Mock Cropper")).toBeInTheDocument();
+    expect(screen.getByRole("slider")).toHaveClass("accent-red-500");
+    expect(screen.getByRole("slider")).not.toHaveClass("accent-red-600");
   });
 
   it("closes the crop modal on Cancel without uploading", async () => {

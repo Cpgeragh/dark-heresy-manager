@@ -40,6 +40,7 @@ export function DeleteConfirmModal({
       title={title}
       message={message}
       confirmLabel="Delete Permanently"
+      confirmVariant="danger"
       confirmDisabled={typed !== "DELETE" || !ready}
       busy={deleting}
       loadingLabel="Deleting"
