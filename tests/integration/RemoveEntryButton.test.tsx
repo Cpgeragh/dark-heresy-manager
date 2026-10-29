@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { RemoveEntryButton } from "../../src/ui/RemoveEntryButton";
@@ -44,6 +44,29 @@ describe("RemoveEntryButton", () => {
 
     expect(onRemove).toHaveBeenCalledOnce();
     expect(screen.getByRole("dialog", { name: "Remove Talent" })).toBeInTheDocument();
+  });
+
+  it("shows waiting dots and stays open when a removal is refused", async () => {
+    const user = userEvent.setup();
+    let settle: (saved: boolean) => void = () => {};
+    const onRemove = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(<RemoveEntryButton kind="Quirk" name="Bald" onRemove={onRemove} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove Bald" }));
+    const dialog = screen.getByRole("dialog", { name: "Remove Quirk" });
+    await user.click(within(dialog).getByRole("button", { name: "Remove" }));
+
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
+    await act(async () => {
+      settle(false);
+    });
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).toBeNull());
+    expect(dialog).toBeInTheDocument();
   });
 
   it("shows only the explanation and Close when removal is blocked", async () => {

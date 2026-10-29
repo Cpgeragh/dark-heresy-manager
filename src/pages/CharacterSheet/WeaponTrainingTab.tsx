@@ -29,23 +29,14 @@ import {
   getGrantedExoticWeapons,
   getGrantedWeaponTrainingIds,
 } from "../../mechanics/talents/talentEffects";
-import {
-  colourAmberPlain,
-  colourGlowActive,
-  colourGlowInactive,
-} from "../../ui/styles/colourTokens";
+import { colourAmberPlain } from "../../ui/styles/colourTokens";
+import { GlowChip, type GlowChipColour } from "../../ui/chips/GlowChip";
 import { ExoticCustomWeaponButton } from "./ExoticCustomWeaponButton";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
-import {
-  uiDisabledControl,
-  uiFocusRing,
-  uiHoverSurface,
-  uiPressFeedback,
-} from "../../ui/styles/buttonStyles";
-import { uiCorner } from "../../ui/styles/shapeStyles";
 import { XpCostForm } from "../../ui/forms/XpCostForm";
 import { FormLabel } from "../../ui/forms/FormLabel";
 import { ConfirmModal } from "../../ui/modals/ConfirmModal";
+import { RemoveEntryModal } from "../../ui/modals/RemoveEntryModal";
 
 const EXOTIC_WEAPON_TRAINING_OPTIONS = Array.from(
   new Set(
@@ -64,7 +55,7 @@ const WEAPON_TRAINING_GROUP_RGB: Record<string, string> = {
   "Thrown Weapon Training": "251,191,36", // amber-400
 };
 
-const WEAPON_TRAINING_GROUP_COLOUR: Record<string, keyof typeof colourGlowActive> = {
+const WEAPON_TRAINING_GROUP_COLOUR: Record<string, GlowChipColour> = {
   "Basic Weapon Training": "teal",
   "Heavy Weapon Training": "violet",
   "Melee Weapon Training": "orange",
@@ -162,12 +153,6 @@ export function WeaponTrainingTab({
     [weaponTraining, onUpdate]
   );
 
-  const confirmRemoveTraining = useCallback(async () => {
-    if (!pendingRemoveTraining) return;
-    const saved = await handleRemoveTraining(pendingRemoveTraining.id);
-    if (saved !== false) setPendingRemoveTraining(null);
-  }, [pendingRemoveTraining, handleRemoveTraining, setPendingRemoveTraining]);
-
   const confirmTrain = useCallback(async () => {
     if (!pendingTrain) return;
     const saved = await onUpdate({
@@ -261,12 +246,6 @@ export function WeaponTrainingTab({
     [weaponTraining, onUpdate]
   );
 
-  const confirmRemoveExotic = useCallback(async () => {
-    if (!pendingRemoveExotic) return;
-    const saved = await handleRemoveExotic(pendingRemoveExotic.index);
-    if (saved !== false) setPendingRemoveExotic(null);
-  }, [pendingRemoveExotic, handleRemoveExotic, setPendingRemoveExotic]);
-
   const confirmExoticPurchase = useCallback(async () => {
     if (!pendingExoticPurchase) return;
     const entry: WeaponTrainingExoticEntry = {
@@ -323,9 +302,12 @@ export function WeaponTrainingTab({
               };
 
               return (
-                <button
+                <GlowChip
+                  as="button"
                   key={id}
-                  type="button"
+                  active={active}
+                  colour={WEAPON_TRAINING_GROUP_COLOUR[group.label]}
+                  pulsing={pulsing}
                   disabled={!clickable}
                   onClick={handleClick}
                   aria-pressed={active}
@@ -335,16 +317,9 @@ export function WeaponTrainingTab({
                       ? weaponTrainingPulseVars(WEAPON_TRAINING_GROUP_RGB[group.label])
                       : undefined
                   }
-                  className={`px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm transition ${uiPressFeedback(
-                    clickable
-                  )} ${uiFocusRing} ${uiDisabledControl} ${pulsing ? "animate-psy-pulse" : ""} ${
-                    active
-                      ? `${colourGlowActive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? uiHoverSurface : ""}`
-                      : `${colourGlowInactive[WEAPON_TRAINING_GROUP_COLOUR[group.label]]} ${clickable ? uiHoverSurface : ""}`
-                  }`}
                 >
                   {display}
-                </button>
+                </GlowChip>
               );
             })}
           </div>
@@ -374,44 +349,38 @@ export function WeaponTrainingTab({
 
         <div className={`${uiChipRow} justify-center items-center max-w-xl mx-auto`}>
           {weaponTraining.exoticWeapons.map((weapon, index) => (
-            <button
+            <GlowChip
+              as="button"
               key={`owned:${index}:${weapon.name}`}
-              type="button"
+              active
+              colour="fuchsia"
               disabled={!editable}
               onClick={() => setPendingRemoveExotic({ index, name: weapon.name })}
               aria-label={`Remove ${weapon.name}`}
-              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${
-                editable ? uiHoverSurface : ""
-              } ${uiPressFeedback(editable)} ${uiFocusRing} ${uiDisabledControl}`}
             >
               {weapon.name}
-            </button>
+            </GlowChip>
           ))}
           {grantedExotics.map((weapon, index) => (
-            <button
-              key={`granted:${index}:${weapon}`}
-              type="button"
-              disabled
-              className={`px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm ${colourGlowActive.fuchsia} ${uiFocusRing} ${uiDisabledControl}`}
-            >
+            <GlowChip key={`granted:${index}:${weapon}`} active colour="fuchsia">
               {weapon}
-            </button>
+            </GlowChip>
           ))}
           {careerExoticPurchases.map((entry) => (
-            <button
+            <GlowChip
+              as="button"
               key={`available:${entry.name}`}
-              type="button"
+              active={false}
+              colour="fuchsia"
+              pulsing
               disabled={!editable}
               onClick={() => setPendingExoticPurchase(entry)}
               aria-pressed="false"
               aria-label={`${entry.name}, ${entry.purchase.cost} XP`}
               style={weaponTrainingPulseVars(EXOTIC_WEAPON_TRAINING_RGB)}
-              className={`animate-psy-pulse px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm transition ${colourGlowInactive.fuchsia} ${
-                editable ? uiHoverSurface : ""
-              } ${uiPressFeedback(editable)} ${uiFocusRing} ${uiDisabledControl}`}
             >
               {entry.name}
-            </button>
+            </GlowChip>
           ))}
           {isDM && <ExoticCustomWeaponButton onClick={() => setShowExoticPicker(true)} />}
         </div>
@@ -445,21 +414,19 @@ export function WeaponTrainingTab({
       )}
 
       {pendingRemoveTraining && (
-        <ConfirmModal
-          title="Remove Weapon Training"
-          message={`Remove ${pendingRemoveTraining.group} (${pendingRemoveTraining.display})?`}
-          confirmLabel="Remove"
-          onConfirm={confirmRemoveTraining}
+        <RemoveEntryModal
+          kind="Weapon Training"
+          name={`${pendingRemoveTraining.group} (${pendingRemoveTraining.display})`}
+          onRemove={() => handleRemoveTraining(pendingRemoveTraining.id)}
           onCancel={() => setPendingRemoveTraining(null)}
         />
       )}
 
       {pendingRemoveExotic && (
-        <ConfirmModal
-          title="Remove Exotic Weapon"
-          message={`Remove ${pendingRemoveExotic.name}?`}
-          confirmLabel="Remove"
-          onConfirm={confirmRemoveExotic}
+        <RemoveEntryModal
+          kind="Exotic Weapon"
+          name={pendingRemoveExotic.name}
+          onRemove={() => handleRemoveExotic(pendingRemoveExotic.index)}
           onCancel={() => setPendingRemoveExotic(null)}
         />
       )}

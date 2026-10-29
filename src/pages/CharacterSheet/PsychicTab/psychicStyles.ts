@@ -2,12 +2,9 @@
 // Separate from its consumers because it's shared between PsychicTab and PowerCard, not inlined into either.
 
 import type { CSSProperties } from "react";
-import {
-  chipColours,
-  colourGlowActive,
-  colourGlowInactive,
-  type ChipColour,
-} from "../../../ui/styles/colourTokens";
+import type { PsychicDiscipline } from "../../../data/reference/psychicReference";
+import type { GlowChipColour } from "../../../ui/chips/GlowChip";
+import type { ChipColour } from "../../../ui/styles/colourTokens";
 
 export const disciplineColours: Record<string, ChipColour> = {
   Minor: "violet",
@@ -19,23 +16,14 @@ export const disciplineColours: Record<string, ChipColour> = {
   default: "slate",
 };
 
-export const disciplineActiveColours: Record<string, string> = {
-  Minor: chipColours.violet,
-  Biomancy: colourGlowActive.emerald,
-  Divination: colourGlowActive.cyan,
-  Pyromancy: colourGlowActive.orange,
-  Telekinetics: colourGlowActive.sky,
-  Telepathy: colourGlowActive.fuchsia,
-  default: chipColours.slate,
-};
+export type MajorPsychicDiscipline = Exclude<PsychicDiscipline, "Minor">;
 
-export const disciplineInactiveColours: Record<string, string> = {
-  Biomancy: colourGlowInactive.emerald,
-  Divination: colourGlowInactive.cyan,
-  Pyromancy: colourGlowInactive.orange,
-  Telekinetics: colourGlowInactive.sky,
-  Telepathy: colourGlowInactive.fuchsia,
-  default: chipColours.slate,
+export const disciplineGlowColours: Record<MajorPsychicDiscipline, GlowChipColour> = {
+  Biomancy: "emerald",
+  Divination: "cyan",
+  Pyromancy: "orange",
+  Telekinetics: "sky",
+  Telepathy: "fuchsia",
 };
 
 export const psychicSelectionSourceColours = {

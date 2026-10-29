@@ -71,6 +71,7 @@ describe("AttendeePicker", () => {
     await user.click(screen.getByRole("button", { name: "Remove Libby" }));
 
     expect(onChange).toHaveBeenCalledWith(["c3", "c1"]);
+    expect(screen.queryByRole("dialog", { name: "Remove Attendee" })).not.toBeInTheDocument();
   });
 
   it("is used through the test helper to add a character", async () => {

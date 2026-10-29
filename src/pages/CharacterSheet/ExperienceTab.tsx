@@ -22,7 +22,6 @@ import {
 import {
   uiChipRow,
   editableInputClass,
-  readOnlyBadgeClass,
   uiInfoModalWrapper,
   uiCardTitle,
   uiSection,
@@ -1006,7 +1005,7 @@ export function ExperienceTab({
 
   return (
     <div className={uiStackPage}>
-      {!editable && <span className={readOnlyBadgeClass}>Read-only</span>}
+      {!editable && <Chip colour="slate">Read-only</Chip>}
 
       <section className={`${uiSummaryGrid} grid-cols-3`}>
         <div

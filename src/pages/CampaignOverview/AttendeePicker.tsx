@@ -4,11 +4,9 @@
 
 import { useMemo, useState } from "react";
 import { Button } from "../../ui/buttons/Button";
-import { Chip } from "../../ui/chips/Chip";
-import { CloseIcon } from "../../ui/icons/CloseIcon";
+import { RemovableChip } from "../../ui/chips/RemovableChip";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { PickerField } from "../../ui/pickers/PickerField";
-import { uiDismissButton } from "../../ui/styles/buttonStyles";
 import { uiChipRow, uiStackField } from "../../ui/styles/editableStyles";
 
 interface Character {
@@ -59,17 +57,11 @@ export function AttendeePicker({ characters, selected, onChange }: Props) {
       {chosen.length > 0 && (
         <div className={uiChipRow}>
           {chosen.map((character) => (
-            <Chip key={character.id} colour="slate">
-              {character.characterName}
-              <button
-                type="button"
-                onClick={() => onChange(selected.filter((id) => id !== character.id))}
-                aria-label={`Remove ${character.characterName}`}
-                className={uiDismissButton}
-              >
-                <CloseIcon />
-              </button>
-            </Chip>
+            <RemovableChip
+              key={character.id}
+              name={character.characterName}
+              onRemove={() => onChange(selected.filter((id) => id !== character.id))}
+            />
           ))}
         </div>
       )}

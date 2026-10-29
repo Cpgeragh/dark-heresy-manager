@@ -4,12 +4,12 @@ import { useState } from "react";
 import type { Character } from "../../types/Character";
 import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { Button } from "../../ui/buttons/Button";
+import { Chip } from "../../ui/chips/Chip";
 import { ErrorState } from "../../ui/ErrorState";
 import { PendingOverlay } from "../../ui/PendingOverlay";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
   uiSection,
-  readOnlyBadgeClass,
   uiTextPlaceholder,
   uiTextMeta,
   uiTextBody,
@@ -82,7 +82,7 @@ export function AdminTab({
       <section className={uiSection}>
         <div className={`${uiSplitRow} mb-2`}>
           <SectionHeader as="h3">Ownership</SectionHeader>
-          <span className={readOnlyBadgeClass}>DM authority</span>
+          <Chip colour="slate">DM authority</Chip>
         </div>
 
         <div className={`${uiStackField} text-sm lg:text-base`}>
@@ -155,7 +155,7 @@ export function AdminTab({
       <section className={uiSection}>
         <div className={`${uiSplitRow} mb-2`}>
           <SectionHeader as="h3">Claim History</SectionHeader>
-          <span className={readOnlyBadgeClass}>Immutable</span>
+          <Chip colour="slate">Immutable</Chip>
         </div>
 
         <Button

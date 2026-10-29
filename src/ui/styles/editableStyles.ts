@@ -1,10 +1,8 @@
 // src/ui/styles/editableStyles.ts
 
-import { chipClassName } from "./chipStyles";
 import {
   colourGroupHoverTextStrong,
   colourPeerHoverTextStrong,
-  chipColours,
   colourAccentBar,
   colourAmberPlain,
   colourBorderSurface,
@@ -25,8 +23,8 @@ import { uiCorner } from "./shapeStyles";
 /**
  * Shared UI styles and tokens.
  *
- * - editableInputClass / editableTextareaClass / readOnlyBadgeClass:
- *   reflect an editable/read-only decision already made elsewhere.
+ * - editableInputClass / editableTextareaClass:
+ *   reflect an editable decision already made elsewhere.
  * - uiSection / uiCell / uiCellLabel etc.:
  *   shared layout tokens used across tab components.
  *
@@ -215,5 +213,3 @@ export const uiCardTitle = uiItemName;
 export const uiRuleName = `text-sm lg:text-base font-semibold uppercase tracking-wide ${colourMetadataLabelText}`;
 
 // ──────────────────────────────────────────────────────────────────────────────
-
-export const readOnlyBadgeClass = chipClassName({ className: chipColours.slate });

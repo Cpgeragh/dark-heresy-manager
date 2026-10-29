@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { RemoveButton } from "./buttons/RemoveButton";
-import { ConfirmModal } from "./modals/ConfirmModal";
 import { DeleteConfirmModal } from "./modals/DeleteConfirmModal";
+import { RemoveEntryModal, type RemoveEntryExtra } from "./modals/RemoveEntryModal";
 
-export interface RemoveEntryExtra {
-  label: string;
-  message: string;
-  onClick: () => unknown;
-}
+export type { RemoveEntryExtra } from "./modals/RemoveEntryModal";
 
 interface RemoveEntryButtonProps {
   kind: string;
@@ -35,15 +31,6 @@ export function RemoveEntryButton({
   const close = () => {
     if (!deleting) setOpen(false);
   };
-  const title = blockedMessage
-    ? `Cannot ${verb} ${kind}`
-    : extra
-      ? `Manage ${kind}`
-      : `${verb} ${kind}`;
-  const message = blockedMessage ?? extra?.message ?? `${verb} ${name} from ${from}?`;
-  const run = (action: () => unknown) => async () => {
-    if ((await action()) !== false) close();
-  };
   const runDelete = async () => {
     setDeleting(true);
     try {
@@ -67,20 +54,17 @@ export function RemoveEntryButton({
           onCancel={close}
         />
       )}
-      {open &&
-        verb === "Remove" &&
-        (blockedMessage ? (
-          <ConfirmModal title={title} message={message} onCancel={close} />
-        ) : (
-          <ConfirmModal
-            title={title}
-            message={message}
-            confirmLabel={extra ? `${verb} ${kind}` : verb}
-            onConfirm={run(onRemove)}
-            extraAction={extra ? { label: extra.label, onClick: run(extra.onClick) } : undefined}
-            onCancel={close}
-          />
-        ))}
+      {open && verb === "Remove" && (
+        <RemoveEntryModal
+          kind={kind}
+          name={name}
+          from={from}
+          blockedMessage={blockedMessage}
+          extra={extra}
+          onRemove={onRemove}
+          onCancel={close}
+        />
+      )}
     </>
   );
 }

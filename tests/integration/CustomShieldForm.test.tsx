@@ -82,6 +82,7 @@ describe("CustomShieldForm", () => {
     await user.click(qualityAddButton);
     expect(screen.getByText("Accurate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Remove Accurate" }));
+    expect(screen.queryByRole("dialog", { name: "Remove Quality" })).not.toBeInTheDocument();
     // Removing returns it to the dropdown's available options, so the text
     // itself still exists, check the chip's dismiss button is gone instead.
     expect(screen.queryByRole("button", { name: "Remove Accurate" })).not.toBeInTheDocument();

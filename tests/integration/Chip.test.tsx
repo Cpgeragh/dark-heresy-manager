@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { Chip, NestedChip } from "../../src/ui/chips/Chip";
+import { GlowChip } from "../../src/ui/chips/GlowChip";
+import { RemovableChip } from "../../src/ui/chips/RemovableChip";
 import { chipColours, type ChipColour } from "../../src/ui/styles/colourTokens";
 import { uiCorner } from "../../src/ui/styles/shapeStyles";
 
@@ -55,5 +57,50 @@ describe("Chip", () => {
     expect(button).toHaveClass("border-red-500/50", "text-red-300");
     await userEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders passive glow chips with the shared compact-control size", () => {
+    render(
+      <>
+        <GlowChip active colour="emerald">
+          Known
+        </GlowChip>
+        <GlowChip active={false} colour="fuchsia">
+          Unknown
+        </GlowChip>
+      </>
+    );
+
+    expect(screen.getByText("Known")).toHaveClass(
+      "px-2.5",
+      "py-1",
+      "text-emerald-300",
+      "font-semibold"
+    );
+    expect(screen.getByText("Unknown")).toHaveClass("px-2.5", "py-1", "text-fuchsia-400/50");
+  });
+
+  it("removes an unfinished form choice immediately", async () => {
+    const onRemove = vi.fn();
+    render(<RemovableChip name="Accurate" onRemove={onRemove} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove Accurate" }));
+
+    expect(onRemove).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("asks before removing saved data", async () => {
+    const onRemove = vi.fn();
+    render(<RemovableChip name="Bald" confirmation={{ kind: "Quirk" }} onRemove={onRemove} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove Bald" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Remove Quirk" });
+    expect(within(dialog).getByText("Remove Bald from this character?")).toBeInTheDocument();
+    expect(onRemove).not.toHaveBeenCalled();
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
+    expect(onRemove).toHaveBeenCalledOnce();
   });
 });

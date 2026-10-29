@@ -5,6 +5,7 @@ import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules
 import { Button } from "../../../ui/buttons/Button";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { Chip, NestedChip } from "../../../ui/chips/Chip";
+import { RemovableChip } from "../../../ui/chips/RemovableChip";
 import { ItemMetaChips, NestedItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
@@ -14,7 +15,6 @@ import { InfoParagraph } from "../../../ui/InfoSection";
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { UpgradeEntryCard } from "../../../ui/UpgradeEntryCard";
-import { CloseIcon } from "../../../ui/icons/CloseIcon";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import {
   uiChipRow,
@@ -25,7 +25,6 @@ import {
   uiStackField,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
-import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { FormLabel } from "../../../ui/forms/FormLabel";
@@ -84,17 +83,7 @@ export function WeaponQualitySelector({
       {selected.length > 0 && (
         <div className={`${uiChipRow}`}>
           {selected.map((quality) => (
-            <Chip key={quality} colour="slate">
-              {quality}
-              <button
-                type="button"
-                onClick={() => onRemove(quality)}
-                aria-label={`Remove ${quality}`}
-                className={uiDismissButton}
-              >
-                <CloseIcon />
-              </button>
-            </Chip>
+            <RemovableChip key={quality} name={quality} onRemove={() => onRemove(quality)} />
           ))}
         </div>
       )}

@@ -59,7 +59,10 @@ describe("WeaponTrainingTab", () => {
     await user.click(screen.getAllByRole("button", { name: /^Bolt/ })[0]);
     expect(onUpdate).not.toHaveBeenCalled();
 
-    expect(screen.getByText(/Remove Basic Weapon Training \(Bolt\)\?/)).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Remove Weapon Training" });
+    expect(
+      within(dialog).getByText("Remove Basic Weapon Training (Bolt) from this character?")
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
@@ -285,7 +288,7 @@ describe("WeaponTrainingTab", () => {
     await user.click(screen.getByLabelText("Remove Needle Pistol"));
     expect(onUpdate).not.toHaveBeenCalled();
 
-    expect(screen.getByText(/Remove Needle Pistol\?/)).toBeInTheDocument();
+    expect(screen.getByText("Remove Needle Pistol from this character?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
@@ -511,6 +514,7 @@ describe("WeaponTrainingTab", () => {
       screen.getByText(/Granted by a Talent, Trait, or Career effect: Chain/)
     ).toBeInTheDocument();
     expect(screen.getByText("Granted by Sicarius Tutoring (Guardsman)")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Needle Pistol" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Remove Needle Pistol")).not.toBeInTheDocument();
   });
 });

@@ -25,14 +25,15 @@ import { colourGlowActive, colourPsychicText } from "../../../ui/styles/colourTo
 import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
+import { GlowChip } from "../../../ui/chips/GlowChip";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { PickerBody, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
 import { InfoModal } from "../../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../../data/reference/talentDescriptions";
 import {
-  disciplineActiveColours,
-  disciplineInactiveColours,
+  disciplineGlowColours,
+  type MajorPsychicDiscipline,
   psyRatingPulseVars,
   psychicSelectionSourceColours,
 } from "./psychicStyles";
@@ -64,7 +65,7 @@ import { PowerPicker } from "./PowerPicker";
 import { normalisePowerName, toCustomPowerData } from "./psychicPowerHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../../hooks/useMediaQuery";
-import { uiCorner, uiCornerSmall } from "../../../ui/styles/shapeStyles";
+import { uiCornerSmall } from "../../../ui/styles/shapeStyles";
 import { FormLabel } from "../../../ui/forms/FormLabel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -593,21 +594,19 @@ export function PsychicTab({
             Disciplines
           </FormLabel>
           <div className={`${uiChipRow} justify-center`}>
-            {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
-              const active = (psychic.disciplines ?? []).includes(d);
+            {PSYCHIC_DISCIPLINES.filter(
+              (discipline): discipline is MajorPsychicDiscipline => discipline !== "Minor"
+            ).map((discipline) => {
+              const active = (psychic.disciplines ?? []).includes(discipline);
               return (
-                <span
-                  key={d}
-                  aria-label={`${d}: ${active ? "known" : "not known"}`}
-                  className={[
-                    `px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm transition`,
-                    active
-                      ? (disciplineActiveColours[d] ?? disciplineActiveColours.default)
-                      : (disciplineInactiveColours[d] ?? disciplineInactiveColours.default),
-                  ].join(" ")}
+                <GlowChip
+                  key={discipline}
+                  active={active}
+                  colour={disciplineGlowColours[discipline]}
+                  aria-label={`${discipline}: ${active ? "known" : "not known"}`}
                 >
-                  {d}
-                </span>
+                  {discipline}
+                </GlowChip>
               );
             })}
           </div>

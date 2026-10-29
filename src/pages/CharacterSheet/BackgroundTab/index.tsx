@@ -35,8 +35,8 @@ import {
 } from "../../../data/reference/divinationData";
 import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../../data/reference/appearanceData";
 import { Chip } from "../../../ui/chips/Chip";
+import { RemovableChip } from "../../../ui/chips/RemovableChip";
 import {
-  chipColours,
   colourActiveRose,
   colourActiveSky,
   colourTextPrimary,
@@ -56,11 +56,8 @@ import { AppearanceTraitPicker } from "../AppearanceTraitPicker";
 import { GenderPicker } from "../GenderPicker";
 import { QuirkPicker } from "../QuirkPicker";
 import { AddButton } from "../../../ui/buttons/AddButton";
-import { CloseIcon } from "../../../ui/icons/CloseIcon";
-import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";
-import { uiCorner } from "../../../ui/styles/shapeStyles";
 import { FormLabel } from "../../../ui/forms/FormLabel";
 
 interface BackgroundTabProps {
@@ -70,7 +67,7 @@ interface BackgroundTabProps {
   playerName: string | null;
   hasLivePlayerName: boolean;
   playerNameProfileUnresolved: boolean;
-  onUpdateHeader: (next: CharacterHeader, options?: PatchOptions) => void;
+  onUpdateHeader: (next: CharacterHeader, options?: PatchOptions) => void | Promise<boolean>;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<boolean | void>;
@@ -166,8 +163,7 @@ export function BackgroundTab({
       options?: PatchOptions
     ) => {
       const next = { ...header, [key]: value };
-      if (options) onUpdateHeader(next, options);
-      else onUpdateHeader(next);
+      return options ? onUpdateHeader(next, options) : onUpdateHeader(next);
     },
     [header, onUpdateHeader]
   );
@@ -239,13 +235,11 @@ export function BackgroundTab({
   }, [header.weight, updateHeaderField, weightDraft]);
 
   const handleRemoveQuirk = useCallback(
-    (quirk: string) => {
+    (quirk: string) =>
       updateHeaderField(
         "quirks",
-        (header.quirks ?? []).filter((q) => q !== quirk),
-        { optimistic: true }
-      );
-    },
+        (header.quirks ?? []).filter((candidate) => candidate !== quirk)
+      ),
     [header.quirks, updateHeaderField]
   );
 
@@ -435,24 +429,21 @@ export function BackgroundTab({
           <div className={`${uiChipRow}`}>
             {[...(header.quirks ?? [])]
               .sort((a, b) => a.localeCompare(b))
-              .map((quirk) => (
-                <span
-                  key={quirk}
-                  className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 ${uiCorner} border text-xs lg:text-sm ${chipColours.slate}`}
-                >
-                  {quirk}
-                  {editable && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveQuirk(quirk)}
-                      aria-label={`Remove ${quirk}`}
-                      className={uiDismissButton}
-                    >
-                      <CloseIcon />
-                    </button>
-                  )}
-                </span>
-              ))}
+              .map((quirk) =>
+                editable ? (
+                  <RemovableChip
+                    key={quirk}
+                    name={quirk}
+                    size="control"
+                    confirmation={{ kind: "Quirk" }}
+                    onRemove={() => handleRemoveQuirk(quirk)}
+                  />
+                ) : (
+                  <Chip key={quirk} colour="slate" size="control">
+                    {quirk}
+                  </Chip>
+                )
+              )}
           </div>
         </div>
 

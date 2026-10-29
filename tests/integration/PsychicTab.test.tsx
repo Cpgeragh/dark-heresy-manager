@@ -223,8 +223,15 @@ describe("PsychicTab", () => {
   it("shows Disciplines as read-only Talent-controlled status chips", () => {
     renderTab({ psychic: { ...emptyPsychic, disciplines: ["Biomancy"] } });
 
-    expect(screen.getByLabelText("Biomancy: known")).not.toHaveClass("text-emerald-400/50");
+    expect(screen.getByLabelText("Biomancy: known")).toHaveClass(
+      "px-2.5",
+      "py-1",
+      "text-emerald-300",
+      "font-semibold"
+    );
     expect(screen.getByLabelText("Telepathy: not known")).toHaveClass(
+      "px-2.5",
+      "py-1",
       "border-fuchsia-700/50",
       "bg-fuchsia-950/15",
       "text-fuchsia-400/50"

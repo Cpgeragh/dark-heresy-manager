@@ -618,15 +618,47 @@ describe("BackgroundTab", () => {
     expect(within(modal).queryByText("Bald")).not.toBeInTheDocument();
   });
 
-  it("removes a quirk", async () => {
+  it("asks before removing a quirk and waits for the save result", async () => {
     const user = userEvent.setup();
-    const { onUpdateHeader } = renderTab({
+    let settleFirstRemoval: (saved: boolean) => void = () => {};
+    const onUpdateHeader = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<boolean>((resolve) => {
+            settleFirstRemoval = resolve;
+          })
+      )
+      .mockResolvedValueOnce(true);
+
+    renderTab({
       header: { characterName: "Brother Corvus", quirks: ["Bald", "Hairy"] },
+      onUpdateHeader,
     });
+
     await user.click(screen.getAllByRole("button", { name: "Remove Bald" })[0]);
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Hairy"] }), {
-      optimistic: true,
+
+    const dialog = screen.getByRole("dialog", { name: "Remove Quirk" });
+    expect(within(dialog).getByText("Remove Bald from this character?")).toBeInTheDocument();
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("button", { name: "Remove" }));
+    expect(onUpdateHeader).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ quirks: ["Hairy"] })
+    );
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).not.toBeNull());
+
+    await act(async () => {
+      settleFirstRemoval(false);
     });
+    await waitFor(() => expect(dialog.querySelector('[aria-busy="true"]')).toBeNull());
+    expect(dialog).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "Remove" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Remove Quirk" })).not.toBeInTheDocument()
+    );
   });
 
   it("accepts a valid whole-number age and rejects zero", async () => {
