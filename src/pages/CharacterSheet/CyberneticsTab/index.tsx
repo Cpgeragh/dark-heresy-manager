@@ -24,17 +24,11 @@ import { isInstalled } from "../../../utils/cyberneticInstalled";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import {
-  uiChipRow,
-  uiTwoColumnGrid,
-  uiItemName,
-  uiSection,
   uiTextPlaceholder,
   uiStackPage,
   uiStackSection,
   uiSplitRow,
 } from "../../../ui/styles/editableStyles";
-import { Chip } from "../../../ui/chips/Chip";
-import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import { createDraftCustomItem, saveDraftCustomItem } from "../../../services/customItemService";
@@ -90,7 +84,6 @@ interface CyberneticsTabProps {
     next: ArcheotechItem[],
     options?: PatchOptions
   ) => void | Promise<boolean | void>;
-  career?: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -120,7 +113,6 @@ export function CyberneticsTab({
   onUpdateCharacter,
   archeotech,
   onUpdateArcheotech,
-  career,
 }: CyberneticsTabProps) {
   recordComponentRender("CyberneticsTab");
   const [showPicker, setShowPicker] = useState(false);
@@ -921,33 +913,6 @@ export function CyberneticsTab({
 
         <IndependentCardGrid items={integratedWeaponCards} />
       </section>
-
-      {/* ── INSTALLED IMPLANTS ────────────────────────────────────────────── */}
-      {career === "Tech-Priest" && (
-        <section className={uiStackSection}>
-          <SectionHeader>Mechanicus Implants</SectionHeader>
-          <div className={`${uiTwoColumnGrid}`}>
-            {[
-              "Electro-Graft",
-              "Electoo Inductors",
-              "Respirator Unit",
-              "Cyber-Mantle",
-              "Potentia Coil",
-              "Cranial Circuitry",
-            ].map((name) => (
-              <div key={name} className={uiSection}>
-                <div className={uiItemName}>{name}</div>
-                <div className={`mt-1.5 ${uiChipRow} items-center`}>
-                  <Chip colour={sourceChipColour("CR")} className="font-code">
-                    CR
-                  </Chip>
-                  <Chip colour="amber">Granted by Mechanicus Implants</Chip>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       <section className={uiStackSection}>
         <div className={uiSplitRow}>

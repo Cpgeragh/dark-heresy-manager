@@ -2,13 +2,11 @@ import { useState } from "react";
 import type { CyberneticItem, MeleeWeapon, RangedWeapon } from "../../../types/Character";
 import { resolveMeleeWeaponReference } from "../../../data/reference/weaponReference";
 import { Button } from "../../../ui/buttons/Button";
-import { ModalHeader } from "../../../ui/modals/ModalHeader";
-import { ModalShell } from "../../../ui/modals/ModalShell";
+import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
   uiTwoColumnGrid,
   uiTextBody,
   uiTextError,
-  uiStackBody,
   uiStackList,
 } from "../../../ui/styles/editableStyles";
 import { ImplantRow } from "./ImplantRow";
@@ -50,13 +48,28 @@ export function ConcealedWeaponBionicInstaller({
   ].sort((a, b) => a.name.localeCompare(b.name));
   const selectingArm = !armId;
   return (
-    <ModalShell
-      ariaLabel="Install Concealed Weapon Bionic"
+    <PickerModal
+      title="Concealed Weapon Bionic"
+      query=""
+      onQueryChange={() => {}}
       onClose={onClose}
-      className="max-w-md lg:max-w-lg overflow-y-auto"
+      isEmpty={false}
+      hideSearch
+      maxWidth="max-w-md lg:max-w-lg"
+      footer={
+        <div className={uiTwoColumnGrid}>
+          {!selectingArm && <Button onClick={() => setArmId(null)}>Back</Button>}
+          <Button
+            variant="neutral"
+            onClick={onClose}
+            className={selectingArm ? "col-span-2" : undefined}
+          >
+            Cancel
+          </Button>
+        </div>
+      }
     >
-      <ModalHeader title="Concealed Weapon Bionic" onClose={onClose} />
-      <div className={`p-4 lg:p-5 ${uiStackBody}`}>
+      <PickerBody>
         <p className={`text-sm lg:text-base ${uiTextBody}`}>
           {selectingArm
             ? "Choose the existing Bionic Arm that will house the weapon."
@@ -125,17 +138,7 @@ export function ConcealedWeaponBionicInstaller({
                 </div>
               );
             })}
-      </div>
-      <div className={`${uiTwoColumnGrid} p-4`}>
-        {!selectingArm && <Button onClick={() => setArmId(null)}>Back</Button>}
-        <Button
-          variant="neutral"
-          onClick={onClose}
-          className={selectingArm ? "col-span-2" : undefined}
-        >
-          Cancel
-        </Button>
-      </div>
-    </ModalShell>
+      </PickerBody>
+    </PickerModal>
   );
 }

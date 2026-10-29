@@ -1021,7 +1021,6 @@ export default function CharacterSheet({
                   onUpdateCharacter={patchFieldsWithResult}
                   archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
                   onUpdateArcheotech={handleUpdateArcheotech}
-                  career={character.header.career}
                 />
               )}
 

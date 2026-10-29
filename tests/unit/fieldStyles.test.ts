@@ -1,6 +1,10 @@
 // tests/unit/fieldStyles.test.ts
 import { describe, expect, it } from "vitest";
-import { editableInputClass, editableInputColour } from "../../src/ui/styles/editableStyles";
+import {
+  editableInputClass,
+  editableInputColour,
+  editableInputLargeClass,
+} from "../../src/ui/styles/editableStyles";
 
 const sizeClasses = ["w-full", "px-2", "py-1", "text-sm", "lg:text-base"];
 
@@ -36,5 +40,21 @@ describe("editableInputColour", () => {
 
     expect(full).toEqual(expect.arrayContaining(editableInputColour(true).split(" ")));
     expect(full).toEqual(expect.arrayContaining(sizeClasses));
+  });
+});
+
+describe("editableInputLargeClass", () => {
+  it("gives the larger padding and text with no fixed width, in the shared colours", () => {
+    const classes = editableInputLargeClass(true).split(" ");
+
+    expect(classes).toEqual(
+      expect.arrayContaining(["border", "px-3", "lg:px-4", "py-2", "lg:py-2.5", "text-sm"])
+    );
+    expect(classes).not.toContain("w-full");
+    expect(classes).toEqual(expect.arrayContaining(editableInputColour(true).split(" ")));
+  });
+
+  it("leaves the default text box size unchanged", () => {
+    expect(editableInputClass(true).split(" ")).toEqual(expect.arrayContaining(sizeClasses));
   });
 });

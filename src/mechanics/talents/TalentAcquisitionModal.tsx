@@ -49,6 +49,7 @@ import {
   type TalentAcquisitionResult,
 } from "./talentAcquisitionResult";
 import { FormLabel } from "../../ui/forms/FormLabel";
+import { CheckboxRow } from "../../ui/forms/CheckboxRow";
 import { CustomFormFooter } from "../../ui/forms/CustomFormFooter";
 
 export type { TalentAcquisitionResult } from "./talentAcquisitionResult";
@@ -708,17 +709,10 @@ export function TalentAcquisitionModal({
         )}
 
         {entry.talentId === "touched-by-the-fates" && (
-          <label className={`flex items-start gap-3 text-sm ${uiTextBody}`}>
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(event) => setConfirmed(event.target.checked)}
-            />
-            <span>
-              Set this NPC’s Fate Points to {Math.ceil(willpowerBonus / 2)} (half Willpower Bonus{" "}
-              {willpowerBonus}, rounded up).
-            </span>
-          </label>
+          <CheckboxRow checked={confirmed} onChange={setConfirmed}>
+            Set this NPC’s Fate Points to {Math.ceil(willpowerBonus / 2)} (half Willpower Bonus{" "}
+            {willpowerBonus}, rounded up).
+          </CheckboxRow>
         )}
 
         {entry.talentId === "purity-of-flesh" && purityStage === "purity" && (
@@ -838,22 +832,18 @@ export function TalentAcquisitionModal({
               const selected = removedDisorderIds.includes(disorder.id);
               return (
                 <div key={disorder.id} className={`${uiStackList} ${uiCell} p-3`}>
-                  <label className={`flex items-center gap-3 text-sm ${uiTextBody}`}>
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={(event) =>
-                        setRemovedDisorderIds((current) =>
-                          event.target.checked
-                            ? [...current, disorder.id]
-                            : current.filter((id) => id !== disorder.id)
-                        )
-                      }
-                    />
-                    <span>
-                      {disorder.name} ({disorder.severity})
-                    </span>
-                  </label>
+                  <CheckboxRow
+                    checked={selected}
+                    onChange={(checked) =>
+                      setRemovedDisorderIds((current) =>
+                        checked
+                          ? [...current, disorder.id]
+                          : current.filter((id) => id !== disorder.id)
+                      )
+                    }
+                  >
+                    {disorder.name} ({disorder.severity})
+                  </CheckboxRow>
                   {selected && (
                     <input
                       className={editableInputClass(true)}
@@ -871,14 +861,9 @@ export function TalentAcquisitionModal({
                 </div>
               );
             })}
-            <label className={`flex items-start gap-3 text-sm ${uiTextBody}`}>
-              <input
-                type="checkbox"
-                checked={confirmed}
-                onChange={(event) => setConfirmed(event.target.checked)}
-              />
-              <span>The GM has reviewed these changes.</span>
-            </label>
+            <CheckboxRow checked={confirmed} onChange={setConfirmed}>
+              The GM has reviewed these changes.
+            </CheckboxRow>
           </>
         )}
 

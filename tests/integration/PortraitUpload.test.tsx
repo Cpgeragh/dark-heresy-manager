@@ -9,6 +9,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { uiTwoColumnGrid } from "../../src/ui/styles/editableStyles";
 
 vi.mock("react-easy-crop", () => ({
   default: () => <div>Mock Cropper</div>,
@@ -76,6 +77,19 @@ describe("PortraitUpload", () => {
     expect(screen.getByText("Mock Cropper")).toBeInTheDocument();
     expect(screen.getByRole("slider")).toHaveClass("accent-red-500");
     expect(screen.getByRole("slider")).not.toHaveClass("accent-red-600");
+  });
+
+  it("lays Save and Cancel out in the shared two-column footer", async () => {
+    renderUpload();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const goodFile = new File(["fake-image-bytes"], "portrait.png", { type: "image/png" });
+
+    await userEvent.upload(input, goodFile);
+    await screen.findByRole("dialog", { name: "Position Portrait" });
+
+    const footer = screen.getByRole("button", { name: "Save" }).parentElement;
+    expect(footer).toHaveClass(...uiTwoColumnGrid.split(" "));
+    expect(footer).toContainElement(screen.getByRole("button", { name: "Cancel" }));
   });
 
   it("closes the crop modal on Cancel without uploading", async () => {

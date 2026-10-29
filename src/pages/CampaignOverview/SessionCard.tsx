@@ -13,6 +13,7 @@ import { Button } from "../../ui/buttons/Button";
 import { CardOverlayButton } from "../../ui/buttons/CardOverlayButton";
 import { RemoveButton } from "../../ui/buttons/RemoveButton";
 import { Chip } from "../../ui/chips/Chip";
+import { CheckboxRow } from "../../ui/forms/CheckboxRow";
 import { CheckIcon } from "../../ui/icons/CheckIcon";
 import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { DeleteConfirmModal } from "../../ui/modals/DeleteConfirmModal";
@@ -275,17 +276,9 @@ export function SessionCard({
                   This session's XP was already applied. Deleting it won't remove that XP unless
                   checked below.
                 </p>
-                <label
-                  className={`flex items-center gap-1.5 text-xs lg:text-sm ${uiTextBody} cursor-pointer`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={reverseXp}
-                    onChange={(e) => setReverseXp(e.target.checked)}
-                    disabled={deleting}
-                  />
+                <CheckboxRow checked={reverseXp} onChange={setReverseXp} disabled={deleting}>
                   Also remove {session.xpAwarded} XP from attendees
-                </label>
+                </CheckboxRow>
                 <p className={uiTextMeta}>
                   This will affect {reverseXp ? xpAffectedDocuments : 2} documents.
                 </p>

@@ -229,6 +229,7 @@ vi.mock("../../src/pages/CharacterSheet/weapons/CustomMeleeForm", () => ({
 import { CyberneticsTab } from "../../src/pages/CharacterSheet/CyberneticsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { CyberneticItem, RangedWeapon } from "../../src/types/Character";
+import { applyTechPriestImplants } from "../../src/mechanics/career/careerStartingBenefits";
 
 function renderTab(props: Partial<React.ComponentProps<typeof CyberneticsTab>> = {}) {
   const onUpdate = vi.fn();
@@ -324,47 +325,23 @@ describe("CyberneticsTab", () => {
     expect(screen.getByText("No implants.")).toBeInTheDocument();
   });
 
-  it("shows Mechanicus Implants only for a Tech-Priest career", () => {
-    const { rerender } = render(
-      <ToastProvider>
-        <CyberneticsTab
-          campaignId="campaign-1"
-          characterId="char-1"
-          userId="user-1"
-          isDM={false}
-          cybernetics={[]}
-          rangedWeapons={[]}
-          meleeWeapons={[]}
-          editable={true}
-          onUpdate={vi.fn()}
-          onUpdateRanged={vi.fn()}
-          onUpdateMelee={vi.fn()}
-          career="Guardsman"
-        />
-      </ToastProvider>
-    );
-    expect(screen.queryByText("Mechanicus Implants")).not.toBeInTheDocument();
+  it("lists the granted Tech-Priest implants only under Implants, with no separate Mechanicus Implants section", () => {
+    renderTab({ cybernetics: applyTechPriestImplants([], "Tech-Priest") });
 
-    rerender(
-      <ToastProvider>
-        <CyberneticsTab
-          campaignId="campaign-1"
-          characterId="char-1"
-          userId="user-1"
-          isDM={false}
-          cybernetics={[]}
-          rangedWeapons={[]}
-          meleeWeapons={[]}
-          editable={true}
-          onUpdate={vi.fn()}
-          onUpdateRanged={vi.fn()}
-          onUpdateMelee={vi.fn()}
-          career="Tech-Priest"
-        />
-      </ToastProvider>
-    );
-    expect(screen.getByText("Mechanicus Implants")).toBeInTheDocument();
-    expect(screen.getByText("Electro-Graft")).toBeInTheDocument();
+    expect(screen.queryByText("Mechanicus Implants")).not.toBeInTheDocument();
+    expect(screen.queryByText("Granted by Mechanicus Implants")).not.toBeInTheDocument();
+    const implants = screen.getByText("Implants").closest("section");
+    for (const name of [
+      "Electro-Graft",
+      "Electoo Inductors",
+      "Respirator Unit",
+      "Cyber-Mantle",
+      "Potentia Coil",
+      "Cranial Circuitry",
+    ]) {
+      const matches = screen.getAllByText(name);
+      expect(matches.every((match) => implants?.contains(match))).toBe(true);
+    }
   });
 
   it("installs a plain cybernetic from the picker", async () => {

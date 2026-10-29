@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "../ui/buttons/Button";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { editableInputColour } from "../ui/styles/editableStyles";
+import { editableInputLargeClass } from "../ui/styles/editableStyles";
 
 export function MessageInput({
   onSend,
@@ -37,9 +37,7 @@ export function MessageInput({
   return (
     <div className="flex gap-2 lg:gap-3 mt-2">
       <input
-        className={`flex-1 border px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base ${editableInputColour(
-          !disabled
-        )}`}
+        className={`flex-1 ${editableInputLargeClass(!disabled)}`}
         placeholder={placeholder}
         value={text}
         maxLength={PRODUCT_LIMITS.messageCharacters}

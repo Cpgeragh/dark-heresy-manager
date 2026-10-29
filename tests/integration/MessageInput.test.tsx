@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { MessageInput } from "../../src/components/MessageInput";
+import { editableInputLargeClass } from "../../src/ui/styles/editableStyles";
 
 describe("MessageInput", () => {
   it("sends trimmed text and clears the input", async () => {
@@ -41,6 +42,15 @@ describe("MessageInput", () => {
 
     fireEvent.keyDown(input, { key: "Enter" });
     expect(onSend).toHaveBeenCalledWith("Hi");
+  });
+
+  it("uses the shared large text box size and fills the row", () => {
+    render(<MessageInput onSend={vi.fn()} />);
+
+    expect(screen.getByPlaceholderText("Message…")).toHaveClass(
+      ...editableInputLargeClass(true).split(" "),
+      "flex-1"
+    );
   });
 
   it("disables the input and button while disabled", () => {

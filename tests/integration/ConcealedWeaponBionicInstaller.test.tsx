@@ -142,6 +142,23 @@ describe("ConcealedWeaponBionicInstaller", () => {
     expect(screen.getByRole("button", { name: "Select Bionic Arm" })).toBeInTheDocument();
   });
 
+  it("titles the pop-up and keeps Cancel outside the scrolling list", () => {
+    renderInstaller();
+
+    expect(screen.getByRole("dialog", { name: "Concealed Weapon Bionic" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" }).closest(".overflow-y-auto")).toBeNull();
+  });
+
+  it("keeps Back outside the scrolling list on the weapon step", async () => {
+    const user = userEvent.setup();
+    const arm: CyberneticItem = { id: "arm-1", name: "Bionic Arm", referenceId: BIONIC_ARM_REF_ID };
+    renderInstaller({ cybernetics: [arm] });
+
+    await user.click(screen.getByRole("button", { name: "Select Bionic Arm" }));
+
+    expect(screen.getByRole("button", { name: "Back" }).closest(".overflow-y-auto")).toBeNull();
+  });
+
   it("calls onClose from Cancel", async () => {
     const user = userEvent.setup();
     const { onClose } = renderInstaller();

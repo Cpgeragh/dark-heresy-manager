@@ -14,7 +14,12 @@ import {
   ACCEPTED_PORTRAIT_MIME_TYPES,
   assertPortraitSource,
 } from "../firestore/firebaseValidation";
-import { uiTextMeta, uiTextPlaceholder, uiStackBody } from "../ui/styles/editableStyles";
+import {
+  uiTextMeta,
+  uiTextPlaceholder,
+  uiStackBody,
+  uiTwoColumnGrid,
+} from "../ui/styles/editableStyles";
 import {
   colourHeadingAccent,
   colourControlRaised,
@@ -220,21 +225,11 @@ export function PortraitUpload({
               />
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                className="flex-1"
-                onClick={handleSave}
-                loading={uploading}
-                loadingLabel="Uploading"
-              >
+            <div className={uiTwoColumnGrid}>
+              <Button fullWidth onClick={handleSave} loading={uploading} loadingLabel="Uploading">
                 Save
               </Button>
-              <Button
-                variant="neutral"
-                className="flex-1"
-                onClick={handleCancel}
-                disabled={uploading}
-              >
+              <Button variant="neutral" fullWidth onClick={handleCancel} disabled={uploading}>
                 Cancel
               </Button>
             </div>

@@ -37,6 +37,11 @@ export function editableInputClass(isEditable: boolean) {
   return fieldControlClass({ editable: isEditable });
 }
 
+/** The larger text box, such as the chat message box, with no fixed width. */
+export function editableInputLargeClass(isEditable: boolean) {
+  return fieldControlClass({ editable: isEditable, size: "large" });
+}
+
 /** Fill, border and selected border of a text box, for boxes that set their own size. */
 export function editableInputColour(isEditable: boolean, invalid = false) {
   return fieldColourClass({ editable: isEditable, invalid });

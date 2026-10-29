@@ -1453,6 +1453,12 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] The middle Characteristics block on a phone keeps its soft silver glow, and the counters keep their darker shadow (`colourGlowSilver`, `colourControlShadow`)
 - [ ] A pulsing Weapon Training pill glows in the colour of its group, a pulsing exotic pill glows fuchsia, and the Psy Rating square pulses harder at a higher rating, in the same indigo at every rating (`GlowChip`, `colourGlowPulseRgb`)
 - [ ] Opening the installed app or reloading the page shows the same near-black background in the browser bar, the launch screen, the static splash and the app, with the same red title and spinner before and after React loads (`index.html`, `src/index.css`, `pwaOptions.ts`)
+- [ ] Every tick box with a sentence, in the Touched by the Fates and removed Disorder confirmations, the GM review line, the recovery code confirmation in Onboarding and the Also remove XP option in the session delete pop-up, has the same 16 pixel box with a red tick, the same text size and grey, and the same gap; the box lines up with the first line of a long sentence and the pointer shows over the whole row (`CheckboxRow`)
+- [ ] The recovery code confirmation in Onboarding stays centred and shows its red star after the sentence, and the Also remove XP box cannot be clicked while the delete is saving (`CheckboxRow`)
+- [ ] The Concealed Weapon Bionic pop-up has the same header, divider lines and Back and Cancel footer as the other pickers, and its title and buttons stay in place while a long weapon list scrolls (`PickerModal`)
+- [ ] Position Portrait shows Save and Cancel in two equal columns, like the other pop-ups (`uiTwoColumnGrid`)
+- [ ] The chat message box keeps its taller size, with the Send button the same height beside it (`editableInputLargeClass`)
+- [ ] A Tech-Priest's Cybernetics tab shows each of the six Mechanicus Implants once, under Implants, with no separate Mechanicus Implants section (`CyberneticsTab`)
 
 ## 36. Waiting and Instant Saves
 

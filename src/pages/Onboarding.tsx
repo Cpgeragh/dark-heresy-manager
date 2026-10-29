@@ -10,7 +10,6 @@ import { createAccount, getRecoveryCode } from "../services/identityService";
 import { completeOnboarding, discardOnboardingSetup } from "../services/userAccountService";
 import { saveFirstName } from "../services/profileService";
 import {
-  uiInlineRow,
   editableInputClass,
   uiCodeBox,
   uiCodeText,
@@ -38,7 +37,7 @@ import {
   colourDivider,
 } from "../ui/styles/colourTokens";
 import { RequiredFieldsNote } from "../ui/forms/CustomFormFooter";
-import { RequiredMark } from "../ui/forms/RequiredMark";
+import { CheckboxRow } from "../ui/forms/CheckboxRow";
 import { FormLabel } from "../ui/forms/FormLabel";
 import { ConfirmModal } from "../ui/modals/ConfirmModal";
 
@@ -472,20 +471,14 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                       {copied ? "Copied" : "Copy recovery code"}
                     </Button>
 
-                    <label
-                      className={`${uiInlineRow} cursor-pointer justify-center text-sm lg:text-base ${colourTextPrimary}`}
+                    <CheckboxRow
+                      required
+                      checked={savedConfirmed}
+                      onChange={setSavedConfirmed}
+                      className="justify-center"
                     >
-                      <input
-                        type="checkbox"
-                        required
-                        checked={savedConfirmed}
-                        onChange={(e) => setSavedConfirmed(e.target.checked)}
-                        className="h-4 w-4 shrink-0"
-                      />
-                      <span>
-                        I've saved my recovery code somewhere safe. <RequiredMark />
-                      </span>
-                    </label>
+                      I've saved my recovery code somewhere safe.
+                    </CheckboxRow>
                   </div>
 
                   <div className={`border-t ${colourDivider} px-4 py-3 lg:px-5 lg:py-4`}>

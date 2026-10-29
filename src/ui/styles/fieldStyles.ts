@@ -8,16 +8,21 @@ import { uiDisabledLook, uiFocusRing } from "./buttonStyles";
 import { uiCorner } from "./shapeStyles";
 
 export type FieldResize = "none" | "vertical";
+export type FieldSize = "default" | "large";
 
 interface FieldControlOptions {
   editable: boolean;
   invalid?: boolean;
   resize?: FieldResize;
+  size?: FieldSize;
 }
 
 type FieldColourOptions = Pick<FieldControlOptions, "editable" | "invalid">;
 
 const fieldControlBase = "w-full border px-2 py-1 text-sm lg:text-base";
+
+/** Larger border and padding with no fixed width, so the box can fill a row beside a button. */
+const fieldControlLarge = "border px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base";
 
 const fieldColourBase = `${uiCorner} transition placeholder:text-slate-500`;
 
@@ -38,8 +43,14 @@ export function fieldColourClass({ editable, invalid = false }: FieldColourOptio
   return `${fieldColourBase} ${stateClass}`;
 }
 
-export function fieldControlClass({ editable, invalid = false, resize }: FieldControlOptions) {
+export function fieldControlClass({
+  editable,
+  invalid = false,
+  resize,
+  size = "default",
+}: FieldControlOptions) {
   const resizeClass = resize === "vertical" ? "resize-y" : resize === "none" ? "resize-none" : "";
+  const sizeClass = size === "large" ? fieldControlLarge : fieldControlBase;
 
-  return [fieldControlBase, fieldColourClass({ editable, invalid }), resizeClass].join(" ");
+  return [sizeClass, fieldColourClass({ editable, invalid }), resizeClass].join(" ");
 }
