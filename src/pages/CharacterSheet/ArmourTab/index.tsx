@@ -37,8 +37,12 @@ import {
   uiTable,
   uiTableBody,
   uiTableCell,
+  uiTableFirstCell,
   uiTableHeaderCell,
   uiTableHeaderRow,
+  uiTableNumberCell,
+  uiTableNumberHeaderCell,
+  uiTableScroll,
 } from "../../../ui/styles/tableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
@@ -565,14 +569,23 @@ export function ArmourTab({
       <section>
         <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>
-          <div className="overflow-x-auto">
-            <table className={`${uiTable} lg:table-fixed`}>
+          <div className={uiTableScroll}>
+            <table className={`${uiTable} lg:table-fixed`} aria-label="Armour location summary">
               <thead>
                 <tr className={uiTableHeaderRow}>
-                  <th className={`${uiTableHeaderCell} pr-4 text-left lg:w-32`}>Location</th>
-                  <th className={`${uiTableHeaderCell} px-3 text-center`}>TB</th>
-                  <th className={`${uiTableHeaderCell} px-3 text-center`}>AP</th>
-                  <th className={`${uiTableHeaderCell} px-3 text-center`}>
+                  <th
+                    scope="col"
+                    className={`${uiTableHeaderCell} ${uiTableFirstCell} text-left lg:w-32`}
+                  >
+                    Location
+                  </th>
+                  <th scope="col" className={uiTableNumberHeaderCell}>
+                    TB
+                  </th>
+                  <th scope="col" className={uiTableNumberHeaderCell}>
+                    AP
+                  </th>
+                  <th scope="col" className={uiTableNumberHeaderCell}>
                     <span className="inline-flex items-center gap-1">
                       Misc
                       {hasMisc && (
@@ -603,7 +616,9 @@ export function ArmourTab({
                       )}
                     </span>
                   </th>
-                  <th className={`${uiTableHeaderCell} px-3 text-center`}>Total</th>
+                  <th scope="col" className={uiTableNumberHeaderCell}>
+                    Total
+                  </th>
                 </tr>
               </thead>
               <tbody className={uiTableBody}>
@@ -621,19 +636,15 @@ export function ArmourTab({
                   const total = ap + toughnessBonus + misc;
                   return (
                     <tr key={loc}>
-                      <td className={`${uiTableCell} pr-4`}>{ARMOUR_LOCATION_LABELS[loc]}</td>
-                      <td className={`${uiTableCell} px-3 text-center font-code`}>
-                        {toughnessBonus}
+                      <td className={`${uiTableCell} ${uiTableFirstCell}`}>
+                        {ARMOUR_LOCATION_LABELS[loc]}
                       </td>
-                      <td className={`${uiTableCell} px-3 text-center font-code`}>+{ap}</td>
-                      <td
-                        className={`${uiTableCell} px-3 text-center font-code ${misc > 0 ? "" : uiTextPlaceholder}`}
-                      >
+                      <td className={uiTableNumberCell}>{toughnessBonus}</td>
+                      <td className={uiTableNumberCell}>+{ap}</td>
+                      <td className={`${uiTableNumberCell} ${misc > 0 ? "" : uiTextPlaceholder}`}>
                         {misc > 0 ? `+${misc}` : "-"}
                       </td>
-                      <td className={`${uiTableCell} px-3 text-center font-code font-semibold`}>
-                        {total}
-                      </td>
+                      <td className={`${uiTableNumberCell} font-semibold`}>{total}</td>
                     </tr>
                   );
                 })}
