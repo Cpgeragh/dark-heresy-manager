@@ -11,6 +11,7 @@ import {
   colourShadowStrong,
   colourTextPrimary,
 } from "../styles/colourTokens";
+import { uiBackdropBlur } from "../styles/layerStyles";
 import { uiCorner } from "../styles/shapeStyles";
 
 export const MODAL_OPENED_EVENT = "dhm:modal-opened";
@@ -182,8 +183,8 @@ export function ModalShell({
       }}
       className={`m-auto w-[calc(100%-2rem)] ${colourModalSurface} border ${uiCorner} ${colourShadowStrong} p-0${colourTextPrimary} ${
         suspended
-          ? `invisible ${colourModalBackdropSuspended} backdrop:backdrop-blur-none`
-          : `${colourModalBackdrop} backdrop:backdrop-blur-sm`
+          ? `invisible ${colourModalBackdropSuspended} ${uiBackdropBlur.dialogNone}`
+          : `${colourModalBackdrop} ${uiBackdropBlur.dialog}`
       } ${className}`.trim()}
       style={{ ...style, ...viewportStyle }}
     >

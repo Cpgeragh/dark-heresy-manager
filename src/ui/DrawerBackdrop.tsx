@@ -1,5 +1,5 @@
 import { colourDrawerBackdrop } from "./styles/colourTokens";
-import { uiLayerBackdrop } from "./styles/layerStyles";
+import { uiBackdropBlur, uiDrawerDuration, uiLayerBackdrop } from "./styles/layerStyles";
 
 interface DrawerBackdropProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface DrawerBackdropProps {
 export function DrawerBackdrop({ isOpen, onClose }: DrawerBackdropProps) {
   return (
     <div
-      className={`fixed inset-0 ${uiLayerBackdrop} ${colourDrawerBackdrop} backdrop-blur-sm transition-opacity duration-300 ${
+      className={`fixed inset-0 ${uiLayerBackdrop} ${colourDrawerBackdrop} ${uiBackdropBlur.page} transition-opacity ${uiDrawerDuration} ${
         isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
       }`}
       onClick={onClose}
