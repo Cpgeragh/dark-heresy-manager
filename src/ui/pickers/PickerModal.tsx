@@ -30,6 +30,7 @@ import {
   colourPickerSelected,
 } from "../styles/colourTokens";
 import { uiCorner } from "../styles/shapeStyles";
+import { uiIconSize } from "../styles/iconStyles";
 
 export function PickerBody({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`p-4 lg:p-5 ${uiStackBody} ${className}`.trim()} {...props} />;
@@ -96,7 +97,7 @@ export function PickerRow({
       )}
       {pending && (
         <span
-          className={`${uiSpinner} absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2`}
+          className={`${uiSpinner} ${uiIconSize.px16} absolute right-4 top-1/2 -translate-y-1/2`}
           aria-hidden="true"
         />
       )}

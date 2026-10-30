@@ -1,6 +1,7 @@
 import type { IconProps } from "./iconTypes";
+import { uiIconSize } from "../styles/iconStyles";
 
-export function GearIcon({ className = "w-[18px] h-[18px]" }: IconProps) {
+export function GearIcon({ className = uiIconSize.inline }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

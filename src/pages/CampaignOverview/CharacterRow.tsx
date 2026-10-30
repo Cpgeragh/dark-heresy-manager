@@ -36,6 +36,7 @@ import type { ClaimLogAction } from "shared-rules";
 import { ChatMessageButton } from "../../components/chat/ChatMessageButton";
 import { PortraitUpload } from "../../components/PortraitUpload";
 import { recordComponentRender } from "../../performance/performanceMetrics";
+import { uiIconSize } from "../../ui/styles/iconStyles";
 
 function formatAction(action: ClaimLogAction): string {
   switch (action) {
@@ -219,7 +220,7 @@ export function CharacterRow({
                   event.preventDefault();
                   setManageOpen(true);
                 }}
-                icon={<GearIcon />}
+                icon={<GearIcon className={uiIconSize.px18} />}
               />
             </div>
           )}

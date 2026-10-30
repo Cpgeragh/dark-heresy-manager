@@ -33,6 +33,7 @@ import {
   colourTextPrimary,
 } from "../../../ui/styles/colourTokens";
 import { uiDisabledControl, uiFocusRing, uiPressFeedback } from "../../../ui/styles/buttonStyles";
+import { uiIconSize } from "../../../ui/styles/iconStyles";
 
 // ─── Ammo Entry Row ───────────────────────────────────────────────────────────
 
@@ -124,7 +125,7 @@ export function AmmoEntryRow({
             />
           )}
           <NestedChip colour="slate">
-            <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+            <WeightIcon className={`${uiIconSize.inline} shrink-0`} />
             <span>{formatWeightForDisplay(formatAmmoWeight(weightKg ?? 0))}</span>
           </NestedChip>
         </div>

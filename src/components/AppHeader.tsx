@@ -15,6 +15,7 @@ import { HeaderMessagesButton } from "./chat/HeaderMessagesButton";
 import { colourPopoverSurface, colourShadowStrong } from "../ui/styles/colourTokens";
 import { uiLayerForeground } from "../ui/styles/layerStyles";
 import { uiCorner } from "../ui/styles/shapeStyles";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 interface AppHeaderProps {
   currentPath: string;
@@ -70,7 +71,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
               <IconButton
                 label="Share App"
                 onClick={() => setShareOpen(true)}
-                icon={<QrCodeIcon />}
+                icon={<QrCodeIcon className={uiIconSize.px18} />}
               />
             )}
           </>
@@ -82,7 +83,11 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
 
             {/* Settings: dashboard only */}
             {isOnDashboard && (
-              <IconButton label="Settings" onClick={onOpenSettings} icon={<GearIcon />} />
+              <IconButton
+                label="Settings"
+                onClick={onOpenSettings}
+                icon={<GearIcon className={uiIconSize.px18} />}
+              />
             )}
 
             {/* Kebab menu */}
@@ -91,7 +96,7 @@ export function AppHeader({ currentPath, onOpenSettings }: AppHeaderProps) {
                 <IconButton
                   label="Options"
                   onClick={() => setKebabOpen((v) => !v)}
-                  icon={<GearIcon />}
+                  icon={<GearIcon className={uiIconSize.px18} />}
                 />
 
                 {kebabOpen && (

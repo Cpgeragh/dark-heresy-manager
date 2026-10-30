@@ -14,7 +14,8 @@ import {
   colourShadowStrong,
 } from "../ui/styles/colourTokens";
 import { uiSplitRow } from "../ui/styles/editableStyles";
-import { uiLayerForeground } from "../ui/styles/layerStyles";
+import { uiDrawerDuration, uiLayerForeground } from "../ui/styles/layerStyles";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 // ================================================================
 // NAVIGATION STRUCTURE
@@ -152,14 +153,14 @@ function SectionDrawerContent({
         label="Open section navigation"
         onClick={open}
         className="h-10 w-10"
-        icon={<MenuIcon />}
+        icon={<MenuIcon className={uiIconSize.px18} />}
       />
 
       <DrawerBackdrop isOpen={isOpen} onClose={close} />
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 ${uiLayerForeground} w-72 max-w-[85vw] ${colourPopoverSurface} border-r flex flex-col ${colourShadowStrong} transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 ${uiLayerForeground} w-72 max-w-[85vw] ${colourPopoverSurface} border-r flex flex-col ${colourShadowStrong} transition-transform ${uiDrawerDuration} ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="Section navigation"
@@ -184,7 +185,7 @@ function SectionDrawerContent({
           <div className="relative overflow-hidden flex-1">
             {/* Level 1: Categories */}
             <div
-              className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
+              className={`absolute inset-0 overflow-y-auto transition-transform ${uiDrawerDuration} ease-in-out ${
                 level === "categories" ? "translate-x-0" : "-translate-x-full"
               }`}
             >
@@ -201,7 +202,7 @@ function SectionDrawerContent({
 
             {/* Level 2: Pages */}
             <div
-              className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
+              className={`absolute inset-0 overflow-y-auto transition-transform ${uiDrawerDuration} ease-in-out ${
                 level === "pages" ? "translate-x-0" : "translate-x-full"
               }`}
             >

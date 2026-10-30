@@ -28,6 +28,7 @@ import {
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 import { parseDamageType, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { FormLabel } from "../../../ui/forms/FormLabel";
+import { uiIconSize } from "../../../ui/styles/iconStyles";
 
 export function WeaponQualitySelector({
   selected,
@@ -179,7 +180,7 @@ export function UpgradeCard({
       chips={
         <div className="flex flex-wrap gap-1 mt-1">
           <NestedChip colour="slate">
-            <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+            <WeightIcon className={`${uiIconSize.inline} shrink-0`} />
             <span className="leading-none">{displayedWeightModifier}</span>
           </NestedChip>
           <NestedItemMetaChips
@@ -242,7 +243,7 @@ export function UpgradePicker({
             />
             <PickerRowChips>
               <Chip colour="slate">
-                <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+                <WeightIcon className={`${uiIconSize.inline} shrink-0`} />
                 <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
               </Chip>
               <ItemMetaChips

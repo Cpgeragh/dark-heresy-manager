@@ -16,6 +16,7 @@ import {
 } from "./styles/editableStyles";
 import { uiLayerLocal } from "./styles/layerStyles";
 import { usePendingClick } from "./usePendingClick";
+import { uiIconSize } from "./styles/iconStyles";
 
 const CARD_SHELL = {
   default: uiSectionShell,
@@ -94,7 +95,7 @@ export function AccordionCard({
             forceExpanded ? undefined : onSelect ? (
               selecting ? (
                 <span
-                  className={`${uiSpinner} relative ${uiLayerLocal} h-4 w-4`}
+                  className={`${uiSpinner} relative ${uiLayerLocal} ${uiIconSize.px16}`}
                   aria-hidden="true"
                 />
               ) : (

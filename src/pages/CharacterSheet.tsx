@@ -19,7 +19,7 @@ import { useCharacterSheet } from "./CharacterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { Button } from "../ui/buttons/Button";
 import { IconButton } from "../ui/buttons/IconButton";
-import { uiLayerForeground } from "../ui/styles/layerStyles";
+import { uiLayerLocal } from "../ui/styles/layerStyles";
 
 import { VitalsTab } from "./CharacterSheet/VitalsTab";
 import { InsanityTab } from "./CharacterSheet/InsanityTab";
@@ -105,6 +105,7 @@ import {
   colourShadowRaised,
 } from "../ui/styles/colourTokens";
 import { uiCorner } from "../ui/styles/shapeStyles";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 const TalentsTab = memo(
   lazy(() =>
@@ -1153,8 +1154,8 @@ export default function CharacterSheet({
           <IconButton
             label="Scroll to top"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className={`fixed bottom-6 right-4 ${uiLayerForeground} h-9 w-9 ${colourFillFloating} ${colourShadowRaised}`}
-            icon={<ChevronUpIcon className="h-5 w-5" />}
+            className={`fixed bottom-6 right-4 ${uiLayerLocal} h-9 w-9 ${colourFillFloating} ${colourShadowRaised}`}
+            icon={<ChevronUpIcon className={uiIconSize.px18} />}
           />
         )}
 

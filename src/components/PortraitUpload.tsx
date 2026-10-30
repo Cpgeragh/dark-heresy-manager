@@ -30,6 +30,7 @@ import {
 } from "../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { uiCorner } from "../ui/styles/shapeStyles";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 
@@ -159,7 +160,7 @@ export function PortraitUpload({
           {currentPortraitUrl ? (
             <img src={currentPortraitUrl} alt="Portrait" className="w-full h-full object-cover" />
           ) : (
-            <PortraitIcon className={`h-6 w-6 ${uiTextPlaceholder}`} />
+            <PortraitIcon className={`${uiIconSize.px24} ${uiTextPlaceholder}`} />
           )}
         </div>
 
@@ -174,7 +175,7 @@ export function PortraitUpload({
             className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border ${colourBorderRed} ${colourHeadingAccent} flex items-center justify-center ${colourHoverAccentTint} ${uiPressFeedback()} ${uiFocusRing} transition`}
             aria-label="Upload portrait"
           >
-            <PlusIcon className="h-3 w-3" />
+            <PlusIcon className={uiIconSize.px12} />
           </button>
         )}
 

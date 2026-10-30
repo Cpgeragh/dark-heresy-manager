@@ -1,6 +1,7 @@
 import type { IconProps } from "./iconTypes";
+import { uiIconSize } from "../styles/iconStyles";
 
-export function MenuIcon({ className = "h-[18px] w-[18px]" }: IconProps) {
+export function MenuIcon({ className = uiIconSize.inline }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

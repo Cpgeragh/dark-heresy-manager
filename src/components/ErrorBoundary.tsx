@@ -20,6 +20,7 @@ import {
 } from "../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
 import { uiLayerBackdrop } from "../ui/styles/layerStyles";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 interface Props {
   children: ReactNode;
@@ -102,7 +103,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
           <div
             className={`w-16 h-16 rounded-full ${colourStateRed} border-2 flex items-center justify-center`}
           >
-            <WarningIcon className={`h-8 w-8 ${uiTextError}`} />
+            <WarningIcon className={`${uiIconSize.px32} ${uiTextError}`} />
           </div>
         </div>
 

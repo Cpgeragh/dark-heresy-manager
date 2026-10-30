@@ -1,8 +1,9 @@
 // src/ui/icons/PencilIcon.tsx
 
 import type { IconProps } from "./iconTypes";
+import { uiIconSize } from "../styles/iconStyles";
 
-export function PencilIcon({ className = "w-4 h-4" }: IconProps) {
+export function PencilIcon({ className = uiIconSize.inline }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

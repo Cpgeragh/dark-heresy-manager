@@ -16,6 +16,7 @@ import {
   colourNoticeAmberText,
 } from "../ui/styles/colourTokens";
 import { uiCodeBox, uiCodeText, uiNoticeBox, uiStackSection } from "../ui/styles/editableStyles";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 interface Props {
   ownUid: string;
@@ -73,7 +74,7 @@ export function RecoveryBackupBanner({
       <p
         className={`inline-flex items-center gap-1.5 text-sm lg:text-base font-semibold ${colourNoticeAmberTitle}`}
       >
-        <WarningIcon className="h-[1em] w-[1em] shrink-0" />
+        <WarningIcon className={`${uiIconSize.inline} shrink-0`} />
         <span>Back up your recovery code</span>
       </p>
       <p className={`text-xs lg:text-sm ${colourNoticeAmberText}`}>

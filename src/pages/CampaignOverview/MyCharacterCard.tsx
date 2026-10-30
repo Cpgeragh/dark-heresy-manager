@@ -23,6 +23,7 @@ import {
   colourErrorText,
 } from "../../ui/styles/colourTokens";
 import { uiCardLinkFeedback } from "../../ui/styles/buttonStyles";
+import { uiIconSize } from "../../ui/styles/iconStyles";
 
 export function MyCharacterCard({
   character,
@@ -81,7 +82,7 @@ export function MyCharacterCard({
             <div className={`flex flex-wrap gap-3 ${uiTextMeta}`}>
               {character.wounds && (
                 <span className="inline-flex items-center gap-1">
-                  <HeartIcon className="h-[1em] w-[1em] shrink-0" />
+                  <HeartIcon className={`${uiIconSize.inline} shrink-0`} />
                   <span
                     className={
                       character.wounds.current <= 2
@@ -97,7 +98,7 @@ export function MyCharacterCard({
               )}
               {xpLeft !== null && (
                 <span className="inline-flex items-center gap-1">
-                  <ExperienceIcon className="h-[1em] w-[1em] shrink-0" />
+                  <ExperienceIcon className={`${uiIconSize.inline} shrink-0`} />
                   <span
                     className={xpLeft < 0 ? `${colourErrorText} font-semibold` : colourTextPrimary}
                   >

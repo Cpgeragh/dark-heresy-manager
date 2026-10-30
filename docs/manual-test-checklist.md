@@ -1464,6 +1464,11 @@ Open each picker with the sheet editable, and again read-only where a View butto
 - [ ] On a counter or a quantity, Tab reaches the number, Enter or Space opens the editor, Enter saves and Escape cancels and focus returns to the number, and clicking elsewhere closes the editor without moving focus (`useReturnFocusAfterEdit`)
 - [ ] Picker fields and the Age field on the Background tab fill with slate-800 under the pointer and shrink slightly when pressed, and a locked or read-only one does neither (`uiFieldButtonFeedback`)
 - [ ] The expand chevron on a card shows a slate square under the pointer, Load older messages dims under the pointer, and neither dims nor shrinks while it is loading; filter buttons, the info button, plus and minus buttons, Reveal, chip dismiss buttons and the Characteristics advance squares fade their colour in instead of snapping (`transition`)
+- [ ] Every icon-only button shows an 18 pixel icon, or a 16 pixel icon in a small one; a toast shows its status icon, Copy or Check and its dismiss cross at 18 pixels; and the Scroll to top arrow is the same size as the other icon buttons (`uiIconSize`, `uiIconButtonIconSize`)
+- [ ] Plus and minus on Add buttons, steppers and quantity controls, the accordion chevron and the picker arrows are drawn with the same thin rounded line as the other icons, and the chevron and arrows are still 16 pixels (`PlusIcon`, `MinusIcon`, `ExpandChevron`, `PickerArrows`)
+- [ ] The pop-up close cross is 18 pixels, and 20 pixels on a large screen, and the cross on a removable chip is 18 pixels and sits centred in the chip: check an attendee chip in a campaign session, a chip on the Background tab and a chip on a weapon card (`closeCross`, `RemovableChip`)
+- [ ] The Armour Location Summary and the Explosive Mishaps table leave the same gap after their first column, scroll sideways on a narrow screen instead of squeezing, and a screen reader announces their column names and table names (`uiTableFirstCell`, `uiTableScroll`)
+- [ ] Opening the section navigation on a character sheet dims and blurs the page, including the Scroll to top button, while the header stays bright; opening a pop-up dims and blurs the whole page with the same blur (`uiBackdropBlur`, `uiLayerLocal`)
 
 ## 36. Waiting and Instant Saves
 

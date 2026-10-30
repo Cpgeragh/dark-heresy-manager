@@ -1,6 +1,7 @@
 import type { IconProps } from "./iconTypes";
+import { uiIconSize } from "../styles/iconStyles";
 
-export function MessageIcon({ className = "h-5 w-5" }: IconProps) {
+export function MessageIcon({ className = uiIconSize.inline }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

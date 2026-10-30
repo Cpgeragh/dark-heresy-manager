@@ -7,6 +7,7 @@ import {
   colourSplashTitle,
 } from "../ui/styles/colourTokens";
 import { uiSpinner, uiTextBody, uiTextPlaceholder } from "../ui/styles/editableStyles";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 interface SplashScreenProps {
   label: string;
@@ -59,7 +60,7 @@ export function SplashScreen({ label }: SplashScreenProps) {
         <div className={`flex-1 border-t-4 border-double ${colourSplashRule}`} />
       </div>
 
-      <div className={`w-8 h-8 ${uiSpinner}`} />
+      <div className={`${uiIconSize.px32} ${uiSpinner}`} />
 
       <div className="h-4 flex items-center justify-center">
         {showLabel && (

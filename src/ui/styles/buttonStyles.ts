@@ -20,6 +20,7 @@ import {
   colourTextPlaceholder,
 } from "./colourTokens";
 import { uiCorner, uiCornerSmall } from "./shapeStyles";
+import { uiIconSize } from "./iconStyles";
 
 const PRESS_FEEDBACK = "active:scale-press motion-reduce:active:scale-100";
 
@@ -48,7 +49,7 @@ export const uiCardLinkFeedback = `${colourHoverSurface} ${uiPressFeedback()} ${
 /** The same feedback for a card whose link is an overlay, so the card reacts to the link under it. */
 export const uiCardOverlayLinkFeedback = `${colourOverlayHoverSurface} has-[a:active]:scale-press motion-reduce:has-[a:active]:scale-100 transition`;
 
-export const uiDismissButton = `${colourTextMuted} ${colourHoverTextPrimary} text-lg leading-none transition ${uiPressFeedback()} ${uiFocusRing}`;
+export const uiDismissButton = `inline-flex items-center justify-center ${colourTextMuted} ${colourHoverTextPrimary} transition ${uiPressFeedback()} ${uiFocusRing}`;
 
 /** The three responsive sizes of a button for an action on an owned entry, taller from 640 px and larger from 768 px. */
 export const uiEntryActionSize = "sm:h-7 sm:px-2.5 md:h-8 md:px-3 md:text-sm";
@@ -83,7 +84,7 @@ export const uiEditableValueHover = `${colourHoverTextPrimary} hover:underline d
 export const uiCardTapHeader = "transition";
 
 /** Icon size inside an icon button, matched to the button's own size. */
-export const uiIconButtonIconSize = { md: "w-[18px] h-[18px]", sm: "w-4 h-4" } as const;
+export const uiIconButtonIconSize = { md: uiIconSize.px18, sm: uiIconSize.px16 } as const;
 
 const uiIconButtonBase = `inline-flex items-center justify-center ${uiCorner} border ${colourBorderRed} ${colourHeadingAccent} ${colourEnabledHoverRedTint} transition shrink-0 ${uiFocusRing}`;
 

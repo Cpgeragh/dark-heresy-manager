@@ -94,6 +94,7 @@ import { AmmoPicker } from "./AmmoPicker";
 import { formatAmmoWeight } from "./formatAmmoWeight";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { uiCorner } from "../../../ui/styles/shapeStyles";
+import { uiIconSize } from "../../../ui/styles/iconStyles";
 
 // ─── Ranged Card ──────────────────────────────────────────────────────────────
 
@@ -773,7 +774,7 @@ export function RangedCard({
                         />
                       )}
                       <NestedChip colour="slate">
-                        <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+                        <WeightIcon className={`${uiIconSize.inline} shrink-0`} />
                         <span>{formatWeightForDisplay(formatAmmoWeight(magazineWeight))}</span>
                       </NestedChip>
                     </div>

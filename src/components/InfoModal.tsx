@@ -8,6 +8,7 @@ import { ModalShell } from "../ui/modals/ModalShell";
 import { uiInfoButton } from "../ui/styles/buttonStyles";
 import { uiTextBody, uiTextPlaceholder, uiStackBody } from "../ui/styles/editableStyles";
 import { colourFillPanel } from "../ui/styles/colourTokens";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 interface InfoModalProps {
   title: string;
@@ -19,7 +20,7 @@ export function InfoModal({ title, content, as = "button" }: InfoModalProps) {
   const [open, setOpen] = useState(false);
 
   const triggerClassName = `inline-flex h-3.5 w-[18px] shrink-0 items-center justify-center text-sm leading-none transform-gpu ${uiInfoButton}`;
-  const triggerIcon = <InfoIcon className="h-2.5 w-2.5" />;
+  const triggerIcon = <InfoIcon className={uiIconSize.px10} />;
 
   return (
     <>

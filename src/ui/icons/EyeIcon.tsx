@@ -1,8 +1,9 @@
 // src/ui/icons/EyeIcon.tsx
 
 import type { IconProps } from "./iconTypes";
+import { uiIconSize } from "../styles/iconStyles";
 
-export function EyeIcon({ className = "w-4 h-4" }: IconProps) {
+export function EyeIcon({ className = uiIconSize.inline }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

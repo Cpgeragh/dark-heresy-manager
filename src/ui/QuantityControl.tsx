@@ -9,6 +9,7 @@ import { uiEditableValueHover, uiFocusRing, uiStepButtonColour } from "./styles/
 import { editableInputColour } from "./styles/editableStyles";
 import { colourTextPrimary } from "./styles/colourTokens";
 import { uiCornerSmall } from "./styles/shapeStyles";
+import { uiIconSize } from "./styles/iconStyles";
 
 interface Props {
   quantity: number;
@@ -63,7 +64,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           aria-label="Decrease quantity"
           className={`${sizeStyles.btn} ${uiCornerSmall} ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
-          <MinusIcon className="h-[1em] w-[1em]" />
+          <MinusIcon className={uiIconSize.inline} />
         </button>
       )}
 
@@ -106,7 +107,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           aria-label="Increase quantity"
           className={`${sizeStyles.btn} ${uiCornerSmall} ${uiStepButtonColour} leading-none flex items-center justify-center`}
         >
-          <PlusIcon className="h-[1em] w-[1em]" />
+          <PlusIcon className={uiIconSize.inline} />
         </button>
       )}
     </div>

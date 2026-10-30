@@ -1,6 +1,7 @@
 import type { IconProps } from "./iconTypes";
+import { uiIconSize } from "../styles/iconStyles";
 
-export function PortraitIcon({ className = "h-6 w-6" }: IconProps) {
+export function PortraitIcon({ className = uiIconSize.inline }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

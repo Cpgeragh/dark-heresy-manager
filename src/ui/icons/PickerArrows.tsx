@@ -1,32 +1,32 @@
 // src/ui/icons/PickerArrows.tsx
 
 import { colourIconMuted } from "../styles/colourTokens";
+import { uiIconSize } from "../styles/iconStyles";
+import type { IconProps } from "./iconTypes";
 
-function Arrow({ direction }: { direction: "left" | "right" }) {
+function Arrow({ direction, className }: IconProps & { direction: "left" | "right" }) {
   return (
     <svg
       data-picker-arrow={direction}
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      className={`h-4 w-4 shrink-0 ${colourIconMuted} ${direction === "left" ? "rotate-180" : ""}`}
+      className={`${className} shrink-0 ${colourIconMuted} ${direction === "left" ? "rotate-180" : ""}`}
     >
-      <path
-        d="M3.5 10h13m-5-5 5 5-5 5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M4 12h16m-6-6 6 6-6 6" />
     </svg>
   );
 }
 
-export function ArrowRight() {
-  return <Arrow direction="right" />;
+export function ArrowRight({ className = uiIconSize.px16 }: IconProps) {
+  return <Arrow direction="right" className={className} />;
 }
 
-export function ArrowLeft() {
-  return <Arrow direction="left" />;
+export function ArrowLeft({ className = uiIconSize.px16 }: IconProps) {
+  return <Arrow direction="left" className={className} />;
 }

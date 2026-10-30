@@ -1,6 +1,7 @@
 import type { IconProps } from "./iconTypes";
+import { uiIconSize } from "../styles/iconStyles";
 
-export function CloseIcon({ className = "h-[1em] w-[1em]" }: IconProps) {
+export function CloseIcon({ className = uiIconSize.inline }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

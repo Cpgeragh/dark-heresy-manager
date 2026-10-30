@@ -16,6 +16,7 @@ import {
 } from "../../ui/styles/colourTokens";
 import { uiFocusRing, uiPressFeedback } from "../../ui/styles/buttonStyles";
 import { uiCorner } from "../../ui/styles/shapeStyles";
+import { uiIconSize } from "../../ui/styles/iconStyles";
 
 interface ToastItemProps {
   toast: Toast;
@@ -40,10 +41,10 @@ export function ToastItem({ toast }: ToastItemProps) {
   }, [removeToast, toast.id]);
 
   const icons = {
-    success: <CheckIcon className="h-[1em] w-[1em]" />,
-    error: <ExclamationIcon className="h-[1em] w-[1em]" />,
-    warning: <WarningIcon className="h-[1em] w-[1em]" />,
-    info: <InfoIcon className="h-[1em] w-[1em]" />,
+    success: <CheckIcon className={uiIconSize.px18} />,
+    error: <ExclamationIcon className={uiIconSize.px18} />,
+    warning: <WarningIcon className={uiIconSize.px18} />,
+    info: <InfoIcon className={uiIconSize.px18} />,
   };
   const gridColumns = toast.copyText
     ? "grid-cols-[4.25rem_minmax(0,1fr)_4.25rem]"
@@ -64,9 +65,7 @@ export function ToastItem({ toast }: ToastItemProps) {
       `}
     >
       {/* Icon */}
-      <div className="flex h-8 items-center justify-center text-lg font-bold">
-        {icons[toast.type]}
-      </div>
+      <div className="flex h-8 items-center justify-center">{icons[toast.type]}</div>
 
       {/* Message */}
       <div className="min-w-0 whitespace-pre-wrap break-words text-center text-sm">
@@ -79,22 +78,26 @@ export function ToastItem({ toast }: ToastItemProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className={`inline-flex h-8 w-8 items-center justify-center ${uiCorner} text-xs transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing}`}
+            className={`inline-flex h-8 w-8 items-center justify-center ${uiCorner} transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing}`}
             aria-label="Copy message to clipboard"
             title="Copy to clipboard"
           >
-            {copied ? <CheckIcon /> : <CopyIcon />}
+            {copied ? (
+              <CheckIcon className={uiIconSize.px18} />
+            ) : (
+              <CopyIcon className={uiIconSize.px18} />
+            )}
           </button>
         )}
 
         <button
           type="button"
           onClick={handleDismiss}
-          className={`inline-flex h-8 w-8 items-center justify-center ${uiCorner} text-xl transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing} lg:h-9 lg:w-9 lg:text-2xl`}
+          className={`inline-flex h-8 w-8 items-center justify-center ${uiCorner} transition ${colourHoverToastControl} ${uiPressFeedback()} ${uiFocusRing} lg:h-9 lg:w-9`}
           aria-label="Dismiss notification"
           title="Dismiss"
         >
-          <CloseIcon />
+          <CloseIcon className={uiIconSize.px18} />
         </button>
       </div>
     </div>

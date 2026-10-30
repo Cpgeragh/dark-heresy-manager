@@ -34,6 +34,7 @@ import { toSessionDate } from "../../utils/sessionDate";
 import { isSessionOpen } from "../../utils/sessionStatus";
 import { CloseSessionConfirmModal } from "./CloseSessionConfirmModal";
 import { SessionForm } from "./SessionForm";
+import { uiIconSize } from "../../ui/styles/iconStyles";
 
 interface Character {
   id: string;
@@ -173,7 +174,7 @@ export function SessionCard({
               (session.xpApplied === true ? (
                 <Chip colour="green">
                   <span>XP Applied</span>
-                  <CheckIcon className="h-[1em] w-[1em]" />
+                  <CheckIcon className={uiIconSize.inline} />
                 </Chip>
               ) : (
                 <Button

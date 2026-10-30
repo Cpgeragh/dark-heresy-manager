@@ -7,6 +7,7 @@ import { formatMoneyForDisplay } from "../format/moneyFormat";
 import { availabilityChipColour, sourceChipColour } from "../styles/sourceStyles";
 import { formatWeightForDisplay } from "../format/weightFormat";
 import { WeightIcon } from "../icons/WeightIcon";
+import { uiIconSize } from "../styles/iconStyles";
 
 interface Props {
   weight?: string | null;
@@ -51,7 +52,7 @@ function ItemMetaChipsBase({
     <>
       {displayedWeight && (
         <Chip size={size} colour="slate">
-          <WeightIcon className="h-[1em] w-[1em] shrink-0" />
+          <WeightIcon className={`${uiIconSize.inline} shrink-0`} />
           <span className="leading-none">{displayedWeight}</span>
         </Chip>
       )}

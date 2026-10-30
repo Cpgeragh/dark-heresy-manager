@@ -94,6 +94,7 @@ import {
 import { createLocalId } from "../utils/createLocalId";
 import { uiCorner } from "../ui/styles/shapeStyles";
 import { ConfirmModal } from "../ui/modals/ConfirmModal";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 interface Props {
   user: User;
@@ -437,7 +438,7 @@ function DmCampaignList({
                   aria-haspopup="dialog"
                   aria-expanded={openActionsId === campaign.id}
                   onClick={() => setOpenActionsId(campaign.id)}
-                  icon={<GearIcon />}
+                  icon={<GearIcon className={uiIconSize.px18} />}
                 />
               </div>
             </div>

@@ -4,6 +4,7 @@ import { RemoveEntryModal } from "../modals/RemoveEntryModal";
 import { uiDismissButton } from "../styles/buttonStyles";
 import type { ChipSize } from "../styles/chipStyles";
 import type { ChipColour } from "../styles/colourTokens";
+import { uiIconSize } from "../styles/iconStyles";
 import { Chip } from "./Chip";
 
 interface RemovableChipConfirmation {
@@ -48,7 +49,7 @@ export function RemovableChip({
           aria-label={`Remove ${name}`}
           className={uiDismissButton}
         >
-          <CloseIcon />
+          <CloseIcon className={uiIconSize.px18} />
         </button>
       </Chip>
       {confirming && confirmation && (

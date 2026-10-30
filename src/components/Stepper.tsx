@@ -19,6 +19,7 @@ import {
   colourControlSurfaceDisabled,
   colourTextPrimary,
 } from "../ui/styles/colourTokens";
+import { uiIconSize } from "../ui/styles/iconStyles";
 
 interface StepperProps {
   value: number;
@@ -107,7 +108,7 @@ export function Stepper({
         aria-label="Decrease"
         className={btnClass}
       >
-        <MinusIcon className="h-[1em] w-[1em]" />
+        <MinusIcon className={uiIconSize.inline} />
       </button>
 
       <div className={dividerClass} />
@@ -158,7 +159,7 @@ export function Stepper({
         aria-label="Increase"
         className={btnClass}
       >
-        <PlusIcon className="h-[1em] w-[1em]" />
+        <PlusIcon className={uiIconSize.inline} />
       </button>
     </div>
   );
