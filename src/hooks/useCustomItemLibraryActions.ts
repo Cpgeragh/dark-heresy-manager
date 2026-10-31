@@ -33,8 +33,8 @@ export function useCustomItemLibraryActions<TCategory extends CustomItemCategory
       libraryItem: CampaignCustomItem<TCategory>,
       action: CustomItemLibraryAction,
       operation: (actorUserId: string) => Promise<string>
-    ) => {
-      if (!userId || inFlightItemIds.current.has(libraryItem.id)) return;
+    ): Promise<boolean> => {
+      if (!userId || inFlightItemIds.current.has(libraryItem.id)) return false;
 
       inFlightItemIds.current.add(libraryItem.id);
       setBusyActions((current) => [...current, { itemId: libraryItem.id, action }]);
@@ -42,6 +42,7 @@ export function useCustomItemLibraryActions<TCategory extends CustomItemCategory
       try {
         const successMessage = await operation(userId);
         toast.success(successMessage);
+        return true;
       } catch (error) {
         const errorMessage = getErrorMessage(action, itemLabel, messageStyle);
         if (messageStyle === "namedItem") {
@@ -50,6 +51,7 @@ export function useCustomItemLibraryActions<TCategory extends CustomItemCategory
           console.error(errorMessage.replace(/\.$/, ":"), error);
         }
         toast.error(errorMessage);
+        return false;
       } finally {
         inFlightItemIds.current.delete(libraryItem.id);
         setBusyActions((current) =>

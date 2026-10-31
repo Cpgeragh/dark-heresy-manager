@@ -18,7 +18,7 @@ interface Props {
   recoveryCode?: string;
   canManageRecoveryCode: boolean;
   onGenerateRecoveryCode: () => Promise<void>;
-  onRevokeRecoveryCode: () => Promise<void>;
+  onRequestRevoke: () => void;
   canExport: boolean;
   onExport: () => void;
   canPlayerRelease: boolean;
@@ -30,7 +30,7 @@ export function CharacterKebabContent({
   recoveryCode,
   canManageRecoveryCode,
   onGenerateRecoveryCode,
-  onRevokeRecoveryCode,
+  onRequestRevoke,
   canExport,
   onExport,
   canPlayerRelease,
@@ -40,8 +40,6 @@ export function CharacterKebabContent({
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
-  const [revoking, setRevoking] = useState(false);
-  const [revokeError, setRevokeError] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
 
   const copyCode = useCallback(async () => {
@@ -67,18 +65,6 @@ export function CharacterKebabContent({
     }
   }, [onGenerateRecoveryCode]);
 
-  const handleRevoke = useCallback(async () => {
-    setRevoking(true);
-    setRevokeError(null);
-    try {
-      await onRevokeRecoveryCode();
-    } catch (err) {
-      setRevokeError(err instanceof Error ? err.message : "Failed to revoke Recovery Code.");
-    } finally {
-      setRevoking(false);
-    }
-  }, [onRevokeRecoveryCode]);
-
   return (
     <div className={uiStackBody}>
       {/* Recovery Code */}
@@ -95,19 +81,12 @@ export function CharacterKebabContent({
                 Share
               </Button>
               {canManageRecoveryCode && (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={handleRevoke}
-                  loading={revoking}
-                  loadingLabel="Revoking"
-                >
+                <Button variant="danger" size="sm" onClick={onRequestRevoke}>
                   Revoke
                 </Button>
               )}
             </div>
           </div>
-          {revokeError && <p className={`text-xs lg:text-sm ${uiTextError}`}>{revokeError}</p>}
         </div>
       ) : (
         canManageRecoveryCode && (

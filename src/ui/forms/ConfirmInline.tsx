@@ -19,7 +19,8 @@ interface ConfirmInlineProps {
   triggerLoadingLabel?: string;
   /** Short question shown when armed (simple confirm), e.g. "Delete?". */
   question?: string;
-  onConfirm: () => void | Promise<void>;
+  /** Runs the action. Returning false leaves the question open. */
+  onConfirm: () => unknown;
   onArm?: () => void | Promise<void>;
   details?: ReactNode;
   confirmDisabled?: boolean;
@@ -86,19 +87,17 @@ export function ConfirmInline({
     setArmed(true);
   };
 
-  // Run the action, then collapse back to the resting trigger. Disarming in
-  // finally keeps stay-mounted cases (e.g. "Clear chat") from staying armed;
-  // for cases where the row unmounts on success the state update is a no-op.
+  // Run the action, then collapse back to the resting trigger once it has succeeded. An action
+  // that returns false leaves the question armed so it can be tried again or cancelled.
   const runConfirm = async () => {
     if (submittingRef.current) return;
     submittingRef.current = true;
     setSubmitting(true);
     try {
-      await onConfirm();
+      if ((await onConfirm()) !== false) disarm();
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
-      disarm();
     }
   };
 

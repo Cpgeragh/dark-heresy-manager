@@ -12,6 +12,7 @@ import {
   uiTextError,
 } from "../../ui/styles/editableStyles";
 import { ConfirmInline } from "../../ui/forms/ConfirmInline";
+import { ArchiveCustomItemButton } from "../../ui/forms/ArchiveCustomItemButton";
 import { useToast } from "../../components/Toast";
 import {
   permanentlyDeleteCustomItem,
@@ -102,14 +103,16 @@ export function CustomItemAdminRow({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<boolean> => {
     setManagementBusyAction("delete");
     try {
       await permanentlyDeleteCustomItem({ campaignId, customItemId: item.id });
       toast.success(`${item.name} permanently deleted.`);
+      return true;
     } catch (err) {
       console.error("Failed to delete item:", err);
       toast.error("Failed to delete item.");
+      return false;
     } finally {
       setManagementBusyAction(null);
     }
@@ -143,18 +146,11 @@ export function CustomItemAdminRow({
             </Button>
           )}
           {item.status !== "archived" && (
-            <ConfirmInline
-              triggerLabel="Archive"
-              triggerLoading={busyAction === "archive"}
-              triggerLoadingLabel="Archiving"
-              question="Archive and remove copies?"
-              confirmLabel="Archive"
-              cancelLabel="Cancel"
-              variant="warning"
-              size="xs"
+            <ArchiveCustomItemButton
+              name={item.name}
               busy={busy}
-              busyLabel="Archiving"
-              onConfirm={() => archiveDefinition(item)}
+              archiving={busyAction === "archive"}
+              onArchive={() => archiveDefinition(item)}
             />
           )}
           {item.status === "published" && !!item.draftVersionId && (

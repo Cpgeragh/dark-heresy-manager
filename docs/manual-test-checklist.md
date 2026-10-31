@@ -1008,6 +1008,8 @@ Use a new disposable browser profile for each path: new account, connect existin
 - [ ] Hold account creation, connection, completion, or setup cancellation pending and try Back/Escape/repeated submission: the active screen remains visible and locked, no abandoned request later advances onboarding, and failure leaves a usable screen with one action-error toast
 - [ ] Refresh the page while sitting on the show-code step: the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Create Your Account step instead of showing a blank code
 - [ ] Connect Existing Account: entering an active account's recovery code and a user-chosen device name performs one direct connection action; there is no reclaim/link choice and no existing device or account data is moved
+- [ ] Pressing Connect existing account on a new device with nothing set up opens Connect Existing Account straight away; after creating an account, reloading on the code step and pressing browser Back, it first asks "Cancel New Account Setup", Keep setting up changes nothing, and Cancel account setup removes the unfinished account and then opens Connect Existing Account (`Onboarding.tsx`)
+- [ ] After creating an account and reloading on Save Your Recovery Code, the header Back arrow opens "Cancel New Account Setup" straight away, before Reveal Recovery Code is pressed, and Cancel account setup returns to Create Your Account (`Onboarding.tsx`)
 - [ ] Try the recovery code from an unfinished new-account setup on another device: connection is rejected until the creating device completes onboarding
 - [ ] After onboarding completes once, closing and reopening the app never shows onboarding again; if an onboarded account is missing its required profile, the app fails closed with an account-profile loading error and never asks the user to recreate the name
 - [ ] Connect a fresh device to an account that already has a saved first name: the control stays on "Opening account…" until the shared profile is live, then the dashboard opens directly
@@ -1490,6 +1492,10 @@ Use an editable character with a career, and slow the network in the browser's d
 - [ ] A purchase the server refuses, such as one that would spend more than the character's Total XP, leaves the dialog open with the error message and without waiting dots
 - [ ] A removal or downgrade the server refuses leaves its pop-up open with the error message, the item still on the sheet, and no waiting dots
 - [ ] Adding a Gear item, equipping a weapon, and changing a quantity or counter change the sheet at once, and a save the server refuses puts the sheet back and shows the error message
+- [ ] Revoking a character's Recovery Code from the options menu asks "Revoke Recovery Code?" first, changes nothing on Cancel, shows waiting dots on Revoke, closes only after the save, and a refused revoke leaves the pop-up open with an error message (`useRevokeRecoveryCodeFlow.tsx`)
+- [ ] A refused Delete Session, Release, Force Release or Archive of a custom item leaves its pop-up open with the error message, and a refused Update All Copies, permanent Delete of a custom item or Move to Recently Deleted leaves its question open instead of collapsing back to the button (`SessionCard.tsx`, `useReleaseFlow.tsx`, `ArchiveCustomItemButton.tsx`, `ConfirmInline.tsx`)
+- [ ] Archive on a custom item, on any character sheet tab or in the Custom Item Library, opens Archive Custom Item naming the item and saying it is removed from every character in the campaign, changes nothing on Cancel, shows waiting dots on Archive, and closes only after the save (`ArchiveCustomItemButton.tsx`)
+- [ ] Escalating a Disorder leaves its severity unchanged on the card until the save has finished, and a refused save leaves the old severity in place with its pop-up open (`InsanityPanel.tsx`)
 
 ## Coverage notes
 

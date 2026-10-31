@@ -21,13 +21,9 @@ interface CompleteBackgroundSetupModalProps {
   talents: TalentsAndTraitsBlock;
   editable: boolean;
   saving?: boolean;
-  onUpdateHeader: (next: CharacterHeader) => void;
-  onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
-  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<boolean | void>;
   gear?: GearItem[];
-  onUpdateGear?: (next: GearItem[]) => void | Promise<boolean | void>;
-  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
+  onUpdateCharacter: (partial: Partial<Character>) => Promise<boolean>;
   onReturnToDashboard: () => void;
   onComplete: () => void;
 }
@@ -37,12 +33,8 @@ export function CompleteBackgroundSetupModal({
   talents,
   editable,
   saving = false,
-  onUpdateHeader,
-  onUpdateTalents,
   cybernetics = [],
-  onUpdateCybernetics,
   gear = [],
-  onUpdateGear,
   onUpdateCharacter,
   onReturnToDashboard,
   onComplete,
@@ -70,12 +62,8 @@ export function CompleteBackgroundSetupModal({
           header={header}
           talents={talents}
           editable={editable && !saving}
-          onUpdateHeader={onUpdateHeader}
-          onUpdateTalents={onUpdateTalents}
           cybernetics={cybernetics}
-          onUpdateCybernetics={onUpdateCybernetics}
           gear={gear}
-          onUpdateGear={onUpdateGear}
           onUpdateCharacter={onUpdateCharacter}
         />
 

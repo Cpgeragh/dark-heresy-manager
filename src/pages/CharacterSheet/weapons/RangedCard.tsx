@@ -134,9 +134,9 @@ export function RangedCard({
   weapon: RangedWeapon;
   editable: boolean;
   strengthBonus?: number;
-  onRemove?: () => void;
+  onRemove?: () => unknown;
   onAddUpgrade: (upgradeId: string) => void;
-  onRemoveUpgrade: (upgradeId: string) => void;
+  onRemoveUpgrade: (upgradeId: string) => unknown;
   onUpdateAmmoEntries: (
     entries: WeaponAmmoEntry[],
     options?: PatchOptions

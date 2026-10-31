@@ -6,6 +6,7 @@ import type {
   CustomItemLibraryActionCallbacks,
 } from "../../types/CustomItemActions";
 import { Button } from "../buttons/Button";
+import { ArchiveCustomItemButton } from "./ArchiveCustomItemButton";
 import { ConfirmInline } from "./ConfirmInline";
 
 interface Props extends CustomItemLibraryActionCallbacks {
@@ -49,18 +50,11 @@ export function CustomItemActionButtons({
         </Button>
       )}
       {isDM && libraryItem.status !== "archived" && (
-        <ConfirmInline
-          triggerLabel="Archive"
-          triggerLoading={busyAction === "archive"}
-          triggerLoadingLabel="Archiving"
-          size="xs"
-          variant="warning"
-          question="Archive and remove copies?"
-          confirmLabel="Archive"
-          cancelLabel="Cancel"
+        <ArchiveCustomItemButton
+          name={libraryItem.name}
           busy={busy}
-          busyLabel="Archiving"
-          onConfirm={() => onArchive?.()}
+          archiving={busyAction === "archive"}
+          onArchive={() => onArchive?.()}
         />
       )}
       {isDM && !!libraryItem.publishedVersionId && !!libraryItem.draftVersionId && (

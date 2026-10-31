@@ -1,6 +1,6 @@
 // tests/integration/ConfirmInline.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -136,5 +136,47 @@ describe("ConfirmInline", () => {
     );
     expect(screen.getByText("Affects 4 documents.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled();
+  });
+
+  it("collapses back to the trigger once the action succeeds", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn().mockResolvedValue(true);
+    render(
+      <ConfirmInline
+        triggerLabel="Archive"
+        question="Archive?"
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={onConfirm}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Archive" }));
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect(onConfirm).toHaveBeenCalledOnce();
+    await waitFor(() => expect(screen.queryByText("Archive?")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Archive" })).toBeInTheDocument();
+  });
+
+  it("stays armed when the action returns false", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn().mockResolvedValue(false);
+    render(
+      <ConfirmInline
+        triggerLabel="Archive"
+        question="Archive?"
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={onConfirm}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Archive" }));
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled());
+    expect(onConfirm).toHaveBeenCalledOnce();
+    expect(screen.getByText("Archive?")).toBeInTheDocument();
   });
 });

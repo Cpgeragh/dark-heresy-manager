@@ -8,7 +8,7 @@
 // mandatory Background-setup gate, tab switching via the URL, the DM
 // override bar, the kebab-content wiring, and the XP-reconciliation effect.
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import "@testing-library/jest-dom";
@@ -81,7 +81,7 @@ vi.mock("../../src/pages/CharacterSheet/CharacterKebabContent", () => ({
     <div>
       Mock CharacterKebabContent
       <button onClick={() => (props.onGenerateRecoveryCode as () => void)()}>Mock Generate</button>
-      <button onClick={() => (props.onRevokeRecoveryCode as () => void)()}>Mock Revoke</button>
+      <button onClick={() => (props.onRequestRevoke as () => void)()}>Mock Revoke</button>
       <button onClick={() => (props.onPlayerRelease as () => void)()}>Mock Release</button>
     </div>
   ),
@@ -568,7 +568,7 @@ describe("CharacterSheet DM override bar", () => {
 });
 
 describe("CharacterSheet kebab content", () => {
-  it("wires the generate/revoke recovery-code callbacks", async () => {
+  it("wires the generate recovery-code callback", async () => {
     const user = userEvent.setup();
     renderSheet();
 
@@ -578,9 +578,6 @@ describe("CharacterSheet kebab content", () => {
 
     await user.click(screen.getByText("Mock Generate"));
     expect(registerRecoveryCodeMock).toHaveBeenCalledWith("campaign-1", "char-1");
-
-    await user.click(screen.getByText("Mock Revoke"));
-    expect(revokeRecoveryCodeMock).toHaveBeenCalledWith("campaign-1", "char-1");
   });
 
   it("returns to the player dashboard after a successful release", async () => {
@@ -600,7 +597,7 @@ describe("CharacterSheet kebab content", () => {
     expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
   });
 
-  it("stays on the character sheet when release fails", async () => {
+  it("stays on the character sheet with the question open when release fails", async () => {
     const user = userEvent.setup();
     const releaseCharacter = vi.fn().mockResolvedValue(false);
     useCharacterSheetMock.mockReturnValue(
@@ -614,9 +611,68 @@ describe("CharacterSheet kebab content", () => {
     await user.click(screen.getByRole("button", { name: "Release" }));
 
     expect(releaseCharacter).toHaveBeenCalledOnce();
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Release" })).toBeEnabled());
+    expect(screen.getByRole("dialog", { name: "Release This Character?" })).toBeInTheDocument();
     expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
     expect(screen.getByText("Mock CharacteristicsTab")).toBeInTheDocument();
+  });
+});
+
+async function openRevoke(user: ReturnType<typeof userEvent.setup>) {
+  await waitFor(() => expect(setKebabContentMock).toHaveBeenCalled());
+  render(setKebabContentMock.mock.calls.at(-1)?.[0]);
+  await user.click(screen.getByText("Mock Revoke"));
+}
+
+describe("CharacterSheet revoke pop-up", () => {
+  it("asks before revoking and revokes nothing until the DM confirms", async () => {
+    const user = userEvent.setup();
+    renderSheet();
+
+    await openRevoke(user);
+
+    expect(screen.getByRole("dialog", { name: "Revoke Recovery Code?" })).toBeInTheDocument();
+    expect(revokeRecoveryCodeMock).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when the DM cancels", async () => {
+    const user = userEvent.setup();
+    renderSheet();
+
+    await openRevoke(user);
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(revokeRecoveryCodeMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("revokes the code and closes once the DM confirms", async () => {
+    const user = userEvent.setup();
+    revokeRecoveryCodeMock.mockResolvedValueOnce(undefined);
+    renderSheet();
+
+    await openRevoke(user);
+    const dialog = screen.getByRole("dialog", { name: "Revoke Recovery Code?" });
+    await user.click(within(dialog).getByRole("button", { name: "Revoke" }));
+
+    expect(revokeRecoveryCodeMock).toHaveBeenCalledWith("campaign-1", "char-1");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("keeps the pop-up open when the revoke fails", async () => {
+    const user = userEvent.setup();
+    revokeRecoveryCodeMock.mockRejectedValueOnce(new Error("Failed to reach the server."));
+    renderSheet();
+
+    await openRevoke(user);
+    const dialog = screen.getByRole("dialog", { name: "Revoke Recovery Code?" });
+    await user.click(within(dialog).getByRole("button", { name: "Revoke" }));
+
+    await waitFor(() => expect(revokeRecoveryCodeMock).toHaveBeenCalledOnce());
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "Revoke" })).toBeEnabled()
+    );
+    expect(screen.getByRole("dialog", { name: "Revoke Recovery Code?" })).toBeInTheDocument();
   });
 });
 

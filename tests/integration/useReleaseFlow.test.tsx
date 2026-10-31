@@ -128,20 +128,29 @@ describe("useReleaseFlow", () => {
     expect(onFinished).not.toHaveBeenCalled();
   });
 
-  it("closes without asking about the chat when the release fails", async () => {
+  it("keeps the confirmation open, without asking about the chat, when the release fails", async () => {
     const user = userEvent.setup();
-    const { onFinished } = setup({ release: vi.fn(async () => false) });
+    const { release, onFinished } = setup({ release: vi.fn(async () => false) });
 
     await startAndConfirm(user);
 
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(release).toHaveBeenCalledOnce());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Release" })).toBeEnabled());
+    expect(screen.getByRole("dialog", { name: "Release This Character?" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Keep Your Chat?" })).not.toBeInTheDocument();
+    expect(screen.getByText("flow active")).toBeInTheDocument();
     expect(onFinished).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByText("flow idle")).toBeInTheDocument();
   });
 
   it("treats a release that throws like a failed release", async () => {
     const user = userEvent.setup();
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { onFinished } = setup({
+    const { release, onFinished } = setup({
       release: vi.fn(async () => {
         throw new Error("boom");
       }),
@@ -149,7 +158,9 @@ describe("useReleaseFlow", () => {
 
     await startAndConfirm(user);
 
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(release).toHaveBeenCalledOnce());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Release" })).toBeEnabled());
+    expect(screen.getByRole("dialog", { name: "Release This Character?" })).toBeInTheDocument();
     expect(onFinished).not.toHaveBeenCalled();
   });
 

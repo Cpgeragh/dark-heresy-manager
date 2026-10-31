@@ -20,7 +20,7 @@ import { InfoParagraph } from "../../../ui/InfoSection";
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;
   editable: boolean;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
   onSelect?: () => void;
   selectLabel?: string;
   onLinkPurchase?: () => void;

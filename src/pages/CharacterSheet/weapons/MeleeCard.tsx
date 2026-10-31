@@ -108,9 +108,9 @@ export function MeleeCard({
   weapon: MeleeWeapon;
   editable: boolean;
   strengthBonus: number;
-  onRemove?: () => void;
+  onRemove?: () => unknown;
   onAddUpgrade: (upgradeId: string) => void;
-  onRemoveUpgrade: (upgradeId: string) => void;
+  onRemoveUpgrade: (upgradeId: string) => unknown;
   onUpdateQuantity: (qty: number) => void;
   onUpdateAlternateRangedAmmoEntries?: (
     entries: WeaponAmmoEntry[],

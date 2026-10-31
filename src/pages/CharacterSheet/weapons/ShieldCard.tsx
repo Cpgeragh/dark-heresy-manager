@@ -44,7 +44,7 @@ export function ShieldCard({
 }: {
   item: ShieldItem;
   editable: boolean;
-  onRemove: () => void;
+  onRemove: () => unknown;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;

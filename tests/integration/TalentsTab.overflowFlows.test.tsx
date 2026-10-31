@@ -25,7 +25,6 @@ function StatefulTalentsTab() {
       psychic={emptyPsychic}
       editable
       isDM
-      onUpdateTalents={setTalents}
       onUpdateCharacter={(partial) => {
         if (partial.talentsAndTraits) setTalents(partial.talentsAndTraits);
       }}

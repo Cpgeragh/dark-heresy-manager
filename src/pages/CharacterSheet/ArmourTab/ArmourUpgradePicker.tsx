@@ -13,7 +13,7 @@ export function ArmourUpgradeCard({
 }: {
   upgrade: ArmourUpgradeRef;
   editable: boolean;
-  onRemove: (upgradeId: string) => void;
+  onRemove: (upgradeId: string) => unknown;
 }) {
   return (
     <UpgradeEntryCard

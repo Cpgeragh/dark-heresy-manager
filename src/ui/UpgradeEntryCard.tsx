@@ -22,7 +22,7 @@ export function UpgradeEntryCard({
   /** Where the upgrade is removed from, such as "this armour". */
   removeFrom: string;
   editable: boolean;
-  onRemove: () => void;
+  onRemove: () => unknown;
   chips: ReactNode;
   /** What the Rules information icon opens. */
   rules: ReactNode;

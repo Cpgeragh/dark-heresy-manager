@@ -70,6 +70,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   const [savedConfirmed, setSavedConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cancelSetupOpen, setCancelSetupOpen] = useState(false);
+  const [connectAfterDiscard, setConnectAfterDiscard] = useState(false);
   const [discardingSetup, setDiscardingSetup] = useState(false);
   const discardingSetupRef = useRef(false);
   const previousStepRef = useRef(step);
@@ -230,6 +231,12 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     busyRef.current = true;
     setBusyAction("connect");
     try {
+      // Connecting discards an unfinished new account, so ask first when one exists.
+      if (await getRecoveryCode(effectiveUserId)) {
+        setConnectAfterDiscard(true);
+        setCancelSetupOpen(true);
+        return;
+      }
       await discardOnboardingSetup();
       resetRecoveryFlow();
       goToStep("link");
@@ -260,14 +267,20 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     setDiscardingSetup(true);
     try {
       await discardOnboardingSetup();
-      allowShowCodeExitRef.current = true;
       setCancelSetupOpen(false);
       setCode(null);
       setCodeLoading(false);
       setCopied(false);
       setSavedConfirmed(false);
       setName("");
-      goToStep("welcome", true);
+      if (connectAfterDiscard) {
+        setConnectAfterDiscard(false);
+        resetRecoveryFlow();
+        goToStep("link");
+      } else {
+        allowShowCodeExitRef.current = true;
+        goToStep("welcome", true);
+      }
     } catch (err) {
       console.error("Failed to cancel account setup:", err);
       toast.error("Couldn't cancel account setup. Please try again.");
@@ -278,7 +291,9 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
   }
 
   function closeCancelSetup() {
-    if (!discardingSetupRef.current) setCancelSetupOpen(false);
+    if (discardingSetupRef.current) return;
+    setCancelSetupOpen(false);
+    setConnectAfterDiscard(false);
   }
 
   return (
@@ -513,7 +528,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
         </div>
       </main>
 
-      {cancelSetupOpen && code && (
+      {cancelSetupOpen && (
         <ConfirmModal
           title="Cancel New Account Setup"
           message="Cancel new account setup? This recovery code will no longer work."

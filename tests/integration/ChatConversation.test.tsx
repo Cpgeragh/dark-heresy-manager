@@ -385,7 +385,7 @@ describe("ChatConversation", () => {
     expect(onCleared).not.toHaveBeenCalled();
   });
 
-  it("shows an error and stays in the chat when deleting fails", async () => {
+  it("shows an error and keeps the question open when deleting fails", async () => {
     const user = userEvent.setup();
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     clearChatMock.mockRejectedValue(new Error("offline"));
@@ -397,6 +397,10 @@ describe("ChatConversation", () => {
 
     expect(mockToastError).toHaveBeenCalledWith("Failed to delete the chat. Please try again.");
     expect(onCleared).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Move to Recently Deleted" })).toBeEnabled()
+    );
+    expect(screen.getByText("Move this chat to Recently Deleted?")).toBeInTheDocument();
   });
 
   it("offers Export chat for a chat that has an entry, including a closed one", () => {

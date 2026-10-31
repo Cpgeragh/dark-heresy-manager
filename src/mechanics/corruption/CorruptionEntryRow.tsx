@@ -15,7 +15,7 @@ interface CorruptionEntryRowProps {
   kind: "Mutation" | "Malignancy";
   entry: CorruptionMutationEntry | CorruptionMalignancyEntry;
   editable: boolean;
-  onRemove: () => void;
+  onRemove: () => unknown;
   onUpdateRolls: (rolledModifiers: Record<string, number>) => void;
 }
 

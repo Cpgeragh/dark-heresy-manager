@@ -204,7 +204,10 @@ function renderTab(props: Partial<React.ComponentProps<typeof TalentsTab>> = {})
       talents={makeTalents()}
       psychic={emptyPsychic}
       editable
-      onUpdateTalents={onUpdateTalents}
+      onUpdateCharacter={async (partial) => {
+        if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
+        return true;
+      }}
       {...props}
     />
   );
@@ -226,7 +229,6 @@ function StatefulTalentsTab() {
       talents={talents}
       psychic={emptyPsychic}
       editable
-      onUpdateTalents={setTalents}
       onUpdateCharacter={(partial) => {
         if (partial.talentsAndTraits) setTalents(partial.talentsAndTraits);
       }}
@@ -272,7 +274,7 @@ describe("TalentsTab", () => {
         talents={makeTalents()}
         psychic={emptyPsychic}
         editable
-        onUpdateTalents={() => undefined}
+        onUpdateCharacter={async () => true}
       />
     );
     expect(screen.getAllByRole("button", { name: "Add Talent" }).length).toBeGreaterThan(0);
@@ -282,7 +284,7 @@ describe("TalentsTab", () => {
         talents={makeTalents()}
         psychic={emptyPsychic}
         editable={false}
-        onUpdateTalents={() => undefined}
+        onUpdateCharacter={async () => true}
       />
     );
     expect(screen.getAllByRole("button", { name: "View Talents" }).length).toBeGreaterThan(0);
@@ -296,7 +298,7 @@ describe("TalentsTab", () => {
         talents={makeTalents()}
         psychic={emptyPsychic}
         editable={false}
-        onUpdateTalents={() => undefined}
+        onUpdateCharacter={async () => true}
       />
     );
     await user.click(screen.getAllByRole("button", { name: "View Talents" })[0]);
@@ -1572,7 +1574,12 @@ describe("TalentsTab", () => {
       minorPowers: [{ id: "power-1", name: "Power", known: true, talentEntryUid: "p1" }],
     };
     const { unmount } = render(
-      <TalentsTab talents={talents} psychic={psychic} editable onUpdateTalents={() => undefined} />
+      <TalentsTab
+        talents={talents}
+        psychic={psychic}
+        editable
+        onUpdateCharacter={async () => true}
+      />
     );
     expect(screen.getAllByText("Owned: 2").length).toBeGreaterThan(0);
     expect(
@@ -1584,7 +1591,7 @@ describe("TalentsTab", () => {
         talents={makeTalents({ talents: [talents.talents[0]] })}
         psychic={psychic}
         editable
-        onUpdateTalents={() => undefined}
+        onUpdateCharacter={async () => true}
       />
     );
     expect(screen.getAllByText("Owned: 1").length).toBeGreaterThan(0);
@@ -1623,7 +1630,7 @@ describe("TalentsTab", () => {
         talents={makeTalents({ talents: [psyRating] })}
         psychic={psychic}
         editable
-        onUpdateTalents={() => undefined}
+        onUpdateCharacter={async () => true}
       />
     );
 

@@ -62,7 +62,7 @@ export function GrenadeCard({
   item: GrenadeItem;
   editable: boolean;
   strengthBonus: number;
-  onRemove: () => void;
+  onRemove: () => unknown;
   onUpdateQty: (qty: number) => void;
   isEquipped?: boolean;
   onToggleEquip?: () => void;

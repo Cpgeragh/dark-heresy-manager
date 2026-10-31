@@ -167,7 +167,7 @@ export function UpgradeCard({
 }: {
   upgrade: WeaponUpgradeRef;
   editable: boolean;
-  onRemove: (upgradeId: string) => void;
+  onRemove: (upgradeId: string) => unknown;
 }) {
   const displayedWeightModifier = formatWeightModifier(upgrade.weightModifier);
 

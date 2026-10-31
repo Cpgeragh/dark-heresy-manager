@@ -16,7 +16,7 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
   editable: boolean;
   onToggle: (id: string) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
   onUpdateSpareCells: (id: string, value: number) => void;
 }
 

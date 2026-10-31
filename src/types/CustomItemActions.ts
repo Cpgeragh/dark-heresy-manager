@@ -10,8 +10,8 @@ export interface BusyCustomItemLibraryAction {
 export interface CustomItemLibraryActionCallbacks {
   onEditDefinition?: () => void;
   onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
+  onArchive?: () => unknown;
+  onUpdateAllCopies?: () => unknown;
 }
 
 export interface CustomItemLibraryActionProps<

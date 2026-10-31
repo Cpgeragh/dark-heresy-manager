@@ -16,7 +16,7 @@ interface Props {
   item: ArcheotechItem;
   editable: boolean;
   onToggleInstalled: () => void;
-  onRemove: () => void;
+  onRemove: () => unknown;
   highlightAsArcheotech?: boolean;
 }
 

@@ -15,8 +15,7 @@ function modalProps(
     header: overrides.header ?? { characterName: "Brother Corvus" },
     talents: overrides.talents ?? { homeworld: "", talents: [], traits: [] },
     editable: overrides.editable ?? true,
-    onUpdateHeader: vi.fn(),
-    onUpdateTalents: vi.fn(),
+    onUpdateCharacter: vi.fn(),
     onReturnToDashboard: vi.fn(),
     onComplete: vi.fn(),
   };

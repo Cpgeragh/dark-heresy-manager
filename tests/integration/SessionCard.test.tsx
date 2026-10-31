@@ -3,11 +3,23 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { SessionCard } from "../../src/pages/CampaignOverview/SessionCard";
-import { ToastProvider } from "../../src/components/Toast";
+import { ToastProvider, useToasts } from "../../src/components/Toast";
 import type { SessionDocument } from "../../src/types/Firestore";
 
 function renderWithToast(ui: React.ReactElement) {
   return render(<ToastProvider>{ui}</ToastProvider>);
+}
+
+// The provider only holds toast state, so this lists the messages it holds.
+function ToastMessages() {
+  const toasts = useToasts();
+  return (
+    <ul>
+      {toasts.map((toast) => (
+        <li key={toast.id}>{toast.message}</li>
+      ))}
+    </ul>
+  );
 }
 
 const characters = [
@@ -204,6 +216,34 @@ describe("SessionCard delete pop-up", () => {
     await user.click(confirmDialog().getByRole("button", { name: "Delete Permanently" }));
 
     expect(onDelete).toHaveBeenCalledWith(true);
+  });
+
+  it("keeps the Delete Session pop-up open, with the reversal choice, when the delete fails", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const onDelete = vi.fn().mockRejectedValue(new Error("offline"));
+    const session = { ...baseSession, xpApplied: true };
+    renderWithToast(
+      <>
+        <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
+        <ToastMessages />
+      </>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete Session" }));
+    await user.click(confirmDialog().getByRole("checkbox"));
+    await user.type(confirmDialog().getByPlaceholderText("DELETE"), "DELETE");
+    await user.click(confirmDialog().getByRole("button", { name: "Delete Permanently" }));
+
+    expect(
+      await screen.findByText("Failed to delete session. Please try again.")
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(confirmDialog().getByRole("button", { name: "Delete Permanently" })).toBeEnabled()
+    );
+    expect(onDelete).toHaveBeenCalledWith(true);
+    expect(screen.getByRole("dialog", { name: "Delete Session" })).toBeInTheDocument();
+    expect(confirmDialog().getByRole("checkbox")).toBeChecked();
   });
 
   it("cancelling the pop-up discards the checked state", async () => {

@@ -10,6 +10,9 @@ import type { CharacterHeader, TalentsAndTraitsBlock } from "../../src/types/Cha
 function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = {}) {
   const onUpdateHeader = vi.fn();
   const onUpdateTalents = vi.fn();
+  const onUpdateExperience = vi.fn();
+  const onUpdateInsanity = vi.fn();
+  const onUpdateCybernetics = vi.fn();
   const header: CharacterHeader = { characterName: "Brother Corvus" };
   const talents: TalentsAndTraitsBlock = { homeworld: "", talents: [], traits: [] };
   render(
@@ -22,10 +25,24 @@ function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = 
       playerNameProfileUnresolved={false}
       onUpdateHeader={onUpdateHeader}
       onUpdateTalents={onUpdateTalents}
+      onUpdateCharacter={async (partial) => {
+        if (partial.header) onUpdateHeader(partial.header);
+        if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
+        if (partial.experience) onUpdateExperience(partial.experience);
+        if (partial.insanity) onUpdateInsanity(partial.insanity);
+        if (partial.cybernetics) onUpdateCybernetics(partial.cybernetics);
+        return true;
+      }}
       {...props}
     />
   );
-  return { onUpdateHeader, onUpdateTalents };
+  return {
+    onUpdateHeader,
+    onUpdateTalents,
+    onUpdateExperience,
+    onUpdateInsanity,
+    onUpdateCybernetics,
+  };
 }
 
 describe("BackgroundTab", () => {
@@ -172,8 +189,7 @@ describe("BackgroundTab", () => {
 
   it("selects a Rank 1 Alternate Rank as the character-creation Advance Scheme", async () => {
     const user = userEvent.setup();
-    const onUpdateExperience = vi.fn();
-    renderTab({
+    const { onUpdateExperience } = renderTab({
       header: {
         characterName: "Brother Corvus",
         career: "Assassin",
@@ -181,7 +197,6 @@ describe("BackgroundTab", () => {
       },
       talents: { homeworld: "hive-world", talents: [], traits: [] },
       experience: { total: 0, spent: 0, ranks: [] },
-      onUpdateExperience,
     });
 
     expect(screen.getAllByText("Sell-Steel")).toHaveLength(2);
@@ -205,9 +220,7 @@ describe("BackgroundTab", () => {
 
   it("records the Warden advance scheme and its required 1d5 Insanity result", async () => {
     const user = userEvent.setup();
-    const onUpdateExperience = vi.fn();
-    const onUpdateInsanity = vi.fn();
-    renderTab({
+    const { onUpdateExperience, onUpdateInsanity } = renderTab({
       header: {
         characterName: "Kae Drusil",
         career: "Arbitrator",
@@ -215,9 +228,7 @@ describe("BackgroundTab", () => {
       },
       talents: { homeworld: "hive-world", talents: [], traits: [] },
       experience: { total: 0, spent: 0, ranks: [] },
-      onUpdateExperience,
       insanity: { points: 2, disorders: [] },
-      onUpdateInsanity,
     });
 
     await user.click(screen.getByRole("button", { name: "Change Advance Scheme" }));
@@ -245,8 +256,7 @@ describe("BackgroundTab", () => {
 
   it("offers Reclamator as the Scum character-creation Advance Scheme", async () => {
     const user = userEvent.setup();
-    const onUpdateExperience = vi.fn();
-    renderTab({
+    const { onUpdateExperience } = renderTab({
       header: {
         characterName: "Obadiah Plex",
         career: "Scum",
@@ -254,7 +264,6 @@ describe("BackgroundTab", () => {
       },
       talents: { homeworld: "hive-world", talents: [], traits: [] },
       experience: { total: 0, spent: 0, ranks: [] },
-      onUpdateExperience,
     });
 
     await user.click(screen.getByRole("button", { name: "Change Advance Scheme" }));
@@ -381,8 +390,7 @@ describe("BackgroundTab", () => {
   it("saves a Homeworld change that removes the Career as one combined save", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn().mockResolvedValue(true);
-    const onUpdateCybernetics = vi.fn();
-    const { onUpdateHeader, onUpdateTalents } = renderTab({
+    renderTab({
       header: { characterName: "Brother Corvus", career: "Imperial Psyker", rank: "Sanctionite" },
       talents: {
         homeworld: "feral-world",
@@ -401,7 +409,6 @@ describe("BackgroundTab", () => {
         },
         { id: "independent", name: "Bionic Arm", craftsmanship: "Common" },
       ],
-      onUpdateCybernetics,
       onUpdateCharacter,
     });
     await user.click(screen.getByRole("button", { name: "Change Homeworld" }));
@@ -413,9 +420,6 @@ describe("BackgroundTab", () => {
       header: expect.objectContaining({ career: "", rank: "", careerPath: undefined }),
       cybernetics: [expect.objectContaining({ id: "independent" })],
     });
-    expect(onUpdateHeader).not.toHaveBeenCalled();
-    expect(onUpdateTalents).not.toHaveBeenCalled();
-    expect(onUpdateCybernetics).not.toHaveBeenCalled();
   });
 
   it("keeps the Career picker open with a waiting row until the pick is saved", async () => {
@@ -489,8 +493,7 @@ describe("BackgroundTab", () => {
 
   it("removes a Career-granted Optical Rupture implant when a Homeworld change invalidates Imperial Psyker", async () => {
     const user = userEvent.setup();
-    const onUpdateCybernetics = vi.fn();
-    const { onUpdateHeader } = renderTab({
+    const { onUpdateHeader, onUpdateCybernetics } = renderTab({
       header: { characterName: "Brother Corvus", career: "Imperial Psyker", rank: "Sanctionite" },
       talents: {
         homeworld: "feral-world",
@@ -509,7 +512,6 @@ describe("BackgroundTab", () => {
         },
         { id: "independent", name: "Bionic Arm", craftsmanship: "Common" },
       ],
-      onUpdateCybernetics,
     });
     await user.click(screen.getByRole("button", { name: "Change Homeworld" }));
     await user.click(screen.getByText("Forge World"));

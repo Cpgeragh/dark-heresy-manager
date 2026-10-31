@@ -21,7 +21,7 @@ interface Props {
   isEquipped: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
-  onRemove: () => void;
+  onRemove: () => unknown;
   highlightAsArcheotech?: boolean;
 }
 

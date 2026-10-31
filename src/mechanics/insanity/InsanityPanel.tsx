@@ -252,15 +252,12 @@ export function InsanityPanel({
 
   const handleEscalateDisorder = useCallback(
     (id: string, severity: InsanityDisorderSeverity) =>
-      onUpdate(
-        {
-          ...value,
-          disorders: structuredDisorders.map((entry) =>
-            entry.id === id ? { ...entry, severity } : entry
-          ),
-        },
-        { optimistic: true }
-      ),
+      onUpdate({
+        ...value,
+        disorders: structuredDisorders.map((entry) =>
+          entry.id === id ? { ...entry, severity } : entry
+        ),
+      }),
     [value, structuredDisorders, onUpdate]
   );
 

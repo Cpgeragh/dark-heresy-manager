@@ -101,14 +101,14 @@ export function SessionCard({
     setDeleting(true);
     try {
       await onDelete(reverseXp);
+      setConfirmingDelete(false);
+      setReverseXp(false);
     } catch (err) {
       console.error("Failed to delete session:", err);
       toast.error("Failed to delete session. Please try again.");
     } finally {
       deletingRef.current = false;
       setDeleting(false);
-      setConfirmingDelete(false);
-      setReverseXp(false);
     }
   }, [onDelete, reverseXp, toast]);
 

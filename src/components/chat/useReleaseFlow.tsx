@@ -54,7 +54,7 @@ export function useReleaseFlow({
       console.error("Release failed:", releaseError);
     }
     if (!released) {
-      setStep("idle");
+      setStep("confirm");
       return;
     }
 

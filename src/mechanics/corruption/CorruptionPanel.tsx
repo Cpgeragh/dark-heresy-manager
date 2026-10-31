@@ -222,7 +222,7 @@ function MalignanciesList({
   malignancies: CorruptionMalignancyEntry[];
   legacyMalignancies: string;
   editable: boolean;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
   onUpdateRolls: (id: string, rolledModifiers: Record<string, number>) => void;
   onLegacyChange: (notes: string) => void;
 }) {
@@ -282,7 +282,7 @@ function MutationsList({
 }: {
   mutations: CorruptionMutationEntry[];
   editable: boolean;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
   onUpdateRolls: (id: string, rolledModifiers: Record<string, number>) => void;
   emptyLabel: string;
 }) {

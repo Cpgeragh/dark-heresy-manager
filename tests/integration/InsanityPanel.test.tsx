@@ -464,7 +464,7 @@ describe("InsanityPanel optimistic saves", () => {
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ disorders: [] }));
   });
 
-  it("asks for an optimistic save when a disorder is escalated", async () => {
+  it("waits for the server when a disorder is escalated", async () => {
     const user = userEvent.setup();
     const onUpdate = renderPanel({ points: 20, disorders: [disorder] });
 
@@ -472,9 +472,9 @@ describe("InsanityPanel optimistic saves", () => {
     await user.click(screen.getByRole("button", { name: "Escalate" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ disorders: [expect.objectContaining({ severity: "Severe" })] }),
-      { optimistic: true }
+      expect.objectContaining({ disorders: [expect.objectContaining({ severity: "Severe" })] })
     );
+    expect(onUpdate.mock.calls[0]).toHaveLength(1);
   });
 
   it("waits for the server when a trauma is removed", async () => {

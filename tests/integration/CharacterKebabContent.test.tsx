@@ -12,7 +12,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode=""
         canManageRecoveryCode={false}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={true}
@@ -31,7 +31,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode="DH-TEST-0001"
         canManageRecoveryCode={true}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -50,7 +50,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode="DH-TEST-0001"
         canManageRecoveryCode={true}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -72,7 +72,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode=""
         canManageRecoveryCode={false}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -89,7 +89,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode="DH-TEST-0001"
         canManageRecoveryCode={false}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -107,7 +107,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode=""
         canManageRecoveryCode={true}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -125,7 +125,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode=""
         canManageRecoveryCode={false}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -143,7 +143,7 @@ describe("CharacterKebabContent Recovery Code section", () => {
         recoveryCode=""
         canManageRecoveryCode={true}
         onGenerateRecoveryCode={onGenerate}
-        onRevokeRecoveryCode={vi.fn()}
+        onRequestRevoke={vi.fn()}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -158,14 +158,14 @@ describe("CharacterKebabContent Recovery Code section", () => {
     });
   });
 
-  it("calls onRevokeRecoveryCode when the revoke button is clicked, and shows an error on failure", async () => {
-    const onRevoke = vi.fn().mockRejectedValue(new Error("Failed to reach the server."));
+  it("asks for the revoke when the revoke button is clicked", () => {
+    const onRequestRevoke = vi.fn();
     render(
       <CharacterKebabContent
         recoveryCode="DH-TEST-0001"
         canManageRecoveryCode={true}
         onGenerateRecoveryCode={vi.fn()}
-        onRevokeRecoveryCode={onRevoke}
+        onRequestRevoke={onRequestRevoke}
         canExport={false}
         onExport={noop}
         canPlayerRelease={false}
@@ -174,9 +174,6 @@ describe("CharacterKebabContent Recovery Code section", () => {
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "Revoke" }));
-    expect(onRevoke).toHaveBeenCalledOnce();
-    await waitFor(() => {
-      expect(screen.getByText("Failed to reach the server.")).toBeInTheDocument();
-    });
+    expect(onRequestRevoke).toHaveBeenCalledOnce();
   });
 });

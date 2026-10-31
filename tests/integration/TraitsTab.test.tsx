@@ -115,7 +115,10 @@ function renderTab(props: Partial<React.ComponentProps<typeof TraitsTab>> = {}) 
       <TraitsTab
         talents={makeTalents()}
         editable={true}
-        onUpdateTalents={onUpdateTalents}
+        onUpdateCharacter={async (partial) => {
+          if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
+          return true;
+        }}
         {...props}
       />
     </ToastProvider>
@@ -127,7 +130,14 @@ function StatefulTraitsTab() {
   const [talents, setTalents] = useState(makeTalents());
   return (
     <ToastProvider>
-      <TraitsTab talents={talents} editable onUpdateTalents={setTalents} />
+      <TraitsTab
+        talents={talents}
+        editable
+        onUpdateCharacter={async (partial) => {
+          if (partial.talentsAndTraits) setTalents(partial.talentsAndTraits);
+          return true;
+        }}
+      />
     </ToastProvider>
   );
 }
@@ -155,7 +165,7 @@ describe("TraitsTab", () => {
   it("uses the shared Add and View controls", () => {
     const { unmount } = render(
       <ToastProvider>
-        <TraitsTab talents={makeTalents()} editable onUpdateTalents={vi.fn()} />
+        <TraitsTab talents={makeTalents()} editable onUpdateCharacter={vi.fn()} />
       </ToastProvider>
     );
     expect(screen.getByRole("button", { name: "Add Trait" })).toBeInTheDocument();
@@ -164,7 +174,7 @@ describe("TraitsTab", () => {
 
     render(
       <ToastProvider>
-        <TraitsTab talents={makeTalents()} editable={false} onUpdateTalents={vi.fn()} />
+        <TraitsTab talents={makeTalents()} editable={false} onUpdateCharacter={vi.fn()} />
       </ToastProvider>
     );
     expect(screen.getByRole("button", { name: "View Traits" })).toBeInTheDocument();
@@ -178,7 +188,7 @@ describe("TraitsTab", () => {
 
   it("aggregates Skin of Iron grants and restores an upgraded cybernetic when the latest grant is removed", async () => {
     const user = userEvent.setup();
-    const onUpdateCybernetics = vi.fn();
+    const onUpdateCharacter = vi.fn().mockResolvedValue(true);
     const entries: TalentEntry[] = [
       { uid: "skin-1", talentId: "skin-of-iron", name: "Skin of Iron" },
       {
@@ -197,7 +207,7 @@ describe("TraitsTab", () => {
     renderTab({
       talents: makeTalents({ traits: entries }),
       cybernetics: [{ id: "lungs", name: "Bionic Respiratory System", craftsmanship: "Good" }],
-      onUpdateCybernetics,
+      onUpdateCharacter,
     });
     expect(screen.getAllByText("Owned: 2/4")[0]).toBeInTheDocument();
     await user.click(screen.getAllByRole("button", { name: "Remove Skin of Iron" })[0]);
@@ -206,15 +216,16 @@ describe("TraitsTab", () => {
         name: "Remove",
       })
     );
-    expect(onUpdateCybernetics).toHaveBeenCalledWith([
-      expect.objectContaining({ id: "lungs", craftsmanship: "Common" }),
-    ]);
+    expect(onUpdateCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cybernetics: [expect.objectContaining({ id: "lungs", craftsmanship: "Common" })],
+      })
+    );
   });
 
   it("saves a Trait removal and its cybernetic restore as one combined save", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn().mockResolvedValue(true);
-    const onUpdateCybernetics = vi.fn();
     const entries: TalentEntry[] = [
       { uid: "skin-1", talentId: "skin-of-iron", name: "Skin of Iron" },
       {
@@ -230,10 +241,9 @@ describe("TraitsTab", () => {
         },
       },
     ];
-    const { onUpdateTalents } = renderTab({
+    renderTab({
       talents: makeTalents({ traits: entries }),
       cybernetics: [{ id: "lungs", name: "Bionic Respiratory System", craftsmanship: "Good" }],
-      onUpdateCybernetics,
       onUpdateCharacter,
     });
 
@@ -251,8 +261,6 @@ describe("TraitsTab", () => {
       }),
       cybernetics: [expect.objectContaining({ id: "lungs", craftsmanship: "Common" })],
     });
-    expect(onUpdateTalents).not.toHaveBeenCalled();
-    expect(onUpdateCybernetics).not.toHaveBeenCalled();
   });
 
   it("keeps the Remove button waiting until a Trait removal is saved", async () => {

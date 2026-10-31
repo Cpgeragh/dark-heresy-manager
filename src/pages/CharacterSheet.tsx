@@ -65,6 +65,7 @@ import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
 import { buildChatId, getSpentXp } from "shared-rules";
 import { useReleaseFlow } from "../components/chat/useReleaseFlow";
+import { useRevokeRecoveryCodeFlow } from "./CharacterSheet/useRevokeRecoveryCodeFlow";
 import {
   reconcileCharacterSpentXp,
   registerRecoveryCode,
@@ -459,6 +460,8 @@ export default function CharacterSheet({
     await revokeRecoveryCode(params.campaignId, params.characterId);
   }, [params.campaignId, params.characterId]);
 
+  const revokeRecoveryCodeFlow = useRevokeRecoveryCodeFlow(handleRevokeRecoveryCode);
+
   useLayoutEffect(() => {
     if (!routeActive || !character || isDMLoading) return;
 
@@ -469,7 +472,7 @@ export default function CharacterSheet({
         recoveryCode={character.recoveryCode}
         canManageRecoveryCode={isDM}
         onGenerateRecoveryCode={handleGenerateRecoveryCode}
-        onRevokeRecoveryCode={handleRevokeRecoveryCode}
+        onRequestRevoke={revokeRecoveryCodeFlow.begin}
         canExport={isDM || isOwner}
         onExport={() => exportCharacterJson(character)}
         canPlayerRelease={canPlayerRelease}
@@ -491,7 +494,7 @@ export default function CharacterSheet({
     canPlayerRelease,
     playerRelease.begin,
     handleGenerateRecoveryCode,
-    handleRevokeRecoveryCode,
+    revokeRecoveryCodeFlow.begin,
     isReleasing,
     setBackHref,
     clearBackHref,
@@ -709,12 +712,8 @@ export default function CharacterSheet({
         talents={character.talentsAndTraits}
         editable={allowedToEdit}
         saving={isUpdating}
-        onUpdateHeader={handleUpdateHeader}
-        onUpdateTalents={handleUpdateTalents}
         cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
-        onUpdateCybernetics={handleUpdateCybernetics}
         gear={character.gear ?? EMPTY_GEAR}
-        onUpdateGear={handleUpdateGear}
         onUpdateCharacter={patchFieldsWithResult}
         onReturnToDashboard={() => navigate(ROUTES.DASHBOARD)}
         onComplete={() => {
@@ -898,7 +897,6 @@ export default function CharacterSheet({
                   weaponTraining={character.weaponTraining}
                   isDM={isDM}
                   editable={allowedToEdit}
-                  onUpdateTalents={handleUpdateTalents}
                   onUpdateCharacter={patchFieldsWithResult}
                 />
               )}
@@ -946,9 +944,6 @@ export default function CharacterSheet({
                   cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
                   gear={character.gear ?? EMPTY_GEAR}
                   editable={allowedToEdit}
-                  onUpdateTalents={handleUpdateTalents}
-                  onUpdateCybernetics={handleUpdateCybernetics}
-                  onUpdateGear={handleUpdateGear}
                   onUpdateCharacter={patchFieldsWithResult}
                   campaignId={path.campaignId}
                   characterId={character.id}
@@ -1107,13 +1102,9 @@ export default function CharacterSheet({
                   playerNameProfileUnresolved={ownerProfileUnresolved}
                   onUpdateHeader={handleUpdateHeader}
                   onUpdateTalents={handleUpdateTalents}
-                  onUpdateCybernetics={handleUpdateCybernetics}
                   gear={character.gear ?? EMPTY_GEAR}
-                  onUpdateGear={handleUpdateGear}
                   experience={character.experience}
-                  onUpdateExperience={handleUpdateExperience}
                   insanity={character.insanity}
-                  onUpdateInsanity={handleUpdateInsanity}
                   onUpdateCharacter={patchFieldsWithResult}
                 />
               )}
@@ -1160,6 +1151,7 @@ export default function CharacterSheet({
         )}
 
         {releaseModals}
+        {revokeRecoveryCodeFlow.modal}
       </PageShell>
     </CampaignCustomItemsScope>
   );

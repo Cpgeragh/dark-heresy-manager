@@ -30,11 +30,11 @@ export function PowerGrid({
   userId: string | null;
   campaignCustomPowersById: Map<string, CampaignCustomItem<"power">>;
   getBusyAction: (itemId: string) => CustomItemLibraryAction | null;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
   onEdit: (power: PsychicPower) => void;
   onPublishPower: (item: CampaignCustomItem<"power">) => void;
-  onArchivePower: (item: CampaignCustomItem<"power">) => void;
-  onUpdateAllPowerCopies: (item: CampaignCustomItem<"power">) => void;
+  onArchivePower: (item: CampaignCustomItem<"power">) => unknown;
+  onUpdateAllPowerCopies: (item: CampaignCustomItem<"power">) => unknown;
   canLinkPurchase: boolean;
   onLinkPurchase: (power: PsychicPower) => void;
   canLinkPsyRatingGrant: (power: PsychicPower) => boolean;

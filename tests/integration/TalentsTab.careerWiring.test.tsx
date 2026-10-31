@@ -23,7 +23,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
         rank="Conscript"
         psychic={emptyPsychic}
         editable
-        onUpdateTalents={vi.fn()}
+        onUpdateCharacter={vi.fn().mockResolvedValue(true)}
       />
     );
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
@@ -39,7 +39,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
         talents={makeTalents()}
         psychic={emptyPsychic}
         editable
-        onUpdateTalents={vi.fn()}
+        onUpdateCharacter={vi.fn().mockResolvedValue(true)}
       />
     );
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
@@ -64,7 +64,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
         ]}
         psychic={emptyPsychic}
         editable
-        onUpdateTalents={vi.fn()}
+        onUpdateCharacter={vi.fn().mockResolvedValue(true)}
       />
     );
 
@@ -91,7 +91,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
           rank="Sage Logister"
           editable
           isDM
-          onUpdateTalents={vi.fn()}
+          onUpdateCharacter={vi.fn().mockResolvedValue(true)}
         />
       </ToastProvider>
     );
@@ -111,7 +111,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
           rank="Sage Logister"
           editable
           isDM
-          onUpdateTalents={vi.fn()}
+          onUpdateCharacter={vi.fn().mockResolvedValue(true)}
         />
       </ToastProvider>
     );
@@ -138,7 +138,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
           rank="Sage Logister"
           editable
           isDM
-          onUpdateTalents={vi.fn()}
+          onUpdateCharacter={vi.fn().mockResolvedValue(true)}
         />
       </ToastProvider>
     );

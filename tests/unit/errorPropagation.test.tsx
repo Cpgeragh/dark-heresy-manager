@@ -304,6 +304,7 @@ describe("onboarding error propagation", () => {
   });
 
   it("shows loading only on Connect existing account while it opens", async () => {
+    mockGetRecoveryCode.mockResolvedValue(null);
     let finishDiscard: () => void = () => undefined;
     mockDiscardOnboardingSetup.mockReturnValue(
       new Promise<void>((resolve) => {
@@ -348,6 +349,36 @@ describe("onboarding error propagation", () => {
 
     expect(await screen.findByRole("dialog", { name: "Cancel New Account Setup" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Save Your Recovery Code" })).toBeVisible();
+  });
+
+  it("opens the cancel pop-up from the Back arrow before the code has been revealed", async () => {
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/?step=show-code"]}>
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(await screen.findByRole("dialog", { name: "Cancel New Account Setup" })).toBeVisible();
+    expect(mockGetRecoveryCode).not.toHaveBeenCalled();
+  });
+
+  it("cancels the unfinished setup from the Back arrow before the code has been revealed", async () => {
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/?step=show-code"]}>
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.click(screen.getByRole("button", { name: "Back" }));
+    await browserUser.click(await screen.findByRole("button", { name: "Cancel account setup" }));
+
+    await waitFor(() => expect(mockDiscardOnboardingSetup).toHaveBeenCalledOnce());
+    expect(await screen.findByRole("heading", { name: "Create Your Account" })).toBeVisible();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("stays on the code page when cancelling setup fails", async () => {
@@ -480,6 +511,7 @@ describe("new-device linking", () => {
   });
 
   it("clears any partial new-account data before opening account connection", async () => {
+    mockGetRecoveryCode.mockResolvedValue(null);
     const browserUser = userEvent.setup();
     render(
       <MemoryRouter>
@@ -491,6 +523,102 @@ describe("new-device linking", () => {
 
     await waitFor(() => expect(mockDiscardOnboardingSetup).toHaveBeenCalledOnce());
     expect(await screen.findByRole("heading", { name: "Connect Existing Account" })).toBeVisible();
+  });
+
+  it("asks before discarding an unfinished account setup when connecting an existing account", async () => {
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Onboarding user={user} effectiveUserId="user-1" firstName="David" onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.click(screen.getByRole("button", { name: "Connect existing account" }));
+
+    expect(await screen.findByRole("dialog", { name: "Cancel New Account Setup" })).toBeVisible();
+    expect(mockDiscardOnboardingSetup).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("heading", { name: "Connect Existing Account" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the unfinished setup when the person chooses Keep setting up", async () => {
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Onboarding user={user} effectiveUserId="user-1" firstName="David" onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.click(screen.getByRole("button", { name: "Connect existing account" }));
+    await browserUser.click(await screen.findByRole("button", { name: "Keep setting up" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(mockDiscardOnboardingSetup).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Connect existing account" })).toBeEnabled();
+  });
+
+  it("discards the unfinished setup and opens account connection when the person confirms", async () => {
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Onboarding user={user} effectiveUserId="user-1" firstName="David" onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.click(screen.getByRole("button", { name: "Connect existing account" }));
+    await browserUser.click(await screen.findByRole("button", { name: "Cancel account setup" }));
+
+    await waitFor(() => expect(mockDiscardOnboardingSetup).toHaveBeenCalledOnce());
+    expect(await screen.findByRole("heading", { name: "Connect Existing Account" })).toBeVisible();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("stays on the first screen when discarding the unfinished setup fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mockDiscardOnboardingSetup.mockRejectedValue(new Error("cleanup failed"));
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Onboarding user={user} effectiveUserId="user-1" firstName="David" onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.click(screen.getByRole("button", { name: "Connect existing account" }));
+    await browserUser.click(await screen.findByRole("button", { name: "Cancel account setup" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Couldn't cancel account setup. Please try again."
+      )
+    );
+    expect(screen.getByRole("dialog", { name: "Cancel New Account Setup" })).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Connect Existing Account" })
+    ).not.toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+
+  it("discards nothing when checking for an unfinished setup fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mockGetRecoveryCode.mockRejectedValue(new Error("read failed"));
+    const browserUser = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await browserUser.click(screen.getByRole("button", { name: "Connect existing account" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Couldn't open account connection. Please try again."
+      )
+    );
+    expect(mockDiscardOnboardingSetup).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Connect existing account" })).toBeEnabled();
+    consoleError.mockRestore();
   });
 
   it("uses one direct connection action without a reclaim branch", async () => {

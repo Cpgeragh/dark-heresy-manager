@@ -34,9 +34,9 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
   editable: boolean;
   worn: boolean;
   onToggle: (id: string) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
   onAddUpgrade: (pieceId: string, upgradeId: string) => void;
-  onRemoveUpgrade: (pieceId: string, upgradeId: string) => void;
+  onRemoveUpgrade: (pieceId: string, upgradeId: string) => unknown;
 }
 
 export function PieceRow({

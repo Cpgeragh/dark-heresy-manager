@@ -44,7 +44,7 @@ function DisorderRow({
 }: {
   disorder: InsanityDisorderEntry;
   editable: boolean;
-  onRemove: () => void;
+  onRemove: () => unknown;
   onEscalate: (severity: InsanityDisorderSeverity) => void | Promise<boolean | void>;
 }) {
   const [escalateArmed, setEscalateArmed] = useState(false);
@@ -122,7 +122,7 @@ function TraumaRow({
 }: {
   trauma: InsanityTraumaEntry;
   editable: boolean;
-  onRemove: () => void;
+  onRemove: () => unknown;
 }) {
   const ref = getMentalTraumaRef(trauma.referenceId);
   const name = trauma.name ?? ref?.name ?? "Custom Trauma";
@@ -179,7 +179,7 @@ export function TraumaList({
 }: {
   trauma: InsanityTraumaEntry[];
   editable: boolean;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
 }) {
   if (trauma.length === 0) {
     return (
@@ -226,7 +226,7 @@ export function DisordersList({
   disorders: InsanityDisorderEntry[];
   legacyDisorders: string;
   editable: boolean;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
   onEscalate: (id: string, severity: InsanityDisorderSeverity) => void | Promise<boolean | void>;
   onLegacyChange: (notes: string) => void;
 }) {

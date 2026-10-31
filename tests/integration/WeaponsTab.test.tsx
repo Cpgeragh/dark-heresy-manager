@@ -573,6 +573,26 @@ describe("WeaponsTab remove / equip-toggle", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
+  it("removes an Archeotech item from the Weapons tab", async () => {
+    const user = userEvent.setup();
+    const relicShield: ArcheotechItem = { id: "a1", name: "Relic Buckler", type: "Shield" };
+    const { noop } = renderTab({ archeotech: [relicShield] });
+    await user.click(screen.getAllByRole("button", { name: "Remove Relic Buckler" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    expect(noop).toHaveBeenCalledWith([]);
+  });
+
+  it("keeps the Remove pop-up open when removing an Archeotech item is refused", async () => {
+    const user = userEvent.setup();
+    const onUpdateArcheotech = vi.fn().mockResolvedValue(false);
+    const relicShield: ArcheotechItem = { id: "a1", name: "Relic Buckler", type: "Shield" };
+    renderTab({ archeotech: [relicShield], onUpdateArcheotech });
+    await user.click(screen.getAllByRole("button", { name: "Remove Relic Buckler" })[0]);
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await waitFor(() => expect(onUpdateArcheotech).toHaveBeenCalledWith([]));
+    expect(screen.getByRole("dialog", { name: "Remove Archeotech Item" })).toBeInTheDocument();
+  });
+
   it("always lists an integrated weapon without a Remove or Equip button", () => {
     renderTab({
       rangedWeapons: [
@@ -699,7 +719,8 @@ describe("WeaponsTab custom-item library actions", () => {
     renderTab({ isDM: true, rangedWeapons: [linkedWeapon], meleeWeapons: [] });
     await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Archive" }));
-    await user.click(await screen.findByRole("button", { name: "Archive" }));
+    const dialog = await screen.findByRole("dialog", { name: "Archive Custom Item" });
+    await user.click(within(dialog).getByRole("button", { name: "Archive" }));
     expect(archiveCustomItemMock).toHaveBeenCalledWith(
       expect.objectContaining({ customItemId: "lib1" })
     );

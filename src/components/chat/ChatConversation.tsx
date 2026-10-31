@@ -98,16 +98,18 @@ export function ChatConversation({ accountId, target, chat, onCleared }: ChatCon
       ? [...messages, ...stillPending.map((item) => pendingToMessage(item, accountId))]
       : messages;
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<boolean> => {
     try {
       await clearChat(accountId, chatId);
       toast.success(
         `Chat moved to Recently deleted. You can restore it for ${CHAT_LIMITS.binRetentionDays} days.`
       );
       onCleared?.();
+      return true;
     } catch (deleteError) {
       console.error("Failed to delete chat:", deleteError);
       toast.error("Failed to delete the chat. Please try again.");
+      return false;
     }
   };
 

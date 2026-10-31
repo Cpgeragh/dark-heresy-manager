@@ -42,11 +42,8 @@ interface TraitsTabProps {
   cybernetics?: CyberneticItem[];
   gear?: GearItem[];
   editable: boolean;
-  onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
-  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<boolean | void>;
-  onUpdateGear?: (next: GearItem[]) => void | Promise<boolean | void>;
   /** Saves several character fields in one step, so a Trait change that touches talents, cybernetics and gear is accepted or refused as a whole. */
-  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
+  onUpdateCharacter: (partial: Partial<Character>) => Promise<boolean>;
   campaignId?: string;
   characterId?: string;
   userId?: string | null;
@@ -71,7 +68,7 @@ function UnnaturalCharacteristicCards({
 }: {
   entries: readonly TalentEntry[];
   editable: boolean;
-  onRemove: (uid: string) => void;
+  onRemove: (uid: string) => void | Promise<unknown>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const groups = useMemo(() => {
@@ -122,9 +119,6 @@ export function TraitsTab({
   cybernetics = [],
   gear = [],
   editable,
-  onUpdateTalents,
-  onUpdateCybernetics,
-  onUpdateGear,
   onUpdateCharacter,
   campaignId,
   characterId,
@@ -156,17 +150,6 @@ export function TraitsTab({
       itemLabel: "trait",
     });
 
-  const saveCharacter = useCallback(
-    async (partial: Partial<Character>): Promise<boolean> => {
-      if (onUpdateCharacter) return onUpdateCharacter(partial);
-      if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
-      if (partial.cybernetics) void onUpdateCybernetics?.(partial.cybernetics);
-      if (partial.gear) void onUpdateGear?.(partial.gear);
-      return true;
-    },
-    [onUpdateCharacter, onUpdateTalents, onUpdateCybernetics, onUpdateGear]
-  );
-
   const addCustomTrait = useCallback(
     async (data: CustomTraitData) => {
       if (!userId || !campaignId) {
@@ -179,7 +162,7 @@ export function TraitsTab({
         creator: { userId, characterId, characterName },
         data,
       });
-      const saved = await saveCharacter({
+      const saved = await onUpdateCharacter({
         talentsAndTraits: {
           ...talents,
           traits: [
@@ -198,7 +181,7 @@ export function TraitsTab({
       setCustomTraitOpen(false);
       toast.success("Custom trait saved as a campaign draft.");
     },
-    [userId, campaignId, characterId, characterName, talents, saveCharacter, toast]
+    [userId, campaignId, characterId, characterName, talents, onUpdateCharacter, toast]
   );
 
   const fromCustomLibrary = useCallback(
@@ -211,7 +194,7 @@ export function TraitsTab({
         toast.error("This custom trait has no usable version.");
         return;
       }
-      const saved = await saveCharacter({
+      const saved = await onUpdateCharacter({
         talentsAndTraits: {
           ...talents,
           traits: [
@@ -228,7 +211,7 @@ export function TraitsTab({
       });
       if (saved !== false) setShowPicker(false);
     },
-    [talents, saveCharacter, toast]
+    [talents, onUpdateCharacter, toast]
   );
 
   const updateCustomTrait = useCallback(
@@ -242,7 +225,7 @@ export function TraitsTab({
           editor: { userId, characterId, characterName },
           data,
         });
-        const saved = await saveCharacter({
+        const saved = await onUpdateCharacter({
           talentsAndTraits: {
             ...talents,
             traits: talents.traits.map((entry) =>
@@ -267,7 +250,7 @@ export function TraitsTab({
       characterName,
       editingCustomTrait,
       talents,
-      saveCharacter,
+      onUpdateCharacter,
       toast,
     ]
   );
@@ -291,11 +274,11 @@ export function TraitsTab({
         setPendingAcquisition(entry);
         return;
       }
-      return saveCharacter({
+      return onUpdateCharacter({
         talentsAndTraits: { ...talents, traits: [...talents.traits, entry] },
       });
     },
-    [talents, saveCharacter]
+    [talents, onUpdateCharacter]
   );
 
   const handleRemoveTrait = useCallback(
@@ -307,24 +290,22 @@ export function TraitsTab({
           traits: talents.traits.filter((trait) => trait.uid !== uid),
         },
       };
-      if (onUpdateCharacter || onUpdateCybernetics) {
-        let nextCybernetics = cybernetics.filter((item) => item.grantedByTalentEntryUid !== uid);
-        for (const grant of removed?.acquisition?.trait?.skinOfIronGrants ?? []) {
-          if (grant.kind === "upgrade" && grant.previousCraftsmanship) {
-            nextCybernetics = nextCybernetics.map((item) =>
-              item.id === grant.cyberneticId
-                ? { ...item, craftsmanship: grant.previousCraftsmanship! }
-                : item
-            );
-          }
-        }
-        if (JSON.stringify(nextCybernetics) !== JSON.stringify(cybernetics)) {
-          partial.cybernetics = nextCybernetics;
+      let nextCybernetics = cybernetics.filter((item) => item.grantedByTalentEntryUid !== uid);
+      for (const grant of removed?.acquisition?.trait?.skinOfIronGrants ?? []) {
+        if (grant.kind === "upgrade" && grant.previousCraftsmanship) {
+          nextCybernetics = nextCybernetics.map((item) =>
+            item.id === grant.cyberneticId
+              ? { ...item, craftsmanship: grant.previousCraftsmanship! }
+              : item
+          );
         }
       }
-      return saveCharacter(partial);
+      if (JSON.stringify(nextCybernetics) !== JSON.stringify(cybernetics)) {
+        partial.cybernetics = nextCybernetics;
+      }
+      return onUpdateCharacter(partial);
     },
-    [cybernetics, onUpdateCharacter, onUpdateCybernetics, talents, saveCharacter]
+    [cybernetics, onUpdateCharacter, talents]
   );
 
   const cards = [
@@ -468,7 +449,7 @@ export function TraitsTab({
                     (entry) => entry.talentId === pendingAcquisition.talentId
                   )}
                   onComplete={async (result) => {
-                    const saved = await saveCharacter({
+                    const saved = await onUpdateCharacter({
                       talentsAndTraits: {
                         ...talents,
                         traits: [...talents.traits, result.entry],

@@ -71,14 +71,10 @@ interface BackgroundTabProps {
   onUpdateHeader: (next: CharacterHeader, options?: PatchOptions) => void | Promise<boolean>;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
-  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<boolean | void>;
   gear?: GearItem[];
-  onUpdateGear?: (next: GearItem[]) => void | Promise<boolean | void>;
   experience?: ExperienceBlock;
-  onUpdateExperience?: (next: ExperienceBlock) => void | Promise<boolean>;
   insanity?: InsanityBlock;
-  onUpdateInsanity?: (next: InsanityBlock) => void | Promise<boolean | void>;
-  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
+  onUpdateCharacter: (partial: Partial<Character>) => Promise<boolean>;
 }
 
 type BackgroundSectionGroup = "appearance" | "background";
@@ -110,13 +106,9 @@ export function BackgroundTab({
   onUpdateHeader,
   onUpdateTalents,
   cybernetics = [],
-  onUpdateCybernetics,
   gear = [],
-  onUpdateGear,
   experience,
-  onUpdateExperience,
   insanity,
-  onUpdateInsanity,
   onUpdateCharacter,
 }: BackgroundTabProps) {
   const [showDivinationPicker, setShowDivinationPicker] = useState(false);
@@ -472,16 +464,10 @@ export function BackgroundTab({
           header={header}
           talents={talents}
           editable={editable}
-          onUpdateHeader={onUpdateHeader}
-          onUpdateTalents={onUpdateTalents}
           cybernetics={cybernetics}
-          onUpdateCybernetics={onUpdateCybernetics}
           gear={gear}
-          onUpdateGear={onUpdateGear}
           experience={experience}
-          onUpdateExperience={onUpdateExperience}
           insanity={insanity}
-          onUpdateInsanity={onUpdateInsanity}
           onUpdateCharacter={onUpdateCharacter}
         />
 

@@ -27,7 +27,7 @@ interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   linkedWeaponType?: "ranged" | "melee";
   editable: boolean;
   onToggleInstalled: (id: string) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => unknown;
 }
 
 export function ImplantRow({

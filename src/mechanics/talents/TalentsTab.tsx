@@ -60,8 +60,7 @@ interface TalentsTabProps {
   weaponTraining?: WeaponTrainingBlock;
   isDM?: boolean;
   editable: boolean;
-  onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
-  onUpdateCharacter?: (partial: Partial<Character>) => Promise<boolean>;
+  onUpdateCharacter: (partial: Partial<Character>) => Promise<boolean>;
 }
 
 const VIEW_GROUPS = ["talents", "faith"] as const;
@@ -360,18 +359,9 @@ export function TalentsTab({
   weaponTraining = { trained: [], exoticWeapons: [] },
   isDM = false,
   editable,
-  onUpdateTalents,
   onUpdateCharacter,
 }: TalentsTabProps) {
   recordComponentRender("TalentsTab");
-  const saveTalentAcquisition = useCallback(
-    async (partial: Partial<Character>): Promise<boolean> => {
-      if (onUpdateCharacter) return onUpdateCharacter(partial);
-      if (partial.talentsAndTraits) onUpdateTalents(partial.talentsAndTraits);
-      return true;
-    },
-    [onUpdateCharacter, onUpdateTalents]
-  );
   const {
     addTalent: handleAddTalent,
     acquisitionPending,
@@ -387,7 +377,7 @@ export function TalentsTab({
     insanity,
     willpowerBonus,
     weaponTraining,
-    onSave: saveTalentAcquisition,
+    onSave: onUpdateCharacter,
   });
   const handleRemoveTalent = useCallback(
     async (uid: string, restoreOneTimeEffects = false) => {
@@ -404,8 +394,7 @@ export function TalentsTab({
         meleeWeapons,
         archeotech,
       });
-      if (onUpdateCharacter) return onUpdateCharacter(update);
-      onUpdateTalents(update.talentsAndTraits);
+      return onUpdateCharacter(update);
     },
     [
       talents,
@@ -416,7 +405,6 @@ export function TalentsTab({
       meleeWeapons,
       archeotech,
       onUpdateCharacter,
-      onUpdateTalents,
     ]
   );
   const [activeView, setActiveView] = useState<ViewGroup>("talents");
