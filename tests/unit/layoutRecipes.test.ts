@@ -79,7 +79,6 @@ describe("shared layout recipes", () => {
   it("keeps every expandable card on the shared accordion card", () => {
     const overlayAllowed = [
       "src/ui/AccordionCard.tsx",
-      "src/pages/CharacterSheet/SkillsTab/SkillRow.tsx",
       "src/pages/CharacterSheet/NotesTab.tsx",
       "src/pages/CampaignOverview/SessionCard.tsx",
       "src/components/chat/ChatInboxRow.tsx",
@@ -100,6 +99,50 @@ describe("shared layout recipes", () => {
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  it("draws every show and hide control through the shared pieces", () => {
+    const allowed = [
+      "src/ui/AccordionCard.tsx",
+      "src/ui/buttons/CardOverlayButton.tsx",
+      "src/ui/buttons/ExpandButton.tsx",
+      "src/ui/buttons/DisclosureButton.tsx",
+    ];
+    const offenders: string[] = [];
+
+    for (const file of sourceFiles(join(__dirname, "../../src"))) {
+      const path = file.replace(/\\/g, "/");
+      if (allowed.some((entry) => path.endsWith(entry))) continue;
+      const lines = readFileSync(file, "utf8").split(/\r?\n/);
+      lines.forEach((line, index) => {
+        if (!/aria-expanded|<details|<summary/.test(line)) return;
+        const nearby = lines.slice(Math.max(0, index - 3), index + 4).join("\n");
+        if (!nearby.includes("aria-haspopup")) offenders.push(`${path}:${index + 1}`);
+      });
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("takes every tappable card header padding from one token", () => {
+    for (const file of [
+      "src/ui/AccordionCard.tsx",
+      "src/pages/CharacterSheet/NotesTab.tsx",
+      "src/components/chat/ChatInboxRow.tsx",
+    ]) {
+      const text = readFileSync(join(__dirname, "../..", file), "utf8");
+      expect(text, file).toContain("uiCardHeaderPadding");
+      expect(text, file).not.toMatch(/p-3 lg:p-4|p-4 lg:p-5|py-2\.5/);
+    }
+  });
+
+  it("keeps the stowed grenade card name on the shared item name typography", () => {
+    const text = readFileSync(
+      join(__dirname, "../../src/pages/CharacterSheet/weapons/GrenadeCard.tsx"),
+      "utf8"
+    );
+    expect(text).toContain("uiItemNameTypography");
+    expect(text).not.toContain("font-semibold");
   });
 
   it("keeps every picker row on the shared row name", () => {

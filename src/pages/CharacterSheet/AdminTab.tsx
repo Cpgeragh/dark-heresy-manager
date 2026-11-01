@@ -20,6 +20,7 @@ import {
 } from "../../ui/styles/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
 import { colourMetadataLabelText, colourTextPrimary } from "../../ui/styles/colourTokens";
+import { DisclosureButton } from "../../ui/buttons/DisclosureButton";
 
 interface AdminTabProps {
   campaignId: string;
@@ -158,14 +159,12 @@ export function AdminTab({
           <Chip colour="slate">Immutable</Chip>
         </div>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          aria-expanded={showClaimHistory}
+        <DisclosureButton
+          expanded={showClaimHistory}
           onClick={() => setClaimHistoryRequested((requested) => !requested)}
         >
           {showClaimHistory ? "Close History" : "Open History"}
-        </Button>
+        </DisclosureButton>
 
         {showClaimHistory && (
           <div className="mt-3">

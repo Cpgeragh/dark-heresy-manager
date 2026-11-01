@@ -1,6 +1,6 @@
 // tests/integration/ErrorBoundary.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import "@testing-library/jest-dom";
@@ -48,18 +48,35 @@ describe("ErrorBoundary", () => {
     expect(screen.getByText("Safe content")).toBeInTheDocument();
   });
 
-  it("gives the dev-only Stack trace summary the shared focus ring", () => {
+  it("gives the dev-only Stack trace button the shared focus ring", () => {
     render(
       <ErrorBoundary>
         <AlwaysThrows />
       </ErrorBoundary>
     );
 
-    expect(screen.getByText("Stack trace")).toHaveClass(
+    expect(screen.getByRole("button", { name: "Stack trace" })).toHaveClass(
       ...uiFocusRing.split(" "),
-      "transition",
+      "transition-colors",
       "active:scale-press"
     );
+  });
+
+  it("shows the dev-only stack trace only after the Stack trace button is pressed", () => {
+    const { container } = render(
+      <ErrorBoundary>
+        <AlwaysThrows />
+      </ErrorBoundary>
+    );
+    const button = screen.getByRole("button", { name: "Stack trace" });
+
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(container.ownerDocument.querySelector("pre")).toBeNull();
+
+    fireEvent.click(button);
+
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(container.ownerDocument.querySelector("pre")).not.toBeNull();
   });
 
   it("renders the default fallback UI when a child throws", () => {

@@ -60,8 +60,11 @@ export const uiSectionHeader = `border-l-2 ${colourAccentBar} pl-2 text-xs lg:te
 /** Standard card shell: bright border and semi-transparent background, without padding. */
 export const uiSectionShell = `${uiCorner} border ${colourBorderSurface} ${colourFillCard}`;
 
+/** The padding of a card header, shared by every card that is tapped to open, expand or choose. */
+export const uiCardHeaderPadding = "p-3 lg:p-4";
+
 /** Standard padded section card. */
-export const uiSection = `${uiSectionShell} p-3 lg:p-4`;
+export const uiSection = `${uiSectionShell} ${uiCardHeaderPadding}`;
 
 export const uiCell = `${uiCorner} border ${colourBorderSurface} ${colourFillCard}`;
 
@@ -207,7 +210,7 @@ export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]
 /** Small circular loading spinner. Set its size with width and height classes where it is used. */
 export const uiSpinner = `rounded-full border-2 ${colourSplashRule} ${colourSpinnerAccent} animate-spin`;
 export const uiSubheading = `text-xs lg:text-sm font-semibold ${colourTextPrimary} uppercase tracking-wide`;
-const uiItemNameTypography = "text-sm lg:text-base font-medium";
+export const uiItemNameTypography = "text-sm lg:text-base font-medium";
 /** Base and hover colour placed on content directly following a CardOverlayButton. */
 export const uiOverlayPeerHoverText = `${colourTextPrimary} ${colourPeerHoverTextStrong}`;
 export const uiItemName = `${uiItemNameTypography} ${colourTextPrimary}`;

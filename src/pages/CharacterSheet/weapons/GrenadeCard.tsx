@@ -14,6 +14,7 @@ import {
   uiInactiveItem,
   uiTextLabel,
   uiStackField,
+  uiItemNameTypography,
 } from "../../../ui/styles/editableStyles";
 import {
   colourAmberPlain,
@@ -78,9 +79,7 @@ export function GrenadeCard({
       <div className={`${uiSection} ${uiInactiveItem}`}>
         <div className={`${uiSplitRow}`}>
           <div className="min-w-0">
-            <p className={`text-sm lg:text-base font-semibold ${colourTextMuted} truncate`}>
-              {item.name}
-            </p>
+            <p className={`${uiItemNameTypography} ${colourTextMuted} truncate`}>{item.name}</p>
             <p className={`text-xs lg:text-sm ${colourAmberPlain}`}>
               Stowed · {item.quantity} remaining
             </p>

@@ -51,12 +51,10 @@ import { GearIcon } from "../ui/icons/GearIcon";
 import {
   uiCardLinkFeedback,
   uiCardOverlayLinkFeedback,
-  uiFocusRing,
   uiFocusRingInset,
-  uiPressFeedback,
 } from "../ui/styles/buttonStyles";
 import { IconButton } from "../ui/buttons/IconButton";
-import { ExpandChevron } from "../ui/icons/ExpandChevron";
+import { DisclosureButton } from "../ui/buttons/DisclosureButton";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
@@ -81,7 +79,6 @@ import {
   colourAmberPlain,
   colourTextPrimary,
   colourTextMuted,
-  colourHoverTextBody,
 } from "../ui/styles/colourTokens";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../hooks/useMediaQuery";
 import { useSwipeableTabs } from "../hooks/useSwipeableTabs";
@@ -512,15 +509,9 @@ function DmCampaignList({
         <ErrorState>Unable to load archived campaigns.</ErrorState>
       ) : archivedCampaigns.length > 0 ? (
         <div>
-          <button
-            type="button"
-            onClick={() => setShowArchived((v) => !v)}
-            aria-expanded={showArchived}
-            className={`inline-flex items-center gap-1 text-sm lg:text-base ${uiTextPlaceholder} ${colourHoverTextBody} ${uiPressFeedback()} ${uiFocusRing} transition-colors`}
-          >
-            <ExpandChevron expanded={showArchived} />
-            <span>Archived ({archivedCampaigns.length})</span>
-          </button>
+          <DisclosureButton expanded={showArchived} onClick={() => setShowArchived((v) => !v)}>
+            Archived ({archivedCampaigns.length})
+          </DisclosureButton>
 
           {showArchived && (
             <div className="flex flex-col gap-2 mt-2">

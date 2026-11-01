@@ -231,7 +231,7 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
   quantity?: number; // for thrown weapons (bolas, throwing stars): how many carried
   description?: string; // rules text copied from reference data when needed
   integrated?: boolean; // true for custom built-in weapons without a reference id
-  equipped?: boolean; // true = carried on body, shown expanded and pinned to top
+  equipped?: boolean; // true = carried on body and pinned to the top of the list
   concealedBionic?: { cyberneticId: string; craftsmanship: CyberneticCraftsmanship };
 }
 
@@ -262,7 +262,7 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   alternateRangedAmmoReferenceId?: string; // loaded ammunition for a built-in ranged profile
   description?: string; // custom rules text separate from qualities
   integrated?: boolean; // true for custom built-in weapons without a reference id
-  equipped?: boolean; // true = carried on body, shown expanded and pinned to top
+  equipped?: boolean; // true = carried on body and pinned to the top of the list
   concealedBionic?: { cyberneticId: string; craftsmanship: CyberneticCraftsmanship };
 }
 
@@ -482,7 +482,7 @@ export interface GrenadeItem extends CustomLibraryLinkFields {
   quantity: number;
   /** "Grenade" or "Mine": used to exclude mines from launcher panels */
   type?: string;
-  equipped?: boolean; // true = up to 3 shown in expanded card, remainder in stowed card
+  equipped?: boolean; // true = up to 3 are ready, the remainder show in the stowed card
   class?: string;
   damage?: string;
   pen?: string;

@@ -144,7 +144,8 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(within(history).getByText("1200 XP")).toBeInTheDocument();
   });
 
-  it("renders every reached named rank and marks the current card", () => {
+  it("renders every reached named rank and marks the current card", async () => {
+    const user = userEvent.setup();
     renderTab();
     for (const rank of ["Conscript", "Guard", "Armsman", "Sergeant", "Veteran", "Scout"]) {
       expect(screen.getByRole("article", { name: `${rank} Rank Card` })).toBeInTheDocument();
@@ -168,12 +169,14 @@ describe("ExperienceTab named Career Rank ledger", () => {
       "Guard Rank Card",
       "Conscript Rank Card",
     ]);
-    expect(
-      screen.getByRole("button", { name: "Collapse Scout Rank Card details" })
-    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Expand Scout Rank Card details" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
     expect(
       screen.getByRole("button", { name: "Expand Veteran Rank Card details" })
     ).toHaveAttribute("aria-expanded", "false");
+    await user.click(screen.getByRole("button", { name: "Expand Scout Rank Card details" }));
     const scoutTitle = within(screen.getByRole("article", { name: "Scout Rank Card" })).getByRole(
       "heading",
       { name: "Scout" }
@@ -220,7 +223,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
     ).toBeInTheDocument();
   });
 
-  it("resets expansion to the new current rank when the character ranks up", () => {
+  it("keeps every rank card collapsed when the character ranks up", () => {
     const onUpdate = vi.fn().mockResolvedValue(true);
     const onUpdateCharacter = vi.fn().mockResolvedValue(true);
     const scoutCharacter = makeCharacter();
@@ -251,9 +254,10 @@ describe("ExperienceTab named Career Rank ledger", () => {
       />
     );
 
-    expect(
-      screen.getByRole("button", { name: "Collapse Scout Rank Card details" })
-    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Expand Scout Rank Card details" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
     expect(
       screen.getByRole("button", { name: "Expand Veteran Rank Card details" })
     ).toHaveAttribute("aria-expanded", "false");
@@ -287,6 +291,7 @@ describe("ExperienceTab named Career Rank ledger", () => {
   it("switches between the mobile Rank purchase panels without equal-height side cards", async () => {
     const user = userEvent.setup();
     renderTab();
+    await user.click(screen.getByRole("button", { name: "Expand Scout Rank Card details" }));
     const scout = within(screen.getByRole("article", { name: "Scout Rank Card" }));
     const mobileTabs = within(
       scout.getByRole("tablist", { name: "Scout Rank purchase categories" })
@@ -1004,6 +1009,7 @@ describe("ExperienceTab alternate rank titles", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ character: makeTechPriest("Tech-Priest") });
 
+    await user.click(screen.getByRole("button", { name: "Expand Tech-Priest Rank Card details" }));
     const card = within(screen.getByRole("article", { name: "Tech-Priest Rank Card" }));
     const titleChoice = within(card.getByText("Rank title").parentElement as HTMLElement);
     await user.click(titleChoice.getByRole("button", { name: "Myrmidon" }));
@@ -1020,6 +1026,7 @@ describe("ExperienceTab alternate rank titles", () => {
       character: makeTechPriest("Tech-Priest", { "5": "Myrmidon" }),
     });
 
+    await user.click(screen.getByRole("button", { name: "Expand Myrmidon Rank Card details" }));
     const card = within(screen.getByRole("article", { name: "Myrmidon Rank Card" }));
     const titleChoice = within(card.getByText("Rank title").parentElement as HTMLElement);
     expect(titleChoice.getByRole("button", { name: "Myrmidon" })).toHaveAttribute(

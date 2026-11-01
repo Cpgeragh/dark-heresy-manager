@@ -27,6 +27,7 @@ import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { CharacterEntryRowContent } from "../../ui/CharacterEntryRow";
 import { createLocalId } from "../../utils/createLocalId";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
+import { uiCardHeaderPadding } from "../../ui/styles/editableStyles";
 
 interface NotesTabProps {
   notes: NoteEntry[];
@@ -151,7 +152,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
           items={filtered.map((entry) => (
             <div
               key={entry.id}
-              className={`${uiSectionShell} ${uiCardTapHeader} relative p-4 lg:p-5`}
+              className={`${uiSectionShell} ${uiCardTapHeader} relative ${uiCardHeaderPadding}`}
             >
               <CardOverlayButton
                 label={`Open note ${entry.title}`}

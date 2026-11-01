@@ -121,8 +121,16 @@ describe("AdminTab claim-history listener", () => {
 
     expect(mockUseClaimLogs).toHaveBeenLastCalledWith("campaign-1", "char-1", false);
 
+    expect(screen.getByRole("button", { name: "Open History" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
     await user.click(screen.getByRole("button", { name: "Open History" }));
 
     expect(mockUseClaimLogs).toHaveBeenLastCalledWith("campaign-1", "char-1", true);
+    expect(screen.getByRole("button", { name: "Close History" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
   });
 });

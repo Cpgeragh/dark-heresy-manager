@@ -466,6 +466,29 @@ describe("Dashboard DM campaign list", () => {
     expect(preflightCampaignDeletionMock).toHaveBeenCalledTimes(1);
   });
 
+  it("shows the archived campaigns only while the Archived button is open", async () => {
+    const user = userEvent.setup();
+    archivedStateMock.mockReturnValue({
+      campaigns: [dmCampaign({ id: "campaign-2", name: "Retired Crusade" })],
+      loading: false,
+      error: null,
+    });
+    renderDashboard();
+    const button = screen.getByRole("button", { name: "Archived (1)" });
+
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("Retired Crusade")).not.toBeInTheDocument();
+
+    await user.click(button);
+
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Retired Crusade")).toBeInTheDocument();
+
+    await user.click(button);
+
+    expect(screen.queryByText("Retired Crusade")).not.toBeInTheDocument();
+  });
+
   it("uses the same named deletion confirmation for an archived campaign", async () => {
     const user = userEvent.setup();
     preflightCampaignDeletionMock.mockResolvedValue({ jobId: "archived-job", totalCount: 5 });

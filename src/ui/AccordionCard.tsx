@@ -8,6 +8,7 @@ import { ExpandChevron } from "./icons/ExpandChevron";
 import { uiCardTapHeader } from "./styles/buttonStyles";
 import { colourNoticeAmber, colourNoticePink, colourNoticeRed } from "./styles/colourTokens";
 import {
+  uiCardHeaderPadding,
   uiInactiveItem,
   uiNoticeBox,
   uiOverlayItemNameHover,
@@ -76,7 +77,9 @@ export function AccordionCard({
 
   return (
     <div className={`${CARD_SHELL[tone]} overflow-hidden${inactive ? ` ${uiInactiveItem}` : ""}`}>
-      <div className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full p-3 lg:p-4`}>
+      <div
+        className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full ${uiCardHeaderPadding}`}
+      >
         {!forceExpanded && (
           <CardOverlayButton
             label={onSelect ? (selectLabel ?? `Select ${label}`) : toggleLabel}

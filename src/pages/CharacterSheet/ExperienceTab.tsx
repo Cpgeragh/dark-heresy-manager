@@ -956,15 +956,7 @@ export function ExperienceTab({
   const [xpAction, setXpAction] = useState<XpAction | null>(null);
   const [rankUpOpen, setRankUpOpen] = useState(false);
   const currentRankCard = rankCards.find((card) => card.isCurrent);
-  const currentRankCardId = currentRankCard?.rankId;
-  const [rankExpansion, setRankExpansion] = useState(() => ({
-    currentRankCardId,
-    expandedRankIds: new Set(currentRankCardId ? [currentRankCardId] : []),
-  }));
-  const expandedRankIds =
-    rankExpansion.currentRankCardId === currentRankCardId
-      ? rankExpansion.expandedRankIds
-      : new Set(currentRankCardId ? [currentRankCardId] : []);
+  const [expandedRankIds, setExpandedRankIds] = useState<ReadonlySet<string>>(() => new Set());
   const canAddXp = editable;
   const canRemoveXp = editable;
   const canManageRank = isDM && editable;
@@ -989,17 +981,11 @@ export function ExperienceTab({
   };
 
   const toggleRankCard = (rankId: string) => {
-    setRankExpansion((current) => {
-      const next = new Set(
-        current.currentRankCardId === currentRankCardId
-          ? current.expandedRankIds
-          : currentRankCardId
-            ? [currentRankCardId]
-            : []
-      );
+    setExpandedRankIds((current) => {
+      const next = new Set(current);
       if (next.has(rankId)) next.delete(rankId);
       else next.add(rankId);
-      return { currentRankCardId, expandedRankIds: next };
+      return next;
     });
   };
 
@@ -1172,7 +1158,7 @@ export function ExperienceTab({
                 <article key={card.rankId} aria-label={`${card.name} Rank Card`}>
                   <AccordionCard
                     tone={card.isCurrent ? "red" : "default"}
-                    name={<h3 className={`${uiCardTitle} text-lg lg:text-xl`}>{card.name}</h3>}
+                    name={<h3 className={uiCardTitle}>{card.name}</h3>}
                     label={`${card.name} Rank Card`}
                     expanded={expanded}
                     onToggle={() => toggleRankCard(card.rankId)}

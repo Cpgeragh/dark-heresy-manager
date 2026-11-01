@@ -1,8 +1,9 @@
 // src/components/ErrorBoundary.tsx
 
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import type { ReactNode } from "react";
 import { Button } from "../ui/buttons/Button";
+import { DisclosureButton } from "../ui/buttons/DisclosureButton";
 import { WarningIcon } from "../ui/icons/WarningIcon";
 import {
   uiPageTitle,
@@ -13,12 +14,7 @@ import {
   uiStackBody,
   uiStackList,
 } from "../ui/styles/editableStyles";
-import {
-  colourHoverTextBody,
-  colourPageBackground,
-  colourStateRed,
-} from "../ui/styles/colourTokens";
-import { uiFocusRing, uiPressFeedback } from "../ui/styles/buttonStyles";
+import { colourPageBackground, colourStateRed } from "../ui/styles/colourTokens";
 import { uiLayerBackdrop } from "../ui/styles/layerStyles";
 import { uiIconSize } from "../ui/styles/iconStyles";
 
@@ -31,6 +27,21 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: React.ErrorInfo | null;
+}
+
+/** The development-only stack trace, hidden until the chevron button is pressed. */
+function StackTrace({ stack }: { stack: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-2">
+      <DisclosureButton expanded={open} onClick={() => setOpen((current) => !current)}>
+        Stack trace
+      </DisclosureButton>
+      {open && (
+        <pre className={`mt-2 text-[10px] ${uiTextPlaceholder} overflow-x-auto`}>{stack}</pre>
+      )}
+    </div>
+  );
 }
 
 class ErrorBoundaryImplementation extends Component<Props, State> {
@@ -118,18 +129,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
           <div className={`${uiSection} ${uiStackList}`}>
             <div className={`text-xs font-mono ${uiTextError} font-semibold`}>{error.name}</div>
             <div className={`text-xs font-mono ${uiTextBody}`}>{error.message}</div>
-            {error.stack && (
-              <details className="mt-2">
-                <summary
-                  className={`text-xs ${uiTextPlaceholder} cursor-pointer transition ${colourHoverTextBody} ${uiPressFeedback()} ${uiFocusRing}`}
-                >
-                  Stack trace
-                </summary>
-                <pre className={`mt-2 text-[10px] ${uiTextPlaceholder} overflow-x-auto`}>
-                  {error.stack}
-                </pre>
-              </details>
-            )}
+            {error.stack && <StackTrace stack={error.stack} />}
           </div>
         )}
 

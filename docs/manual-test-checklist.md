@@ -1503,6 +1503,9 @@ Use an editable character with a career, and slow the network in the browser's d
 - [ ] A grenade card shows a Quantity row with a small counter behind a divider line, the same as a thrown Ranged or Melee weapon, and the "3 ready, rest stowed" note still shows when more than three are equipped (`EntryQuantityRow.tsx`)
 - [ ] The Rules line on an ammunition or upgrade card, the Linked chips on an integrated implant, Spare Cells on a force field and the Clips and Rounds counters on ammunition look and behave as before (`EntryDetailLine.tsx`)
 - [ ] The information windows of the drug picker, the Elite Advances, Mutations, Malignancies, Disorders, armour and weapon qualities, companion profiles, careers, homeworlds and implants use the same sky-blue heading over their text, and the Side Effects heading in a drug window is no longer a different colour (`InfoSection.tsx`)
+- [ ] Every Experience rank card, the current one included, starts collapsed, and the rank titles use the same size as other card names (`ExperienceTab.tsx`)
+- [ ] The Archived campaigns button, the Claim History button and the development stack trace button share one look: a chevron that turns when open, and they show and hide their content (`DisclosureButton.tsx`)
+- [ ] The Notes cards and the Chat inbox rows have the same header padding as the expandable cards, and the stowed grenade name has the same weight as other item names (`uiCardHeaderPadding`)
 
 ## Coverage notes
 

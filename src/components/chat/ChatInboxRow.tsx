@@ -16,6 +16,7 @@ import { formatChatListTime } from "../../utils/formatChatListTime";
 import { ChatAvatar, type ChatAvatarPicture } from "./ChatAvatar";
 import { uiLayerLocal } from "../../ui/styles/layerStyles";
 import { UnreadBadge } from "./UnreadBadge";
+import { uiCardHeaderPadding } from "../../ui/styles/editableStyles";
 
 interface ChatInboxRowProps {
   chat: ChatSummaryWithId;
@@ -36,7 +37,7 @@ export function ChatInboxRow({ chat, picture, onOpen }: ChatInboxRowProps) {
 
   return (
     <div
-      className={`${uiSectionShell} ${uiCardTapHeader} relative flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 text-left`}
+      className={`${uiSectionShell} ${uiCardTapHeader} relative flex items-center gap-3 ${uiCardHeaderPadding} text-left`}
     >
       <CardOverlayButton label={label} onClick={onOpen} />
       <div
