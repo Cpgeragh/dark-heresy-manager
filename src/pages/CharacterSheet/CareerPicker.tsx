@@ -2,10 +2,10 @@ import { useState } from "react";
 import { CAREER_LIST, type CareerData, type CareerRankData } from "shared-rules";
 import type { HomeworldData } from "../../data/reference/homeworldData";
 import { Chip } from "../../ui/chips/Chip";
+import { InfoSection, InfoTextSection } from "../../ui/InfoSection";
 import {
   uiSectionShell,
   uiTextBody,
-  uiTextLabel,
   uiTextDescription,
   uiStackBody,
   uiStackList,
@@ -14,15 +14,6 @@ import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { colourMetadataLabelText, colourAccentBar } from "../../ui/styles/colourTokens";
-
-function InfoSection({ title, content }: { title: string; content: string }) {
-  return (
-    <section>
-      <p className={`${uiTextLabel} font-semibold mb-1`}>{title}</p>
-      <p className={uiTextDescription}>{content}</p>
-    </section>
-  );
-}
 
 export function CareerInfoContent({
   career,
@@ -45,41 +36,40 @@ export function CareerInfoContent({
       <p className={uiTextDescription}>{career.description}</p>
 
       {career.requirements?.length && (
-        <InfoSection title="Requirements" content={career.requirements.join(" ")} />
+        <InfoTextSection heading="Requirements" text={career.requirements.join(" ")} />
       )}
 
       {homeworldCareer && (
-        <InfoSection title={homeworldCareer.name} content={homeworldCareer.description} />
+        <InfoTextSection heading={homeworldCareer.name} text={homeworldCareer.description} />
       )}
 
-      <InfoSection title="Starting Skills" content={career.startingSkills} />
-      <InfoSection title="Starting Talents" content={career.startingTalents} />
-      <InfoSection title="Starting Gear" content={career.startingGear} />
+      <InfoTextSection heading="Starting Skills" text={career.startingSkills} />
+      <InfoTextSection heading="Starting Talents" text={career.startingTalents} />
+      <InfoTextSection heading="Starting Gear" text={career.startingGear} />
 
       {career.startingPsychicPowers && (
-        <InfoSection title="Starting Psychic Powers" content={career.startingPsychicPowers} />
+        <InfoTextSection heading="Starting Psychic Powers" text={career.startingPsychicPowers} />
       )}
 
       {career.startingWealth && (
-        <InfoSection title="Starting Wealth" content={career.startingWealth} />
+        <InfoTextSection heading="Starting Wealth" text={career.startingWealth} />
       )}
 
       {career.monthlyIncome && (
-        <InfoSection title="Monthly Income" content={career.monthlyIncome} />
+        <InfoTextSection heading="Monthly Income" text={career.monthlyIncome} />
       )}
 
       {career.traits?.map((trait) => (
         <section key={trait.name} className={uiStackBody}>
-          <InfoSection title={`Trait: ${trait.name}`} content={trait.description} />
+          <InfoTextSection heading={`Trait: ${trait.name}`} text={trait.description} />
           {trait.sections?.map((section) => (
-            <InfoSection key={section.title} title={section.title} content={section.content} />
+            <InfoTextSection key={section.title} heading={section.title} text={section.content} />
           ))}
         </section>
       ))}
 
       {career.specialTable && (
-        <section>
-          <p className={`${uiTextLabel} font-semibold mb-2`}>{career.specialTable.title}</p>
+        <InfoSection heading={career.specialTable.title}>
           <div className={uiStackList}>
             {career.specialTable.rows.map((row) => (
               <div key={row.result} className={`${uiSectionShell} px-3 py-2`}>
@@ -90,7 +80,7 @@ export function CareerInfoContent({
               </div>
             ))}
           </div>
-        </section>
+        </InfoSection>
       )}
     </div>
   );
@@ -99,13 +89,13 @@ export function CareerInfoContent({
 export function RankInfoContent({ career, rank }: { career: CareerData; rank: CareerRankData }) {
   return (
     <div className={uiStackBody}>
-      <InfoSection title="Career" content={career.name} />
-      <InfoSection title="Rank" content={`Rank ${rank.tier}`} />
-      <InfoSection title="XP Level" content={rank.xpLevel} />
+      <InfoTextSection heading="Career" text={career.name} />
+      <InfoTextSection heading="Rank" text={`Rank ${rank.tier}`} />
+      <InfoTextSection heading="XP Level" text={rank.xpLevel} />
       {rank.paths?.length && (
-        <InfoSection
-          title={rank.paths.length > 1 ? "Career Paths" : "Career Path"}
-          content={rank.paths.join(" or ")}
+        <InfoTextSection
+          heading={rank.paths.length > 1 ? "Career Paths" : "Career Path"}
+          text={rank.paths.join(" or ")}
         />
       )}
     </div>

@@ -78,6 +78,7 @@ export function CustomMeleeForm({
   );
   const [description, setDescription] = useState(initialWeapon?.description ?? "");
   const [rules, setRules] = useState(initialWeapon?.rules ?? "");
+  const [itemNotes, setItemNotes] = useState(initialWeapon?.itemNotes ?? "");
   const [saving, setSaving] = useState(false);
   const [showClassPicker, setShowClassPicker] = useState(false);
   const [showTypePicker, setShowTypePicker] = useState(false);
@@ -118,6 +119,7 @@ export function CustomMeleeForm({
         specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
         description: description.trim() || undefined,
         rules: rules.trim() || undefined,
+        itemNotes: itemNotes.trim() || undefined,
         integrated: initialWeapon?.integrated ?? integrated,
         quantity:
           initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
@@ -389,6 +391,8 @@ export function CustomMeleeForm({
             onDescriptionChange={setDescription}
             rules={rules}
             onRulesChange={setRules}
+            itemNotes={itemNotes}
+            onItemNotesChange={setItemNotes}
           />
         </div>
       </CustomFormSection>

@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { openEntryCard } from "../utils/entryCard";
 
 import { ArcheotechArmourRow } from "../../src/pages/CharacterSheet/ArmourTab/ArcheotechArmourRow";
 import type { ArcheotechItem } from "../../src/types/Character";
@@ -33,6 +34,7 @@ function renderRow(props: Partial<React.ComponentProps<typeof ArcheotechArmourRo
       {...props}
     />
   );
+  openEntryCard();
   return { onToggleEquip, onRemove };
 }
 
@@ -70,7 +72,7 @@ describe("ArcheotechArmourRow rules", () => {
   it("shows an empty Rules line when the item has no rules text", () => {
     renderRow();
     expect(screen.getByText("Rules")).toBeInTheDocument();
-    expect(screen.getByText("-")).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
   });
 
   it("says no description was recorded when there is none", async () => {

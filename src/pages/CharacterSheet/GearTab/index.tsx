@@ -45,6 +45,7 @@ import {
 } from "./gearSnapshotHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
+import { keepPersonalNotes } from "../../../utils/personalNotes";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -328,12 +329,15 @@ export function GearTab({
         });
         const updatedConsumables = consumables.map((consumable) =>
           consumable.id === editingConsumableDefinition.item.id
-            ? buildConsumableSnapshot(
-                consumable.id,
-                consumable.quantity,
-                data,
-                editingConsumableDefinition.libraryItem.id,
-                versionId
+            ? keepPersonalNotes(
+                buildConsumableSnapshot(
+                  consumable.id,
+                  consumable.quantity,
+                  data,
+                  editingConsumableDefinition.libraryItem.id,
+                  versionId
+                ),
+                consumable
               )
             : consumable
         );
@@ -456,7 +460,15 @@ export function GearTab({
         });
         const updatedGear = gear.map((gearItem) =>
           gearItem.id === editingGearDefinition.item.id
-            ? buildGearSnapshot(gearItem.id, data, editingGearDefinition.libraryItem.id, versionId)
+            ? keepPersonalNotes(
+                buildGearSnapshot(
+                  gearItem.id,
+                  data,
+                  editingGearDefinition.libraryItem.id,
+                  versionId
+                ),
+                gearItem
+              )
             : gearItem
         );
 

@@ -6,11 +6,7 @@ import type {
   ArmourLocationKey,
   CyberneticCraftsmanship,
 } from "../../../types/Character";
-import {
-  uiTwoColumnGrid,
-  editableInputClass,
-  editableTextareaClass,
-} from "../../../ui/styles/editableStyles";
+import { uiTwoColumnGrid, editableInputClass } from "../../../ui/styles/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/format/moneyFormat";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
@@ -69,7 +65,7 @@ export function CustomArcheotechForm({
   const [name, setName] = useState(initialItem?.name ?? "");
   const [description, setDescription] = useState(initialItem?.description ?? "");
   const [rules, setRules] = useState(initialItem?.rules ?? "");
-  const [notes, setNotes] = useState(initialItem?.notes ?? "");
+  const [itemNotes, setItemNotes] = useState(initialItem?.itemNotes ?? initialItem?.notes ?? "");
   const [weight, setWeight] = useState(initialItem?.weight ?? "");
   const [value, setValue] = useState(initialItem?.value ?? "");
   const [availability, setAvailability] = useState(initialItem?.availability ?? "");
@@ -130,7 +126,7 @@ export function CustomArcheotechForm({
         type: selectedType,
         description: description.trim() || undefined,
         rules: rules.trim() || undefined,
-        notes: notes.trim() || undefined,
+        itemNotes: itemNotes.trim() || undefined,
         weight: formatWeightInput(weight),
         value: formatMoneyInput(value),
         availability: availability || undefined,
@@ -609,22 +605,10 @@ export function CustomArcheotechForm({
             onDescriptionChange={setDescription}
             rules={rules}
             onRulesChange={setRules}
+            itemNotes={itemNotes}
+            onItemNotesChange={setItemNotes}
             descriptionPlaceholder="What it is, how it looks, where it came from…"
           />
-          <div>
-            <FormLabel htmlFor="custom-archeotech-notes" supportingText="(optional)">
-              Notes
-            </FormLabel>
-            <textarea
-              id="custom-archeotech-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Personal notes, where it was found…"
-              rows={2}
-              className={editableTextareaClass(true) + " mt-0.5"}
-              autoComplete="off"
-            />
-          </div>
         </CustomFormSection>
       </>
     </CustomFormShell>

@@ -61,6 +61,7 @@ import {
 } from "../weapons/weaponHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
+import { keepPersonalNotes } from "../../../utils/personalNotes";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -382,13 +383,16 @@ export function CyberneticsTab({
         });
         const updatedCybernetics = cybernetics.map((cybernetic) =>
           cybernetic.id === editingCyberneticDefinition.item.id
-            ? buildCyberneticSnapshot(
-                cybernetic.id,
-                cybernetic.bodyLocation,
-                data,
-                editingCyberneticDefinition.libraryItem.id,
-                versionId,
-                cybernetic.installed
+            ? keepPersonalNotes(
+                buildCyberneticSnapshot(
+                  cybernetic.id,
+                  cybernetic.bodyLocation,
+                  data,
+                  editingCyberneticDefinition.libraryItem.id,
+                  versionId,
+                  cybernetic.installed
+                ),
+                cybernetic
               )
             : cybernetic
         );

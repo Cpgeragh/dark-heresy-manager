@@ -4,6 +4,7 @@ import { EntryActionButton } from "../../ui/buttons/EntryActionButton";
 import { Chip } from "../../ui/chips/Chip";
 import { RollChip } from "../../ui/chips/RollChip";
 import { OwnedEntryRow } from "../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../ui/entryNotesLine";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MalignancyInfoContent, MutationInfoContent } from "./CorruptionReferenceModals";
@@ -69,6 +70,14 @@ export function CorruptionEntryRow({
             ))}
           </>
         }
+        lines={{
+          notes: entryNotesLine(display.name, undefined, {
+            collection: kind === "Mutation" ? "mutations" : "malignancies",
+            id: entry.id,
+            notes: entry.personalNotes,
+            editable,
+          }),
+        }}
         actions={
           editable && rollEntries.length > 0 ? (
             <EntryActionButton onClick={() => setIsEditingRolls(true)}>

@@ -11,7 +11,7 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph } from "../../../ui/InfoSection";
+import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import { PickerField } from "../../../ui/pickers/PickerField";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { UpgradeEntryCard } from "../../../ui/UpgradeEntryCard";
@@ -20,7 +20,6 @@ import {
   uiChipRow,
   editableInputColour,
   uiTextPlaceholder,
-  uiRuleName,
   uiTextDescription,
   uiStackField,
   uiStackBody,
@@ -144,14 +143,13 @@ export function SpecialRulesContent({
 
   return (
     <div className={uiStackBody}>
-      {description && <p className={uiTextDescription}>{description}</p>}
+      {description && <InfoParagraph>{description}</InfoParagraph>}
       {ruleNames.map((name) => {
         const desc = WEAPON_SPECIAL_RULES[name];
         return (
-          <div key={name}>
-            <p className={uiRuleName}>{name}</p>
-            <p className={`${uiTextDescription} mt-1`}>{desc}</p>
-          </div>
+          <InfoSection key={name} heading={name}>
+            <InfoParagraph>{desc}</InfoParagraph>
+          </InfoSection>
         );
       })}
     </div>

@@ -81,6 +81,7 @@ export function CustomShieldForm({
   );
   const [notes, setNotes] = useState(initialShield?.notes ?? "");
   const [rules, setRules] = useState(initialShield?.rules ?? "");
+  const [itemNotes, setItemNotes] = useState(initialShield?.itemNotes ?? "");
   const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
   const qualityPicker = useWeaponQualityPicker(selectedQualities, setSelectedQualities);
@@ -112,6 +113,7 @@ export function CustomShieldForm({
         specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
         notes: notes.trim() || undefined,
         rules: rules.trim() || undefined,
+        itemNotes: itemNotes.trim() || undefined,
         weight: formatWeightInput(weight),
         value: formatMoneyInput(value),
         availability,
@@ -343,6 +345,8 @@ export function CustomShieldForm({
             onDescriptionChange={setNotes}
             rules={rules}
             onRulesChange={setRules}
+            itemNotes={itemNotes}
+            onItemNotesChange={setItemNotes}
           />
         </div>
       </CustomFormSection>

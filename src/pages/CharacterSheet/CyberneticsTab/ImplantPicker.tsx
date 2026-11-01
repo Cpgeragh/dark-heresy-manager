@@ -18,7 +18,7 @@ import {
   PickerRowName,
   PickerRowRulesLine,
 } from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph } from "../../../ui/InfoSection";
+import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
@@ -29,9 +29,7 @@ import {
   uiInlineRow,
   uiTwoColumnGrid,
   uiTextBody,
-  uiTextLabel,
   uiTextGMNote,
-  uiTextDescription,
   uiDescriptionBox,
   uiStackBody,
   uiStackField,
@@ -162,20 +160,18 @@ export function ImplantPicker({
   const implantInfo = (ref: CyberneticRef) => (
     <div className={uiStackBody}>
       {ref.notes && (
-        <div>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
-          <p className={uiTextDescription}>{ref.notes}</p>
-        </div>
+        <InfoSection heading="Item Rules">
+          <InfoParagraph>{ref.notes}</InfoParagraph>
+        </InfoSection>
       )}
       {availableCraftsmanship(ref).map((quality) => (
-        <div key={quality}>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>{quality}</p>
-          <p className={uiTextDescription}>
+        <InfoSection key={quality} heading={quality}>
+          <InfoParagraph>
             {ref.id === "ih-concealed-weapon-bionic"
               ? concealedWeaponBionicDescription(quality)
               : craftsmanshipDescription(ref, quality)}
-          </p>
-        </div>
+          </InfoParagraph>
+        </InfoSection>
       ))}
     </div>
   );

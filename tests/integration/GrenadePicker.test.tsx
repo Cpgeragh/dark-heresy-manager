@@ -131,7 +131,7 @@ describe("GrenadePicker", () => {
     const user = userEvent.setup();
     renderPicker();
     await expand(user, GRENADE_NAME);
-    expect(screen.queryByText("Qty")).not.toBeInTheDocument();
+    expect(screen.queryByText("Quantity")).not.toBeInTheDocument();
   });
 
   it("shows a View title in read-only mode and does not call onSelect on tap", async () => {

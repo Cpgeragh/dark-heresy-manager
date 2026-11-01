@@ -14,6 +14,7 @@ const heavyIntegrationTests = [
 // New unit tests default to the Node project so an undeclared browser dependency
 // fails visibly instead of adding jsdom startup cost to every unit-test worker.
 const browserUnitTests = [
+  "tests/unit/archeotechSnapshotHelpers.test.ts",
   "tests/unit/armourSnapshotHelpers.test.ts",
   "tests/unit/boundedFirestoreQueries.test.tsx",
   "tests/unit/campaignsContext.test.tsx",
@@ -23,6 +24,7 @@ const browserUnitTests = [
   "tests/unit/customItemService.test.ts",
   "tests/unit/cyberneticSnapshotHelpers.test.ts",
   "tests/unit/deviceLinkService.test.ts",
+  "tests/unit/drugSnapshotHelpers.test.ts",
   "tests/unit/errorPropagation.test.tsx",
   "tests/unit/firebase.test.ts",
   "tests/unit/gearSnapshotHelpers.test.ts",

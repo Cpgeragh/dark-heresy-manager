@@ -47,7 +47,6 @@ import {
   editableInputClass,
   uiSection,
   uiTextBody,
-  uiTextLabel,
   uiTextPlaceholder,
   uiStackBody,
   uiStackField,
@@ -69,6 +68,7 @@ import {
 } from "./eliteAdvanceAccess";
 import { XpCostForm } from "../../ui/forms/XpCostForm";
 import { FormLabel } from "../../ui/forms/FormLabel";
+import { InfoParagraph, InfoSection } from "../../ui/InfoSection";
 
 interface EliteAdvancesTabProps {
   talents: TalentsAndTraitsBlock;
@@ -137,58 +137,52 @@ function nextSkillLevel(level: SkillAdvanceLevel): PurchasedSkillLevel | undefin
 function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
   return (
     <div className={`${uiStackBody} ${uiTextBody}`}>
-      <p>{advance.description}</p>
+      <InfoParagraph>{advance.description}</InfoParagraph>
       {advance.downtime && (
-        <p>
-          <span className={uiTextLabel}>Downtime: </span>
-          {advance.downtime}
-        </p>
+        <InfoSection heading="Downtime">
+          <InfoParagraph>{advance.downtime}</InfoParagraph>
+        </InfoSection>
       )}
       {advance.grantedSkills && advance.grantedSkills.length > 0 && (
-        <div>
-          <p className={uiTextLabel}>Granted skills</p>
-          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
+        <InfoSection heading="Granted skills">
+          <ul className={`list-disc ${uiStackField} pl-5`}>
             {advance.grantedSkills.map((skill) => (
               <li key={`${skill.skillId}-${skill.level}`}>{getSkillName(skill.skillId)}</li>
             ))}
           </ul>
-        </div>
+        </InfoSection>
       )}
       {advance.grantedTalents && advance.grantedTalents.length > 0 && (
-        <div>
-          <p className={uiTextLabel}>Granted talents</p>
-          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
+        <InfoSection heading="Granted talents">
+          <ul className={`list-disc ${uiStackField} pl-5`}>
             {advance.grantedTalents.map((talentId) => (
               <li key={talentId}>{getTalentName(talentId)}</li>
             ))}
           </ul>
-        </div>
+        </InfoSection>
       )}
       {advance.grantedTraits && advance.grantedTraits.length > 0 && (
-        <div>
-          <p className={uiTextLabel}>Granted traits</p>
-          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
+        <InfoSection heading="Granted traits">
+          <ul className={`list-disc ${uiStackField} pl-5`}>
             {advance.grantedTraits.map((traitId) => (
               <li key={traitId}>{getTraitName(traitId)}</li>
             ))}
           </ul>
-        </div>
+        </InfoSection>
       )}
       {(advance.grantedMinorPsychicPowers ?? 0) > 0 && (
-        <div>
-          <p className={uiTextLabel}>Granted psychic powers</p>
-          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
+        <InfoSection heading="Granted psychic powers">
+          <ul className={`list-disc ${uiStackField} pl-5`}>
             <li>
               {advance.grantedMinorPsychicPowers} random permanent Minor Psychic Power
               {advance.grantedMinorPsychicPowers === 1 ? "" : "s"}
             </li>
           </ul>
-        </div>
+        </InfoSection>
       )}
       {advance.unlockedAdvances && advance.unlockedAdvances.length > 0 && (
-        <div>
-          <p className={uiTextLabel}>Unlocked advances</p>
-          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
+        <InfoSection heading="Unlocked advances">
+          <ul className={`list-disc ${uiStackField} pl-5`}>
             {advance.unlockedAdvances.map((unlocked, index) => (
               <li key={`${unlocked.kind}-${unlocked.skillId ?? unlocked.talentId}-${index}`}>
                 {getUnlockedAdvanceName(unlocked)} — {unlocked.cost} XP
@@ -196,27 +190,25 @@ function EliteAdvanceDetails({ advance }: { advance: EliteAdvanceData }) {
               </li>
             ))}
           </ul>
-        </div>
+        </InfoSection>
       )}
       {advance.consequences && advance.consequences.length > 0 && (
-        <div>
-          <p className={uiTextLabel}>Consequences</p>
-          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
+        <InfoSection heading="Consequences">
+          <ul className={`list-disc ${uiStackField} pl-5`}>
             {advance.consequences.map((consequence) => (
               <li key={consequence}>{consequence}</li>
             ))}
           </ul>
-        </div>
+        </InfoSection>
       )}
       {advance.effects && advance.effects.length > 0 && (
-        <div>
-          <p className={uiTextLabel}>Effects</p>
-          <ul className={`mt-1 list-disc ${uiStackField} pl-5`}>
+        <InfoSection heading="Effects">
+          <ul className={`list-disc ${uiStackField} pl-5`}>
             {advance.effects.map((effect) => (
               <li key={effect}>{effect}</li>
             ))}
           </ul>
-        </div>
+        </InfoSection>
       )}
     </div>
   );
@@ -972,6 +964,7 @@ export function EliteAdvancesTab({
                 talentId: entry.eliteAdvanceId,
                 name: advance?.name ?? entry.name,
                 source: advance?.source,
+                personalNotes: entry.personalNotes,
                 ...(entry.grantedByAlternateRankId
                   ? {
                       grantedByTalentEntryUid: `alternate-rank:${entry.grantedByAlternateRankId}`,

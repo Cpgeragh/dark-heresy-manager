@@ -35,7 +35,6 @@ import {
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiItemName,
-  uiRuleName,
   uiTextDescription,
   uiStackField,
   uiStackBody,
@@ -60,8 +59,11 @@ import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay, readWeightKg } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
+import { EntryLines } from "../../../ui/EntryLines";
 import { EntryDetailLine } from "../../../ui/EntryDetailLine";
-import { InfoParagraph } from "../../../ui/InfoSection";
+import { EntryQuantityRow } from "../../../ui/EntryQuantityRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
+import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import { WeightIcon } from "../../../ui/icons/WeightIcon";
 import { StatChip } from "../../../ui/chips/StatChip";
 import {
@@ -562,65 +564,70 @@ export function RangedCard({
       )}
 
       <div className={uiStackField}>
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {hasQualities ? rulesText : "-"}
-          </span>
-          {hasQualityModal && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${weapon.name} Qualities`}
-                content={<SpecialRulesContent rules={rulesText} />}
-              />
-            </span>
-          )}
-        </div>
-        <EntryDetailLine
-          label="Rules"
-          info={
-            hasItemRules || weapon.rules?.trim() ? (
-              <InfoModal
-                title={`${weapon.name} Rules`}
-                content={
-                  <div className={uiStackBody}>
-                    {weapon.rules?.trim() && <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>}
-                    {hasItemRules && (
-                      <>
-                        <p className={uiRuleName}>Concealed Weapon Bionic</p>
-                        {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                          <p key={rule} className={uiTextDescription}>
-                            {rule}
-                          </p>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                }
-              />
-            ) : undefined
-          }
+        <EntryLines
+          lines={{
+            craftsmanship: {
+              value: craftsmanship,
+              info: (
+                <InfoModal
+                  title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
+                  content={
+                    concealedBionicEffect ? (
+                      <div className={uiStackBody}>
+                        <div>
+                          <p className={uiTextDescription}>{concealedBionicEffect}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      rangedCraftsmanshipDescription(craftsmanship)
+                    )
+                  }
+                />
+              ),
+            },
+            qualities: {
+              value: hasQualities ? rulesText : undefined,
+              info: hasQualityModal ? (
+                <InfoModal
+                  title={`${weapon.name} Qualities`}
+                  content={<SpecialRulesContent rules={rulesText} />}
+                />
+              ) : undefined,
+            },
+            rules: {
+              info:
+                hasItemRules || weapon.rules?.trim() ? (
+                  <InfoModal
+                    title={`${weapon.name} Rules`}
+                    content={
+                      <div className={uiStackBody}>
+                        {weapon.rules?.trim() && (
+                          <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>
+                        )}
+                        {hasItemRules && (
+                          <InfoSection heading="Concealed Weapon Bionic">
+                            <div className={uiStackList}>
+                              {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
+                                <InfoParagraph key={rule}>{rule}</InfoParagraph>
+                              ))}
+                            </div>
+                          </InfoSection>
+                        )}
+                      </div>
+                    }
+                  />
+                ) : undefined,
+            },
+            notes: onSelect
+              ? undefined
+              : entryNotesLine(weapon.name, weapon.itemNotes, {
+                  collection: "ranged",
+                  id: weapon.id,
+                  notes: weapon.personalNotes,
+                  editable,
+                }),
+          }}
         />
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Craftsmanship</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
-          <span className={uiInfoModalWrapper}>
-            <InfoModal
-              title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
-              content={
-                concealedBionicEffect ? (
-                  <div className={uiStackBody}>
-                    <div>
-                      <p className={uiTextDescription}>{concealedBionicEffect}</p>
-                    </div>
-                  </div>
-                ) : (
-                  rangedCraftsmanshipDescription(craftsmanship)
-                )
-              }
-            />
-          </span>
-        </div>
       </div>
 
       {/* Weight / Value / Availability / Source */}
@@ -636,15 +643,11 @@ export function RangedCard({
 
       {/* Thrown weapon: quantity counter */}
       {isThrown && (
-        <div className={`border-t ${colourDivider} pt-2 ${uiSplitRow}`}>
-          <span className={uiTextLabel}>Quantity</span>
-          <QuantityControl
-            quantity={weapon.quantity ?? 0}
-            editable={editable}
-            size="sm"
-            onUpdate={onUpdateQuantity}
-          />
-        </div>
+        <EntryQuantityRow
+          quantity={weapon.quantity ?? 0}
+          editable={editable}
+          onUpdate={onUpdateQuantity}
+        />
       )}
 
       {/* Grenade launcher: ammo drawn from grenade inventory */}
@@ -779,16 +782,20 @@ export function RangedCard({
                       </NestedChip>
                     </div>
                   )}
-                  <div className="flex items-center gap-1.5">
-                    <span className={uiTextLabel}>Rounds</span>
-                    <QuantityControl
-                      quantity={slot.rounds}
-                      editable={editable && Boolean(slot.referenceId)}
-                      size="xs"
-                      onUpdate={(rounds) => handleUpdateMagazineRounds(slot.id, rounds)}
-                    />
-                    <span className={uiTextBody}>/ {magazineCapacity}</span>
-                  </div>
+                  <EntryDetailLine
+                    label="Rounds"
+                    value={
+                      <>
+                        <QuantityControl
+                          quantity={slot.rounds}
+                          editable={editable && Boolean(slot.referenceId)}
+                          size="xs"
+                          onUpdate={(rounds) => handleUpdateMagazineRounds(slot.id, rounds)}
+                        />
+                        <span className={uiTextBody}>/ {magazineCapacity}</span>
+                      </>
+                    }
+                  />
                 </div>
               );
             })}

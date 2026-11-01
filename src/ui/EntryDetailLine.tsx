@@ -17,7 +17,7 @@ export function EntryDetailLine({ label, value, info }: EntryDetailLineProps) {
   const hasValue = value !== undefined && value !== "";
   return (
     <div className="flex items-center gap-1.5">
-      <span className={uiTextLabel}>{label}</span>
+      <span className={`${uiTextLabel} shrink-0`}>{label}</span>
       {hasValue && <span className={`text-xs lg:text-sm ${uiTextBody}`}>{value}</span>}
       {info && <span className={uiInfoModalWrapper}>{info}</span>}
       {!hasValue && !info && <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>}

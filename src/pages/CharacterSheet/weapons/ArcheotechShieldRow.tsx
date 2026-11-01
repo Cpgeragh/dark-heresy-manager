@@ -5,14 +5,15 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
-import { uiChipRow } from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiStackField } from "../../../ui/styles/editableStyles";
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { EquipToggle } from "./weaponShared";
 import { locationLabel } from "../../../utils/armourLocations";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { EntryLines } from "../../../ui/EntryLines";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 
 interface Props {
@@ -84,17 +85,26 @@ export function ArcheotechShieldRow({
         {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
         {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
       </div>
-      <EntryDetailLine
-        label="Rules"
-        info={
-          rules ? (
-            <InfoModal
-              title={`${item.name} Rules`}
-              content={<InfoParagraph>{rules}</InfoParagraph>}
-            />
-          ) : undefined
-        }
-      />
+      <div className={uiStackField}>
+        <EntryLines
+          lines={{
+            rules: {
+              info: rules ? (
+                <InfoModal
+                  title={`${item.name} Rules`}
+                  content={<InfoParagraph>{rules}</InfoParagraph>}
+                />
+              ) : undefined,
+            },
+            notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
+              collection: "archeotech",
+              id: item.id,
+              notes: item.personalNotes,
+              editable,
+            }),
+          }}
+        />
+      </div>
       <ItemMetaChips
         weight={item.weight}
         value={item.value}

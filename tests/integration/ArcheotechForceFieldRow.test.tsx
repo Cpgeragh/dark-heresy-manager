@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { openEntryCard } from "../utils/entryCard";
 
 import { ArcheotechForceFieldRow } from "../../src/pages/CharacterSheet/ArmourTab/ArcheotechForceFieldRow";
 import type { ArcheotechItem } from "../../src/types/Character";
@@ -31,6 +32,7 @@ function renderRow(props: Partial<React.ComponentProps<typeof ArcheotechForceFie
       {...props}
     />
   );
+  openEntryCard();
   return { onToggleEquip, onRemove };
 }
 
@@ -62,7 +64,7 @@ describe("ArcheotechForceFieldRow rules", () => {
   it("shows an empty Rules line when the item has no rules text", () => {
     renderRow();
     expect(screen.getByText("Rules")).toBeInTheDocument();
-    expect(screen.getByText("-")).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
   });
 
   it("says no description was recorded when there is none", async () => {
@@ -122,6 +124,7 @@ describe("ArcheotechForceFieldRow shared layout", () => {
     render(
       <ArcheotechForceFieldRow item={{ ...baseItem, source: "IH" }} editable onRemove={vi.fn()} />
     );
+    openEntryCard();
 
     await user.click(screen.getByRole("button", { name: `Remove ${baseItem.name}` }));
 

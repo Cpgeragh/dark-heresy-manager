@@ -113,9 +113,26 @@ vi.mock("../../src/pages/CharacterSheet/CorruptionTab", () => ({
 vi.mock("../../src/pages/CharacterSheet/CharacteristicsTab", () => ({
   CharacteristicsTab: () => <div>Mock CharacteristicsTab</div>,
 }));
-vi.mock("../../src/pages/CharacterSheet/SkillsTab", () => ({
-  SkillsTab: () => <div>Mock SkillsTab</div>,
-}));
+vi.mock("../../src/pages/CharacterSheet/SkillsTab", async () => {
+  const { useState } = await import("react");
+  const { usePersonalNotesSaver } = await import("../../src/context/usePersonalNotesSaver");
+  return {
+    SkillsTab: () => {
+      const savePersonalNotes = usePersonalNotesSaver();
+      const [result, setResult] = useState("");
+      const save = async (id: string) =>
+        setResult(`saved: ${await savePersonalNotes?.("skills", id, "Hold the line")}`);
+      return (
+        <div>
+          Mock SkillsTab
+          <button onClick={() => void save("dodge")}>Mock Save Skill Note</button>
+          <button onClick={() => void save("missing")}>Mock Save Missing Skill Note</button>
+          <span>{result}</span>
+        </div>
+      );
+    },
+  };
+});
 vi.mock("../../src/mechanics/talents/TalentsTab", () => ({
   TalentsTab: () => <div>Mock TalentsTab</div>,
 }));
@@ -851,5 +868,54 @@ describe("CharacterSheet XP reconciliation", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(reconcileCharacterSpentXpMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("CharacterSheet personal notes", () => {
+  const skills = [
+    { id: "dodge", name: "Dodge", level: "trained" },
+    { id: "awareness", name: "Awareness", level: "trained", personalNotes: "Keep watch" },
+  ] as unknown as Character["skills"];
+
+  function renderSkillsSheet(patchFieldWithResult: ReturnType<typeof vi.fn>) {
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ character: character({ skills }), patchFieldWithResult })
+    );
+    renderSheet("/campaign/campaign-1/character/char-1?tab=skills");
+  }
+
+  it("saves the note of one skill through the skills handler and leaves the others alone", async () => {
+    const user = userEvent.setup();
+    const patchFieldWithResult = vi.fn().mockResolvedValue(true);
+    renderSkillsSheet(patchFieldWithResult);
+
+    await user.click(await screen.findByRole("button", { name: "Mock Save Skill Note" }));
+
+    expect(await screen.findByText("saved: true")).toBeInTheDocument();
+    expect(patchFieldWithResult).toHaveBeenCalledWith(
+      "skills",
+      [{ ...skills[0], personalNotes: "Hold the line" }, skills[1]],
+      undefined
+    );
+  });
+
+  it("reports a failed save to the pop-up", async () => {
+    const user = userEvent.setup();
+    renderSkillsSheet(vi.fn().mockResolvedValue(false));
+
+    await user.click(await screen.findByRole("button", { name: "Mock Save Skill Note" }));
+
+    expect(await screen.findByText("saved: false")).toBeInTheDocument();
+  });
+
+  it("saves nothing for an entry that is no longer on the character", async () => {
+    const user = userEvent.setup();
+    const patchFieldWithResult = vi.fn().mockResolvedValue(true);
+    renderSkillsSheet(patchFieldWithResult);
+
+    await user.click(await screen.findByRole("button", { name: "Mock Save Missing Skill Note" }));
+
+    expect(await screen.findByText("saved: false")).toBeInTheDocument();
+    expect(patchFieldWithResult).not.toHaveBeenCalled();
   });
 });

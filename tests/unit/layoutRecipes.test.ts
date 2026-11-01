@@ -346,3 +346,112 @@ describe("shared layout recipes", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe("shared entry lines", () => {
+  const root = join(__dirname, "../..");
+  const read = (file: string) => readFileSync(join(root, file), "utf8");
+  const relative = (file: string) => file.slice(root.length + 1).replaceAll("\\", "/");
+  const sourceOf = (rule: (text: string) => boolean, skip: string[] = []) =>
+    sourceFiles(join(root, "src"))
+      .filter((file) => !skip.includes(relative(file)) && rule(readFileSync(file, "utf8")))
+      .map(relative);
+
+  const ownedEntryFiles = [
+    "src/pages/CharacterSheet/SkillsTab/SkillRow.tsx",
+    "src/mechanics/talents/TalentEntryCards.tsx",
+    "src/mechanics/corruption/CorruptionEntryRow.tsx",
+    "src/mechanics/insanity/InsanityEntryLists.tsx",
+    "src/pages/CharacterSheet/GearTab/ItemRow.tsx",
+    "src/pages/CharacterSheet/GearTab/ConsumableRow.tsx",
+    "src/pages/CharacterSheet/DrugsTab/DrugRow.tsx",
+    "src/pages/CharacterSheet/CyberneticsTab/ImplantRow.tsx",
+    "src/pages/CharacterSheet/CyberneticsTab/ArcheotechImplantRow.tsx",
+    "src/pages/CharacterSheet/ArmourTab/PieceRow.tsx",
+    "src/pages/CharacterSheet/ArmourTab/ForceFieldRow.tsx",
+    "src/pages/CharacterSheet/ArmourTab/ArcheotechArmourRow.tsx",
+    "src/pages/CharacterSheet/ArmourTab/ArcheotechForceFieldRow.tsx",
+    "src/pages/CharacterSheet/ArcheotechTab/ItemCard.tsx",
+  ];
+  const cardFiles = [
+    "src/pages/CharacterSheet/weapons/RangedCard.tsx",
+    "src/pages/CharacterSheet/weapons/MeleeCard.tsx",
+    "src/pages/CharacterSheet/weapons/GrenadeCard.tsx",
+    "src/pages/CharacterSheet/weapons/ShieldCard.tsx",
+    "src/pages/CharacterSheet/weapons/ArcheotechWeaponCard.tsx",
+    "src/pages/CharacterSheet/weapons/ArcheotechShieldRow.tsx",
+    "src/pages/CharacterSheet/weapons/CyberneticWeaponCard.tsx",
+    "src/pages/CharacterSheet/PsychicTab/PowerCard.tsx",
+    "src/pages/CharacterSheet/CompanionsTab.tsx",
+  ];
+
+  it("draws the ordered entry labels only through EntryLines", () => {
+    const pattern =
+      /<EntryDetailLine\s+label="(Craftsmanship|Duration|Qualities|Rules|Mishaps|Gained from|Talent effects|Notes)"/;
+    expect(
+      sourceOf(
+        (text) => pattern.test(text),
+        [
+          "src/ui/EntryLines.tsx",
+          "src/pages/CharacterSheet/weapons/AmmoEntryRow.tsx",
+          "src/ui/UpgradeEntryCard.tsx",
+          "src/ui/pickers/PickerRowParts.tsx",
+        ]
+      )
+    ).toEqual([]);
+  });
+
+  it("writes no entry label by hand", () => {
+    const pattern =
+      /<span className=\{uiTextLabel\}>(Craftsmanship|Duration|Qualities|Rules|Mishaps|Gained [Ff]rom|Talent effects|Notes|Linked|Spare Cells|Clips|Rounds|Quantity|Qty)</;
+    expect(sourceOf((text) => pattern.test(text), ["src/ui/EntryQuantityRow.tsx"])).toEqual([]);
+  });
+
+  it("writes no heading in an information window by hand", () => {
+    const pattern = /<p className=\{(`\$\{)?(uiRuleName|uiTextLabel)/;
+    expect(sourceOf((text) => pattern.test(text), ["src/ui/InfoSection.tsx"])).toEqual([]);
+  });
+
+  it("keeps accordions out of the owned entry row files", () => {
+    const offenders = ownedEntryFiles.filter(
+      (file) => !file.endsWith("TalentEntryCards.tsx") && read(file).includes("AccordionCard")
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it("gives every owned entry row a Notes line", () => {
+    const missing = ownedEntryFiles.filter((file) => !read(file).includes("entryNotesLine("));
+    expect(missing).toEqual([]);
+  });
+
+  it("draws the labelled lines of every card through EntryLines", () => {
+    const missing = cardFiles.filter((file) => !read(file).includes("<EntryLines"));
+    expect(missing).toEqual([]);
+  });
+
+  it("keeps one character's personal note out of every reusable definition", () => {
+    const mismatched = sourceOf(
+      (text) =>
+        (text.match(/function toCustom\w*Data\(/g) ?? []).length !==
+        (text.match(/personalNotes: _personalNotes/g) ?? []).length
+    );
+    expect(mismatched).toEqual([]);
+    const total = sourceFiles(join(root, "src")).reduce(
+      (sum, file) =>
+        sum + (readFileSync(file, "utf8").match(/function toCustom\w*Data\(/g) ?? []).length,
+      0
+    );
+    expect(total).toBe(11);
+  });
+
+  it("keeps the note when a custom definition is rebuilt", () => {
+    const missing = [
+      "src/pages/CharacterSheet/GearTab/index.tsx",
+      "src/pages/CharacterSheet/DrugsTab/index.tsx",
+      "src/pages/CharacterSheet/CyberneticsTab/index.tsx",
+      "src/pages/CharacterSheet/ArmourTab/index.tsx",
+      "src/pages/CharacterSheet/ArcheotechTab/index.tsx",
+      "src/pages/CharacterSheet/PsychicTab/index.tsx",
+    ].filter((file) => !read(file).includes("keepPersonalNotes("));
+    expect(missing).toEqual([]);
+  });
+});

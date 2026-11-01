@@ -28,6 +28,7 @@ export function CustomConsumableForm({
         value: initialItem?.value,
         description: initialItem?.description,
         rules: initialItem?.rules,
+        itemNotes: initialItem?.itemNotes,
       }}
       quantity={{ initialValue: initialItem?.quantity, visible: includeQuantity }}
       title={title}
@@ -46,6 +47,7 @@ export function CustomConsumableForm({
           source: draft.source,
           description: draft.description,
           rules: draft.rules,
+          itemNotes: draft.itemNotes,
           customLibraryId: initialItem?.customLibraryId,
           customLibraryVersionId: initialItem?.customLibraryVersionId,
         })

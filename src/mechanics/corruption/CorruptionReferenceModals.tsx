@@ -1,5 +1,5 @@
 import { InfoParagraph, InfoSection } from "../../ui/InfoSection";
-import { uiRuleName, uiStackBody } from "../../ui/styles/editableStyles";
+import { uiStackBody } from "../../ui/styles/editableStyles";
 import type { CorruptionMalignancyRef } from "./corruptionReference";
 import type { MutationRef } from "./mutationsReference";
 
@@ -12,12 +12,13 @@ export function MalignancyInfoContent({
 }) {
   return (
     <div className={uiStackBody}>
-      {malignancy.roll && (
-        <div>
-          <p className={uiRuleName}>{malignancy.roll}</p>
-        </div>
+      {malignancy.roll ? (
+        <InfoSection heading={malignancy.roll}>
+          {malignancy.effect && <InfoParagraph>{malignancy.effect}</InfoParagraph>}
+        </InfoSection>
+      ) : (
+        malignancy.effect && <InfoParagraph>{malignancy.effect}</InfoParagraph>
       )}
-      {malignancy.effect && <InfoParagraph>{malignancy.effect}</InfoParagraph>}
       {notes && (
         <InfoSection heading="Notes">
           <InfoParagraph>{notes}</InfoParagraph>
@@ -36,12 +37,13 @@ export function MutationInfoContent({
 }) {
   return (
     <div className={uiStackBody}>
-      {mutation.roll && (
-        <div>
-          <p className={uiRuleName}>{mutation.roll}</p>
-        </div>
+      {mutation.roll ? (
+        <InfoSection heading={mutation.roll}>
+          {mutation.effect && <InfoParagraph>{mutation.effect}</InfoParagraph>}
+        </InfoSection>
+      ) : (
+        mutation.effect && <InfoParagraph>{mutation.effect}</InfoParagraph>
       )}
-      {mutation.effect && <InfoParagraph>{mutation.effect}</InfoParagraph>}
       {notes && (
         <InfoSection heading="Notes">
           <InfoParagraph>{notes}</InfoParagraph>

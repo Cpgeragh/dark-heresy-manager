@@ -3,6 +3,7 @@
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
@@ -42,6 +43,7 @@ export function ItemRow({
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      collapsible
       information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
       chips={
         <ItemMetaChips
@@ -61,6 +63,12 @@ export function ItemRow({
             />
           ) : undefined,
         },
+        notes: entryNotesLine(item.name, item.itemNotes, {
+          collection: "gear",
+          id: item.id,
+          notes: item.personalNotes,
+          editable,
+        }),
         gainedFrom: item.grantedByTalentName
           ? `${item.grantedByTalentName} (${item.grantedByType})`
           : undefined,

@@ -1,12 +1,14 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { InfoModal } from "../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../types/CustomItemActions";
 import { StatusBadge } from "./chips/StatusBadge";
+import { AccordionCard } from "./AccordionCard";
 import { CharacterEntryRow } from "./CharacterEntryRow";
-import { EntryDetailLine } from "./EntryDetailLine";
+import { EntryLines, type EntryLine, type OwnedEntryLines } from "./EntryLines";
 import { CustomItemActionButtons } from "./forms/CustomItemActionButtons";
 import { RemoveEntryButton, type RemoveEntryExtra } from "./RemoveEntryButton";
-import { uiChipRow } from "./styles/editableStyles";
+import { uiChipRow, uiInlineRow, uiStackField } from "./styles/editableStyles";
+import { uiLayerLocal } from "./styles/layerStyles";
 
 export type OwnedEntryKind =
   | "Skill"
@@ -25,21 +27,7 @@ export type OwnedEntryKind =
   | "Force Field"
   | "Archeotech Item";
 
-interface EntryLine {
-  value?: ReactNode;
-  info?: ReactNode;
-}
-
-/** The labelled lines of an owned entry. A line the caller supplies shows a dash when it is empty. */
-export interface OwnedEntryLines {
-  craftsmanship?: EntryLine;
-  duration?: EntryLine;
-  qualities?: EntryLine;
-  rules?: EntryLine;
-  gainedFrom?: string;
-  talentEffects?: string;
-  notes?: string;
-}
+export type { EntryLine, OwnedEntryLines };
 
 export interface OwnedEntryRemoval {
   kind: OwnedEntryKind;
@@ -68,6 +56,10 @@ interface OwnedEntryRowProps {
   tone?: "default" | "archeotech";
   /** Extra content below the lines, such as Upgrades or Spare Cells. */
   body?: ReactNode;
+  /** Draws the entry as a closed card that opens to show its chips and lines. */
+  collapsible?: boolean;
+  /** Keeps a collapsible entry open, with no chevron, where every detail must show. */
+  forceExpanded?: boolean;
 }
 
 /** One owned entry on a character sheet: the same layout for every kind, with only the content changing. */
@@ -86,66 +78,88 @@ export function OwnedEntryRow({
   inactive,
   tone,
   body,
+  collapsible = false,
+  forceExpanded = false,
 }: OwnedEntryRowProps) {
+  const [expanded, setExpanded] = useState(false);
   const libraryItem = library?.libraryItem;
+  const badges = (
+    <>
+      {libraryItem && <StatusBadge status={libraryItem.status} />}
+      {badge}
+    </>
+  );
+  const info = <InfoModal title={name} content={information} as={informationAs} />;
+  const chipRow = chips ? (
+    <div className={`${uiChipRow} items-center empty:hidden [&>*]:shrink-0`}>{chips}</div>
+  ) : undefined;
+  const labelledLines = lines ? <EntryLines lines={lines} /> : undefined;
+  const removeButton =
+    editable && removal && !removal.hidden ? (
+      <RemoveEntryButton
+        kind={removal.kind}
+        name={name}
+        onRemove={removal.onRemove}
+        blockedMessage={removal.blockedMessage}
+        extra={removal.extra}
+      />
+    ) : undefined;
+  const libraryButtons = library?.libraryItem ? (
+    <CustomItemActionButtons
+      libraryItem={library.libraryItem}
+      isDM={library.isDM ?? false}
+      canEditDefinition={library.canEditDefinition ?? false}
+      busyAction={library.busyAction}
+      onEditDefinition={library.onEditDefinition}
+      onPublish={library.onPublish}
+      onArchive={library.onArchive}
+      onUpdateAllCopies={library.onUpdateAllCopies}
+    />
+  ) : undefined;
+
+  if (collapsible) {
+    return (
+      <AccordionCard
+        name={displayName ?? name}
+        label={name}
+        expanded={expanded}
+        onToggle={() => setExpanded((current) => !current)}
+        forceExpanded={forceExpanded}
+        tone={tone === "archeotech" ? "amber" : "default"}
+        inactive={inactive}
+        badge={badges}
+        info={info}
+        removeAction={removeButton}
+        actions={
+          actions ? (
+            <div className={`${uiInlineRow} relative ${uiLayerLocal} pointer-events-auto`}>
+              {actions}
+            </div>
+          ) : undefined
+        }
+      >
+        {chipRow}
+        <div className={`${uiStackField} empty:hidden`}>{labelledLines}</div>
+        {body}
+        {libraryButtons}
+      </AccordionCard>
+    );
+  }
+
   return (
     <CharacterEntryRow
       name={displayName ?? name}
       inactive={inactive}
       tone={tone}
       actions={actions}
-      badge={
-        <>
-          {libraryItem && <StatusBadge status={libraryItem.status} />}
-          {badge}
-        </>
-      }
-      info={<InfoModal title={name} content={information} as={informationAs} />}
-      metadata={
-        chips ? (
-          <div className={`${uiChipRow} items-center empty:hidden [&>*]:shrink-0`}>{chips}</div>
-        ) : undefined
-      }
-      afterMetadata={
-        <>
-          {lines?.craftsmanship && (
-            <EntryDetailLine label="Craftsmanship" {...lines.craftsmanship} />
-          )}
-          {lines?.duration && <EntryDetailLine label="Duration" {...lines.duration} />}
-          {lines?.qualities && <EntryDetailLine label="Qualities" {...lines.qualities} />}
-          {lines?.rules && <EntryDetailLine label="Rules" {...lines.rules} />}
-          {lines?.gainedFrom && <EntryDetailLine label="Gained from" value={lines.gainedFrom} />}
-          {lines?.talentEffects && (
-            <EntryDetailLine label="Talent effects" value={lines.talentEffects} />
-          )}
-          {lines?.notes && <EntryDetailLine label="Notes" value={lines.notes} />}
-        </>
-      }
-      removeAction={
-        editable && removal && !removal.hidden ? (
-          <RemoveEntryButton
-            kind={removal.kind}
-            name={name}
-            onRemove={removal.onRemove}
-            blockedMessage={removal.blockedMessage}
-            extra={removal.extra}
-          />
-        ) : undefined
-      }
+      badge={badges}
+      info={info}
+      metadata={chipRow}
+      afterMetadata={labelledLines}
+      removeAction={removeButton}
     >
       {body}
-      {library?.libraryItem && (
-        <CustomItemActionButtons
-          libraryItem={library.libraryItem}
-          isDM={library.isDM ?? false}
-          canEditDefinition={library.canEditDefinition ?? false}
-          busyAction={library.busyAction}
-          onEditDefinition={library.onEditDefinition}
-          onPublish={library.onPublish}
-          onArchive={library.onArchive}
-          onUpdateAllCopies={library.onUpdateAllCopies}
-        />
-      )}
+      {libraryButtons}
     </CharacterEntryRow>
   );
 }

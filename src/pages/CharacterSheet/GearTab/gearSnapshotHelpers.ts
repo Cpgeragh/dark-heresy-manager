@@ -12,6 +12,7 @@ export function toCustomGearData(item: GearItem): CustomGearData {
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     ...data
   } = item;
 
@@ -24,6 +25,7 @@ export function toCustomConsumableData(item: ConsumableItem): CustomConsumableDa
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     quantity: _quantity,
     ...data
   } = item;

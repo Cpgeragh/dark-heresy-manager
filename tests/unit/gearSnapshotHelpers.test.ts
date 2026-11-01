@@ -10,6 +10,20 @@ import {
 import type { ConsumableItem, GearItem } from "../../src/types/Character";
 
 describe("gear snapshot helpers", () => {
+  it("keeps one character's personal note out of reusable gear and consumable data", () => {
+    expect(
+      toCustomGearData({ id: "g", name: "Auspex", personalNotes: "Mine" } as GearItem)
+    ).toEqual({ name: "Auspex" });
+    expect(
+      toCustomConsumableData({
+        id: "c",
+        name: "Ration Pack",
+        quantity: 2,
+        personalNotes: "Mine",
+      } as ConsumableItem)
+    ).toEqual({ name: "Ration Pack" });
+  });
+
   it("removes character-instance links from reusable gear data", () => {
     const item: GearItem = {
       id: "gear-instance",

@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { DrugItem } from "../../../types/Character";
 import type { DrugRef } from "../../../data/reference/drugsReference";
-import type { CampaignCustomItem, CustomDrugData } from "../../../types/CustomItems";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { DrugPicker } from "./DrugPicker";
 import { DrugRow } from "./DrugRow";
 import { CustomDrugForm } from "./CustomDrugForm";
@@ -22,14 +22,16 @@ import {
 import { colourNoticeViolet, colourDrugNoticeText } from "../../../ui/styles/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
-import {
-  createDraftCustomItem,
-  inferCustomItemStatus,
-  saveDraftCustomItem,
-} from "../../../services/customItemService";
+import { createDraftCustomItem, saveDraftCustomItem } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
+import { keepPersonalNotes } from "../../../utils/personalNotes";
+import {
+  toCustomDrugData,
+  buildDrugSnapshot,
+  buildFallbackDrugLibraryItem,
+} from "./drugSnapshotHelpers";
 
 interface DrugsTabProps {
   campaignId: string;
@@ -198,12 +200,15 @@ export function DrugsTab({
         });
         const updatedDrugs = drugs.map((drug) =>
           drug.id === editingDrugDefinition.item.id
-            ? buildDrugSnapshot(
-                drug.id,
-                drug.quantity,
-                data,
-                editingDrugDefinition.libraryItem.id,
-                versionId
+            ? keepPersonalNotes(
+                buildDrugSnapshot(
+                  drug.id,
+                  drug.quantity,
+                  data,
+                  editingDrugDefinition.libraryItem.id,
+                  versionId
+                ),
+                drug
               )
             : drug
         );
@@ -347,74 +352,4 @@ export function DrugsTab({
       )}
     </div>
   );
-}
-
-function toCustomDrugData(item: DrugItem): CustomDrugData {
-  const {
-    id: _id,
-    referenceId: _referenceId,
-    customLibraryId: _customLibraryId,
-    customLibraryVersionId: _customLibraryVersionId,
-    quantity: _quantity,
-    ...data
-  } = item;
-
-  return data;
-}
-
-function buildDrugSnapshot(
-  id: string,
-  quantity: number,
-  data: CustomDrugData,
-  customLibraryId: string,
-  customLibraryVersionId: string
-): DrugItem {
-  return {
-    id,
-    ...data,
-    quantity,
-    customLibraryId,
-    customLibraryVersionId,
-  };
-}
-
-function buildFallbackDrugLibraryItem({
-  campaignId,
-  item,
-  userId,
-  characterId,
-  characterName,
-}: {
-  campaignId: string;
-  item: DrugItem;
-  userId: string | null;
-  characterId: string;
-  characterName?: string;
-}): CampaignCustomItem<"drug"> {
-  const data = toCustomDrugData(item);
-  const creator = {
-    userId: userId ?? "",
-    characterId,
-    characterName,
-  };
-
-  return {
-    id: item.customLibraryId ?? "",
-    campaignId,
-    category: "drug",
-    status: inferCustomItemStatus(item),
-    name: item.name,
-    creator,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: creator,
-    updatedBy: creator,
-    publishedVersionId: null,
-    draftVersionId: item.customLibraryVersionId ?? null,
-    latestVersionId: item.customLibraryVersionId ?? "",
-    latestVersionNumber: 1,
-    archivedAt: null,
-    archivedByUserId: null,
-    data,
-  };
 }

@@ -17,12 +17,8 @@ import {
 import {
   uiChipRow,
   uiSplitRow,
-  uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
-  uiInfoModalWrapper,
-  uiRuleName,
-  uiTextDescription,
   uiStackField,
   uiStackBody,
   uiStackList,
@@ -38,11 +34,12 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip, NestedChip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
-import { InfoParagraph } from "../../../ui/InfoSection";
+import { EntryLines } from "../../../ui/EntryLines";
+import { EntryQuantityRow } from "../../../ui/EntryQuantityRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
+import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import { StatChip } from "../../../ui/chips/StatChip";
 import {
   DamageTypeChip,
@@ -412,67 +409,72 @@ export function MeleeCard({
       )}
 
       <div className={uiStackField}>
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {hasQualities ? rulesText : "-"}
-          </span>
-          {hasQualityModal && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${weapon.name} Qualities`}
-                content={<SpecialRulesContent rules={rulesText} />}
-              />
-            </span>
-          )}
-        </div>
-        <EntryDetailLine
-          label="Rules"
-          info={
-            hasItemRules || weapon.rules?.trim() ? (
-              <InfoModal
-                title={`${weapon.name} Rules`}
-                content={
-                  <div className={uiStackBody}>
-                    {weapon.rules?.trim() && <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>}
-                    {hasItemRules && (
-                      <>
-                        <p className={uiRuleName}>Concealed Weapon Bionic</p>
-                        {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                          <p key={rule} className={uiTextDescription}>
-                            {rule}
+        <EntryLines
+          lines={{
+            craftsmanship: {
+              value: craftsmanship,
+              info: (
+                <InfoModal
+                  title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
+                  content={
+                    concealedBionicEffect ? (
+                      <div className={uiStackBody}>
+                        <div>
+                          <p
+                            className={`text-sm lg:text-base ${colourTextPrimary} leading-relaxed`}
+                          >
+                            {concealedBionicEffect}
                           </p>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                }
-              />
-            ) : undefined
-          }
+                        </div>
+                      </div>
+                    ) : (
+                      meleeCraftsmanshipDescription(craftsmanship)
+                    )
+                  }
+                />
+              ),
+            },
+            qualities: {
+              value: hasQualities ? rulesText : undefined,
+              info: hasQualityModal ? (
+                <InfoModal
+                  title={`${weapon.name} Qualities`}
+                  content={<SpecialRulesContent rules={rulesText} />}
+                />
+              ) : undefined,
+            },
+            rules: {
+              info:
+                hasItemRules || weapon.rules?.trim() ? (
+                  <InfoModal
+                    title={`${weapon.name} Rules`}
+                    content={
+                      <div className={uiStackBody}>
+                        {weapon.rules?.trim() && (
+                          <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>
+                        )}
+                        {hasItemRules && (
+                          <InfoSection heading="Concealed Weapon Bionic">
+                            <div className={uiStackList}>
+                              {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
+                                <InfoParagraph key={rule}>{rule}</InfoParagraph>
+                              ))}
+                            </div>
+                          </InfoSection>
+                        )}
+                      </div>
+                    }
+                  />
+                ) : undefined,
+            },
+            notes: entryNotesLine(weapon.name, weapon.itemNotes, {
+              collection: "melee",
+              id: weapon.id,
+              notes: weapon.personalNotes,
+              editable,
+            }),
+          }}
         />
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Craftsmanship</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
-          <span className={uiInfoModalWrapper}>
-            <InfoModal
-              title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
-              content={
-                concealedBionicEffect ? (
-                  <div className={uiStackBody}>
-                    <div>
-                      <p className={`text-sm lg:text-base ${colourTextPrimary} leading-relaxed`}>
-                        {concealedBionicEffect}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  meleeCraftsmanshipDescription(craftsmanship)
-                )
-              }
-            />
-          </span>
-        </div>
       </div>
 
       {/* Weight / Value / Availability / Source */}
@@ -527,15 +529,11 @@ export function MeleeCard({
       )}
 
       {isThrown && (
-        <div className={`border-t ${colourDivider} pt-2 ${uiSplitRow}`}>
-          <span className={uiTextLabel}>Quantity</span>
-          <QuantityControl
-            quantity={weapon.quantity ?? 1}
-            editable={editable}
-            size="sm"
-            onUpdate={onUpdateQuantity}
-          />
-        </div>
+        <EntryQuantityRow
+          quantity={weapon.quantity ?? 1}
+          editable={editable}
+          onUpdate={onUpdateQuantity}
+        />
       )}
 
       {/* Upgrades */}

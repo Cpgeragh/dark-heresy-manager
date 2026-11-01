@@ -4,6 +4,7 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/chips/Chip";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -34,6 +35,7 @@ export function ArcheotechForceFieldRow({
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      collapsible
       badge={highlightAsArcheotech ? <Chip colour="amber">Archeotech</Chip> : undefined}
       tone={highlightAsArcheotech ? "archeotech" : "default"}
       inactive={!active}
@@ -53,6 +55,12 @@ export function ArcheotechForceFieldRow({
         </>
       }
       lines={{
+        notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
+          collection: "archeotech",
+          id: item.id,
+          notes: item.personalNotes,
+          editable,
+        }),
         rules: {
           info: rules ? (
             <InfoModal

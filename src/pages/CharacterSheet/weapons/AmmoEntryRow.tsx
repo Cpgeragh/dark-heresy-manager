@@ -15,14 +15,13 @@ import {
   uiChipRow,
   uiSplitRow,
   uiCell,
-  uiInfoModalWrapper,
   uiItemName,
-  uiTextLabel,
   uiTextDescription,
   uiStackField,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { InfoModal } from "../../../components/InfoModal";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import type { AmmoTrackingMode } from "./weaponHelpers";
 import { formatAmmoWeight } from "./formatAmmoWeight";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -132,9 +131,9 @@ export function AmmoEntryRow({
       )}
 
       {hasAmmoInfo && (
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Rules</span>
-          <span className={uiInfoModalWrapper}>
+        <EntryDetailLine
+          label="Rules"
+          info={
             <InfoModal
               title={displayName}
               content={
@@ -153,42 +152,48 @@ export function AmmoEntryRow({
                 </div>
               }
             />
-          </span>
-        </div>
+          }
+        />
       )}
 
       {/* Count */}
       <div className="flex items-center gap-4">
         {ammoTracking === "loose" ? (
-          <div className="flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rounds</span>
-            <QuantityControl
-              quantity={looseRoundCount}
-              editable={editable}
-              size="xs"
-              onUpdate={onSetLooseRounds}
-            />
-          </div>
+          <EntryDetailLine
+            label="Rounds"
+            value={
+              <QuantityControl
+                quantity={looseRoundCount}
+                editable={editable}
+                size="xs"
+                onUpdate={onSetLooseRounds}
+              />
+            }
+          />
         ) : (
           <div className="flex flex-col items-start gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Clips</span>
-              <QuantityControl
-                quantity={entry.clips}
-                editable={editable}
-                size="xs"
-                onUpdate={onUpdateClips}
-              />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rounds</span>
-              <QuantityControl
-                quantity={entry.rounds}
-                editable={editable}
-                size="xs"
-                onUpdate={onUpdateRounds}
-              />
-            </div>
+            <EntryDetailLine
+              label="Clips"
+              value={
+                <QuantityControl
+                  quantity={entry.clips}
+                  editable={editable}
+                  size="xs"
+                  onUpdate={onUpdateClips}
+                />
+              }
+            />
+            <EntryDetailLine
+              label="Rounds"
+              value={
+                <QuantityControl
+                  quantity={entry.rounds}
+                  editable={editable}
+                  size="xs"
+                  onUpdate={onUpdateRounds}
+                />
+              }
+            />
           </div>
         )}
       </div>

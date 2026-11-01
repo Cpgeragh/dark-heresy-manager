@@ -63,6 +63,7 @@ import { CustomPowerForm } from "./CustomPowerForm";
 import { PowerGrid } from "./PowerGrid";
 import { PowerPicker } from "./PowerPicker";
 import { normalisePowerName, toCustomPowerData } from "./psychicPowerHelpers";
+import { keepPersonalNotes } from "../../../utils/personalNotes";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { DESKTOP_LAYOUT_QUERY, useMediaQuery } from "../../../hooks/useMediaQuery";
 import { uiCornerSmall } from "../../../ui/styles/shapeStyles";
@@ -481,7 +482,9 @@ export function PsychicTab({
         await onUpdate({
           ...psychic,
           [type]: psychic[type].map((existing) =>
-            existing.id === power.id ? { ...power, customLibraryVersionId: versionId } : existing
+            existing.id === power.id
+              ? { ...keepPersonalNotes(power, existing), customLibraryVersionId: versionId }
+              : existing
           ),
         });
         setEditingCustomPower(null);

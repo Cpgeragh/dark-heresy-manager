@@ -20,6 +20,12 @@ describe("armour snapshot helpers", () => {
     upgrades: ["upgrade-reference"],
   };
 
+  it("keeps one character's personal note out of reusable armour data", () => {
+    expect(toCustomArmourData({ ...piece, personalNotes: "Mine" })).not.toHaveProperty(
+      "personalNotes"
+    );
+  });
+
   it("removes character-instance state and tags reusable worn-armour data", () => {
     const data = toCustomArmourData(piece);
 

@@ -80,6 +80,7 @@ export function CustomImplantForm({
   );
   const [notes, setNotes] = useState(initialItem?.notes ?? "");
   const [rules, setRules] = useState(initialItem?.rules ?? "");
+  const [itemNotes, setItemNotes] = useState(initialItem?.itemNotes ?? "");
   const [saving, setSaving] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -106,6 +107,7 @@ export function CustomImplantForm({
         source: origin,
         notes: notes.trim() || undefined,
         rules: rules.trim() || undefined,
+        itemNotes: itemNotes.trim() || undefined,
         customLibraryId: initialItem?.customLibraryId,
         customLibraryVersionId: initialItem?.customLibraryVersionId,
         ...(includeLocation && selectedLocation ? { bodyLocation: selectedLocation } : {}),
@@ -262,6 +264,8 @@ export function CustomImplantForm({
             onDescriptionChange={setNotes}
             rules={rules}
             onRulesChange={setRules}
+            itemNotes={itemNotes}
+            onItemNotesChange={setItemNotes}
             rulesPlaceholder="Implant rules, effects, drawbacks..."
           />
         </div>

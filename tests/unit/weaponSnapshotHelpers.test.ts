@@ -277,3 +277,38 @@ describe("buildFallbackShieldLibraryItem", () => {
     expect(item.name).toBe("Riot Shield");
   });
 });
+
+describe("personal notes on weapon snapshots", () => {
+  const ranged = { id: "r1", name: "Lasgun", personalNotes: "Mine" } as RangedWeapon;
+  const melee = { id: "m1", name: "Chainsword", personalNotes: "Mine" } as MeleeWeapon;
+  const grenade = { id: "g1", name: "Frag", quantity: 1, personalNotes: "Mine" } as GrenadeItem;
+  const shield = { id: "s1", name: "Buckler", personalNotes: "Mine" } as ShieldItem;
+
+  it("keeps one character's note out of the reusable definition", () => {
+    expect(toCustomRangedWeaponData(ranged)).not.toHaveProperty("personalNotes");
+    expect(toCustomMeleeWeaponData(melee)).not.toHaveProperty("personalNotes");
+    expect(toCustomGrenadeData(grenade)).not.toHaveProperty("personalNotes");
+    expect(toCustomShieldData(shield)).not.toHaveProperty("personalNotes");
+  });
+
+  it("keeps the note on the character's copy when a definition is rebuilt", () => {
+    expect(
+      buildRangedWeaponSnapshot("r1", ranged, toCustomRangedWeaponData(ranged), "lib", "v2")
+    ).toMatchObject({ personalNotes: "Mine" });
+    expect(
+      buildMeleeWeaponSnapshot("m1", melee, toCustomMeleeWeaponData(melee), "lib", "v2")
+    ).toMatchObject({ personalNotes: "Mine" });
+    expect(
+      buildGrenadeSnapshot("g1", grenade, toCustomGrenadeData(grenade), "lib", "v2")
+    ).toMatchObject({ personalNotes: "Mine" });
+    expect(
+      buildShieldSnapshot("s1", shield, toCustomShieldData(shield), "lib", "v2")
+    ).toMatchObject({ personalNotes: "Mine" });
+  });
+
+  it("adds no note to a new copy that had none", () => {
+    expect(
+      buildRangedWeaponSnapshot("r2", {}, toCustomRangedWeaponData(ranged), "lib", "v1")
+    ).not.toHaveProperty("personalNotes");
+  });
+});

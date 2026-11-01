@@ -301,3 +301,13 @@ describe("RangedCard ammo optimistic saves", () => {
     expect(onUpdateAmmoEntries).toHaveBeenLastCalledWith(expect.any(Array), { optimistic: true });
   });
 });
+
+describe("RangedCard labelled lines", () => {
+  it("prints Craftsmanship, Qualities, Rules and Notes in the shared order", () => {
+    renderCard();
+    const labels = screen
+      .getAllByText(/^(Craftsmanship|Qualities|Rules|Notes)$/)
+      .map((label) => label.textContent);
+    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules", "Notes"]);
+  });
+});

@@ -22,6 +22,7 @@ interface InitialValue {
   value?: string;
   description?: string;
   rules?: string;
+  itemNotes?: string;
 }
 
 interface QuantityConfig {
@@ -38,6 +39,7 @@ export interface CustomInventoryItemDraft {
   value: string;
   description?: string;
   rules?: string;
+  itemNotes?: string;
 }
 
 interface Props {
@@ -79,6 +81,7 @@ export function CustomInventoryItemForm({
   const [value, setValue] = useState(initialValue?.value ?? "");
   const [description, setDescription] = useState(initialValue?.description ?? "");
   const [rules, setRules] = useState(initialValue?.rules ?? "");
+  const [itemNotes, setItemNotes] = useState(initialValue?.itemNotes ?? "");
   const [saving, setSaving] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
   const quantityNumber = Number(quantity);
@@ -112,6 +115,7 @@ export function CustomInventoryItemForm({
         value: formatMoneyInput(value),
         description: description.trim() || undefined,
         rules: rules.trim() || undefined,
+        itemNotes: itemNotes.trim() || undefined,
       });
     } finally {
       setSaving(false);
@@ -241,6 +245,8 @@ export function CustomInventoryItemForm({
             onDescriptionChange={setDescription}
             rules={rules}
             onRulesChange={setRules}
+            itemNotes={itemNotes}
+            onItemNotesChange={setItemNotes}
             descriptionPlaceholder={descriptionPlaceholder}
           />
         </div>

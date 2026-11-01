@@ -4,6 +4,7 @@ import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -39,6 +40,7 @@ export function DrugRow({
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      collapsible
       information={
         hasDescription ? (
           <>
@@ -64,6 +66,12 @@ export function DrugRow({
         />
       }
       lines={{
+        notes: entryNotesLine(item.name, item.itemNotes, {
+          collection: "drugs",
+          id: item.id,
+          notes: item.personalNotes,
+          editable,
+        }),
         duration: ref?.duration ? { value: ref.duration } : undefined,
         rules: {
           info: hasRules ? (

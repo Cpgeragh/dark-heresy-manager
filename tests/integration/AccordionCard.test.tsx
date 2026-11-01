@@ -123,6 +123,16 @@ describe("AccordionCard", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
+  it("dims the card when it is inactive", () => {
+    const { container } = renderCard({ inactive: true });
+    expect(container.firstElementChild).toHaveClass("opacity-60");
+  });
+
+  it("does not dim the card by default", () => {
+    const { container } = renderCard();
+    expect(container.firstElementChild).not.toHaveClass("opacity-60");
+  });
+
   it("uses a notice shell for a tone and links the toggle to the body", () => {
     const { container } = renderCard({ expanded: true, tone: "red", bodyId: "details-1" });
     expect(container.firstElementChild).toHaveClass("border-red-500/60");

@@ -26,6 +26,7 @@ export function CustomGearForm({
         value: initialItem?.value,
         description: initialItem?.description,
         rules: initialItem?.rules,
+        itemNotes: initialItem?.itemNotes,
       }}
       title={title}
       submitLabel={submitLabel}
@@ -42,6 +43,7 @@ export function CustomGearForm({
           source: draft.source,
           description: draft.description,
           rules: draft.rules,
+          itemNotes: draft.itemNotes,
           customLibraryId: initialItem?.customLibraryId,
           customLibraryVersionId: initialItem?.customLibraryVersionId,
         })

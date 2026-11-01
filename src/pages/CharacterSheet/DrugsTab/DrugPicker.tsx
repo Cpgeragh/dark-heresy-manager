@@ -15,42 +15,32 @@ import {
   PickerRowName,
   PickerRowRulesLine,
 } from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph } from "../../../ui/InfoSection";
-import { uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
+import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-import { colourHeadingAccent } from "../../../ui/styles/colourTokens";
 
 function drugInfoContent(ref: DrugRef) {
   return (
     <>
       {ref.duration && (
-        <div>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>Duration</p>
-          <p className={uiTextDescription}>{ref.duration}</p>
-        </div>
+        <InfoSection heading="Duration">
+          <InfoParagraph>{ref.duration}</InfoParagraph>
+        </InfoSection>
       )}
       {ref.effect && (
-        <div>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>Effect</p>
-          <p className={uiTextDescription}>{ref.effect}</p>
-        </div>
+        <InfoSection heading="Effect">
+          <InfoParagraph>{ref.effect}</InfoParagraph>
+        </InfoSection>
       )}
       {ref.sideEffect && (
-        <div>
-          <p
-            className={`text-xs lg:text-sm font-semibold ${colourHeadingAccent} uppercase tracking-wide mb-1`}
-          >
-            Side Effects
-          </p>
-          <p className={uiTextDescription}>{ref.sideEffect}</p>
-        </div>
+        <InfoSection heading="Side Effects">
+          <InfoParagraph>{ref.sideEffect}</InfoParagraph>
+        </InfoSection>
       )}
       {ref.notes && (
-        <div>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-          <p className={uiTextDescription}>{ref.notes}</p>
-        </div>
+        <InfoSection heading="Notes">
+          <InfoParagraph>{ref.notes}</InfoParagraph>
+        </InfoSection>
       )}
     </>
   );

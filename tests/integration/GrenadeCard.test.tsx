@@ -87,9 +87,26 @@ describe("GrenadeCard in a picker", () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-  it("shows no Qty row when the card can be selected", () => {
+  it("shows no Quantity row when the card can be selected", () => {
     renderCard({ onSelect: vi.fn() });
+    expect(screen.queryByText("Quantity")).not.toBeInTheDocument();
+  });
+
+  it("shows a Quantity row with the counter on an owned card", () => {
+    renderCard();
+    expect(screen.getByText("Quantity")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit quantity, currently 5" })).toBeInTheDocument();
     expect(screen.queryByText("Qty")).not.toBeInTheDocument();
+  });
+
+  it("notes that only three are ready when more than three are equipped", () => {
+    renderCard();
+    expect(screen.getByText("3 ready, rest stowed")).toBeInTheDocument();
+  });
+
+  it("gives no stowed note for three grenades or fewer", () => {
+    renderCard({ item: { ...baseItem, quantity: 3 } });
+    expect(screen.queryByText("3 ready, rest stowed")).not.toBeInTheDocument();
   });
 });
 

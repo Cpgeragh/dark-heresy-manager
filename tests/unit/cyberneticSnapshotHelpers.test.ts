@@ -17,6 +17,13 @@ describe("cybernetic snapshot helpers", () => {
     bodyLocation: ["rightArm"],
   };
 
+  it("keeps one character's personal note out of reusable data", () => {
+    expect(toCustomCyberneticData({ ...item, personalNotes: "Mine" })).toEqual({
+      name: "Bionic Arm",
+      craftsmanship: "Good",
+    });
+  });
+
   it("removes character-instance links and installed locations from reusable data", () => {
     const data = toCustomCyberneticData(item);
 

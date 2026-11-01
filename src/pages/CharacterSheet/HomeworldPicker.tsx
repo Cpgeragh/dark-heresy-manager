@@ -5,10 +5,10 @@ import { TRAIT_LIST } from "../../data/reference/traitData";
 import { TRAIT_DESCRIPTIONS } from "../../data/reference/traitDescriptions";
 import { type HomeworldData, HOMEWORLD_LIST } from "../../data/reference/homeworldData";
 import { Chip } from "../../ui/chips/Chip";
+import { InfoSection, InfoTextSection } from "../../ui/InfoSection";
 import {
   uiInfoModalWrapper,
   uiTextBody,
-  uiTextLabel,
   uiTextDescription,
   uiStackBody,
   uiStackList,
@@ -19,66 +19,59 @@ import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { RollChip } from "../../ui/chips/RollChip";
 import { sourceChipColour } from "../../ui/styles/sourceStyles";
 
-function InfoSection({ title, content }: { title: string; content: string }) {
-  return (
-    <section>
-      <p className={`${uiTextLabel} font-semibold mb-1`}>{title}</p>
-      <p className={uiTextDescription}>{content}</p>
-    </section>
-  );
-}
-
 export function HomeworldInfoContent({ homeworld }: { homeworld: HomeworldData }) {
   return (
     <div className={uiStackBody}>
       <p className={uiTextDescription}>{homeworld.description}</p>
 
       {homeworld.skills && (
-        <section className={uiStackList}>
-          <p className={`${uiTextLabel} font-semibold`}>Skills</p>
-          {homeworld.skills.map((skill) => (
-            <div key={skill.name} className={uiSplitRow}>
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className={`text-sm lg:text-base ${uiTextBody}`}>{skill.name}</span>
-                {SKILL_DESCRIPTIONS[skill.name] && (
+        <InfoSection heading="Skills">
+          <div className={uiStackList}>
+            {homeworld.skills.map((skill) => (
+              <div key={skill.name} className={uiSplitRow}>
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className={`text-sm lg:text-base ${uiTextBody}`}>{skill.name}</span>
+                  {SKILL_DESCRIPTIONS[skill.name] && (
+                    <span className={uiInfoModalWrapper}>
+                      <InfoModal
+                        title={skill.name}
+                        content={SKILL_DESCRIPTIONS[skill.name]}
+                        as="span"
+                      />
+                    </span>
+                  )}
+                </div>
+                <span className={`shrink-0 text-xs lg:text-sm ${uiTextBody}`}>{skill.rule}</span>
+              </div>
+            ))}
+          </div>
+        </InfoSection>
+      )}
+
+      <InfoSection heading="Traits">
+        <div className={uiStackList}>
+          {homeworld.traits.map((trait) => {
+            const traitData = TRAIT_LIST.find(
+              (entry) => entry.name === trait.name && entry.source === homeworld.source
+            );
+            const description = traitData && TRAIT_DESCRIPTIONS[traitData.id];
+
+            return (
+              <div key={trait.name} className="flex min-w-0 items-center gap-1.5">
+                <span className={`text-sm lg:text-base ${uiTextBody}`}>{trait.name}</span>
+                {description && (
                   <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={skill.name}
-                      content={SKILL_DESCRIPTIONS[skill.name]}
-                      as="span"
-                    />
+                    <InfoModal title={trait.name} content={description} as="span" />
                   </span>
                 )}
               </div>
-              <span className={`shrink-0 text-xs lg:text-sm ${uiTextBody}`}>{skill.rule}</span>
-            </div>
-          ))}
-        </section>
-      )}
-
-      <section className={uiStackList}>
-        <p className={`${uiTextLabel} font-semibold`}>Traits</p>
-        {homeworld.traits.map((trait) => {
-          const traitData = TRAIT_LIST.find(
-            (entry) => entry.name === trait.name && entry.source === homeworld.source
-          );
-          const description = traitData && TRAIT_DESCRIPTIONS[traitData.id];
-
-          return (
-            <div key={trait.name} className="flex min-w-0 items-center gap-1.5">
-              <span className={`text-sm lg:text-base ${uiTextBody}`}>{trait.name}</span>
-              {description && (
-                <span className={uiInfoModalWrapper}>
-                  <InfoModal title={trait.name} content={description} as="span" />
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </section>
+            );
+          })}
+        </div>
+      </InfoSection>
 
       {homeworld.sections?.map((section) => (
-        <InfoSection key={section.title} title={section.title} content={section.content} />
+        <InfoTextSection key={section.title} heading={section.title} text={section.content} />
       ))}
     </div>
   );

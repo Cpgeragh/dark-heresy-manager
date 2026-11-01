@@ -43,22 +43,28 @@ export interface CustomItemAuditFields {
 
 export type CustomGearData = Omit<
   GearItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId"
+  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "personalNotes"
 >;
 
 export type CustomConsumableData = Omit<
   ConsumableItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "quantity"
+  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "quantity" | "personalNotes"
 >;
 
 export type CustomDrugData = Omit<
   DrugItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "quantity"
+  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "quantity" | "personalNotes"
 >;
 
 export type CustomCyberneticData = Omit<
   CyberneticItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "bodyLocation" | "installed"
+  | "id"
+  | "referenceId"
+  | "customLibraryId"
+  | "customLibraryVersionId"
+  | "bodyLocation"
+  | "installed"
+  | "personalNotes"
 >;
 
 export type CustomRangedWeaponData = Omit<
@@ -71,6 +77,7 @@ export type CustomRangedWeaponData = Omit<
   | "equipped"
   | "quantity"
   | "upgrades"
+  | "personalNotes"
 > & {
   weaponKind: "ranged";
 };
@@ -84,6 +91,7 @@ export type CustomMeleeWeaponData = Omit<
   | "equipped"
   | "quantity"
   | "upgrades"
+  | "personalNotes"
 > & {
   weaponKind: "melee";
 };
@@ -97,6 +105,7 @@ export type CustomGrenadeData = Omit<
   | "equipped"
   | "quantity"
   | "custom"
+  | "personalNotes"
 > & {
   weaponKind: "grenade";
 };
@@ -106,30 +115,48 @@ export type CustomWeaponData = CustomRangedWeaponData | CustomMeleeWeaponData | 
 export type CustomArmourData =
   | (Omit<
       WornArmourPiece,
-      "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "worn" | "upgrades"
+      | "id"
+      | "referenceId"
+      | "customLibraryId"
+      | "customLibraryVersionId"
+      | "worn"
+      | "upgrades"
+      | "personalNotes"
     > & {
       armourKind: "worn";
     })
   | (Omit<
       ShieldItem,
-      "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "equipped"
+      | "id"
+      | "referenceId"
+      | "customLibraryId"
+      | "customLibraryVersionId"
+      | "equipped"
+      | "personalNotes"
     > & {
       armourKind: "shield";
     });
 
 export type CustomArcheotechData = Omit<
   ArcheotechItem,
-  "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "equipped" | "installed"
+  | "id"
+  | "referenceId"
+  | "customLibraryId"
+  | "customLibraryVersionId"
+  | "equipped"
+  | "installed"
+  | "personalNotes"
 >;
 
 export type CustomPsychicPowerData = Omit<
   PsychicPower,
-  "id" | "talentEntryUid" | "customLibraryId" | "customLibraryVersionId" | "known"
+  "id" | "talentEntryUid" | "customLibraryId" | "customLibraryVersionId" | "known" | "personalNotes"
 >;
 
 export type CustomTraitData = {
   name: string;
   description: string;
+  itemNotes?: string;
   source: string;
 };
 

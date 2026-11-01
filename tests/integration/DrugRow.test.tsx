@@ -3,6 +3,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { ReactElement } from "react";
+import { openEntryCard } from "../utils/entryCard";
 import { DrugRow } from "../../src/pages/CharacterSheet/DrugsTab/DrugRow";
 import type { DrugItem } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
@@ -15,9 +17,15 @@ function item(over: Partial<DrugItem> = {}): DrugItem {
   return { id: "d1", name: "Obscura", quantity: 1, ...over };
 }
 
+function renderOpen(ui: ReactElement) {
+  const result = render(ui);
+  openEntryCard();
+  return result;
+}
+
 describe("DrugRow", () => {
   it("shows the duration as a labelled line on the card", () => {
-    render(
+    renderOpen(
       <DrugRow
         item={item({ name: "Frenzon", referenceId: "cr-frenzon" })}
         editable={true}
@@ -32,7 +40,7 @@ describe("DrugRow", () => {
 
   it("shows the notes as the description and keeps the duration out of the window", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <DrugRow
         item={item({ name: "Frenzon", referenceId: "cr-frenzon" })}
         editable={true}
@@ -50,7 +58,7 @@ describe("DrugRow", () => {
 
   it("shows the effect and side effects behind the Rules line", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <DrugRow
         item={item({ name: "De-Tox", referenceId: "cr-de-tox" })}
         editable={true}
@@ -68,7 +76,7 @@ describe("DrugRow", () => {
 
   it("says no description was recorded for a drug without notes", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <DrugRow
         item={item({ name: "De-Tox", referenceId: "cr-de-tox" })}
         editable={true}
@@ -82,13 +90,13 @@ describe("DrugRow", () => {
   });
 
   it("renders the item name", () => {
-    render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+    renderOpen(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
     expect(screen.getByText("Obscura")).toBeInTheDocument();
   });
 
   it("shows a status badge when linked to a campaign library item", () => {
     const libraryItem = { status: "draft" } as CampaignCustomItem<"drug">;
-    render(
+    renderOpen(
       <DrugRow
         item={item()}
         libraryItem={libraryItem}
@@ -102,7 +110,7 @@ describe("DrugRow", () => {
 
   it("shows real effect/duration/side-effect text from the reference data via the info modal", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <DrugRow
         item={item({ referenceId: OBSCURA_REF_ID })}
         editable={true}
@@ -118,7 +126,7 @@ describe("DrugRow", () => {
   it("wires the quantity control", async () => {
     const user = userEvent.setup();
     const onUpdateQty = vi.fn();
-    render(
+    renderOpen(
       <DrugRow
         item={item({ quantity: 2 })}
         editable={true}
@@ -134,7 +142,7 @@ describe("DrugRow", () => {
   it("calls onRemove only after removal is confirmed", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={onRemove} />);
+    renderOpen(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={onRemove} />);
 
     await user.click(screen.getByRole("button", { name: "Remove Obscura" }));
     expect(onRemove).not.toHaveBeenCalled();
@@ -143,14 +151,14 @@ describe("DrugRow", () => {
   });
 
   it("shows no weight chip for a custom drug with no weight recorded", () => {
-    render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+    renderOpen(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
 
     expect(screen.queryByText(/kg/)).not.toBeInTheDocument();
   });
 
   it("names the Remove pop-up after a Drug", async () => {
     const user = userEvent.setup();
-    render(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+    renderOpen(<DrugRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "Remove Obscura" }));
 
@@ -158,7 +166,7 @@ describe("DrugRow", () => {
   });
 
   it("hides the quantity and remove controls when not editable", () => {
-    render(<DrugRow item={item()} editable={false} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
+    renderOpen(<DrugRow item={item()} editable={false} onUpdateQty={vi.fn()} onRemove={vi.fn()} />);
     expect(screen.queryByRole("button", { name: "Increase quantity" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove Obscura" })).not.toBeInTheDocument();
   });

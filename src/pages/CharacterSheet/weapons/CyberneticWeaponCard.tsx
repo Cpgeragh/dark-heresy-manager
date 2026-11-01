@@ -6,13 +6,7 @@ import type { CyberneticWeapon } from "../../../data/reference/cyberneticsRefere
 import type { WeaponCraftsmanship } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/chips/Chip";
-import {
-  uiChipRow,
-  uiTextLabel,
-  uiTextBody,
-  uiInfoModalWrapper,
-  uiStackField,
-} from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiStackField } from "../../../ui/styles/editableStyles";
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
@@ -24,7 +18,7 @@ import {
   rangedRulesForCraftsmanship,
   meleeDamageForCraftsmanship,
 } from "./weaponHelpers";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { EntryLines } from "../../../ui/EntryLines";
 import { InfoParagraph } from "../../../ui/InfoSection";
 
 export function CyberneticWeaponCard({
@@ -100,49 +94,42 @@ export function CyberneticWeaponCard({
       </div>
 
       <div className={uiStackField}>
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Gained From</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{cyberneticName}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {hasRules ? effectiveSpecialRules : "-"}
-          </span>
-          {ruleNamesInLookup.length > 0 && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${weapon.name} Qualities`}
-                content={<SpecialRulesContent rules={effectiveSpecialRules ?? ""} />}
-              />
-            </span>
-          )}
-        </div>
-        <EntryDetailLine
-          label="Rules"
-          info={
-            rules ? (
-              <InfoModal
-                title={`${weapon.name} Rules`}
-                content={<InfoParagraph>{rules}</InfoParagraph>}
-              />
-            ) : undefined
-          }
+        <EntryLines
+          lines={{
+            craftsmanship: {
+              value: craftsmanship,
+              info: (
+                <InfoModal
+                  title={`${craftsmanship} Weapon`}
+                  content={
+                    weapon.type === "ranged"
+                      ? rangedCraftsmanshipDescription(craftsmanship)
+                      : meleeCraftsmanshipDescription(craftsmanship)
+                  }
+                />
+              ),
+            },
+            qualities: {
+              value: hasRules ? effectiveSpecialRules : undefined,
+              info:
+                ruleNamesInLookup.length > 0 ? (
+                  <InfoModal
+                    title={`${weapon.name} Qualities`}
+                    content={<SpecialRulesContent rules={effectiveSpecialRules ?? ""} />}
+                  />
+                ) : undefined,
+            },
+            rules: {
+              info: rules ? (
+                <InfoModal
+                  title={`${weapon.name} Rules`}
+                  content={<InfoParagraph>{rules}</InfoParagraph>}
+                />
+              ) : undefined,
+            },
+            gainedFrom: cyberneticName,
+          }}
         />
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Craftsmanship</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>{craftsmanship}</span>
-          <span className={uiInfoModalWrapper}>
-            <InfoModal
-              title={`${craftsmanship} Weapon`}
-              content={
-                weapon.type === "ranged"
-                  ? rangedCraftsmanshipDescription(craftsmanship)
-                  : meleeCraftsmanshipDescription(craftsmanship)
-              }
-            />
-          </span>
-        </div>
       </div>
     </AccordionCard>
   );

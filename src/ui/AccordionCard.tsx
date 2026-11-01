@@ -8,6 +8,7 @@ import { ExpandChevron } from "./icons/ExpandChevron";
 import { uiCardTapHeader } from "./styles/buttonStyles";
 import { colourNoticeAmber, colourNoticePink, colourNoticeRed } from "./styles/colourTokens";
 import {
+  uiInactiveItem,
   uiNoticeBox,
   uiOverlayItemNameHover,
   uiSectionShell,
@@ -32,6 +33,8 @@ interface AccordionCardProps {
   expanded: boolean;
   onToggle: () => void;
   tone?: keyof typeof CARD_SHELL;
+  /** Dims the card, for an entry that is not worn, installed or active. */
+  inactive?: boolean;
   badge?: ReactNode;
   info?: ReactNode;
   metadata?: ReactNode;
@@ -53,6 +56,7 @@ export function AccordionCard({
   expanded,
   onToggle,
   tone = "default",
+  inactive = false,
   badge,
   info,
   metadata,
@@ -71,7 +75,7 @@ export function AccordionCard({
   );
 
   return (
-    <div className={`${CARD_SHELL[tone]} overflow-hidden`}>
+    <div className={`${CARD_SHELL[tone]} overflow-hidden${inactive ? ` ${uiInactiveItem}` : ""}`}>
       <div className={`${forceExpanded ? "" : uiCardTapHeader} relative w-full p-3 lg:p-4`}>
         {!forceExpanded && (
           <CardOverlayButton

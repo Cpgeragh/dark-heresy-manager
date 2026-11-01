@@ -16,6 +16,7 @@ import { normaliseSources } from "./talentUtils";
 import { hasRestorableTalentEffect } from "./talentRemovalRules";
 import { recordComponentRender } from "../../performance/performanceMetrics";
 import { OwnedEntryRow } from "../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../ui/entryNotesLine";
 
 interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
@@ -91,6 +92,12 @@ export function EntryCard({
       ))
     : undefined;
 
+  const notesCollection =
+    removalNoun === "Trait"
+      ? "traits"
+      : removalNoun === "Elite Advance"
+        ? "eliteAdvances"
+        : "talents";
   const gainedFrom = isGranted
     ? `${entry.grantedByTalentName} (${entry.grantedByType})`
     : eliteAdvanceSource
@@ -112,7 +119,15 @@ export function EntryCard({
           {statusChip && <Chip colour={statusChipColour ?? "amber"}>{statusChip}</Chip>}
         </>
       }
-      lines={{ gainedFrom }}
+      lines={{
+        gainedFrom,
+        notes: entryNotesLine(shownName, entry.itemNotes, {
+          collection: notesCollection,
+          id: entry.uid,
+          notes: entry.personalNotes,
+          editable: editable && (!isGranted || removalNoun === "Elite Advance"),
+        }),
+      }}
       library={{
         libraryItem,
         isDM,

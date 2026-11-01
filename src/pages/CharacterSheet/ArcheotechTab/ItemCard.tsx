@@ -1,10 +1,7 @@
 // src/pages/CharacterSheet/ArcheotechTab/ItemCard.tsx
 
-import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { uiChipRow } from "../../../ui/styles/editableStyles";
-import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -12,11 +9,8 @@ import { locationLabel } from "../../../utils/armourLocations";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
-import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
-import { StatusBadge } from "../../../ui/chips/StatusBadge";
-import { AccordionCard } from "../../../ui/AccordionCard";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 
 interface Props extends CustomItemLibraryActionProps<"archeotech"> {
@@ -38,9 +32,6 @@ export function ItemCard({
   onUpdateAllCopies,
   onRemove,
 }: Props) {
-  const [expanded, setExpanded] = useState(false);
-
-  const notes = item.notes?.trim();
   const ref = item.referenceId
     ? ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId)
     : undefined;
@@ -55,21 +46,10 @@ export function ItemCard({
 
   const typeBadge = item.type ? <Chip colour="slate">{item.type}</Chip> : undefined;
 
-  const badge = (
-    <>
-      {libraryItem && <StatusBadge status={libraryItem.status} />}
-      {typeBadge}
-    </>
-  );
-
   const information = description ? <InfoParagraph>{description}</InfoParagraph> : undefined;
 
   const rulesInfo = rules ? (
     <InfoModal title={`${item.name} Rules`} content={<InfoParagraph>{rules}</InfoParagraph>} />
-  ) : undefined;
-
-  const removeAction = editable ? (
-    <RemoveEntryButton kind="Archeotech Item" name={item.name} onRemove={onRemove} />
   ) : undefined;
 
   const chips = (
@@ -113,50 +93,11 @@ export function ItemCard({
   const craftsmanship =
     item.type === "Cybernetic" && item.craftsmanship ? item.craftsmanship : undefined;
 
-  const lines = (
-    <>
-      {craftsmanship && <EntryDetailLine label="Craftsmanship" value={craftsmanship} />}
-      {specialRules && <EntryDetailLine label="Qualities" value={specialRules} />}
-      <EntryDetailLine label="Rules" info={rulesInfo} />
-      {notes && <EntryDetailLine label="Notes" value={notes} />}
-    </>
-  );
-
-  const libraryActions = libraryItem ? (
-    <CustomItemActionButtons
-      libraryItem={libraryItem}
-      isDM={isDM}
-      canEditDefinition={canEditDefinition}
-      busyAction={busyAction}
-      onEditDefinition={onEditDefinition}
-      onPublish={onPublish}
-      onArchive={onArchive}
-      onUpdateAllCopies={onUpdateAllCopies}
-    />
-  ) : undefined;
-
-  if (notes) {
-    return (
-      <AccordionCard
-        name={item.name}
-        label={item.name}
-        expanded={expanded}
-        onToggle={() => setExpanded((value) => !value)}
-        badge={badge}
-        info={<InfoModal title={item.name} content={information} />}
-        metadata={<div className={`${uiChipRow} items-center`}>{chips}</div>}
-        removeAction={removeAction}
-      >
-        {lines}
-        {libraryActions}
-      </AccordionCard>
-    );
-  }
-
   return (
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      collapsible
       badge={typeBadge}
       information={information}
       chips={chips}
@@ -164,6 +105,12 @@ export function ItemCard({
         craftsmanship: craftsmanship ? { value: craftsmanship } : undefined,
         qualities: specialRules ? { value: specialRules } : undefined,
         rules: { info: rulesInfo },
+        notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
+          collection: "archeotech",
+          id: item.id,
+          notes: item.personalNotes,
+          editable,
+        }),
       }}
       library={{
         libraryItem,

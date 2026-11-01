@@ -3,6 +3,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { ReactElement } from "react";
+import { openEntryCard } from "../utils/entryCard";
 import { ConsumableRow } from "../../src/pages/CharacterSheet/GearTab/ConsumableRow";
 import type { ConsumableItem } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
@@ -11,9 +13,15 @@ function item(over: Partial<ConsumableItem> = {}): ConsumableItem {
   return { id: "c1", name: "Stimm", quantity: 1, ...over };
 }
 
+function renderOpen(ui: ReactElement) {
+  const result = render(ui);
+  openEntryCard();
+  return result;
+}
+
 describe("ConsumableRow", () => {
   it("puts the quantity control on the right with no Qty label, after the Remove button", () => {
-    render(
+    renderOpen(
       <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
     );
 
@@ -27,11 +35,11 @@ describe("ConsumableRow", () => {
 
   it("always shows a Rules line, with the rules behind it when the item has them", async () => {
     const user = userEvent.setup();
-    const { rerender } = render(
+    const { rerender } = renderOpen(
       <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
     );
     expect(screen.getByText("Rules")).toBeInTheDocument();
-    expect(screen.getByText("-")).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
 
     rerender(
       <ConsumableRow
@@ -46,7 +54,7 @@ describe("ConsumableRow", () => {
   });
 
   it("renders the item name", () => {
-    render(
+    renderOpen(
       <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
     );
     expect(screen.getByText("Stimm")).toBeInTheDocument();
@@ -54,7 +62,7 @@ describe("ConsumableRow", () => {
 
   it("shows a status badge when linked to a campaign library item", () => {
     const libraryItem = { status: "archived" } as CampaignCustomItem<"consumable">;
-    render(
+    renderOpen(
       <ConsumableRow
         item={item()}
         libraryItem={libraryItem}
@@ -67,7 +75,7 @@ describe("ConsumableRow", () => {
   });
 
   it("shows the description via the info modal only when one exists", () => {
-    render(
+    renderOpen(
       <ConsumableRow
         item={item({ description: "Restores 1d5 Wounds." })}
         editable={true}
@@ -75,12 +83,14 @@ describe("ConsumableRow", () => {
         onRemove={vi.fn()}
       />
     );
-    expect(screen.getByRole("button", { name: /information/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show information about Stimm" })
+    ).toBeInTheDocument();
   });
 
   it("keeps the info button when there is no description and says nothing was recorded", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <ConsumableRow
         item={item({ description: "" })}
         editable={true}
@@ -95,7 +105,7 @@ describe("ConsumableRow", () => {
   it("wires the quantity control", async () => {
     const user = userEvent.setup();
     const onUpdateQty = vi.fn();
-    render(
+    renderOpen(
       <ConsumableRow
         item={item({ quantity: 2 })}
         editable={true}
@@ -111,7 +121,7 @@ describe("ConsumableRow", () => {
   it("calls onRemove only after removal is confirmed", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(
+    renderOpen(
       <ConsumableRow item={item()} editable={true} onUpdateQty={vi.fn()} onRemove={onRemove} />
     );
 
@@ -122,7 +132,7 @@ describe("ConsumableRow", () => {
   });
 
   it("hides quantity and remove controls when not editable", () => {
-    render(
+    renderOpen(
       <ConsumableRow item={item()} editable={false} onUpdateQty={vi.fn()} onRemove={vi.fn()} />
     );
     expect(screen.queryByRole("button", { name: "Decrease quantity" })).not.toBeInTheDocument();

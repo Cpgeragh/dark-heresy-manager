@@ -35,10 +35,11 @@ describe("OwnedEntryRow lines", () => {
         name="Bionic Arm"
         editable
         lines={{
-          notes: "Left side",
+          notes: { value: "Left side" },
           talentEffects: "Talented (Awareness) (Talent): +10",
           gainedFrom: "Skin of Iron (Talent)",
           rules: { value: "Rule text" },
+          mishaps: { value: "Explosive" },
           qualities: { value: "Reliable" },
           duration: { value: "1d10 minutes" },
           craftsmanship: { value: "Good" },
@@ -47,7 +48,9 @@ describe("OwnedEntryRow lines", () => {
     );
 
     const labels = screen
-      .getAllByText(/^(Craftsmanship|Duration|Qualities|Rules|Gained from|Talent effects|Notes)$/)
+      .getAllByText(
+        /^(Craftsmanship|Duration|Qualities|Rules|Mishaps|Gained from|Talent effects|Notes)$/
+      )
       .map((label) => label.textContent);
 
     expect(labels).toEqual([
@@ -55,6 +58,7 @@ describe("OwnedEntryRow lines", () => {
       "Duration",
       "Qualities",
       "Rules",
+      "Mishaps",
       "Gained from",
       "Talent effects",
       "Notes",
@@ -141,6 +145,100 @@ describe("OwnedEntryRow removal", () => {
     );
 
     expect(screen.queryByRole("button", { name: "Remove Grapnel" })).not.toBeInTheDocument();
+  });
+});
+
+describe("OwnedEntryRow collapsible", () => {
+  function renderCollapsible(extra: Partial<React.ComponentProps<typeof OwnedEntryRow>> = {}) {
+    return render(
+      <OwnedEntryRow
+        name="Flak Jacket"
+        editable
+        collapsible
+        chips={<span>Location chip</span>}
+        lines={{ rules: { value: "Rule text" }, notes: { value: "Note text" } }}
+        body={<p>Upgrades section</p>}
+        {...extra}
+      />
+    );
+  }
+
+  it("starts closed and keeps the name and information icon in the header", () => {
+    renderCollapsible();
+
+    expect(screen.getByRole("button", { name: "Expand Flak Jacket details" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(
+      screen.getByRole("button", { name: "Show information about Flak Jacket" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Location chip")).not.toBeInTheDocument();
+    expect(screen.queryByText("Rules")).not.toBeInTheDocument();
+    expect(screen.queryByText("Upgrades section")).not.toBeInTheDocument();
+  });
+
+  it("opens to show the chips, the lines in the fixed order and the body", async () => {
+    const user = userEvent.setup();
+    renderCollapsible();
+
+    await user.click(screen.getByRole("button", { name: "Expand Flak Jacket details" }));
+
+    expect(screen.getByText("Location chip")).toBeInTheDocument();
+    expect(screen.getByText("Upgrades section")).toBeInTheDocument();
+    const labels = screen.getAllByText(/^(Rules|Notes)$/).map((label) => label.textContent);
+    expect(labels).toEqual(["Rules", "Notes"]);
+  });
+
+  it("closes again on a second press", async () => {
+    const user = userEvent.setup();
+    renderCollapsible();
+
+    await user.click(screen.getByRole("button", { name: "Expand Flak Jacket details" }));
+    await user.click(screen.getByRole("button", { name: "Collapse Flak Jacket details" }));
+
+    expect(screen.queryByText("Location chip")).not.toBeInTheDocument();
+  });
+
+  it("stays open with no chevron when forced expanded", () => {
+    renderCollapsible({ forceExpanded: true });
+
+    expect(screen.getByText("Location chip")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Expand / })).not.toBeInTheDocument();
+  });
+
+  it("dims the card while inactive and uses the amber look for Archeotech", () => {
+    const { container } = renderCollapsible({ inactive: true, tone: "archeotech" });
+
+    expect(container.firstElementChild).toHaveClass("opacity-60", "border-amber-500/60");
+  });
+
+  it("keeps the header action tappable without opening the card", async () => {
+    const user = userEvent.setup();
+    const onUse = vi.fn();
+    renderCollapsible({
+      actions: (
+        <button type="button" onClick={onUse}>
+          Wear
+        </button>
+      ),
+    });
+
+    const button = screen.getByRole("button", { name: "Wear" });
+    expect(button.parentElement).toHaveClass("pointer-events-auto");
+    await user.click(button);
+
+    expect(onUse).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Expand Flak Jacket details" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+  });
+
+  it("keeps the Remove button in the closed header", () => {
+    renderCollapsible({ removal: { kind: "Armour Piece", onRemove: vi.fn() } });
+
+    expect(screen.getByRole("button", { name: "Remove Flak Jacket" })).toBeInTheDocument();
   });
 });
 

@@ -112,6 +112,7 @@ export function CustomGrenadeForm({
   );
   const [description, setDescription] = useState(initialGrenade?.description ?? "");
   const [rules, setRules] = useState(initialGrenade?.rules ?? "");
+  const [itemNotes, setItemNotes] = useState(initialGrenade?.itemNotes ?? "");
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
@@ -155,6 +156,7 @@ export function CustomGrenadeForm({
         source: origin,
         description: description.trim() || undefined,
         rules: rules.trim() || undefined,
+        itemNotes: itemNotes.trim() || undefined,
         equipped: initialGrenade?.equipped,
         customLibraryId: initialGrenade?.customLibraryId,
         customLibraryVersionId: initialGrenade?.customLibraryVersionId,
@@ -409,6 +411,8 @@ export function CustomGrenadeForm({
             onDescriptionChange={setDescription}
             rules={rules}
             onRulesChange={setRules}
+            itemNotes={itemNotes}
+            onItemNotesChange={setItemNotes}
           />
         </div>
       </CustomFormSection>

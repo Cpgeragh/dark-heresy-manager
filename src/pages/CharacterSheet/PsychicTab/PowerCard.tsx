@@ -6,7 +6,9 @@ import { Chip } from "../../../ui/chips/Chip";
 import { sourceChipColour } from "../../../ui/styles/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours, psychicSelectionSourceColours } from "./psychicStyles";
-import { uiChipRow, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiStackField, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
+import { EntryLines } from "../../../ui/EntryLines";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { Button } from "../../../ui/buttons/Button";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -131,6 +133,21 @@ export function PowerCard({
       }
     >
       <PowerStats power={power} />
+
+      {!onSelect && (
+        <div className={uiStackField}>
+          <EntryLines
+            lines={{
+              notes: entryNotesLine(power.name || "Psychic Power", power.itemNotes, {
+                collection: "powers",
+                id: power.id,
+                notes: power.personalNotes,
+                editable,
+              }),
+            }}
+          />
+        </div>
+      )}
 
       {onLinkPurchase && (
         <Button size="sm" onClick={onLinkPurchase}>

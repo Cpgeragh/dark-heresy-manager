@@ -7,13 +7,7 @@ import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActi
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import {
-  uiChipRow,
-  uiTextBody,
-  uiTextLabel,
-  uiInfoModalWrapper,
-  uiStackField,
-} from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiStackField } from "../../../ui/styles/editableStyles";
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { colourDivider } from "../../../ui/styles/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
@@ -24,7 +18,8 @@ import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamag
 import { weaponClassChip } from "./weaponHelpers";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { EntryLines } from "../../../ui/EntryLines";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 
 export function ArcheotechWeaponCard({
@@ -149,39 +144,41 @@ export function ArcheotechWeaponCard({
 
       {/* Qualities / Rules */}
       <div className={uiStackField}>
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {hasRules ? specialRules : "-"}
-          </span>
-          {ruleNamesInLookup.length > 0 && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${item.name} Qualities`}
-                content={<SpecialRulesContent rules={specialRules ?? ""} />}
-              />
-            </span>
-          )}
-        </div>
-        <EntryDetailLine
-          label="Rules"
-          info={
-            rules ? (
-              <InfoModal
-                title={`${item.name} Rules`}
-                content={<InfoParagraph>{rules}</InfoParagraph>}
-              />
-            ) : undefined
-          }
+        <EntryLines
+          lines={{
+            qualities: {
+              value: hasRules ? specialRules : undefined,
+              info:
+                ruleNamesInLookup.length > 0 ? (
+                  <InfoModal
+                    title={`${item.name} Qualities`}
+                    content={<SpecialRulesContent rules={specialRules ?? ""} />}
+                  />
+                ) : undefined,
+            },
+            rules: {
+              info: rules ? (
+                <InfoModal
+                  title={`${item.name} Rules`}
+                  content={<InfoParagraph>{rules}</InfoParagraph>}
+                />
+              ) : undefined,
+            },
+            mishaps: showMishaps
+              ? {
+                  info: (
+                    <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
+                  ),
+                }
+              : undefined,
+            notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
+              collection: "archeotech",
+              id: item.id,
+              notes: item.personalNotes,
+              editable,
+            }),
+          }}
         />
-        {showMishaps && (
-          <div className="flex items-center gap-1.5">
-            <span className={uiTextLabel}>Mishaps</span>
-            <span className={uiInfoModalWrapper}>
-              <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
-            </span>
-          </div>
-        )}
       </div>
 
       {libraryItem && (

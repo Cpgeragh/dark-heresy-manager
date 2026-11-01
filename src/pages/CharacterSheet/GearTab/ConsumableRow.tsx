@@ -2,6 +2,7 @@
 
 import type { ConsumableItem } from "../../../types/Character";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -38,6 +39,7 @@ export function ConsumableRow({
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      collapsible
       information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
       chips={
         <ItemMetaChips
@@ -49,6 +51,12 @@ export function ConsumableRow({
         />
       }
       lines={{
+        notes: entryNotesLine(item.name, item.itemNotes, {
+          collection: "consumables",
+          id: item.id,
+          notes: item.personalNotes,
+          editable,
+        }),
         rules: {
           info: rules ? (
             <InfoModal

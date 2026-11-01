@@ -12,9 +12,7 @@ import {
   uiSplitRow,
   uiSection,
   uiInactiveItem,
-  uiTextBody,
   uiTextLabel,
-  uiInfoModalWrapper,
   uiStackField,
 } from "../../../ui/styles/editableStyles";
 import {
@@ -26,14 +24,15 @@ import {
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { EntryLines } from "../../../ui/EntryLines";
+import { EntryQuantityRow } from "../../../ui/EntryQuantityRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -189,57 +188,58 @@ export function GrenadeCard({
 
       {/* Qualities / Rules */}
       <div className={uiStackField}>
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {hasRules ? item.specialRules : "-"}
-          </span>
-          {ruleNamesInLookup.length > 0 && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${item.name} Qualities`}
-                content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
-              />
-            </span>
-          )}
-        </div>
-        <EntryDetailLine
-          label="Rules"
-          info={
-            item.rules?.trim() ? (
-              <InfoModal
-                title={`${item.name} Rules`}
-                content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
-              />
+        <EntryLines
+          lines={{
+            qualities: {
+              value: hasRules ? item.specialRules : undefined,
+              info:
+                ruleNamesInLookup.length > 0 ? (
+                  <InfoModal
+                    title={`${item.name} Qualities`}
+                    content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
+                  />
+                ) : undefined,
+            },
+            rules: {
+              info: item.rules?.trim() ? (
+                <InfoModal
+                  title={`${item.name} Rules`}
+                  content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
+                />
+              ) : undefined,
+            },
+            mishaps: showMishaps
+              ? {
+                  info: (
+                    <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
+                  ),
+                }
+              : undefined,
+            notes: onSelect
+              ? undefined
+              : entryNotesLine(item.name, item.itemNotes, {
+                  collection: "grenades",
+                  id: item.id,
+                  notes: item.personalNotes,
+                  editable,
+                }),
+          }}
+        />
+      </div>
+
+      {!onSelect && (
+        <EntryQuantityRow
+          quantity={item.quantity}
+          editable={editable}
+          onUpdate={onUpdateQty}
+          note={
+            isEquipped && item.quantity > 3 ? (
+              <span className={`text-[10px] lg:text-xs ${colourAmberPlain}`}>
+                3 ready, rest stowed
+              </span>
             ) : undefined
           }
         />
-        {showMishaps && (
-          <div className="flex items-center gap-1.5">
-            <span className={uiTextLabel}>Mishaps</span>
-            <span className={uiInfoModalWrapper}>
-              <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Quantity row */}
-      {!onSelect && (
-        <div className="flex items-center gap-3 pt-1">
-          <span className={`text-xs lg:text-sm ${uiTextBody} uppercase tracking-wide`}>Qty</span>
-          <QuantityControl
-            quantity={item.quantity}
-            editable={editable}
-            size="lg"
-            onUpdate={onUpdateQty}
-          />
-          {isEquipped && item.quantity > 3 && (
-            <span className={`text-[10px] lg:text-xs ${colourAmberPlain} ml-1`}>
-              3 ready, rest stowed
-            </span>
-          )}
-        </div>
       )}
 
       {/* Weight / Value / Availability / Source */}

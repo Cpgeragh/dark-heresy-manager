@@ -79,6 +79,7 @@ export function CustomPieceForm({
   );
   const [description, setDescription] = useState(initialPiece?.description ?? "");
   const [notes, setNotes] = useState(initialPiece?.notes ?? "");
+  const [itemNotes, setItemNotes] = useState(initialPiece?.itemNotes ?? "");
   const [protectionRating, setProtectionRating] = useState(
     initialPiece?.protectionRating !== undefined ? String(initialPiece.protectionRating) : ""
   );
@@ -131,6 +132,7 @@ export function CustomPieceForm({
           : undefined,
       description: description.trim() || undefined,
       notes: notes.trim() || undefined,
+      itemNotes: itemNotes.trim() || undefined,
       custom: true,
       ...(forceField
         ? { isForceField: true, protectionRating: Number(protectionRating) || 0 }
@@ -362,6 +364,8 @@ export function CustomPieceForm({
           onDescriptionChange={setDescription}
           rules={notes}
           onRulesChange={setNotes}
+          itemNotes={itemNotes}
+          onItemNotesChange={setItemNotes}
           rulesPlaceholder="Special rules or effects…"
         />
       </CustomFormSection>

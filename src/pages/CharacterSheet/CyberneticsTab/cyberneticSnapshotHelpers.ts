@@ -8,6 +8,7 @@ export function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticDa
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     bodyLocation: _bodyLocation,
     installed: _installed,
     ...data

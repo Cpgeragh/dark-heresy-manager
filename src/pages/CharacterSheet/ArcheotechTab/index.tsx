@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
 import type { ArcheotechRef } from "../../../data/reference/archeotechReference";
-import type { CampaignCustomItem, CustomArcheotechData } from "../../../types/CustomItems";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { ArcheotechPickerModal } from "./ArcheotechPickerModal";
 import { ItemCard } from "./ItemCard";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
@@ -21,13 +21,15 @@ import {
 } from "../../../ui/styles/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
-import {
-  createDraftCustomItem,
-  inferCustomItemStatus,
-  saveDraftCustomItem,
-} from "../../../services/customItemService";
+import { createDraftCustomItem, saveDraftCustomItem } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
+import { keepPersonalNotes } from "../../../utils/personalNotes";
+import {
+  toCustomArcheotechData,
+  buildArcheotechSnapshot,
+  buildFallbackArcheotechLibraryItem,
+} from "./archeotechSnapshotHelpers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -205,13 +207,16 @@ export function ArcheotechTab({
         });
         const updatedArcheotech = archeotech.map((archeotechItem) =>
           archeotechItem.id === editingArcheotechDefinition.item.id
-            ? buildArcheotechSnapshot(
-                archeotechItem.id,
-                archeotechItem.equipped,
-                data,
-                editingArcheotechDefinition.libraryItem.id,
-                versionId,
-                archeotechItem.installed
+            ? keepPersonalNotes(
+                buildArcheotechSnapshot(
+                  archeotechItem.id,
+                  archeotechItem.equipped,
+                  data,
+                  editingArcheotechDefinition.libraryItem.id,
+                  versionId,
+                  archeotechItem.installed
+                ),
+                archeotechItem
               )
             : archeotechItem
         );
@@ -381,77 +386,4 @@ export function ArcheotechTab({
       )}
     </div>
   );
-}
-
-function toCustomArcheotechData(item: ArcheotechItem): CustomArcheotechData {
-  const {
-    id: _id,
-    referenceId: _referenceId,
-    customLibraryId: _customLibraryId,
-    customLibraryVersionId: _customLibraryVersionId,
-    equipped: _equipped,
-    installed: _installed,
-    ...data
-  } = item;
-
-  return data;
-}
-
-function buildArcheotechSnapshot(
-  id: string,
-  equipped: boolean | undefined,
-  data: CustomArcheotechData,
-  customLibraryId: string,
-  customLibraryVersionId: string,
-  installed?: boolean
-): ArcheotechItem {
-  return {
-    id,
-    ...data,
-    customLibraryId,
-    customLibraryVersionId,
-    ...(equipped !== undefined ? { equipped } : {}),
-    ...(installed !== undefined ? { installed } : {}),
-  };
-}
-
-function buildFallbackArcheotechLibraryItem({
-  campaignId,
-  item,
-  userId,
-  characterId,
-  characterName,
-}: {
-  campaignId: string;
-  item: ArcheotechItem;
-  userId: string | null;
-  characterId: string;
-  characterName?: string;
-}): CampaignCustomItem<"archeotech"> {
-  const data = toCustomArcheotechData(item);
-  const creator = {
-    userId: userId ?? "",
-    characterId,
-    characterName,
-  };
-
-  return {
-    id: item.customLibraryId ?? "",
-    campaignId,
-    category: "archeotech",
-    status: inferCustomItemStatus(item),
-    name: item.name,
-    creator,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: creator,
-    updatedBy: creator,
-    publishedVersionId: null,
-    draftVersionId: item.customLibraryVersionId ?? null,
-    latestVersionId: item.customLibraryVersionId ?? "",
-    latestVersionNumber: 1,
-    archivedAt: null,
-    archivedByUserId: null,
-    data,
-  };
 }

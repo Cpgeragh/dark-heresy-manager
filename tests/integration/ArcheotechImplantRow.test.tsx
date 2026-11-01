@@ -3,6 +3,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { ReactElement } from "react";
+import { openEntryCard } from "../utils/entryCard";
 import { ArcheotechImplantRow } from "../../src/pages/CharacterSheet/CyberneticsTab/ArcheotechImplantRow";
 import type { ArcheotechItem } from "../../src/types/Character";
 
@@ -10,9 +12,15 @@ function item(over: Partial<ArcheotechItem> = {}): ArcheotechItem {
   return { id: "a1", name: "Auto-Quill", ...over } as ArcheotechItem;
 }
 
+function renderOpen(ui: ReactElement) {
+  const result = render(ui);
+  openEntryCard();
+  return result;
+}
+
 describe("ArcheotechImplantRow", () => {
   it("renders the item name and the Archeotech badge by default", () => {
-    render(
+    renderOpen(
       <ArcheotechImplantRow
         item={item()}
         editable={true}
@@ -25,7 +33,7 @@ describe("ArcheotechImplantRow", () => {
   });
 
   it("hides the Archeotech badge and uses the plain section style when highlightAsArcheotech is false", () => {
-    render(
+    renderOpen(
       <ArcheotechImplantRow
         item={item()}
         editable={true}
@@ -38,7 +46,7 @@ describe("ArcheotechImplantRow", () => {
   });
 
   it("shows the craftsmanship chip when set", () => {
-    render(
+    renderOpen(
       <ArcheotechImplantRow
         item={item({ craftsmanship: "Good" })}
         editable={true}
@@ -50,7 +58,7 @@ describe("ArcheotechImplantRow", () => {
   });
 
   it("shows a location chip when bodyLocation is set", () => {
-    render(
+    renderOpen(
       <ArcheotechImplantRow
         item={item({ bodyLocation: ["rightArm"] })}
         editable={true}
@@ -64,7 +72,7 @@ describe("ArcheotechImplantRow", () => {
   it("confirms removal when editable, and hides Remove when not", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderOpen(
       <ArcheotechImplantRow
         item={item()}
         editable={true}
@@ -92,7 +100,7 @@ describe("ArcheotechImplantRow", () => {
   it("shows Uninstall on an installed item, Install on one that is not, and calls the handler", async () => {
     const user = userEvent.setup();
     const onToggleInstalled = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderOpen(
       <ArcheotechImplantRow
         item={item()}
         editable
@@ -115,7 +123,7 @@ describe("ArcheotechImplantRow", () => {
   });
 
   it("shows a viewer an Installed chip only while the item is installed", () => {
-    const { rerender } = render(
+    const { rerender } = renderOpen(
       <ArcheotechImplantRow
         item={item()}
         editable={false}
@@ -139,7 +147,7 @@ describe("ArcheotechImplantRow", () => {
 
 describe("ArcheotechImplantRow shared entry pieces", () => {
   it("shows craftsmanship on a labelled Craftsmanship line as plain text", () => {
-    render(
+    renderOpen(
       <ArcheotechImplantRow
         item={item({ craftsmanship: "Good" })}
         editable={true}
@@ -154,7 +162,7 @@ describe("ArcheotechImplantRow shared entry pieces", () => {
 
   it("always has an information icon and an empty Rules line", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <ArcheotechImplantRow
         item={item()}
         editable={true}
@@ -163,7 +171,7 @@ describe("ArcheotechImplantRow shared entry pieces", () => {
       />
     );
     expect(screen.getByText("Rules")).toBeInTheDocument();
-    expect(screen.getByText("-")).toBeInTheDocument();
+    expect(screen.getByText("Rules").parentElement).toHaveTextContent("Rules-");
     await user.click(screen.getByRole("button", { name: "Show information about Auto-Quill" }));
     expect(screen.getByText("No description recorded.")).toBeInTheDocument();
   });
@@ -172,7 +180,7 @@ describe("ArcheotechImplantRow shared entry pieces", () => {
 describe("ArcheotechImplantRow shared layout", () => {
   it("names the Remove pop-up after an Archeotech Item", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <ArcheotechImplantRow item={item()} editable onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
     );
 
@@ -182,7 +190,7 @@ describe("ArcheotechImplantRow shared layout", () => {
   });
 
   it("shows the source chip when the item has a source", () => {
-    render(
+    renderOpen(
       <ArcheotechImplantRow
         item={item({ source: "IH" })}
         editable

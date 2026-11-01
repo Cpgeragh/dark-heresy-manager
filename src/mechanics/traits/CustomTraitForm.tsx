@@ -11,6 +11,7 @@ import { CustomFormShell } from "../../ui/forms/CustomFormShell";
 import { OriginSelector } from "../../ui/forms/OriginSelector";
 import type { CustomItemOrigin } from "../../constants/customItems";
 import { FormLabel } from "../../ui/forms/FormLabel";
+import { ItemNotesField } from "../../ui/forms/ItemNotesField";
 import type { CustomTraitData } from "../../types/CustomItems";
 
 export function CustomTraitForm({
@@ -31,6 +32,7 @@ export function CustomTraitForm({
   const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialTrait?.name ?? "");
   const [description, setDescription] = useState(initialTrait?.description ?? "");
+  const [itemNotes, setItemNotes] = useState(initialTrait?.itemNotes ?? "");
   const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
     initialTrait?.source === "Custom" || initialTrait?.source === "2nd Ed"
       ? initialTrait.source
@@ -41,7 +43,12 @@ export function CustomTraitForm({
 
   const addTrait = async () => {
     if (!canAdd || !origin) return;
-    await onAdd({ name: name.trim(), description: description.trim(), source: origin });
+    await onAdd({
+      name: name.trim(),
+      description: description.trim(),
+      itemNotes: itemNotes.trim() || undefined,
+      source: origin,
+    });
   };
 
   return (
@@ -94,6 +101,7 @@ export function CustomTraitForm({
               autoComplete="off"
             />
           </div>
+          <ItemNotesField idPrefix="custom-trait" value={itemNotes} onChange={setItemNotes} />
         </div>
       </CustomFormSection>
     </CustomFormShell>

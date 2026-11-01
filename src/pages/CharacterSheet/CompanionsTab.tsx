@@ -11,14 +11,15 @@ import { RemoveEntryButton } from "../../ui/RemoveEntryButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { StatChip } from "../../ui/chips/StatChip";
 import { AccordionCard } from "../../ui/AccordionCard";
+import { EntryDetailLine } from "../../ui/EntryDetailLine";
+import { InfoParagraph, InfoSection } from "../../ui/InfoSection";
+import { EntryLines } from "../../ui/EntryLines";
+import { entryNotesLine } from "../../ui/entryNotesLine";
 import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import {
   uiChipRow,
-  uiInfoModalWrapper,
-  uiTextBody,
-  uiTextLabel,
+  uiStackField,
   uiTextPlaceholder,
-  uiRuleName,
   uiStackSection,
   uiStackBody,
   uiStackList,
@@ -167,28 +168,27 @@ function ProfileEntries({
   );
 
   return (
-    <div className="flex items-center gap-1.5">
-      <span className={`${uiTextLabel} shrink-0`}>{title}</span>
-      <span className={`text-xs lg:text-sm ${uiTextBody}`}>{entries.join(", ")}</span>
-      {hasAdditionalRules && (
-        <span className={uiInfoModalWrapper}>
+    <EntryDetailLine
+      label={title}
+      value={entries.join(", ")}
+      info={
+        hasAdditionalRules ? (
           <InfoModal
             title={`${companionName} ${title}`}
             content={
               <div className={uiStackBody}>
                 {entries.map((entry, index) => (
-                  <div key={entry}>
-                    <p className={uiRuleName}>{entry}</p>
-                    <p className={`mt-1 leading-relaxed ${uiTextBody}`}>{descriptions[index]}</p>
-                  </div>
+                  <InfoSection key={entry} heading={entry}>
+                    <InfoParagraph>{descriptions[index]}</InfoParagraph>
+                  </InfoSection>
                 ))}
               </div>
             }
             as={modalAs}
           />
-        </span>
-      )}
-    </div>
+        ) : undefined
+      }
+    />
   );
 }
 
@@ -299,6 +299,18 @@ function CompanionCard({
       }
     >
       <CompanionProfileDetails companionReference={companionReference} modalAs="button" />
+      <div className={uiStackField}>
+        <EntryLines
+          lines={{
+            notes: entryNotesLine(companionReference.name, undefined, {
+              collection: "companions",
+              id: companion.id,
+              notes: companion.personalNotes,
+              editable,
+            }),
+          }}
+        />
+      </div>
     </AccordionCard>
   );
 }

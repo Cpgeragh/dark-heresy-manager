@@ -1,5 +1,6 @@
 import { editableTextareaClass } from "../styles/editableStyles";
 import { FormLabel } from "./FormLabel";
+import { ItemNotesField } from "./ItemNotesField";
 
 interface DescriptionAndRulesFieldsProps {
   idPrefix: string;
@@ -9,9 +10,11 @@ interface DescriptionAndRulesFieldsProps {
   onRulesChange: (value: string) => void;
   descriptionPlaceholder?: string;
   rulesPlaceholder?: string;
+  itemNotes?: string;
+  onItemNotesChange?: (value: string) => void;
 }
 
-/** The Description and Rules text boxes every custom item form shares, for use inside a two column grid. */
+/** The Description, Rules and Notes text boxes every custom item form shares, for use inside a two column grid. */
 export function DescriptionAndRulesFields({
   idPrefix,
   description,
@@ -20,6 +23,8 @@ export function DescriptionAndRulesFields({
   onRulesChange,
   descriptionPlaceholder,
   rulesPlaceholder = "What it does in play, such as modifiers or special effects...",
+  itemNotes = "",
+  onItemNotesChange,
 }: DescriptionAndRulesFieldsProps) {
   return (
     <>
@@ -47,6 +52,9 @@ export function DescriptionAndRulesFields({
           autoComplete="off"
         />
       </div>
+      {onItemNotesChange && (
+        <ItemNotesField idPrefix={idPrefix} value={itemNotes} onChange={onItemNotesChange} />
+      )}
     </>
   );
 }

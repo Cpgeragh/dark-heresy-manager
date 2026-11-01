@@ -10,6 +10,7 @@ import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import { FormLabel } from "../../../ui/forms/FormLabel";
+import { ItemNotesField } from "../../../ui/forms/ItemNotesField";
 import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
@@ -64,6 +65,7 @@ export function CustomPowerForm({
   const initialRange = rangeToFormValue(initialPower?.range);
   const [name, setName] = useState(initialPower?.name ?? "");
   const [description, setDescription] = useState(initialPower?.description ?? "");
+  const [itemNotes, setItemNotes] = useState(initialPower?.itemNotes ?? "");
   const [discipline, setDiscipline] = useState<PsychicDiscipline | "">(
     target === "minor"
       ? "Minor"
@@ -140,6 +142,7 @@ export function CustomPowerForm({
         sustained,
         origin: origin as CustomItemOrigin,
         description: description.trim() || undefined,
+        itemNotes: itemNotes.trim() || undefined,
         isMinor: target === "minor",
         custom: true,
         known: initialPower?.known ?? true,
@@ -337,6 +340,13 @@ export function CustomPowerForm({
             autoComplete="off"
           />
         </div>
+
+        <ItemNotesField
+          idPrefix="custom-power"
+          value={itemNotes}
+          onChange={setItemNotes}
+          className={uiStackField}
+        />
 
         <div className="flex gap-2 pt-1">
           <Button

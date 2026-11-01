@@ -5,8 +5,10 @@ import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsRefere
 import { Chip } from "../../../ui/chips/Chip";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { isInstalled } from "../../../utils/cyberneticInstalled";
-import { uiChipRow, uiTextLabel, uiTextDescription } from "../../../ui/styles/editableStyles";
+import { uiTextDescription } from "../../../ui/styles/editableStyles";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
+import { EntryDetailLine } from "../../../ui/EntryDetailLine";
 import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
@@ -28,6 +30,7 @@ interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   editable: boolean;
   onToggleInstalled: (id: string) => void;
   onRemove: (id: string) => unknown;
+  forceExpanded?: boolean;
 }
 
 export function ImplantRow({
@@ -46,6 +49,7 @@ export function ImplantRow({
   onArchive,
   onUpdateAllCopies,
   onRemove,
+  forceExpanded = false,
 }: Props) {
   recordComponentRender("ImplantRow");
   const ref = CYBERNETICS_REFERENCE.find((r) => r.id === item.referenceId);
@@ -67,6 +71,8 @@ export function ImplantRow({
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      collapsible
+      forceExpanded={forceExpanded}
       inactive={!installed}
       actions={
         isConcealedWeaponBionic ? undefined : (
@@ -114,6 +120,12 @@ export function ImplantRow({
         </>
       }
       lines={{
+        notes: entryNotesLine(item.name, item.itemNotes, {
+          collection: "cybernetics",
+          id: item.id,
+          notes: item.personalNotes,
+          editable,
+        }),
         craftsmanship: item.craftsmanship
           ? {
               value: displayedCraftsmanship,
@@ -143,11 +155,15 @@ export function ImplantRow({
       }}
       body={
         linkedArmName && linkedWeaponName ? (
-          <div className={`${uiChipRow} items-center`}>
-            <span className={uiTextLabel}>Linked</span>
-            <Chip colour="pink">{linkedArmName}</Chip>
-            <Chip colour="pink">{linkedWeaponName}</Chip>
-          </div>
+          <EntryDetailLine
+            label="Linked"
+            value={
+              <>
+                <Chip colour="pink">{linkedArmName}</Chip>
+                <Chip colour="pink">{linkedWeaponName}</Chip>
+              </>
+            }
+          />
         ) : undefined
       }
       library={{

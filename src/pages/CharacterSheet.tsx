@@ -97,6 +97,9 @@ import {
   useCampaignCustomItemsRaw,
 } from "../hooks/useCampaignCustomItems";
 import { useCampaignsContext } from "../context/useCampaignsContext";
+import { PersonalNotesContext, type SavePersonalNotes } from "../context/PersonalNotesContext";
+import { useToast } from "../components/Toast";
+import { buildPersonalNotesChange } from "../utils/personalNotes";
 import { ToggleButton } from "../ui/buttons/ToggleButton";
 import {
   colourAmberPlain,
@@ -210,6 +213,7 @@ export default function CharacterSheet({
   recordComponentRender("CharacterSheet");
   const params = useParams<{ campaignId: string; characterId: string }>();
   const { dmCampaigns, playerCampaigns } = useCampaignsContext();
+  const toast = useToast();
 
   const {
     path,
@@ -662,6 +666,71 @@ export default function CharacterSheet({
     [patchField]
   );
 
+  const savePersonalNotes = useCallback<SavePersonalNotes>(
+    async (collection, id, text) => {
+      if (!character) return false;
+      const change = buildPersonalNotesChange(character, collection, id, text);
+      if (!change) {
+        toast.error("That entry is no longer on this character.");
+        return false;
+      }
+      switch (change.field) {
+        case "skills":
+          return handleUpdateSkills(change.value);
+        case "talentsAndTraits":
+          return handleUpdateTalents(change.value);
+        case "corruption":
+          return handleUpdateCorruption(change.value);
+        case "insanity":
+          return handleUpdateInsanity(change.value);
+        case "gear":
+          return handleUpdateGear(change.value);
+        case "consumables":
+          return handleUpdateConsumables(change.value);
+        case "drugs":
+          return handleUpdateDrugs(change.value);
+        case "cybernetics":
+          return handleUpdateCybernetics(change.value);
+        case "armour":
+          return handleUpdateArmour(change.value);
+        case "archeotech":
+          return handleUpdateArcheotech(change.value);
+        case "rangedWeapons":
+          return handleUpdateRangedWeapons(change.value);
+        case "meleeWeapons":
+          return handleUpdateMeleeWeapons(change.value);
+        case "grenades":
+          return handleUpdateGrenades(change.value);
+        case "shields":
+          return handleUpdateShields(change.value);
+        case "psychic":
+          return handleUpdatePsychic(change.value);
+        case "companions":
+          return handleUpdateCompanions(change.value);
+      }
+    },
+    [
+      character,
+      toast,
+      handleUpdateSkills,
+      handleUpdateTalents,
+      handleUpdateCorruption,
+      handleUpdateInsanity,
+      handleUpdateGear,
+      handleUpdateConsumables,
+      handleUpdateDrugs,
+      handleUpdateCybernetics,
+      handleUpdateArmour,
+      handleUpdateArcheotech,
+      handleUpdateRangedWeapons,
+      handleUpdateMeleeWeapons,
+      handleUpdateGrenades,
+      handleUpdateShields,
+      handleUpdatePsychic,
+      handleUpdateCompanions,
+    ]
+  );
+
   // ================================================================
   // RENDERING LOGIC
   // ================================================================
@@ -754,7 +823,7 @@ export default function CharacterSheet({
     ? `${uiCorner} border p-4 lg:p-5 transition-colors ${colourEditOverrideSurface}`
     : `${uiSectionShell} p-4 lg:p-5 transition-colors`;
 
-  return (
+  const sheetContent = (
     <CampaignCustomItemsScope
       campaignId={params.campaignId ?? ""}
       userId={effectiveUserId}
@@ -1154,5 +1223,11 @@ export default function CharacterSheet({
         {revokeRecoveryCodeFlow.modal}
       </PageShell>
     </CampaignCustomItemsScope>
+  );
+
+  return (
+    <PersonalNotesContext.Provider value={savePersonalNotes}>
+      {sheetContent}
+    </PersonalNotesContext.Provider>
   );
 }

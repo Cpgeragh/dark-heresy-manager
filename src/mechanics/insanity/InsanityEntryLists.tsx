@@ -9,6 +9,7 @@ import type {
 import { AddButton } from "../../ui/buttons/AddButton";
 import { EntryActionButton } from "../../ui/buttons/EntryActionButton";
 import { OwnedEntryRow } from "../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../ui/entryNotesLine";
 import { ViewButton } from "../../ui/buttons/ViewButton";
 import { Chip } from "../../ui/chips/Chip";
 import { RollChip } from "../../ui/chips/RollChip";
@@ -86,6 +87,14 @@ function DisorderRow({
             )}
           </>
         }
+        lines={{
+          notes: entryNotesLine(disorder.name, undefined, {
+            collection: "disorders",
+            id: disorder.id,
+            notes: disorder.personalNotes,
+            editable,
+          }),
+        }}
         actions={
           editable && nextSeverity ? (
             <EntryActionButton onClick={() => setEscalateArmed(true)}>
@@ -146,6 +155,14 @@ function TraumaRow({
           </>
         ) : undefined
       }
+      lines={{
+        notes: entryNotesLine(name, undefined, {
+          collection: "trauma",
+          id: trauma.id,
+          notes: trauma.personalNotes,
+          editable,
+        }),
+      }}
       removal={{ kind: "Trauma", onRemove }}
     />
   );

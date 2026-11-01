@@ -47,6 +47,7 @@ export interface Characteristics {
 export type SkillAdvanceLevel = "untrained" | "trained" | "+10" | "+20";
 
 export interface SkillEntry {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   name: string;
 
@@ -95,6 +96,7 @@ export interface FateBlock {
 export type InsanityDisorderSeverity = "Minor" | "Severe" | "Acute";
 
 export interface InsanityDisorderEntry {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string;
   type: string;
@@ -106,6 +108,7 @@ export interface InsanityDisorderEntry {
 }
 
 export interface InsanityTraumaEntry {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string;
   roll?: string;
@@ -124,6 +127,7 @@ export interface InsanityBlock {
 }
 
 export interface CorruptionMalignancyEntry {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string;
   roll?: string;
@@ -136,6 +140,7 @@ export interface CorruptionMalignancyEntry {
 }
 
 export interface CorruptionMutationEntry {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string;
   roll?: string;
@@ -195,6 +200,7 @@ export interface WeaponMagazineSlot {
 }
 
 export interface RangedWeapon extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // set when created from RANGED_WEAPON_REFERENCE
   name: string;
@@ -208,6 +214,7 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
   rld?: string;
   specialRules?: string;
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   weight?: string;
   value?: string;
   availability?: string;
@@ -229,6 +236,7 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
 }
 
 export interface MeleeWeapon extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // set when created from MELEE_WEAPON_REFERENCE
   name: string;
@@ -238,6 +246,7 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   pen?: string;
   specialRules?: string;
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   /** Multiplier applied to Strength Bonus for total melee Damage (Power Fist = 2). */
   strengthBonusMultiplier?: number;
   weight?: string;
@@ -261,6 +270,7 @@ export type StandardCraftsmanship = "Poor" | "Common" | "Good" | "Best";
 export type WeaponCraftsmanship = StandardCraftsmanship;
 
 export interface ShieldItem extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // set when created from SHIELD_REFERENCE
   name: string;
@@ -273,6 +283,7 @@ export interface ShieldItem extends CustomLibraryLinkFields {
   specialRules?: string;
   rules?: string;
   notes?: string; // full rules text
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   weight?: string;
   value?: string;
   availability?: string;
@@ -295,6 +306,7 @@ export type ArmourCraftsmanship = StandardCraftsmanship;
 export type ArmourQuality = "Primitive" | "Flak" | "Mesh" | "Sanctified" | "Powered" | "Overload";
 
 export interface WornArmourPiece extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // links back to ArmourRef.id
   name: string;
@@ -308,6 +320,7 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
   worn: boolean;
   description?: string;
   notes?: string; // rules text
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   weight?: string;
   value?: string;
   availability?: string;
@@ -326,6 +339,7 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
 }
 
 export interface CompanionItem {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   /** Links back to CompanionRef.id. */
   referenceId: string;
@@ -339,12 +353,14 @@ export interface CompanionItem {
 export type CyberneticCraftsmanship = Exclude<StandardCraftsmanship, "Best">;
 
 export interface CyberneticItem extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // links back to CyberneticRef.id
   name: string;
   craftsmanship?: CyberneticCraftsmanship;
   notes?: string; // player-added notes
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   value?: string;
   weight?: string;
   availability?: string;
@@ -363,11 +379,13 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
  * GEAR
  */
 export interface GearItem extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // links back to GearRef.id
   name: string;
   description?: string;
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   weight?: string;
   value?: string;
   availability?: string;
@@ -381,6 +399,7 @@ export interface GearItem extends CustomLibraryLinkFields {
  * ARCHEOTECH
  */
 export interface ArcheotechItem extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // links back to ArcheotechRef.id
   name: string;
@@ -388,6 +407,7 @@ export interface ArcheotechItem extends CustomLibraryLinkFields {
   description?: string;
   notes?: string;
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   weight?: string;
   value?: string;
   availability?: string;
@@ -419,6 +439,7 @@ export interface ArcheotechItem extends CustomLibraryLinkFields {
  * DRUGS
  */
 export interface DrugItem extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // links back to DrugRef.id
   name: string;
@@ -429,18 +450,21 @@ export interface DrugItem extends CustomLibraryLinkFields {
   source?: string;
   notes?: string; // player-added notes
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
 }
 
 /**
  * CONSUMABLES
  */
 export interface ConsumableItem extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // links back to ConsumableRef.id
   name: string;
   quantity: number;
   description?: string;
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   weight?: string;
   value?: string; // cost per dose/unit
   availability?: string;
@@ -451,6 +475,7 @@ export interface ConsumableItem extends CustomLibraryLinkFields {
  * GRENADES
  */
 export interface GrenadeItem extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   referenceId?: string; // links back to GrenadeRef.id
   name: string;
@@ -463,6 +488,7 @@ export interface GrenadeItem extends CustomLibraryLinkFields {
   pen?: string;
   specialRules?: string;
   rules?: string;
+  itemNotes?: string; // the creator's note on a custom item, shared by every copy
   weight?: string;
   value?: string; // cost per grenade
   availability?: string;
@@ -577,6 +603,7 @@ export interface CareerStartingChoices {
 }
 
 export interface TalentEntry extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   uid: string; // unique per-character instance (crypto.randomUUID())
   talentId: string; // references TalentData.id or TraitData.id
   name: string; // display name, e.g. "Hatred (Heretics)"
@@ -584,6 +611,7 @@ export interface TalentEntry extends CustomLibraryLinkFields {
   notes?: string; // optional player notes
   description?: string; // a custom trait's own rules text
   source?: string; // a custom trait's own origin (Custom / 2nd Ed)
+  itemNotes?: string; // a custom trait's creator note, shared by every copy
   acquisition?: TalentAcquisitionDetails;
   /** Hand-typed XP cost, only used when this entry has no real cost on the character's career table. */
   manualCost?: number;
@@ -606,6 +634,7 @@ export interface EliteAdvancePurchase {
 }
 
 export interface EliteAdvanceEntry {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   uid: string;
   eliteAdvanceId: string;
   name: string;
@@ -731,6 +760,7 @@ export interface ExperienceBlock {
  * PSYCHIC
  */
 export interface PsychicPower extends CustomLibraryLinkFields {
+  personalNotes?: string; // the player's own note, kept on this character's copy only
   id: string;
   /** Character-only link to the exact Minor Psychic Power/Psychic Power purchase consumed. */
   talentEntryUid?: string;
@@ -743,6 +773,7 @@ export interface PsychicPower extends CustomLibraryLinkFields {
   sustained?: string;
   range?: string;
   description?: string;
+  itemNotes?: string; // the creator's note on a custom power, shared by every copy
   source?: string;
   origin?: CustomItemOrigin;
   isMinor?: boolean;

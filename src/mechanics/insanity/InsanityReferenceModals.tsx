@@ -1,5 +1,5 @@
 import { InfoParagraph, InfoSection } from "../../ui/InfoSection";
-import { uiRuleName, uiStackBody } from "../../ui/styles/editableStyles";
+import { uiStackBody } from "../../ui/styles/editableStyles";
 
 export function DisorderInfoContent({
   type,
@@ -17,10 +17,9 @@ export function DisorderInfoContent({
   return (
     <div className={uiStackBody}>
       {(type !== name || typeDescription) && (
-        <div>
-          <p className={uiRuleName}>{type}</p>
+        <InfoSection heading={type}>
           {typeDescription && <InfoParagraph>{typeDescription}</InfoParagraph>}
-        </div>
+        </InfoSection>
       )}
       <div>
         <InfoParagraph>{description}</InfoParagraph>

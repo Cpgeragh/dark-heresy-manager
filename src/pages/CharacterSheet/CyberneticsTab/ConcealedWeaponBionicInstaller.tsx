@@ -87,6 +87,7 @@ export function ConcealedWeaponBionicInstaller({
                 <ImplantRow
                   item={item}
                   editable={false}
+                  forceExpanded
                   onToggleInstalled={() => {}}
                   onRemove={() => {}}
                 />

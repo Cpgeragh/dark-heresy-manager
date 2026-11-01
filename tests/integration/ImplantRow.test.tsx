@@ -3,6 +3,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { ReactElement } from "react";
+import { openEntryCard } from "../utils/entryCard";
 import { ImplantRow } from "../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow";
 import type { CyberneticItem } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
@@ -16,9 +18,15 @@ function item(over: Partial<CyberneticItem> = {}): CyberneticItem {
   return { id: "c1", name: "Auto-Quill", ...over };
 }
 
+function renderOpen(ui: ReactElement) {
+  const result = render(ui);
+  openEntryCard();
+  return result;
+}
+
 describe("ImplantRow", () => {
   it("renders the item name", () => {
-    render(
+    renderOpen(
       <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
     );
     expect(screen.getByText("Auto-Quill")).toBeInTheDocument();
@@ -26,7 +34,7 @@ describe("ImplantRow", () => {
 
   it("shows a status badge when linked to a campaign library item", () => {
     const libraryItem = { status: "published" } as CampaignCustomItem<"cybernetic">;
-    render(
+    renderOpen(
       <ImplantRow
         item={item()}
         libraryItem={libraryItem}
@@ -39,7 +47,7 @@ describe("ImplantRow", () => {
   });
 
   it("shows the linked arm and weapon chips for a concealed-weapon-bionic implant", () => {
-    render(
+    renderOpen(
       <ImplantRow
         item={item({ referenceId: CONCEALED_WEAPON_BIONIC_ID, craftsmanship: "Common" })}
         linkedArmName="Left Bionic Arm"
@@ -55,7 +63,7 @@ describe("ImplantRow", () => {
   });
 
   it("shows craftsmanship as plain text on a Craftsmanship line, not as a button", () => {
-    render(
+    renderOpen(
       <ImplantRow
         item={item({ referenceId: CONCEALED_WEAPON_BIONIC_ID, craftsmanship: "Common" })}
         editable={true}
@@ -71,7 +79,7 @@ describe("ImplantRow", () => {
 
   it("shows the item rules behind the Rules line", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <ImplantRow
         item={item({ name: "Bionic Arm", referenceId: "cr-bionic-arm" })}
         editable={true}
@@ -88,8 +96,8 @@ describe("ImplantRow", () => {
     );
   });
 
-  it("prints Craftsmanship before Rules, then Gained from, with the Linked chips below the lines", () => {
-    render(
+  it("prints Craftsmanship before Rules, then Gained from and Notes, with the Linked chips below the lines", () => {
+    renderOpen(
       <ImplantRow
         item={item({
           referenceId: CONCEALED_WEAPON_BIONIC_ID,
@@ -107,15 +115,15 @@ describe("ImplantRow", () => {
     );
 
     const labels = screen
-      .getAllByText(/^(Craftsmanship|Rules|Gained from|Linked)$/)
+      .getAllByText(/^(Craftsmanship|Rules|Gained from|Notes|Linked)$/)
       .map((label) => label.textContent);
 
-    expect(labels).toEqual(["Craftsmanship", "Rules", "Gained from", "Linked"]);
+    expect(labels).toEqual(["Craftsmanship", "Rules", "Gained from", "Notes", "Linked"]);
   });
 
   it("always shows the information icon and says nothing was recorded without player notes", async () => {
     const user = userEvent.setup();
-    render(
+    renderOpen(
       <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
     );
 
@@ -124,7 +132,7 @@ describe("ImplantRow", () => {
   });
 
   it("puts the Remove button first in the action area", () => {
-    render(
+    renderOpen(
       <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
     );
 
@@ -135,7 +143,7 @@ describe("ImplantRow", () => {
   it("shows Remove for a talent-granted implant", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(
+    renderOpen(
       <ImplantRow
         item={item({ grantedByTalentEntryUid: "t1", grantedByTalentName: "Skin of Iron" })}
         editable={true}
@@ -153,7 +161,7 @@ describe("ImplantRow", () => {
   it("calls onRemove for a normal implant only after confirmation", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(
+    renderOpen(
       <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={onRemove} />
     );
 
@@ -166,7 +174,7 @@ describe("ImplantRow", () => {
   it("keeps the Remove pop-up open when the removal is refused", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn().mockResolvedValue(false);
-    render(
+    renderOpen(
       <ImplantRow item={item()} editable={true} onToggleInstalled={vi.fn()} onRemove={onRemove} />
     );
 
@@ -178,7 +186,7 @@ describe("ImplantRow", () => {
   });
 
   it("shows Uninstall on an installed implant and Install on one that is not", () => {
-    const { rerender } = render(
+    const { rerender } = renderOpen(
       <ImplantRow item={item()} editable onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
     );
     expect(screen.getByRole("button", { name: "Uninstall" })).toBeInTheDocument();
@@ -197,7 +205,7 @@ describe("ImplantRow", () => {
   it("calls onToggleInstalled with the implant id", async () => {
     const user = userEvent.setup();
     const onToggleInstalled = vi.fn();
-    render(
+    renderOpen(
       <ImplantRow
         item={item({ installed: false })}
         editable
@@ -211,7 +219,7 @@ describe("ImplantRow", () => {
   });
 
   it("shows a viewer an Installed chip only while the implant is installed", () => {
-    const { rerender } = render(
+    const { rerender } = renderOpen(
       <ImplantRow item={item()} editable={false} onToggleInstalled={vi.fn()} onRemove={vi.fn()} />
     );
     expect(screen.getByText("Installed")).toBeInTheDocument();
@@ -228,7 +236,7 @@ describe("ImplantRow", () => {
   });
 
   it("shows the weight chip when the implant has a weight", () => {
-    render(
+    renderOpen(
       <ImplantRow
         item={item({ weight: "3 kg" })}
         editable
@@ -240,7 +248,7 @@ describe("ImplantRow", () => {
   });
 
   it("has no Install button on a Concealed Weapon Bionic", () => {
-    render(
+    renderOpen(
       <ImplantRow
         item={item({ referenceId: CONCEALED_WEAPON_BIONIC_ID, installed: true })}
         editable

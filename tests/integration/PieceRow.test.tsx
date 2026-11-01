@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { openEntryCard } from "../utils/entryCard";
 
 import { PieceRow } from "../../src/pages/CharacterSheet/ArmourTab/PieceRow";
 import type { WornArmourPiece } from "../../src/types/Character";
@@ -34,6 +35,7 @@ function renderRow(props: Partial<React.ComponentProps<typeof PieceRow>> = {}) {
       {...props}
     />
   );
+  openEntryCard();
   return { onToggle, onRemove };
 }
 
@@ -145,14 +147,14 @@ describe("PieceRow shared layout", () => {
     expect(screen.getByRole("dialog", { name: "Remove Armour Piece" })).toBeInTheDocument();
   });
 
-  it("prints Craftsmanship, then Qualities, then Rules", () => {
+  it("prints Craftsmanship, then Qualities, then Rules, then Notes", () => {
     renderRow();
 
     const labels = screen
-      .getAllByText(/^(Craftsmanship|Qualities|Rules)$/)
+      .getAllByText(/^(Craftsmanship|Qualities|Rules|Notes)$/)
       .map((label) => label.textContent);
 
-    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules"]);
+    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules", "Notes"]);
   });
 
   it("keeps the Location and AP boxes in the one chip row", () => {

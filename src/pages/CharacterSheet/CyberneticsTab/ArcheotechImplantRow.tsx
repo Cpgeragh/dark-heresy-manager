@@ -5,6 +5,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { Chip } from "../../../ui/chips/Chip";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
@@ -37,6 +38,7 @@ export function ArcheotechImplantRow({
     <OwnedEntryRow
       name={item.name}
       editable={editable}
+      collapsible
       inactive={!installed}
       badge={highlightAsArcheotech ? <Chip colour="amber">Archeotech</Chip> : undefined}
       tone={highlightAsArcheotech ? "archeotech" : "default"}
@@ -59,6 +61,12 @@ export function ArcheotechImplantRow({
         </>
       }
       lines={{
+        notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
+          collection: "archeotech",
+          id: item.id,
+          notes: item.personalNotes,
+          editable,
+        }),
         craftsmanship: item.craftsmanship ? { value: item.craftsmanship } : undefined,
         rules: {
           info: rules ? (

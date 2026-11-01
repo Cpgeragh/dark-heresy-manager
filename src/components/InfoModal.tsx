@@ -14,9 +14,11 @@ interface InfoModalProps {
   title: string;
   content?: ReactNode;
   as?: "button" | "span";
+  /** Hides the window while another pop-up opened from it is showing. */
+  suspended?: boolean;
 }
 
-export function InfoModal({ title, content, as = "button" }: InfoModalProps) {
+export function InfoModal({ title, content, as = "button", suspended = false }: InfoModalProps) {
   const [open, setOpen] = useState(false);
 
   const triggerClassName = `inline-flex h-3.5 w-[18px] shrink-0 items-center justify-center text-sm leading-none transform-gpu ${uiInfoButton}`;
@@ -61,6 +63,7 @@ export function InfoModal({ title, content, as = "button" }: InfoModalProps) {
       {open && (
         <ModalShell
           ariaLabel={title}
+          suspended={suspended}
           onClose={() => setOpen(false)}
           className="max-w-sm lg:max-w-2xl max-h-[70vh] lg:max-h-[85vh] overflow-y-auto whitespace-normal"
         >

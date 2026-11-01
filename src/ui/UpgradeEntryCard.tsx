@@ -1,13 +1,8 @@
 import type { ReactNode } from "react";
 import { InfoModal } from "../components/InfoModal";
+import { EntryDetailLine } from "./EntryDetailLine";
 import { RemoveEntryButton } from "./RemoveEntryButton";
-import {
-  uiCell,
-  uiInfoModalWrapper,
-  uiSplitRow,
-  uiTextBody,
-  uiTextLabel,
-} from "./styles/editableStyles";
+import { uiCell, uiSplitRow, uiTextBody } from "./styles/editableStyles";
 
 /** A fitted upgrade on an armour piece or weapon: its name with Remove, its chips, and a Rules icon. */
 export function UpgradeEntryCard({
@@ -36,11 +31,8 @@ export function UpgradeEntryCard({
         )}
       </div>
       {chips}
-      <div className="flex items-center gap-1.5 mt-1">
-        <span className={uiTextLabel}>Rules</span>
-        <span className={uiInfoModalWrapper}>
-          <InfoModal title={name} content={rules} />
-        </span>
+      <div className="mt-1">
+        <EntryDetailLine label="Rules" info={<InfoModal title={name} content={rules} />} />
       </div>
     </div>
   );

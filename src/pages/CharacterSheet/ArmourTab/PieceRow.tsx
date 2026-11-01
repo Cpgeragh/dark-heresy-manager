@@ -8,6 +8,7 @@ import {
 } from "../../../ui/styles/editableStyles";
 import { StateToggleButton } from "../../../ui/buttons/StateToggleButton";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -74,6 +75,7 @@ export function PieceRow({
       <OwnedEntryRow
         name={piece.name}
         editable={editable}
+        collapsible
         inactive={!worn}
         information={
           piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
@@ -92,6 +94,12 @@ export function PieceRow({
           </>
         }
         lines={{
+          notes: entryNotesLine(piece.name, piece.itemNotes, {
+            collection: "armour",
+            id: piece.id,
+            notes: piece.personalNotes,
+            editable,
+          }),
           craftsmanship: {
             value: craftsmanship,
             info: (

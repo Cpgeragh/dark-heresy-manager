@@ -6,13 +6,7 @@ import type { ShieldItem } from "../../../types/Character";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
-import {
-  uiChipRow,
-  uiTextBody,
-  uiTextLabel,
-  uiInfoModalWrapper,
-  uiStackField,
-} from "../../../ui/styles/editableStyles";
+import { uiChipRow, uiStackField } from "../../../ui/styles/editableStyles";
 import { AccordionCard } from "../../../ui/AccordionCard";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -21,7 +15,8 @@ import { StatChip } from "../../../ui/chips/StatChip";
 import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { RemoveEntryButton } from "../../../ui/RemoveEntryButton";
-import { EntryDetailLine } from "../../../ui/EntryDetailLine";
+import { EntryLines } from "../../../ui/EntryLines";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { InfoParagraph } from "../../../ui/InfoSection";
 import { colourDivider } from "../../../ui/styles/colourTokens";
 
@@ -117,30 +112,35 @@ export function ShieldCard({
 
       {/* Qualities / Rules */}
       <div className={uiStackField}>
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Qualities</span>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            {hasRules ? item.specialRules : "-"}
-          </span>
-          {ruleNamesInLookup.length > 0 && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal
-                title={`${item.name} Qualities`}
-                content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
-              />
-            </span>
-          )}
-        </div>
-        <EntryDetailLine
-          label="Rules"
-          info={
-            item.rules?.trim() ? (
-              <InfoModal
-                title={`${item.name} Rules`}
-                content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
-              />
-            ) : undefined
-          }
+        <EntryLines
+          lines={{
+            qualities: {
+              value: hasRules ? item.specialRules : undefined,
+              info:
+                ruleNamesInLookup.length > 0 ? (
+                  <InfoModal
+                    title={`${item.name} Qualities`}
+                    content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
+                  />
+                ) : undefined,
+            },
+            rules: {
+              info: item.rules?.trim() ? (
+                <InfoModal
+                  title={`${item.name} Rules`}
+                  content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
+                />
+              ) : undefined,
+            },
+            notes: onSelect
+              ? undefined
+              : entryNotesLine(item.name, item.itemNotes, {
+                  collection: "shields",
+                  id: item.id,
+                  notes: item.personalNotes,
+                  editable,
+                }),
+          }}
         />
       </div>
 

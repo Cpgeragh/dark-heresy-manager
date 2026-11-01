@@ -28,6 +28,7 @@ export function CustomDrugForm({
         value: initialItem?.value,
         description: initialItem?.notes,
         rules: initialItem?.rules,
+        itemNotes: initialItem?.itemNotes,
       }}
       quantity={{ initialValue: initialItem?.quantity, visible: includeQuantity }}
       title={title}
@@ -46,6 +47,7 @@ export function CustomDrugForm({
           source: draft.source,
           notes: draft.description,
           rules: draft.rules,
+          itemNotes: draft.itemNotes,
           customLibraryId: initialItem?.customLibraryId,
           customLibraryVersionId: initialItem?.customLibraryVersionId,
         })

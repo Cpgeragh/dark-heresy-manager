@@ -12,6 +12,7 @@ export function toCustomPowerData(power: PsychicPower): CustomPsychicPowerData {
     psyRatingTalentEntryUid: _psyRatingTalentEntryUid,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     known: _known,
     ...data
   } = power;

@@ -251,3 +251,13 @@ describe("MeleeCard Two-Handed quality", () => {
     expect(screen.queryByText(/Two-Handed/)).not.toBeInTheDocument();
   });
 });
+
+describe("MeleeCard labelled lines", () => {
+  it("prints Craftsmanship, Qualities, Rules and Notes in the shared order", () => {
+    renderCard();
+    const labels = screen
+      .getAllByText(/^(Craftsmanship|Qualities|Rules|Notes)$/)
+      .map((label) => label.textContent);
+    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules", "Notes"]);
+  });
+});

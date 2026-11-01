@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { openEntryCard } from "../utils/entryCard";
 
 import { ForceFieldRow } from "../../src/pages/CharacterSheet/ArmourTab/ForceFieldRow";
 import type { WornArmourPiece } from "../../src/types/Character";
@@ -35,6 +36,7 @@ function renderRow(props: Partial<React.ComponentProps<typeof ForceFieldRow>> = 
       {...props}
     />
   );
+  openEntryCard();
   return { onToggle, onRemove };
 }
 
@@ -153,13 +155,35 @@ describe("ForceFieldRow shared layout", () => {
     expect(screen.getByRole("dialog", { name: "Remove Force Field" })).toBeInTheDocument();
   });
 
-  it("prints Craftsmanship, then Qualities, then Rules", () => {
+  it("prints Craftsmanship, then Qualities, then Rules, then Notes", () => {
     renderRow();
 
     const labels = screen
-      .getAllByText(/^(Craftsmanship|Qualities|Rules)$/)
+      .getAllByText(/^(Craftsmanship|Qualities|Rules|Notes)$/)
       .map((label) => label.textContent);
 
-    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules"]);
+    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules", "Notes"]);
+  });
+});
+
+describe("ForceFieldRow Spare Cells line", () => {
+  it("shows a Spare Cells line with a stepper for a field that takes spare cells", async () => {
+    const user = userEvent.setup();
+    const onUpdateSpareCells = vi.fn();
+    renderRow({
+      piece: { ...basePiece, referenceId: "ih-refractor-field", spareCells: 1 },
+      onUpdateSpareCells,
+    });
+
+    expect(screen.getByText("Spare Cells")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Increase" }));
+
+    expect(onUpdateSpareCells).toHaveBeenCalledWith("f1", 2);
+  });
+
+  it("shows no Spare Cells line for a field without spare cells", () => {
+    renderRow();
+
+    expect(screen.queryByText("Spare Cells")).not.toBeInTheDocument();
   });
 });

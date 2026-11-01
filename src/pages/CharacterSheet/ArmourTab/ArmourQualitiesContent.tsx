@@ -3,7 +3,8 @@
 import { InfoModal } from "../../../components/InfoModal";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import { PickerRowLine } from "../../../ui/pickers/PickerRowParts";
-import { uiRuleName, uiStackBody, uiTextDescription } from "../../../ui/styles/editableStyles";
+import { uiStackBody } from "../../../ui/styles/editableStyles";
+import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
 
 /** The rule names and descriptions behind the Qualities line of an armour piece or force field. */
 export function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
@@ -13,10 +14,9 @@ export function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
         const desc = ARMOUR_SPECIAL_RULES[name];
         if (!desc) return null;
         return (
-          <div key={name}>
-            <p className={uiRuleName}>{name}</p>
-            <p className={`${uiTextDescription} mt-1`}>{desc}</p>
-          </div>
+          <InfoSection key={name} heading={name}>
+            <InfoParagraph>{desc}</InfoParagraph>
+          </InfoSection>
         );
       })}
     </div>

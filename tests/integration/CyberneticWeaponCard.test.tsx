@@ -85,7 +85,15 @@ describe("CyberneticWeaponCard rules and description", () => {
 });
 
 describe("CyberneticWeaponCard origin", () => {
-  it("shows the implant name under a labeled Gained From row", () => {
+  it("prints Craftsmanship, Qualities, Rules and Gained from in the shared order", () => {
+    renderCard(LASPISTOL, "Common", "Some rules text.");
+    const labels = screen
+      .getAllByText(/^(Craftsmanship|Qualities|Rules|Gained from|Notes)$/)
+      .map((label) => label.textContent);
+    expect(labels).toEqual(["Craftsmanship", "Qualities", "Rules", "Gained from"]);
+  });
+
+  it("shows the implant name under a labeled Gained from row", () => {
     renderCard({
       type: "ranged",
       name: "Laspistol (Compact)",
@@ -93,7 +101,7 @@ describe("CyberneticWeaponCard origin", () => {
       damage: "1d10+1 E",
       pen: "0",
     });
-    expect(screen.getByText("Gained From")).toBeInTheDocument();
+    expect(screen.getByText("Gained from")).toBeInTheDocument();
     expect(screen.getByText("Test Mechadendrite")).toBeInTheDocument();
   });
 });

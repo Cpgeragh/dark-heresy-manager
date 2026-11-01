@@ -183,6 +183,7 @@ describe("ArmourTab", () => {
     ];
     const { onUpdate } = renderTab({ armour });
 
+    fireEvent.click(screen.getAllByRole("button", { name: "Expand Power Armour details" })[0]);
     const upgradeHeader = screen.getAllByText("Upgrades").at(-1)!.parentElement!;
     fireEvent.click(within(upgradeHeader).getByRole("button", { name: "Add Upgrade" }));
     fireEvent.click(screen.getByText("Hexagramatic Wards"));
@@ -204,6 +205,7 @@ describe("ArmourTab", () => {
     ];
     const { onUpdate } = renderTab({ armour });
 
+    fireEvent.click(screen.getAllByRole("button", { name: "Expand Power Armour details" })[0]);
     const wardsLabel = screen.getAllByText("Hexagramatic Wards")[0];
     fireEvent.click(wardsLabel.parentElement!.querySelector("button")!);
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
@@ -276,6 +278,7 @@ describe("ArmourTab", () => {
       ],
     });
 
+    fireEvent.click(screen.getAllByRole("button", { name: "Expand Refractor Field details" })[0]);
     fireEvent.click(screen.getAllByRole("button", { name: "Increase" })[0]);
 
     expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ id: "f1", spareCells: 2 })], {
@@ -329,6 +332,7 @@ describe("ArmourTab", () => {
     ];
     renderTab({ armour, onUpdate });
 
+    fireEvent.click(screen.getAllByRole("button", { name: "Expand Power Armour details" })[0]);
     const wardsLabel = screen.getAllByText("Hexagramatic Wards")[0];
     fireEvent.click(wardsLabel.parentElement!.querySelector("button")!);
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));

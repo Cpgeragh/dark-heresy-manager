@@ -9,6 +9,7 @@ import { Chip } from "../../../ui/chips/Chip";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
+import { entryNotesLine } from "../../../ui/entryNotesLine";
 import { EntryActionButton } from "../../../ui/buttons/EntryActionButton";
 import {
   LEVEL_BADGE,
@@ -106,6 +107,12 @@ export function SkillRow({
             ? `${eliteAdvancePurchase.sourceName} (Elite Advance)`
             : undefined,
           talentEffects: talentSourceSummary || undefined,
+          notes: entryNotesLine(skill.name, undefined, {
+            collection: "skills",
+            id: skill.id,
+            notes: skill.personalNotes,
+            editable,
+          }),
         }}
         actions={
           hasUpgrade ? (

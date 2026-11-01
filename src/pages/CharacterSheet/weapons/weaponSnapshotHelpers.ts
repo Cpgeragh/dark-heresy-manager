@@ -27,6 +27,7 @@ export function toCustomRangedWeaponData(weapon: RangedWeapon): CustomRangedWeap
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     ammoEntries: _ammoEntries,
     equipped: _equipped,
     quantity: _quantity,
@@ -46,6 +47,7 @@ export function toCustomMeleeWeaponData(weapon: MeleeWeapon): CustomMeleeWeaponD
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     equipped: _equipped,
     quantity: _quantity,
     upgrades: _upgrades,
@@ -64,6 +66,7 @@ export function toCustomGrenadeData(grenade: GrenadeItem): CustomGrenadeData {
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     equipped: _equipped,
     quantity: _quantity,
     custom: _custom,
@@ -82,6 +85,7 @@ export function toCustomShieldData(shield: ShieldItem): CustomShieldData {
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     equipped: _equipped,
     ...data
   } = shield;
@@ -219,6 +223,7 @@ export function buildRangedWeaponSnapshot(
     ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
     ...(quantity !== undefined ? { quantity } : {}),
     ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+    ...(copyFields.personalNotes ? { personalNotes: copyFields.personalNotes } : {}),
   };
 }
 
@@ -241,6 +246,7 @@ export function buildMeleeWeaponSnapshot(
     ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
     ...(quantity !== undefined ? { quantity } : {}),
     ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+    ...(copyFields.personalNotes ? { personalNotes: copyFields.personalNotes } : {}),
   };
 }
 
@@ -261,6 +267,7 @@ export function buildGrenadeSnapshot(
     customLibraryId,
     customLibraryVersionId,
     ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+    ...(copyFields.personalNotes ? { personalNotes: copyFields.personalNotes } : {}),
   };
 }
 
@@ -280,6 +287,7 @@ export function buildShieldSnapshot(
     customLibraryId,
     customLibraryVersionId,
     ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+    ...(copyFields.personalNotes ? { personalNotes: copyFields.personalNotes } : {}),
   };
 }
 

@@ -61,6 +61,7 @@ import {
 } from "./armourSnapshotHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import type { PatchOptions } from "../../../hooks/useOptimisticOverlay";
+import { keepPersonalNotes } from "../../../utils/personalNotes";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -309,12 +310,15 @@ export function ArmourTab({
         });
         const updatedArmour = armour.map((armourPiece) =>
           armourPiece.id === editingArmourDefinition.piece.id
-            ? buildArmourSnapshot(
-                armourPiece.id,
-                armourPiece.worn,
-                data,
-                editingArmourDefinition.libraryItem.id,
-                versionId
+            ? keepPersonalNotes(
+                buildArmourSnapshot(
+                  armourPiece.id,
+                  armourPiece.worn,
+                  data,
+                  editingArmourDefinition.libraryItem.id,
+                  versionId
+                ),
+                armourPiece
               )
             : armourPiece
         );

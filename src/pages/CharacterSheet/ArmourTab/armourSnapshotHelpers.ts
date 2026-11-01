@@ -8,6 +8,7 @@ export function toCustomArmourData(piece: WornArmourPiece): CustomArmourData {
     referenceId: _referenceId,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
+    personalNotes: _personalNotes,
     worn: _worn,
     upgrades: _upgrades,
     ...data

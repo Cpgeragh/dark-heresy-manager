@@ -143,6 +143,26 @@ describe("custom-item validation", () => {
     ).not.toThrow();
   });
 
+  it.each([
+    ["gear", {}],
+    ["consumable", {}],
+    ["drug", {}],
+    ["cybernetic", {}],
+    ["weapon", { weaponKind: "melee" }],
+    ["armour", { armourKind: "worn" }],
+    ["archeotech", {}],
+    ["power", {}],
+    ["trait", {}],
+  ])("accepts an item note for %s", (category, extra) => {
+    expect(() =>
+      assertCustomItemData(category, {
+        name: "Item",
+        itemNotes: "Only the GM may use it.",
+        ...extra,
+      })
+    ).not.toThrow();
+  });
+
   it.each(["power", "trait"])("rejects a rules field for %s", (category) => {
     expect(() => assertCustomItemData(category, { name: "Item", rules: "Does a thing." })).toThrow(
       "unsupported field: rules"
