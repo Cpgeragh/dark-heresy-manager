@@ -136,8 +136,8 @@ vi.mock("../../src/pages/CharacterSheet/SkillsTab", async () => {
 vi.mock("../../src/mechanics/talents/TalentsTab", () => ({
   TalentsTab: () => <div>Mock TalentsTab</div>,
 }));
-vi.mock("../../src/mechanics/eliteAdvances/EliteAdvancesTab", () => ({
-  EliteAdvancesTab: () => <div>Mock EliteAdvancesTab</div>,
+vi.mock("../../src/mechanics/eliteAdvances/ElitePackagesTab", () => ({
+  ElitePackagesTab: () => <div>Mock ElitePackagesTab</div>,
 }));
 vi.mock("../../src/mechanics/traits/TraitsTab", () => ({
   TraitsTab: () => <div>Mock TraitsTab</div>,

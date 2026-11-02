@@ -2,7 +2,7 @@
 
 import type {
   SectionDrawerCategory,
-  SectionDrawerPage,
+  SectionDrawerEntry,
   SectionNavigation,
 } from "../../components/SectionDrawer";
 
@@ -10,7 +10,7 @@ interface SheetCategory extends SectionDrawerCategory {
   dmOnly?: boolean;
 }
 
-function alphabetisePages(pages: readonly SectionDrawerPage[]): SectionDrawerPage[] {
+function alphabetisePages(pages: readonly SectionDrawerEntry[]): SectionDrawerEntry[] {
   return [...pages].sort((left, right) => left.label.localeCompare(right.label, "en-GB"));
 }
 
@@ -18,7 +18,7 @@ const SHEET_CATEGORIES: readonly SheetCategory[] = [
   {
     label: "Abilities",
     pages: alphabetisePages([
-      { id: "elite-advances", label: "Elite Advances" },
+      { label: "Elite Advances", pages: [{ id: "elite-packages", label: "Packages" }] },
       { id: "psychic", label: "Psychic" },
       { id: "skills", label: "Skills" },
       { id: "talents", label: "Talents" },

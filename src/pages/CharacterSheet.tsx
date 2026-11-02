@@ -116,10 +116,10 @@ const TalentsTab = memo(
     import("../mechanics/talents/TalentsTab").then(({ TalentsTab }) => ({ default: TalentsTab }))
   )
 );
-const EliteAdvancesTab = memo(
+const ElitePackagesTab = memo(
   lazy(() =>
-    import("../mechanics/eliteAdvances/EliteAdvancesTab").then(({ EliteAdvancesTab }) => ({
-      default: EliteAdvancesTab,
+    import("../mechanics/eliteAdvances/ElitePackagesTab").then(({ ElitePackagesTab }) => ({
+      default: ElitePackagesTab,
     }))
   )
 );
@@ -288,7 +288,7 @@ export default function CharacterSheet({
       import("./CharacterSheet/ArcheotechTab"),
       import("./CharacterSheet/CyberneticsTab"),
       import("../mechanics/talents/TalentsTab"),
-      import("../mechanics/eliteAdvances/EliteAdvancesTab"),
+      import("../mechanics/eliteAdvances/ElitePackagesTab"),
       import("./CharacterSheet/PsychicTab"),
       import("./CharacterSheet/ExperienceTab"),
       import("./CharacterSheet/WeaponTrainingTab"),
@@ -802,7 +802,7 @@ export default function CharacterSheet({
     stats: "Characteristics",
     skills: "Skills",
     talents: "Talents",
-    "elite-advances": "Elite Advances",
+    "elite-packages": "Elite Packages",
     training: "Weapon Training",
     traits: "Traits",
     weapons: "Weapons",
@@ -970,8 +970,8 @@ export default function CharacterSheet({
                 />
               )}
 
-              {activeTab === "elite-advances" && (
-                <EliteAdvancesTab
+              {activeTab === "elite-packages" && (
+                <ElitePackagesTab
                   talents={character.talentsAndTraits}
                   skills={character.skills}
                   experience={character.experience}
@@ -981,7 +981,6 @@ export default function CharacterSheet({
                   rangedWeapons={character.rangedWeapons}
                   meleeWeapons={character.meleeWeapons}
                   archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
-                  willpowerBonus={getCharBonus("wp")}
                   weaponTraining={character.weaponTraining}
                   career={character.header.career}
                   rank={character.header.rank}

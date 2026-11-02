@@ -3,7 +3,9 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
-import { EliteAdvancesTab } from "../../src/mechanics/eliteAdvances/EliteAdvancesTab";
+import { ElitePackagesTab } from "../../src/mechanics/eliteAdvances/ElitePackagesTab";
+import { getSkillDefinition } from "../../src/utils/skillUtils";
+import { openEntryCard } from "../utils/entryCard";
 import type {
   ExperienceBlock,
   InsanityBlock,
@@ -28,6 +30,7 @@ const EXPERIENCE: ExperienceBlock = {
     },
   ],
 };
+const NO_EXPERIENCE: ExperienceBlock = { total: 0, spent: 0, ranks: [] };
 const INSANITY: InsanityBlock = { points: 0, disorders: [] };
 
 function EditableHarness() {
@@ -35,7 +38,7 @@ function EditableHarness() {
   const [skills, setSkills] = useState<SkillEntry[]>([]);
   const [insanity, setInsanity] = useState(INSANITY);
   return (
-    <EliteAdvancesTab
+    <ElitePackagesTab
       talents={talents}
       skills={skills}
       experience={EXPERIENCE}
@@ -53,17 +56,19 @@ function EditableHarness() {
   );
 }
 
-describe("EliteAdvancesTab", () => {
+describe("ElitePackagesTab", () => {
   it("purchases a packaged Elite Advance and records its rolls", async () => {
     const user = userEvent.setup();
     render(<EditableHarness />);
 
-    expect(screen.getByText("No standalone Elite Advances purchased.")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Special"));
+    expect(screen.getByText("No Elite Packages purchased.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
 
-    const picker = screen.getByRole("dialog", { name: "Add Special Elite Advance" });
-    expect(within(picker).getByRole("button", { name: "Show all" })).toBeInTheDocument();
+    const picker = screen.getByRole("dialog", { name: "Add Elite Package" });
+    expect(within(picker).getByRole("tab", { name: "Unlocked" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
     expect(within(picker).getByText("Encarta Maleficarum")).toBeInTheDocument();
     expect(within(picker).getByText("500 XP")).toBeInTheDocument();
 
@@ -74,7 +79,6 @@ describe("EliteAdvancesTab", () => {
     await user.type(within(purchase).getByLabelText("Permanent Fellowship Reduction (1d5)"), "3");
     await user.click(within(purchase).getByRole("button", { name: "Buy for 500 XP" }));
 
-    await user.click(screen.getByRole("button", { name: "Back" }));
     await user.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.getByText("Encarta Maleficarum")).toBeInTheDocument();
   });
@@ -89,7 +93,7 @@ describe("EliteAdvancesTab", () => {
         })
     );
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={EMPTY_TALENTS}
         skills={[]}
         experience={EXPERIENCE}
@@ -101,8 +105,7 @@ describe("EliteAdvancesTab", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
     await user.click(screen.getByText("The Cult of the Red Redemption"));
     const purchase = screen.getByRole("dialog", { name: "Buy The Cult of the Red Redemption" });
     await user.click(within(purchase).getByRole("button", { name: "Buy for 150 XP" }));
@@ -128,7 +131,7 @@ describe("EliteAdvancesTab", () => {
         })
     );
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={EMPTY_TALENTS}
         skills={[]}
         experience={EXPERIENCE}
@@ -140,8 +143,7 @@ describe("EliteAdvancesTab", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
     await user.click(screen.getByText("The Cult of the Red Redemption"));
     const purchase = screen.getByRole("dialog", { name: "Buy The Cult of the Red Redemption" });
     await user.click(within(purchase).getByRole("button", { name: "Buy for 150 XP" }));
@@ -159,14 +161,12 @@ describe("EliteAdvancesTab", () => {
     const user = userEvent.setup();
     render(<EditableHarness />);
 
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
     await user.click(screen.getByText("The Cult of the Red Redemption"));
     const purchase = screen.getByRole("dialog", {
       name: "Buy The Cult of the Red Redemption",
     });
     await user.click(within(purchase).getByRole("button", { name: "Buy for 150 XP" }));
-    await user.click(screen.getByRole("button", { name: "Back" }));
     await user.click(screen.getByRole("button", { name: "Close" }));
 
     expect(screen.getByText("The Cult of the Red Redemption")).toBeInTheDocument();
@@ -176,15 +176,13 @@ describe("EliteAdvancesTab", () => {
     const user = userEvent.setup();
     render(<EditableHarness />);
 
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Special"));
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
     await user.click(screen.getByText("Nascent Psyker"));
     const purchase = screen.getByRole("dialog", { name: "Buy Nascent Psyker" });
     expect(
       within(purchase).getByText("1 random permanent Minor Psychic Power")
     ).toBeInTheDocument();
     await user.click(within(purchase).getByRole("button", { name: "Buy for 0 XP" }));
-    await user.click(screen.getByRole("button", { name: "Back" }));
     await user.click(screen.getByRole("button", { name: "Close" }));
 
     expect(screen.getByText("Nascent Psyker")).toBeInTheDocument();
@@ -194,7 +192,7 @@ describe("EliteAdvancesTab", () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn(async () => true);
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={{
           ...EMPTY_TALENTS,
           eliteAdvances: [
@@ -202,7 +200,7 @@ describe("EliteAdvancesTab", () => {
           ],
         }}
         skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
+        experience={NO_EXPERIENCE}
         insanity={INSANITY}
         psychic={{
           psyRating: 0,
@@ -240,7 +238,7 @@ describe("EliteAdvancesTab", () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn(async () => false);
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={{
           ...EMPTY_TALENTS,
           eliteAdvances: [
@@ -248,7 +246,7 @@ describe("EliteAdvancesTab", () => {
           ],
         }}
         skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
+        experience={NO_EXPERIENCE}
         insanity={INSANITY}
         psychic={{ psyRating: 0, minorPowers: [], majorPowers: [] }}
         editable
@@ -264,62 +262,45 @@ describe("EliteAdvancesTab", () => {
     expect(screen.getByRole("dialog", { name: "Remove Elite Advance" })).toBeInTheDocument();
   });
 
-  it("offers Redemption package advances and buys Flame as real Weapon Training", async () => {
+  it("explains what to do before removing a package that a higher skill tier rests on", async () => {
     const user = userEvent.setup();
     const onUpdateCharacter = vi.fn(async () => true);
-    const talents: TalentsAndTraitsBlock = {
-      ...EMPTY_TALENTS,
-      eliteAdvances: [
-        {
-          uid: "redemption",
-          eliteAdvanceId: "cult-of-the-red-redemption",
-          name: "The Cult of the Red Redemption",
-        },
-      ],
+    const redemptionPurchase = {
+      source: "elite-package" as const,
+      cost: 100,
+      sourceName: "The Cult of the Red Redemption",
+      eliteAdvanceId: "cult-of-the-red-redemption",
     };
     render(
-      <EliteAdvancesTab
-        talents={talents}
-        skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
+      <ElitePackagesTab
+        talents={{
+          ...EMPTY_TALENTS,
+          eliteAdvances: [
+            {
+              uid: "redemption",
+              eliteAdvanceId: "cult-of-the-red-redemption",
+              name: "The Cult of the Red Redemption",
+            },
+          ],
+        }}
+        skills={[
+          {
+            ...getSkillDefinition("secret-tongue-redemption")!,
+            level: "+20",
+            eliteAdvancePurchases: { "+10": redemptionPurchase },
+          },
+        ]}
+        experience={NO_EXPERIENCE}
         insanity={INSANITY}
-        weaponTraining={{ trained: [], exoticWeapons: [] }}
-        career="Adept"
-        rank="Scribe"
         editable
         onUpdateCharacter={onUpdateCharacter}
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Skills"));
-    const skillsPicker = screen.getByRole("dialog", { name: "Add Elite Advance Skill" });
-    expect(within(skillsPicker).getAllByText("Secret Tongue (the Redemption)")).not.toHaveLength(0);
-    expect(within(skillsPicker).getByText("+10")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Back" }));
-    await user.click(screen.getByText("Talents"));
-    const talentsPicker = screen.getByRole("dialog", { name: "Add Elite Advance Talent" });
-    const flameTraining = within(talentsPicker)
-      .getAllByText("Basic Weapon Training (Flame)")
-      .map((element) => element.closest("button"))
-      .find(Boolean);
-    expect(flameTraining).toBeInTheDocument();
-    await user.click(flameTraining!);
+    await user.click(screen.getByRole("button", { name: "Remove The Cult of the Red Redemption" }));
 
-    expect(onUpdateCharacter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        weaponTraining: expect.objectContaining({
-          trained: ["basic-flame"],
-          xpPurchases: { "basic-flame": expect.objectContaining({ cost: 200 }) },
-          eliteAdvancePurchases: {
-            "basic-flame": expect.objectContaining({
-              source: "elite-package",
-              eliteAdvanceId: "cult-of-the-red-redemption",
-            }),
-          },
-        }),
-      })
-    );
+    expect(await screen.findByText(/Step 1: On the Skills page/)).toBeInTheDocument();
+    expect(onUpdateCharacter).not.toHaveBeenCalled();
   });
 
   it("shows the complete supplied rules from a purchased card", async () => {
@@ -335,7 +316,7 @@ describe("EliteAdvancesTab", () => {
       ],
     };
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={talents}
         skills={[]}
         experience={EXPERIENCE}
@@ -369,7 +350,7 @@ describe("EliteAdvancesTab", () => {
     };
 
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={talents}
         skills={[]}
         experience={EXPERIENCE}
@@ -378,6 +359,7 @@ describe("EliteAdvancesTab", () => {
         onUpdateCharacter={async () => true}
       />
     );
+    openEntryCard();
 
     expect(screen.getByText("Bloodsworn Charter")).toBeInTheDocument();
     expect(screen.getByText("Gained from")).toBeInTheDocument();
@@ -388,175 +370,98 @@ describe("EliteAdvancesTab", () => {
     expect(screen.queryByText("0 XP")).not.toBeInTheDocument();
   });
 
-  it("offers Special, Skill, and Talent purchase routes in one picker", async () => {
+  it("opens on the Unlocked list and lists every other package under All", async () => {
     const user = userEvent.setup();
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={EMPTY_TALENTS}
         skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
+        experience={NO_EXPERIENCE}
         insanity={INSANITY}
         editable={false}
         onUpdateCharacter={async () => true}
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "View Elite Advances" }));
-    const picker = screen.getByRole("dialog", { name: "View Elite Advances" });
-    expect(within(picker).getByText("Special")).toBeInTheDocument();
-    expect(within(picker).getByText("Skills")).toBeInTheDocument();
-    expect(within(picker).getByText("Talents")).toBeInTheDocument();
-  });
-
-  it("does not offer automatic Alternate Rank grants through Special Show all", async () => {
-    const user = userEvent.setup();
-    render(
-      <EliteAdvancesTab
-        talents={EMPTY_TALENTS}
-        skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
-        insanity={INSANITY}
-        editable={false}
-        onUpdateCharacter={async () => true}
-      />
+    await user.click(screen.getByRole("button", { name: "View Elite Packages" }));
+    const picker = screen.getByRole("dialog", { name: "View Elite Packages" });
+    expect(within(picker).getByRole("tab", { name: "Unlocked" })).toHaveAttribute(
+      "aria-selected",
+      "true"
     );
+    expect(within(picker).getByText("Nascent Psyker")).toBeInTheDocument();
+    expect(within(picker).queryByText("Encarta Maleficarum")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "View Elite Advances" }));
-    await user.click(screen.getByText("Special"));
-    await user.click(screen.getByRole("button", { name: "Show all" }));
+    await user.click(within(picker).getByRole("tab", { name: "All" }));
 
-    expect(screen.getByText("Encarta Maleficarum")).toBeInTheDocument();
-    expect(screen.queryByText("Bloodsworn Charter")).not.toBeInTheDocument();
+    expect(within(picker).getByText("Encarta Maleficarum")).toBeInTheDocument();
+    expect(within(picker).queryByText("Nascent Psyker")).not.toBeInTheDocument();
+    expect(within(picker).queryByText("Bloodsworn Charter")).not.toBeInTheDocument();
   });
 
-  it("shows the complete Talent catalogue through Show all", async () => {
+  it("lets only the DM buy from the All list, and players still see it", async () => {
     const user = userEvent.setup();
-    render(
-      <EliteAdvancesTab
+    const { unmount } = render(
+      <ElitePackagesTab
         talents={EMPTY_TALENTS}
         skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
+        experience={NO_EXPERIENCE}
         insanity={INSANITY}
-        editable={false}
-        onUpdateCharacter={async () => true}
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "View Elite Advances" }));
-    await user.click(screen.getByText("Talents"));
-    await user.click(screen.getByRole("button", { name: "Show all" }));
-
-    const picker = screen.getByRole("dialog", { name: "View Elite Advance Talents" });
-    const pureFaith = within(picker)
-      .getAllByText("Pure Faith")
-      .map((element) => element.closest("button"))
-      .find((button) => button?.textContent?.trim().startsWith("Pure Faith"));
-    expect(pureFaith).toBeInTheDocument();
-  });
-
-  it("opens the normal acquisition form before saving an Elite Advance Talent", async () => {
-    const user = userEvent.setup();
-    const onUpdateCharacter = vi.fn(async () => true);
-    render(
-      <EliteAdvancesTab
-        talents={EMPTY_TALENTS}
-        skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
-        insanity={INSANITY}
-        willpowerBonus={4}
-        isDM
         editable
-        onUpdateCharacter={onUpdateCharacter}
+        onUpdateCharacter={async () => true}
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Talents"));
-    await user.click(screen.getByRole("button", { name: "Show all" }));
-    await user.click(screen.getByText("Touched by the Fates"));
-
-    const costPicker = screen.getByRole("dialog", { name: "Buy Touched by the Fates" });
-    await user.type(within(costPicker).getByRole("textbox"), "200");
-    await user.click(within(costPicker).getByRole("button", { name: "Buy Touched by the Fates" }));
-
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
+    await user.click(screen.getByRole("tab", { name: "All" }));
+    await user.click(screen.getByText("Encarta Maleficarum"));
     expect(
-      screen.getByRole("dialog", { name: "Touched by the Fates Acquisition" })
-    ).toBeInTheDocument();
-    expect(onUpdateCharacter).not.toHaveBeenCalled();
-  });
+      screen.queryByRole("dialog", { name: "Buy Encarta Maleficarum" })
+    ).not.toBeInTheDocument();
+    unmount();
 
-  it("lets the DM buy a Show all Skill for 0 XP", async () => {
-    const user = userEvent.setup();
-    const onUpdateCharacter = vi.fn(async () => true);
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={EMPTY_TALENTS}
         skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
+        experience={NO_EXPERIENCE}
         insanity={INSANITY}
         isDM
         editable
-        onUpdateCharacter={onUpdateCharacter}
+        onUpdateCharacter={async () => true}
       />
     );
-
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Skills"));
-    await user.click(screen.getByRole("button", { name: "Show all" }));
-    await user.click(screen.getByText("Acrobatics"));
-
-    const costPicker = screen.getByRole("dialog", { name: "Buy Acrobatics" });
-    await user.type(within(costPicker).getByRole("textbox"), "0");
-    await user.click(within(costPicker).getByRole("button", { name: "Buy Acrobatics" }));
-
-    expect(onUpdateCharacter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        skills: [
-          expect.objectContaining({
-            id: "acrobatics",
-            level: "trained",
-            xpPurchases: { trained: expect.objectContaining({ cost: 0 }) },
-          }),
-        ],
-      })
-    );
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
+    await user.click(screen.getByRole("tab", { name: "All" }));
+    await user.click(screen.getByText("Encarta Maleficarum"));
+    expect(screen.getByRole("dialog", { name: "Buy Encarta Maleficarum" })).toBeInTheDocument();
   });
 
-  it("lets the DM buy a Show all Talent for 0 XP", async () => {
+  it("keeps the tab and the search text when the purchase screen closes", async () => {
     const user = userEvent.setup();
-    const onUpdateCharacter = vi.fn(async () => true);
     render(
-      <EliteAdvancesTab
+      <ElitePackagesTab
         talents={EMPTY_TALENTS}
         skills={[]}
-        experience={{ total: 0, spent: 0, ranks: [] }}
+        experience={NO_EXPERIENCE}
         insanity={INSANITY}
         isDM
         editable
-        onUpdateCharacter={onUpdateCharacter}
+        onUpdateCharacter={async () => true}
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Add Elite Advance" }));
-    await user.click(screen.getByText("Talents"));
-    await user.click(screen.getByRole("button", { name: "Show all" }));
-    await user.click(screen.getByText("Air of Authority"));
-
-    const costPicker = screen.getByRole("dialog", { name: "Buy Air of Authority" });
-    await user.type(within(costPicker).getByRole("textbox"), "0");
-    await user.click(within(costPicker).getByRole("button", { name: "Buy Air of Authority" }));
-
-    expect(onUpdateCharacter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        talentsAndTraits: expect.objectContaining({
-          talents: [
-            expect.objectContaining({
-              talentId: "air-of-authority",
-              xpPurchase: expect.objectContaining({ cost: 0 }),
-            }),
-          ],
-        }),
+    await user.click(screen.getByRole("button", { name: "Add Elite Package" }));
+    await user.click(screen.getByRole("tab", { name: "All" }));
+    await user.type(screen.getByPlaceholderText("Search…"), "Enc");
+    await user.click(screen.getByText("Encarta Maleficarum"));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Buy Encarta Maleficarum" })).getByRole("button", {
+        name: "Close",
       })
     );
+
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByPlaceholderText("Search…")).toHaveValue("Enc");
   });
 });
