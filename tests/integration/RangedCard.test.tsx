@@ -84,6 +84,15 @@ describe("RangedCard rules", () => {
 });
 
 describe("RangedCard upgrades", () => {
+  it("makes compatible upgrades available when a closed card is opened", async () => {
+    const user = userEvent.setup();
+    renderCard({ forceExpanded: false });
+    expect(screen.queryByRole("button", { name: "Add Upgrade" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
+    await user.click(screen.getByRole("button", { name: "Add Upgrade" }));
+    expect(screen.getByRole("dialog", { name: "Add Upgrade" })).toBeInTheDocument();
+  });
+
   it("opens the upgrade picker and adds a compatible upgrade", async () => {
     const user = userEvent.setup();
     const { onAddUpgrade } = renderCard();

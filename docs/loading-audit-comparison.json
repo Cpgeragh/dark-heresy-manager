@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-02",
+  "commit": "325c961a",
+  "mode": "compiled performance build with local emulators",
+  "viewport": [
+    1280,
+    720
+  ],
+  "metric": "Input to last observed DOM mutation, excluding collection delay; not paint or INP",
+  "updatedFirstWarm": {
+    "weapons": [
+      281,
+      219,
+      267,
+      245,
+      222
+    ],
+    "drugs": [
+      152,
+      148,
+      172,
+      155,
+      153
+    ],
+    "skills": [
+      116,
+      131,
+      112,
+      120,
+      112
+    ],
+    "gear": [
+      148,
+      127,
+      116,
+      119,
+      136
+    ]
+  },
+  "originalGridControl": {
+    "first": {
+      "weapons": 141,
+      "drugs": 116,
+      "skills": 162,
+      "gear": 117
+    },
+    "warm": {
+      "weapons": [
+        218,
+        197,
+        195,
+        192,
+        204
+      ],
+      "drugs": [
+        144,
+        161,
+        177,
+        162,
+        160
+      ],
+      "skills": [
+        128,
+        164,
+        125,
+        116,
+        110
+      ],
+      "gear": [
+        131,
+        125,
+        125,
+        137,
+        120
+      ]
+    }
+  },
+  "updatedRepeat": {
+    "first": {
+      "weapons": 260,
+      "drugs": 156,
+      "skills": 140,
+      "gear": 130
+    },
+    "warm": {
+      "weapons": [
+        243,
+        275,
+        223,
+        248,
+        253
+      ],
+      "drugs": [
+        162,
+        141,
+        162,
+        163,
+        149
+      ],
+      "skills": [
+        124,
+        127,
+        140,
+        121,
+        129
+      ],
+      "gear": [
+        111,
+        149,
+        121,
+        161,
+        135
+      ]
+    }
+  },
+  "resize": {
+    "realCard": "Drug 1",
+    "draft": "7",
+    "phoneWidth": 500,
+    "expansionPreserved": true,
+    "focusPreserved": true,
+    "cancelled": true
+  },
+  "limitations": [
+    "Five warmed samples per tab per run; no stable tail estimate",
+    "Sequential runs on an uncontrolled desktop host",
+    "Builds include existing unrelated uncommitted source changes, held common for the control",
+    "Background collection callbacks can be delayed; results use event timestamps from completed collections",
+    "No real-server, physical-phone or throttled-network result"
+  ]
+}

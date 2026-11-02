@@ -282,27 +282,17 @@ export function RangedCard({
     ...baseEffective,
     clip: loadedAmmoCapacity ?? baseEffective.clip,
   };
-  const addableCompatible = getCompatibleUpgrades(
-    weapon.class ?? "",
-    weapon.name,
-    false,
-    upgradeIds,
-    resolvedAmmoType,
-    ammoTracking
-  );
-  const viewableCompatible = getCompatibleUpgrades(
-    weapon.class ?? "",
-    weapon.name,
-    false,
-    [],
-    resolvedAmmoType,
-    ammoTracking
-  );
-  const visibleCompatible = allowUpgrades
-    ? editable
-      ? addableCompatible
-      : viewableCompatible
-    : [];
+  const visibleCompatible =
+    (expanded || forceExpanded) && allowUpgrades
+      ? getCompatibleUpgrades(
+          weapon.class ?? "",
+          weapon.name,
+          false,
+          editable ? upgradeIds : [],
+          resolvedAmmoType,
+          ammoTracking
+        )
+      : [];
 
   const rulesText = (activeMeleeProfile?.specialRules ?? effective.specialRules ?? "").trim();
   const ruleNamesInLookup = getKnownSpecialRuleNames(rulesText);

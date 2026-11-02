@@ -174,31 +174,19 @@ export function MeleeCard({
   const craftsmanship = concealedBionicQuality ?? weapon.craftsmanship ?? "Common";
   const strengthBonusMultiplier = weapon.strengthBonusMultiplier ?? 1;
   const effectiveStrengthBonus = strengthBonus * strengthBonusMultiplier;
-  const addableCompatible = getCompatibleUpgrades(
-    weapon.class ?? "",
-    weapon.name,
-    true,
-    upgradeIds,
-    undefined,
-    undefined,
-    baseSpecialRules,
-    craftsmanship
-  );
-  const viewableCompatible = getCompatibleUpgrades(
-    weapon.class ?? "",
-    weapon.name,
-    true,
-    [],
-    undefined,
-    undefined,
-    baseSpecialRules,
-    craftsmanship
-  );
-  const visibleCompatible = allowUpgrades
-    ? editable
-      ? addableCompatible
-      : viewableCompatible
-    : [];
+  const visibleCompatible =
+    (expanded || forceExpanded) && allowUpgrades
+      ? getCompatibleUpgrades(
+          weapon.class ?? "",
+          weapon.name,
+          true,
+          editable ? upgradeIds : [],
+          undefined,
+          undefined,
+          baseSpecialRules,
+          craftsmanship
+        )
+      : [];
   const baseRulesText = effective.specialRules?.trim() ?? "";
   const rulesText = isPistolProfile
     ? pistolRules

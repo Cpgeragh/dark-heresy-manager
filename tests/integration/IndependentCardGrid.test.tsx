@@ -100,12 +100,12 @@ describe("IndependentCardGrid", () => {
 
   it("moves only the expanded card's column and reserves the full grid height", () => {
     mediaAt(1200);
-    let onResize = () => {};
+    let onResize = (_entries: ResizeObserverEntry[]) => {};
     const disconnect = vi.fn();
     vi.stubGlobal(
       "ResizeObserver",
       class {
-        constructor(callback: () => void) {
+        constructor(callback: (entries: ResizeObserverEntry[]) => void) {
           onResize = callback;
         }
         observe() {}
@@ -113,12 +113,7 @@ describe("IndependentCardGrid", () => {
       }
     );
     const heights = [100, 50, 40, 60];
-    const measured = vi
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockImplementation(function (this: HTMLElement) {
-        const index = Number(this.firstElementChild?.getAttribute("data-index"));
-        return { height: heights[index] ?? 0 } as DOMRect;
-      });
+    const measured = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect");
     const computed = vi
       .spyOn(window, "getComputedStyle")
       .mockReturnValue({ columnGap: "8px" } as CSSStyleDeclaration);
@@ -134,12 +129,19 @@ describe("IndependentCardGrid", () => {
       );
       const root = container.firstElementChild as HTMLElement;
       const cards = Array.from(root.children) as HTMLElement[];
+      const entry = (index: number) =>
+        ({
+          target: cards[index],
+          borderBoxSize: [{ blockSize: heights[index] }],
+        }) as unknown as ResizeObserverEntry;
+      act(() => onResize(cards.map((_, index) => entry(index))));
       expect(cards.map((card) => card.style.top)).toEqual(["0px", "0px", "108px", "58px"]);
       expect(root.style.height).toBe("148px");
       heights[0] = 200;
-      act(() => onResize());
+      act(() => onResize([entry(0)]));
       expect(cards.map((card) => card.style.top)).toEqual(["0px", "0px", "208px", "58px"]);
       expect(root.style.height).toBe("248px");
+      expect(measured).not.toHaveBeenCalled();
       unmount();
       expect(disconnect).toHaveBeenCalled();
     } finally {

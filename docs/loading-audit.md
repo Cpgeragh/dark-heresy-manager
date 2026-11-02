@@ -2,9 +2,49 @@
 
 ## Follow-up implementation
 
+Closed ranged and melee weapon cards now defer compatible-upgrade searches until expanded, including force-expanded cards. Open cards calculate only the editing or viewing list they need, rather than both lists. Existing timings predate this targeted change; no speed claim is attached to it. Focused card tests cover opening a closed card and accessing upgrades.
+
+### Layout profiling and retained revision
+
+Temporary build instrumentation measured the initial grid sizing pass during three dense Weapons visits at 85.3 ms, 66 ms and 71.4 ms. That pass called getBoundingClientRect for each card inside useLayoutEffect, forcing synchronous browser layout. This is a confirmed cost; it does not account for the entire Weapons journey, which also mounts 180 ranged cards, 180 melee cards and 180 explosive cards in the fixture.
+
+The retained revision caches border-box heights from ResizeObserver entries and recalculates column positions from those cached numbers. It skips empty grids and no longer synchronously reads every card's rectangle. The cards retain their stable keys and parents. A normal two-column grid provides layout until the initial observer delivery, after which the independent column positions are applied. Observer callbacks measured 1.1 to 1.9 ms. These callbacks exclude the normal browser layout that supplies their entries, so the difference must not be presented as a 66 to 85 ms end-to-end saving.
+
+A refreshed original-grid control and the retained revision used the same compiled performance mode, viewport, fixture and navigation order, with one first pass excluded and five warmed repetitions. Sample sequences, including the rejected experiment, are stored in loading-grid-profile.json.
+
+| Warmed tab | Original-grid control median | Retained observer revision median |
+| --- | ---: | ---: |
+| Weapons | 267 ms | 302 ms |
+| Drugs | 208 ms | 144 ms |
+| Skills | 144 ms | 137 ms |
+| Gear | 143 ms | 113 ms |
+
+Drugs and Gear improved in this run, while Weapons remained slower. The small sequential samples do not establish production performance or prove that every difference is caused by the grid. A second experiment positioned every card absolutely before receiving its first size; it produced much worse and more variable timings and was discarded. The retained source uses the normal-grid fallback.
+
+The real Drug 1 card again retained its expanded state, focused editor and unfinished quantity value of 7 when resized to 500 px and back; Escape cancelled the edit. The geometry regression now verifies that only the changed card's cached size is needed to reposition its column, without any getBoundingClientRect calls. TypeScript, formatting, lint and the production build pass. Eight focused suites pass 161 tests. The additional talent suites pass 57 tests and fail one source-chip lookup at TalentsTab.test.tsx:1536. That exact failure reproduces with the unchanged committed grid through a temporary test transform; it is not introduced by this sizing revision. The unrelated talent source and test were left untouched. Full Weapons latency remains unresolved and should not be described as fixed; its remaining card construction and browser rendering require a deeper trace before further optimisation.
+
+### Repeated timing comparison
+
+The updated grid is committed as 325c961a. A compiled performance build was compared with a control build using the original grid from eaf796ff. The control uses a temporary build transform, so no application source was reverted. Both builds include the common existing working-tree changes. After normalising asset hashes and the build timestamp, all JavaScript chunks except CharacterSheet matched between the builds. The CharacterSheet chunk contains the grid replacement. Temporary measurement scripts are confined to ignored tmp output.
+
+The same large-character fixture, 1280 by 720 viewport, read-only mode, keyboard navigation sequence and browser-event/DOM timing method were used. Each final run included one excluded first pass and five warmed repetitions in the order Weapons, Drugs, Skills, Gear. A 900 ms collection window followed each verified destination; that wait is excluded from event timestamps. Completed reports were collected after the sequence because background frame callbacks sometimes published late. Cross-attributed heading snapshots and incomplete early reads were not used as standalone timings. Full sample sequences are in loading-audit-comparison.json.
+
+| Warmed tab switch | Original-grid control median | Updated repeat median | Updated repeat range |
+| --- | ---: | ---: | --- |
+| Weapons | 197 ms | 248 ms | 223–275 ms |
+| Drugs | 161 ms | 162 ms | 141–163 ms |
+| Skills | 125 ms | 127 ms | 121–140 ms |
+| Gear | 125 ms | 135 ms | 111–161 ms |
+
+An earlier updated-build sequence had medians of 245 ms, 153 ms, 116 ms and 127 ms respectively. These small sequential samples do not establish a general speed improvement. Weapons is approximately 26 per cent slower than the control in the final comparison and warrants a rendering/layout profile. The other differences are small relative to observed variation. The code removes duplicated mounts and preserves state, but that structural improvement is not sufficient evidence of lower interaction latency. Do not mark this optimisation as a measured performance success or deploy it on that basis.
+
+The real Drugs card was also tested with an unfinished quantity value of 7. Expansion, the editor value and focus survived desktop to 500 px and back. Escape cancelled the edit afterwards. Gear has a separate responsive section selector: narrowing it hid the currently inactive Consumables section, so that journey is distinct from the grid-only state-preservation check.
+
+No production code was changed during this measurement pass. Next: profile the updated grid's measurement/layout work alongside Weapons rendering, then compare any proposed revision against this control. Retain the startup update check.
+
 IndependentCardGrid now retains one flat, keyed card tree across screen sizes. The existing media-query hook selects positioning at 640 px by default or 1024 px for its lg option. Desktop card heights are measured before paint and watched with ResizeObserver to position alternating cards in independent columns; mobile cards use their normal document flow. Card parents and DOM order do not change when crossing the breakpoint, preserving drafts, expansion and keyboard focus. The earlier conditional-tree implementation was replaced because it remounted cards on resize. The timings below describe the pre-change build and do not establish a measured speed improvement for this implementation.
 
-Validation: production build and focused ESLint passed. The grid, Traits, Drugs, Armour, Notes, Weapons, Cybernetics, Archeotech, Talents, talent overflow flows and shared layout recipe suites passed after updating the Traits expectation that previously counted both responsive copies. The change is local and has not been deployed. Browser timing comparisons for the changed build remain outstanding.
+Validation: production build and focused ESLint passed. The grid, Traits, Drugs, Armour, Notes, Weapons, Cybernetics, Archeotech, Talents, talent overflow flows and shared layout recipe suites passed after updating the Traits expectation that previously counted both responsive copies. Browser timing comparisons for the changed build are recorded above; no deployment was performed by this audit.
 
 Resize follow-up validation: regression tests assert the same input DOM node, draft, expanded state and focus survive both resize directions. A geometry test verifies expanding the left column does not move the right column, and that following content stays beneath the tallest column. An isolated browser preview confirmed these behaviours at desktop and phone widths, including the independent columns and no overlapping following content.
 

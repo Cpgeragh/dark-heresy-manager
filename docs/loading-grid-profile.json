@@ -1,0 +1,133 @@
+{
+  "date": "2026-11-02",
+  "method": "Compiled performance builds, dense fixture, desktop 1280 x 720, first pass excluded, five warm samples, DOM-mutation endpoint",
+  "synchronousGridInitialMeasurementsMs": [
+    85.3,
+    66,
+    71.4
+  ],
+  "observerCallbacksMs": [
+    1.3,
+    1.4,
+    1.9,
+    1.3,
+    1.3,
+    1.3,
+    1.5,
+    1.1,
+    1.3,
+    1.4,
+    1.5,
+    1.6,
+    1.4,
+    1.2,
+    1.9,
+    1.2,
+    1.3,
+    1.5
+  ],
+  "retainedObserverVariant": {
+    "weapons": [
+      307,
+      302,
+      292,
+      286,
+      312
+    ],
+    "drugs": [
+      144,
+      142,
+      163,
+      145,
+      142
+    ],
+    "skills": [
+      134,
+      141,
+      154,
+      137,
+      121
+    ],
+    "gear": [
+      113,
+      119,
+      113,
+      114,
+      113
+    ]
+  },
+  "refreshedOriginalGridControl": {
+    "weapons": [
+      295,
+      296,
+      267,
+      249,
+      231
+    ],
+    "drugs": [
+      217,
+      208,
+      186,
+      310,
+      185
+    ],
+    "skills": [
+      128,
+      137,
+      144,
+      210,
+      144
+    ],
+    "gear": [
+      117,
+      116,
+      151,
+      143,
+      158
+    ]
+  },
+  "rejectedAbsoluteFirstVariant": {
+    "weapons": [
+      713,
+      555,
+      313,
+      253,
+      304
+    ],
+    "drugs": [
+      823,
+      634,
+      442,
+      211,
+      574
+    ],
+    "skills": [
+      163,
+      153,
+      135,
+      145,
+      152
+    ],
+    "gear": [
+      167,
+      193,
+      175,
+      128,
+      161
+    ]
+  },
+  "limitations": [
+    "Callback comparison excludes normal browser layout that is now performed before observer delivery; it is not a claim that all of the old 66 to 85 ms disappeared from the tab journey.",
+    "Sequential small samples on an uncontrolled desktop host, with existing unrelated working-tree changes.",
+    "No real device, production server, or INP result."
+  ],
+  "resizeCheck": {
+    "card": "Drug 1",
+    "unsavedQuantity": "7",
+    "width": 500,
+    "retainsDraft": true,
+    "retainsExpansion": true,
+    "retainsFocus": true,
+    "cancelled": true
+  }
+}

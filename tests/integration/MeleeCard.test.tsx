@@ -41,6 +41,15 @@ function renderCard(props: Partial<React.ComponentProps<typeof MeleeCard>> = {})
 }
 
 describe("MeleeCard shared header", () => {
+  it("makes compatible upgrades available when a closed card is opened", async () => {
+    const user = userEvent.setup();
+    renderCard({ forceExpanded: false });
+    expect(screen.queryByRole("button", { name: "Add Upgrade" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand Custom Chainsword details" }));
+    await user.click(screen.getByRole("button", { name: "Add Upgrade" }));
+    expect(screen.getByRole("dialog", { name: "Add Upgrade" })).toBeInTheDocument();
+  });
+
   it("shows the Remove button in the closed header", () => {
     renderCard({ forceExpanded: false, isEquipped: false });
     expect(screen.queryByText("Qualities")).not.toBeInTheDocument();
