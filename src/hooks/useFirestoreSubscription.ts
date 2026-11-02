@@ -147,17 +147,50 @@ function useFirestoreSubscription<T>({
 /** Subscribes to one document, or returns the disabled state for a null reference. */
 export function useDocumentSubscription<TDocument extends DocumentData, TResult>(
   reference: DocumentReference<TDocument> | null,
-  mapSnapshot: (snapshot: DocumentSnapshot<TDocument>) => TResult | null
+  mapSnapshot: (snapshot: DocumentSnapshot<TDocument>) => TResult | null,
+  options: { confirmMissingOnServer?: boolean } = {}
 ): FirestoreSubscriptionState<TResult | null> {
   return useFirestoreSubscription<TResult | null>({
     subscriptionKey: reference?.path ?? null,
     createEmptyData: () => null,
-    subscribe: (onData, onError) =>
-      onSnapshot(
+    subscribe: (onData, onError) => {
+      if (!options.confirmMissingOnServer)
+        return onSnapshot(
+          reference!,
+          (snapshot) => onData(mapSnapshot(snapshot), snapshot.metadata),
+          onError
+        );
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      const clearWait = () => {
+        clearTimeout(timeout);
+        timeout = undefined;
+      };
+      const unsubscribe = onSnapshot(
         reference!,
-        (snapshot) => onData(mapSnapshot(snapshot), snapshot.metadata),
-        onError
-      ),
+        { includeMetadataChanges: true },
+        (snapshot) => {
+          const value = mapSnapshot(snapshot);
+          if (value === null && snapshot.metadata.fromCache) {
+            // Cache absence is not evidence that an account or device was removed.
+            timeout ??= setTimeout(
+              () => onError(new Error("Connect to the internet to check your existing account.")),
+              15_000
+            );
+            return;
+          }
+          clearWait();
+          onData(value, snapshot.metadata);
+        },
+        (error) => {
+          clearWait();
+          onError(error);
+        }
+      );
+      return () => {
+        clearWait();
+        unsubscribe();
+      };
+    },
   });
 }
 

@@ -40,6 +40,11 @@ import { RequiredFieldsNote } from "../ui/forms/CustomFormFooter";
 import { CheckboxRow } from "../ui/forms/CheckboxRow";
 import { FormLabel } from "../ui/forms/FormLabel";
 import { ConfirmModal } from "../ui/modals/ConfirmModal";
+import {
+  accountConnectionChanged,
+  readAccountConnection,
+  rememberAccountConnection,
+} from "../services/accountConnectionMarker";
 
 type Step = "welcome" | "show-code" | "link";
 
@@ -51,6 +56,18 @@ interface Props {
 }
 
 export default function Onboarding({ user, onComplete, effectiveUserId, firstName }: Props) {
+  const [previousAccount, setPreviousAccount] = useState(readAccountConnection);
+  const [createNewConfirmed, setCreateNewConfirmed] = useState(false);
+  const [confirmNewAccount, setConfirmNewAccount] = useState(false);
+  useEffect(() => {
+    const update = () => setPreviousAccount(readAccountConnection());
+    window.addEventListener(accountConnectionChanged, update);
+    window.addEventListener("storage", update);
+    return () => {
+      window.removeEventListener(accountConnectionChanged, update);
+      window.removeEventListener("storage", update);
+    };
+  }, []);
   // The current step lives in the URL (?step=…) so browser/phone Back and
   // Forward move between steps natively. Unknown/absent values → welcome.
   const [searchParams, setSearchParams] = useSearchParams();
@@ -124,6 +141,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     completeOnboarding()
       .then(() => {
         if (ignore) return;
+        rememberAccountConnection(user.uid, effectiveUserId);
         setSearchParams({}, { replace: true });
         onComplete();
       })
@@ -182,6 +200,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     setBusyAction("finish");
     try {
       await completeOnboarding();
+      rememberAccountConnection(user.uid, effectiveUserId);
       allowShowCodeExitRef.current = true;
       setSearchParams({}, { replace: true });
       onComplete();
@@ -304,7 +323,37 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
       <main className="flex flex-1 items-center justify-center p-6">
         <div className="max-w-sm lg:max-w-md w-full">
           {/* ── Welcome ── */}
-          {step === "welcome" && (
+          {step === "welcome" && previousAccount && !createNewConfirmed && (
+            <Panel spacing="none" padding="none" className="overflow-hidden">
+              <CenteredTitleHeader as="h1" size="page" title="Reconnect Your Account" />
+              <div className={`${uiStackBody} p-4 lg:p-5`}>
+                <p className={`text-sm lg:text-base ${colourTextPrimary}`}>
+                  This device previously connected to an account. Use your recovery code to
+                  reconnect to it.
+                </p>
+                <Button
+                  fullWidth
+                  size="lg"
+                  onClick={() => void handleConnectExisting()}
+                  disabled={busy}
+                  loading={busyAction === "connect"}
+                  loadingLabel="Opening"
+                >
+                  Reconnect account
+                </Button>
+                <Button
+                  fullWidth
+                  size="lg"
+                  variant="neutral"
+                  onClick={() => setConfirmNewAccount(true)}
+                  disabled={busy}
+                >
+                  Create new account
+                </Button>
+              </div>
+            </Panel>
+          )}
+          {step === "welcome" && (!previousAccount || createNewConfirmed) && (
             <Panel spacing="none" padding="none" className="overflow-hidden">
               <CenteredTitleHeader as="h1" size="page" title="Create Your Account" />
 
@@ -529,6 +578,18 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
         </div>
       </main>
 
+      {confirmNewAccount && (
+        <ConfirmModal
+          title="Create New Account"
+          message="Your existing account will not be deleted. You will still need its recovery code to access it. Create a separate account?"
+          confirmLabel="Create new account"
+          onConfirm={() => {
+            setCreateNewConfirmed(true);
+            setConfirmNewAccount(false);
+          }}
+          onCancel={() => setConfirmNewAccount(false)}
+        />
+      )}
       {cancelSetupOpen && (
         <ConfirmModal
           title="Cancel New Account Setup"

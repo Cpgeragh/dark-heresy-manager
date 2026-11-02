@@ -4,6 +4,13 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
+import { rememberAccountConnection } from "./services/accountConnectionMarker";
+import { readAccountConnection } from "./services/accountConnectionMarker";
+import {
+  queueAccountDiagnostic,
+  flushAccountDiagnostics,
+} from "./services/serverAccountDiagnostics";
+import { AccountCheck } from "./components/AccountCheck";
 import { useDeviceLink } from "./hooks/useDeviceLink";
 import { useLinkedDevices } from "./hooks/useLinkedDevices";
 import { useUserProfile } from "./hooks/useUserProfile";
@@ -77,6 +84,58 @@ function AppContent() {
     loading: profileLoading,
     error: profileError,
   } = useUserProfile(effectiveUserId);
+
+  useEffect(() => {
+    if (!currentUser || loading || linkLoading) return;
+    if (authError || linkError || profileError)
+      queueAccountDiagnostic(currentUser.uid, "startup-error");
+    else if (!onboarded)
+      queueAccountDiagnostic(currentUser.uid, readAccountConnection() ? "reconnect" : "new-login");
+    else if (!profileLoading)
+      queueAccountDiagnostic(currentUser.uid, firstName ? "connected" : "reconnect");
+  }, [
+    currentUser,
+    loading,
+    linkLoading,
+    authError,
+    linkError,
+    profileError,
+    onboarded,
+    profileLoading,
+    firstName,
+  ]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const retry = () => {
+      void flushAccountDiagnostics(currentUser.uid);
+    };
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (
+      currentUser &&
+      onboarded &&
+      !linkLoading &&
+      !profileLoading &&
+      !linkError &&
+      !profileError &&
+      firstName
+    ) {
+      rememberAccountConnection(currentUser.uid, effectiveUserId);
+    }
+  }, [
+    currentUser,
+    onboarded,
+    linkLoading,
+    profileLoading,
+    linkError,
+    profileError,
+    firstName,
+    effectiveUserId,
+  ]);
 
   // Keep the same providers mounted through the existing splash and route changes.
   // Once the device link resolves, campaign and chat reads can run beside the remaining
@@ -244,6 +303,7 @@ export default function App() {
         <AppContent />
       </ErrorBoundary>
       <ToastContainer />
+      <AccountCheck />
     </ToastProvider>
   );
 }

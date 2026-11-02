@@ -29,6 +29,10 @@ import {
   linkDeviceToAccount,
   renameLinkedDevice,
 } from "../../src/services/deviceLinkService";
+import {
+  readAccountConnection,
+  rememberAccountConnection,
+} from "../../src/services/accountConnectionMarker";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -43,6 +47,14 @@ beforeEach(() => {
 });
 
 describe("device link operations", () => {
+  it("clears the remembered account only after a successful deliberate unlink", async () => {
+    rememberAccountConnection("device-1", "account");
+    callDisconnect.mockRejectedValueOnce(new Error("offline"));
+    await expect(disconnectDevice("device-1")).rejects.toThrow("offline");
+    expect(readAccountConnection()).not.toBeNull();
+    await disconnectDevice("device-1");
+    expect(readAccountConnection()).toBeNull();
+  });
   it("connects with a trimmed recovery code", async () => {
     await linkDeviceToAccount("device-1", "  DH-VALI-CODE  ", "  My phone  ");
     expect(callLink).toHaveBeenCalledWith({ code: "DH-VALI-CODE", deviceName: "My phone" });

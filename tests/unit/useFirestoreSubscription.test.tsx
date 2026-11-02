@@ -96,6 +96,63 @@ describe("getSanitizedFirestoreErrorCode", () => {
 });
 
 describe("useDocumentSubscription", () => {
+  function confirmedSubscription() {
+    mockOnSnapshot.mockImplementation((_source, _options, onNext, onError) => {
+      const subscription = { onNext, onError, unsubscribe: vi.fn() };
+      subscriptions.push(subscription);
+      return subscription.unsubscribe;
+    });
+    return renderHook(() =>
+      useDocumentSubscription<DocumentData, string>(
+        makeDocumentReference("userLinks/device"),
+        (snapshot) => (snapshot.exists() ? (snapshot.data().primaryUid as string) : null),
+        { confirmMissingOnServer: true }
+      )
+    );
+  }
+
+  it("waits for the server after a missing cached account link", () => {
+    const { result } = confirmedSubscription();
+    act(() => subscriptions[0].onNext({ exists: () => false, metadata: { fromCache: true } }));
+    expect(result.current.loading).toBe(true);
+    act(() =>
+      subscriptions[0].onNext({
+        exists: () => true,
+        data: () => ({ primaryUid: "account" }),
+        metadata: { fromCache: false },
+      })
+    );
+    expect(result.current).toEqual({ data: "account", loading: false, error: null });
+  });
+
+  it("accepts a server-confirmed missing link and a cached existing link", () => {
+    const { result } = confirmedSubscription();
+    act(() =>
+      subscriptions[0].onNext({
+        exists: () => true,
+        data: () => ({ primaryUid: "offline-account" }),
+        metadata: { fromCache: true },
+      })
+    );
+    expect(result.current.data).toBe("offline-account");
+    act(() => subscriptions[0].onNext({ exists: () => false, metadata: { fromCache: false } }));
+    expect(result.current).toEqual({ data: null, loading: false, error: null });
+  });
+
+  it("shows a retryable error instead of treating an unconfirmed cache miss as setup", () => {
+    vi.useFakeTimers();
+    try {
+      const { result, unmount } = confirmedSubscription();
+      act(() => subscriptions[0].onNext({ exists: () => false, metadata: { fromCache: true } }));
+      act(() => vi.advanceTimersByTime(15_000));
+      expect(result.current.error?.message).toContain("Connect to the internet");
+      expect(result.current.loading).toBe(false);
+      unmount();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("returns the empty disabled state for a missing reference", () => {
     const { result } = renderHook(() =>
       useDocumentSubscription<DocumentData, TestItem>(null, () => null)

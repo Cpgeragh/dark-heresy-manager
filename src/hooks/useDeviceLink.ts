@@ -7,7 +7,9 @@
 
 import { doc, type DocumentData } from "firebase/firestore";
 import { db } from "../firebase";
+import { recordAccountDiagnostic } from "../accountDiagnostics";
 import { disconnectDevice } from "../services/deviceLinkService";
+import { forgetAccountConnection } from "../services/accountConnectionMarker";
 import { useDocumentSubscription } from "./useFirestoreSubscription";
 
 interface DeviceLinkState {
@@ -24,7 +26,18 @@ export function useDeviceLink(myUid: string): DeviceLinkState {
     error,
   } = useDocumentSubscription<DocumentData, string>(
     myUid ? doc(db, "userLinks", myUid) : null,
-    (snapshot) => (snapshot.exists() ? (snapshot.data().primaryUid as string) : null)
+    (snapshot) => {
+      const accountId = snapshot.exists() ? (snapshot.data().primaryUid as string) : undefined;
+      if (!snapshot.exists() && !snapshot.metadata.fromCache) forgetAccountConnection(myUid);
+      recordAccountDiagnostic("account-link", {
+        uid: myUid,
+        accountId,
+        exists: snapshot.exists(),
+        fromCache: snapshot.metadata.fromCache,
+      });
+      return accountId ?? null;
+    },
+    { confirmMissingOnServer: true }
   );
 
   async function disconnect(confirmLastDevice = false) {

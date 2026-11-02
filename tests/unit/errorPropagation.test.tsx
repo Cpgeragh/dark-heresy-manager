@@ -72,11 +72,13 @@ vi.mock("../../src/components/Toast", () => ({
 }));
 
 import Onboarding from "../../src/pages/Onboarding";
+import { rememberAccountConnection } from "../../src/services/accountConnectionMarker";
 
 const user = { uid: "user-1" } as User;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
   mockCompleteOnboarding.mockResolvedValue(undefined);
   mockCreateAccount.mockResolvedValue({ accountId: "account-new", code: "NEW-CODE" });
   mockDiscardOnboardingSetup.mockResolvedValue(undefined);
@@ -128,6 +130,33 @@ function BrowserBackControl() {
 }
 
 describe("onboarding error propagation", () => {
+  it("offers recovery instead of new setup when an earlier connection is remembered", async () => {
+    rememberAccountConnection("previous-login", "existing-account");
+    mockGetRecoveryCode.mockResolvedValue(null);
+    render(
+      <MemoryRouter>
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+    expect(screen.getByRole("heading", { name: "Reconnect Your Account" })).toBeVisible();
+    expect(screen.queryByLabelText("First Name")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Reconnect account" }));
+    expect(await screen.findByRole("heading", { name: "Connect Existing Account" })).toBeVisible();
+    expect(mockCreateAccount).not.toHaveBeenCalled();
+  });
+
+  it("requires confirmation before a returning device starts a separate account", () => {
+    rememberAccountConnection("previous-login", "existing-account");
+    render(
+      <MemoryRouter>
+        <Onboarding user={user} effectiveUserId="user-1" firstName={null} onComplete={vi.fn()} />
+      </MemoryRouter>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Create new account" }));
+    expect(screen.getByRole("dialog", { name: "Create New Account" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Create Your Account" })).not.toBeInTheDocument();
+    expect(mockCreateAccount).not.toHaveBeenCalled();
+  });
   it("requires the primary-device warning before connecting", async () => {
     renderLinkStep();
     fireEvent.change(screen.getByPlaceholderText("DH-XXXX-YYYY"), {

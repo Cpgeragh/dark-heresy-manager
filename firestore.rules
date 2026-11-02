@@ -768,6 +768,11 @@ service cloud.firestore {
       }
     }
 
+    // Device diagnostics are written only by the validated server callable.
+    match /accountDiagnostics/{reportId} {
+      allow read, write: if false;
+    }
+
     // All unlisted paths are denied by default.
   }
 }

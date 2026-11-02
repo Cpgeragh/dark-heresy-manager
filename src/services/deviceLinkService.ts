@@ -4,6 +4,7 @@ import { assertFirestoreDocumentId, assertRecoveryCode } from "../firestore/fire
 import { runSingleFlight } from "../firestore/singleFlight";
 import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
+import { forgetAccountConnection } from "./accountConnectionMarker";
 
 export interface LinkedDevice {
   uid: string;
@@ -114,6 +115,7 @@ export async function disconnectDevice(
   return runSingleFlight("device:disconnect", [uid, confirmLastDevice], async () => {
     try {
       const { data } = await callDisconnectDevice({ confirmLastDevice });
+      forgetAccountConnection(uid);
       return data;
     } catch (error) {
       const details = (error as { details?: { reason?: unknown } } | null)?.details;

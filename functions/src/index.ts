@@ -14,6 +14,10 @@ import { logger, setGlobalOptions } from "firebase-functions/v2";
 import { getFirestore } from "firebase-admin/firestore";
 import { expr, projectID } from "firebase-functions/params";
 import { protectedCallable } from "./shared/protectedCallable.js";
+import {
+  recordAccountDiagnostic as runAccountDiagnostic,
+  type AccountDiagnosticInput,
+} from "./operations/recordAccountDiagnostic.js";
 import { withMinimumDuration } from "./shared/timingSafety.js";
 import { recoveryCodeHmacSecret, identityCodeHmacSecret } from "./shared/secrets.js";
 import { hashRecoveryCode } from "./shared/recoveryCode.js";
@@ -187,6 +191,36 @@ setGlobalOptions({
 });
 
 const heavyWorkOptions = { maxInstances: 2, concurrency: 5 } as const;
+
+export const recordAccountDiagnostic = onCall<AccountDiagnosticInput>(
+  { timeoutSeconds: 15, maxInstances: 2 },
+  (request) => {
+    const uid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<AccountDiagnosticInput, { accepted: boolean }>({
+      request,
+      operation: "account-diagnostic",
+      allowedFields: [
+        "reportId",
+        "build",
+        "project",
+        "status",
+        "previousDeviceUid",
+        "loginCreated",
+      ],
+      requiredFields: ["reportId", "build", "project", "status", "loginCreated"],
+      fieldShapes: {
+        reportId: "string",
+        build: "string",
+        project: "string",
+        status: { enum: ["connected", "new-login", "reconnect", "startup-error"] },
+        previousDeviceUid: "string",
+      },
+      payloadBounds: { maxBytes: 1024, maxStringCharacters: 128 },
+      rateLimits: [{ key: `account-diagnostic:${uid}`, limit: 8, windowMs: 24 * 60 * 60 * 1000 }],
+      handler: ({ uid: actorUid, data }) => runAccountDiagnostic(data, actorUid),
+    });
+  }
+);
 
 export const revealIdentityCode = onCall({ timeoutSeconds: 30 }, (request) => {
   const callerUid = request.auth?.uid ?? "anonymous";

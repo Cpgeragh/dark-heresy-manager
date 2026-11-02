@@ -35,6 +35,13 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "accountDiagnostics",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    { "collectionGroup": "accountDiagnostics", "fieldPath": "reports", "indexes": [] },
+    {
       "collectionGroup": "characters",
       "fieldPath": "userId",
       "indexes": [

@@ -45,3 +45,8 @@ reference-images/
 
 # Scratch/extraction working files (local only)
 tmp/
+
+# Local account investigation helpers
+/scripts/auditAccountConnections.mjs
+/scripts/checkDeployTest.mjs
+/scripts/repairLegacyOnboarding.mjs

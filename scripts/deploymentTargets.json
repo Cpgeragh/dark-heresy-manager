@@ -1,0 +1,10 @@
+{
+  "dark-heresy-manager": {
+    "mode": "production",
+    "fingerprint": "c91009c8ecf6a0fd3ab525df8372cc498f31ed94574c6c0546269eedb9b4924c"
+  },
+  "dark-heresy-manager-staging": {
+    "mode": "staging",
+    "fingerprint": "ba17e619e4e09474c51767ae63ea065b2f21005d85a533e8aed92358302b42ec"
+  }
+}

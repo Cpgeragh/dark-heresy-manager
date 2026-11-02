@@ -5,6 +5,7 @@ import { auth, db, functions } from "../firebase";
 import type { UserDocument } from "../types/Firestore";
 import { assertFirestoreDocumentId } from "../firestore/firebaseValidation";
 import { runSingleFlight } from "../firestore/singleFlight";
+import { forgetAccountConnection } from "./accountConnectionMarker";
 
 const callDeleteAccount = httpsCallable<
   Record<string, never>,
@@ -30,6 +31,11 @@ export async function synchroniseUserAccount(uid: string): Promise<boolean> {
   assertFirestoreDocumentId(uid, "User ID");
   const reference = doc(db, "users", uid);
   const snapshot = await getDoc(reference);
+
+  // An empty/stale offline cache cannot establish that setup is required.
+  if (snapshot.metadata?.fromCache && (!snapshot.exists() || snapshot.data()?.onboarded !== true)) {
+    throw new Error("Connect to the internet to check your existing account.");
+  }
 
   let onboarded = true;
   if (!snapshot.exists()) {
@@ -82,6 +88,7 @@ export async function discardOnboardingSetup(): Promise<void> {
 export async function deleteCurrentAccount(): Promise<void> {
   await runSingleFlight("account:delete", [], async () => {
     await callDeleteAccount({});
+    if (auth.currentUser) forgetAccountConnection(auth.currentUser.uid);
     await signOut(auth);
     window.location.reload();
   });

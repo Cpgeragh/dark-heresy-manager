@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { auth } from "../firebase";
+import { recordAccountDiagnostic } from "../accountDiagnostics";
+import { noteCreatedDiagnosticLogin } from "../services/serverAccountDiagnostics";
 import { synchroniseUserAccount } from "../services/userAccountService";
 import { markApplicationPerformance } from "../performance/performanceMetrics";
 
@@ -43,11 +45,14 @@ export function useAuth(): UseAuthResult {
       async (user) => {
         markApplicationPerformance("startup:auth-state-received");
         if (!user) {
+          if (!ignore) recordAccountDiagnostic("no-restored-login");
           if (anonymousSignInStarted) return;
           anonymousSignInStarted = true;
           markApplicationPerformance("startup:anonymous-sign-in-start");
           try {
-            await signInAnonymously(auth);
+            const signedIn = await signInAnonymously(auth);
+            noteCreatedDiagnosticLogin(signedIn.user.uid);
+            recordAccountDiagnostic("anonymous-login-created", { uid: auth.currentUser?.uid });
             markApplicationPerformance("startup:anonymous-sign-in-complete");
           } catch (cause) {
             finishWithError(cause);
@@ -58,12 +63,14 @@ export function useAuth(): UseAuthResult {
 
         if (ignore) return;
 
+        recordAccountDiagnostic("login-received", { uid: user.uid });
         setError(null);
         setCurrentUser(user);
 
         try {
           markApplicationPerformance("startup:account-synchronisation-start");
           const userIsOnboarded = await synchroniseUserAccount(user.uid);
+          recordAccountDiagnostic("setup-status", { uid: user.uid, onboarded: userIsOnboarded });
           markApplicationPerformance("startup:account-synchronisation-complete");
 
           if (ignore) return;

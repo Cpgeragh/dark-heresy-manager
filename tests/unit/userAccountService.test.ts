@@ -58,6 +58,31 @@ beforeEach(() => {
 });
 
 describe("user account service", () => {
+  it("never creates a user record from an empty offline cache", async () => {
+    mockGetDoc.mockResolvedValue({ exists: () => false, metadata: { fromCache: true } });
+    await expect(synchroniseUserAccount("device-1")).rejects.toThrow("Connect to the internet");
+    expect(mockSetDoc).not.toHaveBeenCalled();
+  });
+
+  it("does not send a cached incomplete user through setup without server confirmation", async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ onboarded: false }),
+      metadata: { fromCache: true },
+    });
+    await expect(synchroniseUserAccount("device-1")).rejects.toThrow("Connect to the internet");
+    expect(mockSetDoc).not.toHaveBeenCalled();
+  });
+
+  it("keeps completed cached accounts available offline", async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ onboarded: true }),
+      metadata: { fromCache: true },
+    });
+    await expect(synchroniseUserAccount("device-1")).resolves.toBe(true);
+    expect(mockSetDoc).not.toHaveBeenCalled();
+  });
   it("creates a missing local device record", async () => {
     mockGetDoc.mockResolvedValue({ exists: () => false });
     await expect(synchroniseUserAccount("device-1")).resolves.toBe(false);
