@@ -28,12 +28,17 @@ export interface SectionDrawerPage {
 
 export interface SectionDrawerCategory {
   label: string;
-  pages: readonly SectionDrawerPage[];
+  pages: readonly SectionDrawerEntry[];
 }
+
+/** A row that opens a further list of entries, built the same way as a category. */
+export type SectionDrawerGroup = SectionDrawerCategory;
+
+export type SectionDrawerEntry = SectionDrawerPage | SectionDrawerGroup;
 
 export type SectionNavigation =
   | { categories: readonly SectionDrawerCategory[] }
-  | { pages: readonly SectionDrawerPage[] };
+  | { pages: readonly SectionDrawerEntry[] };
 
 // ================================================================
 // COMPONENT
@@ -59,24 +64,68 @@ export function SectionDrawer({ ...props }: SectionDrawerProps) {
   return <SectionDrawerContent key={`${navigationKey}:${externalRequest}`} {...props} />;
 }
 
-function PageList({
-  pages,
+function isGroup(entry: SectionDrawerEntry): entry is SectionDrawerGroup {
+  return "pages" in entry;
+}
+
+interface DrawerPanel {
+  label: string | null;
+  backTarget: string;
+  entries: readonly SectionDrawerEntry[];
+}
+
+/** The root list, then one panel for every group opened along the trail. */
+function getPanels(
+  root: readonly SectionDrawerEntry[],
+  rootName: string,
+  trail: readonly number[]
+): DrawerPanel[] {
+  const panels: DrawerPanel[] = [{ label: null, backTarget: rootName, entries: root }];
+  let entries = root;
+  let parentName = rootName;
+  for (const index of trail) {
+    const entry = entries[index] as SectionDrawerEntry | undefined;
+    if (!entry || !isGroup(entry)) break;
+    panels.push({ label: entry.label, backTarget: parentName, entries: entry.pages });
+    entries = entry.pages;
+    parentName = entry.label;
+  }
+  return panels;
+}
+
+function panelOffset(position: number, depth: number): string {
+  if (position === depth) return "translate-x-0";
+  return position < depth ? "-translate-x-full" : "translate-x-full";
+}
+
+function EntryList({
+  entries,
   activePage,
+  onOpen,
   onSelect,
 }: {
-  pages: readonly SectionDrawerPage[];
+  entries: readonly SectionDrawerEntry[];
   activePage: string;
+  onOpen: (index: number) => void;
   onSelect: (id: string) => void;
 }) {
   return (
     <ul className="py-2">
-      {pages.map((page) => (
-        <li key={page.id}>
-          <SectionDrawerRow onClick={() => onSelect(page.id)} active={activePage === page.id}>
-            {page.label}
-          </SectionDrawerRow>
-        </li>
-      ))}
+      {entries.map((entry, index) =>
+        isGroup(entry) ? (
+          <li key={`group:${entry.label}`}>
+            <SectionDrawerRow onClick={() => onOpen(index)} trailing={<ArrowRight />}>
+              {entry.label}
+            </SectionDrawerRow>
+          </li>
+        ) : (
+          <li key={`page:${entry.id}`}>
+            <SectionDrawerRow onClick={() => onSelect(entry.id)} active={activePage === entry.id}>
+              {entry.label}
+            </SectionDrawerRow>
+          </li>
+        )
+      )}
     </ul>
   );
 }
@@ -90,7 +139,9 @@ function SectionDrawerContent({
   onExternalClose,
 }: SectionDrawerProps) {
   const categories = "categories" in navigation ? navigation.categories : null;
-  const flatPages = "pages" in navigation ? navigation.pages : null;
+  const rootEntries: readonly SectionDrawerEntry[] =
+    "categories" in navigation ? navigation.categories : navigation.pages;
+  const rootName = categories ? "categories" : "pages";
   const externalCategoryIndex =
     categories && externalOpen && externalCategoryLabel
       ? categories.findIndex((category) => category.label === externalCategoryLabel)
@@ -98,15 +149,12 @@ function SectionDrawerContent({
   const hasExternalCategory = externalCategoryIndex >= 0;
 
   const [isOpen, setIsOpen] = useState(hasExternalCategory);
-  const [level, setLevel] = useState<"categories" | "pages">(
-    hasExternalCategory ? "pages" : "categories"
+  const [trail, setTrail] = useState<readonly number[]>(
+    hasExternalCategory ? [externalCategoryIndex] : []
   );
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(
-    hasExternalCategory ? externalCategoryIndex : null
-  );
+  const [depth, setDepth] = useState(hasExternalCategory ? 1 : 0);
 
-  const activeCategory =
-    categories && activeCategoryIndex !== null ? categories[activeCategoryIndex] : null;
+  const panels = getPanels(rootEntries, rootName, trail);
 
   const open = useCallback(() => {
     setIsOpen(true);
@@ -114,18 +162,14 @@ function SectionDrawerContent({
 
   const close = useCallback(() => {
     setIsOpen(false);
-    setLevel("categories");
-    setActiveCategoryIndex(null);
+    setTrail([]);
+    setDepth(0);
     onExternalClose?.();
   }, [onExternalClose]);
 
-  const openCategory = useCallback((index: number) => {
-    setActiveCategoryIndex(index);
-    setLevel("pages");
-  }, []);
-
-  const goBack = useCallback(() => {
-    setLevel("categories");
+  const openGroup = useCallback((position: number, index: number) => {
+    setTrail((current) => [...current.slice(0, position), index]);
+    setDepth(position + 1);
   }, []);
 
   const selectPage = useCallback(
@@ -175,60 +219,32 @@ function SectionDrawerContent({
           <CloseButton onClick={close} ariaLabel="Close navigation" />
         </div>
 
-        {flatPages ? (
-          <div className="relative overflow-hidden flex-1">
-            <div className="absolute inset-0 overflow-y-auto">
-              <PageList pages={flatPages} activePage={activePage} onSelect={selectPage} />
-            </div>
-          </div>
-        ) : (
-          <div className="relative overflow-hidden flex-1">
-            {/* Level 1: Categories */}
+        <div className="relative overflow-hidden flex-1">
+          {panels.map((panel, position) => (
             <div
-              className={`absolute inset-0 overflow-y-auto transition-transform ${uiDrawerDuration} ease-in-out ${
-                level === "categories" ? "translate-x-0" : "-translate-x-full"
-              }`}
+              key={`${position}:${panel.label ?? "root"}`}
+              className={`absolute inset-0 overflow-y-auto transition-transform ${uiDrawerDuration} ease-in-out ${panelOffset(position, depth)}`}
             >
-              <ul className="py-2">
-                {categories?.map((cat, index) => (
-                  <li key={cat.label}>
-                    <SectionDrawerRow onClick={() => openCategory(index)} trailing={<ArrowRight />}>
-                      {cat.label}
-                    </SectionDrawerRow>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Level 2: Pages */}
-            <div
-              className={`absolute inset-0 overflow-y-auto transition-transform ${uiDrawerDuration} ease-in-out ${
-                level === "pages" ? "translate-x-0" : "translate-x-full"
-              }`}
-            >
-              {activeCategory && (
-                <>
-                  {/* Back button */}
-                  <div className={`border-b ${colourDivider}`}>
-                    <SectionDrawerRow
-                      onClick={goBack}
-                      aria-label={`Back to categories from ${activeCategory.label}`}
-                      trailing={<ArrowLeft />}
-                    >
-                      {activeCategory.label}
-                    </SectionDrawerRow>
-                  </div>
-
-                  <PageList
-                    pages={activeCategory.pages}
-                    activePage={activePage}
-                    onSelect={selectPage}
-                  />
-                </>
+              {panel.label !== null && (
+                <div className={`border-b ${colourDivider}`}>
+                  <SectionDrawerRow
+                    onClick={() => setDepth(position - 1)}
+                    aria-label={`Back to ${panel.backTarget} from ${panel.label}`}
+                    trailing={<ArrowLeft />}
+                  >
+                    {panel.label}
+                  </SectionDrawerRow>
+                </div>
               )}
+              <EntryList
+                entries={panel.entries}
+                activePage={activePage}
+                onOpen={(index) => openGroup(position, index)}
+                onSelect={selectPage}
+              />
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
     </>
   );
