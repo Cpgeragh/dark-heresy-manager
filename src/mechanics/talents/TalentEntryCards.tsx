@@ -109,6 +109,7 @@ export function EntryCard({
       name={shownName}
       editable={editable}
       information={information}
+      collapsible
       chips={
         <>
           {refSources.map((source) => (

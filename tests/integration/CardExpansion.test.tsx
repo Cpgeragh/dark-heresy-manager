@@ -19,7 +19,8 @@ import { ArcheotechImplantRow } from "../../src/pages/CharacterSheet/Cybernetics
 import { PowerCard } from "../../src/pages/CharacterSheet/PsychicTab/PowerCard";
 import { SkillGroupRow } from "../../src/pages/CharacterSheet/SkillsTab/SkillGroupRow";
 import type { SkillWithComputed } from "../../src/pages/CharacterSheet/SkillsTab/skillsConstants";
-import { TalentGroupCard } from "../../src/mechanics/talents/TalentEntryCards";
+import { EntryCard, TalentGroupCard } from "../../src/mechanics/talents/TalentEntryCards";
+import { SkillRow } from "../../src/pages/CharacterSheet/SkillsTab/SkillRow";
 import type {
   ArcheotechItem,
   GrenadeItem,
@@ -291,6 +292,50 @@ const groupCases: Case[] = [
         entries={[{ uid: "t1", talentId: "hatred", name: "Hatred (Heretics)" }]}
         editable
         onRemove={none}
+      />
+    ),
+  },
+  {
+    label: "the Skill card",
+    name: "Dodge",
+    toggle: /./,
+    element: <SkillRow skill={skill} editable updateLevel={none} />,
+  },
+  {
+    label: "the Talent card",
+    name: "Ambidextrous",
+    toggle: /./,
+    element: (
+      <EntryCard
+        entry={{ uid: "t1", talentId: "ambidextrous", name: "Ambidextrous" }}
+        editable
+        onRemove={none}
+      />
+    ),
+  },
+  {
+    label: "the Trait card",
+    name: "Unnatural Strength",
+    toggle: /./,
+    element: (
+      <EntryCard
+        entry={{ uid: "r1", talentId: "unnatural-strength", name: "Unnatural Strength" }}
+        editable
+        onRemove={none}
+        removalNoun="Trait"
+      />
+    ),
+  },
+  {
+    label: "the Elite Advance card",
+    name: "Iron Jaw",
+    toggle: /./,
+    element: (
+      <EntryCard
+        entry={{ uid: "e1", talentId: "iron-jaw", name: "Iron Jaw" }}
+        editable
+        onRemove={none}
+        removalNoun="Elite Advance"
       />
     ),
   },

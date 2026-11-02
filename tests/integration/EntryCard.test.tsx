@@ -6,6 +6,7 @@ import "@testing-library/jest-dom";
 import { EntryCard } from "../../src/mechanics/talents/TalentEntryCards";
 import type { TalentEntry } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
+import { openEntryCard } from "../utils/entryCard";
 
 const plainEntry: TalentEntry = { uid: "t1", talentId: "unknown-trait", name: "Odd Trait" };
 
@@ -33,6 +34,7 @@ describe("EntryCard", () => {
       },
       statusChip: "Owned: 2",
     });
+    openEntryCard();
 
     const label = screen.getByText("Gained from");
     expect(screen.getByText("Cult Briefing (Talent)")).toBeInTheDocument();

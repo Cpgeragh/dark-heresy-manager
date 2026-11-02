@@ -103,6 +103,7 @@ vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
 import { TraitsTab } from "../../src/mechanics/traits/TraitsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
+import { openAllEntryCards } from "../utils/entryCard";
 
 function makeTalents(over: Partial<TalentsAndTraitsBlock> = {}): TalentsAndTraitsBlock {
   return { homeworld: "", talents: [], traits: [], ...over };
@@ -209,6 +210,7 @@ describe("TraitsTab", () => {
       cybernetics: [{ id: "lungs", name: "Bionic Respiratory System", craftsmanship: "Good" }],
       onUpdateCharacter,
     });
+    openAllEntryCards();
     expect(screen.getAllByText("Owned: 2/4")[0]).toBeInTheDocument();
     await user.click(screen.getAllByRole("button", { name: "Remove Skin of Iron" })[0]);
     await user.click(
@@ -391,6 +393,7 @@ describe("TraitsTab", () => {
         ],
       }),
     });
+    openAllEntryCards();
     expect(screen.getAllByText("Unnatural Characteristic (Weapon Skill)")).toHaveLength(1);
     expect(screen.getAllByText("Owned: 2")).toHaveLength(1);
   });
@@ -426,6 +429,7 @@ describe("TraitsTab", () => {
     await user.click(
       screen.getAllByRole("button", { name: "Expand Unnatural Characteristic details" })[0]
     );
+    openAllEntryCards();
     expect(screen.getByText("Unnatural Characteristic (Weapon Skill)")).toBeInTheDocument();
     expect(screen.getByText("Unnatural Characteristic (Perception)")).toBeInTheDocument();
     expect(screen.getByText("Owned: 2")).toBeInTheDocument();
@@ -628,6 +632,7 @@ describe("TraitsTab", () => {
         ],
       }),
     });
+    openAllEntryCards();
     expect(screen.getAllByText("Machine (2)")[0]).toBeInTheDocument();
     expect(screen.getAllByText("Gained from")[0]).toBeInTheDocument();
     expect(screen.getAllByText("The Flesh is Weak (Talent)")[0]).toBeInTheDocument();

@@ -172,6 +172,7 @@ vi.mock("shared-rules", async (importOriginal) => {
 
 import { TalentsTab } from "../../src/mechanics/talents/TalentsTab";
 import type { PsychicBlock, TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
+import { openAllEntryCards } from "../utils/entryCard";
 
 const emptyPsychic: PsychicBlock = { psyRating: 0, minorPowers: [], majorPowers: [] };
 
@@ -242,11 +243,13 @@ describe("TalentsTab owned render boundary", () => {
     renderTab({
       talents: makeTalents({ talents: [entry("owned-1", "plain-talent", "Plain Talent")] }),
     });
+    openAllEntryCards();
 
     const [source] = screen.getAllByText("CR");
     expect(source).toHaveClass("h-6", "text-xs");
     expect(source).not.toHaveClass("h-5", "text-[10px]");
-    expect(source.closest("div.rounded-lg")).toHaveClass("p-3", "lg:p-4");
+    expect(source.closest("div.rounded-lg")).toHaveClass("overflow-hidden");
+    expect(source.parentElement?.parentElement).toHaveClass("px-3", "lg:px-4");
   });
 
   it("does not rebuild owned talent cards when a picker opens and closes", async () => {
@@ -400,9 +403,8 @@ describe("TalentsTab", () => {
       within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Touched by the Fates")
     );
     const acquisition = screen.getByRole("dialog", { name: "Touched by the Fates Acquisition" });
-    expect(within(acquisition).getByRole("button", { name: "Back" })).toBeInTheDocument();
-    expect(within(acquisition).queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
-    await user.click(within(acquisition).getByRole("button", { name: "Back" }));
+    expect(within(acquisition).queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(within(acquisition).getByRole("button", { name: "Close" }));
 
     const dialog = await screen.findByRole("dialog", { name: "Add Talent" });
     expect(within(dialog).getByText("Touched by the Fates")).toBeInTheDocument();
@@ -429,6 +431,7 @@ describe("TalentsTab", () => {
         ],
       }),
     });
+    openAllEntryCards();
 
     expect(screen.queryByText("None.")).not.toBeInTheDocument();
     expect(screen.getAllByText("General")[0]).toHaveClass("text-slate-300");
@@ -450,7 +453,7 @@ describe("TalentsTab", () => {
     expect(within(card!).getByText("Fel 30")).toBeInTheDocument();
   });
 
-  it("shows a right arrow only when selecting a Talent opens another step", async () => {
+  it("shows a right arrow only when selecting a Talent opens a list of choices", async () => {
     const user = userEvent.setup();
     renderTab();
     await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
@@ -458,10 +461,26 @@ describe("TalentsTab", () => {
     const directCard = within(dialog).getByText("Sound Constitution").closest("button");
     const choiceCard = within(dialog).getByText("Resistance").closest("button");
     const acquisitionCard = within(dialog).getByText("Touched by the Fates").closest("button");
+    const textEntryCard = within(dialog).getByText("Spec Talent").closest("button");
 
     expect(directCard!.querySelector('[data-picker-arrow="right"]')).toBeNull();
     expect(choiceCard!.querySelector('[data-picker-arrow="right"]')).not.toBeNull();
-    expect(acquisitionCard!.querySelector('[data-picker-arrow="right"]')).not.toBeNull();
+    expect(acquisitionCard!.querySelector('[data-picker-arrow="right"]')).toBeNull();
+    expect(textEntryCard!.querySelector('[data-picker-arrow="right"]')).toBeNull();
+  });
+
+  it("returns from the text entry screen with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Add Talent" })).getByText("Spec Talent")
+    );
+
+    const entry = screen.getByRole("dialog", { name: "Skill" });
+    expect(within(entry).queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(within(entry).getByRole("button", { name: "Close" }));
+    expect(screen.getByRole("dialog", { name: "Add Talent" })).toBeInTheDocument();
   });
 
   it("excludes managed Weapon Training from the picker", async () => {
@@ -1511,13 +1530,14 @@ describe("TalentsTab", () => {
   it("shows automatically granted Talents as read-only with their source", () => {
     const talents = makeTalents({ talents: [entry("pw", "the-power-within", "The Power Within")] });
     renderTab({ talents });
+    openAllEntryCards();
     expect(screen.getAllByText("Resistance (Psychic Powers)").length).toBeGreaterThan(0);
     expect(screen.getAllByText("The Power Within (Talent)").length).toBeGreaterThan(0);
     expect(
       screen.queryByRole("button", { name: "Remove Resistance (Psychic Powers)" })
     ).not.toBeInTheDocument();
     for (const grantedText of screen.getAllByText("The Power Within (Talent)")) {
-      const cardContent = grantedText.parentElement?.parentElement;
+      const cardContent = grantedText.parentElement?.parentElement?.parentElement;
       const sourceChip = within(cardContent!).getByText("CR");
       expect(
         sourceChip.compareDocumentPosition(grantedText) & Node.DOCUMENT_POSITION_FOLLOWING
@@ -1581,6 +1601,7 @@ describe("TalentsTab", () => {
         onUpdateCharacter={async () => true}
       />
     );
+    openAllEntryCards();
     expect(screen.getAllByText("Owned: 2").length).toBeGreaterThan(0);
     expect(
       screen.getAllByRole("button", { name: "Remove Minor Psychic Power" }).length
@@ -1594,6 +1615,7 @@ describe("TalentsTab", () => {
         onUpdateCharacter={async () => true}
       />
     );
+    openAllEntryCards();
     expect(screen.getAllByText("Owned: 1").length).toBeGreaterThan(0);
     expect(
       screen.queryByText(

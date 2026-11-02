@@ -87,6 +87,7 @@ export function SkillRow({
         editable={editable}
         information={skillInfoContent}
         informationAs="span"
+        collapsible
         chips={
           <>
             <Chip
