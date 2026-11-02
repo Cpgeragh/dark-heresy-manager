@@ -1,5 +1,17 @@
 # Loading audit, 2 November 2026
 
+## Approved follow-up changes
+
+Weapon and ammunition ID lookups now use shared indexes. Ranged name-and-source fallback searches use a name index, retaining first-match behaviour. Installed upgrades resolve through an index while preserving reference-list order and duplicate handling. Retired weapon aliases, missing-reference behaviour, and reference object identity remain intact. Grenade reference lookups also use an index.
+
+The shared AccordionCard accepts a detail-rendering callback, invoked only when open or force-expanded. Ranged and melee cards defer their detail calculations and element construction through this callback while retaining header data and all hook state in the stable card. Grenade, Shield, Cybernetic Weapon, Archeotech Weapon, and Archeotech Shield cards also defer detail element construction. Closed cards skip their special-rule-name parsing where applicable. The existing grid, keys, card parents, and expansion controls remain unchanged.
+
+Character Sheet code is prepared after Campaign Overview is shown and the browser has an idle opportunity. Settings and chat interfaces are separate dynamic imports, prepared after the current route is shown. One shared queue serialises preparation and removes pending work on navigation. Foreground requests reuse the cached import and need not wait for the queue. Preparation does not mount pages or start their data hooks. Background import errors do not interrupt the visible page; failed cached imports can be requested again. Foreground lazy-import errors retain the existing application error boundary. The loaded inbox remains mounted while closed, preserving its list state, and Settings retains its existing close behaviour. Loading feedback reuses PendingOverlay through a shared viewport wrapper.
+
+Validation: TypeScript, focused ESLint, and the production build passed. Nine existing focused suites passed 260 tests; eleven further suites passed 132 tests, including the updated AccordionCard suite, reference equivalence, import sharing and retry, serial scheduling, navigation cancellation, inbox state, Settings, Weapons, picker previews, and grid state preservation. The AccordionCard suite appears in both groups. The build emitted separate Settings and ChatInboxModal chunks. Windows initially blocked the test runner's temporary-file rename before tests started; the same checks passed with the required file access.
+
+These changes reduce confirmed repeated work and separate downloads. No new speed tests were run, and no overall loading improvement has been measured. Dense Weapons latency remains pending re-measurement. The startup update check, existing character-tab preparation burst, server capacity, and saved timing samples were left unchanged. No staging, commit, or deployment was performed.
+
 ## Follow-up implementation
 
 Closed ranged and melee weapon cards now defer compatible-upgrade searches until expanded, including force-expanded cards. Open cards calculate only the editing or viewing list they need, rather than both lists. Existing timings predate this targeted change; no speed claim is attached to it. Focused card tests cover opening a closed card and accessing upgrades.

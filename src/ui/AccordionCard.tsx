@@ -47,7 +47,8 @@ interface AccordionCardProps {
   /** Shows the body with no overlay button and no chevron. */
   forceExpanded?: boolean;
   bodyId?: string;
-  children?: ReactNode;
+  /** A callback defers detail construction until open; keep hooks in the parent card. */
+  children?: ReactNode | (() => ReactNode);
 }
 
 /** The one expandable card: a tappable header holding the shared entry row, and a body beneath it. */
@@ -116,7 +117,7 @@ export function AccordionCard({
       </div>
       {open && children && (
         <div id={bodyId} className={`px-3 pb-3 lg:px-4 lg:pb-4 ${uiStackSection}`}>
-          {children}
+          {typeof children === "function" ? children() : children}
         </div>
       )}
     </div>

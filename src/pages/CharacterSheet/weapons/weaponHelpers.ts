@@ -8,7 +8,7 @@ import type {
   WeaponCraftsmanship,
 } from "../../../types/Character";
 import {
-  AMMO_REFERENCE,
+  resolveAmmoReference,
   ammoCapacityForWeapon,
   isSoldAsFullClip,
   usesUnitAmmoTracking,
@@ -460,9 +460,7 @@ export function calcEntryWeight(
   const weaponKg = readWeightKg(weaponWeight) ?? 0;
   if (!weaponKg) return 0;
   const clipSize = parseFloat(ammunitionCapacity ?? clip ?? "1") || 1;
-  const ammoRef = entry.referenceId
-    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
-    : undefined;
+  const ammoRef = entry.referenceId ? resolveAmmoReference(entry.referenceId) : undefined;
   const clipWeight = ammoRef?.unitWeightKg ?? weaponKg * 0.1;
   if (ammoTracking === "loose") {
     return (entry.rounds + entry.clips * clipSize) * (clipWeight / clipSize);
@@ -482,9 +480,7 @@ export function resolveAmmoEntryTracking(
   weaponClip: string | undefined,
   weaponAmmoTracking: AmmoTrackingMode
 ): { ammoTracking: AmmoTrackingMode; capacity: string | undefined } {
-  const ammoRef = entry.referenceId
-    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
-    : undefined;
+  const ammoRef = entry.referenceId ? resolveAmmoReference(entry.referenceId) : undefined;
   return {
     ammoTracking:
       isSoldAsFullClip(ammoRef) || ammoRef?.isBackpackFeed ? "clip" : weaponAmmoTracking,
@@ -523,9 +519,7 @@ export function alternateRangedAmmoEntriesOf(weapon: MeleeWeapon): WeaponAmmoEnt
     {
       id: "legacy-alternate-ammo",
       referenceId: weapon.alternateRangedAmmoReferenceId,
-      name:
-        AMMO_REFERENCE.find((ammo) => ammo.id === weapon.alternateRangedAmmoReferenceId)?.name ??
-        "Ammo",
+      name: resolveAmmoReference(weapon.alternateRangedAmmoReferenceId)?.name ?? "Ammo",
       clips: 1,
       rounds: 0,
       loaded: true,

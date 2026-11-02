@@ -1,6 +1,6 @@
 import type { WeaponAmmoEntry } from "../../../types/Character";
 import {
-  AMMO_REFERENCE,
+  resolveAmmoReference,
   RECHARGING_POWER_PACKS_TEXT,
   formatAmmoName,
   isChargePackAmmoName,
@@ -62,9 +62,7 @@ export function AmmoEntryRow({
   onSetLooseRounds: (qty: number) => void;
 }) {
   recordComponentRender("AmmoEntryRow");
-  const ammoRef = entry.referenceId
-    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
-    : undefined;
+  const ammoRef = entry.referenceId ? resolveAmmoReference(entry.referenceId) : undefined;
   const displayName = formatAmmoName(ammoRef?.name ?? entry.name);
   const isChargePack = isChargePackAmmoName(displayName);
   const hasAmmoInfo = !!ammoRef?.description || isChargePack;

@@ -238,3 +238,17 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     isCreationComponent: true,
   },
 ];
+
+// Preserve reference-list order and return each installed upgrade once.
+const upgradesById = new Map<string, { reference: WeaponUpgradeRef; order: number }[]>();
+WEAPON_UPGRADE_REFERENCE.forEach((reference, order) => {
+  const matches = upgradesById.get(reference.id) ?? [];
+  matches.push({ reference, order });
+  upgradesById.set(reference.id, matches);
+});
+export function resolveWeaponUpgrades(ids: readonly string[]): WeaponUpgradeRef[] {
+  return [...new Set(ids)]
+    .flatMap((id) => upgradesById.get(id) ?? [])
+    .sort((a, b) => a.order - b.order)
+    .map(({ reference }) => reference);
+}

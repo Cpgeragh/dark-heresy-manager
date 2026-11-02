@@ -77,7 +77,7 @@ export function ArcheotechWeaponCard({
   const rld = item.rld ?? ref?.rld;
 
   const hasRules = !!specialRules?.trim();
-  const ruleNamesInLookup = getKnownSpecialRuleNames(specialRules);
+  const ruleNamesInLookup = expanded ? getKnownSpecialRuleNames(specialRules) : [];
 
   const hasWeaponStats = !!(damage || weaponClass);
   const showMishaps = item.type === "Grenade";
@@ -132,89 +132,101 @@ export function ArcheotechWeaponCard({
         ) : undefined
       }
     >
-      {/* Stat chips: only for items with structured weapon data */}
-      {hasWeaponStats && (
-        <div className={`${uiChipRow}`}>
-          {range && <StatChip label="Range" value={range} />}
-          {rof && <StatChip label="RoF" value={rof} />}
-          {damage && <StatChip label="Damage" value={damage.replace(/\s*[IREX]$/i, "").trim()} />}
-          {damage && <DamageTypeChip damage={damage} />}
-          {pen && <StatChip label="Pen" value={pen} />}
-          {clip && <StatChip label="Clip" value={clip} />}
-          {rld && <StatChip label="Reload" value={rld} />}
-          {weaponClass === "Melee" && strengthBonus !== undefined && (
-            <>
-              <StatChip label="SB" value={`+${strengthBonus}`} />
+      {() => (
+        <>
+          {/* Stat chips: only for items with structured weapon data */}
+          {hasWeaponStats && (
+            <div className={`${uiChipRow}`}>
+              {range && <StatChip label="Range" value={range} />}
+              {rof && <StatChip label="RoF" value={rof} />}
               {damage && (
-                <StatChip label="Total" value={computeMeleeTotalDamage(damage, strengthBonus)} />
+                <StatChip label="Damage" value={damage.replace(/\s*[IREX]$/i, "").trim()} />
               )}
-            </>
+              {damage && <DamageTypeChip damage={damage} />}
+              {pen && <StatChip label="Pen" value={pen} />}
+              {clip && <StatChip label="Clip" value={clip} />}
+              {rld && <StatChip label="Reload" value={rld} />}
+              {weaponClass === "Melee" && strengthBonus !== undefined && (
+                <>
+                  <StatChip label="SB" value={`+${strengthBonus}`} />
+                  {damage && (
+                    <StatChip
+                      label="Total"
+                      value={computeMeleeTotalDamage(damage, strengthBonus)}
+                    />
+                  )}
+                </>
+              )}
+            </div>
           )}
-        </div>
+
+          {/* Qualities / Rules */}
+          <div className={uiStackField}>
+            <EntryLines
+              lines={{
+                qualities: {
+                  value: hasRules ? specialRules : undefined,
+                  info:
+                    ruleNamesInLookup.length > 0 ? (
+                      <InfoModal
+                        title={`${item.name} Qualities`}
+                        content={<SpecialRulesContent rules={specialRules ?? ""} />}
+                      />
+                    ) : undefined,
+                },
+                rules: {
+                  info: rules ? (
+                    <InfoModal
+                      title={`${item.name} Rules`}
+                      content={<InfoParagraph>{rules}</InfoParagraph>}
+                    />
+                  ) : undefined,
+                },
+                mishaps: showMishaps
+                  ? {
+                      info: (
+                        <InfoModal
+                          title="Explosive Mishaps"
+                          content={<ExplosiveMishapsContent />}
+                        />
+                      ),
+                    }
+                  : undefined,
+                notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
+                  collection: "archeotech",
+                  id: item.id,
+                  notes: item.personalNotes,
+                  editable,
+                }),
+              }}
+            />
+          </div>
+
+          {!preview && libraryItem && (
+            <CustomItemActionButtons
+              libraryItem={libraryItem}
+              isDM={isDM}
+              canEditDefinition={canEditDefinition}
+              busyAction={busyAction}
+              onEditDefinition={onEditDefinition}
+              onPublish={onPublish}
+              onArchive={onArchive}
+              onUpdateAllCopies={onUpdateAllCopies}
+            />
+          )}
+
+          {/* Weight / Value / Availability / Source */}
+          <ItemMetaChips
+            weight={weight}
+            value={value}
+            availability={availability}
+            source={source}
+            assignedLater={preview}
+            className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
+          />
+          {previewNote}
+        </>
       )}
-
-      {/* Qualities / Rules */}
-      <div className={uiStackField}>
-        <EntryLines
-          lines={{
-            qualities: {
-              value: hasRules ? specialRules : undefined,
-              info:
-                ruleNamesInLookup.length > 0 ? (
-                  <InfoModal
-                    title={`${item.name} Qualities`}
-                    content={<SpecialRulesContent rules={specialRules ?? ""} />}
-                  />
-                ) : undefined,
-            },
-            rules: {
-              info: rules ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={<InfoParagraph>{rules}</InfoParagraph>}
-                />
-              ) : undefined,
-            },
-            mishaps: showMishaps
-              ? {
-                  info: (
-                    <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
-                  ),
-                }
-              : undefined,
-            notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
-              collection: "archeotech",
-              id: item.id,
-              notes: item.personalNotes,
-              editable,
-            }),
-          }}
-        />
-      </div>
-
-      {!preview && libraryItem && (
-        <CustomItemActionButtons
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
-      )}
-
-      {/* Weight / Value / Availability / Source */}
-      <ItemMetaChips
-        weight={weight}
-        value={value}
-        availability={availability}
-        source={source}
-        assignedLater={preview}
-        className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
-      />
-      {previewNote}
     </AccordionCard>
   );
 }

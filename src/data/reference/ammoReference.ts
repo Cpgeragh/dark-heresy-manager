@@ -2,6 +2,7 @@
 // Reference data for ammunition types from the Core Rulebook and Dark Heresy sourcebooks.
 // Feeds into the AmmoPicker in WeaponsTab.
 
+import { indexReferences } from "../../utils/referenceIndex";
 import { SkillSource } from "../../types/SkillSource";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -603,3 +604,8 @@ export const AMMO_REFERENCE: AmmoRef[] = [
       "it is only available through xenos sources.",
   },
 ];
+
+const ammoById = indexReferences(AMMO_REFERENCE);
+export function resolveAmmoReference(id?: string): AmmoRef | undefined {
+  return id ? ammoById.get(id) : undefined;
+}

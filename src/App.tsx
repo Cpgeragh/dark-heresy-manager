@@ -16,7 +16,10 @@ import { useLinkedDevices } from "./hooks/useLinkedDevices";
 import { useUserProfile } from "./hooks/useUserProfile";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
-import { ChatInboxModal } from "./components/chat/ChatInboxModal";
+import { DeferredChatInbox } from "./components/chat/DeferredChatInbox";
+import { AppCodePreparation } from "./components/AppCodePreparation";
+import { loadCharacterSheet, loadSettings } from "./loading/appModules";
+import { AppPanelLoading } from "./components/AppPanelLoading";
 import { CloseChatInboxOnNavigation } from "./components/chat/CloseChatInboxOnNavigation";
 import { SplashScreen } from "./components/SplashScreen";
 import { StartupErrorModal } from "./components/StartupErrorModal";
@@ -31,11 +34,11 @@ import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 import { consumeUpdateStalled, consumePostUpgrade } from "./pwaUpdateState";
 import { RouteHolder } from "./components/RouteHolder";
 import { RouteLoadingHold } from "./components/RouteLoadingHold";
-import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
 import { colourTextPrimary, colourPageBackground } from "./ui/styles/colourTokens";
 
-const CharacterSheet = lazy(() => import("./pages/CharacterSheet"));
+const Settings = lazy(loadSettings);
+const CharacterSheet = lazy(loadCharacterSheet);
 const CampaignOverview = lazy(() => import("./pages/CampaignOverview"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 
@@ -224,6 +227,7 @@ function AppContent() {
       <HeaderExtensionProvider>
         <ChatInboxProvider>
           <UpdateStallNotice />
+          <AppCodePreparation shownPath={shownPath} pathname={location.pathname} />
           <CloseChatInboxOnNavigation />
           <div className={`min-h-screen ${colourPageBackground} ${colourTextPrimary}`}>
             {/* HEADER */}
@@ -275,17 +279,19 @@ function AppContent() {
               </ErrorBoundary>
             </main>
 
-            <ChatInboxModal accountId={effectiveUserId} />
+            <DeferredChatInbox accountId={effectiveUserId} />
 
             {settingsOpen && (
-              <Settings
-                effectiveUserId={effectiveUserId}
-                firstName={firstName}
-                devices={devices}
-                deviceListError={devicesError}
-                disconnect={handleDeviceDisconnect}
-                onClose={() => setSettingsOpen(false)}
-              />
+              <Suspense fallback={<AppPanelLoading />}>
+                <Settings
+                  effectiveUserId={effectiveUserId}
+                  firstName={firstName}
+                  devices={devices}
+                  deviceListError={devicesError}
+                  disconnect={handleDeviceDisconnect}
+                  onClose={() => setSettingsOpen(false)}
+                />
+              </Suspense>
             )}
 
             <OfflineIndicator />

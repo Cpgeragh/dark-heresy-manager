@@ -2,6 +2,7 @@
 // Stat-block reference data for ranged and melee weapons, organised by source book.
 // Feeds into the reference-lookup UI on the Weapons tab.
 
+import { indexReferences } from "../../utils/referenceIndex";
 import { SkillSource } from "../../types/SkillSource";
 import { classifyWeaponReference, type WeaponClass, type WeaponType } from "./weaponClassification";
 
@@ -5512,16 +5513,30 @@ const MELEE_WEAPON_REFERENCE_ALIASES: Record<string, string> = {
   "ih-eviscerator": "eviscerator",
 };
 
+const rangedById = indexReferences(RANGED_WEAPON_REFERENCE);
+const meleeById = indexReferences(MELEE_WEAPON_REFERENCE);
+const rangedByName = new Map<string, RangedWeaponRef[]>();
+for (const weapon of RANGED_WEAPON_REFERENCE) {
+  const matches = rangedByName.get(weapon.name) ?? [];
+  matches.push(weapon);
+  rangedByName.set(weapon.name, matches);
+}
+
+export function findRangedWeaponReference(
+  name: string,
+  source?: string
+): RangedWeaponRef | undefined {
+  return rangedByName.get(name)?.find((weapon) => !source || weapon.source === source);
+}
+
 export function resolveRangedWeaponReference(id?: string): RangedWeaponRef | undefined {
   const resolvedId = id ? (RANGED_WEAPON_REFERENCE_ALIASES[id] ?? id) : undefined;
-  return resolvedId
-    ? RANGED_WEAPON_REFERENCE.find((weapon) => weapon.id === resolvedId)
-    : undefined;
+  return resolvedId ? rangedById.get(resolvedId) : undefined;
 }
 
 export function resolveMeleeWeaponReference(id?: string): MeleeWeaponRef | undefined {
   const resolvedId = id ? (MELEE_WEAPON_REFERENCE_ALIASES[id] ?? id) : undefined;
-  return resolvedId ? MELEE_WEAPON_REFERENCE.find((weapon) => weapon.id === resolvedId) : undefined;
+  return resolvedId ? meleeById.get(resolvedId) : undefined;
 }
 
 export const GRENADE_REFERENCE: GrenadeRef[] = [
@@ -5901,3 +5916,8 @@ export const SHIELD_REFERENCE: ShieldRef[] = [
     availability: "Scarce",
   },
 ];
+
+const grenadeById = indexReferences(GRENADE_REFERENCE);
+export function resolveGrenadeReference(id?: string): GrenadeRef | undefined {
+  return id ? grenadeById.get(id) : undefined;
+}

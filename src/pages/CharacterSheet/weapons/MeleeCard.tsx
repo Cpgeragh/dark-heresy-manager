@@ -8,9 +8,9 @@ import { resolveMeleeWeaponReference } from "../../../data/reference/weaponRefer
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
-import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
+import { resolveWeaponUpgrades } from "../../../data/reference/weaponUpgradeReference";
 import {
-  AMMO_REFERENCE,
+  resolveAmmoReference,
   isSoldAsFullClip,
   usesUnitAmmoTracking,
 } from "../../../data/reference/ammoReference";
@@ -129,142 +129,422 @@ export function MeleeCard({
   const [activeProfile, setActiveProfile] = useState("Melee");
   const [showPistolAmmoPicker, setShowPistolAmmoPicker] = useState(false);
 
-  const upgradeIds = weapon.upgrades ?? [];
-  const upgradeRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) => upgradeIds.includes(upgrade.id));
   const weaponRef = weapon.referenceId
     ? resolveMeleeWeaponReference(weapon.referenceId)
     : undefined;
-  const concealedBionicQuality = weapon.concealedBionic?.craftsmanship;
-  // Prefer reference specialRules as source of truth; avoids stale stored character data
-  let baseSpecialRules = weaponRef?.specialRules ?? weapon.specialRules ?? "—";
-  if (concealedBionicQuality === "Poor") {
-    baseSpecialRules = addSpecialRule(baseSpecialRules, "Unreliable");
-  } else if (concealedBionicQuality === "Common" || concealedBionicQuality === "Good") {
-    baseSpecialRules = removeSpecialRule(baseSpecialRules, "Unreliable");
-  }
-  const baseWeapon = { ...weapon, specialRules: baseSpecialRules };
-  const effective = effectiveMeleeStats(baseWeapon, upgradeRefs);
-  const effectiveDamage =
-    concealedBionicQuality === "Good"
-      ? meleeDamageForCraftsmanship(weapon.damage ?? "", "Best")
-      : (weapon.damage ?? "");
-  const pistolProfile = weaponRef?.alternateRangedProfile;
-  const alternateMeleeProfiles = weaponRef?.alternateMeleeProfiles ?? [];
-  const activeMeleeProfile = alternateMeleeProfiles.find(
-    (profile) => profile.label === activeProfile
-  );
-  const isPistolProfile = activeProfile === "Pistol" && !!pistolProfile;
-  const displayedMeleeDamage = activeMeleeProfile?.damage ?? effectiveDamage;
-  const displayedMeleePen = activeMeleeProfile?.pen ?? effective.pen;
-  const displayedMeleeRules = activeMeleeProfile?.specialRules;
-  const pistolAmmoEntries = alternateRangedAmmoEntriesOf(weapon);
-  const loadedPistolAmmoEntry =
-    pistolAmmoEntries.find((entry) => entry.id === weapon.loadedAlternateRangedAmmoId) ??
-    pistolAmmoEntries.find((entry) => entry.loaded);
-  const pistolAmmoRef = loadedPistolAmmoEntry?.referenceId
-    ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedPistolAmmoEntry.referenceId)
-    : undefined;
-  const pistolAmmoFamily = ammoFamilyChip(pistolProfile?.ammoType);
-  let pistolRules = pistolProfile?.specialRules ?? "—";
-  if (pistolAmmoRef && pistolAmmoRef.id !== "ih-irontalon-fragmenting-ammunition") {
-    pistolRules = removeSpecialRule(removeSpecialRule(pistolRules, "Primitive"), "Tearing");
-  }
-  const hasMultipleProfiles = hasMultipleMeleeProfiles(displayedMeleeDamage);
-  const thrownRange = weaponRef?.thrownRange;
-  const craftsmanship = concealedBionicQuality ?? weapon.craftsmanship ?? "Common";
-  const strengthBonusMultiplier = weapon.strengthBonusMultiplier ?? 1;
-  const effectiveStrengthBonus = strengthBonus * strengthBonusMultiplier;
-  const visibleCompatible =
-    (expanded || forceExpanded) && allowUpgrades
-      ? getCompatibleUpgrades(
-          weapon.class ?? "",
-          weapon.name,
-          true,
-          editable ? upgradeIds : [],
-          undefined,
-          undefined,
-          baseSpecialRules,
-          craftsmanship
-        )
-      : [];
-  const baseRulesText = effective.specialRules?.trim() ?? "";
-  const rulesText = isPistolProfile
-    ? pistolRules
-    : displayedMeleeRules
-      ? displayedMeleeRules
-      : weaponRef?.twoHanded
-        ? [baseRulesText, "Two-Handed"]
-            .filter((part) => part && part !== "—" && part !== "-")
-            .join(", ")
-        : baseRulesText;
-  const ruleNamesInLookup = getKnownSpecialRuleNames(rulesText);
-  const hasQualities = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
   const rulesDescription = weaponRef?.description ?? weapon.description;
-  const hasQualityModal = ruleNamesInLookup.length > 0;
-  const hasItemRules = !!weapon.concealedBionic;
-  const concealedBionicEffect =
-    concealedBionicQuality === "Poor"
-      ? "Adds the Unreliable Quality."
-      : concealedBionicQuality === "Good"
-        ? "It gains +10 to attack Tests and +1 Damage."
-        : concealedBionicQuality === "Common"
-          ? "No additional weapon effect."
-          : undefined;
   const classChips = meleeClassChips(weapon.class);
   const activeWeaponType = weaponTypeChip(weaponRef?.type ?? weapon.type);
-  const isThrown =
-    weapon.class?.toLowerCase().includes("thrown") ||
-    weaponRef?.class.toLowerCase().includes("thrown");
 
-  function updatePistolAmmo(
-    entries: WeaponAmmoEntry[],
-    loadedAmmoId?: string,
-    options?: PatchOptions
-  ) {
-    return onUpdateAlternateRangedAmmoEntries?.(entries, loadedAmmoId, options);
-  }
-
-  function handleAddPistolAmmo(name: string, referenceId?: string) {
-    const ammoRef = referenceId
-      ? AMMO_REFERENCE.find((ammo) => ammo.id === referenceId)
+  function renderDetails() {
+    const upgradeIds = weapon.upgrades ?? [];
+    const upgradeRefs = resolveWeaponUpgrades(upgradeIds);
+    const concealedBionicQuality = weapon.concealedBionic?.craftsmanship;
+    // Prefer reference specialRules as source of truth; avoids stale stored character data
+    let baseSpecialRules = weaponRef?.specialRules ?? weapon.specialRules ?? "—";
+    if (concealedBionicQuality === "Poor") {
+      baseSpecialRules = addSpecialRule(baseSpecialRules, "Unreliable");
+    } else if (concealedBionicQuality === "Common" || concealedBionicQuality === "Good") {
+      baseSpecialRules = removeSpecialRule(baseSpecialRules, "Unreliable");
+    }
+    const baseWeapon = { ...weapon, specialRules: baseSpecialRules };
+    const effective = effectiveMeleeStats(baseWeapon, upgradeRefs);
+    const effectiveDamage =
+      concealedBionicQuality === "Good"
+        ? meleeDamageForCraftsmanship(weapon.damage ?? "", "Best")
+        : (weapon.damage ?? "");
+    const pistolProfile = weaponRef?.alternateRangedProfile;
+    const alternateMeleeProfiles = weaponRef?.alternateMeleeProfiles ?? [];
+    const activeMeleeProfile = alternateMeleeProfiles.find(
+      (profile) => profile.label === activeProfile
+    );
+    const isPistolProfile = activeProfile === "Pistol" && !!pistolProfile;
+    const displayedMeleeDamage = activeMeleeProfile?.damage ?? effectiveDamage;
+    const displayedMeleePen = activeMeleeProfile?.pen ?? effective.pen;
+    const displayedMeleeRules = activeMeleeProfile?.specialRules;
+    const pistolAmmoEntries = alternateRangedAmmoEntriesOf(weapon);
+    const loadedPistolAmmoEntry =
+      pistolAmmoEntries.find((entry) => entry.id === weapon.loadedAlternateRangedAmmoId) ??
+      pistolAmmoEntries.find((entry) => entry.loaded);
+    const pistolAmmoRef = loadedPistolAmmoEntry?.referenceId
+      ? resolveAmmoReference(loadedPistolAmmoEntry.referenceId)
       : undefined;
-    const entry: WeaponAmmoEntry = {
-      id: crypto.randomUUID(),
-      referenceId,
-      name,
-      clips: usesUnitAmmoTracking(ammoRef) ? 1 : 0,
-      rounds: isSoldAsFullClip(ammoRef) ? Number(pistolProfile?.clip ?? 1) : 0,
-      loaded: pistolAmmoEntries.length === 0,
-    };
-    updatePistolAmmo(
-      [...pistolAmmoEntries, entry],
-      entry.loaded ? entry.id : weapon.loadedAlternateRangedAmmoId,
-      { optimistic: true }
-    );
-  }
+    const pistolAmmoFamily = ammoFamilyChip(pistolProfile?.ammoType);
+    let pistolRules = pistolProfile?.specialRules ?? "—";
+    if (pistolAmmoRef && pistolAmmoRef.id !== "ih-irontalon-fragmenting-ammunition") {
+      pistolRules = removeSpecialRule(removeSpecialRule(pistolRules, "Primitive"), "Tearing");
+    }
+    const hasMultipleProfiles = hasMultipleMeleeProfiles(displayedMeleeDamage);
+    const thrownRange = weaponRef?.thrownRange;
+    const craftsmanship = concealedBionicQuality ?? weapon.craftsmanship ?? "Common";
+    const strengthBonusMultiplier = weapon.strengthBonusMultiplier ?? 1;
+    const effectiveStrengthBonus = strengthBonus * strengthBonusMultiplier;
+    const visibleCompatible =
+      (expanded || forceExpanded) && allowUpgrades
+        ? getCompatibleUpgrades(
+            weapon.class ?? "",
+            weapon.name,
+            true,
+            editable ? upgradeIds : [],
+            undefined,
+            undefined,
+            baseSpecialRules,
+            craftsmanship
+          )
+        : [];
+    const baseRulesText = effective.specialRules?.trim() ?? "";
+    const rulesText = isPistolProfile
+      ? pistolRules
+      : displayedMeleeRules
+        ? displayedMeleeRules
+        : weaponRef?.twoHanded
+          ? [baseRulesText, "Two-Handed"]
+              .filter((part) => part && part !== "—" && part !== "-")
+              .join(", ")
+          : baseRulesText;
+    const ruleNamesInLookup = getKnownSpecialRuleNames(rulesText);
+    const hasQualities = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
 
-  function handleSetLoadedPistolAmmo(entryId: string) {
-    updatePistolAmmo(
-      pistolAmmoEntries.map((entry) => ({ ...entry, loaded: entry.id === entryId })),
-      entryId,
-      { optimistic: true }
-    );
-  }
+    const hasQualityModal = ruleNamesInLookup.length > 0;
+    const hasItemRules = !!weapon.concealedBionic;
+    const concealedBionicEffect =
+      concealedBionicQuality === "Poor"
+        ? "Adds the Unreliable Quality."
+        : concealedBionicQuality === "Good"
+          ? "It gains +10 to attack Tests and +1 Damage."
+          : concealedBionicQuality === "Common"
+            ? "No additional weapon effect."
+            : undefined;
 
-  function handleRemovePistolAmmo(entryId: string) {
-    const next = pistolAmmoEntries.filter((entry) => entry.id !== entryId);
-    const nextLoaded = next.find((entry) => entry.loaded) ?? next[0];
-    return updatePistolAmmo(
-      next.map((entry) => ({ ...entry, loaded: entry.id === nextLoaded?.id })),
-      nextLoaded?.id
-    );
-  }
+    const isThrown =
+      weapon.class?.toLowerCase().includes("thrown") ||
+      weaponRef?.class.toLowerCase().includes("thrown");
 
-  function handleUpdatePistolAmmo(entryId: string, patch: Partial<WeaponAmmoEntry>) {
-    updatePistolAmmo(
-      pistolAmmoEntries.map((entry) => (entry.id === entryId ? { ...entry, ...patch } : entry)),
-      loadedPistolAmmoEntry?.id,
-      { optimistic: true }
+    function updatePistolAmmo(
+      entries: WeaponAmmoEntry[],
+      loadedAmmoId?: string,
+      options?: PatchOptions
+    ) {
+      return onUpdateAlternateRangedAmmoEntries?.(entries, loadedAmmoId, options);
+    }
+
+    function handleAddPistolAmmo(name: string, referenceId?: string) {
+      const ammoRef = referenceId ? resolveAmmoReference(referenceId) : undefined;
+      const entry: WeaponAmmoEntry = {
+        id: crypto.randomUUID(),
+        referenceId,
+        name,
+        clips: usesUnitAmmoTracking(ammoRef) ? 1 : 0,
+        rounds: isSoldAsFullClip(ammoRef) ? Number(pistolProfile?.clip ?? 1) : 0,
+        loaded: pistolAmmoEntries.length === 0,
+      };
+      updatePistolAmmo(
+        [...pistolAmmoEntries, entry],
+        entry.loaded ? entry.id : weapon.loadedAlternateRangedAmmoId,
+        { optimistic: true }
+      );
+    }
+
+    function handleSetLoadedPistolAmmo(entryId: string) {
+      updatePistolAmmo(
+        pistolAmmoEntries.map((entry) => ({ ...entry, loaded: entry.id === entryId })),
+        entryId,
+        { optimistic: true }
+      );
+    }
+
+    function handleRemovePistolAmmo(entryId: string) {
+      const next = pistolAmmoEntries.filter((entry) => entry.id !== entryId);
+      const nextLoaded = next.find((entry) => entry.loaded) ?? next[0];
+      return updatePistolAmmo(
+        next.map((entry) => ({ ...entry, loaded: entry.id === nextLoaded?.id })),
+        nextLoaded?.id
+      );
+    }
+
+    function handleUpdatePistolAmmo(entryId: string, patch: Partial<WeaponAmmoEntry>) {
+      updatePistolAmmo(
+        pistolAmmoEntries.map((entry) => (entry.id === entryId ? { ...entry, ...patch } : entry)),
+        loadedPistolAmmoEntry?.id,
+        { optimistic: true }
+      );
+    }
+
+    return (
+      <>
+        {libraryItem && (
+          <CustomItemActionButtons
+            className="flex flex-wrap gap-2"
+            libraryItem={libraryItem}
+            isDM={isDM}
+            canEditDefinition={canEditDefinition}
+            busyAction={busyAction}
+            onEditDefinition={onEditDefinition}
+            onPublish={onPublish}
+            onArchive={onArchive}
+            onUpdateAllCopies={onUpdateAllCopies}
+          />
+        )}
+
+        {(pistolProfile || alternateMeleeProfiles.length > 0) && (
+          <div className="flex gap-2">
+            {[
+              weaponRef?.primaryMeleeProfileLabel ?? "Melee",
+              ...alternateMeleeProfiles.map((profile) => profile.label),
+              ...(pistolProfile ? ["Pistol"] : []),
+            ].map((profile) => (
+              <ToggleButton
+                key={profile}
+                selected={
+                  activeProfile ===
+                  (profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee") ? "Melee" : profile)
+                }
+                selectedClassName={colourToggleSelected.red}
+                className="px-2 py-1 text-xs lg:text-sm"
+                onClick={() =>
+                  setActiveProfile(
+                    profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee") ? "Melee" : profile
+                  )
+                }
+              >
+                {profile}
+              </ToggleButton>
+            ))}
+          </div>
+        )}
+
+        {isPistolProfile && pistolProfile ? (
+          <div className={`${uiChipRow}`}>
+            <StatChip label="Range" value={pistolProfile.range} />
+            <StatChip label="RoF" value={pistolProfile.rof} />
+            <StatChip
+              label="Damage"
+              value={pistolProfile.damage.replace(/\s*[IREX]$/i, "").trim()}
+            />
+            <DamageTypeChip damage={pistolProfile.damage} />
+            <StatChip label="Pen" value={pistolProfile.pen} />
+            <StatChip label="Clip" value={pistolProfile.clip} />
+            <StatChip label="Reload" value={pistolProfile.reload} />
+          </div>
+        ) : (
+          <div className={`${uiChipRow}`}>
+            {thrownRange && <StatChip label="Range" value={thrownRange} />}
+            {displayedMeleeDamage && (
+              <StatChip label="Damage" value={displayMeleeDamage(displayedMeleeDamage)} />
+            )}
+            {displayedMeleeDamage && !hasMultipleProfiles && (
+              <DamageTypeChip damage={displayedMeleeDamage} />
+            )}
+            {displayedMeleePen && <StatChip label="Pen" value={displayedMeleePen} />}
+            <StatChip label="SB" value={`+${effectiveStrengthBonus}`} />
+            {displayedMeleeDamage && !hasMultipleProfiles && (
+              <StatChip
+                label="Total"
+                value={computeMeleeTotalDamage(
+                  displayedMeleeDamage,
+                  strengthBonus,
+                  strengthBonusMultiplier
+                )}
+              />
+            )}
+          </div>
+        )}
+
+        <div className={uiStackField}>
+          <EntryLines
+            lines={{
+              craftsmanship: {
+                value: craftsmanship,
+                info: (
+                  <InfoModal
+                    title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
+                    content={
+                      concealedBionicEffect ? (
+                        <div className={uiStackBody}>
+                          <div>
+                            <p
+                              className={`text-sm lg:text-base ${colourTextPrimary} leading-relaxed`}
+                            >
+                              {concealedBionicEffect}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        meleeCraftsmanshipDescription(craftsmanship)
+                      )
+                    }
+                  />
+                ),
+              },
+              qualities: {
+                value: hasQualities ? rulesText : undefined,
+                info: hasQualityModal ? (
+                  <InfoModal
+                    title={`${weapon.name} Qualities`}
+                    content={<SpecialRulesContent rules={rulesText} />}
+                  />
+                ) : undefined,
+              },
+              rules: {
+                info:
+                  hasItemRules || weapon.rules?.trim() ? (
+                    <InfoModal
+                      title={`${weapon.name} Rules`}
+                      content={
+                        <div className={uiStackBody}>
+                          {weapon.rules?.trim() && (
+                            <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>
+                          )}
+                          {hasItemRules && (
+                            <InfoSection heading="Concealed Weapon Bionic">
+                              <div className={uiStackList}>
+                                {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
+                                  <InfoParagraph key={rule}>{rule}</InfoParagraph>
+                                ))}
+                              </div>
+                            </InfoSection>
+                          )}
+                        </div>
+                      }
+                    />
+                  ) : undefined,
+              },
+              notes: entryNotesLine(weapon.name, weapon.itemNotes, {
+                collection: "melee",
+                id: weapon.id,
+                notes: weapon.personalNotes,
+                editable,
+              }),
+            }}
+          />
+        </div>
+
+        {/* Weight / Value / Availability / Source */}
+        <ItemMetaChips
+          weight={effective.weight}
+          value={weapon.value}
+          availability={weapon.availability}
+          source={weapon.source}
+          className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
+        />
+
+        {isPistolProfile && pistolProfile && (
+          <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+            <div className={`${uiSplitRow}`}>
+              <span className={uiTextLabel}>Ammo</span>
+              {editable && (
+                <AddButton
+                  label="Add Ammo"
+                  size="sm"
+                  onClick={() => setShowPistolAmmoPicker(true)}
+                />
+              )}
+            </div>
+            {pistolAmmoFamily && (
+              <NestedChip colour={pistolAmmoFamily.colour}>{pistolAmmoFamily.label}</NestedChip>
+            )}
+            {pistolAmmoEntries.length === 0 ? (
+              <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>
+            ) : (
+              <div className={uiStackList}>
+                {pistolAmmoEntries.map((entry) => (
+                  <AmmoEntryRow
+                    key={entry.id}
+                    entry={entry}
+                    isLoaded={entry.id === loadedPistolAmmoEntry?.id}
+                    editable={editable}
+                    clipSize={String(pistolProfile.clip)}
+                    ammoTracking="loose"
+                    weightKg={pistolAmmoEntryWeightKg(
+                      effective.weight,
+                      String(pistolProfile.clip),
+                      entry
+                    )}
+                    onSetLoaded={() => handleSetLoadedPistolAmmo(entry.id)}
+                    onRemove={() => handleRemovePistolAmmo(entry.id)}
+                    onUpdateClips={(clips) => handleUpdatePistolAmmo(entry.id, { clips })}
+                    onUpdateRounds={(rounds) => handleUpdatePistolAmmo(entry.id, { rounds })}
+                    onSetLooseRounds={(rounds) =>
+                      handleUpdatePistolAmmo(entry.id, { rounds, clips: 0 })
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {isThrown && (
+          <EntryQuantityRow
+            quantity={weapon.quantity ?? 1}
+            editable={editable}
+            onUpdate={onUpdateQuantity}
+          />
+        )}
+
+        {/* Upgrades */}
+        {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
+          <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
+            <div className={uiSplitRow}>
+              <span className={uiTextLabel}>Upgrades</span>
+              {(editable
+                ? visibleCompatible.length > 0
+                : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
+                (editable ? (
+                  <AddButton
+                    label="Add Upgrade"
+                    size="sm"
+                    onClick={() => setShowUpgradePicker(true)}
+                  />
+                ) : (
+                  <ViewButton
+                    label="View Upgrades"
+                    size="sm"
+                    onClick={() => setShowUpgradePicker(true)}
+                  />
+                ))}
+            </div>
+            {upgradeRefs.length === 0 ? (
+              <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
+            ) : (
+              <div className={uiStackList}>
+                {upgradeRefs.map((upgrade) => (
+                  <UpgradeCard
+                    key={upgrade.id}
+                    upgrade={upgrade}
+                    editable={editable}
+                    onRemove={onRemoveUpgrade}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {showUpgradePicker && (
+          <UpgradePicker
+            compatibleUpgrades={visibleCompatible}
+            editable={editable}
+            onSelect={(id) => {
+              onAddUpgrade(id);
+            }}
+            onClose={() => setShowUpgradePicker(false)}
+          />
+        )}
+
+        {showPistolAmmoPicker && pistolProfile && (
+          <AmmoPicker
+            compatibleIds={pistolProfile.compatibleAmmoIds}
+            existingNames={new Set(pistolAmmoEntries.map((entry) => entry.name))}
+            showCustom={false}
+            title="Add Chimera Pistol Ammo"
+            editable={editable}
+            closeOnSelect={false}
+            onSelect={(name, referenceId) => handleAddPistolAmmo(name, referenceId)}
+            onClose={() => setShowPistolAmmoPicker(false)}
+          />
+        )}
+      </>
     );
   }
 
@@ -321,271 +601,7 @@ export function MeleeCard({
         ) : undefined
       }
     >
-      {libraryItem && (
-        <CustomItemActionButtons
-          className="flex flex-wrap gap-2"
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
-      )}
-
-      {(pistolProfile || alternateMeleeProfiles.length > 0) && (
-        <div className="flex gap-2">
-          {[
-            weaponRef?.primaryMeleeProfileLabel ?? "Melee",
-            ...alternateMeleeProfiles.map((profile) => profile.label),
-            ...(pistolProfile ? ["Pistol"] : []),
-          ].map((profile) => (
-            <ToggleButton
-              key={profile}
-              selected={
-                activeProfile ===
-                (profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee") ? "Melee" : profile)
-              }
-              selectedClassName={colourToggleSelected.red}
-              className="px-2 py-1 text-xs lg:text-sm"
-              onClick={() =>
-                setActiveProfile(
-                  profile === (weaponRef?.primaryMeleeProfileLabel ?? "Melee") ? "Melee" : profile
-                )
-              }
-            >
-              {profile}
-            </ToggleButton>
-          ))}
-        </div>
-      )}
-
-      {isPistolProfile && pistolProfile ? (
-        <div className={`${uiChipRow}`}>
-          <StatChip label="Range" value={pistolProfile.range} />
-          <StatChip label="RoF" value={pistolProfile.rof} />
-          <StatChip label="Damage" value={pistolProfile.damage.replace(/\s*[IREX]$/i, "").trim()} />
-          <DamageTypeChip damage={pistolProfile.damage} />
-          <StatChip label="Pen" value={pistolProfile.pen} />
-          <StatChip label="Clip" value={pistolProfile.clip} />
-          <StatChip label="Reload" value={pistolProfile.reload} />
-        </div>
-      ) : (
-        <div className={`${uiChipRow}`}>
-          {thrownRange && <StatChip label="Range" value={thrownRange} />}
-          {displayedMeleeDamage && (
-            <StatChip label="Damage" value={displayMeleeDamage(displayedMeleeDamage)} />
-          )}
-          {displayedMeleeDamage && !hasMultipleProfiles && (
-            <DamageTypeChip damage={displayedMeleeDamage} />
-          )}
-          {displayedMeleePen && <StatChip label="Pen" value={displayedMeleePen} />}
-          <StatChip label="SB" value={`+${effectiveStrengthBonus}`} />
-          {displayedMeleeDamage && !hasMultipleProfiles && (
-            <StatChip
-              label="Total"
-              value={computeMeleeTotalDamage(
-                displayedMeleeDamage,
-                strengthBonus,
-                strengthBonusMultiplier
-              )}
-            />
-          )}
-        </div>
-      )}
-
-      <div className={uiStackField}>
-        <EntryLines
-          lines={{
-            craftsmanship: {
-              value: craftsmanship,
-              info: (
-                <InfoModal
-                  title={`${craftsmanship} ${weapon.concealedBionic ? "Concealed Weapon" : "Weapon"}`}
-                  content={
-                    concealedBionicEffect ? (
-                      <div className={uiStackBody}>
-                        <div>
-                          <p
-                            className={`text-sm lg:text-base ${colourTextPrimary} leading-relaxed`}
-                          >
-                            {concealedBionicEffect}
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      meleeCraftsmanshipDescription(craftsmanship)
-                    )
-                  }
-                />
-              ),
-            },
-            qualities: {
-              value: hasQualities ? rulesText : undefined,
-              info: hasQualityModal ? (
-                <InfoModal
-                  title={`${weapon.name} Qualities`}
-                  content={<SpecialRulesContent rules={rulesText} />}
-                />
-              ) : undefined,
-            },
-            rules: {
-              info:
-                hasItemRules || weapon.rules?.trim() ? (
-                  <InfoModal
-                    title={`${weapon.name} Rules`}
-                    content={
-                      <div className={uiStackBody}>
-                        {weapon.rules?.trim() && (
-                          <InfoParagraph>{weapon.rules.trim()}</InfoParagraph>
-                        )}
-                        {hasItemRules && (
-                          <InfoSection heading="Concealed Weapon Bionic">
-                            <div className={uiStackList}>
-                              {CONCEALED_WEAPON_BIONIC_RULES.map((rule) => (
-                                <InfoParagraph key={rule}>{rule}</InfoParagraph>
-                              ))}
-                            </div>
-                          </InfoSection>
-                        )}
-                      </div>
-                    }
-                  />
-                ) : undefined,
-            },
-            notes: entryNotesLine(weapon.name, weapon.itemNotes, {
-              collection: "melee",
-              id: weapon.id,
-              notes: weapon.personalNotes,
-              editable,
-            }),
-          }}
-        />
-      </div>
-
-      {/* Weight / Value / Availability / Source */}
-      <ItemMetaChips
-        weight={effective.weight}
-        value={weapon.value}
-        availability={weapon.availability}
-        source={weapon.source}
-        className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
-      />
-
-      {isPistolProfile && pistolProfile && (
-        <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-          <div className={`${uiSplitRow}`}>
-            <span className={uiTextLabel}>Ammo</span>
-            {editable && (
-              <AddButton label="Add Ammo" size="sm" onClick={() => setShowPistolAmmoPicker(true)} />
-            )}
-          </div>
-          {pistolAmmoFamily && (
-            <NestedChip colour={pistolAmmoFamily.colour}>{pistolAmmoFamily.label}</NestedChip>
-          )}
-          {pistolAmmoEntries.length === 0 ? (
-            <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>
-          ) : (
-            <div className={uiStackList}>
-              {pistolAmmoEntries.map((entry) => (
-                <AmmoEntryRow
-                  key={entry.id}
-                  entry={entry}
-                  isLoaded={entry.id === loadedPistolAmmoEntry?.id}
-                  editable={editable}
-                  clipSize={String(pistolProfile.clip)}
-                  ammoTracking="loose"
-                  weightKg={pistolAmmoEntryWeightKg(
-                    effective.weight,
-                    String(pistolProfile.clip),
-                    entry
-                  )}
-                  onSetLoaded={() => handleSetLoadedPistolAmmo(entry.id)}
-                  onRemove={() => handleRemovePistolAmmo(entry.id)}
-                  onUpdateClips={(clips) => handleUpdatePistolAmmo(entry.id, { clips })}
-                  onUpdateRounds={(rounds) => handleUpdatePistolAmmo(entry.id, { rounds })}
-                  onSetLooseRounds={(rounds) =>
-                    handleUpdatePistolAmmo(entry.id, { rounds, clips: 0 })
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {isThrown && (
-        <EntryQuantityRow
-          quantity={weapon.quantity ?? 1}
-          editable={editable}
-          onUpdate={onUpdateQuantity}
-        />
-      )}
-
-      {/* Upgrades */}
-      {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-        <div className={`border-t ${colourDivider} pt-2 ${uiStackList}`}>
-          <div className={uiSplitRow}>
-            <span className={uiTextLabel}>Upgrades</span>
-            {(editable
-              ? visibleCompatible.length > 0
-              : upgradeRefs.length > 0 || visibleCompatible.length > 0) &&
-              (editable ? (
-                <AddButton
-                  label="Add Upgrade"
-                  size="sm"
-                  onClick={() => setShowUpgradePicker(true)}
-                />
-              ) : (
-                <ViewButton
-                  label="View Upgrades"
-                  size="sm"
-                  onClick={() => setShowUpgradePicker(true)}
-                />
-              ))}
-          </div>
-          {upgradeRefs.length === 0 ? (
-            <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
-          ) : (
-            <div className={uiStackList}>
-              {upgradeRefs.map((upgrade) => (
-                <UpgradeCard
-                  key={upgrade.id}
-                  upgrade={upgrade}
-                  editable={editable}
-                  onRemove={onRemoveUpgrade}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {showUpgradePicker && (
-        <UpgradePicker
-          compatibleUpgrades={visibleCompatible}
-          editable={editable}
-          onSelect={(id) => {
-            onAddUpgrade(id);
-          }}
-          onClose={() => setShowUpgradePicker(false)}
-        />
-      )}
-
-      {showPistolAmmoPicker && pistolProfile && (
-        <AmmoPicker
-          compatibleIds={pistolProfile.compatibleAmmoIds}
-          existingNames={new Set(pistolAmmoEntries.map((entry) => entry.name))}
-          showCustom={false}
-          title="Add Chimera Pistol Ammo"
-          editable={editable}
-          closeOnSelect={false}
-          onSelect={(name, referenceId) => handleAddPistolAmmo(name, referenceId)}
-          onClose={() => setShowPistolAmmoPicker(false)}
-        />
-      )}
+      {renderDetails}
     </AccordionCard>
   );
 }

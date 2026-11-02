@@ -20,6 +20,36 @@ function renderCard(props: Partial<Parameters<typeof AccordionCard>[0]> = {}) {
 }
 
 describe("AccordionCard", () => {
+  it("constructs deferred details only when open, including force-expanded cards", () => {
+    const details = vi.fn(() => <input aria-label="Draft" defaultValue="7" />);
+    const card = (expanded: boolean, forceExpanded = false) => (
+      <AccordionCard
+        name="Weapon"
+        label="Weapon"
+        expanded={expanded}
+        forceExpanded={forceExpanded}
+        onToggle={() => undefined}
+      >
+        {details}
+      </AccordionCard>
+    );
+    const { rerender } = render(card(false));
+    expect(details).not.toHaveBeenCalled();
+    rerender(card(true));
+    const input = screen.getByRole("textbox", { name: "Draft" });
+    input.focus();
+    rerender(card(true));
+    expect(screen.getByRole("textbox", { name: "Draft" })).toBe(input);
+    expect(input).toHaveValue("7");
+    expect(input).toHaveFocus();
+    rerender(card(false));
+    details.mockClear();
+    rerender(card(false));
+    expect(details).not.toHaveBeenCalled();
+    rerender(card(false, true));
+    expect(screen.getByRole("textbox", { name: "Draft" })).toBeInTheDocument();
+  });
+
   it("names the toggle after its label and reports its expanded state", () => {
     renderCard();
     expect(screen.getByRole("button", { name: "Expand Group name details" })).toHaveAttribute(

@@ -34,6 +34,7 @@ export function CyberneticWeaponCard({
   craftsmanship: WeaponCraftsmanship;
   strengthBonus: number;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const effectiveSpecialRules =
     weapon.type === "ranged"
       ? rangedRulesForCraftsmanship(weapon.specialRules ?? "", craftsmanship)
@@ -43,8 +44,7 @@ export function CyberneticWeaponCard({
       ? meleeDamageForCraftsmanship(weapon.damage, craftsmanship)
       : weapon.damage;
   const hasRules = !!effectiveSpecialRules?.trim();
-  const ruleNamesInLookup = getKnownSpecialRuleNames(effectiveSpecialRules);
-  const [expanded, setExpanded] = useState(false);
+  const ruleNamesInLookup = expanded ? getKnownSpecialRuleNames(effectiveSpecialRules) : [];
 
   return (
     <AccordionCard
@@ -68,69 +68,77 @@ export function CyberneticWeaponCard({
         </div>
       }
     >
-      <div className={`${uiChipRow}`}>
-        {weapon.type === "ranged" && weapon.range && (
-          <StatChip label="Range" value={weapon.range} />
-        )}
-        {weapon.type === "ranged" && weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
-        {effectiveDamage && (
-          <StatChip label="Damage" value={effectiveDamage.replace(/\s*[IREX]$/i, "").trim()} />
-        )}
-        {effectiveDamage && <DamageTypeChip damage={effectiveDamage} />}
-        {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
-        {weapon.type === "ranged" && weapon.clip && <StatChip label="Clip" value={weapon.clip} />}
-        {weapon.type === "ranged" && weapon.rld && <StatChip label="Reload" value={weapon.rld} />}
-        {weapon.type === "melee" && (
-          <>
-            <StatChip label="SB" value={`+${strengthBonus}`} />
-            {effectiveDamage && (
-              <StatChip
-                label="Total"
-                value={computeMeleeTotalDamage(effectiveDamage, strengthBonus)}
-              />
+      {() => (
+        <>
+          <div className={`${uiChipRow}`}>
+            {weapon.type === "ranged" && weapon.range && (
+              <StatChip label="Range" value={weapon.range} />
             )}
-          </>
-        )}
-      </div>
-
-      <div className={uiStackField}>
-        <EntryLines
-          lines={{
-            craftsmanship: {
-              value: craftsmanship,
-              info: (
-                <InfoModal
-                  title={`${craftsmanship} Weapon`}
-                  content={
-                    weapon.type === "ranged"
-                      ? rangedCraftsmanshipDescription(craftsmanship)
-                      : meleeCraftsmanshipDescription(craftsmanship)
-                  }
-                />
-              ),
-            },
-            qualities: {
-              value: hasRules ? effectiveSpecialRules : undefined,
-              info:
-                ruleNamesInLookup.length > 0 ? (
-                  <InfoModal
-                    title={`${weapon.name} Qualities`}
-                    content={<SpecialRulesContent rules={effectiveSpecialRules ?? ""} />}
+            {weapon.type === "ranged" && weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
+            {effectiveDamage && (
+              <StatChip label="Damage" value={effectiveDamage.replace(/\s*[IREX]$/i, "").trim()} />
+            )}
+            {effectiveDamage && <DamageTypeChip damage={effectiveDamage} />}
+            {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
+            {weapon.type === "ranged" && weapon.clip && (
+              <StatChip label="Clip" value={weapon.clip} />
+            )}
+            {weapon.type === "ranged" && weapon.rld && (
+              <StatChip label="Reload" value={weapon.rld} />
+            )}
+            {weapon.type === "melee" && (
+              <>
+                <StatChip label="SB" value={`+${strengthBonus}`} />
+                {effectiveDamage && (
+                  <StatChip
+                    label="Total"
+                    value={computeMeleeTotalDamage(effectiveDamage, strengthBonus)}
                   />
-                ) : undefined,
-            },
-            rules: {
-              info: rules ? (
-                <InfoModal
-                  title={`${weapon.name} Rules`}
-                  content={<InfoParagraph>{rules}</InfoParagraph>}
-                />
-              ) : undefined,
-            },
-            gainedFrom: cyberneticName,
-          }}
-        />
-      </div>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className={uiStackField}>
+            <EntryLines
+              lines={{
+                craftsmanship: {
+                  value: craftsmanship,
+                  info: (
+                    <InfoModal
+                      title={`${craftsmanship} Weapon`}
+                      content={
+                        weapon.type === "ranged"
+                          ? rangedCraftsmanshipDescription(craftsmanship)
+                          : meleeCraftsmanshipDescription(craftsmanship)
+                      }
+                    />
+                  ),
+                },
+                qualities: {
+                  value: hasRules ? effectiveSpecialRules : undefined,
+                  info:
+                    ruleNamesInLookup.length > 0 ? (
+                      <InfoModal
+                        title={`${weapon.name} Qualities`}
+                        content={<SpecialRulesContent rules={effectiveSpecialRules ?? ""} />}
+                      />
+                    ) : undefined,
+                },
+                rules: {
+                  info: rules ? (
+                    <InfoModal
+                      title={`${weapon.name} Rules`}
+                      content={<InfoParagraph>{rules}</InfoParagraph>}
+                    />
+                  ) : undefined,
+                },
+                gainedFrom: cyberneticName,
+              }}
+            />
+          </div>
+        </>
+      )}
     </AccordionCard>
   );
 }

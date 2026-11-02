@@ -48,7 +48,7 @@ export function ShieldCard({
   const [expanded, setExpanded] = useState(false);
 
   const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
-  const ruleNamesInLookup = getKnownSpecialRuleNames(item.specialRules);
+  const ruleNamesInLookup = expanded ? getKnownSpecialRuleNames(item.specialRules) : [];
 
   return (
     <AccordionCard
@@ -85,73 +85,77 @@ export function ShieldCard({
         ) : undefined
       }
     >
-      {libraryItem && (
-        <CustomItemActionButtons
-          className="flex flex-wrap gap-2"
-          libraryItem={libraryItem}
-          isDM={isDM}
-          canEditDefinition={canEditDefinition}
-          busyAction={busyAction}
-          onEditDefinition={onEditDefinition}
-          onPublish={onPublish}
-          onArchive={onArchive}
-          onUpdateAllCopies={onUpdateAllCopies}
-        />
+      {() => (
+        <>
+          {libraryItem && (
+            <CustomItemActionButtons
+              className="flex flex-wrap gap-2"
+              libraryItem={libraryItem}
+              isDM={isDM}
+              canEditDefinition={canEditDefinition}
+              busyAction={busyAction}
+              onEditDefinition={onEditDefinition}
+              onPublish={onPublish}
+              onArchive={onArchive}
+              onUpdateAllCopies={onUpdateAllCopies}
+            />
+          )}
+
+          {/* Stats */}
+          <div className={`${uiChipRow}`}>
+            <StatChip label="AP" value={String(item.ap)} />
+            {item.locations && <StatChip label="Location" value={item.locations} />}
+            {item.damage && (
+              <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
+            )}
+            {item.damage && <DamageTypeChip damage={item.damage} />}
+            {item.pen && <StatChip label="Pen" value={item.pen} />}
+          </div>
+
+          {/* Qualities / Rules */}
+          <div className={uiStackField}>
+            <EntryLines
+              lines={{
+                qualities: {
+                  value: hasRules ? item.specialRules : undefined,
+                  info:
+                    ruleNamesInLookup.length > 0 ? (
+                      <InfoModal
+                        title={`${item.name} Qualities`}
+                        content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
+                      />
+                    ) : undefined,
+                },
+                rules: {
+                  info: item.rules?.trim() ? (
+                    <InfoModal
+                      title={`${item.name} Rules`}
+                      content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
+                    />
+                  ) : undefined,
+                },
+                notes: onSelect
+                  ? undefined
+                  : entryNotesLine(item.name, item.itemNotes, {
+                      collection: "shields",
+                      id: item.id,
+                      notes: item.personalNotes,
+                      editable,
+                    }),
+              }}
+            />
+          </div>
+
+          {/* Weight / Value / Availability / Source */}
+          <ItemMetaChips
+            weight={item.weight}
+            value={item.value}
+            availability={item.availability}
+            source={item.source}
+            className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
+          />
+        </>
       )}
-
-      {/* Stats */}
-      <div className={`${uiChipRow}`}>
-        <StatChip label="AP" value={String(item.ap)} />
-        {item.locations && <StatChip label="Location" value={item.locations} />}
-        {item.damage && (
-          <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
-        )}
-        {item.damage && <DamageTypeChip damage={item.damage} />}
-        {item.pen && <StatChip label="Pen" value={item.pen} />}
-      </div>
-
-      {/* Qualities / Rules */}
-      <div className={uiStackField}>
-        <EntryLines
-          lines={{
-            qualities: {
-              value: hasRules ? item.specialRules : undefined,
-              info:
-                ruleNamesInLookup.length > 0 ? (
-                  <InfoModal
-                    title={`${item.name} Qualities`}
-                    content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
-                  />
-                ) : undefined,
-            },
-            rules: {
-              info: item.rules?.trim() ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={<InfoParagraph>{item.rules.trim()}</InfoParagraph>}
-                />
-              ) : undefined,
-            },
-            notes: onSelect
-              ? undefined
-              : entryNotesLine(item.name, item.itemNotes, {
-                  collection: "shields",
-                  id: item.id,
-                  notes: item.personalNotes,
-                  editable,
-                }),
-          }}
-        />
-      </div>
-
-      {/* Weight / Value / Availability / Source */}
-      <ItemMetaChips
-        weight={item.weight}
-        value={item.value}
-        availability={item.availability}
-        source={item.source}
-        className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
-      />
     </AccordionCard>
   );
 }

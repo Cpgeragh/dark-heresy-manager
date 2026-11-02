@@ -81,36 +81,40 @@ export function ArcheotechShieldRow({
         ) : undefined
       }
     >
-      <div className={uiChipRow}>
-        {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
-        {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-      </div>
-      <div className={uiStackField}>
-        <EntryLines
-          lines={{
-            rules: {
-              info: rules ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={<InfoParagraph>{rules}</InfoParagraph>}
-                />
-              ) : undefined,
-            },
-            notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
-              collection: "archeotech",
-              id: item.id,
-              notes: item.personalNotes,
-              editable,
-            }),
-          }}
-        />
-      </div>
-      <ItemMetaChips
-        weight={item.weight}
-        value={item.value}
-        availability={item.availability}
-        className={uiChipRow}
-      />
+      {() => (
+        <>
+          <div className={uiChipRow}>
+            {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
+            {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
+          </div>
+          <div className={uiStackField}>
+            <EntryLines
+              lines={{
+                rules: {
+                  info: rules ? (
+                    <InfoModal
+                      title={`${item.name} Rules`}
+                      content={<InfoParagraph>{rules}</InfoParagraph>}
+                    />
+                  ) : undefined,
+                },
+                notes: entryNotesLine(item.name, item.itemNotes ?? item.notes, {
+                  collection: "archeotech",
+                  id: item.id,
+                  notes: item.personalNotes,
+                  editable,
+                }),
+              }}
+            />
+          </div>
+          <ItemMetaChips
+            weight={item.weight}
+            value={item.value}
+            availability={item.availability}
+            className={uiChipRow}
+          />
+        </>
+      )}
     </AccordionCard>
   );
 }
