@@ -226,7 +226,7 @@ const cases: Case[] = [
     collection: "skills",
     id: "dodge",
     name: "Dodge",
-    collapsible: false,
+    collapsible: true,
     element: <SkillRow skill={skill} editable updateLevel={none} />,
   },
   {
@@ -234,7 +234,7 @@ const cases: Case[] = [
     collection: "talents",
     id: "t1",
     name: "Ambidextrous",
-    collapsible: false,
+    collapsible: true,
     element: (
       <EntryCard
         entry={{ uid: "t1", talentId: "ambidextrous", name: "Ambidextrous" }}
@@ -248,7 +248,7 @@ const cases: Case[] = [
     collection: "traits",
     id: "r1",
     name: "Unnatural Strength",
-    collapsible: false,
+    collapsible: true,
     element: (
       <EntryCard
         entry={{ uid: "r1", talentId: "unnatural-strength", name: "Unnatural Strength" }}
@@ -263,7 +263,7 @@ const cases: Case[] = [
     collection: "eliteAdvances",
     id: "e1",
     name: "Iron Jaw",
-    collapsible: false,
+    collapsible: true,
     element: (
       <EntryCard
         entry={{ uid: "e1", talentId: "iron-jaw", name: "Iron Jaw" }}

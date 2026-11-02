@@ -19,6 +19,9 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
   onToggle: (id: string) => void;
   onRemove: (id: string) => unknown;
   onUpdateSpareCells: (id: string, value: number) => void;
+  /** Drawn in a picker: a closed card that `onSelect` chooses. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
 }
 
 export function ForceFieldRow({
@@ -35,6 +38,8 @@ export function ForceFieldRow({
   onToggle,
   onRemove,
   onUpdateSpareCells,
+  preview,
+  onSelect,
 }: Props) {
   const active = piece.worn;
   const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
@@ -47,6 +52,8 @@ export function ForceFieldRow({
       name={piece.name}
       editable={editable}
       collapsible
+      preview={preview}
+      onSelect={onSelect}
       inactive={!active}
       information={
         piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
@@ -72,15 +79,18 @@ export function ForceFieldRow({
           notes: piece.personalNotes,
           editable,
         }),
-        craftsmanship: {
-          value: craftsmanship,
-          info: (
-            <InfoModal
-              title={`${craftsmanship} Force Field`}
-              content={forceFieldCraftsmanshipDescription(craftsmanship)}
-            />
-          ),
-        },
+        craftsmanship:
+          preview && !libraryItem
+            ? undefined
+            : {
+                value: craftsmanship,
+                info: (
+                  <InfoModal
+                    title={`${craftsmanship} Force Field`}
+                    content={forceFieldCraftsmanshipDescription(craftsmanship)}
+                  />
+                ),
+              },
         qualities: {
           value: qualities.length > 0 ? qualities.join(", ") : undefined,
           info:

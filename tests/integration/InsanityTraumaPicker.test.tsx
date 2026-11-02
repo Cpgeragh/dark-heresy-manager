@@ -89,6 +89,17 @@ describe("InsanityTraumaPicker", () => {
 });
 
 describe("InsanityTraumaPicker custom trauma", () => {
+  it("returns from the custom form with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.click(screen.getByRole("button", { name: "Add Custom Trauma" }));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.getByRole("button", { name: "Add Custom Trauma" })).toBeInTheDocument();
+  });
+
   it("adds a custom trauma with a name, origin, and rules text", async () => {
     const user = userEvent.setup();
     const { onAdd } = setup();

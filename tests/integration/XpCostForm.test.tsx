@@ -9,11 +9,9 @@ import { XpCostForm } from "../../src/ui/forms/XpCostForm";
 function Harness({
   onSubmit = vi.fn(),
   onClose = vi.fn(),
-  showBack = false,
 }: {
   onSubmit?: () => void | Promise<unknown>;
   onClose?: () => void;
-  showBack?: boolean;
 }) {
   const [cost, setCost] = useState("");
   return (
@@ -24,7 +22,6 @@ function Harness({
       onCostChange={setCost}
       onSubmit={onSubmit}
       onClose={onClose}
-      showBack={showBack}
     />
   );
 }
@@ -48,17 +45,17 @@ describe("XpCostForm", () => {
     expect(submit).toBeEnabled();
   });
 
-  it("closes from Cancel, and shows the Back arrow only when asked", async () => {
+  it("closes from Cancel and from the Close cross, with no Back arrow", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
-    const { rerender } = render(<Harness onClose={onClose} />);
+    render(<Harness onClose={onClose} />);
 
     expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onClose).toHaveBeenCalledTimes(1);
 
-    rerender(<Harness onClose={onClose} showBack />);
-    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(onClose).toHaveBeenCalledTimes(2);
   });
 
   it("shows the button as waiting until the save finishes", async () => {

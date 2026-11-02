@@ -21,14 +21,14 @@ function setup(existingReferenceIds = new Set<string>(), editable = true) {
 }
 
 describe("InsanityDisorderPicker", () => {
-  it("puts the information icon beside the name and the arrow on every row, with no Rules line", () => {
+  it("puts the information icon beside the name, shows no arrow because a row opens a form, and has no Rules line", () => {
     setup();
     const row = screen.getByText("Fear of the Dead", { selector: "span" }).closest("button")!;
 
     expect(
       within(row).getByRole("button", { name: "Show information about Fear of the Dead" })
     ).toBeInTheDocument();
-    expect(row.firstElementChild).toHaveClass("gap-3");
+    expect(row.firstElementChild).not.toHaveClass("gap-3");
     expect(screen.queryByText("Rules")).not.toBeInTheDocument();
   });
 
@@ -40,6 +40,17 @@ describe("InsanityDisorderPicker", () => {
 
     expect(screen.getByText("Choose Severity")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Minor" })).toBeInTheDocument();
+  });
+
+  it("returns from the severity screen with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.click(screen.getByText("Fear of the Dead", { selector: "span" }));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.getByRole("dialog", { name: "Add Disorder" })).toBeInTheDocument();
   });
 
   it("adds with the chosen severity, not just the default", async () => {

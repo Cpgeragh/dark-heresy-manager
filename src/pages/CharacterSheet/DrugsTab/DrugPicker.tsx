@@ -2,49 +2,12 @@
 
 import { useState } from "react";
 import { DRUGS_REFERENCE, type DrugRef } from "../../../data/reference/drugsReference";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import {
-  PickerCustomAction,
-  PickerList,
-  PickerModal,
-  PickerRow,
-} from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowLine,
-  PickerRowName,
-  PickerRowRulesLine,
-} from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
+import { PickerCustomAction, PickerList, PickerModal } from "../../../ui/pickers/PickerModal";
+import { previewVersionId } from "../weapons/weaponSnapshotHelpers";
+import { buildDrugSnapshot, drugFromReference } from "./drugSnapshotHelpers";
+import { DrugRow } from "./DrugRow";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
-
-function drugInfoContent(ref: DrugRef) {
-  return (
-    <>
-      {ref.duration && (
-        <InfoSection heading="Duration">
-          <InfoParagraph>{ref.duration}</InfoParagraph>
-        </InfoSection>
-      )}
-      {ref.effect && (
-        <InfoSection heading="Effect">
-          <InfoParagraph>{ref.effect}</InfoParagraph>
-        </InfoSection>
-      )}
-      {ref.sideEffect && (
-        <InfoSection heading="Side Effects">
-          <InfoParagraph>{ref.sideEffect}</InfoParagraph>
-        </InfoSection>
-      )}
-      {ref.notes && (
-        <InfoSection heading="Notes">
-          <InfoParagraph>{ref.notes}</InfoParagraph>
-        </InfoSection>
-      )}
-    </>
-  );
-}
 
 export function DrugPicker({
   editable = true,
@@ -94,60 +57,36 @@ export function DrugPicker({
       }
     >
       <PickerList>
-        {pickerEntries.map((entry) => {
-          if (entry.kind === "custom") {
-            const item = entry.item;
-            return (
-              <PickerRow
-                key={`custom-${item.id}`}
-                interactive={editable}
-                onClick={() => onSelectCustomItem?.(item)}
-              >
-                <PickerRowName
-                  name={item.name}
-                  status={item.status}
-                  infoTitle={item.name}
-                  information={
-                    item.data.notes ? <InfoParagraph>{item.data.notes}</InfoParagraph> : undefined
-                  }
-                />
-                <PickerRowChips>
-                  <ItemMetaChips
-                    bare
-                    weight={item.data.weight}
-                    value={item.data.value}
-                    availability={item.data.availability}
-                    source={item.data.source}
-                  />
-                </PickerRowChips>
-                <PickerRowRulesLine name={item.name} rules={item.data.rules} />
-              </PickerRow>
-            );
-          }
-
-          const ref = entry.ref;
-          const hasInfo = !!(ref.duration || ref.effect || ref.sideEffect || ref.notes);
-
-          return (
-            <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-              <PickerRowName
-                name={ref.name}
-                infoTitle={ref.name}
-                information={hasInfo ? drugInfoContent(ref) : undefined}
-              />
-              <PickerRowChips>
-                <ItemMetaChips
-                  bare
-                  weight={ref.weight}
-                  value={ref.value}
-                  availability={ref.availability}
-                  source={ref.source}
-                />
-              </PickerRowChips>
-              {ref.duration && <PickerRowLine label="Duration" value={ref.duration} />}
-            </PickerRow>
-          );
-        })}
+        {pickerEntries.map((entry) =>
+          entry.kind === "custom" ? (
+            <DrugRow
+              key={`custom-${entry.item.id}`}
+              item={buildDrugSnapshot(
+                `picker-${entry.item.id}`,
+                1,
+                entry.item.data,
+                entry.item.id,
+                previewVersionId(entry.item)
+              )}
+              editable={false}
+              libraryItem={entry.item}
+              preview
+              onSelect={editable ? () => onSelectCustomItem?.(entry.item) : undefined}
+              onUpdateQty={() => {}}
+              onRemove={() => {}}
+            />
+          ) : (
+            <DrugRow
+              key={entry.ref.id}
+              item={drugFromReference(`picker-${entry.ref.id}`, entry.ref)}
+              editable={false}
+              preview
+              onSelect={editable ? () => onSelect(entry.ref) : undefined}
+              onUpdateQty={() => {}}
+              onRemove={() => {}}
+            />
+          )
+        )}
       </PickerList>
     </PickerModal>
   );

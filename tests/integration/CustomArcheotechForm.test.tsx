@@ -22,6 +22,20 @@ describe("ArcheotechTab CustomArcheotechForm", () => {
     expect(screen.getByPlaceholderText("Item name…")).toBeInTheDocument();
   });
 
+  it("shows no arrow on a type row and returns from the details form with the Close cross", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const deviceRow = screen.getByText("Device").closest("button")!;
+    expect(deviceRow.querySelector('[data-picker-arrow="right"]')).toBeNull();
+    await user.click(deviceRow);
+
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.getByText("Device")).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Item name…")).not.toBeInTheDocument();
+  });
+
   it("disables submit until a name is entered", async () => {
     const user = userEvent.setup();
     renderForm();

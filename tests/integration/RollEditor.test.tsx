@@ -55,7 +55,7 @@ describe("RollEditor", () => {
     expect(onSave).toHaveBeenCalledWith({ int: 4, fel: 9 });
   });
 
-  it("calls onCancel from the back button without saving", async () => {
+  it("calls onCancel from the close cross without saving", async () => {
     const user = userEvent.setup();
     const onCancel = vi.fn();
     render(
@@ -68,7 +68,7 @@ describe("RollEditor", () => {
       />
     );
 
-    await user.click(screen.getByLabelText("Back"));
+    await user.click(screen.getByLabelText("Close"));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });

@@ -5,30 +5,29 @@ import {
   CONSUMABLES_REFERENCE,
   type ConsumableRef,
 } from "../../../data/reference/consumablesReference";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import {
-  PickerCustomAction,
-  PickerList,
-  PickerModal,
-  PickerRow,
-} from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowName,
-  PickerRowRulesLine,
-} from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph } from "../../../ui/InfoSection";
+import { PickerCustomAction, PickerList, PickerModal } from "../../../ui/pickers/PickerModal";
+import { formatMoneyInput, openEndedCostMinimum } from "../../../ui/format/moneyFormat";
+import { useAssignedItemPick, type AssignedItemNeeds } from "../../../hooks/useAssignedItemPick";
+import { AssignedItemPickScreen } from "../../../ui/pickers/AssignedItemPickScreen";
+import { AssignedOnAddNote } from "../../../ui/pickers/AssignedOnAddNote";
+import { previewVersionId } from "../weapons/weaponSnapshotHelpers";
+import { buildConsumableSnapshot, consumableFromReference } from "./gearSnapshotHelpers";
+import { ConsumableRow } from "./ConsumableRow";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props {
   editable?: boolean;
   customItems?: CampaignCustomItem<"consumable">[];
-  onSelect: (ref: ConsumableRef) => void | Promise<boolean | void>;
+  onSelect: (ref: ConsumableRef, gmValue?: string) => void | Promise<boolean | void>;
   onSelectCustomItem?: (item: CampaignCustomItem<"consumable">) => void | Promise<boolean | void>;
   onCustom?: () => void;
   onClose: () => void;
   suspended?: boolean;
+}
+
+function consumableNeeds(ref: ConsumableRef): AssignedItemNeeds {
+  return { cost: true, weight: false, rarity: false, minimumCost: openEndedCostMinimum(ref.value) };
 }
 
 export function ConsumablePicker({
@@ -42,6 +41,7 @@ export function ConsumablePicker({
 }: Props) {
   recordComponentRender("ConsumablePicker");
   const [query, setQuery] = useState("");
+  const pick = useAssignedItemPick(consumableNeeds);
   const normalizedQuery = query.toLowerCase();
   const filtered = CONSUMABLES_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(normalizedQuery)
@@ -54,6 +54,26 @@ export function ConsumablePicker({
     ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
     ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
   ].sort((a, b) => a.name.localeCompare(b.name));
+
+  function handleSelect(ref: ConsumableRef) {
+    if (openEndedCostMinimum(ref.value) !== undefined) {
+      pick.begin(ref);
+      return;
+    }
+    return onSelect(ref);
+  }
+
+  if (pick.pending) {
+    return (
+      <AssignedItemPickScreen
+        pick={pick}
+        title="Assigned Cost"
+        idPrefix="consumable-assigned-meta"
+        confirmLabel="Add to Inventory"
+        onConfirm={() => pick.confirm((ref) => onSelect(ref, formatMoneyInput(pick.meta.gmCost)))}
+      />
+    );
+  }
 
   return (
     <PickerModal
@@ -73,58 +93,37 @@ export function ConsumablePicker({
       <PickerList>
         {pickerEntries.map((entry) =>
           entry.kind === "custom" ? (
-            <PickerRow
+            <ConsumableRow
               key={`custom-${entry.item.id}`}
-              interactive={editable}
-              onClick={() => onSelectCustomItem?.(entry.item)}
-            >
-              <PickerRowName
-                name={entry.item.name}
-                status={entry.item.status}
-                infoTitle={entry.item.name}
-                information={
-                  entry.item.data.description ? (
-                    <InfoParagraph>{entry.item.data.description}</InfoParagraph>
-                  ) : undefined
-                }
-              />
-              <PickerRowChips className="text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  weight={entry.item.data.weight}
-                  value={entry.item.data.value}
-                  availability={entry.item.data.availability}
-                  source={entry.item.data.source}
-                />
-              </PickerRowChips>
-              <PickerRowRulesLine name={entry.item.name} rules={entry.item.data.rules} />
-            </PickerRow>
+              item={buildConsumableSnapshot(
+                `picker-${entry.item.id}`,
+                1,
+                entry.item.data,
+                entry.item.id,
+                previewVersionId(entry.item)
+              )}
+              editable={false}
+              libraryItem={entry.item}
+              preview
+              onSelect={editable ? () => onSelectCustomItem?.(entry.item) : undefined}
+              onUpdateQty={() => {}}
+              onRemove={() => {}}
+            />
           ) : (
-            <PickerRow
+            <ConsumableRow
               key={entry.ref.id}
-              interactive={editable}
-              onClick={() => onSelect(entry.ref)}
-            >
-              <PickerRowName
-                name={entry.ref.name}
-                infoTitle={entry.ref.name}
-                information={
-                  entry.ref.description ? (
-                    <InfoParagraph>{entry.ref.description}</InfoParagraph>
-                  ) : undefined
-                }
-              />
-              <PickerRowChips className="text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  weight={entry.ref.weight}
-                  value={entry.ref.value}
-                  availability={entry.ref.availability}
-                  source={entry.ref.source}
-                />
-              </PickerRowChips>
-              <PickerRowRulesLine name={entry.ref.name} rules={entry.ref.rules} />
-            </PickerRow>
+              item={consumableFromReference(`picker-${entry.ref.id}`, entry.ref)}
+              editable={false}
+              preview
+              previewNote={
+                openEndedCostMinimum(entry.ref.value) !== undefined ? (
+                  <AssignedOnAddNote>Cost assigned on add</AssignedOnAddNote>
+                ) : undefined
+              }
+              onSelect={editable ? () => handleSelect(entry.ref) : undefined}
+              onUpdateQty={() => {}}
+              onRemove={() => {}}
+            />
           )
         )}
       </PickerList>

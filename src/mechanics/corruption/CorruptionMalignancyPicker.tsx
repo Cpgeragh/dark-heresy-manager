@@ -13,7 +13,6 @@ import {
   PickerRow,
 } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
-import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { FormLabel } from "../../ui/forms/FormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
 import { editableInputClass, editableTextareaClass } from "../../ui/styles/editableStyles";
@@ -66,8 +65,6 @@ export function CorruptionMalignancyPicker({
       <CustomFormShell
         title="Custom Malignancy"
         scrollPositionRef={customFormScrollPositionRef}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         onClose={() => setCustomMode(false)}
         canSubmit={canAddCustom}
         submitLabel="Add Malignancy"
@@ -142,8 +139,6 @@ export function CorruptionMalignancyPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setSelected(null)}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={
@@ -214,7 +209,6 @@ export function CorruptionMalignancyPicker({
           <PickerRow
             key={ref.id}
             interactive={editable}
-            opensScreen={getRoll1d10Modifiers(ref.modifiers).length > 0}
             onClick={() => {
               if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
                 addReferenceMalignancy(ref);

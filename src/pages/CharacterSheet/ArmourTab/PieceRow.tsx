@@ -38,6 +38,9 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
   onRemove: (id: string) => unknown;
   onAddUpgrade: (pieceId: string, upgradeId: string) => void;
   onRemoveUpgrade: (pieceId: string, upgradeId: string) => unknown;
+  /** Drawn in a picker: a closed card that `onSelect` chooses. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
 }
 
 export function PieceRow({
@@ -56,8 +59,10 @@ export function PieceRow({
   onRemove,
   onAddUpgrade,
   onRemoveUpgrade,
+  preview,
+  onSelect,
 }: Props) {
-  recordComponentRender("ArmourPieceRow");
+  recordComponentRender(preview ? "ArmourPiecePreviewRow" : "ArmourPieceRow");
   const [showUpgradePicker, setShowUpgradePicker] = useState(false);
   const apDesc = apBreakdown(piece);
   const craftsmanship = piece.craftsmanship ?? "Common";
@@ -76,6 +81,8 @@ export function PieceRow({
         name={piece.name}
         editable={editable}
         collapsible
+        preview={preview}
+        onSelect={onSelect}
         inactive={!worn}
         information={
           piece.description ? <InfoParagraph>{piece.description}</InfoParagraph> : undefined
@@ -100,15 +107,18 @@ export function PieceRow({
             notes: piece.personalNotes,
             editable,
           }),
-          craftsmanship: {
-            value: craftsmanship,
-            info: (
-              <InfoModal
-                title={`${craftsmanship} Armour`}
-                content={armourCraftsmanshipDescription(craftsmanship)}
-              />
-            ),
-          },
+          craftsmanship:
+            preview && !libraryItem
+              ? undefined
+              : {
+                  value: craftsmanship,
+                  info: (
+                    <InfoModal
+                      title={`${craftsmanship} Armour`}
+                      content={armourCraftsmanshipDescription(craftsmanship)}
+                    />
+                  ),
+                },
           qualities: {
             value: qualities.length > 0 ? qualities.join(", ") : undefined,
             info:

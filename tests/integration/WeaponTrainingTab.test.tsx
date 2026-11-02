@@ -436,6 +436,9 @@ describe("WeaponTrainingTab", () => {
       screen.queryByRole("button", { name: "Use an available training slot" })
     ).not.toBeInTheDocument();
     expect(screen.getByRole("dialog", { name: "Exotic Weapon Training" })).toBeInTheDocument();
+    const picker = screen.getByRole("dialog", { name: "Exotic Weapon Training" });
+    expect(within(picker).queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    expect(within(picker).getByRole("button", { name: "Close" })).toBeInTheDocument();
     expect(screen.getByText("Needle Pistol")).toBeInTheDocument();
   });
 

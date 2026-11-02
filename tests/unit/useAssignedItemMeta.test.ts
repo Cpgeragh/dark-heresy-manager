@@ -18,6 +18,20 @@ describe("useAssignedItemMeta", () => {
     expect(result.current.canConfirm).toBe(true);
   });
 
+  it("refuses a cost below the minimum and accepts the minimum itself", () => {
+    const { result } = renderHook(() =>
+      useAssignedItemMeta({ requiresRarity: false, minimumCost: 20 })
+    );
+
+    act(() => result.current.setGmCost("19"));
+    expect(result.current.costValid).toBe(false);
+    expect(result.current.canConfirm).toBe(false);
+
+    act(() => result.current.setGmCost("20"));
+    expect(result.current.costValid).toBe(true);
+    expect(result.current.canConfirm).toBe(true);
+  });
+
   it("does not require a cost when configured, but still requires rarity if asked for", () => {
     const { result } = renderHook(() =>
       useAssignedItemMeta({ requiresCost: false, requiresRarity: true })

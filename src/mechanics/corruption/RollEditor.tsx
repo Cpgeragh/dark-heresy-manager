@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
 import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import type { CharacteristicModifier } from "./characteristicModifiers";
 import { RollModifierFields } from "./RollModifierFields";
 import { areRollModifierValuesValid, getRoll1d10Modifiers } from "./rollModifierValues";
@@ -37,8 +36,6 @@ export function RollEditor({
       query=""
       onQueryChange={() => undefined}
       onClose={onCancel}
-      closeLabel={<ArrowLeft />}
-      closeAriaLabel="Back"
       hideSearch
       isEmpty={false}
       footer={

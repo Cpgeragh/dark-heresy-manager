@@ -1,6 +1,6 @@
 // tests/integration/ForceFieldPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -11,10 +11,9 @@ const FIELD_A = "Refraction Bracer";
 const FIELD_B = "Jokaerian Field";
 const WORN_ARMOUR = "Flak Jacket";
 
-function row(name: string): HTMLElement {
-  const match = screen.getByText(name).closest("button");
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match as HTMLElement;
+function row(name: string): HTMLButtonElement {
+  return (screen.queryByRole("button", { name: `Select ${name}` }) ??
+    screen.getByRole("button", { name: `Expand ${name} details` })) as HTMLButtonElement;
 }
 
 function makeCustomItem(
@@ -102,9 +101,38 @@ describe("ForceFieldPicker list", () => {
     expect(screen.queryByText(WORN_ARMOUR)).not.toBeInTheDocument();
   });
 
-  it("shows a PR stat chip for each entry", () => {
+  it("shows a PR stat chip once the card is opened", () => {
     renderPicker();
-    expect(row(FIELD_A).textContent).toContain("PR");
+    fireEvent.click(screen.getByRole("button", { name: `Expand ${FIELD_A} details` }));
+    expect(screen.getByText("PR")).toBeInTheDocument();
+  });
+
+  it("hides the Craftsmanship line on a reference card until one is chosen", () => {
+    renderPicker();
+    fireEvent.click(screen.getByRole("button", { name: `Expand ${FIELD_A} details` }));
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.queryByText("Craftsmanship")).not.toBeInTheDocument();
+  });
+
+  it("shows the stored Craftsmanship line on a custom card", () => {
+    renderPicker({
+      customItems: [
+        makeCustomItem({
+          data: {
+            armourKind: "worn",
+            name: "Custom Field",
+            locations: [],
+            ap: 0,
+            isForceField: true,
+            protectionRating: 40,
+            craftsmanship: "Good",
+          },
+        }),
+      ],
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Expand Custom Field details" }));
+    expect(screen.getByText("Craftsmanship")).toBeInTheDocument();
+    expect(screen.getByText("Good")).toBeInTheDocument();
   });
 });
 
@@ -119,6 +147,15 @@ describe("ForceFieldPicker craftsmanship selection", () => {
       expect.objectContaining({ id: "dh-refraction-bracer" }),
       "Poor"
     );
+  });
+
+  it("returns to the list with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await user.click(row(FIELD_A));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(row(FIELD_B)).toBeInTheDocument();
   });
 });
 
@@ -140,18 +177,15 @@ describe("ForceFieldPicker custom fields", () => {
     expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });
 
-  it("shows the information icon on a custom row and on a reference row with the arrow", () => {
+  it("shows the information icon in the header of a custom card and a reference card, with no arrow", () => {
     renderPicker({ customItems: [makeCustomItem()] });
     expect(
-      within(row("Custom Field")).getByRole("button", {
-        name: "Show information about Custom Field",
-      })
+      screen.getByRole("button", { name: "Show information about Custom Field" })
     ).toBeInTheDocument();
-    const bracer = row(FIELD_A);
     expect(
-      within(bracer).getByRole("button", { name: `Show information about ${FIELD_A}` })
+      screen.getByRole("button", { name: `Show information about ${FIELD_A}` })
     ).toBeInTheDocument();
-    expect(bracer.firstElementChild).toHaveClass("gap-3");
+    expect(document.querySelector("[data-picker-arrow]")).toBeNull();
   });
 
   it("calls onSelectCustomItem when a custom field is clicked", async () => {

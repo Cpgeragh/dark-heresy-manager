@@ -1,5 +1,6 @@
 // src/pages/CharacterSheet/GearTab/ItemRow.tsx
 
+import type { ReactNode } from "react";
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
@@ -14,6 +15,11 @@ interface Props extends CustomItemLibraryActionProps<"gear"> {
   item: GearItem;
   editable: boolean;
   onRemove: () => void | Promise<boolean | void>;
+  /** Drawn in a picker: a closed card that `onSelect` chooses. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
+  /** A picker-only note inside the opened card, such as "Cost assigned on add". */
+  previewNote?: ReactNode;
 }
 
 export function ItemRow({
@@ -28,8 +34,11 @@ export function ItemRow({
   onArchive,
   onUpdateAllCopies,
   onRemove,
+  preview,
+  onSelect,
+  previewNote,
 }: Props) {
-  recordComponentRender("GearItemRow");
+  recordComponentRender(preview ? "GearItemPreviewRow" : "GearItemRow");
   const description = item.description?.trim();
   const rules = item.rules?.trim();
 
@@ -44,15 +53,21 @@ export function ItemRow({
       name={item.name}
       editable={editable}
       collapsible
+      preview={preview}
+      onSelect={onSelect}
       information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
       chips={
-        <ItemMetaChips
-          bare
-          weight={weight}
-          value={value}
-          availability={availability}
-          source={item.source}
-        />
+        <>
+          <ItemMetaChips
+            bare
+            weight={weight}
+            value={value}
+            availability={availability}
+            source={item.source}
+            assignedLater={preview}
+          />
+          {previewNote}
+        </>
       }
       lines={{
         rules: {

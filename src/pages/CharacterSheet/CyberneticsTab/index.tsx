@@ -51,6 +51,7 @@ import { ConcealedWeaponBionicInstaller } from "./ConcealedWeaponBionicInstaller
 import {
   buildCyberneticSnapshot,
   buildFallbackCyberneticLibraryItem,
+  cyberneticFromReference,
   toCustomCyberneticData,
 } from "./cyberneticSnapshotHelpers";
 import {
@@ -213,22 +214,13 @@ export function CyberneticsTab({
       onUpdate(
         [
           ...cybernetics,
-          {
-            id: crypto.randomUUID(),
-            referenceId: ref.id,
-            name: ref.name,
-            ...(craftsmanship ? { craftsmanship } : {}),
-            ...(craftsmanship
-              ? { value: gmValue ?? craftsmanshipValue(ref, craftsmanship) }
-              : gmValue !== undefined
-                ? { value: gmValue }
-                : {}),
-            availability: gmRarity ?? ref.availability,
-            source: ref.source,
-            installed: false,
-            ...(gmWeight ? { weight: gmWeight } : {}),
-            ...(bodyLocation ? { bodyLocation } : {}),
-          },
+          cyberneticFromReference(crypto.randomUUID(), ref, {
+            craftsmanship,
+            bodyLocation,
+            value: gmValue,
+            availability: gmRarity,
+            weight: gmWeight,
+          }),
         ],
         { optimistic: true }
       );

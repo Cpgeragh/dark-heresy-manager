@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildCyberneticSnapshot,
   buildFallbackCyberneticLibraryItem,
+  cyberneticFromReference,
   toCustomCyberneticData,
 } from "../../src/pages/CharacterSheet/CyberneticsTab/cyberneticSnapshotHelpers";
+import { CYBERNETICS_REFERENCE } from "../../src/data/reference/cyberneticsReference";
+import { craftsmanshipValue } from "../../src/pages/CharacterSheet/CyberneticsTab/cyberneticsHelpers";
 import type { CyberneticItem } from "../../src/types/Character";
 
 describe("cybernetic snapshot helpers", () => {
@@ -74,5 +77,39 @@ describe("cybernetic snapshot helpers", () => {
       status: "published",
     });
     expect(fallback.data).not.toHaveProperty("bodyLocation");
+  });
+});
+
+describe("cybernetic reference builder", () => {
+  const ref = CYBERNETICS_REFERENCE.find((entry) => entry.name === "Auger Arrays")!;
+
+  it("builds a not installed implant with no craftsmanship by default", () => {
+    const built = cyberneticFromReference("picker-implant", ref);
+    expect(built).toMatchObject({
+      id: "picker-implant",
+      referenceId: ref.id,
+      name: ref.name,
+      availability: ref.availability,
+      source: ref.source,
+      installed: false,
+    });
+    expect(built).not.toHaveProperty("craftsmanship");
+  });
+
+  it("prices a chosen craftsmanship unless a value is assigned", () => {
+    expect(cyberneticFromReference("picker-implant", ref, { craftsmanship: "Good" })).toMatchObject(
+      {
+        craftsmanship: "Good",
+        value: craftsmanshipValue(ref, "Good"),
+      }
+    );
+    expect(
+      cyberneticFromReference("picker-implant", ref, {
+        craftsmanship: "Good",
+        value: "9 Thrones",
+        weight: "3 kg",
+        bodyLocation: ["leftArm"],
+      })
+    ).toMatchObject({ value: "9 Thrones", weight: "3 kg", bodyLocation: ["leftArm"] });
   });
 });

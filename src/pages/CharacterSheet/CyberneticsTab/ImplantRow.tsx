@@ -1,5 +1,6 @@
 // src/pages/CharacterSheet/CyberneticsTab/ImplantRow.tsx
 
+import type { ReactNode } from "react";
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/chips/Chip";
@@ -31,6 +32,11 @@ interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   onToggleInstalled: (id: string) => void;
   onRemove: (id: string) => unknown;
   forceExpanded?: boolean;
+  /** Drawn in a picker: a closed card that `onSelect` chooses. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
+  /** A picker-only note inside the opened card, such as "Cost assigned on add". */
+  previewNote?: ReactNode;
 }
 
 export function ImplantRow({
@@ -50,8 +56,11 @@ export function ImplantRow({
   onUpdateAllCopies,
   onRemove,
   forceExpanded = false,
+  preview,
+  onSelect,
+  previewNote,
 }: Props) {
-  recordComponentRender("ImplantRow");
+  recordComponentRender(preview ? "ImplantPreviewRow" : "ImplantRow");
   const ref = CYBERNETICS_REFERENCE.find((r) => r.id === item.referenceId);
   const qualityOptions = availableCraftsmanship(ref);
   const displayedCraftsmanship =
@@ -72,6 +81,8 @@ export function ImplantRow({
       name={item.name}
       editable={editable}
       collapsible
+      preview={preview}
+      onSelect={onSelect}
       forceExpanded={forceExpanded}
       inactive={!installed}
       actions={
@@ -110,13 +121,15 @@ export function ImplantRow({
           <ItemMetaChips
             bare
             weight={item.weight}
-            value={item.value ?? (isVariableMeta(ref?.value) ? undefined : ref?.value)}
+            value={item.value ?? (isVariableMeta(ref?.value) && !preview ? undefined : ref?.value)}
             availability={
               item.availability ??
-              (isVariableMeta(ref?.availability) ? undefined : ref?.availability)
+              (isVariableMeta(ref?.availability) && !preview ? undefined : ref?.availability)
             }
             source={item.source ?? ref?.source}
+            assignedLater={preview}
           />
+          {previewNote}
         </>
       }
       lines={{

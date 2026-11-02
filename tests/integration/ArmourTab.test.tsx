@@ -158,7 +158,7 @@ describe("ArmourTab", () => {
     const { onUpdate } = renderTab({ armour: [] });
 
     fireEvent.click(screen.getByRole("button", { name: "Equip Armour" }));
-    fireEvent.click(screen.getByText("Custom Coat"));
+    fireEvent.click(screen.getByRole("button", { name: "Select Custom Coat" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       [

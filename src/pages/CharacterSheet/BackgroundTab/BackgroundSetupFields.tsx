@@ -24,7 +24,6 @@ import {
   uiChipRow,
   uiInfoModalWrapper,
   uiItemName,
-  uiTextBody,
   uiStackBody,
 } from "../../../ui/styles/editableStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
@@ -34,8 +33,7 @@ import { TraitAcquisitionModal } from "../../../mechanics/traits/TraitAcquisitio
 import { homeworldNeedsTraitAcquisition } from "../../../mechanics/traits/traitEffects";
 import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
 import { HomeworldTraitAcquisitionModal } from "../HomeworldTraitAcquisitionModal";
-import { PickerList, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
-import { PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { colourDivider } from "../../../ui/styles/colourTokens";
 
 export interface BackgroundSetupFieldsProps {
@@ -441,60 +439,34 @@ export function BackgroundSetupFields({
       )}
 
       {showAdvanceSchemePicker && selectedRank && (
-        <PickerModal
+        <OptionPickerScreen
+          standalone
           title="Advance Scheme"
-          query=""
-          onQueryChange={() => undefined}
+          options={[
+            { value: "", label: selectedRank.name },
+            ...startingAdvanceSchemes.map((rank) => ({ value: rank.id, label: rank.name })),
+          ]}
+          selected={selectedAdvanceScheme?.id ?? ""}
+          onSelect={(value) => handleAdvanceSchemeSelect(value || undefined)}
           onClose={() => setShowAdvanceSchemePicker(false)}
-          isEmpty={false}
-          hideSearch
-        >
-          <PickerList>
-            <PickerRow
-              selected={!selectedAdvanceScheme}
-              onClick={() => handleAdvanceSchemeSelect()}
-            >
-              <PickerRowName name={selectedRank.name} />
-            </PickerRow>
-            {startingAdvanceSchemes.map((rank) => (
-              <PickerRow
-                key={rank.id}
-                selected={selectedAdvanceScheme?.id === rank.id}
-                onClick={() => handleAdvanceSchemeSelect(rank.id)}
-              >
-                <PickerRowName name={rank.name} />
-              </PickerRow>
-            ))}
-          </PickerList>
-        </PickerModal>
+        />
       )}
 
       {pendingAdvanceSchemeId && (
-        <PickerModal
+        <OptionPickerScreen
+          standalone
           title="Insanity Gained (1d5)"
-          query=""
-          onQueryChange={() => undefined}
+          intro="Roll 1d5 and select the result."
+          options={[1, 2, 3, 4, 5].map((value) => ({
+            value: String(value),
+            label: `${value} Insanity ${value === 1 ? "Point" : "Points"}`,
+          }))}
+          onSelect={async (value) => {
+            const saved = await commitAdvanceSchemeSelect(pendingAdvanceSchemeId, Number(value));
+            if (saved !== false) setPendingAdvanceSchemeId(null);
+          }}
           onClose={() => setPendingAdvanceSchemeId(null)}
-          isEmpty={false}
-          hideSearch
-        >
-          <PickerList>
-            <p className={`px-3 py-2 text-sm ${uiTextBody} lg:text-base`}>
-              Roll 1d5 and select the result.
-            </p>
-            {[1, 2, 3, 4, 5].map((value) => (
-              <PickerRow
-                key={value}
-                onClick={async () => {
-                  const saved = await commitAdvanceSchemeSelect(pendingAdvanceSchemeId, value);
-                  if (saved !== false) setPendingAdvanceSchemeId(null);
-                }}
-              >
-                <PickerRowName name={`${value} Insanity ${value === 1 ? "Point" : "Points"}`} />
-              </PickerRow>
-            ))}
-          </PickerList>
-        </PickerModal>
+        />
       )}
 
       {pendingHomeworldId && (

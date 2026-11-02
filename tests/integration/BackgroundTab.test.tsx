@@ -775,6 +775,19 @@ describe("BackgroundTab", () => {
     });
   });
 
+  it("returns from the Other screen with the Close cross or Cancel, never a Back arrow", async () => {
+    const user = userEvent.setup();
+    renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Gender" })[0]);
+    await user.click(screen.getByRole("button", { name: "Other" }));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.getByRole("button", { name: "Female" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Other" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByRole("button", { name: "Female" })).toBeInTheDocument();
+  });
+
   it("pre-fills the custom name when re-editing an existing custom gender", async () => {
     const user = userEvent.setup();
     renderTab({ header: { characterName: "Brother Corvus", gender: "Ecclesiarchy-blessed" } });
@@ -823,5 +836,18 @@ describe("BackgroundTab", () => {
       expect.objectContaining({ skin: "Stained (any)" }),
       { optimistic: true }
     );
+  });
+
+  it("returns from the colour screen with the Close cross or Cancel, never a Back arrow", async () => {
+    const user = userEvent.setup();
+    renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
+    await user.click(screen.getByText("Stained (any)"));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.getByText("Stained (any)")).toBeInTheDocument();
+    await user.click(screen.getByText("Stained (any)"));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByText("Stained (any)")).toBeInTheDocument();
   });
 });

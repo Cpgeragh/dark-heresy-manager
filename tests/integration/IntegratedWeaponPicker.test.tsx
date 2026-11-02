@@ -138,4 +138,14 @@ describe("IntegratedWeaponPicker cards", () => {
     await user.click(screen.getByRole("button", { name: `Expand ${name} details` }));
     expect(screen.getByText("+7")).toBeInTheDocument();
   });
+
+  it("returns from the craftsmanship screen with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    const name = INTEGRATED_RANGED_REFS[0].name;
+    await user.click(selectButton(name));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(selectButton(name)).toBeInTheDocument();
+  });
 });

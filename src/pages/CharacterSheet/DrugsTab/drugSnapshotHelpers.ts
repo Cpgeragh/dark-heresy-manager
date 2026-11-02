@@ -1,4 +1,5 @@
 import { inferCustomItemStatus } from "../../../services/customItemService";
+import type { DrugRef } from "../../../data/reference/drugsReference";
 import type { DrugItem } from "../../../types/Character";
 import type { CampaignCustomItem, CustomDrugData } from "../../../types/CustomItems";
 
@@ -70,5 +71,18 @@ export function buildFallbackDrugLibraryItem({
     archivedAt: null,
     archivedByUserId: null,
     data,
+  };
+}
+
+export function drugFromReference(id: string, ref: DrugRef): DrugItem {
+  return {
+    id,
+    referenceId: ref.id,
+    name: ref.name,
+    quantity: 1,
+    weight: ref.weight,
+    value: ref.value,
+    availability: ref.availability,
+    source: ref.source,
   };
 }

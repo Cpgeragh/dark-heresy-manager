@@ -24,13 +24,18 @@ export function DrugRow({
   onUpdateAllCopies,
   onUpdateQty,
   onRemove,
+  preview,
+  onSelect,
 }: {
   item: DrugItem;
   editable: boolean;
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void | Promise<boolean | void>;
+  /** Drawn in a picker: a closed card that `onSelect` chooses. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
 } & CustomItemLibraryActionProps<"drug">) {
-  recordComponentRender("DrugRow");
+  recordComponentRender(preview ? "DrugPreviewRow" : "DrugRow");
   const ref = DRUGS_REFERENCE.find((r) => r.id === item.referenceId);
   const hasDescription = !!(ref?.notes || item.notes);
   const rules = item.rules?.trim();
@@ -41,6 +46,8 @@ export function DrugRow({
       name={item.name}
       editable={editable}
       collapsible
+      preview={preview}
+      onSelect={onSelect}
       information={
         hasDescription ? (
           <>

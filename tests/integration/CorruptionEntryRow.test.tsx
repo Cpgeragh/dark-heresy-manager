@@ -63,7 +63,7 @@ describe.each(fixtures)("CorruptionEntryRow for a $kind", (fixture) => {
     expect(screen.queryByRole("button", { name: "Edit Rolls" })).not.toBeInTheDocument();
   });
 
-  it("flags a missing roll as not recorded, and edits it via the Edit Rolls button", async () => {
+  it("shows no chip for a missing roll, and edits it via the Edit Rolls button", async () => {
     const user = userEvent.setup();
     const onUpdateRolls = vi.fn();
     render(
@@ -76,7 +76,8 @@ describe.each(fixtures)("CorruptionEntryRow for a $kind", (fixture) => {
       />
     );
 
-    expect(screen.getByText("Agility: not recorded")).toBeInTheDocument();
+    expect(screen.queryByText(/Agility/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/not recorded/)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Edit Rolls" }));
     await user.type(screen.getByRole("spinbutton"), "7");

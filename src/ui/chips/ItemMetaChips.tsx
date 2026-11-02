@@ -4,6 +4,7 @@ import { uiChipRow } from "../styles/editableStyles";
 
 import { Chip } from "./Chip";
 import { formatMoneyForDisplay } from "../format/moneyFormat";
+import { isVariableMeta } from "../../data/reference/referenceMeta";
 import { availabilityChipColour, sourceChipColour } from "../styles/sourceStyles";
 import { formatWeightForDisplay } from "../format/weightFormat";
 import { WeightIcon } from "../icons/WeightIcon";
@@ -23,6 +24,11 @@ interface Props {
    * other chips.
    */
   bare?: boolean;
+  /**
+   * Drawn in a picker for an item whose cost or availability is assigned when it is added:
+   * a marker such as a dash or "Varies" shows the word "Varies" instead of a dash cost.
+   */
+  assignedLater?: boolean;
 }
 
 interface ItemMetaChipsBaseProps extends Props {
@@ -40,13 +46,20 @@ function ItemMetaChipsBase({
   purchaseAmount,
   className,
   bare,
+  assignedLater,
   size,
 }: ItemMetaChipsBaseProps) {
   const displayedWeight = weight ? formatWeightForDisplay(weight) : "";
   if (!displayedWeight && !value && !purchaseAmount && !availability && !source) return null;
 
-  const displayedValue =
-    value !== undefined && value !== null ? formatMoneyForDisplay(value) : undefined;
+  const variesLater = (field?: string | null) =>
+    Boolean(assignedLater && field && isVariableMeta(field));
+  const displayedValue = variesLater(value)
+    ? "Varies"
+    : value !== undefined && value !== null
+      ? formatMoneyForDisplay(value)
+      : undefined;
+  const displayedAvailability = variesLater(availability) ? "Varies" : availability;
 
   const chips = (
     <>
@@ -66,9 +79,9 @@ function ItemMetaChipsBase({
           per {purchaseAmount}
         </Chip>
       )}
-      {availability && (
-        <Chip size={size} colour={availabilityChipColour(availability)}>
-          {availability}
+      {displayedAvailability && (
+        <Chip size={size} colour={availabilityChipColour(displayedAvailability)}>
+          {displayedAvailability}
         </Chip>
       )}
       {source && (

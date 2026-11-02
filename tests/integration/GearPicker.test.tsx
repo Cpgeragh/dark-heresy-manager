@@ -10,16 +10,15 @@ import { SkillSource } from "../../src/types/SkillSource";
 
 // "Backpack" has a fixed (non-variable) cost, so clicking it calls onSelect
 // directly with no GM-assigned-cost sub-step in between.
+// The picker draws a full card for each of its 165 reference items, so a click takes about 2 seconds.
+vi.setConfig({ testTimeout: 15_000 });
+
 const GEAR_NAME = "Backpack";
 const VARIABLE_GEAR_NAME = "Charm";
 
 function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
+  return (screen.queryByRole("button", { name: `Select ${name}` }) ??
+    screen.getByRole("button", { name: `Expand ${name} details` })) as HTMLButtonElement;
 }
 
 function renderPicker(editable = true) {
@@ -190,16 +189,68 @@ describe("GearPicker", () => {
     );
   });
 
-  it("uses a close button in the assigned-cost header and returns through the Back button", async () => {
+  it("asks for a cost of at least 20 on the Cylinder, which is priced 20+", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row("Cylinder"));
+
+    const addButton = screen.getByRole("button", { name: "Add to Inventory" });
+    const costInput = screen.getByLabelText(/Cost \(Thrones\)/);
+    expect(screen.getByRole("dialog", { name: "Assigned Cost" })).toBeInTheDocument();
+    expect(onSelect).not.toHaveBeenCalled();
+
+    await user.type(costInput, "19");
+    expect(screen.getByText("Must be a whole number of 20 or more.")).toBeInTheDocument();
+    expect(addButton).toBeDisabled();
+
+    await user.clear(costInput);
+    await user.type(costInput, "20");
+    expect(addButton).toBeEnabled();
+    await user.click(addButton);
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Cylinder" }),
+      "20 Thrones",
+      undefined,
+      undefined
+    );
+  });
+
+  it("shows the Cylinder card as ₮ 20+ with the assigned-on-add note", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await user.click(screen.getByRole("button", { name: "Expand Cylinder details" }));
+    expect(screen.getByText("₮ 20+")).toBeInTheDocument();
+    expect(screen.getByText("Cost assigned on add")).toBeInTheDocument();
+  });
+
+  it("returns to the list from the Close cross on the assigned-cost screen", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
 
     await user.click(row(VARIABLE_GEAR_NAME));
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "75");
     const assignedDialog = screen.getByRole("dialog", { name: "Assigned Cost" });
-    expect(within(assignedDialog).getByRole("button", { name: "Close" })).toBeInTheDocument();
-    expect(within(assignedDialog).getAllByRole("button", { name: "Back" })).toHaveLength(1);
-    await user.click(within(assignedDialog).getByRole("button", { name: "Back" }));
+    expect(within(assignedDialog).queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(within(assignedDialog).getByRole("button", { name: "Close" }));
+
+    expect(screen.getByPlaceholderText("Search gear…")).toBeInTheDocument();
+    await user.click(row(VARIABLE_GEAR_NAME));
+    expect(screen.getByLabelText(/Cost \(Thrones\)/)).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Add to Inventory" })).toBeDisabled();
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("returns to the list from the Cancel button on the assigned-cost screen", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row(VARIABLE_GEAR_NAME));
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "75");
+    const assignedDialog = screen.getByRole("dialog", { name: "Assigned Cost" });
+    expect(within(assignedDialog).getAllByRole("button", { name: "Cancel" })).toHaveLength(1);
+    await user.click(within(assignedDialog).getByRole("button", { name: "Cancel" }));
 
     expect(screen.getByPlaceholderText("Search gear…")).toBeInTheDocument();
     await user.click(row(VARIABLE_GEAR_NAME));

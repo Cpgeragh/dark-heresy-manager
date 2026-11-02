@@ -26,6 +26,8 @@ import { useToast } from "../../../components/Toast";
 import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 import { keepPersonalNotes } from "../../../utils/personalNotes";
 import {
+  ARCHEOTECH_WEAPON_TYPES,
+  archeotechFromReference,
   toCustomArcheotechData,
   buildArcheotechSnapshot,
   buildFallbackArcheotechLibraryItem,
@@ -100,17 +102,11 @@ export function ArcheotechTab({
       if (!editable) return;
       const next = [
         ...archeotech,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          type: ref.type,
-          source: ref.source,
-          // Store GM-assigned values directly on the item so they override "—"
-          value: gmValue || undefined,
-          availability: gmRarity || undefined,
-          weight: gmWeight || undefined,
-        },
+        archeotechFromReference(crypto.randomUUID(), ref, {
+          value: gmValue,
+          availability: gmRarity,
+          weight: gmWeight,
+        }),
       ];
       if (gmValue === undefined && gmRarity === undefined && gmWeight === undefined) {
         onUpdate(next, { optimistic: true });
@@ -296,9 +292,7 @@ export function ArcheotechTab({
       onRemove: () => removeItem(item.id),
     };
 
-    const isWeaponType = ["Weapon", "Integrated Weapon", "Grenade", "Mine"].includes(
-      item.type ?? ""
-    );
+    const isWeaponType = ARCHEOTECH_WEAPON_TYPES.includes(item.type ?? "");
     if (isWeaponType)
       return (
         <ArcheotechWeaponCard

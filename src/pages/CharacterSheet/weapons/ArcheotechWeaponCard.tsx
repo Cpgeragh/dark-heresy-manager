@@ -1,11 +1,12 @@
 // src/pages/CharacterSheet/weapons/ArcheotechWeaponCard.tsx
 // Collapsible card for weapons, grenades and mines stored in the Archeotech tab.
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { Chip } from "../../../ui/chips/Chip";
+import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { uiChipRow, uiStackField } from "../../../ui/styles/editableStyles";
 import { AccordionCard } from "../../../ui/AccordionCard";
@@ -39,6 +40,9 @@ export function ArcheotechWeaponCard({
   onToggleEquip,
   slotsDisabled = false,
   highlightAsArcheotech = true,
+  preview = false,
+  onSelect,
+  previewNote,
 }: {
   item: ArcheotechItem;
   strengthBonus?: number;
@@ -48,6 +52,11 @@ export function ArcheotechWeaponCard({
   onToggleEquip?: () => void | Promise<void>;
   slotsDisabled?: boolean;
   highlightAsArcheotech?: boolean;
+  /** Drawn in a picker: a closed card that `onSelect` chooses, with no Remove, Equip or library buttons. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
+  /** A picker-only note inside the opened card. */
+  previewNote?: ReactNode;
 } & CustomItemLibraryActionProps<"archeotech">) {
   const [expanded, setExpanded] = useState(false);
 
@@ -80,6 +89,8 @@ export function ArcheotechWeaponCard({
       label={item.name}
       expanded={expanded}
       onToggle={() => setExpanded((e) => !e)}
+      onSelect={onSelect}
+      badge={libraryItem ? <StatusBadge status={libraryItem.status} /> : undefined}
       info={
         <InfoModal
           title={item.name}
@@ -106,12 +117,12 @@ export function ArcheotechWeaponCard({
         ) : undefined
       }
       removeAction={
-        editable && onRemove ? (
+        !preview && editable && onRemove ? (
           <RemoveEntryButton kind="Archeotech Item" name={item.name} onRemove={onRemove} />
         ) : undefined
       }
       actions={
-        onToggleEquip ? (
+        onToggleEquip && !preview ? (
           <EquipToggle
             equipped={isEquipped}
             disabled={slotsDisabled}
@@ -181,7 +192,7 @@ export function ArcheotechWeaponCard({
         />
       </div>
 
-      {libraryItem && (
+      {!preview && libraryItem && (
         <CustomItemActionButtons
           libraryItem={libraryItem}
           isDM={isDM}
@@ -200,8 +211,10 @@ export function ArcheotechWeaponCard({
         value={value}
         availability={availability}
         source={source}
+        assignedLater={preview}
         className={`${uiChipRow} border-t ${colourDivider} pt-2 mt-1`}
       />
+      {previewNote}
     </AccordionCard>
   );
 }

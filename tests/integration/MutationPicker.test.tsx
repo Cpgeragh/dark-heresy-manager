@@ -21,7 +21,7 @@ function setup(tier: "minor" | "major" = "minor", editable = true) {
 }
 
 describe("MutationPicker rows", () => {
-  it("puts the information icon beside the name, shows the arrow only when a roll is needed, and has no Rules line", () => {
+  it("puts the information icon beside the name, shows no arrow even when a roll is needed, and has no Rules line", () => {
     setup();
     const flat = screen.getByText("Tough Hide", { selector: "span" }).closest("button")!;
     const rolled = screen.getByText("Misshapen", { selector: "span" }).closest("button")!;
@@ -29,7 +29,7 @@ describe("MutationPicker rows", () => {
     expect(
       within(flat).getByRole("button", { name: "Show information about Tough Hide" })
     ).toBeInTheDocument();
-    expect(rolled.firstElementChild).toHaveClass("gap-3");
+    expect(rolled.firstElementChild).not.toHaveClass("gap-3");
     expect(flat.firstElementChild).not.toHaveClass("gap-3");
     expect(screen.queryByText("Rules")).not.toBeInTheDocument();
   });
@@ -158,6 +158,30 @@ describe("MutationPicker roll-capture sub-screen", () => {
         custom: true,
       })
     );
+  });
+});
+
+describe("MutationPicker form screens", () => {
+  it("returns from the roll screen with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.click(screen.getByText("Misshapen", { selector: "span" }));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.getByRole("dialog", { name: "Add Minor Mutation" })).toBeInTheDocument();
+  });
+
+  it("returns from the custom form with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.click(screen.getByRole("button", { name: "Add Custom Minor Mutation" }));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.getByRole("dialog", { name: "Add Minor Mutation" })).toBeInTheDocument();
   });
 });
 

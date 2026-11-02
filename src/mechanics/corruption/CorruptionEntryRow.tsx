@@ -60,14 +60,13 @@ export function CorruptionEntryRow({
                 {entry.source}
               </Chip>
             )}
-            {rollEntries.map((rollEntry) => (
-              <Chip
-                key={rollEntry.characteristic}
-                colour={rollEntry.value === undefined ? "rose" : "sky"}
-              >
-                {rollEntry.label}: {rollEntry.value ?? "not recorded"}
-              </Chip>
-            ))}
+            {rollEntries
+              .filter((rollEntry) => rollEntry.value !== undefined)
+              .map((rollEntry) => (
+                <Chip key={rollEntry.characteristic} colour="sky">
+                  {rollEntry.label}: {rollEntry.value}
+                </Chip>
+              ))}
           </>
         }
         lines={{

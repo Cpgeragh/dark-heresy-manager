@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  armourPieceFromReference,
   buildArmourSnapshot,
   buildFallbackArmourLibraryItem,
   stripArmourKind,
   toCustomArmourData,
 } from "../../src/pages/CharacterSheet/ArmourTab/armourSnapshotHelpers";
+import { ARMOUR_REFERENCE } from "../../src/data/reference/armourReference";
 import type { WornArmourPiece } from "../../src/types/Character";
 
 describe("armour snapshot helpers", () => {
@@ -83,5 +85,34 @@ describe("armour snapshot helpers", () => {
     });
     expect(fallback.data).not.toHaveProperty("worn");
     expect(fallback.data).not.toHaveProperty("upgrades");
+  });
+});
+
+describe("armour reference builder", () => {
+  const flakJacket = ARMOUR_REFERENCE.find((ref) => ref.id === "cr-flak-jacket")!;
+  const refractionBracer = ARMOUR_REFERENCE.find((ref) => ref.id === "dh-refraction-bracer")!;
+
+  it("builds a worn Common piece from a reference", () => {
+    expect(armourPieceFromReference("picker-armour", flakJacket)).toMatchObject({
+      id: "picker-armour",
+      referenceId: flakJacket.id,
+      name: flakJacket.name,
+      ap: flakJacket.ap,
+      craftsmanship: "Common",
+      worn: true,
+      weight: flakJacket.weight,
+    });
+  });
+
+  it("adds one armour point for Best craftsmanship", () => {
+    const piece = armourPieceFromReference("picker-armour", flakJacket, "Best");
+    expect(piece.ap).toBe(flakJacket.ap + 1);
+    expect(piece.craftsmanship).toBe("Best");
+  });
+
+  it("keeps the force field marker and protection rating", () => {
+    const piece = armourPieceFromReference("picker-field", refractionBracer);
+    expect(piece.isForceField).toBe(true);
+    expect(piece.protectionRating).toBe(refractionBracer.protectionRating);
   });
 });

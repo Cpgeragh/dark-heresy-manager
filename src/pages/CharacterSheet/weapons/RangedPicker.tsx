@@ -18,7 +18,6 @@ import {
   PickerList,
   PickerModal,
 } from "../../../ui/pickers/PickerModal";
-import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { FilterButton } from "../../../ui/pickers/FilterButton";
 import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
@@ -159,8 +158,6 @@ export function RangedPicker({
     return (
       <PickerModal
         title={selected.name}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}

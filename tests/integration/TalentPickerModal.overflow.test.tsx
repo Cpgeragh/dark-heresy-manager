@@ -240,7 +240,7 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     await user.click(screen.getByRole("button", { name: "Show all" }));
     await user.click(screen.getByText("Sound Constitution"));
     expect(screen.getByText("XP Cost")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
     const dialog = screen.getByRole("dialog", { name: "Add Talent" });
     expect(within(dialog).getByRole("button", { name: "Back" })).toBeInTheDocument();
     expect(within(dialog).getByText("Mechadendrite Use")).toBeInTheDocument();

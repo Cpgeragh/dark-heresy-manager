@@ -11,7 +11,6 @@ import {
   PickerRow,
 } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
-import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { FormLabel } from "../../ui/forms/FormLabel";
 import { RollChip } from "../../ui/chips/RollChip";
@@ -90,8 +89,6 @@ export function InsanityTraumaPicker({
       <CustomFormShell
         title="Custom Trauma"
         scrollPositionRef={customFormScrollPositionRef}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         onClose={() => setCustomMode(false)}
         canSubmit={canAddCustom}
         submitLabel="Add Trauma"

@@ -11,7 +11,6 @@ import {
   PickerList,
   PickerModal,
 } from "../../../ui/pickers/PickerModal";
-import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { uiTwoColumnGrid, uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { MeleePickerCard, RangedPickerCard } from "./WeaponPickerCards";
@@ -86,8 +85,6 @@ export function IntegratedWeaponPicker({
     return (
       <PickerModal
         title={selected.ref.name}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { exportAccountDiagnostics } from "../accountDiagnostics";
 import { Button } from "../ui/buttons/Button";
+import { uiLayerForeground } from "../ui/styles/layerStyles";
 
 export function AccountCheck() {
   const [message, setMessage] = useState("");
@@ -20,7 +21,7 @@ export function AccountCheck() {
     }
   }
   return (
-    <div className="fixed bottom-2 left-2 z-50">
+    <div className={`fixed bottom-2 left-2 ${uiLayerForeground}`}>
       <Button size="xs" variant="neutral" onClick={copy}>
         Copy account check
       </Button>

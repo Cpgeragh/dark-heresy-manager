@@ -60,6 +60,17 @@ describe("CorruptionMalignancyPicker roll-capture sub-screen", () => {
     expect(onAdd).not.toHaveBeenCalled();
   });
 
+  it("returns from the roll screen with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.click(screen.getByText("Palsy", { selector: "span" }));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.getByText("Witch-mark", { selector: "span" })).toBeInTheDocument();
+  });
+
   it("excludes a malignancy already on the character from the list", () => {
     render(
       <CorruptionMalignancyPicker

@@ -145,7 +145,7 @@ describe("DrugsTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Drug" }));
-    await user.click(screen.getByText(DRUG_NAME));
+    await user.click(screen.getByRole("button", { name: `Select ${DRUG_NAME}` }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       [expect.objectContaining({ name: DRUG_NAME, quantity: 1 })],
@@ -160,7 +160,7 @@ describe("DrugsTab", () => {
     expect(unweighed).toBeDefined();
 
     await user.click(screen.getByRole("button", { name: "Add Drug" }));
-    await user.click(screen.getByText(unweighed!.name));
+    await user.click(screen.getByRole("button", { name: `Select ${unweighed!.name}` }));
 
     const added = onUpdate.mock.calls[0][0][0] as DrugItem;
     expect(added.weight).toBeUndefined();
@@ -176,7 +176,7 @@ describe("DrugsTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Drug" }));
-    await user.click(screen.getByText("Custom Stimm"));
+    await user.click(screen.getByRole("button", { name: "Select Custom Stimm" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       [
@@ -257,9 +257,9 @@ describe("DrugsTab", () => {
     renderTab({ onUpdate });
 
     await user.click(screen.getByRole("button", { name: "Add Drug" }));
-    await user.click(screen.getByText(DRUG_NAME));
+    await user.click(screen.getByRole("button", { name: `Select ${DRUG_NAME}` }));
 
-    const row = screen.getByText(DRUG_NAME).closest("button");
+    const row = screen.getByRole("button", { name: `Select ${DRUG_NAME}` });
     expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: DRUG_NAME })], {
       optimistic: true,
     });

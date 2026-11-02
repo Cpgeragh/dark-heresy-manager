@@ -2,26 +2,17 @@
 
 import { useRef, useState } from "react";
 import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearReference";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import {
-  PickerCustomAction,
-  PickerList,
-  PickerModal,
-  PickerRow,
-} from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowName,
-  PickerRowRulesLine,
-} from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph } from "../../../ui/InfoSection";
-import { uiTextGMNote } from "../../../ui/styles/editableStyles";
-import { formatMoneyInput } from "../../../ui/format/moneyFormat";
+import { PickerCustomAction, PickerList, PickerModal } from "../../../ui/pickers/PickerModal";
+import { previewVersionId } from "../weapons/weaponSnapshotHelpers";
+import { buildGearSnapshot, gearFromReference } from "./gearSnapshotHelpers";
+import { ItemRow } from "./ItemRow";
+import { formatMoneyInput, openEndedCostMinimum } from "../../../ui/format/moneyFormat";
 import { formatWeightInput, isVariableWeight } from "../../../ui/format/weightFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
-import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
-import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
+import { useAssignedItemPick, type AssignedItemNeeds } from "../../../hooks/useAssignedItemPick";
+import { AssignedItemPickScreen } from "../../../ui/pickers/AssignedItemPickScreen";
+import { AssignedOnAddNote } from "../../../ui/pickers/AssignedOnAddNote";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
 interface Props {
@@ -39,6 +30,16 @@ interface Props {
   suspended?: boolean;
 }
 
+function gearNeeds(ref: GearRef): AssignedItemNeeds {
+  const minimumCost = openEndedCostMinimum(ref.value);
+  return {
+    cost: isVariableMeta(ref.value) || minimumCost !== undefined,
+    weight: isVariableWeight(ref.weight),
+    rarity: isVariableMeta(ref.availability),
+    minimumCost,
+  };
+}
+
 export function GearPicker({
   editable = true,
   customItems = [],
@@ -50,7 +51,8 @@ export function GearPicker({
 }: Props) {
   recordComponentRender("GearPicker");
   const [query, setQuery] = useState("");
-  const [pending, setPending] = useState<GearRef | null>(null);
+  const pick = useAssignedItemPick(gearNeeds);
+  const { pending, needs, meta } = pick;
   const listScrollPositionRef = useRef(0);
   const normalizedQuery = query.toLowerCase();
   const filtered = GEAR_REFERENCE.filter((r) =>
@@ -64,91 +66,48 @@ export function GearPicker({
     ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
     ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
   ].sort((a, b) => a.name.localeCompare(b.name));
-  const pendingNeedsRarity = pending ? isVariableMeta(pending.availability) : false;
-  const pendingNeedsCost = pending ? isVariableMeta(pending.value) : true;
-  const pendingNeedsWeight = pending ? isVariableWeight(pending.weight) : false;
-  const {
-    gmCost,
-    setGmCost,
-    gmWeight,
-    setGmWeight,
-    gmRarity,
-    setGmRarity,
-    showRarityPicker,
-    setShowRarityPicker,
-    costValid,
-    canConfirm,
-    resetAssignedItemMeta,
-  } = useAssignedItemMeta({
-    requiresCost: pendingNeedsCost,
-    requiresWeight: pendingNeedsWeight,
-    requiresRarity: pendingNeedsRarity,
-  });
   const isEmpty = !pending && filtered.length === 0 && filteredCustom.length === 0;
 
   function handleSelect(ref: GearRef) {
     if (!editable) return;
-    if (isVariableMeta(ref.value) || isVariableWeight(ref.weight)) {
-      setPending(ref);
-      resetAssignedItemMeta();
+    const refNeeds = gearNeeds(ref);
+    if (refNeeds.cost || refNeeds.weight) {
+      pick.begin(ref);
       return;
     }
     return onSelect(ref);
   }
 
-  function handleAssignedBack() {
-    setPending(null);
-    resetAssignedItemMeta();
-  }
-
-  async function handleConfirm() {
-    if (!pending || !canConfirm) return;
-    await onSelect(
-      pending,
-      pendingNeedsCost ? formatMoneyInput(gmCost) : undefined,
-      pendingNeedsRarity ? gmRarity : undefined,
-      pendingNeedsWeight ? formatWeightInput(gmWeight) : undefined
-    );
-    handleAssignedBack();
-  }
-
   if (pending) {
     const assignedTitle =
-      pendingNeedsCost && pendingNeedsWeight
+      needs.cost && needs.weight
         ? "Assigned Cost and Weight"
-        : pendingNeedsWeight
+        : needs.weight
           ? "Assigned Weight"
           : "Assigned Cost";
     const assignedExplanation =
-      pendingNeedsCost && pendingNeedsWeight
+      needs.cost && needs.weight
         ? "has a variable cost and weight. Enter the values assigned for this item."
-        : pendingNeedsWeight
+        : needs.weight
           ? "has a variable weight. Enter the weight assigned for this item."
           : "has a variable or unlisted cost. Enter the value assigned for this item.";
     return (
-      <AssignedItemMetaScreen
+      <AssignedItemPickScreen
+        pick={pick}
         title={assignedTitle}
-        itemName={pending.name}
         explanation={assignedExplanation}
-        gmCost={gmCost}
-        setGmCost={setGmCost}
-        costValid={costValid}
-        costPlaceholder="e.g. 500"
-        requiresCost={pendingNeedsCost}
-        requiresWeight={pendingNeedsWeight}
-        gmWeight={gmWeight}
-        setGmWeight={setGmWeight}
-        requiresRarity={pendingNeedsRarity}
-        gmRarity={gmRarity}
-        setGmRarity={setGmRarity}
-        showRarityPicker={showRarityPicker}
-        setShowRarityPicker={setShowRarityPicker}
         idPrefix="gear-assigned-meta"
         confirmLabel="Add to Inventory"
-        canConfirm={canConfirm}
-        onBack={handleAssignedBack}
-        onClose={onClose}
-        onConfirm={handleConfirm}
+        onConfirm={() =>
+          pick.confirm((ref) =>
+            onSelect(
+              ref,
+              needs.cost ? formatMoneyInput(meta.gmCost) : undefined,
+              needs.rarity ? meta.gmRarity : undefined,
+              needs.weight ? formatWeightInput(meta.gmWeight) : undefined
+            )
+          )
+        }
       />
     );
   }
@@ -172,63 +131,35 @@ export function GearPicker({
       <PickerList>
         {pickerEntries.map((entry) =>
           entry.kind === "custom" ? (
-            <PickerRow
+            <ItemRow
               key={`custom-${entry.item.id}`}
-              interactive={editable}
-              onClick={() => onSelectCustomItem?.(entry.item)}
-            >
-              <PickerRowName
-                name={entry.item.name}
-                status={entry.item.status}
-                infoTitle={entry.item.name}
-                information={
-                  entry.item.data.description ? (
-                    <InfoParagraph>{entry.item.data.description}</InfoParagraph>
-                  ) : undefined
-                }
-              />
-              <PickerRowChips className="text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  weight={entry.item.data.weight}
-                  value={entry.item.data.value}
-                  availability={entry.item.data.availability}
-                  source={entry.item.data.source}
-                />
-              </PickerRowChips>
-              <PickerRowRulesLine name={entry.item.name} rules={entry.item.data.rules} />
-            </PickerRow>
+              item={buildGearSnapshot(
+                `picker-${entry.item.id}`,
+                entry.item.data,
+                entry.item.id,
+                previewVersionId(entry.item)
+              )}
+              editable={false}
+              libraryItem={entry.item}
+              preview
+              onSelect={editable ? () => onSelectCustomItem?.(entry.item) : undefined}
+              onRemove={() => {}}
+            />
           ) : (
-            <PickerRow
+            <ItemRow
               key={entry.ref.id}
-              interactive={editable}
-              onClick={() => handleSelect(entry.ref)}
-            >
-              <PickerRowName
-                name={entry.ref.name}
-                infoTitle={entry.ref.name}
-                information={
-                  entry.ref.description ? (
-                    <InfoParagraph>{entry.ref.description}</InfoParagraph>
-                  ) : undefined
-                }
-              />
-              <PickerRowChips className="text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  weight={entry.ref.weight}
-                  value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
-                  availability={
-                    isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability
-                  }
-                  source={entry.ref.source}
-                />
-                {isVariableMeta(entry.ref.value) && (
-                  <span className={uiTextGMNote}>Cost assigned on add</span>
-                )}
-              </PickerRowChips>
-              <PickerRowRulesLine name={entry.ref.name} rules={entry.ref.rules} />
-            </PickerRow>
+              item={gearFromReference(`picker-${entry.ref.id}`, entry.ref)}
+              editable={false}
+              preview
+              previewNote={
+                isVariableMeta(entry.ref.value) ||
+                openEndedCostMinimum(entry.ref.value) !== undefined ? (
+                  <AssignedOnAddNote>Cost assigned on add</AssignedOnAddNote>
+                ) : undefined
+              }
+              onSelect={editable ? () => handleSelect(entry.ref) : undefined}
+              onRemove={() => {}}
+            />
           )
         )}
       </PickerList>

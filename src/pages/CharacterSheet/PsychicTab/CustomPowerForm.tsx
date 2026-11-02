@@ -11,7 +11,6 @@ import { Chip } from "../../../ui/chips/Chip";
 import { OriginSelector } from "../../../ui/forms/OriginSelector";
 import { FormLabel } from "../../../ui/forms/FormLabel";
 import { ItemNotesField } from "../../../ui/forms/ItemNotesField";
-import { ArrowLeft } from "../../../ui/icons/PickerArrows";
 import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
 import {
   uiChipRow,
@@ -162,8 +161,6 @@ export function CustomPowerForm({
       query=""
       onQueryChange={() => undefined}
       onClose={initialPower ? onCancel : onBack}
-      closeLabel={initialPower ? undefined : <ArrowLeft />}
-      closeAriaLabel={initialPower ? "Close" : "Back"}
       hideSearch
       isEmpty={false}
     >

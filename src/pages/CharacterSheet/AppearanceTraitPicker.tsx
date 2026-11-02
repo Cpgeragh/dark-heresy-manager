@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
-import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { editableInputClass } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -40,14 +39,12 @@ export function AppearanceTraitPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setQualifying(null)}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={
           <div className="flex gap-2">
             <Button variant="neutral" size="sm" onClick={() => setQualifying(null)}>
-              Back
+              Cancel
             </Button>
             <Button
               size="sm"

@@ -131,7 +131,6 @@ export function AddSkillModal({
       <XpCostForm
         title={`Train ${pendingManualSkill.name}`}
         submitLabel={`Train ${pendingManualSkill.name}`}
-        showBack
         cost={manualCost}
         onCostChange={(value) => setManualCost(sanitizeNonNegativeIntegerInput(value))}
         onClose={() => setPendingManualSkill(null)}

@@ -40,6 +40,8 @@ import {
   buildFallbackConsumableLibraryItem,
   buildFallbackGearLibraryItem,
   buildGearSnapshot,
+  consumableFromReference,
+  gearFromReference,
   toCustomConsumableData,
   toCustomGearData,
 } from "./gearSnapshotHelpers";
@@ -198,26 +200,17 @@ export function GearTab({
   // ── Consumable handlers ──────────────────────────────────────────────────
 
   const addConsumableFromRef = useCallback(
-    (ref: ConsumableRef) => {
+    (ref: ConsumableRef, gmValue?: string) => {
       if (!editable) return;
-      onUpdateConsumables(
-        [
-          ...consumables,
-          {
-            id: crypto.randomUUID(),
-            referenceId: ref.id,
-            name: ref.name,
-            quantity: 1,
-            description: ref.description,
-            rules: ref.rules,
-            weight: ref.weight,
-            value: ref.value,
-            availability: ref.availability,
-            source: ref.source,
-          },
-        ],
-        { optimistic: true }
-      );
+      const next = [
+        ...consumables,
+        consumableFromReference(crypto.randomUUID(), ref, { value: gmValue }),
+      ];
+      if (gmValue === undefined) {
+        onUpdateConsumables(next, { optimistic: true });
+        return;
+      }
+      return onUpdateConsumables(next);
     },
     [editable, consumables, onUpdateConsumables]
   );
@@ -369,17 +362,11 @@ export function GearTab({
       if (!editable) return;
       const next = [
         ...gear,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          description: ref.description,
-          rules: ref.rules,
-          weight: gmWeight ?? ref.weight,
-          value: gmValue ?? ref.value,
-          availability: gmRarity ?? ref.availability,
-          source: ref.source,
-        },
+        gearFromReference(crypto.randomUUID(), ref, {
+          value: gmValue,
+          availability: gmRarity,
+          weight: gmWeight,
+        }),
       ];
       if (gmValue === undefined && gmWeight === undefined) {
         onUpdate(next, { optimistic: true });

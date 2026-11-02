@@ -16,7 +16,6 @@ import {
 } from "../../ui/pickers/PickerModal";
 import { PickerRowChips, PickerRowName } from "../../ui/pickers/PickerRowParts";
 import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
-import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { FilterButton } from "../../ui/pickers/FilterButton";
 import { PickerField } from "../../ui/pickers/PickerField";
 import { FormLabel } from "../../ui/forms/FormLabel";
@@ -127,8 +126,6 @@ export function InsanityDisorderPicker({
       <CustomFormShell
         title="Custom Disorder"
         scrollPositionRef={customScrollPositionRef}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         onClose={() => setCustomMode(false)}
         canSubmit={canAddCustom}
         submitLabel="Add Disorder"
@@ -231,8 +228,6 @@ export function InsanityDisorderPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setSelected(null)}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={
@@ -315,7 +310,6 @@ export function InsanityDisorderPicker({
           <PickerRow
             key={ref.id}
             interactive={editable}
-            opensScreen
             onClick={() => {
               setSelected(ref);
               setSeverity(ref.severityOptions[0]);

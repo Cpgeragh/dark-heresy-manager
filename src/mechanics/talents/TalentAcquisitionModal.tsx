@@ -562,8 +562,6 @@ export function TalentAcquisitionModal({
       query=""
       onQueryChange={() => undefined}
       onClose={onClose}
-      closeLabel={<ArrowLeft />}
-      closeAriaLabel="Back"
       isEmpty={false}
       hideSearch
       maxWidth="max-w-lg"

@@ -46,7 +46,6 @@ import {
   hasTalentChoice,
   isTalentAvailableInPicker,
   makeTalentEntry,
-  needsTalentAcquisition,
   normaliseSources,
 } from "./talentUtils";
 import { getFaithTalentGroupChip } from "./faithTalentGroups";
@@ -376,7 +375,6 @@ export function TalentPickerModal({
       <XpCostForm
         title={`Buy ${pendingManualCost.talent.name}`}
         submitLabel={`Buy ${pendingManualCost.talent.name}`}
-        showBack
         cost={manualCostInput}
         onCostChange={(value) => setManualCostInput(sanitizeNonNegativeIntegerInput(value))}
         onClose={() => setPendingManualCost(null)}
@@ -453,18 +451,11 @@ export function TalentPickerModal({
             const usesTextEntry =
               row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
             const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
-            const opensAcquisition =
-              Boolean(!useTalentBehaviours && (row as TraitData).acquisition) ||
-              (useTalentBehaviours &&
-                needsTalentAcquisition(
-                  { uid: "picker-preview", talentId: row.id, name: row.name },
-                  { homeworld: "", talents: [...entries], traits: [] }
-                ));
             return (
               <PickerRow
                 key={item.id}
                 interactive={canMakeManualPurchase}
-                opensScreen={usesChoicePicker || usesTextEntry || opensAcquisition}
+                opensScreen={usesChoicePicker}
                 onClick={() => {
                   if (!canMakeManualPurchase) return;
                   if (usesChoicePicker) {
@@ -520,8 +511,6 @@ export function TalentPickerModal({
     return (
       <PickerModal
         title={detailChoice?.detailLabel ?? talentData.specialisationLabel ?? "Specialisation"}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         query=""
         onQueryChange={() => undefined}
         onClose={resetPicked}
@@ -657,14 +646,6 @@ export function TalentPickerModal({
             (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
           const usesTextEntry =
             row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
-          const opensAcquisition =
-            Boolean(!useTalentBehaviours && (row as TraitData).acquisition) ||
-            (useTalentBehaviours &&
-              needsTalentAcquisition(
-                { uid: "picker-preview", talentId: row.id, name: row.name },
-                { homeworld: "", talents: [...entries], traits: [] }
-              ));
-          const opensNextStep = usesChoicePicker || usesTextEntry || opensAcquisition;
           const cost =
             career && !usesChoicePicker && !usesTextEntry
               ? getNextTalentCost(career, rank, item.id, undefined, entries, alternateRanks)
@@ -682,7 +663,7 @@ export function TalentPickerModal({
             <PickerRow
               key={item.id}
               interactive={editable}
-              opensScreen={opensNextStep}
+              opensScreen={usesChoicePicker}
               onClick={() => {
                 if (!editable) return;
                 const itemTalent = item as TalentData;

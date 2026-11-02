@@ -1,5 +1,6 @@
 // src/pages/CharacterSheet/GearTab/ConsumableRow.tsx
 
+import type { ReactNode } from "react";
 import type { ConsumableItem } from "../../../types/Character";
 import { OwnedEntryRow } from "../../../ui/OwnedEntryRow";
 import { entryNotesLine } from "../../../ui/entryNotesLine";
@@ -15,6 +16,11 @@ interface Props extends CustomItemLibraryActionProps<"consumable"> {
   editable: boolean;
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void | Promise<boolean | void>;
+  /** Drawn in a picker: a closed card that `onSelect` chooses. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
+  /** A picker-only note inside the opened card, such as "Cost assigned on add". */
+  previewNote?: ReactNode;
 }
 
 export function ConsumableRow({
@@ -30,8 +36,11 @@ export function ConsumableRow({
   onUpdateAllCopies,
   onUpdateQty,
   onRemove,
+  preview,
+  onSelect,
+  previewNote,
 }: Props) {
-  recordComponentRender("ConsumableRow");
+  recordComponentRender(preview ? "ConsumablePreviewRow" : "ConsumableRow");
   const description = item.description?.trim();
   const rules = item.rules?.trim();
 
@@ -40,15 +49,20 @@ export function ConsumableRow({
       name={item.name}
       editable={editable}
       collapsible
+      preview={preview}
+      onSelect={onSelect}
       information={description ? <InfoParagraph>{description}</InfoParagraph> : undefined}
       chips={
-        <ItemMetaChips
-          bare
-          weight={item.weight}
-          value={item.value}
-          availability={item.availability}
-          source={item.source}
-        />
+        <>
+          <ItemMetaChips
+            bare
+            weight={item.weight}
+            value={item.value}
+            availability={item.availability}
+            source={item.source}
+          />
+          {previewNote}
+        </>
       }
       lines={{
         notes: entryNotesLine(item.name, item.itemNotes, {

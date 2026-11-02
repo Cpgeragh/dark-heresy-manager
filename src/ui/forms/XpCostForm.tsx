@@ -1,5 +1,4 @@
 import { useId, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft } from "../icons/PickerArrows";
 import { editableInputClass } from "../styles/editableStyles";
 import { CustomFormSection } from "./CustomFormSection";
 import { CustomFormShell } from "./CustomFormShell";
@@ -12,8 +11,6 @@ interface XpCostFormProps {
   onCostChange: (value: string) => void;
   onSubmit: () => void | Promise<unknown>;
   onClose: () => void;
-  /** Shows the Back arrow, for a pop-up opened as the second step of a list. */
-  showBack?: boolean;
   /** Any further condition besides the cost box not being empty. */
   canSubmit?: boolean;
   /** Extra notes above the cost box. */
@@ -28,7 +25,6 @@ export function XpCostForm({
   onCostChange,
   onSubmit,
   onClose,
-  showBack = false,
   canSubmit = true,
   children,
 }: XpCostFormProps) {
@@ -48,8 +44,6 @@ export function XpCostForm({
   return (
     <CustomFormShell
       title={title}
-      closeLabel={showBack ? <ArrowLeft /> : undefined}
-      closeAriaLabel={showBack ? "Back" : undefined}
       maxWidth="max-w-sm"
       scrollPositionRef={scrollPositionRef}
       canSubmit={canSubmit && cost.trim() !== ""}

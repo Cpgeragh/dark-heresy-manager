@@ -1,5 +1,11 @@
 import { inferCustomItemStatus } from "../../../services/customItemService";
-import type { ArmourLocationKey, CyberneticItem } from "../../../types/Character";
+import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
+import type {
+  ArmourLocationKey,
+  CyberneticCraftsmanship,
+  CyberneticItem,
+} from "../../../types/Character";
+import { craftsmanshipValue } from "./cyberneticsHelpers";
 import type { CampaignCustomItem, CustomCyberneticData } from "../../../types/CustomItems";
 
 export function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticData {
@@ -73,5 +79,35 @@ export function buildFallbackCyberneticLibraryItem({
     archivedAt: null,
     archivedByUserId: null,
     data,
+  };
+}
+
+export function cyberneticFromReference(
+  id: string,
+  ref: CyberneticRef,
+  options: {
+    craftsmanship?: CyberneticCraftsmanship;
+    bodyLocation?: ArmourLocationKey[];
+    value?: string;
+    availability?: string;
+    weight?: string;
+  } = {}
+): CyberneticItem {
+  const { craftsmanship, bodyLocation, value, availability, weight } = options;
+  return {
+    id,
+    referenceId: ref.id,
+    name: ref.name,
+    ...(craftsmanship ? { craftsmanship } : {}),
+    ...(craftsmanship
+      ? { value: value ?? craftsmanshipValue(ref, craftsmanship) }
+      : value !== undefined
+        ? { value }
+        : {}),
+    availability: availability ?? ref.availability,
+    source: ref.source,
+    installed: false,
+    ...(weight ? { weight } : {}),
+    ...(bodyLocation ? { bodyLocation } : {}),
   };
 }

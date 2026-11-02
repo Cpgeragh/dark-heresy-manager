@@ -1,6 +1,6 @@
 // tests/integration/DrugPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -9,12 +9,8 @@ import { DrugPicker } from "../../src/pages/CharacterSheet/DrugsTab/DrugPicker";
 const DRUG_NAME = "Frenzon";
 
 function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
+  return (screen.queryByRole("button", { name: `Select ${name}` }) ??
+    screen.getByRole("button", { name: `Expand ${name} details` })) as HTMLButtonElement;
 }
 
 function renderPicker(editable = true) {
@@ -40,8 +36,9 @@ describe("DrugPicker", () => {
   it("shows the information icon on a row and a Duration line", () => {
     renderPicker();
     expect(
-      within(row(DRUG_NAME)).getByRole("button", { name: `Show information about ${DRUG_NAME}` })
+      screen.getByRole("button", { name: `Show information about ${DRUG_NAME}` })
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Expand ${DRUG_NAME} details` }));
     expect(screen.getAllByText("Duration").length).toBeGreaterThan(0);
   });
 

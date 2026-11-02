@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "../../ui/buttons/Button";
-import { ArrowLeft } from "../../ui/icons/PickerArrows";
 import { editableInputClass } from "../../ui/styles/editableStyles";
 import { PickerBody, PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
 import { PickerRowName } from "../../ui/pickers/PickerRowParts";
@@ -33,14 +32,12 @@ export function GenderPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setNaming(false)}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={
           <div className="flex gap-2">
             <Button variant="neutral" size="sm" onClick={() => setNaming(false)}>
-              Back
+              Cancel
             </Button>
             <Button
               size="sm"

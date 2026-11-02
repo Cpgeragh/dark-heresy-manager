@@ -17,7 +17,7 @@ describe("ItemMetaChips weight", () => {
   it("shows the word Varies for a Varies weight beside the other chips", () => {
     render(<ItemMetaChips weight="Varies" value="10 Thrones" />);
     expect(screen.getByText("Varies")).toBeInTheDocument();
-    expect(screen.getByText(/10 Thrones/)).toBeInTheDocument();
+    expect(screen.getByText("₮ 10")).toBeInTheDocument();
   });
 
   it("shows 0 kg for a dash", () => {

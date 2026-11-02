@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   buildDrugSnapshot,
   buildFallbackDrugLibraryItem,
+  drugFromReference,
   toCustomDrugData,
 } from "../../src/pages/CharacterSheet/DrugsTab/drugSnapshotHelpers";
+import { DRUGS_REFERENCE } from "../../src/data/reference/drugsReference";
 import type { DrugItem } from "../../src/types/Character";
 
 describe("drug snapshot helpers", () => {
@@ -45,5 +47,21 @@ describe("drug snapshot helpers", () => {
     expect(library.id).toBe("drug-library");
     expect(library.category).toBe("drug");
     expect(library.data).toEqual({ name: "Stimm" });
+  });
+});
+
+describe("drug reference builder", () => {
+  it("builds a drug from a reference with a quantity of one", () => {
+    const ref = DRUGS_REFERENCE[0];
+    expect(drugFromReference("picker-drug", ref)).toEqual({
+      id: "picker-drug",
+      referenceId: ref.id,
+      name: ref.name,
+      quantity: 1,
+      weight: ref.weight,
+      value: ref.value,
+      availability: ref.availability,
+      source: ref.source,
+    });
   });
 });

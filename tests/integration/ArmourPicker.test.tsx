@@ -1,6 +1,6 @@
 // tests/integration/ArmourPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -11,10 +11,9 @@ const ARMOUR_A = "Flak Jacket";
 const ARMOUR_B = "Carapace Helm";
 const FORCE_FIELD = "Refraction Bracer";
 
-function row(name: string): HTMLElement {
-  const match = screen.getByText(name).closest("button");
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match as HTMLElement;
+function row(name: string): HTMLButtonElement {
+  return (screen.queryByRole("button", { name: `Select ${name}` }) ??
+    screen.getByRole("button", { name: `Expand ${name} details` })) as HTMLButtonElement;
 }
 
 function makeCustomItem(
@@ -71,14 +70,14 @@ describe("ArmourPicker list", () => {
     expect(row(ARMOUR_B)).toBeInTheDocument();
   });
 
-  it("shows the information icon, the Rules line from notes and the arrow on a reference row", () => {
+  it("shows the information icon in the header, the Rules line once the card is opened, and no arrow", () => {
     renderPicker();
-    const helm = row(ARMOUR_B);
     expect(
-      within(helm).getByRole("button", { name: "Show information about Carapace Helm" })
+      screen.getByRole("button", { name: "Show information about Carapace Helm" })
     ).toBeInTheDocument();
-    expect(within(helm).getByText("Rules")).toBeInTheDocument();
-    expect(helm.firstElementChild).toHaveClass("gap-3");
+    fireEvent.click(screen.getByRole("button", { name: "Expand Carapace Helm details" }));
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(document.querySelector("[data-picker-arrow]")).toBeNull();
   });
 
   it("filters the list by search query", async () => {
@@ -93,6 +92,32 @@ describe("ArmourPicker list", () => {
     renderPicker();
     expect(screen.queryByText(FORCE_FIELD)).not.toBeInTheDocument();
   });
+
+  it("hides the Craftsmanship line on a reference card until one is chosen", () => {
+    renderPicker();
+    fireEvent.click(screen.getByRole("button", { name: `Expand ${ARMOUR_A} details` }));
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.queryByText("Craftsmanship")).not.toBeInTheDocument();
+  });
+
+  it("shows the stored Craftsmanship line on a custom card", () => {
+    renderPicker({
+      customItems: [
+        makeCustomItem({
+          data: {
+            armourKind: "worn",
+            name: "Custom Coat",
+            locations: ["body"],
+            ap: 3,
+            craftsmanship: "Good",
+          },
+        }),
+      ],
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Expand Custom Coat details" }));
+    expect(screen.getByText("Craftsmanship")).toBeInTheDocument();
+    expect(screen.getByText("Good")).toBeInTheDocument();
+  });
 });
 
 describe("ArmourPicker craftsmanship selection", () => {
@@ -106,6 +131,15 @@ describe("ArmourPicker craftsmanship selection", () => {
       expect.objectContaining({ id: "cr-flak-jacket" }),
       "Best"
     );
+  });
+
+  it("returns to the list with the Close cross, not a Back arrow", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await user.click(row(ARMOUR_A));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(row(ARMOUR_B)).toBeInTheDocument();
   });
 });
 
@@ -140,11 +174,10 @@ describe("ArmourPicker custom pieces", () => {
 
   it("shows the information icon with no arrow on a custom row", () => {
     renderPicker({ customItems: [makeCustomItem()] });
-    const coat = row("Custom Coat");
     expect(
-      within(coat).getByRole("button", { name: "Show information about Custom Coat" })
+      screen.getByRole("button", { name: "Show information about Custom Coat" })
     ).toBeInTheDocument();
-    expect(coat.firstElementChild).not.toHaveClass("gap-3");
+    expect(document.querySelector("[data-picker-arrow]")).toBeNull();
   });
 
   it("calls onSelectCustomItem when a custom piece is clicked", async () => {

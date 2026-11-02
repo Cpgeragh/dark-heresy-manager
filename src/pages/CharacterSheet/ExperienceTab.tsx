@@ -52,8 +52,7 @@ import { FormLabel } from "../../ui/forms/FormLabel";
 import { RequiredFieldsNote } from "../../ui/forms/CustomFormFooter";
 import { InfoModal } from "../../components/InfoModal";
 import { AccordionCard } from "../../ui/AccordionCard";
-import { PickerList, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
-import { PickerRowName } from "../../ui/pickers/PickerRowParts";
+import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
   segmentedTabId,
@@ -710,39 +709,21 @@ function RankUpModal({
       </ModalShell>
 
       {rankTypePickerOpen && selectedRank && (
-        <PickerModal
+        <OptionPickerScreen
+          standalone
           title="Choose Rank Type"
-          query=""
-          onQueryChange={() => {}}
-          onClose={() => setRankTypePickerOpen(false)}
-          isEmpty={false}
-          hideSearch
           maxWidth="max-w-lg"
-        >
-          <PickerList>
-            <PickerRow
-              selected={selectedAlternateRankId === ""}
-              onClick={() => {
-                selectAlternateRank("");
-                setRankTypePickerOpen(false);
-              }}
-            >
-              <PickerRowName name={selectedRank.name} />
-            </PickerRow>
-            {availableAlternateRanks.map((alternateRank) => (
-              <PickerRow
-                key={alternateRank.id}
-                selected={selectedAlternateRankId === alternateRank.id}
-                onClick={() => {
-                  selectAlternateRank(alternateRank.id);
-                  setRankTypePickerOpen(false);
-                }}
-              >
-                <PickerRowName name={alternateRank.name} />
-              </PickerRow>
-            ))}
-          </PickerList>
-        </PickerModal>
+          options={[
+            { value: "", label: selectedRank.name },
+            ...availableAlternateRanks.map((rank) => ({ value: rank.id, label: rank.name })),
+          ]}
+          selected={selectedAlternateRankId}
+          onSelect={(value) => {
+            selectAlternateRank(value);
+            setRankTypePickerOpen(false);
+          }}
+          onClose={() => setRankTypePickerOpen(false)}
+        />
       )}
 
       {xpAction && (

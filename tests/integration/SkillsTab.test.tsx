@@ -8,6 +8,7 @@ import { useState } from "react";
 import { SkillsTab } from "../../src/pages/CharacterSheet/SkillsTab";
 import type { SkillEntry, Characteristics } from "../../src/types/Character";
 import type { CharField } from "../../src/types/Character";
+import { openAllEntryCards } from "../utils/entryCard";
 
 const getCharField = (_k: keyof Characteristics): CharField => ({ base: 30, advances: 0 });
 
@@ -151,6 +152,7 @@ describe("SkillsTab", () => {
 
   it("shows the computed Skill value in the governing characteristic chip", () => {
     renderTab();
+    openAllEntryCards();
 
     const characteristicValues = screen.getAllByLabelText("Perception 30");
     expect(characteristicValues.length).toBeGreaterThan(0);
@@ -158,7 +160,8 @@ describe("SkillsTab", () => {
       expect(value).toHaveTextContent("Per 30");
       expect(value).toHaveClass("h-6", "text-xs");
       expect(value).not.toHaveClass("font-code", "h-5", "text-[10px]");
-      expect(value.closest("div.rounded-lg")).toHaveClass("p-3", "lg:p-4");
+      expect(value.closest("div.rounded-lg")).toHaveClass("overflow-hidden");
+      expect(value.parentElement?.parentElement).toHaveClass("px-3", "lg:px-4");
     }
     expect(screen.queryByText("Total")).not.toBeInTheDocument();
   });
@@ -170,12 +173,12 @@ describe("SkillsTab", () => {
     expect(upgrades.length).toBeGreaterThan(0);
     for (const upgrade of upgrades) {
       expect(upgrade).toHaveClass("border-red-500", "text-red-500");
-      const actions = upgrade.parentElement;
+      const actions = upgrade.parentElement?.parentElement;
       expect(actions).toHaveClass("flex", "flex-wrap", "items-center", "justify-end");
       expect(
         within(actions as HTMLElement).getByRole("button", { name: "Remove Awareness" })
       ).toBeInTheDocument();
-      expect(actions?.parentElement).toHaveClass("items-start", "justify-between");
+      expect(actions?.parentElement).toHaveClass("items-center", "justify-between");
     }
   });
 
@@ -203,6 +206,7 @@ describe("SkillsTab", () => {
         traits: [],
       },
     });
+    openAllEntryCards();
 
     const line = screen.getAllByText("Talent effects")[0].parentElement as HTMLElement;
     expect(within(line).getByText("Talented (Awareness) (Talent): +10")).toBeInTheDocument();
@@ -727,6 +731,7 @@ describe("SkillsTab", () => {
         traits: [],
       },
     });
+    openAllEntryCards();
     expect(screen.getAllByLabelText("Perception 40").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tech-Use").length).toBeGreaterThan(0);
     expect(
@@ -754,6 +759,7 @@ describe("SkillsTab", () => {
       rank: "Scout",
       talents: GUARDSMAN_DRIVE_GRANT,
     });
+    openAllEntryCards();
 
     expect(screen.getAllByText("Drive (Ground Vehicle)")).toHaveLength(1);
     expect(
@@ -785,7 +791,7 @@ describe("SkillsTab", () => {
     await user.click(screen.getAllByRole("button", { name: /Common Lore/ })[0]);
     expect(screen.getAllByText("Common Lore (War)").length).toBeGreaterThan(0);
     expect(
-      screen.getAllByText("Blank Slate (Trait): counts Common Lore (War) as trained").length
+      screen.getAllByText(/Blank Slate \(Trait\): counts Common Lore \(War\) as trained/).length
     ).toBeGreaterThan(0);
     expect(
       screen.queryByRole("button", { name: "Remove Common Lore (War)" })
@@ -879,6 +885,7 @@ describe("SkillsTab", () => {
       />
     );
 
+    openAllEntryCards();
     expect(
       screen.queryByText(/Cult Briefing \(Heretek\) \(Talent\): Trained/)
     ).not.toBeInTheDocument();

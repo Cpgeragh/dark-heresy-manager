@@ -18,6 +18,7 @@ export interface AssignedItemMetaFieldsProps {
   setGmCost: (value: string) => void;
   costValid: boolean;
   costPlaceholder: string;
+  minimumCost?: number;
   requiresCost?: boolean;
   requiresWeight?: boolean;
   gmWeight?: string;
@@ -35,6 +36,7 @@ export function AssignedItemMetaFields({
   setGmCost,
   costValid,
   costPlaceholder,
+  minimumCost = 0,
   requiresCost = true,
   requiresWeight = false,
   gmWeight = "",
@@ -73,7 +75,7 @@ export function AssignedItemMetaFields({
           />
           {gmCost.trim() !== "" && !costValid && (
             <p className={`text-xs lg:text-sm ${uiTextError}`}>
-              Must be a whole number of 0 or more.
+              Must be a whole number of {minimumCost.toLocaleString("en-US")} or more.
             </p>
           )}
         </div>

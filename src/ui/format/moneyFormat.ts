@@ -1,4 +1,5 @@
 const EMPTY_MONEY_VALUES = new Set(["", "-", "—", "n/a", "na", "none", "variable", "varies"]);
+const OPEN_ENDED_COST = /\+\s*(?:thrones?)?\s*$/i;
 
 function formatInteger(value: number): string {
   if (!Number.isFinite(value) || value < 0) return "0";
@@ -30,7 +31,18 @@ export function formatMoneyInput(value: string): string {
   return `${formatInteger(parseMoneyNumber(value))} Thrones`;
 }
 
+/** The lowest cost of a price written with a plus sign, such as "10,000+", or undefined for any other cost. */
+export function openEndedCostMinimum(value?: string | null): number | undefined {
+  if (typeof value !== "string" || !OPEN_ENDED_COST.test(value)) return undefined;
+  return parseMoneyNumber(value);
+}
+
 export function formatMoneyForDisplay(value?: string | number | null): string {
-  const hasOpenEndedCost = typeof value === "string" && /\+\s*(?:thrones?)?\s*$/i.test(value);
-  return `₮ ${formatInteger(parseMoneyNumber(value))}${hasOpenEndedCost ? "+" : ""} Thrones`;
+  const unknown =
+    value === undefined ||
+    value === null ||
+    (typeof value === "string" && EMPTY_MONEY_VALUES.has(value.trim().toLowerCase()));
+  if (unknown) return "₮ —";
+  const hasOpenEndedCost = typeof value === "string" && OPEN_ENDED_COST.test(value);
+  return `₮ ${formatInteger(parseMoneyNumber(value))}${hasOpenEndedCost ? "+" : ""}`;
 }

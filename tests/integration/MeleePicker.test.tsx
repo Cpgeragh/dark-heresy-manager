@@ -142,17 +142,18 @@ describe("MeleePicker", () => {
     expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "ref-sword" }), "Common");
   });
 
-  it("returns to the list when the back button is clicked", async () => {
+  it("returns to the list with the Close cross, not a Back arrow", async () => {
     const user = userEvent.setup();
     renderPicker();
     await user.click(screen.getByRole("button", { name: "Select Sword" }));
     expect(screen.getByRole("button", { name: "Add Weapon" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.getByPlaceholderText("Search weapons…")).toBeInTheDocument();
     expect(screen.getByText("Axe")).toBeInTheDocument();
   });
 
-  it("shows a Draft badge only for draft-status custom items", () => {
+  it("shows the status word on the name of a draft custom item", () => {
     renderPicker({
       customItems: [makeCustomItem({ id: "draft-1", status: "draft" })],
     });
@@ -161,9 +162,10 @@ describe("MeleePicker", () => {
     expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });
 
-  it("doesn't show a Draft badge for published custom items", () => {
+  it("shows the published status word on a published custom item", () => {
     renderPicker({ customItems: [makeCustomItem({ status: "published" })] });
     expect(screen.getByText("Custom Cleaver")).toBeInTheDocument();
+    expect(screen.getByText("published")).toBeInTheDocument();
     expect(screen.queryByText("draft")).not.toBeInTheDocument();
     expect(screen.queryByText("Custom")).not.toBeInTheDocument();
   });

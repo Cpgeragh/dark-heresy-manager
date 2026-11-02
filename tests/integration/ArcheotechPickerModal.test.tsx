@@ -14,12 +14,8 @@ const ITEM_NAME = "Belecane-Pattern Stasis Grenade";
 const GM_ITEM_NAME = "Cameleoline Grid";
 
 function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
+  return (screen.queryByRole("button", { name: `Select ${name}` }) ??
+    screen.getByRole("button", { name: `Expand ${name} details` })) as HTMLButtonElement;
 }
 
 function renderPicker(editable = true) {
@@ -43,19 +39,20 @@ describe("ArcheotechPickerModal", () => {
     expect(screen.getAllByText(ITEM_NAME).length).toBeGreaterThan(0);
   });
 
-  it("shows the arrow only on an item that opens the GM-assigned-values step", () => {
+  it("shows no arrow on any row, including an item that opens the GM-assigned-values step", () => {
     renderPicker();
-    expect(row(GM_ITEM_NAME).firstElementChild).toHaveClass("gap-3");
-    expect(row(ITEM_NAME).firstElementChild).not.toHaveClass("gap-3");
+    expect(row(GM_ITEM_NAME)).toBeInTheDocument();
+    expect(row(ITEM_NAME)).toBeInTheDocument();
+    expect(document.querySelector("[data-picker-arrow]")).toBeNull();
   });
 
   it("shows the information icon and a Qualities line on a row that has qualities", () => {
     renderPicker();
-    const grenade = row(ITEM_NAME);
     expect(
-      within(grenade).getByRole("button", { name: `Show information about ${ITEM_NAME}` })
+      screen.getByRole("button", { name: `Show information about ${ITEM_NAME}` })
     ).toBeInTheDocument();
-    expect(within(grenade).getByText("Qualities")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Expand ${ITEM_NAME} details` }));
+    expect(screen.getByText("Qualities")).toBeInTheDocument();
   });
 
   it("calls onSelect with the chosen ref when an item with a fixed cost is clicked", async () => {
@@ -134,9 +131,9 @@ describe("ArcheotechPickerModal", () => {
     ).toBe(210);
 
     const assignedDialog = screen.getByRole("dialog", { name: "GM-Assigned Values" });
-    expect(within(assignedDialog).getByRole("button", { name: "Close" })).toBeInTheDocument();
-    expect(within(assignedDialog).getAllByRole("button", { name: "Back" })).toHaveLength(1);
-    await user.click(within(assignedDialog).getByRole("button", { name: "Back" }));
+    expect(within(assignedDialog).queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    expect(within(assignedDialog).getAllByRole("button", { name: "Cancel" })).toHaveLength(1);
+    await user.click(within(assignedDialog).getByRole("button", { name: "Close" }));
     expect(
       screen
         .getByRole("dialog", { name: "Add Archeotech" })

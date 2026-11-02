@@ -13,8 +13,8 @@ interface AssignedItemMetaScreenProps extends Omit<
   title: string;
   confirmLabel: string;
   canConfirm: boolean;
+  /** Returns to the list; the Close cross and the Cancel button both call it. */
   onBack: () => void;
-  onClose: () => void;
   onConfirm: () => void | Promise<void>;
   showRarityPicker: boolean;
   setGmRarity: (value: string) => void;
@@ -29,7 +29,6 @@ export function AssignedItemMetaScreen({
   confirmLabel,
   canConfirm,
   onBack,
-  onClose,
   onConfirm,
   showRarityPicker,
   setGmRarity,
@@ -59,7 +58,7 @@ export function AssignedItemMetaScreen({
       title={title}
       query=""
       onQueryChange={ignoreQueryChange}
-      onClose={onClose}
+      onClose={onBack}
       isEmpty={false}
       hideSearch
       maxWidth={maxWidth}
@@ -75,7 +74,7 @@ export function AssignedItemMetaScreen({
 
         <div className="flex gap-2 pt-1">
           <Button variant="neutral" onClick={onBack}>
-            Back
+            Cancel
           </Button>
           <Button className="flex-1" onClick={onConfirm} disabled={!canConfirm}>
             {confirmLabel}

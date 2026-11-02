@@ -4,9 +4,13 @@ import {
   buildFallbackConsumableLibraryItem,
   buildFallbackGearLibraryItem,
   buildGearSnapshot,
+  consumableFromReference,
+  gearFromReference,
   toCustomConsumableData,
   toCustomGearData,
 } from "../../src/pages/CharacterSheet/GearTab/gearSnapshotHelpers";
+import { CONSUMABLES_REFERENCE } from "../../src/data/reference/consumablesReference";
+import { GEAR_REFERENCE } from "../../src/data/reference/gearReference";
 import type { ConsumableItem, GearItem } from "../../src/types/Character";
 
 describe("gear snapshot helpers", () => {
@@ -102,5 +106,38 @@ describe("gear snapshot helpers", () => {
       status: "published",
     });
     expect(consumable.data).not.toHaveProperty("quantity");
+  });
+});
+
+describe("gear and consumable reference builders", () => {
+  it("builds a gear item from a reference, with assigned values winning", () => {
+    const ref = GEAR_REFERENCE[0];
+    expect(gearFromReference("picker-gear", ref)).toMatchObject({
+      id: "picker-gear",
+      referenceId: ref.id,
+      name: ref.name,
+      weight: ref.weight,
+      value: ref.value,
+      availability: ref.availability,
+      source: ref.source,
+    });
+    expect(
+      gearFromReference("picker-gear", ref, {
+        value: "500 Thrones",
+        availability: "Rare",
+        weight: "2 kg",
+      })
+    ).toMatchObject({ value: "500 Thrones", availability: "Rare", weight: "2 kg" });
+  });
+
+  it("builds a consumable from a reference with a quantity of one", () => {
+    const ref = CONSUMABLES_REFERENCE[0];
+    expect(consumableFromReference("picker-consumable", ref)).toMatchObject({
+      id: "picker-consumable",
+      referenceId: ref.id,
+      name: ref.name,
+      quantity: 1,
+      value: ref.value,
+    });
   });
 });

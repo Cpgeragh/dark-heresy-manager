@@ -240,7 +240,7 @@ describe("GearTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getByText(GEAR_NAME));
+    await user.click(screen.getByRole("button", { name: `Select ${GEAR_NAME}` }));
 
     expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })], {
       optimistic: true,
@@ -252,7 +252,7 @@ describe("GearTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getByText(VARIABLE_GEAR_NAME));
+    await user.click(screen.getByRole("button", { name: `Select ${VARIABLE_GEAR_NAME}` }));
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "500");
     await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
 
@@ -261,12 +261,40 @@ describe("GearTab", () => {
     ]);
   }, 15000);
 
+  it("keeps a plus-priced item on a visible save with the cost entered", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add Item" }));
+    await user.click(screen.getByRole("button", { name: "Select Cylinder" }));
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "25");
+    await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
+
+    expect(onUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({ name: "Cylinder", value: "25 Thrones" }),
+    ]);
+  }, 15000);
+
+  it("keeps Kataline Malmsey on a visible save with the cost entered", async () => {
+    const user = userEvent.setup();
+    const { onUpdateConsumables } = renderTab();
+
+    await user.click(screen.getByRole("button", { name: "Add Consumable" }));
+    await user.click(screen.getByRole("button", { name: "Select Kataline Malmsey" }));
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "12000");
+    await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
+
+    expect(onUpdateConsumables).toHaveBeenCalledWith([
+      expect.objectContaining({ name: "Kataline Malmsey", quantity: 1, value: "12,000 Thrones" }),
+    ]);
+  }, 15000);
+
   it("adds a real consumable from the reference picker", async () => {
     const user = userEvent.setup();
     const { onUpdateConsumables } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Consumable" }));
-    await user.click(screen.getByText(CONSUMABLE_NAME));
+    await user.click(screen.getByRole("button", { name: `Select ${CONSUMABLE_NAME}` }));
 
     expect(onUpdateConsumables).toHaveBeenCalledWith(
       [expect.objectContaining({ name: CONSUMABLE_NAME, quantity: 1 })],
@@ -284,7 +312,7 @@ describe("GearTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getByText("Custom Rope"));
+    await user.click(screen.getByRole("button", { name: "Select Custom Rope" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       [
@@ -308,7 +336,7 @@ describe("GearTab", () => {
     const { onUpdateConsumables } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Consumable" }));
-    await user.click(screen.getByText("Custom Tonic"));
+    await user.click(screen.getByRole("button", { name: "Select Custom Tonic" }));
 
     expect(onUpdateConsumables).toHaveBeenCalledWith(
       [
@@ -409,9 +437,9 @@ describe("GearTab", () => {
     renderTab({ onUpdate });
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getByText(GEAR_NAME));
+    await user.click(screen.getByRole("button", { name: `Select ${GEAR_NAME}` }));
 
-    const row = screen.getByText(GEAR_NAME).closest("button");
+    const row = screen.getByRole("button", { name: `Select ${GEAR_NAME}` });
     expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ name: GEAR_NAME })], {
       optimistic: true,
     });
@@ -433,9 +461,9 @@ describe("GearTab", () => {
     renderTab({ onUpdateConsumables });
 
     await user.click(screen.getByRole("button", { name: "Add Consumable" }));
-    await user.click(screen.getByText(CONSUMABLE_NAME));
+    await user.click(screen.getByRole("button", { name: `Select ${CONSUMABLE_NAME}` }));
 
-    const row = screen.getByText(CONSUMABLE_NAME).closest("button");
+    const row = screen.getByRole("button", { name: `Select ${CONSUMABLE_NAME}` });
     expect(onUpdateConsumables).toHaveBeenCalledWith(
       [expect.objectContaining({ name: CONSUMABLE_NAME })],
       { optimistic: true }

@@ -9,22 +9,14 @@ import {
   PickerCustomAction,
   PickerList,
   PickerModal,
-  PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowName,
-  PickerRowRulesLine,
-} from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph } from "../../../ui/InfoSection";
-import { ArmourQualitiesLine } from "./ArmourQualitiesContent";
-import { ArrowLeft } from "../../../ui/icons/PickerArrows";
+import { previewVersionId } from "../weapons/weaponSnapshotHelpers";
+import { armourPieceFromReference, buildArmourSnapshot } from "./armourSnapshotHelpers";
+import { ForceFieldRow } from "./ForceFieldRow";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
-import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { uiTextBody, uiDescriptionBox } from "../../../ui/styles/editableStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
-import { StatChip } from "../../../ui/chips/StatChip";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 
@@ -76,8 +68,6 @@ export function ForceFieldPicker({
     return (
       <PickerModal
         title={selected.name}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}
@@ -139,67 +129,40 @@ export function ForceFieldPicker({
       <PickerList>
         {pickerEntries.map((entry) => {
           if (entry.kind === "reference") {
-            const ref = entry.ref;
             return (
-              <PickerRow
-                key={ref.id}
-                interactive={editable}
-                opensScreen
-                onClick={() => setSelected(ref)}
-              >
-                <PickerRowName name={ref.name} infoTitle={ref.name} />
-                <PickerRowChips>
-                  {ref.protectionRating !== undefined && (
-                    <StatChip label="PR" value={String(ref.protectionRating)} />
-                  )}
-                </PickerRowChips>
-                <PickerRowChips>
-                  <ItemMetaChips
-                    weight={ref.weight}
-                    value={ref.value}
-                    availability={ref.availability}
-                    source={ref.source}
-                  />
-                </PickerRowChips>
-                <ArmourQualitiesLine name={ref.name} qualities={ref.qualities} />
-                <PickerRowRulesLine name={ref.name} rules={ref.notes} />
-              </PickerRow>
+              <ForceFieldRow
+                key={entry.ref.id}
+                piece={armourPieceFromReference(`picker-${entry.ref.id}`, entry.ref)}
+                editable={false}
+                preview
+                onSelect={editable ? () => setSelected(entry.ref) : undefined}
+                onToggle={() => {}}
+                onRemove={() => {}}
+                onUpdateSpareCells={() => {}}
+              />
             );
           }
 
           const item = entry.item;
-          const data = item.data;
-          if (data.armourKind !== "worn") return null;
+          if (item.data.armourKind !== "worn") return null;
           return (
-            <PickerRow
+            <ForceFieldRow
               key={item.id}
-              interactive={editable}
-              onClick={() => onSelectCustomItem?.(item)}
-            >
-              <PickerRowName
-                name={item.name}
-                status={item.status}
-                infoTitle={item.name}
-                information={
-                  data.description ? <InfoParagraph>{data.description}</InfoParagraph> : undefined
-                }
-              />
-              <PickerRowChips>
-                {data.protectionRating !== undefined && (
-                  <StatChip label="PR" value={String(data.protectionRating)} />
-                )}
-              </PickerRowChips>
-              <PickerRowChips>
-                <ItemMetaChips
-                  weight={data.weight}
-                  value={data.value}
-                  availability={data.availability}
-                  source={data.source}
-                />
-              </PickerRowChips>
-              <ArmourQualitiesLine name={item.name} qualities={data.qualities} />
-              <PickerRowRulesLine name={item.name} rules={data.notes} />
-            </PickerRow>
+              piece={buildArmourSnapshot(
+                `picker-${item.id}`,
+                true,
+                item.data,
+                item.id,
+                previewVersionId(item)
+              )}
+              editable={false}
+              libraryItem={item}
+              preview
+              onSelect={editable ? () => onSelectCustomItem?.(item) : undefined}
+              onToggle={() => {}}
+              onRemove={() => {}}
+              onUpdateSpareCells={() => {}}
+            />
           );
         })}
       </PickerList>

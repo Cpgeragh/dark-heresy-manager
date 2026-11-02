@@ -1,6 +1,6 @@
 // tests/integration/OptionPickerScreen.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -50,6 +50,73 @@ describe("OptionPickerScreen", () => {
     setup("Rare");
     const rareButton = screen.getByText("Rare").closest("button")!;
     expect(rareButton.className).toContain("bg-slate-800");
+  });
+});
+
+describe("OptionPickerScreen layout options", () => {
+  it("shows the Close cross and no Back arrow when standalone", () => {
+    render(
+      <OptionPickerScreen
+        standalone
+        title="Rank Type"
+        options={OPTIONS}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+  });
+
+  it("shows an intro sentence above the options", () => {
+    render(
+      <OptionPickerScreen
+        title="Insanity Gained"
+        intro="Roll 1d5 and select the result."
+        options={OPTIONS}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+      />
+    );
+    expect(screen.getByText("Roll 1d5 and select the result.")).toBeInTheDocument();
+  });
+
+  it("keeps the chosen row busy until an async onSelect settles", async () => {
+    const user = userEvent.setup();
+    let finish: () => void = () => undefined;
+    const onSelect = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(
+      <OptionPickerScreen
+        title="Availability"
+        options={OPTIONS}
+        onSelect={onSelect}
+        onClose={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByText("Rare"));
+    expect(screen.getByText("Rare").closest("button")).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => finish());
+    expect(screen.getByText("Rare").closest("button")).not.toHaveAttribute("aria-busy");
+  });
+
+  it("applies a width override to the dialog", () => {
+    render(
+      <OptionPickerScreen
+        title="Availability"
+        maxWidth="max-w-md"
+        options={OPTIONS}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("dialog", { name: "Availability" })).toHaveClass("max-w-md");
   });
 });
 

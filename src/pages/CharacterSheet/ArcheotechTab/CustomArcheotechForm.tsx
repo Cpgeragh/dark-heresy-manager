@@ -204,7 +204,6 @@ export function CustomArcheotechForm({
           {ITEM_TYPES.map((t) => (
             <PickerRow
               key={t}
-              opensScreen
               onClick={() => {
                 setSelectedType(t);
                 setPhase("details");
@@ -259,8 +258,6 @@ export function CustomArcheotechForm({
     <CustomFormShell
       title={startType ? title : (selectedType ?? title)}
       scrollPositionRef={formScrollPositionRef}
-      closeLabel={startType ? undefined : <ArrowLeft />}
-      closeAriaLabel={startType ? "Close" : "Back"}
       onClose={startType ? onCancel : () => setPhase("select")}
       onCancel={onCancel}
       canSubmit={canAdd}

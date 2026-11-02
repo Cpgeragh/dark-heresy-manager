@@ -1,6 +1,6 @@
 // tests/integration/ImplantPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -19,12 +19,8 @@ const VARIABLE_LOCATION_IMPLANT_NAME = "Karrikian Lock-Arm";
 const NO_QUALITY_IMPLANT_NAME = "Electro-Graft";
 
 function row(name: string): HTMLButtonElement {
-  const match = screen
-    .getAllByText(name)
-    .map((el) => el.closest("button"))
-    .find((el): el is HTMLButtonElement => el !== null);
-  if (!match) throw new Error(`No button row found for: ${name}`);
-  return match;
+  return (screen.queryByRole("button", { name: `Select ${name}` }) ??
+    screen.getByRole("button", { name: `Expand ${name} details` })) as HTMLButtonElement;
 }
 
 function renderPicker(editable = true) {
@@ -140,9 +136,19 @@ describe("ImplantPicker", () => {
 
   it("shows the row label naming only the field actually missing", () => {
     renderPicker();
-    const electroGraftRow = row(NO_QUALITY_IMPLANT_NAME);
-    expect(electroGraftRow.textContent).toContain("Cost assigned on add");
-    expect(electroGraftRow.textContent).not.toContain("Cost and availability assigned on add");
+    fireEvent.click(
+      screen.getByRole("button", { name: `Expand ${NO_QUALITY_IMPLANT_NAME} details` })
+    );
+    expect(screen.getByText("Cost assigned on add")).toBeInTheDocument();
+    expect(screen.queryByText("Cost and availability assigned on add")).not.toBeInTheDocument();
+    expect(screen.getByText("Varies")).toBeInTheDocument();
+    expect(screen.queryByText(/₮/)).not.toBeInTheDocument();
+  });
+
+  it("hides the Craftsmanship line on a list card until a quality is chosen", () => {
+    renderPicker();
+    fireEvent.click(screen.getByRole("button", { name: `Expand ${IMPLANT_NAME} details` }));
+    expect(screen.queryByText("Craftsmanship")).not.toBeInTheDocument();
   });
 
   it("only asks for cost, not rarity, for an item with a real fixed availability", async () => {

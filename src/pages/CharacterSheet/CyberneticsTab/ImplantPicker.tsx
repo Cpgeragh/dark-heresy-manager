@@ -13,12 +13,10 @@ import {
   PickerModal,
   PickerRow,
 } from "../../../ui/pickers/PickerModal";
-import {
-  PickerRowChips,
-  PickerRowName,
-  PickerRowRulesLine,
-} from "../../../ui/pickers/PickerRowParts";
-import { InfoParagraph, InfoSection } from "../../../ui/InfoSection";
+import { PickerRowName } from "../../../ui/pickers/PickerRowParts";
+import { previewVersionId } from "../weapons/weaponSnapshotHelpers";
+import { buildCyberneticSnapshot, cyberneticFromReference } from "./cyberneticSnapshotHelpers";
+import { ImplantRow } from "./ImplantRow";
 import { Button } from "../../../ui/buttons/Button";
 import { ToggleButton } from "../../../ui/buttons/ToggleButton";
 import { ModalHeader } from "../../../ui/modals/ModalHeader";
@@ -29,16 +27,14 @@ import {
   uiInlineRow,
   uiTwoColumnGrid,
   uiTextBody,
-  uiTextGMNote,
   uiDescriptionBox,
-  uiStackBody,
   uiStackField,
   editableInputClass,
 } from "../../../ui/styles/editableStyles";
 import { recordComponentRender } from "../../../performance/performanceMetrics";
 import { formatMoneyInput } from "../../../ui/format/moneyFormat";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/format/weightFormat";
-import { CRAFTSMANSHIP_COLOUR, CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
+import { CRAFTSMANSHIP_STYLE } from "../../../ui/styles/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import {
   availableCraftsmanship,
@@ -50,8 +46,9 @@ import {
 } from "./cyberneticsHelpers";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { isVariableMeta } from "../../../data/reference/referenceMeta";
-import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
-import { AssignedItemMetaScreen } from "../../../ui/pickers/AssignedItemMetaScreen";
+import { useAssignedItemPick, type AssignedItemNeeds } from "../../../hooks/useAssignedItemPick";
+import { AssignedItemPickScreen } from "../../../ui/pickers/AssignedItemPickScreen";
+import { AssignedOnAddNote } from "../../../ui/pickers/AssignedOnAddNote";
 import { FormLabel } from "../../../ui/forms/FormLabel";
 
 interface Props {
@@ -71,6 +68,25 @@ interface Props {
   suspended?: boolean;
 }
 
+function assignedOnAddNote(ref: CyberneticRef) {
+  const costVaries = isVariableMeta(ref.value);
+  const rarityVaries = isVariableMeta(ref.availability);
+  if (costVaries && rarityVaries) {
+    return <AssignedOnAddNote>Cost and availability assigned on add</AssignedOnAddNote>;
+  }
+  if (costVaries) return <AssignedOnAddNote>Cost assigned on add</AssignedOnAddNote>;
+  if (rarityVaries) return <AssignedOnAddNote>Availability assigned on add</AssignedOnAddNote>;
+  return undefined;
+}
+
+function implantCostNeeds(ref: CyberneticRef): AssignedItemNeeds {
+  return {
+    cost: isVariableMeta(ref.value),
+    weight: false,
+    rarity: isVariableMeta(ref.availability),
+  };
+}
+
 export function ImplantPicker({
   editable = true,
   customItems = [],
@@ -83,7 +99,7 @@ export function ImplantPicker({
   recordComponentRender("ImplantPicker");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<CyberneticRef | null>(null);
-  const [pendingCost, setPendingCost] = useState<CyberneticRef | null>(null);
+  const costPick = useAssignedItemPick(implantCostNeeds);
   const [location, setLocation] = useState<ArmourLocationKey[] | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship>("Common");
   const [assignedValue, setAssignedValue] = useState<string | undefined>();
@@ -91,19 +107,6 @@ export function ImplantPicker({
   const [weightStep, setWeightStep] = useState(false);
   const [weight, setWeight] = useState("");
   const listScrollPositionRef = useRef(0);
-  const pendingNeedsCost = pendingCost ? isVariableMeta(pendingCost.value) : false;
-  const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.availability) : false;
-  const {
-    gmCost,
-    setGmCost,
-    gmRarity,
-    setGmRarity,
-    showRarityPicker,
-    setShowRarityPicker,
-    costValid,
-    canConfirm: canConfirmCost,
-    resetAssignedItemMeta,
-  } = useAssignedItemMeta({ requiresCost: pendingNeedsCost, requiresRarity: pendingNeedsRarity });
 
   const normalizedQuery = query.toLowerCase();
   const filtered = CYBERNETICS_REFERENCE.filter((r) =>
@@ -120,14 +123,13 @@ export function ImplantPicker({
 
   const resetPicker = () => {
     setSelected(null);
-    setPendingCost(null);
+    costPick.cancel();
     setLocation(null);
     setCraftsmanship("Common");
     setAssignedValue(undefined);
     setAssignedRarity(undefined);
     setWeightStep(false);
     setWeight("");
-    resetAssignedItemMeta();
   };
   const asksQuality = (ref: CyberneticRef) => hasQualityText(ref) || Boolean(ref.requiresLocation);
   const finalizeSelection = (ref: CyberneticRef) => {
@@ -140,63 +142,29 @@ export function ImplantPicker({
   };
   const selectImplant = (ref: CyberneticRef) => {
     if (!editable) return;
-    if (isVariableMeta(ref.value) || isVariableMeta(ref.availability)) {
-      setPendingCost(ref);
-      resetAssignedItemMeta();
+    const refNeeds = implantCostNeeds(ref);
+    if (refNeeds.cost || refNeeds.rarity) {
+      costPick.begin(ref);
       return;
     }
     finalizeSelection(ref);
   };
-  const confirmCost = () => {
-    if (!pendingCost || !canConfirmCost) return;
-    const nextValue = pendingNeedsCost ? formatMoneyInput(gmCost) : undefined;
-    const nextRarity = pendingNeedsRarity ? gmRarity : undefined;
-    setAssignedValue(nextValue);
-    setAssignedRarity(nextRarity);
-    const ref = pendingCost;
-    setPendingCost(null);
-    finalizeSelection(ref);
-  };
-  const implantInfo = (ref: CyberneticRef) => (
-    <div className={uiStackBody}>
-      {ref.notes && (
-        <InfoSection heading="Item Rules">
-          <InfoParagraph>{ref.notes}</InfoParagraph>
-        </InfoSection>
-      )}
-      {availableCraftsmanship(ref).map((quality) => (
-        <InfoSection key={quality} heading={quality}>
-          <InfoParagraph>
-            {ref.id === "ih-concealed-weapon-bionic"
-              ? concealedWeaponBionicDescription(quality)
-              : craftsmanshipDescription(ref, quality)}
-          </InfoParagraph>
-        </InfoSection>
-      ))}
-    </div>
-  );
-
-  if (pendingCost) {
+  const confirmCost = () =>
+    costPick.confirm((ref) => {
+      setAssignedValue(costPick.needs.cost ? formatMoneyInput(costPick.meta.gmCost) : undefined);
+      setAssignedRarity(costPick.needs.rarity ? costPick.meta.gmRarity : undefined);
+      finalizeSelection(ref);
+    });
+  if (costPick.pending) {
     return (
-      <AssignedItemMetaScreen
+      <AssignedItemPickScreen
+        pick={costPick}
         title="Assigned Cost"
-        itemName={pendingCost.name}
         explanation="has no listed cost or availability. Enter the values assigned for this implant."
-        gmCost={gmCost}
-        setGmCost={setGmCost}
-        costValid={costValid}
         costPlaceholder="e.g. 5000"
-        requiresCost={pendingNeedsCost}
-        requiresRarity={pendingNeedsRarity}
-        gmRarity={gmRarity}
-        setGmRarity={setGmRarity}
-        showRarityPicker={showRarityPicker}
-        setShowRarityPicker={setShowRarityPicker}
         idPrefix="cybernetic-assigned-meta"
         confirmLabel="Continue"
-        canConfirm={canConfirmCost}
         onBack={resetPicker}
-        onClose={onClose}
         onConfirm={confirmCost}
         maxWidth="max-w-md lg:max-w-lg"
       />
@@ -398,75 +366,33 @@ export function ImplantPicker({
       <PickerList>
         {pickerEntries.map((entry) =>
           entry.kind === "custom" ? (
-            <PickerRow
+            <ImplantRow
               key={`custom-${entry.item.id}`}
-              interactive={editable}
-              onClick={() => onSelectCustomItem?.(entry.item)}
-            >
-              <PickerRowName
-                name={entry.item.name}
-                status={entry.item.status}
-                infoTitle={entry.item.name}
-                information={
-                  entry.item.data.notes ? (
-                    <InfoParagraph>{entry.item.data.notes}</InfoParagraph>
-                  ) : undefined
-                }
-              />
-              <PickerRowChips className="text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  weight={entry.item.data.weight}
-                  value={entry.item.data.value}
-                  availability={entry.item.data.availability}
-                  source={entry.item.data.source}
-                />
-                <Chip colour={CRAFTSMANSHIP_COLOUR[entry.item.data.craftsmanship ?? "Common"]}>
-                  {entry.item.data.craftsmanship ?? "Common"}
-                </Chip>
-              </PickerRowChips>
-              <PickerRowRulesLine name={entry.item.name} rules={entry.item.data.rules} />
-            </PickerRow>
+              item={buildCyberneticSnapshot(
+                `picker-${entry.item.id}`,
+                undefined,
+                entry.item.data,
+                entry.item.id,
+                previewVersionId(entry.item)
+              )}
+              editable={false}
+              libraryItem={entry.item}
+              preview
+              onSelect={editable ? () => onSelectCustomItem?.(entry.item) : undefined}
+              onToggleInstalled={() => {}}
+              onRemove={() => {}}
+            />
           ) : (
-            <PickerRow
+            <ImplantRow
               key={entry.ref.id}
-              interactive={editable}
-              opensScreen
-              onClick={() => selectImplant(entry.ref)}
-            >
-              <PickerRowName
-                name={entry.ref.name}
-                infoTitle={entry.ref.name}
-                information={
-                  entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good
-                    ? implantInfo(entry.ref)
-                    : undefined
-                }
-              />
-              <PickerRowChips className="text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
-                  availability={
-                    isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability
-                  }
-                  source={entry.ref.source}
-                />
-                {isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
-                  <span className={uiTextGMNote}>Cost and availability assigned on add</span>
-                )}
-                {isVariableMeta(entry.ref.value) && !isVariableMeta(entry.ref.availability) && (
-                  <span className={uiTextGMNote}>Cost assigned on add</span>
-                )}
-                {!isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
-                  <span className={uiTextGMNote}>Availability assigned on add</span>
-                )}
-              </PickerRowChips>
-              <PickerRowRulesLine
-                name={entry.ref.name}
-                rules={entry.ref.id === "ih-concealed-weapon-bionic" ? undefined : entry.ref.notes}
-              />
-            </PickerRow>
+              item={cyberneticFromReference(`picker-${entry.ref.id}`, entry.ref)}
+              editable={false}
+              preview
+              previewNote={assignedOnAddNote(entry.ref)}
+              onSelect={editable ? () => selectImplant(entry.ref) : undefined}
+              onToggleInstalled={() => {}}
+              onRemove={() => {}}
+            />
           )
         )}
       </PickerList>

@@ -60,6 +60,10 @@ interface OwnedEntryRowProps {
   collapsible?: boolean;
   /** Keeps a collapsible entry open, with no chevron, where every detail must show. */
   forceExpanded?: boolean;
+  /** The entry is drawn in a picker: a closed card with no Remove, actions, extra body, library buttons or dimming. */
+  preview?: boolean;
+  /** In a picker a tap on the header chooses the entry, and the chevron opens the card. */
+  onSelect?: () => void | Promise<unknown>;
 }
 
 /** One owned entry on a character sheet: the same layout for every kind, with only the content changing. */
@@ -80,6 +84,8 @@ export function OwnedEntryRow({
   body,
   collapsible = false,
   forceExpanded = false,
+  preview = false,
+  onSelect,
 }: OwnedEntryRowProps) {
   const [expanded, setExpanded] = useState(false);
   const libraryItem = library?.libraryItem;
@@ -95,7 +101,7 @@ export function OwnedEntryRow({
   ) : undefined;
   const labelledLines = lines ? <EntryLines lines={lines} /> : undefined;
   const removeButton =
-    editable && removal && !removal.hidden ? (
+    !preview && editable && removal && !removal.hidden ? (
       <RemoveEntryButton
         kind={removal.kind}
         name={name}
@@ -104,20 +110,21 @@ export function OwnedEntryRow({
         extra={removal.extra}
       />
     ) : undefined;
-  const libraryButtons = library?.libraryItem ? (
-    <CustomItemActionButtons
-      libraryItem={library.libraryItem}
-      isDM={library.isDM ?? false}
-      canEditDefinition={library.canEditDefinition ?? false}
-      busyAction={library.busyAction}
-      onEditDefinition={library.onEditDefinition}
-      onPublish={library.onPublish}
-      onArchive={library.onArchive}
-      onUpdateAllCopies={library.onUpdateAllCopies}
-    />
-  ) : undefined;
+  const libraryButtons =
+    !preview && library?.libraryItem ? (
+      <CustomItemActionButtons
+        libraryItem={library.libraryItem}
+        isDM={library.isDM ?? false}
+        canEditDefinition={library.canEditDefinition ?? false}
+        busyAction={library.busyAction}
+        onEditDefinition={library.onEditDefinition}
+        onPublish={library.onPublish}
+        onArchive={library.onArchive}
+        onUpdateAllCopies={library.onUpdateAllCopies}
+      />
+    ) : undefined;
 
-  if (collapsible) {
+  if (collapsible || preview) {
     return (
       <AccordionCard
         name={displayName ?? name}
@@ -125,13 +132,14 @@ export function OwnedEntryRow({
         expanded={expanded}
         onToggle={() => setExpanded((current) => !current)}
         forceExpanded={forceExpanded}
+        onSelect={onSelect}
         tone={tone === "archeotech" ? "amber" : "default"}
-        inactive={inactive}
+        inactive={preview ? false : inactive}
         badge={badges}
         info={info}
         removeAction={removeButton}
         actions={
-          actions ? (
+          actions && !preview ? (
             <div className={`${uiInlineRow} relative ${uiLayerLocal} pointer-events-auto`}>
               {actions}
             </div>
@@ -140,7 +148,7 @@ export function OwnedEntryRow({
       >
         {chipRow}
         <div className={`${uiStackField} empty:hidden`}>{labelledLines}</div>
-        {body}
+        {preview ? undefined : body}
         {libraryButtons}
       </AccordionCard>
     );

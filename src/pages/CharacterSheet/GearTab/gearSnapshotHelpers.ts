@@ -1,4 +1,6 @@
 import { inferCustomItemStatus } from "../../../services/customItemService";
+import type { ConsumableRef } from "../../../data/reference/consumablesReference";
+import type { GearRef } from "../../../data/reference/gearReference";
 import type { ConsumableItem, GearItem } from "../../../types/Character";
 import type {
   CampaignCustomItem,
@@ -142,5 +144,42 @@ export function buildFallbackConsumableLibraryItem({
     archivedAt: null,
     archivedByUserId: null,
     data,
+  };
+}
+
+export function gearFromReference(
+  id: string,
+  ref: GearRef,
+  assigned: { value?: string; availability?: string; weight?: string } = {}
+): GearItem {
+  return {
+    id,
+    referenceId: ref.id,
+    name: ref.name,
+    description: ref.description,
+    rules: ref.rules,
+    weight: assigned.weight ?? ref.weight,
+    value: assigned.value ?? ref.value,
+    availability: assigned.availability ?? ref.availability,
+    source: ref.source,
+  };
+}
+
+export function consumableFromReference(
+  id: string,
+  ref: ConsumableRef,
+  assigned: { value?: string } = {}
+): ConsumableItem {
+  return {
+    id,
+    referenceId: ref.id,
+    name: ref.name,
+    quantity: 1,
+    description: ref.description,
+    rules: ref.rules,
+    weight: ref.weight,
+    value: assigned.value ?? ref.value,
+    availability: ref.availability,
+    source: ref.source,
   };
 }

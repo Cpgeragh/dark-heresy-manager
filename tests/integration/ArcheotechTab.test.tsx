@@ -147,7 +147,7 @@ describe("ArcheotechTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getAllByText(GRENADE_NAME)[0]);
+    await user.click(screen.getByRole("button", { name: `Select ${GRENADE_NAME}` }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       [expect.objectContaining({ name: GRENADE_NAME, type: "Grenade" })],
@@ -160,7 +160,7 @@ describe("ArcheotechTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getAllByText("Cameleoline Grid")[0]);
+    await user.click(screen.getByRole("button", { name: "Select Cameleoline Grid" }));
     await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "5000");
     await user.type(screen.getByLabelText(/Weight \(kg\)/), "12");
     await user.click(screen.getByLabelText(/Rarity/));
@@ -187,7 +187,7 @@ describe("ArcheotechTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getAllByText("Custom Relic")[0]);
+    await user.click(screen.getByRole("button", { name: "Select Custom Relic" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       [
@@ -213,7 +213,7 @@ describe("ArcheotechTab", () => {
     const { onUpdate } = renderTab();
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
-    await user.click(screen.getAllByText("Custom Eye")[0]);
+    await user.click(screen.getByRole("button", { name: "Select Custom Eye" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       [expect.objectContaining({ name: "Custom Eye", type: "Cybernetic", installed: false })],

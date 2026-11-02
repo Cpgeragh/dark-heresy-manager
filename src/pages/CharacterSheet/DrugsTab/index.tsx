@@ -31,6 +31,7 @@ import {
   toCustomDrugData,
   buildDrugSnapshot,
   buildFallbackDrugLibraryItem,
+  drugFromReference,
 } from "./drugSnapshotHelpers";
 
 interface DrugsTabProps {
@@ -97,22 +98,7 @@ export function DrugsTab({
   const addDrug = useCallback(
     (ref: DrugRef) => {
       if (!editable) return;
-      onUpdate(
-        [
-          ...drugs,
-          {
-            id: crypto.randomUUID(),
-            referenceId: ref.id,
-            name: ref.name,
-            quantity: 1,
-            weight: ref.weight,
-            value: ref.value,
-            availability: ref.availability,
-            source: ref.source,
-          },
-        ],
-        { optimistic: true }
-      );
+      onUpdate([...drugs, drugFromReference(crypto.randomUUID(), ref)], { optimistic: true });
     },
     [editable, drugs, onUpdate]
   );

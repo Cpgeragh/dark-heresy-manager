@@ -14,7 +14,6 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 import { wornApAt, bionicBonusAt } from "./armourHelpers";
 import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
-import { readWeightKg } from "../../../ui/format/weightFormat";
 import { ArmourPicker } from "./ArmourPicker";
 import { ForceFieldPicker } from "./ForceFieldPicker";
 import { CustomPieceForm } from "./CustomPieceForm";
@@ -54,6 +53,7 @@ import { useToast } from "../../../components/Toast";
 import { getTraitArmourSources } from "../../../mechanics/traits/traitEffects";
 import { IndependentCardGrid } from "../../../ui/layout/IndependentCardGrid";
 import {
+  armourPieceFromReference,
   buildArmourSnapshot,
   buildFallbackArmourLibraryItem,
   stripArmourKind,
@@ -87,38 +87,6 @@ interface ArmourTabProps {
 interface EditingArmourDefinition {
   piece: WornArmourPiece;
   libraryItem: CampaignCustomItem<"armour">;
-}
-
-function formatKg(value: number): string {
-  return `${Number(value.toFixed(2))} kg`;
-}
-
-function halveWeight(weight: string): string {
-  const kg = readWeightKg(weight);
-  if (kg === null) return weight;
-  return formatKg(kg / 2);
-}
-
-function applyCraftsmanshipToRef(ref: ArmourRef, craftsmanship: ArmourCraftsmanship) {
-  if (craftsmanship !== "Best") {
-    return {
-      ap: ref.ap,
-      apOverrides: ref.apOverrides,
-      weight: ref.weight,
-    };
-  }
-
-  const apOverrides = ref.apOverrides
-    ? (Object.fromEntries(
-        Object.entries(ref.apOverrides).map(([location, ap]) => [location, (ap ?? ref.ap) + 1])
-      ) as typeof ref.apOverrides)
-    : undefined;
-
-  return {
-    ap: ref.ap + 1,
-    apOverrides,
-    weight: halveWeight(ref.weight),
-  };
 }
 
 export function ArmourTab({
@@ -192,23 +160,7 @@ export function ArmourTab({
 
   const fromReference = useCallback(
     (ref: ArmourRef, craftsmanship: ArmourCraftsmanship = "Common") => {
-      const crafted = applyCraftsmanshipToRef(ref, craftsmanship);
-      addPiece({
-        id: crypto.randomUUID(),
-        referenceId: ref.id,
-        name: ref.name,
-        locations: ref.locations,
-        ap: crafted.ap,
-        ...(crafted.apOverrides ? { apOverrides: crafted.apOverrides } : {}),
-        ...(ref.isForceField ? { isForceField: true } : {}),
-        ...(ref.protectionRating !== undefined ? { protectionRating: ref.protectionRating } : {}),
-        craftsmanship,
-        worn: true,
-        weight: crafted.weight,
-        value: ref.value,
-        availability: ref.availability,
-        source: ref.source,
-      });
+      addPiece(armourPieceFromReference(crypto.randomUUID(), ref, craftsmanship));
     },
     [addPiece]
   );

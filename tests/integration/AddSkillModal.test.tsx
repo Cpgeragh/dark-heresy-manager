@@ -272,7 +272,7 @@ describe("AddSkillModal with a career-restricted list", () => {
     setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
     await user.click(screen.getByRole("button", { name: "Show all skills" }));
     await user.click(screen.getByRole("button", { name: "Select Dodge" }));
-    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
 
     expect(screen.getByRole("button", { name: "Select Dodge" })).toBeInTheDocument();
   });

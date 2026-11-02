@@ -11,7 +11,7 @@ The initial route loads the sheet shell and current content. These substantial d
 | Lazy domain     | Owning module       |
 | --------------- | ------------------- |
 | Talents         | `TalentsTab`        |
-| Elite Advances  | `EliteAdvancesTab`  |
+| Elite Packages  | `ElitePackagesTab`  |
 | Weapons         | `WeaponsTab`        |
 | Weapon training | `WeaponTrainingTab` |
 | Experience      | `ExperienceTab`     |

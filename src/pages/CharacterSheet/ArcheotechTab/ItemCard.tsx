@@ -1,5 +1,6 @@
 // src/pages/CharacterSheet/ArcheotechTab/ItemCard.tsx
 
+import type { ReactNode } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { Chip } from "../../../ui/chips/Chip";
@@ -17,6 +18,11 @@ interface Props extends CustomItemLibraryActionProps<"archeotech"> {
   item: ArcheotechItem;
   editable: boolean;
   onRemove: () => void | Promise<boolean | void>;
+  /** Drawn in a picker: a closed card that `onSelect` chooses. */
+  preview?: boolean;
+  onSelect?: () => void | Promise<unknown>;
+  /** A picker-only note inside the opened card, such as "Cost assigned on add". */
+  previewNote?: ReactNode;
 }
 
 export function ItemCard({
@@ -31,6 +37,9 @@ export function ItemCard({
   onArchive,
   onUpdateAllCopies,
   onRemove,
+  preview,
+  onSelect,
+  previewNote,
 }: Props) {
   const ref = item.referenceId
     ? ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId)
@@ -86,7 +95,9 @@ export function ItemCard({
         value={value}
         availability={availability}
         source={source}
+        assignedLater={preview}
       />
+      {previewNote}
     </>
   );
 
@@ -98,6 +109,8 @@ export function ItemCard({
       name={item.name}
       editable={editable}
       collapsible
+      preview={preview}
+      onSelect={onSelect}
       badge={typeBadge}
       information={information}
       chips={chips}
