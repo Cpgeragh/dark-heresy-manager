@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { useLinkDevice } from "./useLinkDevice";
 import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import { validateRecoveryCode } from "../utils/validation";
+import type { DeviceRecoveryMode } from "../services/deviceLinkService";
 
 export type IdentityRecoveryPhase = "idle" | "linking" | "finishing";
 
@@ -41,17 +42,19 @@ export function useIdentityRecoveryFlow() {
   }, []);
 
   const link = useCallback(
-    async (onSuccess?: () => void | Promise<void>) => {
+    async (onSuccess?: () => void | Promise<void>, mode: DeviceRecoveryMode = "link") => {
       if (operationRef.current || phase !== "idle" || !validateRecoveryCode(code).isValid) return;
       const operationVersion = ++operationVersionRef.current;
       operationRef.current = true;
       setPhase("linking");
       setLocalError(null);
       try {
-        await linkDevice(code, deviceName.trim());
+        if (mode === "link") await linkDevice(code, deviceName.trim());
+        else await linkDevice(code, deviceName.trim(), mode);
         if (operationVersionRef.current !== operationVersion) return;
         await onSuccess?.();
         if (operationVersionRef.current === operationVersion) setPhase("finishing");
+        return true;
       } catch {
         if (operationVersionRef.current === operationVersion) {
           operationRef.current = false;

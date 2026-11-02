@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { User } from "firebase/auth";
 import { MemoryRouter, useNavigate } from "react-router-dom";
@@ -128,6 +128,35 @@ function BrowserBackControl() {
 }
 
 describe("onboarding error propagation", () => {
+  it("requires the primary-device warning before connecting", async () => {
+    renderLinkStep();
+    fireEvent.change(screen.getByPlaceholderText("DH-XXXX-YYYY"), {
+      target: { value: "DH-AAAA-BBBB" },
+    });
+    fireEvent.change(screen.getByLabelText(/Device Name/), { target: { value: "My phone" } });
+    fireEvent.click(screen.getByRole("button", { name: "Set as primary device" }));
+    expect(mockLinkDevice).not.toHaveBeenCalled();
+    expect(screen.getByText(/Your previous primary device will be disconnected/)).toBeVisible();
+    fireEvent.click(
+      within(screen.getByRole("dialog", { name: "Set as Primary Device" })).getByRole("button", {
+        name: "Set as primary device",
+      })
+    );
+    await waitFor(() =>
+      expect(mockLinkDevice).toHaveBeenCalledWith("DH-AAAA-BBBB", "My phone", "primary")
+    );
+  });
+
+  it("allows successful completion to leave the code screen without asking to cancel", async () => {
+    const onComplete = renderCodeStep();
+    await confirmSavedCode();
+    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+    expect(
+      screen.queryByRole("dialog", { name: "Cancel New Account Setup" })
+    ).not.toBeInTheDocument();
+    expect(mockDiscardOnboardingSetup).not.toHaveBeenCalled();
+  });
+
   it("creates an account when the first-name form is submitted with Enter", async () => {
     const browserUser = userEvent.setup();
     render(
@@ -478,7 +507,7 @@ describe("new-device linking", () => {
     fireEvent.change(screen.getByPlaceholderText("e.g. My phone"), {
       target: { value: "My laptop" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Find account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Link device" }));
 
     expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001", "My laptop");
     expect(await screen.findByRole("button", { name: "Opening account" })).toBeDisabled();
@@ -630,7 +659,7 @@ describe("new-device linking", () => {
     fireEvent.change(screen.getByPlaceholderText("e.g. My phone"), {
       target: { value: "My laptop" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Find account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Link device" }));
 
     expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001", "My laptop");
     expect(screen.queryByRole("button", { name: "Reclaim Identity" })).not.toBeInTheDocument();

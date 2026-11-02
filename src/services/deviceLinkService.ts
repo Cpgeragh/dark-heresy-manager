@@ -10,12 +10,14 @@ export interface LinkedDevice {
   name: string | null;
   linkedAt: number | null;
   isCurrentDevice: boolean;
+  isPrimary?: boolean;
 }
+export type DeviceRecoveryMode = "link" | "primary" | "recover";
 
-const callLinkDevice = httpsCallable<{ code: string; deviceName: string }, void>(
-  functions,
-  "linkDevice"
-);
+const callLinkDevice = httpsCallable<
+  { code: string; deviceName: string; mode?: DeviceRecoveryMode; confirmed?: boolean },
+  void
+>(functions, "linkDevice");
 const callDisconnectDevice = httpsCallable<
   { confirmLastDevice: boolean },
   { wasLastDevice: boolean }
@@ -47,15 +49,20 @@ export class LastDeviceDisconnectError extends Error {
 export async function linkDeviceToAccount(
   currentUid: string,
   recoveryCode: string,
-  deviceName: string
+  deviceName: string,
+  mode: DeviceRecoveryMode = "link"
 ): Promise<void> {
   assertFirestoreDocumentId(currentUid, "Current user ID");
   assertRecoveryCode(recoveryCode);
   const code = recoveryCode.trim();
   const name = validateDeviceName(deviceName);
-  await runSingleFlight("device:link", [currentUid, code, name], async () => {
+  await runSingleFlight("device:link", [currentUid, code, name, mode], async () => {
     recordClientCodeAttempt("device-link");
-    await callLinkDevice({ code, deviceName: name });
+    await callLinkDevice({
+      code,
+      deviceName: name,
+      ...(mode !== "link" ? { mode, confirmed: true } : {}),
+    });
   });
 }
 

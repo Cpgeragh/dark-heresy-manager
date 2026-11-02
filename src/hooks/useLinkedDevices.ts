@@ -33,6 +33,7 @@ export function useLinkedDevices(accountId: string | null, currentUid: string | 
             name: typeof item.name === "string" && item.name.trim() ? item.name : null,
             linkedAt: linkedAt?.toMillis?.() ?? null,
             isCurrentDevice: link.id === currentUid,
+            isPrimary: item.isPrimary === true,
           };
         })
         .sort(

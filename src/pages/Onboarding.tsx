@@ -182,6 +182,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
     setBusyAction("finish");
     try {
       await completeOnboarding();
+      allowShowCodeExitRef.current = true;
       setSearchParams({}, { replace: true });
       onComplete();
     } catch (err) {
@@ -414,7 +415,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId, firstNam
                 <IdentityRecoveryForm
                   flow={recoveryFlow}
                   deviceNoun="device"
-                  checkLabel="Find account"
+                  checkLabel="Link device"
                   inputAppearance="form"
                   inputLabelAside={
                     <span className={uiInfoModalWrapper}>

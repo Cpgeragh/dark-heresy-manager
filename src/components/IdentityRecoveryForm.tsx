@@ -1,4 +1,6 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ConfirmModal } from "../ui/modals/ConfirmModal";
+import type { DeviceRecoveryMode } from "../services/deviceLinkService";
 import type { IdentityRecoveryFlow } from "../hooks/useIdentityRecoveryFlow";
 import { useToast } from "./Toast";
 import { Button } from "../ui/buttons/Button";
@@ -30,10 +32,11 @@ export function IdentityRecoveryForm({
   description,
   inputAppearance = "recovery",
   inputLabelAside,
-  checkLabel = "Continue",
+  checkLabel = "Link device",
   onLinked,
 }: IdentityRecoveryFormProps) {
   const toast = useToast();
+  const [confirmMode, setConfirmMode] = useState<DeviceRecoveryMode | null>(null);
   const lastErrorRef = useRef<string | null>(null);
   const busy = flow.phase !== "idle";
   const hasValidCode = validateRecoveryCode(flow.code).isValid;
@@ -103,6 +106,42 @@ export function IdentityRecoveryForm({
       >
         {checkLabel}
       </Button>
+      <Button
+        fullWidth
+        size="lg"
+        variant="secondary"
+        disabled={!hasValidCode || !hasDeviceName || busy || flow.linkRequestPending}
+        onClick={() => setConfirmMode("primary")}
+      >
+        Set as primary device
+      </Button>
+      <Button
+        fullWidth
+        size="lg"
+        variant="secondary"
+        disabled={!hasValidCode || !hasDeviceName || busy || flow.linkRequestPending}
+        onClick={() => setConfirmMode("recover")}
+      >
+        Recover account
+      </Button>
+      {confirmMode && (
+        <ConfirmModal
+          title={confirmMode === "primary" ? "Set as Primary Device" : "Recover Account"}
+          message={
+            confirmMode === "primary"
+              ? "This device will become your primary device. Your previous primary device will be disconnected. Your account data will be kept."
+              : "This device will become your primary device. All previous devices will be disconnected. Your account data will be kept."
+          }
+          confirmLabel={confirmMode === "primary" ? "Set as primary device" : "Recover account"}
+          confirmVariant="warningOutline"
+          busy={busy || flow.linkRequestPending}
+          loadingLabel="Connecting"
+          onCancel={() => setConfirmMode(null)}
+          onConfirm={async () => {
+            if (await flow.link(onLinked, confirmMode)) setConfirmMode(null);
+          }}
+        />
+      )}
     </form>
   );
 }

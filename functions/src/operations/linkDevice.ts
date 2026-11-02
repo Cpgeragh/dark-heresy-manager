@@ -19,6 +19,8 @@ import { SERVER_PRODUCT_LIMITS } from "../shared/productLimits.js";
 export interface LinkDeviceInput {
   code: string;
   deviceName: string;
+  mode?: "link" | "primary" | "recover";
+  confirmed?: boolean;
 }
 
 export async function linkDevice(
@@ -27,6 +29,13 @@ export async function linkDevice(
   hmacSecret: string
 ): Promise<void> {
   const db = getFirestore();
+  const mode = input.mode ?? "link";
+  if (!["link", "primary", "recover"].includes(mode)) {
+    throw new HttpsError("invalid-argument", "Invalid recovery option.");
+  }
+  if (mode !== "link" && input.confirmed !== true) {
+    throw new HttpsError("failed-precondition", "Confirm the device disconnection first.");
+  }
   const code = input.code.trim();
   const deviceName = validateDeviceName(input.deviceName);
   const hash = hashRecoveryCode(code, hmacSecret);
@@ -88,7 +97,21 @@ export async function linkDevice(
       accountId,
       accountSnapshot
     );
-    if (deviceCount >= SERVER_PRODUCT_LIMITS.devicesPerAccount) {
+    const removedLinks = [];
+    let nextCount = deviceCount + 1;
+    if (mode !== "link") {
+      const existingDevices = await transaction.get(
+        db.collection("userLinks").where("primaryUid", "==", accountId)
+      );
+      const primaryUid =
+        accountSnapshot.data()?.primaryDeviceUid ?? accountSnapshot.data()?.createdByDeviceUid;
+      for (const device of existingDevices.docs) {
+        if (mode === "recover" || device.id === primaryUid || device.data().isPrimary === true)
+          removedLinks.push(device);
+      }
+      nextCount = existingDevices.size - removedLinks.length + 1;
+    }
+    if (nextCount > SERVER_PRODUCT_LIMITS.devicesPerAccount) {
       if (wasRecounted) persistRecountOnRejection(db, accountId, deviceCount);
       throw new HttpsError(
         "resource-exhausted",
@@ -96,11 +119,22 @@ export async function linkDevice(
       );
     }
 
+    for (const device of removedLinks) {
+      transaction.delete(device.ref);
+      transaction.set(
+        db.collection("users").doc(device.id),
+        { onboarded: false, recoveryBackedUp: false },
+        { merge: true }
+      );
+    }
     transaction.create(linkRef, {
       primaryUid: accountId,
       name: deviceName,
       linkedAt: FieldValue.serverTimestamp(),
+      ...(mode !== "link" ? { isPrimary: true } : {}),
     });
-    writeDeviceCount(transaction, accountRef, deviceCount + 1);
+    if (mode !== "link")
+      transaction.set(accountRef, { primaryDeviceUid: callerUid }, { merge: true });
+    writeDeviceCount(transaction, accountRef, nextCount);
   });
 }

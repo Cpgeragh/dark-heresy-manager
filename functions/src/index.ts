@@ -456,9 +456,13 @@ export const linkDevice = onCall<LinkDeviceInput>(
     return protectedCallable<LinkDeviceInput, void>({
       request,
       operation: "link-device",
-      allowedFields: ["code", "deviceName"],
+      allowedFields: ["code", "deviceName", "mode", "confirmed"],
       requiredFields: ["code", "deviceName"],
-      fieldShapes: { code: "string", deviceName: "string" },
+      fieldShapes: {
+        code: "string",
+        deviceName: "string",
+        mode: { enum: ["link", "primary", "recover"] },
+      },
       rateLimits: [
         { key: `link-device:user:${callerUid}`, limit: 5, windowMs: 15 * 60 * 1000 },
         { key: `link-device:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },

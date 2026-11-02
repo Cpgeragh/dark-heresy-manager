@@ -8,9 +8,11 @@ const state = vi.hoisted(() => ({
   accountStatus: "active",
   profile: true,
   deviceCount: 1,
+  primaryDeviceUid: "old-device",
 }));
 const transactionCreate = vi.hoisted(() => vi.fn());
 const transactionSet = vi.hoisted(() => vi.fn());
+const transactionDelete = vi.hoisted(() => vi.fn());
 const makeRef = (path: string) => ({ path, id: path.split("/").at(-1) });
 const collection = vi.hoisted(() =>
   vi.fn((name: string) => ({
@@ -31,14 +33,31 @@ const runTransaction = vi.hoisted(() =>
         if (reference.path === "accounts/account-1")
           return {
             exists: true,
-            data: () => ({ status: state.accountStatus, deviceCount: state.deviceCount }),
+            data: () => ({
+              status: state.accountStatus,
+              deviceCount: state.deviceCount,
+              primaryDeviceUid: state.primaryDeviceUid,
+            }),
           };
         if (reference.path === "userProfiles/account-1")
           return { exists: state.profile, data: () => ({ firstName: "Iris" }) };
+        if (reference.path === "userLinks/query")
+          return {
+            size: 2,
+            docs: [
+              {
+                id: "old-device",
+                ref: makeRef("userLinks/old-device"),
+                data: () => ({ isPrimary: true }),
+              },
+              { id: "other-device", ref: makeRef("userLinks/other-device"), data: () => ({}) },
+            ],
+          };
         return { exists: false, data: () => ({}) };
       },
       create: transactionCreate,
       set: transactionSet,
+      delete: transactionDelete,
     })
   )
 );
@@ -93,4 +112,48 @@ it("does not expose an unfinished account to another device", async () => {
     linkDevice({ code: "DH-AAAA-BBBB", deviceName: "Phone" }, "device-1", "secret")
   ).rejects.toMatchObject({ code: "failed-precondition" });
   expect(transactionCreate).not.toHaveBeenCalled();
+});
+
+it("requires confirmation before replacing a primary device", async () => {
+  await expect(
+    linkDevice({ code: "DH-AAAA-BBBB", deviceName: "Phone", mode: "primary" }, "device-1", "secret")
+  ).rejects.toMatchObject({ code: "failed-precondition" });
+  expect(transactionDelete).not.toHaveBeenCalled();
+});
+
+it("replaces only the primary device and preserves other connections", async () => {
+  state.deviceCount = 2;
+  await linkDevice(
+    { code: "DH-AAAA-BBBB", deviceName: "Phone", mode: "primary", confirmed: true },
+    "device-1",
+    "secret"
+  );
+  expect(transactionDelete).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({ path: "userLinks/old-device" })
+  );
+  expect(transactionSet).toHaveBeenCalledWith(
+    expect.objectContaining({ path: "accounts/account-1" }),
+    { primaryDeviceUid: "device-1" },
+    { merge: true }
+  );
+  expect(transactionSet).toHaveBeenCalledWith(
+    expect.objectContaining({ path: "accounts/account-1" }),
+    { deviceCount: 2 },
+    { merge: true }
+  );
+});
+
+it("recovery disconnects all previous devices", async () => {
+  state.deviceCount = 2;
+  await linkDevice(
+    { code: "DH-AAAA-BBBB", deviceName: "Phone", mode: "recover", confirmed: true },
+    "device-1",
+    "secret"
+  );
+  expect(transactionDelete).toHaveBeenCalledTimes(2);
+  expect(transactionSet).toHaveBeenCalledWith(
+    expect.objectContaining({ path: "accounts/account-1" }),
+    { deviceCount: 1 },
+    { merge: true }
+  );
 });

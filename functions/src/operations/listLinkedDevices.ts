@@ -6,6 +6,7 @@ export interface LinkedDeviceSummary {
   name: string | null;
   linkedAt: number | null;
   isCurrentDevice: boolean;
+  isPrimary?: boolean;
 }
 
 export interface ListLinkedDevicesResult {
@@ -34,6 +35,7 @@ export async function listLinkedDevices(callerUid: string): Promise<ListLinkedDe
       name: typeof data.name === "string" && data.name.trim() ? data.name : null,
       linkedAt,
       isCurrentDevice: link.id === callerUid,
+      ...(data.isPrimary === true ? { isPrimary: true } : {}),
     };
   });
   devices.sort(

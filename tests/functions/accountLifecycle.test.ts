@@ -10,6 +10,65 @@ if (!getApps().length) initializeAdminApp({ projectId: "dh-test" });
 const adminDb = getFirestore();
 
 describe("Functions: permanent account lifecycle", () => {
+  it("replaces the primary device and recovers all devices without changing campaign data", async () => {
+    const clients = await Promise.all(
+      ["original", "additional", "replacement", "recovery"].map((name) =>
+        createIndependentClient(`recovery-${name}-${Date.now()}`)
+      )
+    );
+    const [original, additional, replacement, recovery] = clients;
+    try {
+      for (const client of clients)
+        await adminDb.collection("users").doc(client.uid).set({ onboarded: false });
+      const created = (
+        await httpsCallable<{ deviceName: string }, { accountId: string; code: string }>(
+          original.functions,
+          "createAccount"
+        )({ deviceName: "Original phone" })
+      ).data;
+      await httpsCallable(original.functions, "updateDisplayName")({ firstName: "Iris" });
+      await httpsCallable(original.functions, "completeOnboarding")({});
+      const campaignRef = adminDb.collection("campaigns").doc(`recovery-test-${created.accountId}`);
+      const campaign = { dmId: created.accountId, name: "Preserved campaign" };
+      await campaignRef.set(campaign);
+      await httpsCallable(
+        additional.functions,
+        "linkDevice"
+      )({ code: created.code, deviceName: "Laptop" });
+      await expect(
+        httpsCallable(
+          replacement.functions,
+          "linkDevice"
+        )({ code: created.code, deviceName: "New phone", mode: "primary" })
+      ).rejects.toMatchObject({ code: "functions/failed-precondition" });
+      expect((await adminDb.collection("userLinks").doc(original.uid).get()).exists).toBe(true);
+      await httpsCallable(
+        replacement.functions,
+        "linkDevice"
+      )({ code: created.code, deviceName: "New phone", mode: "primary", confirmed: true });
+      expect((await adminDb.collection("userLinks").doc(original.uid).get()).exists).toBe(false);
+      expect((await adminDb.collection("userLinks").doc(additional.uid).get()).exists).toBe(true);
+      expect(
+        (await adminDb.collection("accounts").doc(created.accountId).get()).data()
+      ).toMatchObject({ deviceCount: 2, primaryDeviceUid: replacement.uid });
+      await httpsCallable(
+        recovery.functions,
+        "linkDevice"
+      )({ code: created.code, deviceName: "Recovered phone", mode: "recover", confirmed: true });
+      const remaining = await adminDb
+        .collection("userLinks")
+        .where("primaryUid", "==", created.accountId)
+        .get();
+      expect(remaining.docs.map((doc) => doc.id)).toEqual([recovery.uid]);
+      expect(
+        (await adminDb.collection("accounts").doc(created.accountId).get()).data()
+      ).toMatchObject({ deviceCount: 1, primaryDeviceUid: recovery.uid });
+      expect((await campaignRef.get()).data()).toEqual(campaign);
+    } finally {
+      await Promise.all(clients.map((client) => deleteApp(client.app)));
+    }
+  }, 30000);
+
   afterAll(async () => teardownTestFunctions());
 
   it("creates one account, connects another device, and warns before the last disconnect", async () => {

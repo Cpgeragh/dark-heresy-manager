@@ -5,6 +5,7 @@
 import { useCallback, useRef, useState } from "react";
 import { auth } from "../firebase";
 import { linkDeviceToAccount } from "../services/deviceLinkService";
+import type { DeviceRecoveryMode } from "../services/deviceLinkService";
 
 export function useLinkDevice() {
   const [loading, setLoading] = useState(false);
@@ -12,33 +13,36 @@ export function useLinkDevice() {
   const linkingRef = useRef<Promise<void> | null>(null);
   const requestVersionRef = useRef(0);
 
-  const linkDevice = useCallback(async (recoveryCode: string, deviceName: string) => {
-    if (linkingRef.current) return linkingRef.current;
-    const user = auth.currentUser;
-    if (!user) throw new Error("Not signed in.");
+  const linkDevice = useCallback(
+    async (recoveryCode: string, deviceName: string, mode: DeviceRecoveryMode = "link") => {
+      if (linkingRef.current) return linkingRef.current;
+      const user = auth.currentUser;
+      if (!user) throw new Error("Not signed in.");
 
-    const requestVersion = ++requestVersionRef.current;
-    setLoading(true);
-    setError(null);
+      const requestVersion = ++requestVersionRef.current;
+      setLoading(true);
+      setError(null);
 
-    const operation = (async () => {
-      try {
-        await linkDeviceToAccount(user.uid, recoveryCode, deviceName);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to link device.";
-        console.error("Failed to link device:", err);
-        if (requestVersionRef.current === requestVersion) setError(message);
-        throw err;
-      } finally {
-        if (requestVersionRef.current === requestVersion) {
-          linkingRef.current = null;
-          setLoading(false);
+      const operation = (async () => {
+        try {
+          await linkDeviceToAccount(user.uid, recoveryCode, deviceName, mode);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Failed to link device.";
+          console.error("Failed to link device:", err);
+          if (requestVersionRef.current === requestVersion) setError(message);
+          throw err;
+        } finally {
+          if (requestVersionRef.current === requestVersion) {
+            linkingRef.current = null;
+            setLoading(false);
+          }
         }
-      }
-    })();
-    linkingRef.current = operation;
-    return operation;
-  }, []);
+      })();
+      linkingRef.current = operation;
+      return operation;
+    },
+    []
+  );
 
   const reset = useCallback(() => {
     requestVersionRef.current += 1;

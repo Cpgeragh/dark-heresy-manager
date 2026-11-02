@@ -84,10 +84,12 @@ export async function createAccount(
       status: "provisional",
       deviceCount: 1,
       createdByDeviceUid: callerUid,
+      primaryDeviceUid: callerUid,
       createdAt: FieldValue.serverTimestamp(),
     });
     transaction.create(linkRef, {
       primaryUid: newAccountId,
+      isPrimary: true,
       name: deviceName,
       linkedAt: FieldValue.serverTimestamp(),
     });

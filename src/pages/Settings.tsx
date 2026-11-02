@@ -409,6 +409,7 @@ export default function Settings({
                     {device.isCurrentDevice && (
                       <p className={`mt-1 ${uiTextMeta}`}>Current device</p>
                     )}
+                    {device.isPrimary && <p className={`mt-1 ${uiTextMeta}`}>Primary device</p>}
                   </div>
                   <div className="flex shrink-0 gap-2">
                     <EditButton
