@@ -49,13 +49,11 @@ function parseArguments(argumentsList) {
 }
 
 async function resolveUid(authentication, requestedUid) {
-  const users = (await authentication.listUsers(2)).users;
   if (requestedUid) {
-    if (!users.some((user) => user.uid === requestedUid)) {
-      throw new Error(`The Auth emulator has no user named ${requestedUid}.`);
-    }
+    await authentication.getUser(requestedUid);
     return requestedUid;
   }
+  const users = (await authentication.listUsers(2)).users;
   if (users.length !== 1) {
     throw new Error(
       users.length === 0

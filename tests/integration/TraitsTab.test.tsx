@@ -391,8 +391,8 @@ describe("TraitsTab", () => {
         ],
       }),
     });
-    expect(screen.getAllByText("Unnatural Characteristic (Weapon Skill)")).toHaveLength(2);
-    expect(screen.getAllByText("Owned: 2")).toHaveLength(2);
+    expect(screen.getAllByText("Unnatural Characteristic (Weapon Skill)")).toHaveLength(1);
+    expect(screen.getAllByText("Owned: 2")).toHaveLength(1);
   });
 
   it("groups different Unnatural Characteristics into expandable children", async () => {

@@ -1,0 +1,145 @@
+{
+  "date": "2026-11-02",
+  "units": "milliseconds",
+  "metric": "Browser interaction to last relevant observed DOM mutation; not a paint or INP measurement",
+  "ordinary": {
+    "campaign": [
+      380,
+      19,
+      18,
+      17,
+      14,
+      23
+    ],
+    "character": [
+      440,
+      50,
+      37,
+      36,
+      44,
+      38
+    ],
+    "gear": [
+      18,
+      8,
+      9,
+      9,
+      7,
+      8
+    ],
+    "weapons": [
+      35,
+      8,
+      11,
+      10,
+      9,
+      9
+    ],
+    "gearPicker": [
+      59,
+      54,
+      45,
+      44,
+      42
+    ],
+    "gearSearch": [
+      8,
+      8,
+      14,
+      8,
+      9
+    ],
+    "numericAcknowledgement": [
+      123.8,
+      113.2,
+      131.7,
+      88.2,
+      122
+    ],
+    "noteAcknowledgement": [
+      130
+    ]
+  },
+  "dense": {
+    "weapons": [
+      392,
+      147,
+      227,
+      244,
+      364,
+      231
+    ],
+    "drugs": [
+      217,
+      158,
+      155,
+      176,
+      191,
+      154
+    ],
+    "skills": [
+      122,
+      176,
+      153,
+      121,
+      152,
+      141
+    ],
+    "gear": [
+      73,
+      87,
+      93,
+      95,
+      84,
+      88
+    ],
+    "narrowWeapons": [
+      226,
+      233,
+      205
+    ],
+    "narrowGear": [
+      119,
+      116,
+      113
+    ],
+    "quantityWarmAcknowledgement": [
+      220,
+      226,
+      228
+    ],
+    "quantityInitialOverlappingAcknowledgement": [
+      3907,
+      3611,
+      3706,
+      3693,
+      3629
+    ],
+    "pickers": {
+      "talent": {
+        "open": 67,
+        "search": 15
+      },
+      "advancedSkill": {
+        "open": 84,
+        "search": 3
+      },
+      "rangedWeapon": {
+        "open": 207,
+        "search": 12
+      },
+      "drug": {
+        "open": 68,
+        "search": 3
+      },
+      "implant": {
+        "open": 55,
+        "search": 3
+      },
+      "armour": {
+        "open": 80,
+        "search": 4
+      }
+    }
+  }
+}
