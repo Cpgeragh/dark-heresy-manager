@@ -25,6 +25,7 @@ import type { PatchOptions } from "../../hooks/useOptimisticOverlay";
 import { uiChipRow, uiStackPage } from "../../ui/styles/editableStyles";
 import { sanitizeNonNegativeIntegerInput } from "../../utils/formInput";
 import { canConfirmManualCostPurchase } from "../../utils/dmGatedPurchase";
+import { removeWeaponTrainingGroup } from "../../utils/weaponTrainingRemoval";
 import {
   getGrantedExoticWeapons,
   getGrantedWeaponTrainingIds,
@@ -117,22 +118,7 @@ export function WeaponTrainingTab({
   ).filter((entry) => !ownedExoticNames.has(entry.name.toLocaleLowerCase()));
 
   const handleRemoveTraining = useCallback(
-    (id: WeaponTrainingTalentId) => {
-      const xpPurchases = { ...weaponTraining.xpPurchases };
-      const manualCosts = { ...weaponTraining.manualCosts };
-      const eliteAdvancePurchases = { ...weaponTraining.eliteAdvancePurchases };
-      delete xpPurchases[id];
-      delete manualCosts[id];
-      delete eliteAdvancePurchases[id];
-      return onUpdate({
-        ...weaponTraining,
-        trained: weaponTraining.trained.filter((t) => t !== id),
-        xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
-        manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
-        eliteAdvancePurchases:
-          Object.keys(eliteAdvancePurchases).length > 0 ? eliteAdvancePurchases : undefined,
-      });
-    },
+    (id: WeaponTrainingTalentId) => onUpdate(removeWeaponTrainingGroup(weaponTraining, id)),
     [weaponTraining, onUpdate]
   );
 
@@ -421,6 +407,7 @@ export function WeaponTrainingTab({
       {showExoticPicker && (
         <OptionPickerScreen
           title="Exotic Weapon Training"
+          standalone
           options={availableExoticOptions}
           selected={newExoticName}
           onSelect={(value) => {
@@ -436,7 +423,6 @@ export function WeaponTrainingTab({
         <XpCostForm
           title={`Add ${newExoticName}`}
           submitLabel="Add Exotic"
-          showBack
           cost={newExoticCost}
           onCostChange={(value) => setNewExoticCost(sanitizeNonNegativeIntegerInput(value))}
           canSubmit={canConfirmExotic}
