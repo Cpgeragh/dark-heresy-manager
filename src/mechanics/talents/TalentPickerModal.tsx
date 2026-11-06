@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import type { AlternateRankSelection, TalentEntry } from "../../types/Character";
 import { makeCurrentRankPurchase, type TalentData } from "shared-rules";
 import type { TraitData } from "../../data/reference/traitData";
@@ -50,10 +50,42 @@ import {
 } from "./talentUtils";
 import { getFaithTalentGroupChip } from "./faithTalentGroups";
 import { XpCostForm } from "../../ui/forms/XpCostForm";
+import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
+import { SegmentedTabs } from "../../ui/SegmentedTabs";
+import {
+  UNLOCKED_ALL_TAB_OPTIONS,
+  UNLOCKED_ALL_TABS,
+  UNLOCKED_ALL_TABS_ID,
+  type UnlockedAllTab,
+} from "../../ui/pickers/unlockedAllTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../ui/styles/segmentedTabStyles";
 
 export type AnyListItem = TalentData | TraitData;
 
 type DetailChoice = { detailLabel: string; displayPrefix?: string } | null;
+
+/** An "Unlocked" tab shown ahead of the full list, whose rows the caller supplies. */
+export interface UnlockedTalentTab {
+  render: (query: string) => { rows: ReactNode; isEmpty: boolean };
+  /** Whether the Unlocked tab already offers this Talent, or this choice of it. */
+  isUnlocked: (talentId: string, specialisation?: string) => boolean;
+}
+
+/** Whether picking a Talent opens a list of choices or a text entry screen before it can be bought. */
+function talentPickKind(row: TalentData, useTalentBehaviours: boolean) {
+  const itemBehaviour = useTalentBehaviours ? getTalentBehaviour(row) : null;
+  const usesChoicePicker =
+    itemBehaviour?.kind === "fixed-repeatable" ||
+    itemBehaviour?.kind === "fixed-single" ||
+    itemBehaviour?.kind === "hybrid" ||
+    (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
+  const usesTextEntry = row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
+  return { usesChoicePicker, usesTextEntry };
+}
 
 export function TalentPickerModal({
   title,
@@ -76,6 +108,7 @@ export function TalentPickerModal({
   career,
   rank,
   alternateRanks = [],
+  unlockedTab,
 }: {
   title: string;
   listData: readonly AnyListItem[];
@@ -97,6 +130,8 @@ export function TalentPickerModal({
   career?: string;
   rank?: string;
   alternateRanks?: readonly AlternateRankSelection[];
+  /** Splits the full list into an "Unlocked" tab, built by the caller, and an "All" tab that leaves out what Unlocked offers. */
+  unlockedTab?: UnlockedTalentTab;
 }) {
   recordComponentRender("TalentPickerModal");
   const [query, setQuery] = useState("");
@@ -114,6 +149,12 @@ export function TalentPickerModal({
   const listScrollPositionRef = useRef(0);
   const detailScrollPositionRef = useRef(0);
   const overflowScrollPositionRef = useRef(0);
+  const [unlockedPane, setUnlockedPane] = useState<UnlockedAllTab>("unlocked");
+  const {
+    containerRef: paneRef,
+    transitionClass: paneTransitionClass,
+    switchTo: switchPane,
+  } = useSwipeableTabs(UNLOCKED_ALL_TABS, unlockedPane, setUnlockedPane);
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
   const canMakeManualPurchase = editable && isDM;
   const allListData = overflowListData ?? listData;
@@ -152,6 +193,13 @@ export function TalentPickerModal({
       .filter((item) => {
         if (seen.has(item.id)) return false;
         seen.add(item.id);
+        if (unlockedTab) {
+          const { usesChoicePicker, usesTextEntry } = talentPickKind(
+            item as TalentData,
+            useTalentBehaviours
+          );
+          if (!usesChoicePicker && !usesTextEntry && unlockedTab.isUnlocked(item.id)) return false;
+        }
         const owned = entries.filter((entry) => entry.talentId === item.id);
         if (useTalentBehaviours) {
           if (!isTalentAvailableInPicker(item as TalentData, entries)) return false;
@@ -166,7 +214,7 @@ export function TalentPickerModal({
         return !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery);
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [allListData, entries, query, useTalentBehaviours]);
+  }, [allListData, entries, query, unlockedTab, useTalentBehaviours]);
 
   const filteredCustom = useMemo(
     () =>
@@ -191,7 +239,11 @@ export function TalentPickerModal({
     ? useTalentBehaviours
       ? (() => {
           const values = getAvailableTalentChoices(talentData, ownedForPicked);
-          if (!career) return values;
+          if (!career) {
+            return unlockedTab && showOverflow
+              ? values.filter((value) => !unlockedTab.isUnlocked(talentData.id, value))
+              : values;
+          }
           return values
             .map((value) => {
               const hybridOption =
@@ -214,7 +266,10 @@ export function TalentPickerModal({
                 rankChips: getTalentRankChips(career, talentData.id, lookupValue, alternateRanks),
               };
             })
-            .filter((option) => showOverflow || option.cost !== undefined);
+            .filter((option) => showOverflow || option.cost !== undefined)
+            .filter(
+              (option) => !(showOverflow && unlockedTab?.isUnlocked(talentData.id, option.value))
+            );
         })()
       : (() => {
           if (!traitData) return [];
@@ -369,6 +424,9 @@ export function TalentPickerModal({
     return add(talentData, value, true);
   };
 
+  const unlockedRows =
+    unlockedTab && unlockedPane === "unlocked" ? unlockedTab.render(query) : null;
+
   if (pendingManualCost && canMakeManualPurchase) {
     const cost = Number(manualCostInput);
     return (
@@ -405,11 +463,27 @@ export function TalentPickerModal({
         query={query}
         onQueryChange={setQuery}
         onClose={() => (overflowBackCloses ? onClose() : setShowOverflow(false))}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
+        closeLabel={unlockedTab ? undefined : <ArrowLeft />}
+        closeAriaLabel={unlockedTab ? "Close" : "Back"}
         suspended={suspended}
         scrollPositionRef={overflowScrollPositionRef}
-        isEmpty={overflowFiltered.length === 0 && filteredCustom.length === 0}
+        isEmpty={
+          unlockedRows
+            ? unlockedRows.isEmpty
+            : overflowFiltered.length === 0 && filteredCustom.length === 0
+        }
+        filterRow={
+          unlockedTab && (
+            <SegmentedTabs
+              id={UNLOCKED_ALL_TABS_ID}
+              ariaLabel="Elite list"
+              options={UNLOCKED_ALL_TAB_OPTIONS}
+              value={unlockedPane}
+              onChange={switchPane}
+              className="w-full"
+            />
+          )
+        }
         footer={
           onCustomAction &&
           customActionLabel && (
@@ -417,80 +491,94 @@ export function TalentPickerModal({
           )
         }
       >
-        <PickerList>
-          {filteredCustom.map((item) => (
-            <PickerRow
-              key={item.id}
-              interactive={editable}
-              onClick={() => {
-                if (editable) return onSelectCustomItem?.(item);
-              }}
-            >
-              <PickerRowName
-                name={item.name}
-                status={item.status}
-                infoTitle={item.name}
-                information={
-                  item.data.description ? (
-                    <InfoParagraph>{item.data.description}</InfoParagraph>
-                  ) : undefined
-                }
-              />
-            </PickerRow>
-          ))}
-          {overflowFiltered.map((item) => {
-            const row = item as TalentData;
-            const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
-            const faithGroupChip = getFaithTalentGroupChip(row);
-            const itemBehaviour = useTalentBehaviours ? getTalentBehaviour(row) : null;
-            const usesChoicePicker =
-              itemBehaviour?.kind === "fixed-repeatable" ||
-              itemBehaviour?.kind === "fixed-single" ||
-              itemBehaviour?.kind === "hybrid" ||
-              (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
-            const usesTextEntry =
-              row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
-            const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
-            return (
-              <PickerRow
-                key={item.id}
-                interactive={canMakeManualPurchase}
-                opensScreen={usesChoicePicker}
-                onClick={() => {
-                  if (!canMakeManualPurchase) return;
-                  if (usesChoicePicker) {
-                    setPicked(item);
-                    setShowChoicePicker(true);
-                  } else if (usesTextEntry) {
-                    setPicked(item);
-                  } else {
-                    attemptOverflowAdd(item);
-                  }
-                }}
-              >
-                <PickerRowName
-                  name={item.name}
-                  infoTitle={item.name}
-                  information={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
-                />
-                <PickerRowChips>
-                  {sources.map((source) => (
-                    <Chip key={source} colour={sourceChipColour(source)} className="font-code">
-                      {source}
-                    </Chip>
-                  ))}
-                  {faithGroupChip && (
-                    <Chip colour={faithGroupChip.colour}>{faithGroupChip.label}</Chip>
-                  )}
-                  {ownedCount > 0 && <Chip colour="amber">Owned: {ownedCount}</Chip>}
-                </PickerRowChips>
-                {row.prerequisites && (
-                  <PickerRowLine label="Prerequisites" value={row.prerequisites} />
-                )}
-              </PickerRow>
-            );
-          })}
-        </PickerList>
+        <div
+          ref={unlockedTab ? paneRef : undefined}
+          id={unlockedTab ? segmentedTabPanelId(UNLOCKED_ALL_TABS_ID, unlockedPane) : undefined}
+          role={unlockedTab ? "tabpanel" : undefined}
+          aria-labelledby={
+            unlockedTab ? segmentedTabId(UNLOCKED_ALL_TABS_ID, unlockedPane) : undefined
+          }
+          className={
+            unlockedTab
+              ? `min-h-[40vh] ${[uiSwipeableTabPanel, paneTransitionClass].join(" ")}`
+              : "contents"
+          }
+        >
+          {unlockedRows ? (
+            unlockedRows.rows
+          ) : (
+            <PickerList>
+              {filteredCustom.map((item) => (
+                <PickerRow
+                  key={item.id}
+                  interactive={editable}
+                  onClick={() => {
+                    if (editable) return onSelectCustomItem?.(item);
+                  }}
+                >
+                  <PickerRowName
+                    name={item.name}
+                    status={item.status}
+                    infoTitle={item.name}
+                    information={
+                      item.data.description ? (
+                        <InfoParagraph>{item.data.description}</InfoParagraph>
+                      ) : undefined
+                    }
+                  />
+                </PickerRow>
+              ))}
+              {overflowFiltered.map((item) => {
+                const row = item as TalentData;
+                const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
+                const faithGroupChip = getFaithTalentGroupChip(row);
+                const { usesChoicePicker, usesTextEntry } = talentPickKind(
+                  row,
+                  useTalentBehaviours
+                );
+                const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
+                return (
+                  <PickerRow
+                    key={item.id}
+                    interactive={canMakeManualPurchase}
+                    opensScreen={usesChoicePicker}
+                    onClick={() => {
+                      if (!canMakeManualPurchase) return;
+                      if (usesChoicePicker) {
+                        setPicked(item);
+                        setShowChoicePicker(true);
+                      } else if (usesTextEntry) {
+                        setPicked(item);
+                      } else {
+                        attemptOverflowAdd(item);
+                      }
+                    }}
+                  >
+                    <PickerRowName
+                      name={item.name}
+                      infoTitle={item.name}
+                      information={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
+                    />
+                    <PickerRowChips>
+                      {sources.map((source) => (
+                        <Chip key={source} colour={sourceChipColour(source)} className="font-code">
+                          {source}
+                        </Chip>
+                      ))}
+                      {faithGroupChip && (
+                        <Chip colour={faithGroupChip.colour}>{faithGroupChip.label}</Chip>
+                      )}
+                      {ownedCount > 0 && <Chip colour="amber">Owned: {ownedCount}</Chip>}
+                    </PickerRowChips>
+                    {row.prerequisites && (
+                      <PickerRowLine label="Prerequisites" value={row.prerequisites} />
+                    )}
+                  </PickerRow>
+                );
+              })}
+            </PickerList>
+          )}
+        </div>
       </PickerModal>
     );
   }
@@ -639,13 +727,7 @@ export function TalentPickerModal({
               ? `Owned: ${ownedCount}/${itemBehaviour.maxPurchases}`
               : `Owned: ${ownedCount}`
             : null;
-          const usesChoicePicker =
-            itemBehaviour?.kind === "fixed-repeatable" ||
-            itemBehaviour?.kind === "fixed-single" ||
-            itemBehaviour?.kind === "hybrid" ||
-            (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
-          const usesTextEntry =
-            row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
+          const { usesChoicePicker, usesTextEntry } = talentPickKind(row, useTalentBehaviours);
           const cost =
             career && !usesChoicePicker && !usesTextEntry
               ? getNextTalentCost(career, rank, item.id, undefined, entries, alternateRanks)

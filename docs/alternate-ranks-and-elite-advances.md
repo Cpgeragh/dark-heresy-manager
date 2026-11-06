@@ -4,23 +4,26 @@ This document defines the current Alternate Rank and Elite Advance behaviour. It
 
 ## Ownership and persistence
 
-| Concern                               | Owner                                                                                                   | Persisted field                                       |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Alternate Rank reference data         | `ALTERNATE_RANKS` in `shared-rules/src/alternateRankData.ts`                                            | None                                                  |
-| Packaged Elite Advance reference data | `ELITE_ADVANCES` in `shared-rules/src/eliteAdvanceData.ts`                                              | None                                                  |
-| Selected Alternate Ranks              | `RankUpModal` in `src/pages/CharacterSheet/ExperienceTab.tsx`                                           | `experience.alternateRanks`                           |
-| Alternate Rank titles                 | `rankTitles` in `ALTERNATE_RANKS` and `getRankDisplayName` in `shared-rules/src/alternateRankTitles.ts` | `experience.alternateRanks[].titleChoices`            |
-| Granted packaged advances             | `applyAlternateRankEliteAdvanceGrants` in `src/mechanics/experience/alternateRankGrants.ts`             | `talentsAndTraits.eliteAdvances`                      |
-| Purchased packaged advances           | `ElitePackagesTab` in `src/mechanics/eliteAdvances/ElitePackagesTab.tsx`                                | `talentsAndTraits.eliteAdvances`                      |
-| Career-table Exotic Training choices  | `getExoticWeaponTrainingPurchases` in `shared-rules/src/weaponTrainingAdvanceCosts.ts`                  | None                                                  |
-| Career-table Exotic Training purchase | `confirmExoticPurchase` in `src/pages/CharacterSheet/WeaponTrainingTab.tsx`                             | `weaponTraining.exoticWeapons[]` and its `xpPurchase` |
-| Exotic Training server validation     | `assertValidWeaponTrainingTransition` in `functions/src/shared/characterFieldValidation.ts`             | None                                                  |
-| Missed-rank advance access            | `getMissedRankCareerAdvances` in `shared-rules/src/careerAdvanceAccess.ts`                              | None                                                  |
-| Career Talent and Trait purchase cost | `getNextTalentOrTraitPurchase` in `shared-rules/src/careerAdvanceAccess.ts`                             | None                                                  |
-| Skill purchase validation             | `assertValidSkillsTransition` in `functions/src/shared/characterFieldValidation.ts`                     | None                                                  |
-| Talent and Trait purchase validation  | `assertValidTalentsAndTraitsTransition` in `functions/src/shared/characterFieldValidation.ts`           | None                                                  |
-| Existing purchase price protection    | `assertExistingPurchasePricesUnchanged` in `functions/src/shared/characterFieldValidation.ts`           | None                                                  |
-| Packaged advance XP                   | `getEliteAdvancesSpent` in `src/mechanics/experience/xpSpent.ts`                                        | `talentsAndTraits.eliteAdvances[].xpPurchase`         |
+| Concern                               | Owner                                                                                                   | Persisted field                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Alternate Rank reference data         | `ALTERNATE_RANKS` in `shared-rules/src/alternateRankData.ts`                                            | None                                                               |
+| Packaged Elite Advance reference data | `ELITE_ADVANCES` in `shared-rules/src/eliteAdvanceData.ts`                                              | None                                                               |
+| Selected Alternate Ranks              | `RankUpModal` in `src/pages/CharacterSheet/ExperienceTab.tsx`                                           | `experience.alternateRanks`                                        |
+| Alternate Rank titles                 | `rankTitles` in `ALTERNATE_RANKS` and `getRankDisplayName` in `shared-rules/src/alternateRankTitles.ts` | `experience.alternateRanks[].titleChoices`                         |
+| Granted packaged advances             | `applyAlternateRankEliteAdvanceGrants` in `src/mechanics/experience/alternateRankGrants.ts`             | `talentsAndTraits.eliteAdvances`                                   |
+| Purchased packaged advances           | `ElitePackagesTab` in `src/mechanics/eliteAdvances/ElitePackagesTab.tsx`                                | `talentsAndTraits.eliteAdvances`                                   |
+| Skills bought as Elite Advances       | `buildSkillPurchase` in `src/mechanics/eliteAdvances/eliteAdvancePurchase.ts`                           | `skills[].xpPurchases` and `skills[].eliteAdvancePurchases`        |
+| Talents bought as Elite Advances      | `buildFixedTalentPurchase` in `eliteAdvancePurchase.ts` and `buyManual` in `EliteTalentsTab`            | `talentsAndTraits.talents[].xpPurchase` and `eliteAdvancePurchase` |
+| Weapon Training bought from a package | `buildFixedTalentPurchase` in `eliteAdvancePurchase.ts`                                                 | `weaponTraining.xpPurchases` and `eliteAdvancePurchases`           |
+| Career-table Exotic Training choices  | `getExoticWeaponTrainingPurchases` in `shared-rules/src/weaponTrainingAdvanceCosts.ts`                  | None                                                               |
+| Career-table Exotic Training purchase | `confirmExoticPurchase` in `src/pages/CharacterSheet/WeaponTrainingTab.tsx`                             | `weaponTraining.exoticWeapons[]` and its `xpPurchase`              |
+| Exotic Training server validation     | `assertValidWeaponTrainingTransition` in `functions/src/shared/characterFieldValidation.ts`             | None                                                               |
+| Missed-rank advance access            | `getMissedRankCareerAdvances` in `shared-rules/src/careerAdvanceAccess.ts`                              | None                                                               |
+| Career Talent and Trait purchase cost | `getNextTalentOrTraitPurchase` in `shared-rules/src/careerAdvanceAccess.ts`                             | None                                                               |
+| Skill purchase validation             | `assertValidSkillsTransition` in `functions/src/shared/characterFieldValidation.ts`                     | None                                                               |
+| Talent and Trait purchase validation  | `assertValidTalentsAndTraitsTransition` in `functions/src/shared/characterFieldValidation.ts`           | None                                                               |
+| Existing purchase price protection    | `assertExistingPurchasePricesUnchanged` in `functions/src/shared/characterFieldValidation.ts`           | None                                                               |
+| Packaged advance XP                   | `getEliteAdvancesSpent` in `src/mechanics/experience/xpSpent.ts`                                        | `talentsAndTraits.eliteAdvances[].xpPurchase`                      |
 
 Reference data is shared through the built `shared-rules` package. Character-specific selections, rolls and purchases remain in the character document.
 
@@ -151,6 +154,7 @@ Removing or downgrading a directly purchased Skill or Talent uses its normal pag
 | Packaged reference data                       | `tests/unit/eliteAdvanceData.test.ts`                                                                                                                                      |
 | Packaged grants and Characteristic effects    | `tests/unit/eliteAdvanceEffects.test.ts`                                                                                                                                   |
 | Packages page, tabs and packaged purchase     | `tests/integration/ElitePackagesTab.test.tsx`                                                                                                                              |
+| Elite skills and talents pages                | `tests/integration/EliteSkillsTab.test.tsx` and `tests/integration/EliteTalentsTab.test.tsx`                                                                               |
 | XP accounting                                 | `tests/unit/xpSpent.test.ts`                                                                                                                                               |
 
 The production verification command is:

@@ -139,6 +139,12 @@ vi.mock("../../src/mechanics/talents/TalentsTab", () => ({
 vi.mock("../../src/mechanics/eliteAdvances/ElitePackagesTab", () => ({
   ElitePackagesTab: () => <div>Mock ElitePackagesTab</div>,
 }));
+vi.mock("../../src/mechanics/eliteAdvances/EliteSkillsTab", () => ({
+  EliteSkillsTab: () => <div>Mock EliteSkillsTab</div>,
+}));
+vi.mock("../../src/mechanics/eliteAdvances/EliteTalentsTab", () => ({
+  EliteTalentsTab: () => <div>Mock EliteTalentsTab</div>,
+}));
 vi.mock("../../src/mechanics/traits/TraitsTab", () => ({
   TraitsTab: () => <div>Mock TraitsTab</div>,
 }));

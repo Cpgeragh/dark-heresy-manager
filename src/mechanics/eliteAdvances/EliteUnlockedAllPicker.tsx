@@ -1,25 +1,20 @@
 import { useState, type ReactNode } from "react";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import { PickerModal } from "../../ui/pickers/PickerModal";
-import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
-  colourToggleSelectedFuchsia,
-  colourToggleSelectedViolet,
-} from "../../ui/styles/colourTokens";
+  UNLOCKED_ALL_TAB_OPTIONS,
+  UNLOCKED_ALL_TABS,
+  UNLOCKED_ALL_TABS_ID,
+  type UnlockedAllTab,
+} from "../../ui/pickers/unlockedAllTabs";
+import { SegmentedTabs } from "../../ui/SegmentedTabs";
 import {
   segmentedTabId,
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/styles/segmentedTabStyles";
 
-export type EliteListTab = "unlocked" | "all";
-
-const ELITE_LIST_TABS = ["unlocked", "all"] as const satisfies readonly EliteListTab[];
-const ELITE_LIST_TAB_OPTIONS = [
-  { value: "unlocked", label: "Unlocked", activeClassName: colourToggleSelectedViolet },
-  { value: "all", label: "All", activeClassName: colourToggleSelectedFuchsia },
-] as const satisfies readonly SegmentedTabOption<EliteListTab>[];
-const ELITE_LIST_TABS_ID = "elite-list";
+export type EliteListTab = UnlockedAllTab;
 
 interface EliteUnlockedAllPickerProps {
   title: string;
@@ -31,7 +26,7 @@ interface EliteUnlockedAllPickerProps {
   suspended?: boolean;
 }
 
-/** The pop-up every Elite page opens to buy from: an "Unlocked" list and an "All" list, swiped or tapped between. */
+/** The pop-up the Elite pages open to buy from: an "Unlocked" list and an "All" list, swiped or tapped between. */
 export function EliteUnlockedAllPicker({
   title,
   onClose,
@@ -42,7 +37,7 @@ export function EliteUnlockedAllPicker({
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<EliteListTab>("unlocked");
   const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
-    ELITE_LIST_TABS,
+    UNLOCKED_ALL_TABS,
     tab,
     setTab
   );
@@ -59,9 +54,9 @@ export function EliteUnlockedAllPicker({
       suspended={suspended}
       filterRow={
         <SegmentedTabs
-          id={ELITE_LIST_TABS_ID}
+          id={UNLOCKED_ALL_TABS_ID}
           ariaLabel="Elite list"
-          options={ELITE_LIST_TAB_OPTIONS}
+          options={UNLOCKED_ALL_TAB_OPTIONS}
           value={tab}
           onChange={switchTo}
           className="w-full"
@@ -70,9 +65,9 @@ export function EliteUnlockedAllPicker({
     >
       <div
         ref={containerRef}
-        id={segmentedTabPanelId(ELITE_LIST_TABS_ID, tab)}
+        id={segmentedTabPanelId(UNLOCKED_ALL_TABS_ID, tab)}
         role="tabpanel"
-        aria-labelledby={segmentedTabId(ELITE_LIST_TABS_ID, tab)}
+        aria-labelledby={segmentedTabId(UNLOCKED_ALL_TABS_ID, tab)}
         className={`min-h-[40vh] ${[uiSwipeableTabPanel, transitionClass].join(" ")}`}
       >
         {rows}

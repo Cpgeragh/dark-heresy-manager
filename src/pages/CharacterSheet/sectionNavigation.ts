@@ -18,7 +18,14 @@ const SHEET_CATEGORIES: readonly SheetCategory[] = [
   {
     label: "Abilities",
     pages: alphabetisePages([
-      { label: "Elite Advances", pages: [{ id: "elite-packages", label: "Packages" }] },
+      {
+        label: "Elite Advances",
+        pages: alphabetisePages([
+          { id: "elite-packages", label: "Packages" },
+          { id: "elite-skills", label: "Skills" },
+          { id: "elite-talents", label: "Talents" },
+        ]),
+      },
       { id: "psychic", label: "Psychic" },
       { id: "skills", label: "Skills" },
       { id: "talents", label: "Talents" },

@@ -6,6 +6,8 @@ export const TAB_IDS = [
   "skills",
   "talents",
   "elite-packages",
+  "elite-skills",
+  "elite-talents",
   "traits",
   "weapons",
   "armour",

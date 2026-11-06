@@ -123,6 +123,20 @@ const ElitePackagesTab = memo(
     }))
   )
 );
+const EliteSkillsTab = memo(
+  lazy(() =>
+    import("../mechanics/eliteAdvances/EliteSkillsTab").then(({ EliteSkillsTab }) => ({
+      default: EliteSkillsTab,
+    }))
+  )
+);
+const EliteTalentsTab = memo(
+  lazy(() =>
+    import("../mechanics/eliteAdvances/EliteTalentsTab").then(({ EliteTalentsTab }) => ({
+      default: EliteTalentsTab,
+    }))
+  )
+);
 const WeaponsTab = memo(
   lazy(() =>
     import("./CharacterSheet/WeaponsTab").then(({ WeaponsTab }) => ({ default: WeaponsTab }))
@@ -289,6 +303,8 @@ export default function CharacterSheet({
       import("./CharacterSheet/CyberneticsTab"),
       import("../mechanics/talents/TalentsTab"),
       import("../mechanics/eliteAdvances/ElitePackagesTab"),
+      import("../mechanics/eliteAdvances/EliteSkillsTab"),
+      import("../mechanics/eliteAdvances/EliteTalentsTab"),
       import("./CharacterSheet/PsychicTab"),
       import("./CharacterSheet/ExperienceTab"),
       import("./CharacterSheet/WeaponTrainingTab"),
@@ -803,6 +819,8 @@ export default function CharacterSheet({
     skills: "Skills",
     talents: "Talents",
     "elite-packages": "Elite Packages",
+    "elite-skills": "Elite Skills",
+    "elite-talents": "Elite Talents",
     training: "Weapon Training",
     traits: "Traits",
     weapons: "Weapons",
@@ -981,6 +999,43 @@ export default function CharacterSheet({
                   rangedWeapons={character.rangedWeapons}
                   meleeWeapons={character.meleeWeapons}
                   archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  weaponTraining={character.weaponTraining}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  isDM={isDM}
+                  editable={allowedToEdit}
+                  onUpdateCharacter={patchFieldsWithResult}
+                />
+              )}
+
+              {activeTab === "elite-skills" && (
+                <EliteSkillsTab
+                  skills={character.skills}
+                  talents={character.talentsAndTraits}
+                  experience={character.experience}
+                  weaponTraining={character.weaponTraining}
+                  career={character.header.career}
+                  rank={character.header.rank}
+                  isDM={isDM}
+                  editable={allowedToEdit}
+                  getCharField={getCharField}
+                  modifierTotals={characteristicModifierTotals}
+                  onUpdateCharacter={patchFieldsWithResult}
+                />
+              )}
+
+              {activeTab === "elite-talents" && (
+                <EliteTalentsTab
+                  talents={character.talentsAndTraits}
+                  skills={character.skills}
+                  experience={character.experience}
+                  insanity={character.insanity}
+                  psychic={character.psychic}
+                  cybernetics={character.cybernetics ?? EMPTY_CYBERNETICS}
+                  rangedWeapons={character.rangedWeapons}
+                  meleeWeapons={character.meleeWeapons}
+                  archeotech={character.archeotech ?? EMPTY_ARCHAEOTECH}
+                  willpowerBonus={getCharBonus("wp")}
                   weaponTraining={character.weaponTraining}
                   career={character.header.career}
                   rank={character.header.rank}

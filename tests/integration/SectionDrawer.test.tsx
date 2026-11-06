@@ -90,6 +90,12 @@ describe("SectionDrawer", () => {
     const eliteRow = screen.getByRole("button", { name: "Elite Advances" });
     expect(eliteRow.lastElementChild).toHaveAttribute("data-picker-arrow", "right");
     await user.click(eliteRow);
+    expect(
+      screen
+        .getAllByRole("button")
+        .map((button) => button.textContent)
+        .filter((label) => ["Packages", "Skills", "Talents"].includes(label ?? ""))
+    ).toEqual(expect.arrayContaining(["Packages", "Skills", "Talents"]));
     await user.click(screen.getByRole("button", { name: "Packages" }));
 
     expect(onPageChange).toHaveBeenCalledWith("elite-packages");
