@@ -11,6 +11,7 @@ import {
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { markApplicationPerformance } from "./performance/performanceMetrics";
+import { beginAuthStartupDiagnostics } from "./authStartupDiagnostics";
 
 const PERFORMANCE_PROJECT_ID = "dh-test";
 const isPerformanceMode = import.meta.env.MODE === "performance";
@@ -48,6 +49,10 @@ if (isPerformanceMode && firebaseConfig.projectId !== PERFORMANCE_PROJECT_ID) {
 }
 
 const app = initializeApp(firebaseConfig);
+if (import.meta.env.PROD && !isPerformanceMode) {
+  // Take the read-only snapshot before any Firebase service can start Auth.
+  await beginAuthStartupDiagnostics(firebaseConfig.apiKey, app.name).catch(() => undefined);
+}
 
 const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 if (

@@ -17,6 +17,7 @@ const browserUnitTests = [
   "tests/unit/serverAccountDiagnostics.test.ts",
   "tests/unit/accountConnectionMarker.test.ts",
   "tests/unit/accountDiagnostics.test.ts",
+  "tests/unit/authStartupDiagnostics.test.ts",
   "tests/unit/archeotechSnapshotHelpers.test.ts",
   "tests/unit/armourSnapshotHelpers.test.ts",
   "tests/unit/boundedFirestoreQueries.test.tsx",

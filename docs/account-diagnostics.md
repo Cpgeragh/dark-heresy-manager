@@ -4,14 +4,29 @@ The app records a bounded private server report after startup settles, or when
 startup detects a connection error. Reports distinguish a restored login from a
 login created during this launch, identify the loaded build and Firebase project,
 and record whether the account is connected, new, awaiting reconnection or failed
-to load. This does not automatically restore an account or establish the cause of
-a reset.
+to load.
+
+Before starting Auth, the app takes a read-only snapshot of the device login
+entry in IndexedDB, local storage and session storage. The snapshot distinguishes
+missing entries, invalid entries and stores that could not be read. It compares
+the saved login with the previous account marker when available. After Auth
+finishes, the app checks whether the resulting device login is actually saved.
+The startup record includes the outcome and the results of token refresh,
+account lookup and anonymous sign-up requests. A timeout preserves partial
+evidence when Auth stalls. **Copy account check** includes the 16 most recent
+startup records alongside the other account events.
+
+A prior confirmed read-back and a missing entry at the next startup establish
+when the device last had the login and when it was first seen missing. If the
+entry is still present, Auth request outcomes can identify a verification
+failure. A record that was already gone at startup cannot reveal what removed it.
 
 The server derives the current device UID from Firebase Authentication and the
 account ID from its own device-link record. A previous device UID from the local
 reconnect marker is explicitly stored as client-reported evidence, never as proof
 of account access. No recovery codes, tokens, profile names or campaign content
-are submitted. The callable rejects additional fields and payloads over 1 KiB.
+are submitted. The callable accepts only allowlisted outcomes and error codes in
+the startup evidence and rejects additional fields and payloads over 2 KiB.
 Clients cannot read or write the diagnostic collection directly; investigation
 requires administrative access.
 

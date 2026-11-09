@@ -49,12 +49,34 @@ describe("src/firebase.ts config validation", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllEnvs();
   });
 
   it("initialises without throwing when every config value is present", async () => {
     stubAllEnvVars();
     await expect(import("../../src/firebase")).resolves.toBeDefined();
+  });
+
+  it("takes the storage snapshot before Firebase Auth starts in a deployed build", async () => {
+    stubAllEnvVars();
+    vi.stubEnv("PROD", true);
+    const diagnostics = await import("../../src/authStartupDiagnostics");
+    const { getAuth } = await import("firebase/auth");
+    vi.mocked(getAuth).mockClear();
+    let complete!: () => void;
+    const snapshot = vi.spyOn(diagnostics, "beginAuthStartupDiagnostics").mockReturnValue(
+      new Promise<void>((resolve) => {
+        complete = resolve;
+      })
+    );
+
+    const firebase = import("../../src/firebase");
+    await vi.waitFor(() => expect(snapshot).toHaveBeenCalledOnce());
+    expect(getAuth).not.toHaveBeenCalled();
+    complete();
+    await firebase;
+    expect(getAuth).toHaveBeenCalledOnce();
   });
 
   it.each(REQUIRED_ENV_VARS)("throws when %s is missing", async (missingKey) => {

@@ -5,6 +5,7 @@ import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { auth } from "../firebase";
 import { recordAccountDiagnostic } from "../accountDiagnostics";
+import { finishAuthStartup, noteAuthStartupWithoutLogin } from "../authStartupDiagnostics";
 import { noteCreatedDiagnosticLogin } from "../services/serverAccountDiagnostics";
 import { synchroniseUserAccount } from "../services/userAccountService";
 import { markApplicationPerformance } from "../performance/performanceMetrics";
@@ -32,6 +33,7 @@ export function useAuth(): UseAuthResult {
 
     const finishWithError = (cause: unknown) => {
       if (ignore) return;
+      finishAuthStartup("error", undefined, cause);
       const authError = cause instanceof Error ? cause : new Error("Unable to load account.");
       markApplicationPerformance("startup:auth-error");
       markApplicationPerformance("startup:auth-ready");
@@ -45,13 +47,17 @@ export function useAuth(): UseAuthResult {
       async (user) => {
         markApplicationPerformance("startup:auth-state-received");
         if (!user) {
-          if (!ignore) recordAccountDiagnostic("no-restored-login");
+          if (!ignore) {
+            noteAuthStartupWithoutLogin();
+            recordAccountDiagnostic("no-restored-login");
+          }
           if (anonymousSignInStarted) return;
           anonymousSignInStarted = true;
           markApplicationPerformance("startup:anonymous-sign-in-start");
           try {
             const signedIn = await signInAnonymously(auth);
             noteCreatedDiagnosticLogin(signedIn.user.uid);
+            finishAuthStartup("created", signedIn.user.uid);
             recordAccountDiagnostic("anonymous-login-created", { uid: auth.currentUser?.uid });
             markApplicationPerformance("startup:anonymous-sign-in-complete");
           } catch (cause) {
@@ -63,6 +69,7 @@ export function useAuth(): UseAuthResult {
 
         if (ignore) return;
 
+        if (!anonymousSignInStarted) finishAuthStartup("restored", user.uid);
         recordAccountDiagnostic("login-received", { uid: user.uid });
         setError(null);
         setCurrentUser(user);

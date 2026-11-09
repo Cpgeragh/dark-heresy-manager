@@ -1,4 +1,5 @@
 import { readAccountConnection } from "./accountConnectionMarker";
+import { authStartupEvidenceForReport, type AuthStartupEvidence } from "../authStartupDiagnostics";
 
 export type AccountDiagnosticStatus = "connected" | "new-login" | "reconnect" | "startup-error";
 interface Report {
@@ -8,6 +9,7 @@ interface Report {
   status: AccountDiagnosticStatus;
   previousDeviceUid?: string;
   loginCreated: boolean;
+  authStartup?: AuthStartupEvidence;
 }
 interface Queue {
   day: string;
@@ -95,9 +97,8 @@ export function queueAccountDiagnostic(uid: string, status: AccountDiagnosticSta
     const sessionKey = `${uid}:${status}`;
     if (seen.has(sessionKey)) return;
     seen.add(sessionKey);
-    const state = queueFor(uid);
     const previous = readAccountConnection()?.deviceUid;
-    state.reports.push({
+    const report: Report = {
       reportId: crypto.randomUUID(),
       build: import.meta.env.VITE_ACCOUNT_CHECK_BUILD,
       project: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -106,10 +107,21 @@ export function queueAccountDiagnostic(uid: string, status: AccountDiagnosticSta
       ...(previous && /^[a-zA-Z0-9]{20,128}$/.test(previous)
         ? { previousDeviceUid: previous }
         : {}),
-    });
-    state.reports = state.reports.slice(-4);
-    save(uid, state);
-    void flushAccountDiagnostics(uid);
+    };
+    const enqueue = (authStartup?: AuthStartupEvidence) => {
+      const state = queueFor(uid);
+      if (authStartup) {
+        report.authStartup = authStartup;
+        report.loginCreated ||= authStartup.outcome === "created";
+      }
+      state.reports.push(report);
+      state.reports = state.reports.slice(-4);
+      save(uid, state);
+      void flushAccountDiagnostics(uid);
+    };
+    const authStartup = authStartupEvidenceForReport(uid);
+    if (authStartup) void authStartup.then(enqueue, () => enqueue());
+    else enqueue();
   } catch {
     // Diagnostic storage or browser API failures must not interrupt the app.
   }

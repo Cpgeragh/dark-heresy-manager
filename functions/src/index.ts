@@ -206,6 +206,7 @@ export const recordAccountDiagnostic = onCall<AccountDiagnosticInput>(
         "status",
         "previousDeviceUid",
         "loginCreated",
+        "authStartup",
       ],
       requiredFields: ["reportId", "build", "project", "status", "loginCreated"],
       fieldShapes: {
@@ -215,7 +216,7 @@ export const recordAccountDiagnostic = onCall<AccountDiagnosticInput>(
         status: { enum: ["connected", "new-login", "reconnect", "startup-error"] },
         previousDeviceUid: "string",
       },
-      payloadBounds: { maxBytes: 1024, maxStringCharacters: 128 },
+      payloadBounds: { maxBytes: 2048, maxStringCharacters: 128 },
       rateLimits: [{ key: `account-diagnostic:${uid}`, limit: 8, windowMs: 24 * 60 * 60 * 1000 }],
       handler: ({ uid: actorUid, data }) => runAccountDiagnostic(data, actorUid),
     });
